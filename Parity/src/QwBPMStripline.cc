@@ -16,7 +16,7 @@
 #endif // __USE_DATABASE__
 #include "QwVQWK_Channel.h"
 #include "QwScaler_Channel.h"
-
+#include "QwMollerADC_Channel.h"
 
 /* Position calibration factor, transform ADC counts in mm*/
 //const Double_t QwBPStripline::kQwStriplineCalibration = 18.77;
@@ -542,7 +542,7 @@ Int_t QwBPMStripline<T>::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in
   else
     {
     std::cerr <<
-      "QwBPMStripline::ProcessEvBuffer(): attemp to fill in raw date for a wire that doesn't exist \n";
+      "QwBPMStripline::ProcessEvBuffer(): attempt to fill in raw data for a wire that doesn't exist \n";
     }
   return word_position_in_buffer;
 }
@@ -1055,6 +1055,10 @@ void  QwBPMStripline<T>::SetRandomEventParameters(Double_t meanX, Double_t sigma
     fAbsPos[kXAxis].SetRandomEventParameters(meanX, sigmaX);
     fAbsPos[kYAxis].SetRandomEventParameters(meanY, sigmaY);
 
+    for(int i = 0; i < 4; i++){
+      fWire[i].CopyParameters(&fAbsPos[0]);
+    }
+
 /*  // Average values of the signals in the stripline ADCs
   Double_t sumX = 3.5; // These are just guesses, but I made X and Y different
   Double_t sumY = 4.1; // to make it more interesting for the analyzer...
@@ -1104,7 +1108,7 @@ void QwBPMStripline<T>::RandomizeEventData(int helicity, double time)
   //  std::cout << "In QwBPMStripline<T>::RandomizeEventData" << std::endl;
   for(i=kXAxis;i<kNumAxes;i++){
     fAbsPos[i].RandomizeEventData(helicity, time); 
-    //  fAbsPos[i].PrintInfo();
+    //fAbsPos[i].PrintInfo();
   }
   this->FillRawEventData();
 }
@@ -1184,16 +1188,26 @@ void QwBPMStripline<T>::FillRawEventData()
   static T rawpos[2] = {T("rawpos_0","derived"),T("rawpos_1","derived")};
   int helicity = 0; double time = 0.0;
 
+  numer.CopyParameters(&fAbsPos[0]);
+  denom.CopyParameters(&fAbsPos[0]);
+  tmp1.CopyParameters(&fAbsPos[0]);
+  tmp2.CopyParameters(&fAbsPos[0]);
+  rawpos[0].CopyParameters(&fAbsPos[0]);
+  rawpos[1].CopyParameters(&fAbsPos[0]);
+
   for(i=kXAxis;i<kNumAxes;i++){
     //fAbsPos[i].PrintValue();
     fRelPos[i] = fAbsPos[i];
     fRelPos[i].Scale(fGains[i]);
     fRelPos[i].AddChannelOffset(-1.0*fPositionCenter[i]);
+    //fRelPos[i].PrintValue();
   }
 
   for(i=kXAxis; i<kNumAxes; i++){ 
     tmp1.AssignScaledValue(fRelPos[i],   fCosRotation);
     tmp2.AssignScaledValue(fRelPos[1-i], fSinRotation);
+    //std::cout << "CosRotation: " << fCosRotation << std::endl;
+    //std::cout << "SinRotation: " << fSinRotation << std::endl;
     if (i == kXAxis) {
       rawpos[i].Sum(tmp1,tmp2);
     } else {
@@ -1217,11 +1231,16 @@ void QwBPMStripline<T>::FillRawEventData()
          fWire[i*2].AssignScaledValue(tmp2, 1.0);
          fWire[i*2+1].Ratio(tmp2, tmp1);
       }
+
+      //fWire[i*2].PrintValue();
+      //fWire[i*2+1].PrintValue();
+      fWire[i*2].CopyParameters(&fAbsPos[0]);
+      fWire[i*2+1].CopyParameters(&fAbsPos[0]);
       fWire[i*2].SetRawEventData();
       fWire[i*2+1].SetRawEventData();
       //std::cout <<  "*******In QwBPMStripline::FillRawEventData for channel:\t" << this->GetElementName() << std::endl;
-      //fWire[i*2].PrintValue();
-      //fWire[i*2+1].PrintValue();
+      //fWire[i*2].PrintInfo();
+      //fWire[i*2+1].PrintInfo();
     }
 
 
@@ -1281,3 +1300,4 @@ void QwBPMStripline<T>::SetSubElementCalibrationFactor(Int_t j, Double_t value)
 template class QwBPMStripline<QwVQWK_Channel>; 
 template class QwBPMStripline<QwSIS3801_Channel>; 
 template class QwBPMStripline<QwSIS3801D24_Channel>;
+template class QwBPMStripline<QwMollerADC_Channel>;

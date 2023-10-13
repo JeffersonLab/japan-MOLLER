@@ -17,7 +17,7 @@
 #include "QwVQWK_Channel.h"
 #include "QwScaler_Channel.h"
 #include "QwParameterFile.h"
-
+#include "QwMollerADC_Channel.h"
 
 template<typename T>
 void  QwCombinedBPM<T>::InitializeChannel(TString name)
@@ -536,12 +536,12 @@ void  QwCombinedBPM<T>::ProcessEvent()
 
 
   if (ldebug) {
-    fEffectiveCharge.PrintInfo();
+    //fEffectiveCharge.PrintInfo();
     for(Short_t axis=kXAxis;axis<kNumAxes;axis++) {
       fAbsPos[axis].PrintInfo();
       fSlope[axis].PrintInfo();
       fIntercept[axis].PrintInfo();
-      fMinimumChiSquare[axis].PrintInfo();
+      //fMinimumChiSquare[axis].PrintInfo();
     }
   }
 
@@ -754,10 +754,10 @@ void QwCombinedBPM<T>::GetProjectedPosition(VQwBPM *device)
    // Maybe we should apply resolution smearing to the stripline BPMs?
    // device->PrintInfo();
    device->ApplyResolutionSmearing();
-   // device->PrintInfo();
+    //device->PrintInfo();
    device->FillRawEventData();
-   // std::cout << "Device " << device->GetElementName() << " X = " << std::setprecision(15) << device->GetPosition(kXAxis)->GetValue() 
-   // << "\t Y = " << std::setprecision(15) << device->GetPosition(kYAxis)->GetValue() << std::endl;
+    //std::cout << "Device " << device->GetElementName() << " X = " << std::setprecision(15) << device->GetPosition(kXAxis)->GetValue() 
+    //<< "\t Y = " << std::setprecision(15) << device->GetPosition(kYAxis)->GetValue() << std::endl;
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -1175,9 +1175,19 @@ void QwCombinedBPM<T>::RandomizeEventData(int helicity, double time)
   // Randomize the abs position and angle.
   for (size_t axis=kXAxis; axis<kNumAxes; axis++) 
   {
+    //std::cout << "In QwCombinedBPM::RandomizeEventData-> Slope(before): " << fSlope[axis].GetValue() << std::endl;
+    //std::cout << "BEFORE RANDOMIZING POS & SLOPE: " << std::endl;
+    //fSlope[axis].PrintInfo();
+    //fAbsPos[axis].PrintInfo();
+
     fAbsPos[axis].RandomizeEventData(helicity, time);
     fSlope[axis].RandomizeEventData(helicity, time);
 
+    //std::cout << "AFTER RANDOMIZING POS & SLOPE: " << std::endl;
+    //fSlope[axis].PrintInfo();
+    //fAbsPos[axis].PrintInfo();
+    //fSlope[axis].PrintValue();
+    //std::cout << "In QwCombinedBPM::RandomizeEventData-> Slope(after): " << fSlope[axis].GetValue() << std::endl;
 
     zpos = this->GetPositionInZ();
     //std::cout << "In QwCombinedBPM: zpos= " << zpos << std::endl;
@@ -1337,3 +1347,4 @@ std::vector<QwErrDBInterface> QwCombinedBPM<T>::GetErrDBEntry()
 template class QwCombinedBPM<QwVQWK_Channel>; 
 template class QwCombinedBPM<QwSIS3801_Channel>; 
 template class QwCombinedBPM<QwSIS3801D24_Channel>;
+template class QwCombinedBPM<QwMollerADC_Channel>;

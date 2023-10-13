@@ -17,7 +17,7 @@ const Bool_t QwVQWK_Channel::kDEBUG = kFALSE;
 const Int_t  QwVQWK_Channel::kWordsPerChannel = 6;
 const Int_t  QwVQWK_Channel::kMaxChannels     = 8;
 
-const Double_t QwVQWK_Channel::kTimePerSample = 2.0 * Qw::us;
+const Double_t QwVQWK_Channel::kTimePerSample = (2.0/30.0) * Qw::us; //2.0 originally
 
 /*!  Conversion factor to translate the average bit count in an ADC
  *   channel into average voltage.
@@ -269,23 +269,44 @@ void QwVQWK_Channel::RandomizeEventData(int helicity, double time)
   // sqrt_fBlocksPerEvent = sqrt(fBlocksPerEvent);
 
   // Calculate drift (if time is not specified, it stays constant at zero)
+  //Double_t drift = 0.0;
+  //for (UInt_t i = 0; i < fMockDriftFrequency.size(); i++) {
+  //  drift += fMockDriftAmplitude[i] * sin(2.0 * Qw::pi * fMockDriftFrequency[i] * time + fMockDriftPhase[i]);
+  //}
+
+  // updated to calculate the drift for each block individually
   Double_t drift = 0.0;
-  for (UInt_t i = 0; i < fMockDriftFrequency.size(); i++) {
-    drift += fMockDriftAmplitude[i] * sin(2.0 * Qw::pi * fMockDriftFrequency[i] * time + fMockDriftPhase[i]);
+  for (Int_t i = 0; i < fBlocksPerEvent; i++){
+    drift = 0.0;
+    if (i >= 1){
+      time += (fNumberOfSamples_map/4.0)*kTimePerSample;
+    }
+    for (UInt_t i = 0; i < fMockDriftFrequency.size(); i++) {
+      drift += fMockDriftAmplitude[i] * sin(2.0 * Qw::pi * fMockDriftFrequency[i] * time + fMockDriftPhase[i]);
+      //std::cout << "Drift: " << drift << std::endl;
+    }
   }
+
   // Calculate signal
   fHardwareBlockSum = 0.0;
   fHardwareBlockSumM2 = 0.0; // second moment is zero for single events
 
   for (Int_t i = 0; i < fBlocksPerEvent; i++) {
     double tmpvar = GetRandomValue();
+    //std::cout << "tmpvar: " << tmpvar << std::endl;
+    //std::cout << "->fMockSigma: " << fMockGaussianSigma << std::endl;
+
     fBlock[i] = fMockGaussianMean + drift;
+    //std::cout << "(Start of loop)  " << this->GetElementName() << "-> "<< "fBlock[" << i << "]: " << fBlock[i] << ", Drift: " << drift <<", Mean: " << fMockGaussianMean<<  std::endl;
     if (fCalcMockDataAsDiff) {
       fBlock[i] += helicity*fMockAsymmetry;
     } else {
       fBlock[i] *= 1.0 + helicity*fMockAsymmetry;
     }
-    fBlock[i] += fMockGaussianSigma*tmpvar;
+    fBlock[i] += fMockGaussianSigma*tmpvar*sqrt(fBlocksPerEvent);
+    //std::cout << "(End of loop)    " << this->GetElementName() << "-> "<< "fBlock[" << i << "]: " << fBlock[i] << ", Drift: " << drift <<", Mean: " << fMockGaussianMean<<  std::endl;
+
+    
 /*    
     fBlock[i] = //GetRandomValue();
      fMockGaussianMean * (1 + helicity * fMockAsymmetry) 
@@ -371,7 +392,7 @@ void QwVQWK_Channel::SetRawEventData(){
 //  std::cout <<  "*******In QwVQWK_Channel::SetRawEventData for channel:\t" << this->GetElementName() << std::endl;
   for (Int_t i = 0; i < fBlocksPerEvent; i++) 
     {
-     //  The raw data is decoded ino calibated values with the following (in ProcessEvent()):
+     //  The raw data is decoded ino calibrated values with the following (in ProcessEvent()):
      //      fBlock[i] = fCalibrationFactor * ( (1.0 * fBlock_raw[i] * fBlocksPerEvent / fNumberOfSamples) - fPedestal );
      //  We should invert that function here:
 /*     if (fBlock[i]<-10.0 || fBlock[i]>+10.0)
@@ -385,7 +406,7 @@ void QwVQWK_Channel::SetRawEventData(){
   //   fBlock[i] = fCalibrationFactor * ((1.0 * fBlock_raw[i] * fBlocksPerEvent / fNumberOfSamples) - fPedestal);
   //   fHardwareBlockSum += fBlock[i];
 
-     /* std::cout << "\t fBlock[i] = "                                        << std::setprecision(6) << fBlock[i]                                                                                 << "\n"
+  /*    std::cout << "\t fBlock[i] = "                                        << std::setprecision(6) << fBlock[i]                                                                                 << "\n"
                << "\t fCalibrationFactor = "                               << fCalibrationFactor                                                                        << "\n"
                << "\t fPedestal = "                                        << fPedestal                                                                                 << "\n"
                << "\t fNumberOfSamples = "                                 << fNumberOfSamples                                                                          << "\n"
@@ -395,7 +416,7 @@ void QwVQWK_Channel::SetRawEventData(){
                << "\t fBlock_raw[i] = "                                    << fBlock_raw[i]                                                                             << "\n"
                << "\t fHardwareBlockSum_raw = "                            << fHardwareBlockSum_raw                                                                     << "\n"
                << std::endl;
-      */
+   */   
     }
 
 /*  std::cout << "fBlock[0] = " << std::setprecision(16) << fBlock[0] << std::endl
