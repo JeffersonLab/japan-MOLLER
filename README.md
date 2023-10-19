@@ -41,6 +41,21 @@ cd buildXcode
 cmake -G Xcode ../
 ```
 
+### Generating and analyzing mockdata files
+An example command to generate a mock-data file would be:
+```
+build/qwmockdatagenerator -r 4 -e 1:20000 --config qwparity_simple.conf --detectors mock_newdets.map --data .
+```
+
+The command to analyze that mock-data file and produce a root file is:
+```
+build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --data-handler mock_datahandlers.map --data . --rootfiles .
+```
+
+The parameter files are searched for within the Parity/prminputs directory.
+
+
+
 ### To make modifications
 Before starting work make sure you have the latest changes from the remote repository:
 ```
