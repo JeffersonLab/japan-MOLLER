@@ -14,14 +14,14 @@ To get the repository from a remote you "clone" -> once you have the repository 
 ### To get repository
 Use this if you plan to do work and want to propagate changes to the repository for others to see:
 ```
-  git clone git@github.com:JeffersonLab/japan
+  git clone git@github.com:JeffersonLab/japan-MOLLER
 ```
 
 Are you getting an error? Do you need access to the repository? Contact cipriangal, paulmking or kpaschke.
 
 Alternately just get a copy that you just want to run (without making changes to the repository):
   ```
-  git clone https://github.com/JeffersonLab/japan
+  git clone https://github.com/JeffersonLab/japan-MOLLER
   ```
 
 ### Building the code
