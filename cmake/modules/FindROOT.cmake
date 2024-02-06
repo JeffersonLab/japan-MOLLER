@@ -136,7 +136,12 @@ foreach(_lib IN LISTS ROOT_FIND_COMPONENTS ROOT_LIB_FLAGS)
 	)
       list(APPEND ROOT_LIBRARIES ${ROOT_${_lib}_LIBRARY})
       list(REMOVE_ITEM ROOT_FIND_COMPONENTS ${_lib})
-      list(APPEND targetlist ROOT::${_lib})
+      # libNew is apparently not ready for use at this time. See
+      # https://root-forum.cern.ch/t/aborting-with-std-align-val-t-is-not-implemented-yet-rhel-9-2/55989/17
+      # If libNew is really needed, explicitly link with ROOT::New
+      if(NOT "${_lib}" STREQUAL "New")
+        list(APPEND targetlist ROOT::${_lib})
+      endif()
     endif()
   endif()
 endforeach()
