@@ -117,6 +117,19 @@ separate_arguments(ROOT_CXXFLAG_LIST)
 separate_arguments(ROOT_LIB_FLAGS)
 string(REPLACE "-l" "" ROOT_LIB_FLAGS "${ROOT_LIB_FLAGS}")
 
+# libNew is currently broken with C++17 or higher. See
+# https://root-forum.cern.ch/t/aborting-with-std-align-val-t-is-not-implemented-yet-rhel-9-2/55989/17
+string(REGEX MATCH "(^| +)-std=([^ ]*)\\+\\+(..)" _cxx_std "${ROOT_CXX_FLAGS}")
+set(uselibnew TRUE)
+if(CMAKE_MATCH_COUNT EQUAL 3)
+  if(${CMAKE_MATCH_3} GREATER_EQUAL 17)
+    set(uselibnew FALSE)
+  endif()
+elseif(${CMAKE_CXX_STANDARD} GREATER_EQUAL 17)
+  set(uselibnew FALSE)
+endif()
+unset(_cxx_std)
+
 # Find absolute paths to the core libraries plus any requested components
 set(ROOT_LIBRARIES)
 set(targetlist)
@@ -136,15 +149,14 @@ foreach(_lib IN LISTS ROOT_FIND_COMPONENTS ROOT_LIB_FLAGS)
 	)
       list(APPEND ROOT_LIBRARIES ${ROOT_${_lib}_LIBRARY})
       list(REMOVE_ITEM ROOT_FIND_COMPONENTS ${_lib})
-      # libNew is apparently not ready for use at this time. See
-      # https://root-forum.cern.ch/t/aborting-with-std-align-val-t-is-not-implemented-yet-rhel-9-2/55989/17
-      # If libNew is really needed, explicitly link with ROOT::New
-      if(NOT "${_lib}" STREQUAL "New")
+      if(NOT "${_lib}" STREQUAL "New" OR uselibnew)
         list(APPEND targetlist ROOT::${_lib})
       endif()
     endif()
   endif()
 endforeach()
+unset(uselibnew)
+
 if(ROOT_LIBRARIES)
   list(REMOVE_DUPLICATES ROOT_LIBRARIES)
 endif()
