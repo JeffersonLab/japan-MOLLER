@@ -264,7 +264,7 @@ void THaCodaFile::staterr(TString tried_to, unsigned int status) {
        std::cout << "   1.  You mistyped the name of file ?" << std::endl;
        std::cout << "   2.  The file has length zero ? " << std::endl;
     }
-    switch (status) {
+    switch (static_cast<Long64_t>(status)) {
       case S_EVFILE_TRUNC :
 	 std::cout << "THaCodaFile ERROR:  Truncated event on file read" << std::endl;
          std::cout << "Evbuffer size is too small.  Job aborted." << std::endl;
