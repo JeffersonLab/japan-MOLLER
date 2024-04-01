@@ -165,6 +165,10 @@ target_compile_options(${PROJECT_NAME}
     ${${PROJECT_NAME_UC}_DIAG_FLAGS_LIST}
   )
 
+if(${CMAKE_CXX_STANDARD} LESS 17)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC QW_ENABLE_MAPFILE)
+endif()
+
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
     evio

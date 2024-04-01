@@ -25,6 +25,7 @@ QwRootFile::QwRootFile(const TString& run_label)
   // Process the configuration options
   ProcessOptions(gQwOptions);
 
+#ifdef QW_ENABLE_MAPFILE
   // Check for the memory-mapped file flag
   if (fEnableMapFile) {
 
@@ -43,8 +44,9 @@ QwRootFile::QwRootFile(const TString& run_label)
     QwMessage << "================== RealTime Producer Memory Map File =================" << QwLog::endl;
     fMapFile->Print();
     QwMessage << "======================================================================" << QwLog::endl;
-
-  } else {
+  } else
+#endif
+  {
 
     TString rootfilename = fRootFileDir;
     TString hostname = gSystem -> HostName();
@@ -249,6 +251,16 @@ void QwRootFile::ProcessOptions(QwOptions &options)
 
   // Option 'mapfile' to enable memory-mapped ROOT file
   fEnableMapFile = options.GetValue<bool>("enable-mapfile");
+#ifndef QW_ENABLE_MAPFILE
+  if( fEnableMapFile ) {
+    QwMessage << QwLog::endl;
+    QwWarning << "QwRootFile::ProcessOptions:  "
+              << "The 'enable-mapfile' flag is not supported by the ROOT "
+                 "version with which this app is built. Disabling it."
+              << QwLog::endl;
+    fEnableMapFile = false;
+  }
+#endif
   fUseTemporaryFile = options.GetValue<bool>("write-temporary-rootfiles");
 
   // Options 'disable-trees' and 'disable-histos' for disabling
