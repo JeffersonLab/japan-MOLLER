@@ -83,6 +83,14 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   };
   virtual ~QwMollerADC_Channel() { };
 
+  void CopyFrom(const QwMollerADC_Channel& value){
+    VQwHardwareChannel::CopyFrom(value);
+    fBlocksPerEvent = value.fBlocksPerEvent;
+    fNumberOfSamples_map = value.fNumberOfSamples_map;
+    fSaturationABSLimit = value.fSaturationABSLimit;
+    *this = value;
+  };
+  
 
   using VQwHardwareChannel::Clone;
 
