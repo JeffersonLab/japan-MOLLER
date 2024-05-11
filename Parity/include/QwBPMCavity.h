@@ -18,6 +18,7 @@
 #include "QwVQWK_Channel.h"
 #include "VQwBPM.h"
 #include "QwParameterFile.h"
+#include "QwUtil.h"
 
 // Forward declarations
 class QwDBInterface;
@@ -49,9 +50,12 @@ class QwBPMCavity : public VQwBPM {
 	  InitializeChannel(subsystemname, name);
   };
   QwBPMCavity(const QwBPMCavity& source)
-  : VQwBPM(source),
-    fElement(source.fElement),fRelPos(source.fRelPos),fAbsPos(source.fAbsPos)
-  { }
+  : VQwBPM(source)
+  {
+    QwCopyArray(source.fElement, fElement);
+    QwCopyArray(source.fRelPos, fRelPos);
+    QwCopyArray(source.fAbsPos, fAbsPos);
+  }
   virtual ~QwBPMCavity() { };
 
   void    InitializeChannel(TString name);
@@ -146,12 +150,12 @@ class QwBPMCavity : public VQwBPM {
 
 
  protected:
-  QwVQWK_Channel fElement[kNumElements];
-  QwVQWK_Channel fRelPos[kNumAxes];
+  std::array<QwVQWK_Channel,kNumElements> fElement;//(kNumElements);
+  std::array<QwVQWK_Channel,kNumAxes> fRelPos;//(kNumAxes);
 
   //  These are the "real" data elements, to which the base class
   //  fAbsPos_base and fElement[kQElem]_base are pointers.
-  QwVQWK_Channel fAbsPos[kNumAxes];
+  std::array<QwVQWK_Channel,kNumAxes> fAbsPos;//(kNumAxes);
 
 
  private:
