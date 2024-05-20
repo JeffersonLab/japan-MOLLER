@@ -166,7 +166,7 @@ jobs:
     - build
     strategy:
       matrix:
-        CC: [clang]
+        CC: [gcc]
         CMAKE_BUILD_TYPE: [Release]
         runs:
         - 1:1
