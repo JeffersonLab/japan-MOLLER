@@ -122,7 +122,7 @@ jobs:
       uses: aidasoft/run-lcg-view@v3
       if: ${{ github.event_name == 'pull_request' }}
       with:
-        platform-release: ${{ env.clang-tidy-platform }}/${{ env.clang-tidy-release }}
+        release-platform: ${{ env.clang-tidy-release }}/${{ env.clang-tidy-platform }}
         run: |
           git diff ${{ github.event.pull_request.head.sha }} ${{ github.event.pull_request.base.sha }} | clang-tidy-diff -p 1 -path build -quiet -export-fixes clang_tidy_fixes.yml -extra-arg='-std=c++20' -checks='-*,bugprone-*,-bugprone-narrowing-conversions,-bugprone-macro-parentheses' -clang-tidy-binary run-clang-tidy
     - name: Run clang-tidy on all files
