@@ -10,7 +10,6 @@
 
 #ifndef BOOST_VERSION
 #include "boost/version.hpp"
-#include "boost/filesystem/directory.hpp"
 #endif
 
 // Qweak headers
@@ -283,7 +282,7 @@ int QwParameterFile::FindFile(
 
   // Loop over all files in the directory
   // note: default iterator constructor yields past-the-end
-  bfs::directory_iterator end_iterator;
+  bfs::directory_iterator end_iterator();
   for (bfs::directory_iterator file_iterator(directory);
        file_iterator != end_iterator;
        file_iterator++) {
