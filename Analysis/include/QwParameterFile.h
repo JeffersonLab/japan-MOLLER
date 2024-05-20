@@ -30,7 +30,6 @@
 // Boost headers
 #include "boost/lexical_cast.hpp"
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/convenience.hpp"
 #include "boost/filesystem/path.hpp"
 namespace bfs = boost::filesystem;
 using boost::lexical_cast;
