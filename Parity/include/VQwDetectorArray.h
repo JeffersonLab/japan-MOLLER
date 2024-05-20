@@ -20,8 +20,34 @@
 #include "QwCombinedPMT.h"
 
 
-// Forward declarations
-class QwDetectorArrayID;
+class QwDetectorArrayID {
+
+ public:
+
+    QwDetectorArrayID():fSubbankIndex(-1),fWordInSubbank(-1),
+     fTypeID(kQwUnknownPMT),fIndex(-1),
+     fSubelement(kInvalidSubelementIndex),fmoduletype(""),fdetectorname("") {};
+
+    int fSubbankIndex;
+    int fWordInSubbank; //first word reported for this channel in the subbank
+                        //(eg VQWK channel report 6 words for each event, scalers oly report one word per event)
+                        // The first word of the subbank gets fWordInSubbank=0
+
+    EQwPMTInstrumentType fTypeID;     // type of detector
+    int fIndex;      // index of this detector in the vector containing all the detector of same type
+    UInt_t fSubelement; // some detectors have many subelements (eg stripline have 4 antenas)
+                        // some have only one sub element(eg lumis have one channel)
+
+    TString fmoduletype; // eg: VQWK, SCALER
+    TString fdetectorname;
+    TString fdetectortype; // stripline, IntegrationPMT, ... this string is encoded by fTypeID
+
+    std::vector<TString> fCombinedChannelNames;
+    std::vector<Double_t> fWeight;
+
+    void Print() const;
+
+};
 
 
 class VQwDetectorArray: virtual public VQwSubsystemParity {
@@ -217,36 +243,6 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
 
   static const Bool_t bDEBUG=kFALSE;
   Int_t fMainDetErrorCount;
-
-};
-
-
-class QwDetectorArrayID {
-
- public:
-    
-    QwDetectorArrayID():fSubbankIndex(-1),fWordInSubbank(-1),
-     fTypeID(kQwUnknownPMT),fIndex(-1),
-     fSubelement(kInvalidSubelementIndex),fmoduletype(""),fdetectorname("") {};
-
-    int fSubbankIndex;
-    int fWordInSubbank; //first word reported for this channel in the subbank
-                        //(eg VQWK channel report 6 words for each event, scalers oly report one word per event)
-                        // The first word of the subbank gets fWordInSubbank=0
-
-    EQwPMTInstrumentType fTypeID;     // type of detector
-    int fIndex;      // index of this detector in the vector containing all the detector of same type
-    UInt_t fSubelement; // some detectors have many subelements (eg stripline have 4 antenas)
-                        // some have only one sub element(eg lumis have one channel)
-
-    TString fmoduletype; // eg: VQWK, SCALER
-    TString fdetectorname;
-    TString fdetectortype; // stripline, IntegrationPMT, ... this string is encoded by fTypeID
-
-    std::vector<TString> fCombinedChannelNames;
-    std::vector<Double_t> fWeight;
-
-    void Print() const;
 
 };
 
