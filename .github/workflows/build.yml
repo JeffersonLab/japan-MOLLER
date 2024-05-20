@@ -10,9 +10,14 @@ on:
   merge_group:
   workflow_dispatch:
     inputs:
-      release-platform:
-        description: 'LCG release-platform'
-        default: 'LCG_105/x86_64-ubuntu2204-gcc11-opt'
+      release:
+        description: 'Default LCG release'
+        default: 'LCG_105'
+        required: false
+        type: string
+      platform:
+        description: 'Default LCG platform'
+        default: 'x86_64-ubuntu2204-gcc11-opt'
         required: false
         type: string
 
@@ -21,7 +26,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  release-platform: ${{ inputs.platform || 'LCG_105/x86_64-ubuntu2204-gcc11-opt' }}
+  release: ${{ inputs.release || 'LCG_105' }}
+  platform: ${{ inputs.platform || 'x86_64-ubuntu2204-gcc11-opt' }}
   clang-tidy-release: dev3
   clang-tidy-platform: x86_64-el9-clang16-opt
   clang-tidy-CC: clang
@@ -174,13 +180,14 @@ jobs:
     - name: Download install directory
       uses: actions/download-artifact@v4
       with:
-        name: install-${{ matrix.CC }}-{{ matrix.CMAKE_BUILD_TYPE }}-${{ env.release-platform }}
+        name: install-${{ matrix.CC }}-{{ matrix.CMAKE_BUILD_TYPE }}-${{ env.release }}-${{ env.platform }}
     - name: Uncompress install directory
       run: tar -xaf install.tar.zst
     - uses: cvmfs-contrib/github-action-cvmfs@v4
     - name: Run mock data generator
       uses: aidasoft/run-lcg-view@v3
       with:
+        release-platform: ${{ env.release }}/${{ env.platform }}
         run: |
           mkdir -p data/
           install/bin/qwmockdatagenerator -r ${{ matrix.runs }} -e ${{ matrix.events }} --config qwparity_simple.conf --detectors mock_newdets.map --data data/
@@ -193,6 +200,7 @@ jobs:
     - name: Run mock data analysis
       uses: aidasoft/run-lcg-view@v3
       with:
+        release-platform: ${{ env.release }}/${{ env.platform }}
         run: |
           mkdir -p rootfiles/
           install/bin/qwparity -r ${{ matrix.runs }} --config qwparity_simple.conf --detectors mock_newdets.map --data-handler mock_datahandlers.map --data data/ --rootfiles rootfiles/
