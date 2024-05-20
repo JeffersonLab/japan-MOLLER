@@ -10,6 +10,7 @@
 
 #ifndef BOOST_VERSION
 #include "boost/version.hpp"
+#include "boost/filesystem/directory.hpp"
 #endif
 
 // Qweak headers
