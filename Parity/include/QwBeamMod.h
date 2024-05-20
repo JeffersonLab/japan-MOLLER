@@ -25,7 +25,8 @@
 #include "QwVQWK_Channel.h"
 #include "QwWord.h"
 
-
+// Forward declarations
+class QwBeamMod;
 
 //enum EBeamInstrumentType{kBPMStripline = 0,
 //			 kBCM,
