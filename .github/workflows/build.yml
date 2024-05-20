@@ -180,7 +180,7 @@ jobs:
     - name: Download install directory
       uses: actions/download-artifact@v4
       with:
-        name: install-${{ matrix.CC }}-{{ matrix.CMAKE_BUILD_TYPE }}-${{ env.release }}-${{ env.platform }}
+        name: install-${{ matrix.CC }}-${{ matrix.CMAKE_BUILD_TYPE }}-${{ env.release }}-${{ env.platform }}
     - name: Uncompress install directory
       run: tar -xaf install.tar.zst
     - uses: cvmfs-contrib/github-action-cvmfs@v4
