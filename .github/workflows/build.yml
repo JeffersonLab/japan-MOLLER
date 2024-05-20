@@ -21,9 +21,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - CC: gcc
+          - LCG: "LCG_105/x86_64-ubuntu2204-gcc11-opt"
+            CC: gcc
             CXX: g++
-          - CC: clang
+          - LCG: "dev3/x86_64-el9-clang16-opt"
+            CC: clang
             CXX: clang++
     env:
       PREFIX: ${{ github.workspace }}/install
@@ -51,9 +53,10 @@ jobs:
     - uses: cvmfs-contrib/github-action-cvmfs@v4
     - uses: aidasoft/run-lcg-view@v3
       with:
-        release-platform: "LCG_105/x86_64-ubuntu2204-gcc11-opt"
+        release-platform: ${{ matrix.LCG }}
         run: |
-          CC=${{ matrix.CC }} CXX=${{ matrix.CXX }} cmake -B build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          export CC=${{ matrix.CC }} CXX=${{ matrix.CXX }}
+          cmake -B build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake --build build -- -k -j $(getconf _NPROCESSORS_ONLN) install
     - uses: actions/upload-artifact@v4
       with:
