@@ -8,13 +8,20 @@ on:
       - '*'
   pull_request:
   merge_group:
-  workflow_dispatch: # allow manual triggering
+  workflow_dispatch:
+    inputs:
+      release-platform:
+        description: 'LCG release-platform'
+        default: 'LCG_105/x86_64-ubuntu2204-gcc11-opt'
+        required: false
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:
+  release-platform: ${{ inputs.platform || 'LCG_105/x86_64-ubuntu2204-gcc11-opt' }}
   clang-tidy-release: dev3
   clang-tidy-platform: x86_64-el9-clang16-opt
   clang-tidy-CC: clang
@@ -146,3 +153,52 @@ jobs:
         clang_tidy_fixes: clang_tidy_fixes.yml
         request_changes: true
         suggestions_per_comment: 10
+
+  mock:
+    runs-on: ubuntu-latest
+    needs:
+    - build
+    strategy:
+      matrix:
+        CC: [clang]
+        CMAKE_BUILD_TYPE: [Release]
+        runs:
+        - 1:1
+        events:
+        - 1:20000
+    steps:
+    - name: Checkout .github
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: .github
+    - name: Download install directory
+      uses: actions/download-artifact@v4
+      with:
+        name: install-${{ matrix.CC }}-{{ matrix.CMAKE_BUILD_TYPE }}-${{ env.release-platform }}
+    - name: Uncompress install directory
+      run: tar -xaf install.tar.zst
+    - uses: cvmfs-contrib/github-action-cvmfs@v4
+    - name: Run mock data generator
+      uses: aidasoft/run-lcg-view@v3
+      with:
+        run: |
+          mkdir -p data/
+          install/bin/qwmockdatagenerator -r ${{ matrix.runs }} -e ${{ matrix.events }} --config qwparity_simple.conf --detectors mock_newdets.map --data data/
+    - name: Upload mock data
+      uses: actions/upload-artifact@v4
+      with:
+        name: QwMock.log
+        path: data/*.log
+        if-no-files-found: error
+    - name: Run mock data analysis
+      uses: aidasoft/run-lcg-view@v3
+      with:
+        run: |
+          mkdir -p rootfiles/
+          install/bin/qwparity -r ${{ matrix.runs }} --config qwparity_simple.conf --detectors mock_newdets.map --data-handler mock_datahandlers.map --data data/ --rootfiles rootfiles/
+    - name: Upload analysis
+      uses: actions/upload-artifact@v4
+      with:
+        name: QwMock.root
+        path: rootfiles/*.root
+        if-no-files-found: error
