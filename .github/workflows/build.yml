@@ -15,7 +15,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  clang-tidy-LCG: dev3/x86_64-el9-clang16-opt
+  clang-tidy-release: dev3
+  clang-tidy-platform: x86_64-el9-clang16-opt
   clang-tidy-CC: clang
   clang-tidy-CMAKE_BUILD_TYPE: Debug
 
@@ -26,19 +27,23 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - LCG: "LCG_105/x86_64-ubuntu2204-gcc11-opt"
+          - release: LCG_105
+            platform: x86_64-ubuntu2204-gcc11-opt
             CC: gcc
             CXX: g++
             CMAKE_BUILD_TYPE: Release
-          - LCG: "LCG_105/x86_64-ubuntu2204-gcc11-opt"
+          - release: LCG_105
+            platform: x86_64-ubuntu2204-gcc11-opt
             CC: gcc
             CXX: g++
             CMAKE_BUILD_TYPE: Debug
-          - LCG: "dev3/x86_64-el9-clang16-opt"
+          - release: dev3
+            platform: x86_64-el9-clang16-opt
             CC: clang
             CXX: clang++
             CMAKE_BUILD_TYPE: Release
-          - LCG: "dev3/x86_64-el9-clang16-opt"
+          - release: dev3
+            platform: x86_64-el9-clang16-opt
             CC: clang
             CXX: clang++
             CMAKE_BUILD_TYPE: Debug
@@ -70,7 +75,7 @@ jobs:
     - uses: cvmfs-contrib/github-action-cvmfs@v4
     - uses: aidasoft/run-lcg-view@v3
       with:
-        release-platform: ${{ matrix.LCG }}
+        release-platform: ${{ matrix.release }}/${{ matrix.platform }}
         run: |
           export CC=${{ matrix.CC }} CXX=${{ matrix.CXX }}
           cmake -B build -S . -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
@@ -80,17 +85,17 @@ jobs:
     - name: Upload install directory
       uses: actions/upload-artifact@v4
       with:
-        name: install-${{ matrix.CC }}-${{ matrix.CMAKE_BUILD_TYPE }}-${{ matrix.LCG }}
+        name: install-${{ matrix.CC }}-${{ matrix.CMAKE_BUILD_TYPE }}-${{ matrix.release }}-${{ matrix.platform }}
         path: install.tar.zst
         if-no-files-found: error
     - name: Compress build directory
-      if: matrix.LCG == env.clang-tidy-LCG && matrix.CC == env.clang-tidy-CC && matrix.CMAKE_BUILD_TYPE == env.clang-tidy-CMAKE_BUILD_TYPE
+      if: matrix.release == env.clang-tidy-release && matrix.platform == env.clang-tidy-platform && matrix.CC == env.clang-tidy-CC && matrix.CMAKE_BUILD_TYPE == env.clang-tidy-CMAKE_BUILD_TYPE
       run: tar -caf build.tar.zst build/
     - name: Upload build directory
-      if: matrix.LCG == env.clang-tidy-LCG && matrix.CC == env.clang-tidy-CC && matrix.CMAKE_BUILD_TYPE == env.clang-tidy-CMAKE_BUILD_TYPE
+      if: matrix.release == env.clang-tidy-release && matrix.platform == env.clang-tidy-platform && matrix.CC == env.clang-tidy-CC && matrix.CMAKE_BUILD_TYPE == env.clang-tidy-CMAKE_BUILD_TYPE
       uses: actions/upload-artifact@v4
       with:
-        name: build-${{ matrix.CC }}-eic-shell-${{ matrix.CMAKE_BUILD_TYPE }}-${{ env.platform }}-${{ matrix.release }}
+        name: build-${{ matrix.CC }}-${{ matrix.CMAKE_BUILD_TYPE }}-${{ matrix.platform }}-${{ matrix.release }}
         path: build.tar.zst
         if-no-files-found: error
 
@@ -105,7 +110,7 @@ jobs:
     - name: Download build artifact
       uses: actions/download-artifact@v4
       with:
-        name: build-${{ env.clang-tidy-CC }}-eic-shell-${{ env.clang-tidy-CMAKE_BUILD_TYPE }}-${{ env.platform }}-${{ env.release }}
+        name: build-${{ env.clang-tidy-CC }}-${{ env.clang-tidy-CMAKE_BUILD_TYPE }}-${{ env.clang-tidy-platform }}-${{ env.clang-tidy-release }}
         path: .
     - name: Uncompress build artifact
       run: tar -xaf build.tar.zst
@@ -113,14 +118,14 @@ jobs:
       uses: aidasoft/run-lcg-view@v3
       if: ${{ github.event_name == 'pull_request' }}
       with:
-        platform-release: "${{ env.platform }}:${{ env.release }}"
+        platform-release: ${{ env.clang-tidy-platform }}/${{ env.clang-tidy-release }}
         run: |
           git diff ${{ github.event.pull_request.head.sha }} ${{ github.event.pull_request.base.sha }} | clang-tidy-diff -p 1 -path build -quiet -export-fixes clang_tidy_fixes.yml -extra-arg='-std=c++20' -checks='-*,bugprone-*,-bugprone-narrowing-conversions,-bugprone-macro-parentheses' -clang-tidy-binary run-clang-tidy
     - name: Run clang-tidy on all files
       uses: aidasoft/run-lcg-view@v3
       if: ${{ github.event_name == 'push' }}
       with:
-        platform-release: "${{ env.platform }}:${{ env.release }}"
+        platform-release: ${{ env.clang-tidy-platform }}/${{ env.clang-tidy-release }}
         run: |
           run-clang-tidy -p build -export-fixes clang_tidy_fixes.yml -extra-arg='-std=c++20'
     - name: Upload clang-tidy fixes as artifact
