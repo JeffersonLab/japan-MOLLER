@@ -73,7 +73,7 @@ jobs:
         release-platform: ${{ matrix.LCG }}
         run: |
           export CC=${{ matrix.CC }} CXX=${{ matrix.CXX }}
-          cmake -B build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake -B build -S . -DCMAKE_INSTALL_PREFIX=install -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake --build build -- -k -j $(getconf _NPROCESSORS_ONLN) install
     - name: Compress install directory
       run: tar -caf install.tar.zst install/
