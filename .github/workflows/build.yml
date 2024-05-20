@@ -129,7 +129,7 @@ jobs:
       uses: aidasoft/run-lcg-view@v3
       if: ${{ github.event_name == 'push' }}
       with:
-        platform-release: ${{ env.clang-tidy-platform }}/${{ env.clang-tidy-release }}
+        release-platform: ${{ env.clang-tidy-release }}/${{ env.clang-tidy-platform }}
         run: |
           run-clang-tidy -p build -export-fixes clang_tidy_fixes.yml -extra-arg='-std=c++20'
     - name: Upload clang-tidy fixes as artifact
