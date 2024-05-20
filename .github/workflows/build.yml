@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  clang-tidy-release: dev3
+  clang-tidy-release: LCG_105
   clang-tidy-platform: x86_64-el9-clang16-opt
   clang-tidy-CC: clang
   clang-tidy-CMAKE_BUILD_TYPE: Debug
@@ -37,12 +37,12 @@ jobs:
             CC: gcc
             CXX: g++
             CMAKE_BUILD_TYPE: Debug
-          - release: dev3
+          - release: LCG_105
             platform: x86_64-el9-clang16-opt
             CC: clang
             CXX: clang++
             CMAKE_BUILD_TYPE: Release
-          - release: dev3
+          - release: LCG_105
             platform: x86_64-el9-clang16-opt
             CC: clang
             CXX: clang++
