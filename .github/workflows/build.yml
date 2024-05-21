@@ -182,27 +182,21 @@ jobs:
     - name: Uncompress install directory
       run: tar -xaf install.tar.zst
     - uses: cvmfs-contrib/github-action-cvmfs@v4
-    - name: Run mock data generator
+    - name: Run mock data generator and analysis
       uses: aidasoft/run-lcg-view@v3
       with:
         release-platform: ${{ env.release }}/${{ env.platform }}
         run: |
           mkdir -p data/
-          export QW_PRMINPUT=Parity/prminput
           install/bin/qwmockdatagenerator -r ${{ matrix.runs }} -e ${{ matrix.events }} --config qwparity_simple.conf --detectors mock_newdets.map --data data/
+          mkdir -p rootfiles/
+          install/bin/qwparity -r ${{ matrix.runs }} --config qwparity_simple.conf --detectors mock_newdets.map --data-handler mock_datahandlers.map --data data/ --rootfiles rootfiles/
     - name: Upload mock data
       uses: actions/upload-artifact@v4
       with:
         name: QwMock.log
         path: data/*.log
         if-no-files-found: error
-    - name: Run mock data analysis
-      uses: aidasoft/run-lcg-view@v3
-      with:
-        release-platform: ${{ env.release }}/${{ env.platform }}
-        run: |
-          mkdir -p rootfiles/
-          install/bin/qwparity -r ${{ matrix.runs }} --config qwparity_simple.conf --detectors mock_newdets.map --data-handler mock_datahandlers.map --data data/ --rootfiles rootfiles/
     - name: Upload analysis
       uses: actions/upload-artifact@v4
       with:
