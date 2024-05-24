@@ -1,8 +1,7 @@
-# QwMockData Root Guide
-May 13 2024\
-Version 0.3
+**QwMockData Root Guide**\
+May 23, 2024\
+Version 0.4
 
-#### Contact
 If you have any questions or suggestions for the guide, please send an
 email to:\
 Ryan Conaway\
@@ -80,8 +79,42 @@ Mock Data Rootfile
 
 Opening a mock data rootfile, we should see
 
-![Objects stored within a mock data
-rootfile.[]{label="fig:view"}](Images/example_rootfile.png)
+``` {.c}
+    root[0] TFile* f = new TFile("isu_sample_4.root")
+    (TFile*) 0x55ede7b9a3e0
+    root[1] .ls
+    TFile**          isu_sample_4.root       myfile1
+     TFile*          isu_sample_4.root       myfile1
+      KEY: TLIST     4_condition;1       Doubly linked list
+      KEY: TLIST     mapfiles;1          Doubly linked list
+      KEY: TDirectoryFile evt_histo;1       evt_histo
+      KEY: TDirectoryFile mul_histo;1       mul_histo
+      KEY: TDirectoryFile burst_histo;1     burst_histo
+      KEY: TDirectoryFile objects;1         objects
+      KEY: TTree     evt;1      MPS event data tree
+      KEY: TTree     mul;1      Helicity event data tree
+      KEY: TTree     pr;1       Pair tree
+      KEY: TTree     evts;1     Running sum tree
+      KEY: TTree     muls;1     Running sum tree
+      KEY: TTree     bursts;1     Burst running sum tree
+```
+
+The first two rows displays what file is loaded into memory and all
+consecutive rows are the objects that the file contains. Each object has
+a `KEY` that indicates what the type of the object stored within the
+file; we can see that our file has two `TList` objects, four
+`TDirectoryFile` objects, and six `TTree` objects. Each object is
+followed by the name of the object. The last column is a brief
+description of what is contained in the the tree. To access objects in a
+ROOT file, it is often sufficient to use the name of the object
+directly:
+
+``` {.c}
+    root[0] evt->Print()
+```
+
+The TTree objects and their contents are the main focus of the guide.
+For completeness, we will briefly discuss the TList objects as well.
 
 Conditions
 ----------
@@ -91,8 +124,40 @@ QwAnalyzer. It contains the ROOT version, the hostname, rootfile
 creation time, analyzer options used, the analyzer version, and other
 misc. meta-data.
 
-![Meta-data stored in the TList Condition
-Object.[]{label="fig:view"}](Images/condition_TLIST.png)
+``` {.c}
+    root[2] TList* conditions = (TList*)f->Get("4_condition")
+    (TList*) 0x55a04178aa0
+    root[3] condition->ls()
+    OBJ:  TList     4_condition     Doubly linked list : 0
+     OBJ: TObjString  ROOT Version : 6.26/10, Date: 20221115, GIT: 4dddea35 heads/latest-stable 
+          Collectable string class : 0 at: 0x55fa041adbf0
+     OBJ: TObjString  QwAnalyzer Name : test_build/qwparity  Colectable string class : 0 
+          at: 0x55fa0414486b0
+    OBJ: TObjString  ROOT file created on Hostname : Ryan-dellXPS  Collectable string class : 0 
+         at: 0x55fa040bf620
+    OBJ: TObjString  ROOT file created by the user : 20221116  Collectable string class : 0 
+         at: 0x55fa041a0540
+    OBJ: TObjString  QwAnalyzer Options: -r4-e1:20000--configqwparity_simple.conf--
+         detectorsmock_newdets.map--data/home/mrc/Data--rootfiles/home/mrc/Rootfiles  
+         Collectable string class : 0 at: 0x55fa04143f20
+    OBJ: TObjString  ROOT file creating time: Mon, 29 Apr 2024 15:48:58 -0400 (EDT) +62870700 nsec 
+         Collectable string class : 0 at: 0x55a03abaeb0
+    OBJ: TObjString 
+    commit 0692b13a79ce5376fb1c2226be8f62af8ef9112b
+    Author: Paul King <pking@jlab.org>
+    Date:   Mon Apr 1 11:15:22 2024 -0400
+        Merge pull request #11 from hansenjo/fix-root-libnew
+    Check the ROOT version, and disable the TMapFile if the libNew is not properly supported.  We will need to use an older ROOT to test the realtime systems.
+    ## main...origin/main
+    Geant4 version 11.2.1
+     ROOT version 6.26/10
+     CMake version 3.16.3
+    Generated at 2024-04-19T14:44:15
+    Source dir /home/mrc/Github/japan-MOLLER/test_build
+    Build  dir /home/mrc/Github/japan-MOLLER/test_build
+
+    TObjString = DAQ ROC flags when QwAnalyzer runs : Invalid, because the system is not cdaqlx and the user is not cdaq.
+```
 
 Mapfiles
 --------
@@ -101,8 +166,34 @@ The TList object, `mapfiles`, stores the parameter files (.map files)
 used. The `--config <file>` and `--detectors <file>` flags often contain
 several sub-files that are called to set the analysis parameters.
 
-![.map files used to configure the
-analysis.](Images/mapfiles_TList.png)
+``` {.c}
+root [4] mapfiles->Print()
+    Collection name='mapfiles', class='TList', size=24
+ Collection name='mock_qweak_helicity.map', class='TList', size=1
+ Collection name='mock_beamline_eventcuts.map', class='TList', size=1
+ Collection name='mock_beamline_geometry.map', class='TList', size=1
+ Collection name='mock_qweak_beamline.map', class='TList', size=1
+ Collection name='mock_qweak_pedestal.map', class='TList', size=1
+ Collection name='mollinj_beamline.map', class='TList', size=1
+ Collection name='mollinj_beamline_eventcuts.map', class='TList', size=1
+ Collection name='mollinj_beamline_geometry.map', class='TList', size=1
+ Collection name='mollinj_beamline_pedestal.map', class='TList', size=1
+ Collection name='mock_moller_maindet_eventcuts.map', class='TList', size=1
+ Collection name='mock_moller_thinqtz_adc.map', class='TList', size=1
+ Collection name='pedestal_thinqtz.map', class='TList', size=1
+ Collection name='mock_moller_maindet_eventcuts.map', class='TList', size=1
+ Collection name='mock_moller_shrmax_adc.map', class='TList', size=1
+ Collection name='pedestal_shrmax.map', class='TList', size=1
+ Collection name='mock_moller_maindet_eventcuts.map', class='TList', size=1
+ Collection name='mock_moller_piondet_adc.map', class='TList', size=1
+ Collection name='pedestal_piondet.map', class='TList', size=1
+ Collection name='mock_moller_maindet_eventcuts.map', class='TList', size=1
+ Collection name='mock_moller_smallang_adc.map', class='TList', size=1
+ Collection name='pedestal_smallang.map', class='TList', size=1
+ Collection name='mock_moller_largeang_adc.map', class='TList', size=1
+ Collection name='mock_moller_maindet_eventcuts.map', class='TList', size=1
+ Collection name='pedestal_largeang.map', class='TList', size=1
+```
 
 TTree evt
 ---------
@@ -225,20 +316,44 @@ These leaves are not present in other trees.
 The mul ROOT tree will have a several branches that correspond to
 helicity-based quantities computed for corresponding evt tree branches.
 These helicity-based quantities include the `asym`, `diff`, and `yield`.
-How these values are calculated can vary depending on the device they
-are calculated for. Below is a figure that demonstrates how the various
-helicity quantitues are calculated.
+How these values are calculated can vary depending on the subsystem that
+they are calculated for.
+     Subsystem|                 Quantity|                Name|          Unit
+  ---------------| -----------------------------------| -------| -------------------
+   Beamline: BPM|        (1/2)(X_L-X_R)   |      Diff|           mm
+   Beamline: BPM|        (1/2)}(X_L+X_R)   |      Yield|          mm
+   Beamline: BCM|        (1/2)(X_L+X_R)   |      Yield|        uA
+   Beamline: BCM|       (X_L-X_R)/(X_L+X_R) |      Asym|         no unit
+   Main Detector|      (1/2)(Sig_L+Sig_R) |      Yield|   V/uA
+   Main Detector|   (Sig_L-Sig_R)/(Sig_L+Sig_R)|   Asym|         no unit
 
-![image](Images/quartet_quantities.png)
+The BPM Difference is the difference in beam position reported by the
+BPM during a given multiplicity window. The BPM Yield is the average
+position signal over a muliplicity window. The BCM Yield is the total
+charge reported by the BCM over a multiplicity window. The BCM
+Asym(metry) is the difference between the reported charge for
+left-helicity and right-helicity windows divided by the sum. For each
+detector subsystem, the Detector Yield is the average signal detected
+over a multiplicity window and the Detector Asym(metry) is the
+difference between the signal for left-helicity and right-helicity
+windows divided by the sum.
 
 The branches for the helicity-based quantities always start with the
 quantity keyword followed by the device name (device names correspond
 one-to-one to the branch names found in the evt tree):
 
-![image](Images/MUL_Quantity_Example.png)
+``` {.c}
+    root [7] mul->Print("asym_la14*")
+    ******************************************************************************
+    *Br    0 :asym_la14 : hw_sum/D:block0/D:block1/D:block2/D:block3/D:          *
+    *         | num_samples/D:Device_Error_Code/D                                *
+    *Entries :      281 : Total  Size=      16917 bytes  File Size  =      11473 *
+    *Baskets :        1 : Basket Size=      16000 bytes  Compression=   1.38     *
+    *............................................................................*
+```
 
-In the above output from `evt->Print("asym*")`, we see the branch name,
-`asym_la14`.
+We see the branch name, `asym_la14`.
+
  Keyword | Meaning
  --- | ---
   asym\_ |      Asymmetry calculation
@@ -252,32 +367,41 @@ BCM
 
 The Beam Charge Monitor (BCM) is a cylindrical shaped cavity with an
 antenna, or wire, inside to detect electromagnetic radiation from the
-electron beam. The signal amplitude corresponds to the amount of beam
-passing through the device. The BCM and BPM together constitute the
-beam-monitoring devices (Beminiwattha 2013). The naming scheme for the
-BCM branches always starts with `bcm` and then is followed by a keyword
-that indicates where in the beamline it is monitoring:
+electron beam with the signal amplitude corresponding to the amount of
+beam that passes through the device. The BCM and BPM together constitute
+the beam-monitoring devices (Beminiwattha 2013). The naming scheme for
+the BCM branches always starts with `bcm` and then is followed by a
+keyword that indicates where in the beamline it is monitoring:
 
-  Keyword |                       Description
-  ---------| --------------------------------
-  0lXX|        Injector / Pre-Accelerator BCM
-  0rXX|                        Recombiner BCM
-  0hXX|                            Hall A BCM
+  Keyword                        Description
+  --------- --------------------------------
+  0lXX        Injector / Pre-Accelerator BCM
+  0rXX                        Recombiner BCM
+  0hXX                            Hall A BCM
 
-The `XX` indicates the position of the BCM within that beamline section. One thing to note is
-that the BCMs will sometime have the prefix `qwk_`, this is a holdover
-from the Qweak experiment and is innocuous. It will most likely be
-phased out as japan-MOLLER matures.
+The `XX` indicates the position of the BCM within that beamline section.
+One thing to note is that the BCMs will sometime have the prefix `qwk_`,
+this is a holdover from the Qweak experiment and is innocuous. It will
+most likely be phased out as japan-MOLLER matures.
 
-### BCM Example
+``` {.c}
+    root [8] evt->Print("qwk_bcm*")
+    *............................................................................*
+    *Br    5 :qwk_bcm0l05 : hw_sum/D:block0/D:block1/D:block2/D:block3/D:        *
+    *         | num_samples/D:Device_Error_Code/D:hw_sum_raw/D:block0_raw/D:     *
+    *         | block1_raw/D:block2_raw/D:block3_raw/D:SumSq1_0/D:SumSq2_0/D:    *
+    *         | RawMin_0/D:RawMax_0/D:SumSq1_1/D:SumSq2_1/D:RawMin_1/D:          *
+    *         | RawMax_1/D:SumSq1_2/D:SumSq2_2/D:RawMin_2/D:RawMax_2/D:          *
+    *         | SumSq1_3/D:SumSq2_3/D:RawMin_3/D:RawMax_3/D:sequence_number/D    *
+    *Entries :    19989 : Total  Size=    4669127 bytes  File Size  =    2176548 *
+    *Baskets :      294 : Basket Size=      16000 bytes  Compression=   2.14     *
+    *............................................................................*
+```
 
-![image](Images/BCM_example.png)
-
-In the above output from `evt->Print("*bcm*")`, we see the branch name,
-`qwk_bcm0l05`
-Keword| Meaning
+We see the branch name, `qwk_bcm0l05`
+ Keyword| Description
   ------------------------------| --------------------------------
-  qwk\_|           Holdover from Qweak
+  qwk\_|        Holdover from Qweak
   0l |   Injector / Pre-Accelerator BCM
   05 |     Fifth BCM
 
@@ -319,17 +443,29 @@ Next we will examine the beam parameter keywords:
   WS|                               Wire Sum
 
 The `XX` indicates the position of the BPM within that beamline section.
-Often BPMs will be labeled with `qwk` like the BCMs; however, the BCMs will always have the
-the form `qwk_bcm` whereas the BPMs will just use `qwk_XXXX` instead of
-`bpmXXXX`. This is a holdover from the Qweak experiment and is
-innocuous. It will most likely be phased out as japan-MOLLER matures.
+Often BPMs will be labeled with `qwk` like the BCMs; however, the BCMs
+will always have the the form `qwk_bcm` whereas the BPMs will just use
+`qwk_XXXX` instead of `bpmXXXX`. This is a holdover from the Qweak
+experiment and is innocuous. It will most likely be phased out as
+japan-MOLLER matures.
 
-### BPM Example
+``` {.c}
+    root [9] evt->Print("qwk_*")
+    *............................................................................*
+    *Br   75 :qwk_0l06aXM : hw_sum/D:block0/D:block1/D:block2/D:block3/D:        *
+    *         | num_samples/D:Device_Error_Code/D:hw_sum_raw/D:block0_raw/D:     *
+    *         | block1_raw/D:block2_raw/D:block3_raw/D:SumSq1_0/D:SumSq2_0/D:    *
+    *         | RawMin_0/D:RawMax_0/D:SumSq1_1/D:SumSq2_1/D:RawMin_1/D:          *
+    *         | RawMax_1/D:SumSq1_2/D:SumSq2_2/D:RawMin_2/D:RawMax_2/D:          *
+    *         | SumSq1_3/D:SumSq2_3/D:RawMin_3/D:RawMax_3/D:sequence_number/D    *
+    *Entries :    19989 : Total  Size=    4669127 bytes  File Size  =    1632828 *
+    *Baskets :      294 : Basket Size=      16000 bytes  Compression=   2.85     *
+    *............................................................................*
+```
 
-![image](Images/BPM_Example.png)
+We see the branch name, `qwk_0l06aXm`. Note the use of `qwk_` in lieu of
+`bpm`.
 
-In the above output from `evt->Print("*qwk*")`, we see the branch name,
-`qwk_0l06aXm`. Note the use of `qwk_` in lieu of `bpm`.
 Keword| Meaning
   --------------------------------| ---------------------
   qwk\_ | Holdover from Qweak
@@ -361,7 +497,7 @@ MOLLER measurement will occur in ring 5 so that ring is further
 subdivided by three more segments, giving 84 channels. In total, there
 are 224 thin quartz detectors channels.
 
-![image](Images/Thin_Quartz_Rings.png)
+![image](Images/Quartz_Rings.png)
 
 The thin quarts detectors are labeled as `tq` in the ROOT tree. The
 segment that the thin quarts correspond to denoted explicitly by a
@@ -370,10 +506,21 @@ radial ring that the thin quarts corresponds to is indicated after the
 segment by `_r#`. Since ring 5 is divided further into three more
 segments, ring 5 segments are denoted by `a,b,c (1,2,3)`.
 
-![image](Images/Thin_Quartz_Example.png)
+``` {.c}
+    root [10] evt->Print("tq*")
+    *............................................................................*
+    *Br  188 :tq24_r5a  : hw_sum/D:block0/D:block1/D:block2/D:block3/D:          *
+    *         | num_samples/D:Device_Error_Code/D:hw_sum_raw/D:block0_raw/D:     *
+    *         | block1_raw/D:block2_raw/D:block3_raw/D:SumSq1_0/D:SumSq2_0/D:    *
+    *         | RawMin_0/D:RawMax_0/D:SumSq1_1/D:SumSq2_1/D:RawMin_1/D:          *
+    *         | RawMax_1/D:SumSq1_2/D:SumSq2_2/D:RawMin_2/D:RawMax_2/D:          *
+    *         | SumSq1_3/D:SumSq2_3/D:RawMin_3/D:RawMax_3/D:sequence_number/D    *
+    *Entries :    19989 : Total  Size=    4668242 bytes  File Size  =    2411788 *
+    *Baskets :      294 : Basket Size=      16000 bytes  Compression=   1.93     *
+    *............................................................................*    
+```
 
-In the above output from `evt->Print("tq*")`, we see the branch name,
-`tq24_r5a`
+We see the branch name, `tq24_r5a`
         Keyword | Meaning
   ------------------------| ---------------------
   tq | thin quartz
@@ -393,10 +540,21 @@ measurements. In the ROOT tree, it is labeled as `pd`. The segment that
 the pion detector corresponds to is given by a numeric following the
 `sm` label.
 
-![image](Images/Pion_Det_Example.png)
+``` {.c}
+    root [11] evt->Print("pd*")
+    *............................................................................*
+    *Br   10 :pd11      : hw_sum/D:block0/D:block1/D:block2/D:block3/D:          *
+    *         | num_samples/D:Device_Error_Code/D:hw_sum_raw/D:block0_raw/D:     *
+    *         | block1_raw/D:block2_raw/D:block3_raw/D:SumSq1_0/D:SumSq2_0/D:    *
+    *         | RawMin_0/D:RawMax_0/D:SumSq1_1/D:SumSq2_1/D:RawMin_1/D:          *
+    *         | RawMax_1/D:SumSq1_2/D:SumSq2_2/D:RawMin_2/D:RawMax_2/D:          *
+    *         | SumSq1_3/D:SumSq2_3/D:RawMin_3/D:RawMax_3/D:sequence_number/D    *
+    *Entries :    19989 : Total  Size=    4667062 bytes  File Size  =    2410688 *
+    *Baskets :      294 : Basket Size=      16000 bytes  Compression=   1.93     *
+    *............................................................................*
+```
 
-In the above output from `evt->Print("pd*")`, we see the branch name,
-`pd11`
+We see the branch name, `pd11`
         Keyword | Meaning
   --------------------------| ---------------
   pd | Pion Detector
@@ -416,9 +574,21 @@ hadronic and low-energy backgrounds. In the ROOT tree, the shower max
 detectors are labeled as `sm`. The segment that the shower max detector
 corresponds to is given by a numeric following the `sm` label.
 
-![image](Images/shower_max_example.png)
+``` {.c}
+    *............................................................................*
+    *Br    2 :sm03      : hw_sum/D:block0/D:block1/D:block2/D:block3/D:          *
+    *         | num_samples/D:Device_Error_Code/D:hw_sum_raw/D:block0_raw/D:     *
+    *         | block1_raw/D:block2_raw/D:block3_raw/D:SumSq1_0/D:SumSq2_0/D:    *
+    *         | RawMin_0/D:RawMax_0/D:SumSq1_1/D:SumSq2_1/D:RawMin_1/D:          *
+    *         | RawMax_1/D:SumSq1_2/D:SumSq2_2/D:RawMin_2/D:RawMax_2/D:          *
+    *         | SumSq1_3/D:SumSq2_3/D:RawMin_3/D:RawMax_3/D:sequence_number/D    *
+    *Entries :    19989 : Total  Size=    4667062 bytes  File Size  =    2410197 *
+    *Baskets :      294 : Basket Size=      16000 bytes  Compression=   1.93     *
+    *............................................................................*
+```
 
-In the above output from `evt->Print("sm*")`, we see the branch name,
+We see the branch name, `sm03`
+
 `sm03`
         Keyword | Meaning
   ------------------------| ------------
@@ -431,17 +601,31 @@ We can see that this branch corresponds to a shower max in segment 3.
 
 The large angle monitors detectors consist of seven quartz radiator and
 pmt modules, one for each sector. They are located downstream of the
-target and are positioned to detect large angle scattering. In the ROOT
-tree, the large angle monitors are labeled as `la`, followed by a
-numeric that specifies which detector and channel it corresponds to.
+target and are positioned to detect large angle scattering. They are
+expected to have a high event rate with a small asymmetry measurement.
+They monitor for potential false asymmetries from re-scattered
+backgrounds. In the ROOT tree, the large angle monitors are labeled as
+`la`, followed by a numeric that specifies which detector and channel it
+corresponds to.
 
-![image](Images/Large_Angle_Monitor.png)
+``` {.c}
+    root [13] evt->Print("la*")
+    *............................................................................*
+    *Br   37 :la38      : hw_sum/D:block0/D:block1/D:block2/D:block3/D:          *
+    *         | num_samples/D:Device_Error_Code/D:hw_sum_raw/D:block0_raw/D:     *
+    *         | block1_raw/D:block2_raw/D:block3_raw/D:SumSq1_0/D:SumSq2_0/D:    *
+    *         | RawMin_0/D:RawMax_0/D:SumSq1_1/D:SumSq2_1/D:RawMin_1/D:          *
+    *         | RawMax_1/D:SumSq1_2/D:SumSq2_2/D:RawMin_2/D:RawMax_2/D:          *
+    *         | SumSq1_3/D:SumSq2_3/D:RawMin_3/D:RawMax_3/D:sequence_number/D    *
+    *Entries :    19989 : Total  Size=    4667062 bytes  File Size  =    2410667 *
+    *Baskets :      294 : Basket Size=      16000 bytes  Compression=   1.93     *
+    *............................................................................*
+```
 
-In the above output from `evt->Print("la*")`, we see the branch name,
-`la38`. Each detector has 8 channels, so the divisor of the numeric mod
-8 corresponds to the sector, and the remainder corresponds to the
-channel.
- 
+We see the branch name, `la38`. Each detector has 8 channels, so the
+divisor of the numeric mod 8 corresponds to the sector, and the
+remainder corresponds to the channel.
+
  Keyword | Meaning
   ------------------------| -------------------------------------------------------------
   la | Large Angle Monitor
@@ -458,10 +642,21 @@ The small angle monitors are downstream from the target. In the ROOT
 tree, they are labeled as `sa`, followed by a numeric. The numeric
 indicates which small angle monitor the branch corresponds to.
 
-![image](Images/Small_Angle_Example.png)
+``` {.c}
+    root [14] evt->Print("sa*")
+    *............................................................................*
+    *Br    5 :sa06      : hw_sum/D:block0/D:block1/D:block2/D:block3/D:          *
+    *         | num_samples/D:Device_Error_Code/D:hw_sum_raw/D:block0_raw/D:     *
+    *         | block1_raw/D:block2_raw/D:block3_raw/D:SumSq1_0/D:SumSq2_0/D:    *
+    *         | RawMin_0/D:RawMax_0/D:SumSq1_1/D:SumSq2_1/D:RawMin_1/D:          *
+    *         | RawMax_1/D:SumSq1_2/D:SumSq2_2/D:RawMin_2/D:RawMax_2/D:          *
+    *         | SumSq1_3/D:SumSq2_3/D:RawMin_3/D:RawMax_3/D:sequence_number/D    *
+    *Entries :    19989 : Total  Size=    4667062 bytes  File Size  =    2410773 *
+    *Baskets :      294 : Basket Size=      16000 bytes  Compression=   1.93     *
+    *............................................................................*
+```
 
-In the above output from `evt->Print("sa*")`, we see the branch name,
-`sa06`.
+We see the branch name, `sa06`.
 
  Keyword | Meaning
   ----------------------| ---------------------
@@ -528,7 +723,16 @@ identify them during analysis.
 
 ### Error Code Example
 
-![image](Images/Error_Code_Example.png)
+``` {.c}
+    root [15] evt->Scan("ErrorFlag")
+    ************************
+    *    Row   * ErrorFlag *
+    ************************
+    *        0 *  67305472 *
+    *        1 *  67305472 *
+    *        2 *  67305472 *
+    *          ...         *
+```
 
 Opening up the evt tree and scanning the ErrorFlag branch, we see that
 we have the decimal error code `67305475`, or converting to hexadecimal,
@@ -559,7 +763,17 @@ All the ROOT trees have a units branch. This branch stores unit
 conversions in the leaves for `ppm`, `ppb`, `um`, `mm`, `mA per uA`, and `V per uA`. To use the unit conversions, you scale
 the histograms by the `units.<leaf>`.
 
+``` {.c}
+    root [43] TCanvas* example = new TCanvas()
+    root [44] example->Divide(2,1)
+    root [45] example->cd(1)
+    root [46] mul->Draw("asym_la42")
+    root [47] example->cd(2)
+    root [48] mul->Draw("asym_la42/units.ppm")
+```
+
 ![image](Images/Units_Example.png)
+
 ### Helicity Branches
 
 The helicity branches are an assortment of branches that contain event's
@@ -568,8 +782,10 @@ and `pat_counter` which count the number of MPS signals and the number
 of 64-mulitplet helicity pattern respectively. The branch `pat_phase`
 tracks which 64-multiplet helicity an event corresponds to.
 
-Useful Navigation Tips
-----------------------
+Useful Tips
+-----------
+
+### Navigation
 
 If you are using the terminal to access the rootfile, and only want to
 view specific branches, you can specify the output of the
