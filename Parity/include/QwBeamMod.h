@@ -25,7 +25,8 @@
 #include "QwVQWK_Channel.h"
 #include "QwWord.h"
 
-
+// Forward declarations
+class QwBeamMod;
 
 //enum EBeamInstrumentType{kBPMStripline = 0,
 //			 kBCM,
@@ -34,7 +35,49 @@
 
 // this emun vector needs to be coherent with the DetectorTypes declaration in the QwBeamLine constructor
 
-class QwModChannelID;
+
+
+/*****************************************************************
+*  Class:
+******************************************************************/
+class QwModChannelID
+{
+ public:
+
+  QwModChannelID(Int_t subbankid, Int_t wordssofar,TString name,
+                   TString modtype ,QwBeamMod * obj);
+
+   QwModChannelID(Int_t subbankid, QwParameterFile &paramfile);
+
+
+
+/*     QwModChannelID):fSubbankIndex(-1),fWordInSubbank(-1),fTypeID(-1),fIndex(-1), */
+/*     fSubelement(999999),fmoduletype(""),fmodulename("") */
+/*     {}; */
+
+  Int_t fSubbankIndex;        //Generated from ROCID(readout CPU) & BankID(corespondes to internal headers to ID differnt types of data..ex. F1TDC)
+  Int_t fWordInSubbank;
+  //first word reported for this channel in the subbank
+  //(eg VQWK channel report 6 words for each event, scalers oly report one word per event)
+
+  // The first word of the subbank gets fWordInSubbank=0
+
+  TString fmoduletype; // eg: VQWK, SCALER
+  TString fmodulename;
+  Int_t modnum;
+  Int_t channum;
+
+  // TString fdetectortype;
+
+  Int_t  kUnknownDeviceType;
+  Int_t  fTypeID;           // type of detector eg: lumi or stripline, etc..
+  Int_t  fIndex;            // index of this detector in the vector containing all the detector of same type
+
+  void Print();
+
+};
+
+
 
 /*****************************************************************
 *  Class:
@@ -173,46 +216,5 @@ class QwBeamMod: public VQwSubsystemParity, public MQwSubsystemCloneable<QwBeamM
  UInt_t fBmwObj_ErrorFlag;
 
 };
-
-
-
-class QwModChannelID
-{
- public:
-
-  QwModChannelID(Int_t subbankid, Int_t wordssofar,TString name,
-		   TString modtype ,QwBeamMod * obj);
-
-   QwModChannelID(Int_t subbankid, QwParameterFile &paramfile);
-  
-
-
-/*     QwModChannelID):fSubbankIndex(-1),fWordInSubbank(-1),fTypeID(-1),fIndex(-1), */
-/*     fSubelement(999999),fmoduletype(""),fmodulename("") */
-/*     {}; */
-
-  Int_t fSubbankIndex;        //Generated from ROCID(readout CPU) & BankID(corespondes to internal headers to ID differnt types of data..ex. F1TDC)
-  Int_t fWordInSubbank;
-  //first word reported for this channel in the subbank
-  //(eg VQWK channel report 6 words for each event, scalers oly report one word per event)
-
-  // The first word of the subbank gets fWordInSubbank=0
-
-  TString fmoduletype; // eg: VQWK, SCALER
-  TString fmodulename;
-  Int_t modnum;
-  Int_t channum;
-  
-  // TString fdetectortype;
-
-  Int_t  kUnknownDeviceType;
-  Int_t  fTypeID;           // type of detector eg: lumi or stripline, etc..
-  Int_t  fIndex;            // index of this detector in the vector containing all the detector of same type
-
-  void Print();
-
-};
-
-
 
 #endif
