@@ -300,7 +300,7 @@ int THaEtClient::codaRead() {
   	 std::cout<<"\n\n===== Event "<<j<<"  length "<<event_size<<std::endl<<std::flush;
 	 pdata = data;
          for (i=0; i < event_size; i++, pdata++) {
-           std::cout<<"evbuff["<<std::dec<<i<<"] = "<<*pdata<<" = 0x"<<std::hex<<*pdata<<std::endl<<std::flush;
+           std::cout<<"evbuff["<<std::dec<<i<<"] = "<<*pdata<<" = 0x"<<std::hex<<*pdata<<std::dec<<std::endl<<std::flush;
 	 }
       }
     }
