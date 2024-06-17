@@ -1,6 +1,7 @@
-**QwMockData Root Guide**\
-May 23, 2024\
-Version 0.4
+# QwMockData Root Guide
+June 6, 2024\
+Version 1.0
+
 
 If you have any questions or suggestions for the guide, please send an
 email to:\
@@ -13,11 +14,9 @@ Running QwMockDataGenerator
 Using the JAPAN-MOLLER repository, run the following commands in a
 terminal:
 
-        $  build/qwmockdatagenerator -r 4 -e 1:20000 --config qwparity_simple.conf \
-           --detectors mock_newdets.map --data <Data>
-        $  build/qwparity -r 4 --config qwparity_simple.conf \
-           --detectors mock_newdets.map --data-handler mock_datahandlers.map \
-           --data <Data> --rootfiles <Rootfiles>
+        $  build/qwmockdatagenerator -r 4 -e 1:20000 --config qwparity_simple.conf --detectors mock_newdets.map --data <Data>
+        
+        $  build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data <Data> --rootfiles <Rootfiles>
 
 General ROOT TTree Format
 =========================
@@ -199,7 +198,7 @@ TTree evt
 ---------
 
 The evt tree contains the Macro Pulse Signal (MPS) event data. The MPS
-is a 960 Hz helicity signal generated at the injector that determines
+is a 1920 Hz helicity signal generated at the injector that determines
 when the helicity state is stable and data can be collected.
 
 ![The trigger and ADC gate timing diagram(Beminiwattha
@@ -497,6 +496,7 @@ MOLLER measurement will occur in ring 5 so that ring is further
 subdivided by three more segments, giving 84 channels. In total, there
 are 224 thin quartz detectors channels.
 
+
 ![image](Images/Quartz_Rings.png)
 
 The thin quarts detectors are labeled as `tq` in the ROOT tree. The
@@ -504,7 +504,7 @@ segment that the thin quarts correspond to denoted explicitly by a
 numeric value, i.e. `tq4` indicates a thin quarts in segment 4. The
 radial ring that the thin quarts corresponds to is indicated after the
 segment by `_r#`. Since ring 5 is divided further into three more
-segments, ring 5 segments are denoted by `a,b,c (1,2,3)`.
+segments, ring 5 segments are denoted by `a,b,c (left,center,right)`.
 
 ``` {.c}
     root [10] evt->Print("tq*")
@@ -529,7 +529,7 @@ We see the branch name, `tq24_r5a`
   \_r5a |    ring 5 subsection a
 
 We can see that this branch corresponds to a ring 5 thin quartz
-detector, in segment 24, and in the additional ring 5 sub-segment a.
+detector, in segment 24, and in the additional ring 5 sub-segment a (left).
 
 ### Pion Detector
 
@@ -782,10 +782,7 @@ and `pat_counter` which count the number of MPS signals and the number
 of 64-mulitplet helicity pattern respectively. The branch `pat_phase`
 tracks which 64-multiplet helicity an event corresponds to.
 
-Useful Tips
------------
-
-### Navigation
+Navigation Tips
 
 If you are using the terminal to access the rootfile, and only want to
 view specific branches, you can specify the output of the
@@ -799,4 +796,144 @@ you can search for branches that end in `bcm` with the command
 `Print("*bcm")`. You can also search for branches that contain `bcm`
 somewhere with `Print("*bcm*")`. Lastily, you can search for a branch
 that contains `bcm` and another keyword by `Print("*bcm*0l*")`.
+
+Drawing Histograms Tips
+-----------------------
+
+Below are some tips on drawing histogram plots of the different
+branches. We will be using the evt tree as our example tree and the
+large angle monitor leaves as our example leaves:
+
+``` {.c}
+root [0] TFile* f = new TFile("isu_sample_4.root")
+(TFile *) 0x56263c367110
+root [1] .ls
+TFile**         isu_sample_4.root      myfile1
+ TFile*         isu_sample_4.root      myfile1
+    ...         ...      ...
+  KEY: TTree    evt;1   MPS event data tree
+    ...         ...      ...
+  KEY: TTree    muls;1  Running sum tree
+  KEY: TTree    bursts;1        Burst running sum tree
+```
+
+Printing out the branches in the evt tree, we see the large angle
+monitor, `laXX`, branches
+
+``` {.c}
+root [2] evt->Print()
+*............................................................................*
+*Br  619 :la41      : hw_sum/D:block0/D:block1/D:block2/D:block3/D:          *
+*         | num_samples/D:Device_Error_Code/D:hw_sum_raw/D:block0_raw/D:     *
+*         | block1_raw/D:block2_raw/D:block3_raw/D:SumSq1_0/D:SumSq2_0/D:    *
+*         | RawMin_0/D:RawMax_0/D:SumSq1_1/D:SumSq2_1/D:RawMin_1/D:          *
+*         | RawMax_1/D:SumSq1_2/D:SumSq2_2/D:RawMin_2/D:RawMax_2/D:          *
+*         | SumSq1_3/D:SumSq2_3/D:RawMin_3/D:RawMax_3/D:sequence_number/D    *
+*Entries :    19989 : Total  Size=    4667062 bytes  File Size  =    2411094 *
+*Baskets :      294 : Basket Size=      16000 bytes  Compression=   1.93     *
+*............................................................................*
+*Br  620 :la42      : hw_sum/D:block0/D:block1/D:block2/D:block3/D:          *
+*         | num_samples/D:Device_Error_Code/D:hw_sum_raw/D:block0_raw/D:     *
+*         | block1_raw/D:block2_raw/D:block3_raw/D:SumSq1_0/D:SumSq2_0/D:    *
+*         | RawMin_0/D:RawMax_0/D:SumSq1_1/D:SumSq2_1/D:RawMin_1/D:          *
+*         | RawMax_1/D:SumSq1_2/D:SumSq2_2/D:RawMin_2/D:RawMax_2/D:          *
+*         | SumSq1_3/D:SumSq2_3/D:RawMin_3/D:RawMax_3/D:sequence_number/D    *
+*Entries :    19989 : Total  Size=    4667062 bytes  File Size  =    2410743 *
+*Baskets :      294 : Basket Size=      16000 bytes  Compression=   1.93     *
+*............................................................................*
+```
+
+### Simple Plot
+
+To draw one branch in a TTree, you type
+`Tree_Name -> Draw("Branch_Name")`. Typing
+
+``` {.c}
+root [3] evt->Draw("la41")
+Info in <TCanvas::MakeDefCanvas>:  created default TCanvas with name c1
+```
+
+we should see a default canvas called `c1` appear with the branch,
+`la41`, drawn.
+
+![image](Images/la41_drawn.png)
+### Plotting Branches Against Each other
+
+Suppose we have two branches that we want to compare their correlations
+against. In our case, we want to see if branches `la41` and `la42`
+correlate. We can do this easily by typing
+`Tree_Name -> Draw("Branch_Name_1:Branch_Name_2")`.
+
+``` {.c}
+root [4] evt->Draw("la41:la42")
+Info in <TCanvas::MakeDefCanvas>:  created default TCanvas with name c1
+```
+
+We should see branches `la41` and `la42` drawn against each other,
+resulting in a mostly linear correlation:
+
+![image](Images/la41_la42_drawn.png)
+You can also do binary operations between the branches when you
+draw them:
+
+``` {.c}
+root [5] evt->Draw("la41+la42")
+root [6] evt->Draw("la41-la42")
+root [7] evt->Draw("la41/la42")
+```
+
+Note: You can only draw two branches against each other if they have the
+same number of entries.
+
+### Comparing Trees in Multiple Files
+
+Suppose we have two files, `isu_sample_4.root` and `isu_sample_5.root`,
+and that we would like to compare the branches between them. To
+accomplish this, we need to `friend` the two trees in the two files.
+Start by opening both files:
+
+``` {.c}
+root [0] TFile* f4 = new TFile("isu_sample_4.root")
+(TFile *) 0x56014ef42320
+root [1] TFile* f5 = new TFile("isu_sample_5.root")
+(TFile *) 0x56014f7809b0
+```
+
+We need to be more explicit with the opening of the trees since we are
+working between two different files with (presumably) similar naming
+schemes. We do this by explicitly obtaining the trees we wish to compare
+from each file (you can still print out the file contents by typing
+`f5->ls()`; this displays the contents of `TFile* f5`).
+
+``` {.c}
+root [2] TTree* t4 = (TTree*)f4->Get("evt")
+(TTree *) 0x5560d9dac5a0
+root [3] TTree* t5 = (TTree*)f5->Get("evt")
+(TTree *) 0x5560dacf97a0
+```
+
+Now we have to friend the two trees:
+
+``` {.c}
+root [4] t4->AddFriend(t5, "other")
+(TFriendElement *) 0x5560db4d3550
+```
+
+We can now draw the two trees (and their respective branches) against
+each other:
+
+``` {.c}
+root [5] t4->Draw("la41:other.la41")
+Info in <TCanvas::MakeDefCanvas>:  created default TCanvas with name c1
+```
+
+![image](Images/friendship_trees.png)
+
+
+And voila! We can now draw two trees from two different files against
+each other. Just like in section 5.8.2, we can do binary
+operations on the two trees when we invoke `Draw("...")`. 
+
+Note: You can only draw two branches against each other if they have the same number
+of entries.
 
