@@ -783,6 +783,7 @@ of 64-mulitplet helicity pattern respectively. The branch `pat_phase`
 tracks which 64-multiplet helicity an event corresponds to.
 
 Navigation Tips
+-----------------------
 
 If you are using the terminal to access the rootfile, and only want to
 view specific branches, you can specify the output of the
@@ -843,7 +844,7 @@ root [2] evt->Print()
 *............................................................................*
 ```
 
-### Simple Plot
+### Plotting a Branch
 
 To draw one branch in a TTree, you type
 `Tree_Name -> Draw("Branch_Name")`. Typing
