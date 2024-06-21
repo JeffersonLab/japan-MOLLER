@@ -44,7 +44,7 @@ VQwDataHandler::VQwDataHandler(const TString& name)
   fSubsystemArray(0),
   fHelicityPattern(0),
   fKeepRunningSum(kFALSE)
-{ }
+{ fRunningsum=NULL;}
 
 VQwDataHandler::VQwDataHandler(const VQwDataHandler &source)
 : fPriority(source.fPriority),
@@ -70,7 +70,11 @@ VQwDataHandler::VQwDataHandler(const VQwDataHandler &source)
     this->fOutputVar[i] = source.fOutputVar[i]->Clone(VQwDataElement::kDerived);
     //this->fOutputVar[i] = new QwVQWK_Channel(*vqwk, VQwDataElement::kDerived);
   }
-
+  if (source.fRunningsum!=NULL){
+    fRunningsum = source.fRunningsum->Clone();
+  } else {
+    fRunningsum = NULL;
+  }
 }
 
 

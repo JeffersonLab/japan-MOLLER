@@ -294,7 +294,7 @@ void THaCodaFile::staterr(TString tried_to, unsigned int status) {
 	}
         break;
       default:
-        std::cout << "Error status  0x" << std::hex << status << std::endl;
+        std::cout << "Error status  0x" << std::hex << status << std::dec << std::endl;
       }
   };
 
