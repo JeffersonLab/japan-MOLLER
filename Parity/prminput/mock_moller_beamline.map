@@ -1,0 +1,156 @@
+!!!!
+!!!!  Beamline element names and locations are taken from MOLLER DocDB 1071, version 5.
+!!!!  https://moller-docdb.physics.sunysb.edu/cgi-bin/DocDBTest/private/ShowDocument?docid=1071&version=5
+!!!!
+
+ROC=31
+Bank=0x3102
+!
+!
+! module.type, module.num  chan.num, det.type, det.name, if unrotated then last column ->UNROTATED
+
+sample_size=15000
+!ADC0
+  MollerADC, 0, 0,  bpmstripline,  BPM1C10XP
+  MollerADC, 0, 1,  bpmstripline,  BPM1C10XM
+  MollerADC, 0, 2,  bpmstripline,  BPM1C10YP
+  MollerADC, 0, 3,  bpmstripline,  BPM1C10YM
+  MollerADC, 0, 4,  bpmstripline,  BPM1C11XP
+  MollerADC, 0, 5,  bpmstripline,  BPM1C11XM
+  MollerADC, 0, 6,  bpmstripline,  BPM1C11YP
+  MollerADC, 0, 7,  bpmstripline,  BPM1C11YM
+
+
+!ADC1
+  MollerADC, 1, 0,  bpmstripline,  BPM1C12XP
+  MollerADC, 1, 1,  bpmstripline,  BPM1C12XM
+  MollerADC, 1, 2,  bpmstripline,  BPM1C12YP
+  MollerADC, 1, 3,  bpmstripline,  BPM1C12YM
+  MollerADC, 1, 4,  bpmstripline,  BPM1C16XP
+  MollerADC, 1, 5,  bpmstripline,  BPM1C16XM
+  MollerADC, 1, 6,  bpmstripline,  BPM1C16YP
+  MollerADC, 1, 7,  bpmstripline,  BPM1C16YM
+
+
+!ADC2
+  MollerADC, 2, 0,  bpmstripline,  BPM1C20XP
+  MollerADC, 2, 1,  bpmstripline,  BPM1C20XM
+  MollerADC, 2, 2,  bpmstripline,  BPM1C20YP
+  MollerADC, 2, 3,  bpmstripline,  BPM1C20YM
+  MollerADC, 2, 4,  bpmstripline,  BPM1P02BXP
+  MollerADC, 2, 5,  bpmstripline,  BPM1P02BXM
+  MollerADC, 2, 6,  bpmstripline,  BPM1P02BYP
+  MollerADC, 2, 7,  bpmstripline,  BPM1P02BYM
+
+
+!ADC3
+  MollerADC, 3, 0,  bpmstripline,  BPM1P03AXP
+  MollerADC, 3, 1,  bpmstripline,  BPM1P03AXM
+  MollerADC, 3, 2,  bpmstripline,  BPM1P03AYP
+  MollerADC, 3, 3,  bpmstripline,  BPM1P03AYM
+  MollerADC, 3, 4,  bpmstripline,  BPM1H01XP
+  MollerADC, 3, 5,  bpmstripline,  BPM1H01XM
+  MollerADC, 3, 6,  bpmstripline,  BPM1H01YP
+  MollerADC, 3, 7,  bpmstripline,  BPM1H01YM
+
+
+!ADC4
+  MollerADC, 4, 0,  bpmstripline,  BPM1H02XP
+  MollerADC, 4, 1,  bpmstripline,  BPM1H02XM
+  MollerADC, 4, 2,  bpmstripline,  BPM1H02YP
+  MollerADC, 4, 3,  bpmstripline,  BPM1H02YM
+  MollerADC, 4, 4,  bpmstripline,  BPM1H03XP
+  MollerADC, 4, 5,  bpmstripline,  BPM1H03XM
+  MollerADC, 4, 6,  bpmstripline,  BPM1H03YP
+  MollerADC, 4, 7,  bpmstripline,  BPM1H03YM
+
+
+!ADC5
+  MollerADC, 5, 0,  bpmstripline,  BPM1H04XP
+  MollerADC, 5, 1,  bpmstripline,  BPM1H04XM
+  MollerADC, 5, 2,  bpmstripline,  BPM1H04YP
+  MollerADC, 5, 3,  bpmstripline,  BPM1H04YM
+  MollerADC, 5, 4,  bpmstripline,  BPM1H05XP
+  MollerADC, 5, 5,  bpmstripline,  BPM1H05XM
+  MollerADC, 5, 6,  bpmstripline,  BPM1H05YP
+  MollerADC, 5, 7,  bpmstripline,  BPM1H05YM
+
+
+!ADC6
+  MollerADC, 6, 0, bpmstripline, BPM1H11XP
+  MollerADC, 6, 1, bpmstripline, BPM1H11XM
+  MollerADC, 6, 2, bpmstripline, BPM1H11YP
+  MollerADC, 6, 3, bpmstripline, BPM1H11YM
+  MollerADC, 6, 4, bpmstripline, BPM1H14XP
+  MollerADC, 6, 5, bpmstripline, BPM1H14XM
+  MollerADC, 6, 6, bpmstripline, BPM1H14YP
+  MollerADC, 6, 7, bpmstripline, BPM1H14YM
+ 
+!ADC7 
+!  MollerADC, 7, 0, bpmcavity, CAV1H04AXI
+!  MollerADC, 7, 1, bpmcavity, CAV1H04AYI
+!  MollerADC, 7, 2, bpmcavity, CAV1H04AQ
+
+!ADC8 
+!  MollerADC, 8, 0, bpmcavity, CAV1H13AXI
+!  MollerADC, 8, 1, bpmcavity, CAV1H13AYI
+!  MollerADC, 8, 2, bpmcavity, CAV1H13AQ
+
+
+!ADC7
+  MollerADC, 7, 0,  bcm,  BCM1H02A
+  MollerADC, 7, 1,  bcm,  BCM1H02B
+  MollerADC, 7, 2,  bcm,  BCM1H04A
+  MollerADC, 7, 3,  bcm,  BCM1H12A
+  MollerADC, 7, 4,  bcm,  BCM1H12B
+  MollerADC, 7, 5,  bcm,  BCM1H12C
+  MollerADC, 7, 6,  bcm,  BCM1H13
+  MollerADC, 7, 7,  bcm,  BCM1H15
+
+
+begin=combinedbpm
+name=bpm_target
+bpm1h04, bpmstripline, 1.0, 1.0, 1.0
+bpm1h05, bpmstripline, 1.0, 1.0, 1.0
+bpm1h11, bpmstripline, 1.0, 1.0, 1.0
+bpm1h14, bpmstripline, 1.0, 1.0, 1.0
+end=combinedbpm
+
+
+begin=combinedbcm
+name=bcm_target
+bcm1h02a, bcm, 1.0
+bcm1h02b, bcm, 1.0
+bcm1h04a, bcm, 1.0
+bcm1h12a, bcm, 1.0
+bcm1h12b, bcm, 1.0
+bcm1h12c, bcm, 1.0
+bcm1h13, bcm, 1.0
+bcm1h15, bcm, 1.0
+end=combinedbcm
+
+begin=energycalculator
+name=target_energy
+!name          type            ratios     property  
+ !BPM1C10,      bpmstripline,   0.00008,   beamposition
+ BPM1C11,      bpmstripline,   0.00012,   beamposition
+ BPM1C12,      bpmstripline,   0.00024,   beamposition
+ BPM1C16,      bpmstripline,   0.00004,   beamposition 
+ BPM1C20,      bpmstripline,   0.00002,   beamposition
+ bpm_target,   combinedbpm,   -0.00017,   targetbeamposition          
+ bpm_target,   combinedbpm,    2.6,       targetbeamangle
+end=energycalculator
+
+
+[PUBLISH]
+ q_targ,   combobcm,     bcm_target,     c
+ x_targ,   combobpm,     bpm_target,     x
+ y_targ,   combobpm,     bpm_target,     y
+ xp_targ,  combobpm,     bpm_target,     xp
+ yp_targ,  combobpm,     bpm_target,     yp
+ e_targ,   comboenergy,  target_energy,  e
+
+
+
+
+!END

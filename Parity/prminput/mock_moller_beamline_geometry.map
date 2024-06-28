@@ -1,0 +1,22 @@
+!!!!
+!!!!  Beamline element names and locations are taken from MOLLER DocDB 1071, version 5.
+!!!!  https://moller-docdb.physics.sunysb.edu/cgi-bin/DocDBTest/private/ShowDocument?docid=1071&version=5
+!!!!
+
+bpmstripline, BPM1C10, 0.2, -0.5,  6751.8,  1.0, 1.0, 1.0
+bpmstripline, BPM1C11, 0.2, -0.5,  7271.8,  1.0, 1.0, 1.0
+bpmstripline, BPM1C12, 0.2, -0.5,  7791.8,  1.0, 1.0, 1.0
+bpmstripline, BPM1C16, 0.2, -0.5,  9871.8,  1.0, 1.0, 1.0
+bpmstripline, BPM1C20, 0.2, -0.5,  10799.3,  1.0, 1.0, 1.0
+bpmstripline, BPM1P02B, 0.2, -0.5,  11781.3,  1.0, 1.0, 1.0
+bpmstripline, BPM1P03A, 0.2, -0.5,  12003.9,  1.0, 1.0, 1.0
+bpmstripline, BPM1H01, 0.2, -0.5,  12480.5,  1.0, 1.0, 1.0
+bpmstripline, BPM1H02, 0.2, -0.5,  12698.8,  1.0, 1.0, 1.0
+bpmstripline, BPM1H03, 0.2, -0.5,  12917.2,  1.0, 1.0, 1.0
+bpmstripline, BPM1H04, 0.2, -0.5,  13113.7,  1.0, 1.0, 1.0
+bpmstripline, BPM1H05, 0.2, -0.5,  13244.3,  1.0, 1.0, 1.0
+bpmstripline, BPM1H11, 0.2, -0.5,  14099.0,  1.0, 1.0, 1.0
+bpmstripline, BPM1H14, 0.2, -0.5,  14394.6,  1.0, 1.0, 1.0
+
+combinedbpm, bpm_target, 0.0, 0.0,  14605.1,  1.0, 1.0, 1.0
+
