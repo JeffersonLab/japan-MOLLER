@@ -6,11 +6,11 @@
  map  = mock_qweak_helicity.map
 
 [QwBeamLine]
- name  = Main BeamLine
- map   = mock_qweak_beamline.map
- param = mock_qweak_pedestal.map
- geom  = mock_beamline_geometry.map
- eventcut = mock_beamline_eventcuts.map
+ name     = Main BeamLine
+ map      = mock_moller_beamline.map
+ param    = mock_moller_beamline_pedestal.map
+ geom     = mock_moller_beamline_geometry.map
+ eventcut = mock_moller_beamline_eventcuts.map
 
 [QwBeamLine]
  name  = Injector BeamLine

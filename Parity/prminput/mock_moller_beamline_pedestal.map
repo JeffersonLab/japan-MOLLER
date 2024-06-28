@@ -1,0 +1,80 @@
+! this file contains the pedestals for the ADCS
+! respect the format of the file
+! name of chanel, pedestal, gain
+! if this is a Triumf ADC enter the hardware sum pedestal
+! the pedestal will be subtracted to the data
+BCM1H02A ,	            0   ,  76.293e-2
+BCM1H02B ,	            0   ,  76.293e-2
+BCM1H04A ,	            0   ,  76.293e-2
+BCM1H12A ,	            0   ,  76.293e-2
+BCM1H12B ,	            0   ,  76.293e-2
+BCM1H12C ,	            0   ,  76.293e-2
+BCM1H13 ,	            0   ,  76.293e-2
+BCM1H15 ,	            0   ,  76.293e-2
+
+BPM1C10XP  ,	            0   ,  76.293e-6
+BPM1C10XM  ,	            0   ,  76.293e-6
+BPM1C10YP  ,	            0   ,  76.293e-6
+BPM1C10YM  ,	            0   ,  76.293e-6
+BPM1C11XP  ,	            0   ,  76.293e-6
+BPM1C11XM  ,	            0   ,  76.293e-6
+BPM1C11YP  ,	            0   ,  76.293e-6
+BPM1C11YM  ,	            0   ,  76.293e-6
+BPM1C12XP  ,	            0   ,  76.293e-6
+BPM1C12XM  ,	            0   ,  76.293e-6
+BPM1C12YP  ,	            0   ,  76.293e-6
+BPM1C12YM  ,	            0   ,  76.293e-6
+BPM1C16XP  ,                0   ,  76.293e-6 
+BPM1C16XM  ,                0   ,  76.293e-6 
+BPM1C16YP  ,                0   ,  76.293e-6 
+BPM1C16YM  ,                0   ,  76.293e-6 
+BPM1C20XP  ,                0   ,  76.293e-6 
+BPM1C20XM  ,                0   ,  76.293e-6 
+BPM1C20YP  ,                0   ,  76.293e-6 
+BPM1C20YM  ,                0   ,  76.293e-6 
+BPM1P02BXP  ,	            0   ,  76.293e-6
+BPM1P02BXM  ,	            0   ,  76.293e-6
+BPM1P02BYP  ,	            0   ,  76.293e-6
+BPM1P02BYM  ,	            0   ,  76.293e-6
+BPM1P03AXP  ,	            0   ,  76.293e-6
+BPM1P03AXM  ,	            0   ,  76.293e-6
+BPM1P03AYP  ,	            0   ,  76.293e-6
+BPM1P03AYM  ,	            0   ,  76.293e-6
+BPM1H01XP  ,	            0   ,  76.293e-6
+BPM1H01XM  ,	            0   ,  76.293e-6
+BPM1H01YP  ,	            0   ,  76.293e-6
+BPM1H01YM  ,	            0   ,  76.293e-6
+BPM1H02XP  ,	            0   ,  76.293e-6
+BPM1H02XM  ,	            0   ,  76.293e-6
+BPM1H02YP  ,	            0   ,  76.293e-6
+BPM1H02YM  ,	            0   ,  76.293e-6
+BPM1H03XP  ,	            0   ,  76.293e-6
+BPM1H03XM  ,	            0   ,  76.293e-6
+BPM1H03YP  ,	            0   ,  76.293e-6
+BPM1H03YM  ,	            0   ,  76.293e-6
+BPM1H04XP  ,	            0   ,  76.293e-6
+BPM1H04XM  ,	            0   ,  76.293e-6
+BPM1H04YP  ,	            0   ,  76.293e-6
+BPM1H04YM  ,	            0   ,  76.293e-6
+BPM1H05XP  ,	            0   ,  76.293e-6
+BPM1H05XM  ,	            0   ,  76.293e-6
+BPM1H05YP  ,	            0   ,  76.293e-6
+BPM1H05YM  ,	            0   ,  76.293e-6
+BPM1H11XP  ,	            0   ,  76.293e-6
+BPM1H11XM  ,	            0   ,  76.293e-6
+BPM1H11YP  ,	            0   ,  76.293e-6
+BPM1H11YM  ,	            0   ,  76.293e-6
+BPM1H14XP  ,	            0   ,  76.293e-6
+BPM1H14XM  ,	            0   ,  76.293e-6
+BPM1H14YP  ,	            0   ,  76.293e-6
+BPM1H14YM  ,	            0   ,  76.293e-6
+
+!END
+.
+
+
+
+
+
+
+
