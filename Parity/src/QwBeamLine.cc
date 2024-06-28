@@ -344,7 +344,7 @@ Int_t QwBeamLine::LoadChannelMap(TString mapfile)
 	if (local_element->NeedsExternalClock()){
 	  QwDebug << "Try to push device "
 		  << local_element->GetElementName()
-		  << " (address=" << std::hex << local_element
+		  << " (address=" << std::hex << local_element << std::dec
 		  << ") onto the clock_needed_list"
 		  << QwLog::endl;
 	  clock_needed_list.push_back(localBeamDetectorID);
