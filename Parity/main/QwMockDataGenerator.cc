@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
   // Get the beamline channels we want to correlate
   QwBeamLine* beamline = dynamic_cast<QwBeamLine*>(detectors.GetSubsystemByName("Main BeamLine"));
   if (! beamline) QwWarning << "No beamline subsystem defined!" << QwLog::endl;
-  beamline->LoadMockDataParameters("mock_data_parameters.map");
+  detectors.LoadMockDataParameters("mock_data_parameters.map");
 
 //-----------------------------------------------------------------------------------------------
   // Get the main detector channels we want to correlate

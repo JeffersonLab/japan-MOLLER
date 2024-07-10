@@ -639,3 +639,14 @@ void  QwSubsystemArrayParity::FillHistograms()
   if (GetEventcutErrorFlag()==0)
     QwSubsystemArray::FillHistograms();
 }
+
+//*****************************************************************//
+void QwSubsystemArrayParity::LoadMockDataParameters(TString mapfile)
+{
+  for (iterator subsys = begin(); subsys != end(); ++subsys) {
+    std::cout << "Beginning of for loop" << std::endl;
+    VQwSubsystemParity* subsys_parity = dynamic_cast<VQwSubsystemParity*>(subsys->get());
+    subsys_parity->LoadMockDataParameters(mapfile);
+    std::cout << "In loadmockdata function" << std::endl;
+  }
+}
