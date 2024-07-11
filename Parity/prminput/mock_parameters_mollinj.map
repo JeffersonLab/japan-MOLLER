@@ -1,0 +1,23 @@
+!Injector beam line elements
+
+bpmstripline,     bpm0i01a       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0i01        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0i02a       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0i02        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0i05        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0i07        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l01        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l02        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l03        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l04        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l05        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l06        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l07        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l08        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l09        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l10        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm1i02        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm1i04        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm1i06        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm2i01        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm2i02        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3

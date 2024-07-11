@@ -1,0 +1,12 @@
+# This is the detectors map used for VQWK checks
+
+
+[QwBeamLine]
+ name       = Main BeamLine
+ mock_param = mock_parameters_beamline.map
+
+[QwBeamLine]
+ name       = Injector BeamLine
+ mock_param = mock_parameters_mollinj.map
+ 
+ 
