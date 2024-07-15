@@ -621,14 +621,7 @@ Int_t VQwDetectorArray::LoadInputParameters(TString pedestalfile) {
             varped  = mapstr.GetTypedNextToken<Double_t>(); // value of the pedestal
             varcal  = mapstr.GetTypedNextToken<Double_t>(); // value of the calibration factor
 
-            // varnormrate  = mapstr.GetTypedNextToken<Double_t>(); // value of the NormRate
-            // varvoltperhz = mapstr.GetTypedNextToken<Double_t>(); // value of the VoltPerHz
-            // varasym      = mapstr.GetTypedNextToken<Double_t>(); // value of the asymmetry
-            // varcx        = mapstr.GetTypedNextToken<Double_t>(); // value of the coefficient C_x
-            // varcy        = mapstr.GetTypedNextToken<Double_t>(); // value of the coefficient C_y 
-            // varcxp       = mapstr.GetTypedNextToken<Double_t>(); // value of the coefficient C_xp
-            // varcyp       = mapstr.GetTypedNextToken<Double_t>(); // value of the coefficient C_yp
-            // varce        = mapstr.GetTypedNextToken<Double_t>(); // value of the coefficient C_e
+            
 
 
             if (ldebug) 
@@ -649,14 +642,7 @@ Int_t VQwDetectorArray::LoadInputParameters(TString pedestalfile) {
                 fIntegrationPMT[i].SetPedestal(varped);
                 fIntegrationPMT[i].SetCalibrationFactor(varcal);
 
-                // fIntegrationPMT[i].SetNormRate(varnormrate);
-                // fIntegrationPMT[i].SetVoltPerHz(varvoltperhz);
-                // fIntegrationPMT[i].SetAsymmetry(varasym);
-                // fIntegrationPMT[i].SetCoefficientCx(varcx);
-                // fIntegrationPMT[i].SetCoefficientCy(varcy);
-                // fIntegrationPMT[i].SetCoefficientCxp(varcxp);
-                // fIntegrationPMT[i].SetCoefficientCyp(varcyp);
-                // fIntegrationPMT[i].SetCoefficientCe(varce);
+               
 
                 // i=fIntegrationPMT.size()+1;
                 // notfound=kFALSE;
@@ -726,8 +712,7 @@ void VQwDetectorArray::LoadMockDataParameters(TString pedestalfile) {
             varname = mapstr.GetTypedNextToken<TString>();	//name of the channel
             varname.ToLower();
             varname.Remove(TString::kBoth,' ');
-	    // varped  = mapstr.GetTypedNextToken<Double_t>(); // value of the pedestal
-	    // varcal  = mapstr.GetTypedNextToken<Double_t>(); // value of the calibration factor
+	   
 
 	    varnormrate  = mapstr.GetTypedNextToken<Double_t>(); // value of the NormRate
             varvoltperhz = mapstr.GetTypedNextToken<Double_t>(); // value of the VoltPerHz
@@ -754,8 +739,6 @@ void VQwDetectorArray::LoadMockDataParameters(TString pedestalfile) {
 	    for (size_t i=0;i<fIntegrationPMT.size();i++){
               if (fIntegrationPMT[i].GetElementName()==varname) {
 
-		// fIntegrationPMT[i].SetPedestal(varped);
-		// fIntegrationPMT[i].SetCalibrationFactor(varcal);
 
                 fIntegrationPMT[i].SetNormRate(varnormrate);
                 fIntegrationPMT[i].SetVoltPerHz(varvoltperhz);
