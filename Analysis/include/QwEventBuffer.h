@@ -318,7 +318,7 @@ template < class T > Bool_t QwEventBuffer::FillObjectWithEventData(T &object){
       //  This is a single bank of some type
       object.ProcessBuffer(decoder->GetEvtType(), 0, decoder->GetBankDataType(),
 			   &localbuff[decoder->GetWordsSoFar()],
-			   decoder->decoder->GetEvtLength());
+			   decoder->GetEvtLength());
     }
   }
   return okay;
