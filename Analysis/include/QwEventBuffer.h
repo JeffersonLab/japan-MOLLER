@@ -277,6 +277,7 @@ class QwEventBuffer: public MQwCodaControlEvent{
 	VEventDecoder* decoder;
 };
 
+/*
 template < class T > Bool_t QwEventBuffer::FillObjectWithEventData(T &object){
   ///  Template to fill any object with data from a CODA event.
   ///
@@ -318,11 +319,12 @@ template < class T > Bool_t QwEventBuffer::FillObjectWithEventData(T &object){
       //  This is a single bank of some type
       object.ProcessBuffer(decoder->GetEvtType(), 0, decoder->GetBankDataType(),
 			   &localbuff[decoder->GetWordsSoFar()],
-			   decoder->fEvtLength);
+			   decoder->decoder->GetEvtLength());
     }
   }
   return okay;
 }
+*/
 
 
 

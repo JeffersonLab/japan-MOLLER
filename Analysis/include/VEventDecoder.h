@@ -71,6 +71,7 @@ public:
 	// Generic Information
 	UInt_t GetWordsSoFar()const  { return fWordsSoFar;  }
 	UInt_t GetEvtNumber()const   { return fEvtNumber;   }
+	UInt_t GetEvtLength()const   { return fEvtLength;   }
 	UInt_t GetFragLength()const  { return fFragLength;  }
 	// Event Information
 	UInt_t GetEvtType()const     { return fEvtType;     }

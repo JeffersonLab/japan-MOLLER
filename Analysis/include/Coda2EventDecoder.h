@@ -1,5 +1,5 @@
 #ifndef CODA2EVENTDECODER_H
-#define CODA2EVEMTDECODER_H
+#define CODA2EVENTDECODER_H
 
 #include "VEventDecoder.h"
 #include "Rtypes.h"
