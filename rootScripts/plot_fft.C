@@ -8,6 +8,7 @@
 //To change the frequency limit, you need to change the event period using the command: set_period(period).
 //You can also change the CntHouse file run number by using the command:open_myfile(), and in the parenthesis you will insert the run number. For example: open_myfile(16664).
 //The parameters of the plot can also be changed when running the program.
+//"open_myfile" can also be used with the full path to open any other root file. 
 #include "TFile.h"
 #include "TTree.h"
 
@@ -77,7 +78,12 @@ void open_myfile(Int_t run_num=16664,
   myfile->Print();
   mytree = (TTree*)myfile->Get("evt");
 }
-
+void open_myfile(TString fullname)
+{
+  myfile = new TFile(fullname);
+  myfile->Print();
+  mytree = (TTree*)myfile->Get("evt");
+}
 
 void plot_fft(Int_t first_event=0, Int_t num_events=1000)
 {
@@ -91,8 +97,8 @@ void plot_fft(Int_t first_event=0, Int_t num_events=1000)
 
   //  The data structure in the tree for each branch has 13 Double_t values.  We will
   //  just want to take the first one "[0]".
-   Double_t bcm_an_ds[13];
-   mytree->SetBranchAddress(chan_name,&bcm_an_ds);
+   Double_t chan_data[13];
+   mytree->SetBranchAddress(chan_name,&chan_data);
 
    Long64_t nentries = mytree->GetEntries();
    Long64_t maxevent = first_event + num_events;
@@ -117,11 +123,11 @@ void plot_fft(Int_t first_event=0, Int_t num_events=1000)
    Double_t meanval=0.0;
    for (Long64_t i=first_event;i<maxevent;i++) {
      mytree->GetEntry(i);
-     //  At this point, the variable "bcm_an_ds[0]" will have the value for the event "i".
+     //  At this point, the variable "chan_data[0]" will have the value for the event "i".
      //  You could then assign that to the data array that we'd use for the FFT.
-     //  if (i%100==0) std::cout << "i=="<<i << " bcm_an_ds=="<< bcm_an_ds[0] <<std::endl;
-     in[ii++]=bcm_an_ds[0];
-     meanval += bcm_an_ds[0];
+     //  if (i%100==0) std::cout << "i=="<<i << " chan_data=="<< chan_data[0] <<std::endl;
+     in[ii++]=chan_data[0];
+     meanval += chan_data[0];
    }
    meanval /= ii;
    for (Int_t i=0; i<ii; i++){
@@ -202,8 +208,8 @@ void plot_block_fft(Int_t first_event=0, Int_t num_events=1000)
 
   //  The data structure in the tree for each branch has 13 Double_t values.  We will
   //  just want to take the first one "[0]".
-   Double_t bcm_an_ds[13];
-   mytree->SetBranchAddress(chan_name,&bcm_an_ds);
+   Double_t chan_data[13];
+   mytree->SetBranchAddress(chan_name,&chan_data);
 
    Long64_t nentries = mytree->GetEntries();
    Long64_t maxevent = first_event + num_events;
@@ -228,17 +234,17 @@ void plot_block_fft(Int_t first_event=0, Int_t num_events=1000)
    Double_t meanval=0.0;
    for (Long64_t i=first_event;i<maxevent;i++) {
      mytree->GetEntry(i);
-     //  At this point, the variable "bcm_an_ds[0]" will have the value for the event "i".
+     //  At this point, the variable "chan_data[0]" will have the value for the event "i".
      //  You could then assign that to the data array that we'd use for the FFT.
-     //  if (i%100==0) std::cout << "i=="<<i << " bcm_an_ds=="<< bcm_an_ds[0] <<std::endl;
-     in[ii++]=bcm_an_ds[1];
-     meanval += bcm_an_ds[1];
-     in[ii++]=bcm_an_ds[2];
-     meanval += bcm_an_ds[2];
-     in[ii++]=bcm_an_ds[3];
-     meanval += bcm_an_ds[3];
-     in[ii++]=bcm_an_ds[4];
-     meanval += bcm_an_ds[4];
+     //  if (i%100==0) std::cout << "i=="<<i << " chan_data=="<< chan_data[0] <<std::endl;
+     in[ii++]=chan_data[1];
+     meanval += chan_data[1];
+     in[ii++]=chan_data[2];
+     meanval += chan_data[2];
+     in[ii++]=chan_data[3];
+     meanval += chan_data[3];
+     in[ii++]=chan_data[4];
+     meanval += chan_data[4];
    }
    meanval /= ii;
    for (Int_t i=0; i<ii; i++){
