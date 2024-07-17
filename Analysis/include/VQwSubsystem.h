@@ -348,6 +348,8 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   /// Vector of marker words per ROC & subbank associated with this subsystem
   std::vector< std::vector< std::vector<UInt_t> > > fMarkerWords;
 
+ public:
+  std::vector<ROCID_t> GetROCIds() const { return fROC_IDs; }
  protected:
 
   // Comparison of type
