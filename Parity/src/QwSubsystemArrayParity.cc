@@ -654,6 +654,16 @@ void QwSubsystemArrayParity::LoadMockDataParameters(std::string mapfile)
   // Process preamble
   QwVerbose << "Preamble:" << QwLog::endl;
   QwVerbose << *preamble << QwLog::endl;
+  double window_period;
+  if (preamble->FileHasVariablePair("=","window_period",window_period)){
+    fWindowPeriod = window_period * Qw::sec;
+  }else{
+    fWindowPeriod = Qw::ms;
+  }
+
+  QwMessage << "fWindowPeriod = " << fWindowPeriod << QwLog::endl;
+
+    
   if (preamble) delete preamble;
 
   QwParameterFile* section;

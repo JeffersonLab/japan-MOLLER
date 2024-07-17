@@ -235,8 +235,7 @@ if(1==2){
       }
 
       // Calculate the time assuming one ms for every helicity window
-      double helicity_window = Qw::ms;
-      double time = event * helicity_window;
+      double time = event * detectors.GetWindowPeriod();
 
       // Fill the detectors with randomized data
       

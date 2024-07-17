@@ -1,5 +1,8 @@
 # This is the detectors map used for VQWK checks
 
+window_period = 1e-3
+
+#window_period = 520.85e-6
 
 [QwBeamLine]
  name       = Main BeamLine
