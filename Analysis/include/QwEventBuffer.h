@@ -277,7 +277,6 @@ class QwEventBuffer: public MQwCodaControlEvent{
 	VEventDecoder* decoder;
 };
 
-/*
 template < class T > Bool_t QwEventBuffer::FillObjectWithEventData(T &object){
   ///  Template to fill any object with data from a CODA event.
   ///
@@ -324,7 +323,6 @@ template < class T > Bool_t QwEventBuffer::FillObjectWithEventData(T &object){
   }
   return okay;
 }
-*/
 
 
 
