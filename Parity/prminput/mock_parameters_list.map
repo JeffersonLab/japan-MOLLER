@@ -1,0 +1,35 @@
+# This is the detectors map used for VQWK checks
+
+window_period = 1e-3
+
+#window_period = 520.85e-6
+
+[QwBeamLine]
+ name       = Main BeamLine
+ mock_param = mock_parameters_beamline.map
+
+[QwBeamLine]
+ name       = Injector BeamLine
+ mock_param = mock_parameters_mollinj.map
+
+[QwDetectorArray]
+ name  = Thin Quartz Detector
+ mock_param = mock_parameters_thinqtz.map
+
+[QwDetectorArray]
+ name  = Shower Max Detector
+ mock_param = mock_parameters_shrmax.map
+
+[QwDetectorArray]
+ name  = Pion Detector
+ mock_param = mock_parameters_piondet.map
+
+[QwDetectorArray]
+ name  = Small Angle Detector
+ mock_param = mock_parameters_smallang.map
+
+[QwDetectorArray]
+ name  = Large Angle Detector
+ mock_param = mock_parameters_largeang.map
+ 
+ 

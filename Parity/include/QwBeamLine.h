@@ -70,7 +70,7 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
   void LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, Int_t &eventcut_flag);
   void LoadEventCuts_Fin(Int_t &eventcut_flag);
   Int_t  LoadGeometryDefinition(TString mapfile);
-  Int_t  LoadMockDataParameters(TString mapfile);
+  void  LoadMockDataParameters(TString mapfile);
   void   AssignGeometry(QwParameterFile* mapstr, VQwBPM * bpm);
 
   Bool_t ApplySingleEventCuts();//derived from VQwSubsystemParity

@@ -139,12 +139,6 @@ class QwSubsystemArray:
 			const BankID_t bank_id, UInt_t *buffer,
 			UInt_t num_words);
 
-  /// \brief Randomize the data in this event
-  void  RandomizeEventData(int helicity = 0, double time = 0.0);
-
-  /// \brief Encode the data in this event
-  void  EncodeEventData(std::vector<UInt_t> &buffer);
-
   /// \brief Process the decoded data in this event
   void  ProcessEvent();
 
@@ -284,6 +278,20 @@ class QwSubsystemArray:
   std::string fSubsystemsMapFile;
   std::vector<std::string> fSubsystemsDisabledByName; ///< List of disabled types
   std::vector<std::string> fSubsystemsDisabledByType; ///< List of disabled names
+
+public:
+  // Mock Data Variables
+    /// \brief Randomize the data in this event
+  void  RandomizeEventData(int helicity = 0, double time = 0.0);
+
+  /// \brief Encode the data in this event
+  void  EncodeEventData(std::vector<UInt_t> &buffer);
+
+  double GetWindowPeriod(){return fWindowPeriod;};
+
+protected:
+  double fWindowPeriod;
+  
 
 }; // class QwSubsystemArray
 

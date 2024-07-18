@@ -621,7 +621,100 @@ Int_t VQwDetectorArray::LoadInputParameters(TString pedestalfile) {
             varped  = mapstr.GetTypedNextToken<Double_t>(); // value of the pedestal
             varcal  = mapstr.GetTypedNextToken<Double_t>(); // value of the calibration factor
 
-            varnormrate  = mapstr.GetTypedNextToken<Double_t>(); // value of the NormRate
+            
+
+
+            if (ldebug) 
+             std::cout << "Inputs for channel " << varname      << ": ped="  << varped  << ": cal=" << varcal << "\n"
+                       << ": varnormrate="      << varnormrate  << "\n"
+                       << ": varvoltperhz="     << varvoltperhz << "\n"
+                       << ": asym="             << varasym      << "\n"
+                       << ": C_x="              << varcx        << ": C_y="  << varcy   << "\n"
+                       << ": C_xp="             << varcxp       << ": C_yp=" << varcyp  << "\n"
+                       << ": C_e="              << varce        << "\n";
+
+	    // Bool_t notfound=kTRUE;
+
+	    // if (notfound)
+	    for (size_t i=0;i<fIntegrationPMT.size();i++){
+              if (fIntegrationPMT[i].GetElementName()==varname) {
+
+                fIntegrationPMT[i].SetPedestal(varped);
+                fIntegrationPMT[i].SetCalibrationFactor(varcal);
+
+               
+
+                // i=fIntegrationPMT.size()+1;
+                // notfound=kFALSE;
+                // i=fIntegrationPMT.size()+1;
+
+		break;
+                
+              }
+	    }
+
+        }
+
+    }
+
+    if (ldebug) 
+     std::cout<<" line read in the pedestal + cal file ="<<lineread<<" \n";
+
+    ldebug=kFALSE;
+    mapstr.Close(); // Close the file (ifstream)
+    return 0;
+
+}
+
+
+
+
+
+
+
+
+
+void VQwDetectorArray::LoadMockDataParameters(TString pedestalfile) {
+
+    Bool_t ldebug=kFALSE;
+    TString varname;
+    Double_t varped;
+    Double_t varcal;
+
+    //  Double_t varbaserate;
+    Double_t varnormrate;
+    Double_t varvoltperhz;
+    Double_t varasym;
+    Double_t varcx;
+    Double_t varcy;
+    Double_t varcxp;
+    Double_t varcyp;
+    Double_t varce;
+
+    TString localname;
+
+    Int_t lineread=0;
+
+    QwParameterFile mapstr(pedestalfile.Data());  //Open the file
+    fDetectorMaps.insert(mapstr.GetParamFileNameContents());
+
+    while (mapstr.ReadNextLine()) {
+
+        lineread+=1;
+        if (ldebug)std::cout<<" line read so far ="<<lineread<<"\n";
+         mapstr.TrimComment('!');   // Remove everything after a '!' character.
+      
+        mapstr.TrimWhitespace();   // Get rid of leading and trailing spaces.
+      
+        if (mapstr.LineIsEmpty())  continue;
+
+        else {
+            varname = mapstr.GetTypedNextToken<TString>();	//name of the channel
+            varname.ToLower();
+            varname.Remove(TString::kBoth,' ');
+	   
+
+	    varnormrate  = mapstr.GetTypedNextToken<Double_t>(); // value of the NormRate
             varvoltperhz = mapstr.GetTypedNextToken<Double_t>(); // value of the VoltPerHz
             varasym      = mapstr.GetTypedNextToken<Double_t>(); // value of the asymmetry
             varcx        = mapstr.GetTypedNextToken<Double_t>(); // value of the coefficient C_x
@@ -640,14 +733,12 @@ Int_t VQwDetectorArray::LoadInputParameters(TString pedestalfile) {
                        << ": C_xp="             << varcxp       << ": C_yp=" << varcyp  << "\n"
                        << ": C_e="              << varce        << "\n";
 
-            Bool_t notfound=kTRUE;
+	    // Bool_t notfound=kTRUE;
 
-            if (notfound)
-             for (size_t i=0;i<fIntegrationPMT.size();i++)
+	    // if (notfound)
+	    for (size_t i=0;i<fIntegrationPMT.size();i++){
               if (fIntegrationPMT[i].GetElementName()==varname) {
 
-                fIntegrationPMT[i].SetPedestal(varped);
-                fIntegrationPMT[i].SetCalibrationFactor(varcal);
 
                 fIntegrationPMT[i].SetNormRate(varnormrate);
                 fIntegrationPMT[i].SetVoltPerHz(varvoltperhz);
@@ -658,11 +749,14 @@ Int_t VQwDetectorArray::LoadInputParameters(TString pedestalfile) {
                 fIntegrationPMT[i].SetCoefficientCyp(varcyp);
                 fIntegrationPMT[i].SetCoefficientCe(varce);
 
-                i=fIntegrationPMT.size()+1;
-                notfound=kFALSE;
-                i=fIntegrationPMT.size()+1;
+                // i=fIntegrationPMT.size()+1;
+                // notfound=kFALSE;
+                // i=fIntegrationPMT.size()+1;
+
+		break;
                 
               }
+	    }
 
         }
 
@@ -673,9 +767,18 @@ Int_t VQwDetectorArray::LoadInputParameters(TString pedestalfile) {
 
     ldebug=kFALSE;
     mapstr.Close(); // Close the file (ifstream)
-    return 0;
 
 }
+
+
+
+
+
+
+
+
+
+
 
 
 Bool_t VQwDetectorArray::IsGoodEvent() {
