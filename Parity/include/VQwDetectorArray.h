@@ -191,6 +191,8 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
 
     };
 
+    void LoadMockDataParameters(TString pedestalfile);
+
     void  PrintValue() const;
     void  WritePromptSummary(QwPromptSummary *ps, TString type);
     void  PrintInfo() const;

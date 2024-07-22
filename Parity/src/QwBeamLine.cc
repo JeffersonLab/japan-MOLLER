@@ -724,7 +724,7 @@ Int_t QwBeamLine::LoadGeometryDefinition(TString mapfile){
 
 //--------------------------------------------------------------------------------------------------------
 
-Int_t QwBeamLine::LoadMockDataParameters(TString mapfile) {
+void QwBeamLine::LoadMockDataParameters(TString mapfile) {
 
   Bool_t   ldebug=kFALSE;
   TString  varname, varvalue;
@@ -768,7 +768,6 @@ Int_t QwBeamLine::LoadMockDataParameters(TString mapfile) {
     //  The device should process the reminder of this line.
     GetElement(GetQwBeamInstrumentType(devtype),index)->LoadMockDataParameters(mapstr);
   }
-  return 0;
 }
 
 //--------------------------------------------------------------------------------------------------------

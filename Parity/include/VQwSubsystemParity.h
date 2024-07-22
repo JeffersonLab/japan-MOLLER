@@ -152,6 +152,8 @@ class VQwSubsystemParity: virtual public VQwSubsystem {
 
 
     virtual Bool_t CheckForEndOfBurst() const {return kFALSE;};
+
+    virtual void LoadMockDataParameters(TString mapfile) {};
 	
 }; // class VQwSubsystemParity
 
