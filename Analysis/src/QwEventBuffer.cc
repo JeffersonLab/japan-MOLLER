@@ -733,8 +733,6 @@ Bool_t QwEventBuffer::FillSubsystemData(QwSubsystemArray &subsystems)
   subsystems.SetCodaEventNumber(decoder->GetEvtNumber());
   subsystems.SetCodaEventType(decoder->GetEvtType());
 
-	// TODO:
-	// What is this mask?
   // If this event type is masked for the subsystem array, return right away
   if (((0x1 << (decoder->GetEvtType() - 1)) & subsystems.GetEventTypeMask()) == 0) {
     return kTRUE;

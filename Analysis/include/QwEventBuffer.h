@@ -71,8 +71,6 @@ class QwEventBuffer: public MQwCodaControlEvent{
       delete fRunListFile;
       fRunListFile = NULL;
     }
-	  // TODO: 
-	  // is this the proper deletion of out decoder class?
 	  // Delete Decoder
 	  if(decoder != NULL) {
 			delete decoder;

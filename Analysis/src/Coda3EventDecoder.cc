@@ -18,8 +18,6 @@ std::vector<UInt_t> Coda3EventDecoder::EncodePHYSEventHeader(std::vector<ROCID_t
 	int ROCCount = ROCList.size();
 	int wordcount = (8 + ROCCount*3);
 	std::vector<UInt_t> header;
-	// TODO:
-	// Could we make this more dynamic by reversing the TBOBJ::Fill mechanism?
 	header.push_back(0xFF501001);
 	header.push_back(wordcount); 						 // word count for Trigger Bank
 	header.push_back(0xFF212000 | ROCCount); // # of ROCs 
@@ -106,8 +104,6 @@ void Coda3EventDecoder::EncodeEndEventHeader(int* buffer, int eventcount, int lo
 */
 Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 {
-	// TODO:
-	// How should we handle bad events??
 	fPhysicsEventFlag = kFALSE;
 	fControlEventFlag = kFALSE;
 	Int_t ret = HED_OK;
@@ -157,15 +153,11 @@ Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 	else { // Not a control event, user event, nor physics event. Not sure what it is
 		//  Arbitrarily set the event type to "fEvtTag".
 		//  The first two words have been examined.
-		QwWarning << "!!! Cannot determine the event type !!!" << QwLog::endl;
-		QwMessage << "Printing Event Buffer:";
-		QwMessage << "\n------------\n" << QwLog::endl;
+		QwWarning << "Undetermined Event Type" << QwLog::endl;
 		for(size_t index = 0; fEvtLength; index++){
-			// TODO: // what if fEvtLength is gibberish because the event is gibberish?
-			QwMessage << "\t" << buffer[index];
-			if(index % 4 == 0){ QwMessage << QwLog::endl; }
+			QwVerbose << "\t" << buffer[index];
+			if(index % 4 == 0){ QwVerbose << QwLog::endl; }
 		}	
-		QwMessage << "\n------------\n" << QwLog::endl;
 		fEvtType = fEvtTag;	fEvtNumber = 0;
 	}
 
@@ -357,7 +349,7 @@ uint32_t Coda3EventDecoder::TBOBJ::Fill( const uint32_t* evbuffer,
 		uint32_t rocnum = (*p & 0xff000000) >> 24;
 		// TODO:
 		// tsroc is the crate # of the TS
-		// This is filled with the THaCrateMap class which we are not using
+		// This is filled with Podd's THaCrateMap class which we are not using
 		// tsroc is currently always 0
 		if( rocnum == tsroc ) {
 			TSROC = p + 1;
@@ -397,9 +389,6 @@ Int_t Coda3EventDecoder::LoadTrigBankInfo( UInt_t i )
 
 void Coda3EventDecoder::trigBankErrorHandler( Int_t flag )
 {
-	// TODO:
-	// How should we handle bad events?
-	//QwError << "trigBankErrorHandling is not yet fully supported!" << QwLog::endl;
 	switch(flag){
 		case HED_OK:
 			QwWarning << "TrigBankDecode() returned HED_OK... why are we here?" << QwLog::endl;
