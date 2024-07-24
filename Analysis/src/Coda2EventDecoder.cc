@@ -5,11 +5,11 @@
 #include <vector>
 #include <ctime>
 
-// Encoding Functions
-
-/*
-	Creates a PHYS Event Header
-*/
+/**
+ * @brief Creates PHYS Event EVIO Header
+ * @param ROCList List of ROCS. Unused in Coda2 headers.
+ * @return PHYS Event Header
+ */
 std::vector<UInt_t> Coda2EventDecoder::EncodePHYSEventHeader(std::vector<ROCID_t> &ROCList)
 {
 	std::vector<UInt_t> header;
@@ -24,24 +24,28 @@ std::vector<UInt_t> Coda2EventDecoder::EncodePHYSEventHeader(std::vector<ROCID_t
 	return header;
 }
 
-/*
-	Creates an Event Header Buffer
-	Note: It expects a buffer size of 5. Giving a buffer size other than 5 results in UB
-*/
+/**
+ * @brief Creates Prestart Event EVIO Header
+ * @param buffer Array of size 5 to store the Prestart Header
+ * @param runnumber Number of the run
+ * @param runtype Run type
+ * @param localtime Event time
+ */
 void Coda2EventDecoder::EncodePrestartEventHeader(int* buffer, int runnumber, int runtype, int localtime)
 {
 	buffer[0] = 4; // Prestart event length
-	// TODO: We need access to the ControlEvent enum
 	buffer[1] = ((kPRESTART_EVENT << 16) | (0x01 << 8) | 0xCC);
 	buffer[2] = localtime;
 	buffer[3] = runnumber;
 	buffer[4] = runtype;
 }
 
-/*
-	Creates an Event Header Buffer
-	Note: It expects a buffer size of 5. Giving a buffer size other than 5 results in UB
-*/
+/**
+ * @brief Creates Go Event EVIO Header
+ * @param buffer Array of size 5 to store the Go Header
+ * @param eventcount Number of events 
+ * @param localtime Event time
+ */
 void Coda2EventDecoder::EncodeGoEventHeader(int* buffer, int eventcount, int localtime)
 {
 	buffer[0] = 4; // Go event length
@@ -51,10 +55,12 @@ void Coda2EventDecoder::EncodeGoEventHeader(int* buffer, int eventcount, int loc
 	buffer[4] = eventcount;
 }
 
-/*
-	Creates an Event Header Buffer
-	Note: It expects a buffer size of 5. Giving a buffer size other than 5 results in UB
-*/
+/**
+ * @brief Creates Pause Event EVIO Header
+ * @param buffer Array of size 5 to store the Go Header
+ * @param eventcount Number of events 
+ * @param localtime Event time
+ */
 void Coda2EventDecoder::EncodePauseEventHeader(int* buffer, int eventcount, int localtime)
 {
 	buffer[0] = 4; // Pause event length
@@ -64,10 +70,12 @@ void Coda2EventDecoder::EncodePauseEventHeader(int* buffer, int eventcount, int 
 	buffer[4] = eventcount;
 }
  
-/*
-	Creates an Event Header Buffer
-	Note: It expects a buffer size of 5. Giving a buffer size other than 5 results in UB
-*/
+/**
+ * @brief Creates End Event EVIO Header
+ * @param buffer Array of size 5 to store the End Header
+ * @param eventcount Number of events 
+ * @param localtime Event time
+ */
 void Coda2EventDecoder::EncodeEndEventHeader(int* buffer, int eventcount, int localtime)
 {
 	buffer[0] = 4; // End event length
@@ -77,11 +85,11 @@ void Coda2EventDecoder::EncodeEndEventHeader(int* buffer, int eventcount, int lo
 	buffer[4] = eventcount; 
 }
 
-// Decoding Functions
-
-/* 
-	Main Decoding Function
-*/
+/**
+ * @brief Determines if a buffer contains a PHYS event, Control Event, or some other event
+ * @param buffer Event buffer to decode
+ * @return CODA_OK
+ */
 Int_t Coda2EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 {
 
@@ -179,11 +187,10 @@ Int_t Coda2EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 	return CODA_OK;
 }
 
-// Debugging Functions
-
-/*
-	Prints out key decoder info
-*/
+/**
+ * @brief Prints Internal Decoder Information
+ * @param out Output buffer to use to dispay internal Decoder Information.\nCan be QwMessage, QwVerbose, QwWarning, or QwErrror.
+ */
 void Coda2EventDecoder::PrintDecoderInfo(QwLog& out)
 {
 

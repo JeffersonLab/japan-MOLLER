@@ -1,6 +1,11 @@
 #include "VEventDecoder.h"
 #include "QwOptions.h"
 
+/**
+ * @brief Decodes the Subbank Header for PHYS Events
+ * @param buffer Event buffer that contains the subbanks
+ * @return okay
+ */
 Bool_t VEventDecoder::DecodeSubbankHeader(UInt_t *buffer){
 	//  This function will decode the header information from
 	//  either a ROC bank or a subbank.  It will also bump
@@ -59,8 +64,11 @@ Bool_t VEventDecoder::DecodeSubbankHeader(UInt_t *buffer){
 	return okay;
 }
 
-// Prints out all the internal member variables
-// Args: QwLog (QwMessage, QwWarning, or QwError)
+/**
+ * @brief Prints internal decoder information
+ * @param out Output buffer to use to dispay internal Decoder Information.\n Can be QwMessage, QwVerbose, QwWarning, or QwErrror.
+ * @return okay
+ */
 void VEventDecoder::PrintDecoderInfo(QwLog& out)
 {
 	out << "\n-------\n" << std::hex <<

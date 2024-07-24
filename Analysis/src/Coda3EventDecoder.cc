@@ -7,11 +7,11 @@
 
 #include "TError.h"
 
-// Encoding Functions
-
-/*
-	Creates a PHYS Header Buffer
-*/
+/**
+ * @brief Creates PHYS Event EVIO Header
+ * @param ROCList List of ROCS
+ * @return PHYS Event Header
+ */
 std::vector<UInt_t> Coda3EventDecoder::EncodePHYSEventHeader(std::vector<ROCID_t> &ROCList)
 {
 	int localtime = (int) time(0);
@@ -45,10 +45,13 @@ std::vector<UInt_t> Coda3EventDecoder::EncodePHYSEventHeader(std::vector<ROCID_t
 }
 
 
-/*
-	Creates an Event Header Buffer
-	Note: It expects a buffer size of 5. Giving a buffer size other than 5 results in UB
-*/
+/**
+ * @brief Creates Prestart Event EVIO Header
+ * @param buffer Array of size 5 to store the Prestart Header
+ * @param runnumber Number of the run
+ * @param runtype Run type
+ * @param localtime Event time
+ */
 void Coda3EventDecoder::EncodePrestartEventHeader(int* buffer, int runnumber, int runtype, int localtime)
 {
 	buffer[0] = 4; // Prestart event length
@@ -58,10 +61,12 @@ void Coda3EventDecoder::EncodePrestartEventHeader(int* buffer, int runnumber, in
 	buffer[4] = runtype;
 }
 
-/*
-	Creates an Event Header Buffer
-	Note: It expects a buffer size of 5. Giving a buffer size other than 5 results in UB
-*/
+/**
+ * @brief Creates Go Event EVIO Header
+ * @param buffer Array of size 5 to store the Go Header
+ * @param eventcount Number of events 
+ * @param localtime Event time
+ */
 void Coda3EventDecoder::EncodeGoEventHeader(int* buffer, int eventcount, int localtime)
 {
 	buffer[0] = 4; // Go event length
@@ -71,10 +76,12 @@ void Coda3EventDecoder::EncodeGoEventHeader(int* buffer, int eventcount, int loc
 	buffer[4] = eventcount;
 }
 
-/*
-	Creates an Event Header Buffer
-	Note: It expects a buffer size of 5. Giving a buffer size other than 5 results in UB
-*/
+/**
+ * @brief Creates Pause Event EVIO Header
+ * @param buffer Array of size 5 to store the Go Header
+ * @param eventcount Number of events 
+ * @param localtime Event time
+ */
 void Coda3EventDecoder::EncodePauseEventHeader(int* buffer, int eventcount, int localtime)
 {
 	buffer[0] = 4; // Pause event length
@@ -84,10 +91,12 @@ void Coda3EventDecoder::EncodePauseEventHeader(int* buffer, int eventcount, int 
 	buffer[4] = eventcount;
 }
 
-/*
-	Creates an Event Header Buffer
-	Note: It expects a buffer size of 5. Giving a buffer size other than 5 results in UB
-*/
+/**
+ * @brief Creates End Event EVIO Header
+ * @param buffer Array of size 5 to store the End Header
+ * @param eventcount Number of events 
+ * @param localtime Event time
+ */
 void Coda3EventDecoder::EncodeEndEventHeader(int* buffer, int eventcount, int localtime)
 {
 	buffer[0] = 4; // End event length
@@ -97,11 +106,11 @@ void Coda3EventDecoder::EncodeEndEventHeader(int* buffer, int eventcount, int lo
 	buffer[4] = eventcount; 
 }
 
-// Decoding Functions
-
-/*
-	Main Decoding Function
-*/
+/**
+ * @brief Determines if a buffer contains a PHYS event, Control Event, or some other event
+ * @param buffer Event buffer to decode
+ * @return CODA_OK
+ */
 Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 {
 	fPhysicsEventFlag = kFALSE;
@@ -135,10 +144,13 @@ Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 		<< block_size << QwLog::endl;
 	}
 
-	// Determine the event type by the call
+	// Determine the event type by the evt tag
 	fEvtType = InterpretBankTag(fEvtTag);		
 	fWordsSoFar = (2);
-	if(fEvtTag < 0xff00) { /* user event */ printUserEvent(buffer); }
+	if(fEvtTag < 0xff00) { 
+		// User Event
+		printUserEvent(buffer);
+	}
 	else if(fControlEventFlag) {
 		fEvtNumber = 0;	ProcessControlEvent(fEvtType, &buffer[fWordsSoFar]);
 	}
@@ -150,7 +162,8 @@ Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 			fWordsSoFar = 2 + tbank.len;
 		}
 	}
-	else { // Not a control event, user event, nor physics event. Not sure what it is
+	else { 
+		// Not a control event, user event, nor physics event. Not sure what it is
 		//  Arbitrarily set the event type to "fEvtTag".
 		//  The first two words have been examined.
 		QwWarning << "Undetermined Event Type" << QwLog::endl;
@@ -168,7 +181,13 @@ Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 	return CODA_OK;
 }
 
-//_____________________________________________________________________________
+/**
+ * @brief Determines the Event Type (PHYS, CONTROL, OTHER) 
+ * @param tag Event Tag used to determine the Event Type
+ * @return 1: PHYS Event
+ * @return Control Keyword: Control Event
+ * @return tag: Other (User) Event
+ */
 UInt_t Coda3EventDecoder::InterpretBankTag( UInt_t tag )
 {
 	UInt_t evtyp{};
@@ -200,13 +219,17 @@ UInt_t Coda3EventDecoder::InterpretBankTag( UInt_t tag )
 				//FIXME evtyp = 0 could also be a user event type ...
 				// maybe throw an exception here?
 		}
-	} else {              // User event type
+	} else {            // User event type
 		evtyp = tag;      // EPICS, ROC CONFIG, ET-insertions, etc.
 	}
 	return evtyp;
 }
 
 
+/**
+ * @brief Prints User events (non-PHYS and non-Control)
+ * @param buffer Event buffer
+ */
 void Coda3EventDecoder::printUserEvent(const UInt_t *buffer)
 {
 	// checks of ET-inserted data
@@ -250,7 +273,7 @@ void Coda3EventDecoder::printUserEvent(const UInt_t *buffer)
 			break;
 		default:
 			// something else ?
-			QwMessage << "\n--- Special event type: " << fEvtTag << "\n" << QwLog::endl;
+			QwWarning << "\n--- Special event type: " << fEvtTag << " ---\n" << QwLog::endl;
 	}
 	if(print_it) {
 		char *cbuf = (char *)buffer; // These are character data
@@ -261,6 +284,10 @@ void Coda3EventDecoder::printUserEvent(const UInt_t *buffer)
 	}
 }
 
+/**
+ * @brief Prints Internal Decoder Information
+ * @param out Output buffer to use to dispay internal Decoder Information.\nCan be QwMessage, QwVerbose, QwWarning, or QwErrror.
+ */
 void Coda3EventDecoder::PrintDecoderInfo(QwLog& out)
 {
 
@@ -271,6 +298,12 @@ void Coda3EventDecoder::PrintDecoderInfo(QwLog& out)
 		<< QwLog::endl;
 }
 
+/**
+ * @brief Decodes the TI Trigger Bank for PHYS Events
+ * @param buffer PHYS Event buffer
+ * @return HED_OK: Success
+ * @return HED_ERROR: Error
+ */
 Int_t Coda3EventDecoder::trigBankDecode( UInt_t* buffer)
 {
 	const char* const HERE = "Coda3EventDecoder::trigBankDecode";
@@ -293,7 +326,13 @@ Int_t Coda3EventDecoder::trigBankDecode( UInt_t* buffer)
 }
 
 
-//_____________________________________________________________________________
+/**
+ * @brief Extracts TI Header information
+ * @param evbuffer Event Buffer
+ * @param blkSize Block Size (JAPAN expects a Block Size of 1)
+ * @param tsroc Roc Number of the Trigger supervisor.
+ * @return Total length of the trigger bank
+ */
 uint32_t Coda3EventDecoder::TBOBJ::Fill( const uint32_t* evbuffer,
 		uint32_t blkSize, uint32_t tsroc )
 {
@@ -362,6 +401,12 @@ uint32_t Coda3EventDecoder::TBOBJ::Fill( const uint32_t* evbuffer,
 	return len;
 }
 
+/**
+ * @brief Loads the Trigger Bank information of an event
+ * @param i Event whose information will be loaded
+ * @return -1: Error
+ * @return 1: Success
+ */
 Int_t Coda3EventDecoder::LoadTrigBankInfo( UInt_t i )
 {
 	// CODA3: Load tsEvType, evt_time, and trigger_bits for i-th event
@@ -387,6 +432,10 @@ Int_t Coda3EventDecoder::LoadTrigBankInfo( UInt_t i )
 }
 
 
+/**
+ * @brief Displays warning given a trigBank Error flag
+ * @param flag Trig Bank Error
+ */
 void Coda3EventDecoder::trigBankErrorHandler( Int_t flag )
 {
 	switch(flag){
