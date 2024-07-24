@@ -462,7 +462,20 @@ void  QwSubsystemArray::EncodeEventData(std::vector<UInt_t> &buffer)
       (*subsys)->EncodeEventData(buffer);
     }
 }
-
+//*****************************************************************
+void  QwSubsystemArray::GetROCIDList(std::vector<ROCID_t> &list)
+{
+  if (!empty()){
+		std::vector<ROCID_t> tmp;
+    for (iterator subsys = begin(); subsys != end(); ++subsys) {
+			tmp = (*subsys)->GetROCIds();
+			for(auto it = tmp.begin(); it!=tmp.end();it++){
+				if(std::find(list.begin(), list.end(), *it) == list.end() )
+					list.push_back(*it);
+			}
+    }
+	}
+}
 
 //*****************************************************************
 void  QwSubsystemArray::ConstructObjects(TDirectory *folder, TString &prefix)
