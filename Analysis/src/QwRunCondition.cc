@@ -6,6 +6,7 @@
  */
 
 #include "QwRunCondition.h"
+#include "version-config.h"
 
 // External objects
 extern const char* const gGitInfo;
@@ -63,6 +64,7 @@ QwRunCondition::SetArgs(Int_t argc, Char_t* argv[])
   TString user_name = user_string;
 
   // get program name and its arguments (options)
+	TString QwVersion = Form("%d.%d.%d",QWANALYSIS_VERSION_MAJOR, QWANALYSIS_VERSION_MINOR, QWANALYSIS_VERSION_PATCH);
   TString program_name = argv[0];
   TString argv_list;
   for (Int_t i=1; i<argc; i++) argv_list += argv[i];
@@ -88,6 +90,7 @@ QwRunCondition::SetArgs(Int_t argc, Char_t* argv[])
   user_name.Insert      (0, "ROOT file created by the user : ");
 
   program_name.Insert   (0, "QwAnalyzer Name : ");
+  QwVersion.Insert  	  (0, "Version : ");
   argv_list.Insert      (0, "QwAnalyzer Options : ");
 
   roc_flags.Insert      (0, "DAQ ROC flags when QwAnalyzer runs : ");
@@ -96,6 +99,7 @@ QwRunCondition::SetArgs(Int_t argc, Char_t* argv[])
 
   this -> Add(root_version);
   this -> Add(program_name);
+	this -> Add(QwVersion);
   this -> Add(host_name);
   this -> Add(user_name);
   this -> Add(argv_list);

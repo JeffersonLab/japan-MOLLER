@@ -1,5 +1,5 @@
-#ifndef THaCodaFile_h
-#define THaCodaFile_h
+#ifndef Podd_THaCodaFileh_h_
+#define Podd_THaCodaFileh_h_
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -17,58 +17,41 @@
 //
 /////////////////////////////////////////////////////////////////////
 
-#include "Rtypes.h"
 #include "THaCodaData.h"
-#include <stdlib.h>
-#include "evio.h"
-#include "TString.h"
-#include "TArrayI.h"
-#include <iostream>
+#include "CustomAlloc.h"
+#include <vector>
 
-class THaCodaFile : public THaCodaData
-{
+
+class THaCodaFile : public THaCodaData {
 
 public:
 
   THaCodaFile();
-  THaCodaFile(TString filename);
-  THaCodaFile(TString filename, TString rw);
-  ~THaCodaFile();
-  using THaCodaData::codaOpen;
-  int codaOpen(TString filename);
-  int codaOpen(TString filename, TString rw);
-  int codaClose();
-  int codaRead();
-  int codaWrite(int* evbuffer);
-  int *getEvBuffer();
-  int filterToFile(TString output_file);     // filter to an output file
-  void addEvTypeFilt(int evtype_to_filt);    // add an event type to list
-  void addEvListFilt(int event_to_filt);     // add an event num to list
-  void setMaxEvFilt(int max_event);          // max num events to filter
+  explicit THaCodaFile(const char* filename, const char* rw="r");
+  THaCodaFile(const THaCodaFile &fn) = delete;
+  THaCodaFile& operator=(const THaCodaFile &fn) = delete;
+  virtual ~THaCodaFile();
+  virtual Int_t codaOpen(const char* filename, Int_t mode=1);
+  virtual Int_t codaOpen(const char* filename, const char* rw, Int_t mode=1);
+  virtual Int_t codaClose();
+  virtual Int_t codaRead();
+  Int_t codaWrite(const UInt_t* evbuffer);
+  Int_t filterToFile(const char* output_file); // filter to an output file
+  void  addEvTypeFilt(UInt_t evtype_to_filt);  // add an event type to list
+  void  addEvListFilt(UInt_t event_to_filt);   // add an event num to list
+  void  setMaxEvFilt(UInt_t max_event);        // max num events to filter
+  virtual bool isOpen() const;
 
 private:
 
-  THaCodaFile(const THaCodaFile &fn);
-  THaCodaFile& operator=(const THaCodaFile &fn);
-  void init(TString fname);
-  void initFilter();
-  void staterr(TString tried_to, unsigned int status);  // Can cause job to exit(0)
-  int ffirst;
-  int max_to_filt;
-  EVFILE *handle;
-  int maxflist,maxftype;
-  TArrayI evlist, evtypes;
+  void init(const char* fname="");
+  UInt_t max_to_filt;
+  UInt_t maxflist,maxftype;
+  std::vector<UInt_t> evlist, evtypes;
 
-  #ifndef STANDALONE
-    ClassDef(THaCodaFile,0)   //  File of CODA data
-  #endif
+  ClassDef(THaCodaFile,0)   //  File of CODA data
 
 };
 
+
 #endif
-
-
-
-
-
-
