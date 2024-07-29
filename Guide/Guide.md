@@ -42,9 +42,7 @@ In a terminal, run
         $ root
         root[0] TBrowser b
 
-A ROOT Object Browser should appear. Using this browser, you can
-
-navigate to the rootfile and access the ROOT tree.
+A ROOT Object Browser should appear. Using this browser, you can navigate to the rootfile and access the ROOT tree.
 
 Terminal
 --------
@@ -55,9 +53,7 @@ In a terminal, run
         root[0] TFile* f = new TFile("<path/to/rootfile>")
         root[1] .ls
 
-This will display all the objects (e.g. TTrees) inside the opened
-
-rootfile, with the form
+This will display all the objects (e.g. TTrees) inside the opened rootfile, with the form
 
       KEY: <OBJECT_TYPE>   <NAME>;<NAMECYCLE>   <DESCRIPTION>
 
@@ -505,7 +501,7 @@ intensity (see the BPM section). The naming scheme for the beamline
 cavities are of the form `CAVXXYYVV`. The names always start with `CAV`,
 followed by a keyword specifying the location `XX`, a second keyword
 that specifies the region along the beamline `YY`, and a final keyword
-that describes the beam parameter, `VV`. The location keywords are
+that describes the beam parameter `VV`. The location keywords are
 described in section 5.2 Beamline Monitors. The beam parameter keywords
 are described below.
 
@@ -840,6 +836,8 @@ tracks which 64-multiplet helicity an event corresponds to.
 Useful Tips
 ======
 
+Navigation
+----
 If you are using the terminal to access the rootfile, and only want to
 view specific branches, you can specify the output of the
 `(TTree)->Print()` command by inserting a string between the
@@ -854,8 +852,7 @@ somewhere with `Print("*bcm*")`, or you can search for a branch that
 contains `bcm` and another keyword with `Print("*bcm*0l*")`.
 
 Drawing Histograms Tips
------------------------
-
+----
 Below are some tips on drawing histogram plots of the different
 branches. We will be using the evt tree as our example tree and the
 large angle monitor branch as our example:
@@ -992,145 +989,3 @@ operations on the two trees when we invoke `Draw("...")`.
 
 Note: You can only draw two branches against each other if they have the same number
 of entries.
-
-
-Drawing Histograms Tips
------------------------
-
-Below are some tips on drawing histogram plots of the different
-branches. We will be using the evt tree as our example tree and the
-large angle monitor leaves as our example leaves:
-
-``` {.c}
-root [0] TFile* f = new TFile("isu_sample_4.root")
-(TFile *) 0x56263c367110
-root [1] .ls
-TFile**         isu_sample_4.root      myfile1
- TFile*         isu_sample_4.root      myfile1
-    ...         ...      ...
-  KEY: TTree    evt;1   MPS event data tree
-    ...         ...      ...
-  KEY: TTree    muls;1  Running sum tree
-  KEY: TTree    bursts;1        Burst running sum tree
-```
-
-Printing out the branches in the evt tree, we see the large angle
-monitor, `laXX`, branches
-
-``` {.c}
-root [2] evt->Print()
-*............................................................................*
-*Br  619 :la41      : hw_sum/D:block0/D:block1/D:block2/D:block3/D:          *
-*         | num_samples/D:Device_Error_Code/D:hw_sum_raw/D:block0_raw/D:     *
-*         | block1_raw/D:block2_raw/D:block3_raw/D:SumSq1_0/D:SumSq2_0/D:    *
-*         | RawMin_0/D:RawMax_0/D:SumSq1_1/D:SumSq2_1/D:RawMin_1/D:          *
-*         | RawMax_1/D:SumSq1_2/D:SumSq2_2/D:RawMin_2/D:RawMax_2/D:          *
-*         | SumSq1_3/D:SumSq2_3/D:RawMin_3/D:RawMax_3/D:sequence_number/D    *
-*Entries :    19989 : Total  Size=    4667062 bytes  File Size  =    2411094 *
-*Baskets :      294 : Basket Size=      16000 bytes  Compression=   1.93     *
-*............................................................................*
-*Br  620 :la42      : hw_sum/D:block0/D:block1/D:block2/D:block3/D:          *
-*         | num_samples/D:Device_Error_Code/D:hw_sum_raw/D:block0_raw/D:     *
-*         | block1_raw/D:block2_raw/D:block3_raw/D:SumSq1_0/D:SumSq2_0/D:    *
-*         | RawMin_0/D:RawMax_0/D:SumSq1_1/D:SumSq2_1/D:RawMin_1/D:          *
-*         | RawMax_1/D:SumSq1_2/D:SumSq2_2/D:RawMin_2/D:RawMax_2/D:          *
-*         | SumSq1_3/D:SumSq2_3/D:RawMin_3/D:RawMax_3/D:sequence_number/D    *
-*Entries :    19989 : Total  Size=    4667062 bytes  File Size  =    2410743 *
-*Baskets :      294 : Basket Size=      16000 bytes  Compression=   1.93     *
-*............................................................................*
-```
-
-### Plotting a Branch
-
-To draw one branch in a TTree, you type
-`Tree_Name -> Draw("Branch_Name")`. Typing
-
-``` {.c}
-root [3] evt->Draw("la41")
-Info in <TCanvas::MakeDefCanvas>:  created default TCanvas with name c1
-```
-
-we should see a default canvas called `c1` appear with the branch,
-`la41`, drawn.
-
-![image](Images/la41_drawn.png)
-### Plotting Branches Against Each other
-
-Suppose we have two branches that we want to compare their correlations
-against. In our case, we want to see if branches `la41` and `la42`
-correlate. We can do this easily by typing
-`Tree_Name -> Draw("Branch_Name_1:Branch_Name_2")`.
-
-``` {.c}
-root [4] evt->Draw("la41:la42")
-Info in <TCanvas::MakeDefCanvas>:  created default TCanvas with name c1
-```
-
-We should see branches `la41` and `la42` drawn against each other,
-resulting in a mostly linear correlation:
-
-![image](Images/la41_la42_drawn.png)
-You can also do binary operations between the branches when you
-draw them:
-
-``` {.c}
-root [5] evt->Draw("la41+la42")
-root [6] evt->Draw("la41-la42")
-root [7] evt->Draw("la41/la42")
-```
-
-Note: You can only draw two branches against each other if they have the
-same number of entries.
-
-### Comparing Trees in Multiple Files
-
-Suppose we have two files, `isu_sample_4.root` and `isu_sample_5.root`,
-and that we would like to compare the branches between them. To
-accomplish this, we need to `friend` the two trees in the two files.
-Start by opening both files:
-
-``` {.c}
-root [0] TFile* f4 = new TFile("isu_sample_4.root")
-(TFile *) 0x56014ef42320
-root [1] TFile* f5 = new TFile("isu_sample_5.root")
-(TFile *) 0x56014f7809b0
-```
-
-We need to be more explicit with the opening of the trees since we are
-working between two different files with (presumably) similar naming
-schemes. We do this by explicitly obtaining the trees we wish to compare
-from each file (you can still print out the file contents by typing
-`f5->ls()`; this displays the contents of `TFile* f5`).
-
-``` {.c}
-root [2] TTree* t4 = (TTree*)f4->Get("evt")
-(TTree *) 0x5560d9dac5a0
-root [3] TTree* t5 = (TTree*)f5->Get("evt")
-(TTree *) 0x5560dacf97a0
-```
-
-Now we have to friend the two trees:
-
-``` {.c}
-root [4] t4->AddFriend(t5, "other")
-(TFriendElement *) 0x5560db4d3550
-```
-
-We can now draw the two trees (and their respective branches) against
-each other:
-
-``` {.c}
-root [5] t4->Draw("la41:other.la41")
-Info in <TCanvas::MakeDefCanvas>:  created default TCanvas with name c1
-```
-
-![image](Images/friendship_trees.png)
-
-
-And voila! We can now draw two trees from two different files against
-each other. Just like in section 5.8.2, we can do binary
-operations on the two trees when we invoke `Draw("...")`. 
-
-Note: You can only draw two branches against each other if they have the same number
-of entries.
-
