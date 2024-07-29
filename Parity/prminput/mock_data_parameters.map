@@ -1,27 +1,35 @@
 !BPMStripline parameters
 !device_type,     device_name,    asymX,        meanX,        sigmaX,       asymY,        meanY,        sigmaY
-bpmstripline,     qwk_0r06,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
-bpmstripline,     qwk_0r06a,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
-bpmstripline,     qwk_0l06,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
-bpmstripline,     qwk_0l06a,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
-bpmstripline,     qwk_1c12,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
-bpmstripline,     qwk_1h04,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
-bpmstripline,     qwk_1h05,       1.0e-3,       6.0,          3.0e-3        1.0e-3        -1.5,         4.0e-3
-bpmstripline,     qwk_1h06,       1.0e-3,       6.0,          3.0e-3        1.0e-3        -1.5,         4.0e-3
-bpmstripline,     qwk_1h11,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
-bpmstripline,     qwk_1h14,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     BPM1C10,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     BPM1C11,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     BPM1C12,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     BPM1C16,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     BPM1C20,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     BPM1P02B,      1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     BPM1P03A,      1.0e-3,       6.0,          3.0e-3        1.0e-3        -1.5,         4.0e-3
+bpmstripline,     BPM1H01,       1.0e-3,       6.0,          3.0e-3        1.0e-3        -1.5,         4.0e-3
+bpmstripline,     BPM1H02,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     BPM1H03,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     BPM1H04,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     BPM1H05,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     BPM1H11,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     BPM1H14,       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
 
 !BPMStripline resolution smearing:              xres          yres
-bpmstripline,     qwk_0r06,       resolution    0.0e-6,       0.0e-4
-bpmstripline,     qwk_0l06,       resolution    0.0e-6,       0.0e-4
-bpmstripline,     qwk_1c12,       resolution    0.0e-6,       0.0e-4
-bpmstripline,     qwk_1h04,       resolution    0.0e-6,       0.0e-4
-bpmstripline,     qwk_1h05,       resolution    0.0e-6,       0.0e-4
-bpmstripline,     qwk_1h06,       resolution    0.0e-6,       0.0e-4
-bpmstripline,     qwk_0r06a,      resolution    0.0e-6,       0.0e-4
-bpmstripline,     qwk_0l06a,      resolution    0.0e-6,       0.0e-4
-bpmstripline,     qwk_1h11,       resolution    0.0e-6,       0.0e-4 
-bpmstripline,     qwk_1h14,       resolution    0.0e-6,       0.0e-4
+bpmstripline,     BPM1C10,       resolution    0.0e-6,       0.0e-4
+bpmstripline,     BPM1C11,       resolution    0.0e-6,       0.0e-4
+bpmstripline,     BPM1C12,       resolution    0.0e-6,       0.0e-4
+bpmstripline,     BPM1C16,       resolution    0.0e-6,       0.0e-4
+bpmstripline,     BPM1C20,       resolution    0.0e-6,       0.0e-4
+bpmstripline,     BPM1P02B,      resolution    0.0e-6,       0.0e-4
+bpmstripline,     BPM1P03A,      resolution    0.0e-6,       0.0e-4
+bpmstripline,     BPM1H01,       resolution    0.0e-6,       0.0e-4
+bpmstripline,     BPM1H02,       resolution    0.0e-6,       0.0e-4 
+bpmstripline,     BPM1H03,       resolution    0.0e-6,       0.0e-4
+bpmstripline,     BPM1H04,       resolution    0.0e-6,       0.0e-4
+bpmstripline,     BPM1H05,       resolution    0.0e-6,       0.0e-4
+bpmstripline,     BPM1H11,       resolution    0.0e-6,       0.0e-4
+bpmstripline,     BPM1H14,       resolution    0.0e-6,       0.0e-4
 
 !CombinedBPM parameters
 !device_type,     device_name,                  asym,         mean,         sigma(jitter)
@@ -38,24 +46,24 @@ combinedbpm,      bpm_target,     yslope    drift     0.0e-6,      0.654,       
 
 !BCM parameters
 !device_type,     device_name,    asym,         mean,         sigma(jitter)
-bcm,              qwk_bcm0l00,    0.0e-0,       100.0,        0.02 !0.02 all
-bcm,              qwk_bcm0l01,    1.0e-1,       100.0,        0.02
-bcm,              qwk_bcm0l02,    2.0e-2,       100.0,        0.02
-bcm,              qwk_bcm0l03,    3.0e-3,       100.0,        0.02
-bcm,              qwk_bcm0l04,    4.0e-4,       100.0,        0.02
-bcm,              qwk_bcm0l05,    5.0e-5,       100.0,        0.02
-bcm,              qwk_bcm0l06,    6.0e-6,       100.0,        0.02
-bcm,              qwk_bcm0l07,    7.0e-7,       100.0,        0.02
+bcm,              BCM1H02A,       0.0e-0,       100.0,        0.02 !0.02 all
+bcm,              BCM1H02B,       1.0e-1,       100.0,        0.02
+bcm,              BCM1H04A,       2.0e-2,       100.0,        0.02
+bcm,              BCM1H12A,       3.0e-3,       100.0,        0.02
+bcm,              BCM1H12B,       4.0e-4,       100.0,        0.02
+bcm,              BCM1H12C,       5.0e-5,       100.0,        0.02
+bcm,              BCM1H13,        6.0e-6,       100.0,        0.02
+bcm,              BCM1H15,        7.0e-7,       100.0,        0.02
 
 !BCM resolution smearing
-bcm,              qwk_bcm0l00,    resolution    0.0
-bcm,              qwk_bcm0l01,    resolution    0.0
-bcm,              qwk_bcm0l02,    resolution    0.0
-bcm,              qwk_bcm0l03,    resolution    0.0
-bcm,              qwk_bcm0l04,    resolution    0.0
-bcm,              qwk_bcm0l05,    resolution    0.0
-bcm,              qwk_bcm0l06,    resolution    0.0
-bcm,              qwk_bcm0l07,    resolution    0.0
+bcm,              BCM1H02A,       resolution    0.0
+bcm,              BCM1H02B,       resolution    0.0
+bcm,              BCM1H04A,       resolution    0.0
+bcm,              BCM1H12A,       resolution    0.0
+bcm,              BCM1H12B,       resolution    0.0
+bcm,              BCM1H12C,       resolution    0.0
+bcm,              BCM1H13,        resolution    0.0
+bcm,              BCM1H15,        resolution    0.0
 
 !CombinedBCM parameters
 !device_type,     device_name,    asym,         mean,         sigma(jitter)
@@ -78,4 +86,26 @@ energycalculator, target_energy,  0.0e-5,       0.0e-3,      1.0e-6 !1.0e-6
 !EnergyCalculator drifts               amplitude (abs), phase shift (rad), frequency (Hz)
 energycalculator, target_energy,  drift         1.0e-5,        0.0,          43.0 !1.0e-5
 
+!Injector beam line elements
 
+bpmstripline,     bpm0i01a       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0i01        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0i02a       1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0i02        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0i05        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0i07        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l01        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l02        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l03        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l04        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l05        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l06        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l07        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l08        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l09        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm0l10        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm1i02        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm1i04        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm1i06        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm2i01        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3
+bpmstripline,     bpm2i02        1.0e-3,       6.0,          3.0e-3,       1.0e-3,       -1.5,         4.0e-3

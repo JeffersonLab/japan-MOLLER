@@ -1,6 +1,6 @@
 
 ROC=24
-Bank=0x02
+Bank=0x2400
 vqwk_buffer_offset=1
 
 !same sample size for ADCs in a given bank

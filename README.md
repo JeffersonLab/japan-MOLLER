@@ -49,7 +49,7 @@ build/qwmockdatagenerator -r 4 -e 1:20000 --config qwparity_simple.conf --detect
 
 The command to analyze that mock-data file and produce a root file is:
 ```
-build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --data-handler mock_datahandlers.map --data . --rootfiles .
+build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles .
 ```
 
 The parameter files are searched for within the Parity/prminputs directory.

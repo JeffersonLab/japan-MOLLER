@@ -47,7 +47,7 @@ QwOptions* QwOptions::fInstance = 0;
  * wherever this object is accessible.
  */
 QwOptions::QwOptions()
-  : fParsed(false)
+  : fArgc(0), fArgv(NULL), fParsed(false)
 {
   // No default config files
   fConfigFiles.clear();

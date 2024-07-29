@@ -4,6 +4,7 @@ July 29, 2024\
 Version 1.1
 
 
+
 If you have any questions or suggestions for the guide, please send an
 email to:\
 Ryan Conaway\
@@ -42,6 +43,7 @@ In a terminal, run
         root[0] TBrowser b
 
 A ROOT Object Browser should appear. Using this browser, you can
+
 navigate to the rootfile and access the ROOT tree.
 
 Terminal
@@ -54,6 +56,7 @@ In a terminal, run
         root[1] .ls
 
 This will display all the objects (e.g. TTrees) inside the opened
+
 rootfile, with the form
 
       KEY: <OBJECT_TYPE>   <NAME>;<NAMECYCLE>   <DESCRIPTION>
@@ -327,6 +330,7 @@ they are calculated for.
    Main Detector|      $\frac{1}{2}(Sig_L+Sig_R)$ |      Yield|   V/uA
    Main Detector|   $\frac{Sig_L-Sig_R}{Sig_L+Sig_R}$|   Asym|         no unit
 
+
 The BPM Difference is the difference in beam position reported by the
 BPM during a given multiplicity window. The BPM Yield is the average
 position signal over a muliplicity window. The BCM Yield is the total
@@ -354,16 +358,17 @@ one-to-one to the branch names found in the evt tree):
 
 We see the branch name, `asym_la14`.
 
-  Keyword|                          Region
-  ----------| ----------------------------
-  asym|      Asymmetry calculation
-  la14|   Large Angle Monitor (See Detector section)
+ Keyword | Meaning
+ --- | ---
+  asym\_ |      Asymmetry calculation
+  la14 |  Large Angle Monitor (See Detector section)
+  
 
 We can see that this branch corresponds to the helicity multiplet
 asymmetry calculated for the large angle monitor device.
 
 Beamline Monitors
------------------
+===================
 
 There are several monitors along the beamline that are essential in
 constraining asymmetry measurements. These beam monitors either monitor
@@ -414,7 +419,7 @@ beamline. See the Beamline Monitors section for details.
 ``` {.c}
     root [8] evt->Print("bcm*")
     *............................................................................*
-    *Br    5 :bcm1h15 : hw_sum/D:block0/D:block1/D:block2/D:block3/D:        *
+    *Br    5 :bcm1h15 : hw_sum/D:block0/D:block1/D:block2/D:block3/D:            *
     *         | num_samples/D:Device_Error_Code/D:hw_sum_raw/D:block0_raw/D:     *
     *         | block1_raw/D:block2_raw/D:block3_raw/D:SumSq1_0/D:SumSq2_0/D:    *
     *         | RawMin_0/D:RawMax_0/D:SumSq1_1/D:SumSq2_1/D:RawMin_1/D:          *
@@ -435,6 +440,7 @@ We see the branch name, `bcm1h15`
 We can see that this branch corresponds to a BCM located in Hall A.
 
 ### BPM
+
 
 The Beam Position Monitor (BPM) is a cylindrical cavity with four
 symmetrical antennas, or wires, that pick up the RF-signal of the
@@ -469,7 +475,7 @@ Monitors section. The beam parameter keywords are described below.
 ``` {.c}
     root [9] evt->Print("bpm*")
     *............................................................................*
-    *Br   75 :bpm0l09XP : hw_sum/D:block0/D:block1/D:block2/D:block3/D:        *
+    *Br   75 :bpm0l09XP : hw_sum/D:block0/D:block1/D:block2/D:block3/D:          *
     *         | num_samples/D:Device_Error_Code/D:hw_sum_raw/D:block0_raw/D:     *
     *         | block1_raw/D:block2_raw/D:block3_raw/D:SumSq1_0/D:SumSq2_0/D:    *
     *         | RawMin_0/D:RawMax_0/D:SumSq1_1/D:SumSq2_1/D:RawMin_1/D:          *
@@ -523,6 +529,7 @@ Mock Example: We see the branch name, `CAV1H13AXI`.
 We can see that this branch corresponds to a cavity BPM located in Hall
 A that monitors the X-position coupled with the Beam intensity.
 
+
 Detectors
 ---------
 
@@ -575,6 +582,7 @@ We see the branch name, `tq24_r5a`
   24 | segment 24
   \_r5a |    ring 5 subsection a (left)
   
+
 We can see that this branch corresponds to a ring 5 thin quartz
 detector, in segment 24, and in the additional ring 5 sub-segment a (left).
 
@@ -830,7 +838,7 @@ of 64-mulitplet helicity pattern respectively. The branch `pat_phase`
 tracks which 64-multiplet helicity an event corresponds to.
 
 Useful Tips
-
+======
 
 If you are using the terminal to access the rootfile, and only want to
 view specific branches, you can specify the output of the
@@ -984,6 +992,7 @@ operations on the two trees when we invoke `Draw("...")`.
 
 Note: You can only draw two branches against each other if they have the same number
 of entries.
+
 
 Drawing Histograms Tips
 -----------------------
