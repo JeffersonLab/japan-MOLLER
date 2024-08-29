@@ -73,7 +73,7 @@ QwRootFile::QwRootFile(const TString& run_label)
 		<<"rootfile " << rootfilename << QwLog::endl;
     }
 
-    TString run_condition_name = Form("%s_condition", run_label.Data());
+    TString run_condition_name = Form("condition_%s", run_label.Data());
     TList *run_cond_list = (TList*) fRootFile -> FindObjectAny(run_condition_name);
     if (not run_cond_list) {
       QwRunCondition run_condition(

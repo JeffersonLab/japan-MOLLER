@@ -145,6 +145,9 @@ class QwSubsystemArray:
   /// \brief Encode the data in this event
   void  EncodeEventData(std::vector<UInt_t> &buffer);
 
+	/// \brief Get the ROCID list
+	void GetROCIDList(std::vector<ROCID_t> &list);
+
   /// \brief Process the decoded data in this event
   void  ProcessEvent();
 

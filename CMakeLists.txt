@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 # Name of this project
-project(QwAnalysis VERSION 0.1 LANGUAGES CXX)
+project(QwAnalysis VERSION 2.0.0 LANGUAGES CXX)
 
 # Local path for cmake modules
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules/")
@@ -109,6 +109,11 @@ set(PRE_CONFIGURE_FILE ${PROJECT_SOURCE_DIR}/cmake/templates/gitinfo.cc.in)
 set(POST_CONFIGURE_FILE ${CMAKE_BINARY_DIR}/gitinfo.cc)
 include(CMakeGitInfo)
 list(APPEND my_project_sources ${POST_CONFIGURE_FILE})
+#----------------------------------------------------------------------------
+# Version 
+#
+configure_file(${PROJECT_SOURCE_DIR}/cmake/templates/version-config.in ${CMAKE_BINARY_DIR}/version-config.h)
+list(APPEND my_project_headers ${CMAKE_BINARY_DIR}/version-config.h)
 
 
 #----------------------------------------------------------------------------
@@ -169,6 +174,8 @@ target_include_directories(${PROJECT_NAME}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Analysis/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Parity/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
   )
 
 target_compile_options(${PROJECT_NAME}
@@ -184,7 +191,7 @@ endif()
 
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
-    evio
+    eviowrapper
   PUBLIC
     ROOT::Libraries
     ${MYSQLPP_LIBRARIES}
