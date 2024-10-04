@@ -141,6 +141,8 @@ class QwSubsystemArrayParity: public QwSubsystemArray {
 
     virtual Bool_t CheckForEndOfBurst() const;
 
+  public:
+  void LoadMockDataParameters(std::string mapfile);
   protected:
 
     /// Test whether this subsystem array can contain a particular subsystem

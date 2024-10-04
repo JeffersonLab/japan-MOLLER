@@ -639,3 +639,61 @@ void  QwSubsystemArrayParity::FillHistograms()
   if (GetEventcutErrorFlag()==0)
     QwSubsystemArray::FillHistograms();
 }
+
+//*****************************************************************//
+void QwSubsystemArrayParity::LoadMockDataParameters(std::string mapfile)
+{
+  // for (iterator subsys = begin(); subsys != end(); ++subsys) {
+  //   VQwSubsystemParity* subsys_parity = dynamic_cast<VQwSubsystemParity*>(GetSubsystemByName(subsys_name)->LoadMockDataParameters(mock_param_name));
+  //   subsys_parity->LoadMockDataParameters(mapfile);
+  // }
+  QwParameterFile detectors(mapfile);
+    // This is how this should work
+  QwParameterFile* preamble;
+  preamble = detectors.ReadSectionPreamble();
+  // Process preamble
+  QwVerbose << "Preamble:" << QwLog::endl;
+  QwVerbose << *preamble << QwLog::endl;
+  double window_period;
+  if (preamble->FileHasVariablePair("=","window_period",window_period)){
+    fWindowPeriod = window_period * Qw::sec;
+  }else{
+    fWindowPeriod = Qw::ms;
+  }
+
+  QwMessage << "fWindowPeriod = " << fWindowPeriod << QwLog::endl;
+
+    
+  if (preamble) delete preamble;
+
+  QwParameterFile* section;
+  std::string section_name;
+  while ((section = detectors.ReadNextSection(section_name))) {
+
+    // Debugging output of configuration section
+    QwVerbose << "[" << section_name << "]" << QwLog::endl;
+    QwVerbose << *section << QwLog::endl;
+
+    // Determine type and name of subsystem
+    std::string subsys_type = section_name;
+    std::string subsys_name;
+    if (! section->FileHasVariablePair("=","name",subsys_name)) {
+      QwError << "No name defined in section for subsystem " << subsys_type << "." << QwLog::endl;
+      delete section; section = 0;
+      continue;
+    }
+    std::string mock_param_name;
+    if (! section->FileHasVariablePair("=","mock_param",mock_param_name)) {
+     QwError << "No mock data parameter defined for " << subsys_name << "." << QwLog::endl;
+     delete section; section = 0;
+     continue;
+    }
+    VQwSubsystemParity* subsys_parity = dynamic_cast<VQwSubsystemParity*>(GetSubsystemByName(subsys_name));
+    if (! subsys_parity){
+      QwError << "Subsystem " << subsys_name << " listed in the mock-data-parameter map does not match any subsystems in the detetor map file." <<QwLog::endl;
+    } else {
+      subsys_parity->LoadMockDataParameters(mock_param_name);
+    }
+    delete section; section = 0;
+  }
+}
