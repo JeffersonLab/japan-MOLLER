@@ -29,21 +29,20 @@ if(NOT EVIO_FOUND)
 endif()
 
 #----------------------------------------------------------------------------
-# CODA ET Library
+# CODA ET
 #
 find_package(ET CONFIG QUIET)
 if(NOT ET_FOUND)
   find_package(ET MODULE)
 endif()
 if(ET_FOUND)
+  	add_definitions(-D__CODA_ET)
 	# Sources and headers
 	file(GLOB my_et_headers
 		include/THaEtClient.h
-		#include/evetLib.h
   )
 	file(GLOB my_et_sources
 		src/THaEtClient.C
-		#src/evetLib.c
   )
 	set(my_evio_sources ${my_evio_sources} ${my_et_sources})
 	set(my_evio_headers ${my_evio_headers} ${my_et_headers})

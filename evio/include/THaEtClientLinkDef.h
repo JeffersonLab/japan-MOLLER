@@ -7,4 +7,3 @@
 #pragma link C++ class THaEtClient+;
 
 #endif
-
