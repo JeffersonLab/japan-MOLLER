@@ -1168,7 +1168,7 @@ Int_t QwEventBuffer::OpenETStream(TString computer, TString session, int mode,
   if (fEvStreamMode==fEvStreamNull){
 #ifdef __CODA_ET
     if (stationname != ""){
-      fEvStream = new THaEtClient(computer, session, mode, stationname);
+      fEvStream = new THaEtClient(computer, session, mode, stationname.Data());
     } else {
       fEvStream = new THaEtClient(computer, session, mode);
     }
