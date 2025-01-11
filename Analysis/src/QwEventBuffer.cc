@@ -621,12 +621,30 @@ Int_t QwEventBuffer::EncodeSubsystemData(QwSubsystemArray &subsystems)
 }
 
 
+void QwEventBuffer::ResetControlParameters()
+{
+	decoder->ResetControlParameters();
+}
+void QwEventBuffer::ReportRunSummary()
+{
+	decoder->ReportRunSummary();
+}
+
+TString QwEventBuffer::GetStartSQLTime()
+{
+	return decoder->GetStartSQLTime();
+}
+
+TString QwEventBuffer::GetEndSQLTime()
+{
+	return decoder->GetEndSQLTime();
+}
+
 Int_t QwEventBuffer::EncodePrestartEvent(int runnumber, int runtype)
 {
   int buffer[5];
   int localtime  = (int)time(0);
   decoder->EncodePrestartEventHeader(buffer, runnumber, runtype, localtime);
-  ProcessPrestart(localtime, runnumber, runtype);
   return WriteEvent(buffer);
 }
 Int_t QwEventBuffer::EncodeGoEvent()
@@ -635,7 +653,6 @@ Int_t QwEventBuffer::EncodeGoEvent()
   int localtime  = (int)time(0);
   int eventcount = 0;
   decoder->EncodeGoEventHeader(buffer, eventcount, localtime);
-  ProcessGo(localtime, eventcount);
   return WriteEvent(buffer);
 }
 Int_t QwEventBuffer::EncodePauseEvent()
@@ -644,7 +661,6 @@ Int_t QwEventBuffer::EncodePauseEvent()
   int localtime  = (int)time(0);
   int eventcount = 0;
   decoder->EncodePauseEventHeader(buffer, eventcount, localtime);
-  ProcessPause(localtime, eventcount);
   return WriteEvent(buffer);
 }
 Int_t QwEventBuffer::EncodeEndEvent()
@@ -653,7 +669,6 @@ Int_t QwEventBuffer::EncodeEndEvent()
   int localtime  = (int)time(0);
   int eventcount = 0;
   decoder->EncodeEndEventHeader(buffer, eventcount, localtime);
-  ProcessEnd(localtime, eventcount);
   return WriteEvent(buffer);
 }
 
