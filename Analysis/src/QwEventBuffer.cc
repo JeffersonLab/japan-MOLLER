@@ -453,8 +453,8 @@ Int_t QwEventBuffer::GetNextEvent()
       fEventRange.first = decoder->GetEvtNumber() + 1;
       if (decoder->GetEvtNumber() > 1000) status = EOF;
     }
-    if (fOnline && fExitOnEnd && fEndTime>0){
-      QwMessage << "Caught End Event (end time=="<< fEndTime 
+    if (fOnline && fExitOnEnd && decoder->GetEndTime()>0){
+      QwMessage << "Caught End Event (end time=="<< decoder->GetEndTime()
 		<< ").  Exit event loop." << QwLog::endl;
       status = EOF;
     }
@@ -1182,7 +1182,7 @@ Int_t QwEventBuffer::OpenETStream(TString computer, TString session, int mode,
 Int_t QwEventBuffer::CloseETStream()
 {
   Int_t status = kFileHandleNotConfigured;
-  if (fEvStreamMode==fEvStreamFile){
+  if (fEvStreamMode==fEvStreamET){
     status = fEvStream->codaClose();
   }
   return status;

@@ -52,7 +52,7 @@ private:
   int32_t waitflag{0};
   bool opened{false};
   std::string daqhost, session, etfile, station;
-  Int_t init( const char* computer = "japa_sta" );
+  Int_t init( const char* station = "japa_sta" );
 
   // rate calculation
   Int_t firstRateCalc{1};
