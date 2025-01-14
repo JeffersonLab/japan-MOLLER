@@ -641,6 +641,16 @@ TString QwEventBuffer::GetEndSQLTime()
 	return decoder->GetEndSQLTime();
 }
 
+time_t  GetStartUnixTime()
+{
+	return decoder->GetStartUnixTime();
+}
+
+time_t  GetEndUnixTime()
+{
+	return decoder->GetEndUnixTime();
+}
+
 Int_t QwEventBuffer::EncodePrestartEvent(int runnumber, int runtype)
 {
   int buffer[5];

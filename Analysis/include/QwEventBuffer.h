@@ -168,6 +168,8 @@ class QwEventBuffer {
 
 	TString GetStartSQLTime();
 	TString GetEndSQLTime();
+	time_t  GetStartUnixTime();
+	time_t  GetEndUnixTime();
 
   void ResetFlags();
 
