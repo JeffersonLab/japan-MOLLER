@@ -561,8 +561,9 @@ Int_t QwEventBuffer::GetEtEvent(){
   //  Do we want to have any loop here to wait for a bad
   //  read to be cleared?
   status = fEvStream->codaRead();
-  if (status == CODA_FATAL)
+  if (status != CODA_OK) {
     globalEXIT = 1;
+	}
   return status;
 }
 
