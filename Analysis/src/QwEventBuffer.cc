@@ -641,12 +641,12 @@ TString QwEventBuffer::GetEndSQLTime()
 	return decoder->GetEndSQLTime();
 }
 
-time_t  GetStartUnixTime()
+time_t  QwEventBuffer::GetStartUnixTime()
 {
 	return decoder->GetStartUnixTime();
 }
 
-time_t  GetEndUnixTime()
+time_t  QwEventBuffer::GetEndUnixTime()
 {
 	return decoder->GetEndUnixTime();
 }
