@@ -130,7 +130,7 @@ void QwEventBuffer::DefineOptions(QwOptions &options)
      "ET system wait mode: 0 is wait-forever, 1 is timeout \"quickly\"  --- Only used in online mode"); 
   options.AddOptions("ET system options")
     ("ET.exit-on-end", po::value<bool>()->default_value(false),
-     "Exit the event loop if the end event is found.  --- Only used in online mode");
+     "Exit the event loop if the end event is found. JAPAN remains open and waits for the next run. --- Only used in online mode");
   options.AddOptions("CodaVersion")
     ("coda-version", po::value<int>()->default_value(3),
      "Sets the Coda Version. Allowed values = {2,3}. \nThis is needed for writing and reading mock data. Mock data needs to be written and read with the same Coda Version.");
@@ -454,6 +454,12 @@ Int_t QwEventBuffer::GetNextEvent()
       if (decoder->GetEvtNumber() > 1000) status = EOF;
     }
     if (fOnline && fExitOnEnd && decoder->GetEndTime()>0){
+      // fExitOnEnd exits the event loop only and does not exit JAPAN. 
+      // The root file gets processed and JAPAN immediately waits for the next run.
+      // We considered adding a exit-JAPAN-on-end flag that quits JAPAN but decided 
+      // we didn't have a use case for it. If quitting JAPAN is desired, just set:
+      // globalEXIT = 1
+      // -- mrc (01/21/25)
       QwMessage << "Caught End Event (end time=="<< decoder->GetEndTime()
 		<< ").  Exit event loop." << QwLog::endl;
       status = EOF;
