@@ -131,6 +131,9 @@ report_build_info()
 add_subdirectory(evio)
 include_directories(evio/include)
 
+#----------------------------------------------------------------------------
+# et library
+#
 find_package(ET)
 IF(ET_FOUND)
   #  The QwEventBuffer class also needs to see the "__CODA_ET" define,
@@ -173,7 +176,6 @@ target_include_directories(${PROJECT_NAME}
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Analysis/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Parity/include>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
 		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
   )

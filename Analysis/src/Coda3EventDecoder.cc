@@ -59,6 +59,7 @@ void Coda3EventDecoder::EncodePrestartEventHeader(int* buffer, int runnumber, in
 	buffer[2] = localtime;
 	buffer[3] = runnumber;
 	buffer[4] = runtype;
+  ProcessPrestart(localtime, runnumber, runtype);
 }
 
 /**
@@ -74,6 +75,7 @@ void Coda3EventDecoder::EncodeGoEventHeader(int* buffer, int eventcount, int loc
 	buffer[2] = localtime;
 	buffer[3] = 0; // unused
 	buffer[4] = eventcount;
+  ProcessGo(localtime, eventcount);
 }
 
 /**
@@ -89,6 +91,7 @@ void Coda3EventDecoder::EncodePauseEventHeader(int* buffer, int eventcount, int 
 	buffer[2] =	localtime;
 	buffer[3] = 0; // unused
 	buffer[4] = eventcount;
+  ProcessPause(localtime, eventcount);
 }
 
 /**
@@ -104,6 +107,7 @@ void Coda3EventDecoder::EncodeEndEventHeader(int* buffer, int eventcount, int lo
 	buffer[2] = localtime;
 	buffer[3] = 0; // unused
 	buffer[4] = eventcount; 
+  ProcessEnd(localtime, eventcount);
 }
 
 /**

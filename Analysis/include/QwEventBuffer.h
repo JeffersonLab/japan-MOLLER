@@ -36,7 +36,8 @@ class QwSubsystemArray;
 
 ///
 /// \ingroup QwAnalysis
-class QwEventBuffer: public MQwCodaControlEvent{
+// class QwEventBuffer: public MQwCodaControlEvent{
+class QwEventBuffer {
  public:
   static void DefineOptions(QwOptions &options);
   static void SetDefaultDataDirectory(const std::string& dir) {
@@ -157,11 +158,18 @@ class QwEventBuffer: public MQwCodaControlEvent{
   template < class T > Bool_t FillObjectWithEventData(T &t);
 
 
+  void ResetControlParameters();
+	void ReportRunSummary();
   Int_t EncodeSubsystemData(QwSubsystemArray &subsystems);
   Int_t EncodePrestartEvent(int runnumber, int runtype = 0);
   Int_t EncodeGoEvent();
   Int_t EncodePauseEvent();
   Int_t EncodeEndEvent();
+
+	TString GetStartSQLTime();
+	TString GetEndSQLTime();
+	time_t  GetStartUnixTime();
+	time_t  GetEndUnixTime();
 
   void ResetFlags();
 

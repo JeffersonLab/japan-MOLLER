@@ -130,7 +130,7 @@ void QwEventBuffer::DefineOptions(QwOptions &options)
      "ET system wait mode: 0 is wait-forever, 1 is timeout \"quickly\"  --- Only used in online mode"); 
   options.AddOptions("ET system options")
     ("ET.exit-on-end", po::value<bool>()->default_value(false),
-     "Exit the event loop if the end event is found.  --- Only used in online mode");
+     "Exit the event loop if the end event is found. JAPAN remains open and waits for the next run. --- Only used in online mode");
   options.AddOptions("CodaVersion")
     ("coda-version", po::value<int>()->default_value(3),
      "Sets the Coda Version. Allowed values = {2,3}. \nThis is needed for writing and reading mock data. Mock data needs to be written and read with the same Coda Version.");
@@ -453,8 +453,14 @@ Int_t QwEventBuffer::GetNextEvent()
       fEventRange.first = decoder->GetEvtNumber() + 1;
       if (decoder->GetEvtNumber() > 1000) status = EOF;
     }
-    if (fOnline && fExitOnEnd && fEndTime>0){
-      QwMessage << "Caught End Event (end time=="<< fEndTime 
+    if (fOnline && fExitOnEnd && decoder->GetEndTime()>0){
+      // fExitOnEnd exits the event loop only and does not exit JAPAN. 
+      // The root file gets processed and JAPAN immediately waits for the next run.
+      // We considered adding a exit-JAPAN-on-end flag that quits JAPAN but decided 
+      // we didn't have a use case for it. If quitting JAPAN is desired, just set:
+      // globalEXIT = 1
+      // -- mrc (01/21/25)
+      QwMessage << "Caught End Event (end time=="<< decoder->GetEndTime()
 		<< ").  Exit event loop." << QwLog::endl;
       status = EOF;
     }
@@ -561,8 +567,9 @@ Int_t QwEventBuffer::GetEtEvent(){
   //  Do we want to have any loop here to wait for a bad
   //  read to be cleared?
   status = fEvStream->codaRead();
-  if (status == CODA_EXIT)
+  if (status != CODA_OK) {
     globalEXIT = 1;
+	}
   return status;
 }
 
@@ -621,12 +628,40 @@ Int_t QwEventBuffer::EncodeSubsystemData(QwSubsystemArray &subsystems)
 }
 
 
+void QwEventBuffer::ResetControlParameters()
+{
+	decoder->ResetControlParameters();
+}
+void QwEventBuffer::ReportRunSummary()
+{
+	decoder->ReportRunSummary();
+}
+
+TString QwEventBuffer::GetStartSQLTime()
+{
+	return decoder->GetStartSQLTime();
+}
+
+TString QwEventBuffer::GetEndSQLTime()
+{
+	return decoder->GetEndSQLTime();
+}
+
+time_t  QwEventBuffer::GetStartUnixTime()
+{
+	return decoder->GetStartUnixTime();
+}
+
+time_t  QwEventBuffer::GetEndUnixTime()
+{
+	return decoder->GetEndUnixTime();
+}
+
 Int_t QwEventBuffer::EncodePrestartEvent(int runnumber, int runtype)
 {
   int buffer[5];
   int localtime  = (int)time(0);
   decoder->EncodePrestartEventHeader(buffer, runnumber, runtype, localtime);
-  ProcessPrestart(localtime, runnumber, runtype);
   return WriteEvent(buffer);
 }
 Int_t QwEventBuffer::EncodeGoEvent()
@@ -635,7 +670,6 @@ Int_t QwEventBuffer::EncodeGoEvent()
   int localtime  = (int)time(0);
   int eventcount = 0;
   decoder->EncodeGoEventHeader(buffer, eventcount, localtime);
-  ProcessGo(localtime, eventcount);
   return WriteEvent(buffer);
 }
 Int_t QwEventBuffer::EncodePauseEvent()
@@ -644,7 +678,6 @@ Int_t QwEventBuffer::EncodePauseEvent()
   int localtime  = (int)time(0);
   int eventcount = 0;
   decoder->EncodePauseEventHeader(buffer, eventcount, localtime);
-  ProcessPause(localtime, eventcount);
   return WriteEvent(buffer);
 }
 Int_t QwEventBuffer::EncodeEndEvent()
@@ -653,7 +686,6 @@ Int_t QwEventBuffer::EncodeEndEvent()
   int localtime  = (int)time(0);
   int eventcount = 0;
   decoder->EncodeEndEventHeader(buffer, eventcount, localtime);
-  ProcessEnd(localtime, eventcount);
   return WriteEvent(buffer);
 }
 
@@ -1168,7 +1200,7 @@ Int_t QwEventBuffer::OpenETStream(TString computer, TString session, int mode,
   if (fEvStreamMode==fEvStreamNull){
 #ifdef __CODA_ET
     if (stationname != ""){
-      fEvStream = new THaEtClient(computer, session, mode, stationname);
+      fEvStream = new THaEtClient(computer, session, mode, stationname.Data());
     } else {
       fEvStream = new THaEtClient(computer, session, mode);
     }
@@ -1182,7 +1214,7 @@ Int_t QwEventBuffer::OpenETStream(TString computer, TString session, int mode,
 Int_t QwEventBuffer::CloseETStream()
 {
   Int_t status = kFileHandleNotConfigured;
-  if (fEvStreamMode==fEvStreamFile){
+  if (fEvStreamMode==fEvStreamET){
     status = fEvStream->codaClose();
   }
   return status;

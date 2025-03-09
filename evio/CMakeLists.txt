@@ -31,19 +31,22 @@ endif()
 #----------------------------------------------------------------------------
 # CODA ET
 #
-find_package(ET)
-IF(ET_FOUND)
-  add_definitions(-D__CODA_ET)
-  include_directories(${ET_INCLUDE_DIR})
-  list(APPEND my_evio_headers
-    ${PROJECT_SOURCE_DIR}/evio/include/THaEtClient.h
-    )
-  list(APPEND my_evio_sources
-    ${PROJECT_SOURCE_DIR}/evio/src/THaEtClient.C
-    )
-else(ET_FOUND)
-  set(ET_LIBRARY "")
-endif(ET_FOUND)
+find_package(ET CONFIG QUIET)
+if(NOT ET_FOUND)
+  find_package(ET MODULE)
+endif()
+if(ET_FOUND)
+  	add_definitions(-D__CODA_ET)
+	# Sources and headers
+	file(GLOB my_et_headers
+		include/THaEtClient.h
+  )
+	file(GLOB my_et_sources
+		src/THaEtClient.C
+  )
+	set(my_evio_sources ${my_evio_sources} ${my_et_sources})
+	set(my_evio_headers ${my_evio_headers} ${my_et_headers})
+endif()
 
 
 #----------------------------------------------------------------------------
@@ -69,17 +72,17 @@ foreach(file ${my_evio_headers})
   endif()
 endforeach()
 
-
 #----------------------------------------------------------------------------
 # evio library
 #
 add_library(eviowrapper SHARED ${my_evio_sources})
 
-target_include_directories(eviowrapper
+target_include_directories(${LIBNAME}
   PUBLIC
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+		$<BUILD_INTERFACE:${ET_INCLUDE_DIR}>
   )
 
 target_compile_options(eviowrapper
@@ -92,7 +95,7 @@ target_compile_options(eviowrapper
 if(ET_FOUND)
 target_link_libraries(eviowrapper
   PUBLIC
-    EVIOWRAPPER::ET
+    EVIO::ET
     ROOT::Libraries
   PRIVATE
     EVIO::EVIO
