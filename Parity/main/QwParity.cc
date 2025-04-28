@@ -487,24 +487,32 @@ Int_t main(Int_t argc, Char_t* argv[])
       QwMessage << " =========================" << QwLog::endl;
       eventsum.PrintValue();
     }
-    treerootfile->FillTreeBranches(eventsum);
-    treerootfile->FillTree("evts");
+    if (treerootfile->UseRNTuple()) {
+      // Fill RNTuple data instead of TTrees
+      detectors.FillRNTuple();
+      helicitypattern.FillRNTuple();
+      datahandlerarray_evt.FillRNTuple();
+    } else {
+      // Existing TTree filling code
+      treerootfile->FillTreeBranches(eventsum);
+      treerootfile->FillTree("evts");
 
-    if (gQwOptions.GetValue<bool>("print-patternsum")) {
-      QwMessage << " Running average of patterns" << QwLog::endl;
-      QwMessage << " =========================" << QwLog::endl;
-      patternsum.PrintValue();
-    }
-    treerootfile->FillTreeBranches(patternsum);
-    treerootfile->FillTree("muls");
+      if (gQwOptions.GetValue<bool>("print-patternsum")) {
+        QwMessage << " Running average of patterns" << QwLog::endl;
+        QwMessage << " =========================" << QwLog::endl;
+        patternsum.PrintValue();
+      }
+      treerootfile->FillTreeBranches(patternsum);
+      treerootfile->FillTree("muls");
 
-    if (gQwOptions.GetValue<bool>("print-burstsum")) {
-      QwMessage << " Running average of bursts" << QwLog::endl;
-      QwMessage << " =========================" << QwLog::endl;
-      burstsum.PrintValue();
+      if (gQwOptions.GetValue<bool>("print-burstsum")) {
+        QwMessage << " Running average of bursts" << QwLog::endl;
+        QwMessage << " =========================" << QwLog::endl;
+        burstsum.PrintValue();
+      }
+      burstrootfile->FillTreeBranches(burstsum);
+      burstrootfile->FillTree("bursts");
     }
-    burstrootfile->FillTreeBranches(burstsum);
-    burstrootfile->FillTree("bursts");
 
     //  Construct objects
     treerootfile->ConstructObjects("objects", helicitypattern);

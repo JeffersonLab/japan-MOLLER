@@ -98,12 +98,9 @@ QwRootFile::QwRootFile(const TString& run_label)
  */
 QwRootFile::~QwRootFile()
 {
-  // Keep the file on disk if any RNTuples or histograms have been filled.
+  // Keep the file on disk if any trees or histograms have been filled.
   // Also respect any other requests to keep the file around.
   if (!fMakePermanent) fMakePermanent = HasAnyFilled();
-
-  // Close all RNTuple writers
-  fRNTupleWriters.clear();
 
   // Close the map file
   if (fMapFile) {
@@ -176,13 +173,13 @@ void QwRootFile::DefineOptions(QwOptions &options)
     ("write-temporary-rootfiles", po::value<bool>()->default_bool_value(true),
      "When writing ROOT files, use the PID to create a temporary filename");
 
-  // Define the histogram and RNTuple options
+  // Define the histogram and tree options
   options.AddOptions("ROOT output options")
     ("disable-tree", po::value<std::vector<std::string>>()->composing(),
-     "disable output to RNTuple regex");
+     "disable output to tree regex");
   options.AddOptions("ROOT output options")
     ("disable-trees", po::value<bool>()->default_bool_value(false),
-     "disable output to all RNTuples");
+     "disable output to all trees");
   options.AddOptions("ROOT output options")
     ("disable-histos", po::value<bool>()->default_bool_value(false),
      "disable output to all histograms");
@@ -204,7 +201,7 @@ void QwRootFile::DefineOptions(QwOptions &options)
     ("disable-slow-tree", po::value<bool>()->default_bool_value(false),
      "disable slow control tree");
 
-  // Define the RNTuple output prescaling options
+  // Define the tree output prescaling options
   options.AddOptions("ROOT output options")
     ("num-mps-accepted-events", po::value<int>()->default_value(0),
      "number of accepted consecutive MPS events");
@@ -221,22 +218,30 @@ void QwRootFile::DefineOptions(QwOptions &options)
     ("mapfile-update-interval", po::value<int>()->default_value(-1),
      "Events between a map file update");
 
-  // Define the compression and autosave options (default values by ROOT)
+  // Define the autoflush and autosave option (default values by ROOT)
   options.AddOptions("ROOT performance options")
     ("autoflush", po::value<int>()->default_value(0),
-     "RNTuple autoflush");
+     "TTree autoflush");
   options.AddOptions("ROOT performance options")
     ("autosave", po::value<int>()->default_value(300000000),
-     "RNTuple autosave");
+     "TTree autosave");
   options.AddOptions("ROOT performance options")
     ("basket-size", po::value<int>()->default_value(16000),
-     "RNTuple page size");
+     "TTree basket size");
   options.AddOptions("ROOT performance options")
     ("circular-buffer", po::value<int>()->default_value(0),
-     "RNTuple circular buffer");
+     "TTree circular buffer");
   options.AddOptions("ROOT performance options")
     ("compression-level", po::value<int>()->default_value(1),
-     "RNTuple and TFile compression level");
+     "TFile compression level");
+
+  // Add RNTuple options
+  options.AddOptions("ROOT output options")
+    ("use-rntuple", po::value<bool>()->default_bool_value(false),
+     "Use RNTuple format instead of TTree");
+  options.AddOptions("ROOT output options")
+    ("rntuple-compression", po::value<std::string>()->default_value("zstd"),
+     "RNTuple compression algorithm (none, zlib, lzma, lz4, zstd)");
 }
 
 
@@ -267,7 +272,7 @@ void QwRootFile::ProcessOptions(QwOptions &options)
   fUseTemporaryFile = options.GetValue<bool>("write-temporary-rootfiles");
 
   // Options 'disable-trees' and 'disable-histos' for disabling
-  // RNTuple and histogram output
+  // tree and histogram output
   auto v = options.GetValueVector<std::string>("disable-tree");
   std::for_each(v.begin(), v.end(), [&](const std::string& s){ this->DisableTree(s); });
   if (options.GetValue<bool>("disable-trees"))  DisableTree(".*");
@@ -282,7 +287,7 @@ void QwRootFile::ProcessOptions(QwOptions &options)
   if (options.GetValue<bool>("disable-slow-tree")) DisableTree("^slow$");
 
   // Options 'num-accepted-events' and 'num-discarded-events' for
-  // prescaling of the RNTuple output
+  // prescaling of the tree output
   fNumMpsEventsToSave = options.GetValue<int>("num-mps-accepted-events");
   fNumMpsEventsToSkip = options.GetValue<int>("num-mps-discarded-events");
   fNumHelEventsToSave = options.GetValue<int>("num-mps-accepted-events");
@@ -296,12 +301,24 @@ void QwRootFile::ProcessOptions(QwOptions &options)
 
   // Autoflush and autosave
   fAutoFlush = options.GetValue<int>("autoflush");
-  fAutoSave = options.GetValue<int>("autosave");
+  if ((ROOT_VERSION_CODE < ROOT_VERSION(5,26,00)) && fAutoFlush != -30000000){
+    QwMessage << QwLog::endl;
+    QwWarning << "QwRootFile::ProcessOptions:  "
+              << "The 'autoflush' flag is not supported by ROOT version "
+              << ROOT_RELEASE
+              << QwLog::endl;
+  }
+  fAutoSave  = options.GetValue<int>("autosave");
+
+  // Process RNTuple options
+  fUseRNTuple = options.GetValue<bool>("use-rntuple");
+  fRNTupleCompression = options.GetValue<std::string>("rntuple-compression");
+
   return;
 }
 
 /**
- * Determine whether the rootfile object has any non-empty RNTuples or
+ * Determine whether the rootfile object has any non-empty trees or
  * histograms.
  */
 Bool_t QwRootFile::HasAnyFilled(void) {
@@ -311,7 +328,7 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
   if (!d) return false;
   TList* l = d->GetListOfKeys();
 
-  for (int i = 0; i < l->GetEntries(); ++i) {
+  for( int i=0; i < l->GetEntries(); ++i) {
     const char* name = l->At(i)->GetName();
     TObject* obj = d->FindObjectAny(name);
 
@@ -319,27 +336,47 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
     if (!obj) continue;
 
     // Lists of parameter files, map files, and job conditions don't count.
-    if (TString(name).Contains("parameter_file")) continue;
-    if (TString(name).Contains("mapfile")) continue;
-    if (TString(name).Contains("_condition")) continue;
-    // The EPICS RNTuple doesn't count
-    if (TString(name).Contains("slow")) continue;
+    if ( TString(name).Contains("parameter_file") ) continue;
+    if ( TString(name).Contains("mapfile") ) continue;
+    if ( TString(name).Contains("_condition") ) continue;
+    //  The EPICS tree doesn't count
+    if ( TString(name).Contains("slow") ) continue;
 
     // Recursively check subdirectories.
-    if (obj->IsA()->InheritsFrom("TDirectory"))
-      if (this->HasAnyFilled((TDirectory*)obj)) return true;
+    if (obj->IsA()->InheritsFrom( "TDirectory" ))
+      if (this->HasAnyFilled( (TDirectory*)obj )) return true;
 
-    // Check for RNTuples - we need to use a different mechanism since RNTuple is experimental
-    // For now, we'll assume RNTuples have content if they exist in our writers map
-    for (const auto& pair : fRNTupleWriters) {
-      if (TString(pair.first.c_str()) == name && pair.second->GetNEntries() > 0) {
-        return true;
-      }
-    }
+    if (obj->IsA()->InheritsFrom( "TTree" ))
+      if ( ((TTree*) obj)->GetEntries() ) return true;
 
-    if (obj->IsA()->InheritsFrom("TH1"))
-      if (((TH1*)obj)->GetEntries()) return true;
+    if (obj->IsA()->InheritsFrom( "TH1" ))
+      if ( ((TH1*) obj)->GetEntries() ) return true;
   }
 
   return false;
+}
+
+std::shared_ptr<ROOT::Experimental::RNTupleModel> QwRootFile::GetRNTupleModel(const std::string& name)
+{
+  if (fRNTupleModels.find(name) == fRNTupleModels.end()) {
+    fRNTupleModels[name] = ROOT::Experimental::RNTupleModel::Create();
+  }
+  return fRNTupleModels[name];
+}
+
+void QwRootFile::CreateRNTupleWriter(const std::string& name, const std::string& title)
+{
+  if (!fUseRNTuple || !fRootFile) return;
+  
+  auto model = GetRNTupleModel(name);
+  std::string ntupleName = name;
+  std::string options = "RECREATE";
+  
+  // Set compression based on fRNTupleCompression
+  if (fRNTupleCompression != "none") {
+    options += ":" + fRNTupleCompression;
+  }
+  
+  fRNTupleWriters[name] = ROOT::Experimental::RNTupleWriter::Create(
+    std::move(model), ntupleName, *fRootFile, options);
 }
