@@ -37,5 +37,5 @@ jobs:
         platforms: linux/amd64,linux/arm64
         push: true
         tags: |
-          apanta123/japan-moller-test:latest
-          apanta123/japan-moller-test:${{ github.ref_name }}
+          jeffersonlab/japan-moller:latest
+          jeffersonlab/japan-moller:${{ github.ref_name }}
