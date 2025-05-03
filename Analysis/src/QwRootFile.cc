@@ -1,9 +1,27 @@
+// NOTE: The RNTuple classes are experimental at this point.
+// Functionality, interface, and data format is still subject to changes.
+// Do not use for real data!
+ 
+// Until C++ runtime modules are universally used, we explicitly load the ntuple library.  Otherwise
+// triggering autoloading from the use of templated types would require an exhaustive enumeration
+// of "all" template instances in the LinkDef file.
+R__LOAD_LIBRARY(ROOTNTuple)
 #include "QwRootFile.h"
 #include "QwRunCondition.h"
 #include "TH1.h"
 
 #include <unistd.h>
 #include <cstdio>
+
+// Include ROOT RNTuple headers
+#include "ROOT/RNTuple.hxx"
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RNTupleWriter.hxx"
+
+#include "QwSubsystemArrayParity.h"
+#include "QwHelicityPattern.h"
+#include "QwEPICSEvent.h"
+// Include headers for any other types used in template instantiations
 
 std::string QwRootFile::fDefaultRootFileDir = ".";
 std::string QwRootFile::fDefaultRootFileStem = "Qweak_";
@@ -234,14 +252,6 @@ void QwRootFile::DefineOptions(QwOptions &options)
   options.AddOptions("ROOT performance options")
     ("compression-level", po::value<int>()->default_value(1),
      "TFile compression level");
-
-  // Add RNTuple options
-  options.AddOptions("ROOT output options")
-    ("use-rntuple", po::value<bool>()->default_bool_value(false),
-     "Use RNTuple format instead of TTree");
-  options.AddOptions("ROOT output options")
-    ("rntuple-compression", po::value<std::string>()->default_value("zstd"),
-     "RNTuple compression algorithm (none, zlib, lzma, lz4, zstd)");
 }
 
 
@@ -309,11 +319,6 @@ void QwRootFile::ProcessOptions(QwOptions &options)
               << QwLog::endl;
   }
   fAutoSave  = options.GetValue<int>("autosave");
-
-  // Process RNTuple options
-  fUseRNTuple = options.GetValue<bool>("use-rntuple");
-  fRNTupleCompression = options.GetValue<std::string>("rntuple-compression");
-
   return;
 }
 
@@ -356,27 +361,80 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
   return false;
 }
 
-std::shared_ptr<ROOT::Experimental::RNTupleModel> QwRootFile::GetRNTupleModel(const std::string& name)
+template<typename T>
+void QwRootFile::ConstructRNTupleBranches(const char* name, const char* title, T& subsys, const char* prefix)
 {
-  if (fRNTupleModels.find(name) == fRNTupleModels.end()) {
-    fRNTupleModels[name] = ROOT::Experimental::RNTupleModel::Create();
+  if (!fUseRNTuple)
+  {
+    return;
   }
-  return fRNTupleModels[name];
+  // Create an RNTuple model
+  auto model = ROOT::Experimental::RNTupleModel::Create();
+
+  // First, create a temporary tree to get branch information
+  TString prefix_str(prefix);
+
+  // Create a vector to determine how many fields we need
+  std::vector<Double_t> tmp_values;
+  subsys.ConstructBranchAndVector(nullptr, prefix_str, tmp_values);
+
+  // Create fields in the RNTuple model for each value
+  std::vector<std::shared_ptr<Double_t>> fields;
+  for (size_t i = 0; i < tmp_values.size(); i++) 
+  {
+    // Create a generic field name based on the prefix and index
+    std::string field_name = std::string(prefix) + "value_" + std::to_string(i);
+    auto field = model->MakeField<Double_t>(field_name, 0.0);
+    fields.push_back(field);
+  }
+
+  // Store just the fields and field count
+  fRNTupleFields[name] = fields;
+  fRNTupleFieldCount[name] = tmp_values.size();
+
+  // Create the RNTuple writer (model ownership transfers to writer)
+  auto writer = ROOT::Experimental::RNTupleWriter::Recreate(std::move(model), name, fRootFile->GetName());
+  fRNTupleWriters[name] = std::move(writer);
 }
 
-void QwRootFile::CreateRNTupleWriter(const std::string& name, const std::string& title)
+void QwRootFile::FillRNTuple(const char* name)
 {
-  if (!fUseRNTuple || !fRootFile) return;
+  if (!fUseRNTuple) return;
   
-  auto model = GetRNTupleModel(name);
-  std::string ntupleName = name;
-  std::string options = "RECREATE";
+  auto writer_it = fRNTupleWriters.find(name);
+  auto fields_it = fRNTupleFields.find(name);
+  auto count_it = fRNTupleFieldCount.find(name);
   
-  // Set compression based on fRNTupleCompression
-  if (fRNTupleCompression != "none") {
-    options += ":" + fRNTupleCompression;
+  if (writer_it != fRNTupleWriters.end() && 
+      fields_it != fRNTupleFields.end() &&
+      count_it != fRNTupleFieldCount.end()) {
+    
+    // Get the corresponding tree to access its values
+    TTree* tree = dynamic_cast<TTree*>(fRootFile->Get(name));
+    if (tree) {
+      // Read values from tree's current entry
+      std::vector<Double_t> values(count_it->second);
+      
+      // Get the current set of values that would be filled into the tree
+      void* addr = tree->GetBranch("values")->GetAddress();
+      if (addr) {
+        Double_t* data = static_cast<Double_t*>(addr);
+        for (size_t i = 0; i < count_it->second; i++) {
+          values[i] = data[i];
+          // Update the corresponding RNTuple field
+          if (i < fields_it->second.size()) {
+            *(fields_it->second[i]) = values[i];
+          }
+        }
+      }
+    }
+    
+    // Fill the RNTuple with the updated field values
+    writer_it->second->Fill();
   }
-  
-  fRNTupleWriters[name] = ROOT::Experimental::RNTupleWriter::Create(
-    std::move(model), ntupleName, *fRootFile, options);
 }
+
+// Explicit template instantiations
+template void QwRootFile::ConstructRNTupleBranches<QwSubsystemArrayParity>(const char*, const char*, QwSubsystemArrayParity&, const char*);
+template void QwRootFile::ConstructRNTupleBranches<QwHelicityPattern>(const char*, const char*, QwHelicityPattern&, const char*);
+template void QwRootFile::ConstructRNTupleBranches<QwEPICSEvent>(const char*, const char*, QwEPICSEvent&, const char*);
