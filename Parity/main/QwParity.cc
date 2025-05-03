@@ -61,6 +61,7 @@ Int_t main(Int_t argc, Char_t* argv[])
   gQwOptions.AddOptions()("single-output-file", po::value<bool>()->default_bool_value(false), "Write a single output file");
   gQwOptions.AddOptions()("print-errorcounters", po::value<bool>()->default_bool_value(true), "Print summary of error counters");
   gQwOptions.AddOptions()("write-promptsummary", po::value<bool>()->default_bool_value(false), "Write PromptSummary");
+  gQwOptions.AddOptions()("use-rntuple", po::value<bool>()->default_bool_value(false), "Use RNTuple format for output file");
 
   ///  Without anything, print usage
   if (argc == 1) {
@@ -170,10 +171,12 @@ Int_t main(Int_t argc, Char_t* argv[])
     QwRootFile *burstrootfile = NULL;
     QwRootFile *historootfile = NULL;
 
+    bool use_rntuple = gQwOptions.GetValue<bool>("use-rntuple");
 
     if (gQwOptions.GetValue<bool>("single-output-file")) {
 
       treerootfile  = new QwRootFile(run_label);
+      treerootfile->SetUseRNTuple(use_rntuple);
       burstrootfile = historootfile = treerootfile;
       //  Construct a tree which contains map file names which are used to analyze data
       treerootfile->WriteParamFileList("mapfiles", detectors);
@@ -181,8 +184,11 @@ Int_t main(Int_t argc, Char_t* argv[])
     } else {
 
       treerootfile  = new QwRootFile(run_label + ".trees");
+      treerootfile->SetUseRNTuple(use_rntuple);
       burstrootfile = new QwRootFile(run_label + ".bursts");
+      burstrootfile->SetUseRNTuple(use_rntuple);
       historootfile = new QwRootFile(run_label + ".histos");
+      historootfile->SetUseRNTuple(use_rntuple);
 
       //  Construct a tree which contains map file names which are used to analyze data
       detectors.PrintParamFileList();
@@ -202,12 +208,21 @@ Int_t main(Int_t argc, Char_t* argv[])
     detectors.ShareHistograms(ringoutput);
 
     //  Construct tree branches
-    treerootfile->ConstructTreeBranches("evt", "MPS event data tree", ringoutput);
-    treerootfile->ConstructTreeBranches("mul", "Helicity event data tree", helicitypattern);
-    burstrootfile->ConstructTreeBranches("pr", "Pair tree", helicitypattern.GetPairYield(),"yield_");
-    burstrootfile->ConstructTreeBranches("pr", "Pair tree", helicitypattern.GetPairAsymmetry(),"asym_");
-    treerootfile->ConstructTreeBranches("slow", "EPICS and slow control tree", epicsevent);
-    burstrootfile->ConstructTreeBranches("burst", "Burst level data tree", patternsum_per_burst, "|stat");
+    if (use_rntuple) {
+      treerootfile->ConstructRNTupleBranches("evt", "MPS event data ntuple", ringoutput);
+      treerootfile->ConstructRNTupleBranches("mul", "Helicity event data ntuple", helicitypattern);
+      burstrootfile->ConstructRNTupleBranches("pr", "Pair ntuple", helicitypattern.GetPairYield(),"yield_");
+      burstrootfile->ConstructRNTupleBranches("pr", "Pair ntuple", helicitypattern.GetPairAsymmetry(),"asym_");
+      treerootfile->ConstructRNTupleBranches("slow", "EPICS and slow control ntuple", epicsevent);
+      burstrootfile->ConstructRNTupleBranches("burst", "Burst level data ntuple", patternsum_per_burst, "|stat");
+    } else {
+      treerootfile->ConstructTreeBranches("evt", "MPS event data tree", ringoutput);
+      treerootfile->ConstructTreeBranches("mul", "Helicity event data tree", helicitypattern);
+      burstrootfile->ConstructTreeBranches("pr", "Pair tree", helicitypattern.GetPairYield(),"yield_");
+      burstrootfile->ConstructTreeBranches("pr", "Pair tree", helicitypattern.GetPairAsymmetry(),"asym_");
+      treerootfile->ConstructTreeBranches("slow", "EPICS and slow control tree", epicsevent);
+      burstrootfile->ConstructTreeBranches("burst", "Burst level data tree", patternsum_per_burst, "|stat");
+    }
 
     historootfile->ConstructHistograms("evt_histo",   datahandlerarray_evt);
     historootfile->ConstructHistograms("mul_histo",   datahandlerarray_mul);
@@ -285,8 +300,11 @@ Int_t main(Int_t argc, Char_t* argv[])
 	  epicsevent.CalculateRunningValues();
 	  helicitypattern.UpdateBlinder(epicsevent);
 	
-	  treerootfile->FillTreeBranches(epicsevent);
-	  treerootfile->FillTree("slow");
+	  if (use_rntuple) {
+	    treerootfile->FillRNTuple("slow");
+	  } else {
+	    treerootfile->FillTree("slow");
+	  }
 	}
       }
 
@@ -321,8 +339,11 @@ Int_t main(Int_t argc, Char_t* argv[])
 	  historootfile->FillHistograms(ringoutput);
 
 	  // Fill mps tree branches
-	  treerootfile->FillTreeBranches(ringoutput);
-	  treerootfile->FillTree("evt");
+	  if (use_rntuple) {
+	    treerootfile->FillRNTuple("evt");
+	  } else {
+	    treerootfile->FillTree("evt");
+	  }
 
 	  // Process data handlers
           datahandlerarray_evt.ProcessDataHandlerEntry();
@@ -340,10 +361,11 @@ Int_t main(Int_t argc, Char_t* argv[])
             patternsum.AccumulatePairRunningSum(helicitypattern);
 
 	    // Fill pair tree branches
-	    treerootfile->FillTreeBranches(helicitypattern.GetPairYield());
-	    treerootfile->FillTreeBranches(helicitypattern.GetPairAsymmetry());
-	    treerootfile->FillTreeBranches(helicitypattern.GetPairDifference());
-	    treerootfile->FillTree("pr");
+	    if (use_rntuple) {
+	      treerootfile->FillRNTuple("pr");
+	    } else {
+	      treerootfile->FillTree("pr");
+	    }
 	    
 	    // Clear the data
 	    helicitypattern.ClearPairData();
@@ -357,8 +379,11 @@ Int_t main(Int_t argc, Char_t* argv[])
               historootfile->FillHistograms(helicitypattern);
 
               // Fill helicity tree branches
-              treerootfile->FillTreeBranches(helicitypattern);
-              treerootfile->FillTree("mul");
+              if (use_rntuple) {
+                treerootfile->FillRNTuple("mul");
+              } else {
+                treerootfile->FillTree("mul");
+              }
 
               // Process data handlers
               datahandlerarray_mul.ProcessDataHandlerEntry();
@@ -395,8 +420,11 @@ Int_t main(Int_t argc, Char_t* argv[])
                 burstrootfile->FillHistograms(patternsum_per_burst);
 
                 // Fill burst tree branches
-                burstrootfile->FillTreeBranches(patternsum_per_burst);
-                burstrootfile->FillTree("burst");
+                if (use_rntuple) {
+                  burstrootfile->FillRNTuple("burst");
+                } else {
+                  burstrootfile->FillTree("burst");
+                }
 
                 // Finish data handler for burst
                 datahandlerarray_burst.FinishDataHandler();
@@ -450,8 +478,11 @@ Int_t main(Int_t argc, Char_t* argv[])
       burstrootfile->FillHistograms(patternsum_per_burst);
 
       // Fill burst tree branches
-      burstrootfile->FillTreeBranches(patternsum_per_burst);
-      burstrootfile->FillTree("burst");
+      if (use_rntuple) {
+        burstrootfile->FillRNTuple("burst");
+      } else {
+        burstrootfile->FillTree("burst");
+      }
     
       // Finish data handler for burst
       datahandlerarray_burst.FinishDataHandler();
@@ -488,7 +519,11 @@ Int_t main(Int_t argc, Char_t* argv[])
       eventsum.PrintValue();
     }
     treerootfile->FillTreeBranches(eventsum);
-    treerootfile->FillTree("evts");
+    if (use_rntuple) {
+      treerootfile->FillRNTuple("evts");
+    } else {
+      treerootfile->FillTree("evts");
+    }
 
     if (gQwOptions.GetValue<bool>("print-patternsum")) {
       QwMessage << " Running average of patterns" << QwLog::endl;
@@ -496,7 +531,11 @@ Int_t main(Int_t argc, Char_t* argv[])
       patternsum.PrintValue();
     }
     treerootfile->FillTreeBranches(patternsum);
-    treerootfile->FillTree("muls");
+    if (use_rntuple) {
+      treerootfile->FillRNTuple("muls");
+    } else {
+      treerootfile->FillTree("muls");
+    }
 
     if (gQwOptions.GetValue<bool>("print-burstsum")) {
       QwMessage << " Running average of bursts" << QwLog::endl;
@@ -504,7 +543,11 @@ Int_t main(Int_t argc, Char_t* argv[])
       burstsum.PrintValue();
     }
     burstrootfile->FillTreeBranches(burstsum);
-    burstrootfile->FillTree("bursts");
+    if (use_rntuple) {
+      burstrootfile->FillRNTuple("bursts");
+    } else {
+      burstrootfile->FillTree("bursts");
+    }
 
     //  Construct objects
     treerootfile->ConstructObjects("objects", helicitypattern);
