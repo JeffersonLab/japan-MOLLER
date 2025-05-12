@@ -1,15 +1,18 @@
-name: Build on Release
+name: Container Build
 
 on:
   release:
-    types: [published]
+    types: [published]  # Triggered when a release is published
+  workflow_dispatch:  # Allows manual trigger
+  schedule:
+    - cron: '0 8 * * *'  # 3:00 AM ET during Standard Time (UTC-5)
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout release tag
+    - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 1
@@ -17,19 +20,19 @@ jobs:
     - name: Set up QEMU for cross-platform builds
       uses: docker/setup-qemu-action@v3
       with:
-          platforms: 'linux/amd64,linux/arm64'
+        platforms: 'linux/amd64,linux/arm64'
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
     - name: Login to DockerHub
-      if: github.event_name != 'pull_request'
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_TOKEN }}
 
-    - name: Build and push Docker image
+    - name: Build and push Docker image for releases
+      if: github.event_name == 'release' && github.event.action == 'published'
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -39,3 +42,25 @@ jobs:
         tags: |
           jeffersonlab/japan-moller:latest
           jeffersonlab/japan-moller:${{ github.ref_name }}
+
+    - name: Build and push Docker image for nightly build
+      if: github.event_name == 'schedule'
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: |
+          jeffersonlab/japan-moller:nightly
+
+    - name: Build and push Docker image for manual trigger on main branch
+      if: github.event_name == 'workflow_dispatch'
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: |
+          jeffersonlab/japan-moller:main
