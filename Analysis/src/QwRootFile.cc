@@ -5,7 +5,10 @@
 // Until C++ runtime modules are universally used, we explicitly load the ntuple library.  Otherwise
 // triggering autoloading from the use of templated types would require an exhaustive enumeration
 // of "all" template instances in the LinkDef file.
-R__LOAD_LIBRARY(ROOTNTuple)
+
+//Some examples show this, but it causes a lot of problems:
+//R__LOAD_LIBRARY(ROOTNTuple)
+
 #include "QwRootFile.h"
 #include "QwRunCondition.h"
 #include "TH1.h"
@@ -22,6 +25,10 @@ R__LOAD_LIBRARY(ROOTNTuple)
 #include "QwHelicityPattern.h"
 #include "QwEPICSEvent.h"
 // Include headers for any other types used in template instantiations
+
+using RNTupleModel = ROOT::Experimental::RNTupleModel;
+//using RNTupleReader = ROOT::Experimental::RNTupleReader;//This doesn't seem to exist, despite being in examples
+using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
 
 std::string QwRootFile::fDefaultRootFileDir = ".";
 std::string QwRootFile::fDefaultRootFileStem = "Qweak_";
