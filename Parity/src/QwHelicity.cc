@@ -1248,85 +1248,81 @@ void  QwHelicity::ConstructBranchAndVector(TTree *tree, TString &prefix, std::ve
 {
   SetHistoTreeSave(prefix);
 
-
-  fTreeArrayIndex  = values.size();
+  fTreeArrayIndex = values.size();
   TString basename;
+  
   if(fHistoType==kHelNoSave)
-    {
-      //do nothing
-    }
+  {
+    //do nothing
+  }
   else if(fHistoType==kHelSaveMPS)
-    {
-      // basename = "actual_helicity";    //predicted actual helicity before being delayed.
-      // values.push_back(0.0);
-      // tree->Branch(basename, &(values.back()), basename+"/D");
-      //
-      basename = "delayed_helicity";   //predicted delayed helicity
+  {
+    // Reserve space in the values vector regardless of whether we have a valid tree
+    // basename = "actual_helicity";
+    // values.push_back(0.0);
+    
+    basename = "delayed_helicity";
+    values.push_back(0.0);
+    
+    basename = "reported_helicity";
+    values.push_back(0.0);
+    
+    // Add needed values to match FillTreeVector
+    values.push_back(0.0); // pattern_phase
+    values.push_back(0.0); // pattern_number
+    values.push_back(0.0); // pattern_seed
+    values.push_back(0.0); // event_number
+    
+    // Add space for Word values if needed
+    for (size_t i=0; i<fWord.size(); i++) {
       values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
-      //
-      basename = "reported_helicity";  //delayed helicity reported by the input register.
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
-      //
-      basename = "pattern_phase";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
-      //
-      basename = "pattern_number";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
-      //
-      basename = "pattern_seed";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
-      //
-      basename = "event_number";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
-      //
-      for (size_t i=0; i<fWord.size(); i++)
-	{
-	  basename = fWord[i].fWordName;
-	  values.push_back(0.0);
-	  tree->Branch(basename, &(values.back()), basename+"/D");
-	}
     }
+    
+    // Only create branches if we have a valid tree pointer
+    if (tree != nullptr) {
+      // Starting index in the values vector
+      size_t idx = fTreeArrayIndex;
+      
+      // Create the actual branches
+      // tree->Branch("actual_helicity", &(values[idx++]), "actual_helicity/D");
+      tree->Branch("delayed_helicity", &(values[idx++]), "delayed_helicity/D");
+      tree->Branch("reported_helicity", &(values[idx++]), "reported_helicity/D");
+      
+      // Create additional branches to match FillTreeVector
+      tree->Branch("pattern_phase", &(values[idx++]), "pattern_phase/D");
+      tree->Branch("pattern_number", &(values[idx++]), "pattern_number/D");
+      tree->Branch("pattern_seed", &(values[idx++]), "pattern_seed/D");
+      tree->Branch("event_number", &(values[idx++]), "event_number/D");
+      
+      // Add branches for Word values
+      for (size_t i=0; i<fWord.size(); i++) {
+        basename = prefix + fWord[i].fWordName;
+        tree->Branch(basename, &(values[idx++]), basename+"/D");
+      }
+    }
+  }
   else if(fHistoType==kHelSavePattern)
-    {
-      basename = "actual_helicity";    //predicted actual helicity before being delayed.
+  {
+    // Implementation for pattern save type
+    // Similar structure as above but with pattern-specific branches
+    values.push_back(0.0); // for pattern_polarity
+    
+    for (size_t i=0; i<fWord.size(); i++) {
       values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
-      //
-      basename = "actual_pattern_polarity";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
-      //
-      basename = "actual_previous_pattern_polarity";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
-      //
-      basename = "delayed_pattern_polarity";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
-      //
-      basename = "pattern_number";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
-      //
-      basename = "pattern_seed";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
-      //
-      for (size_t i=0; i<fWord.size(); i++)
-	{
-	  basename = fWord[i].fWordName;
-	  values.push_back(0.0);
-	  tree->Branch(basename, &(values.back()), basename+"/D");
-	}
     }
-
-  return;
+    
+    if (tree != nullptr) {
+      size_t idx = fTreeArrayIndex;
+      
+      basename = "pattern_polarity";
+      tree->Branch(basename, &(values[idx++]), basename+"/D");
+      
+      for (size_t i=0; i<fWord.size(); i++) {
+        basename = "hel_" + fWord[i].fWordName;
+        tree->Branch(basename, &(values[idx++]), basename+"/D");
+      }
+    }
+  }
 }
 
 void  QwHelicity::ConstructBranch(TTree *tree, TString &prefix)
