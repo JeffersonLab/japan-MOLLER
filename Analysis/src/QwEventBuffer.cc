@@ -51,6 +51,7 @@ QwEventBuffer::QwEventBuffer()
        fDataFileExtension(fDefaultDataFileExtension),
        fDataDirectory(fDefaultDataDirectory),
        fEvStreamMode(fEvStreamNull),
+       fSingleFile(kFALSE),
        fEvStream(NULL),
        fCurrentRun(-1),
        fNumPhysicsEvents(0),
@@ -185,7 +186,9 @@ void QwEventBuffer::ProcessOptions(QwOptions &options)
   if(options.HasValue("directfile")){
       fSingleFile = kTRUE;
       fDataFile = options.GetValue<string>("directfile");
-    }
+  } else {
+      fSingleFile = kFALSE;
+  }
   fDataDirectory = options.GetValue<string>("data");
   if (fDataDirectory.Length() == 0){
     QwError << "ERROR:  Can't get the data directory in the QwEventBuffer creator."
