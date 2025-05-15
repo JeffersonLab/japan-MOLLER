@@ -691,6 +691,10 @@ void  QwVQWK_Channel::FillHistograms()
 
 void  QwVQWK_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
+  if(tree==nullptr) {
+    QwError << "QwVQWK_Channel::ConstructBranchAndVector: tree is null" << QwLog::endl;
+    return;
+  }
   //  This channel is not used, so skip setting up the tree.
   if (IsNameEmpty()) return;
 
