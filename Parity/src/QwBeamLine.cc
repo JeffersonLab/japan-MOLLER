@@ -2423,7 +2423,16 @@ void  QwBeamLine::FillHistograms()
 //*****************************************************************//
 void QwBeamLine::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values)
 {
-
+  if(tree==nullptr)
+    {
+      QwError << "QwBeamLine::ConstructBranchAndVector: tree is null" << QwLog::endl;
+      return;
+    }
+  if(values.size()==0)
+    {
+      QwError << "QwBeamLine::ConstructBranchAndVector: values vector is empty" << QwLog::endl;
+      return;
+    }
   for(size_t i = 0; i < fClock.size(); i++)
     fClock[i].get()->ConstructBranchAndVector(tree, prefix, values);
   for(size_t i = 0; i < fStripline.size(); i++)

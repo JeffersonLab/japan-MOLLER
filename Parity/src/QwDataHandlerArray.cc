@@ -375,6 +375,10 @@ void  QwDataHandlerArray::FillTreeBranches(QwRootFile *treerootfile)
 
 void  QwDataHandlerArray::ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector <Double_t> &values)
 {
+  if(tree == nullptr) {
+    QwError << "QwDataHandlerArray::ConstructBranchAndVector: tree is null" << QwLog::endl;
+    return;
+  }
   if (!empty()){
     for (iterator handler = begin(); handler != end(); ++handler) {
       VQwDataHandler* handler_parity = dynamic_cast<VQwDataHandler*>(handler->get());

@@ -661,6 +661,11 @@ void  QwMollerADC_Channel::FillHistograms()
 
 void  QwMollerADC_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
+  if(tree==nullptr)
+  {
+    QwError << "QwMollerADC_Channel::ConstructBranchAndVector: tree is null" << QwLog::endl;
+    return;
+  }
   //  This channel is not used, so skip setting up the tree.
   if (IsNameEmpty()) return;
 
@@ -759,8 +764,10 @@ void  QwMollerADC_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix
 
     if (kDEBUG)
       QwMessage << "base name " << basename << " List " << list << QwLog::endl;
-
-    tree->Branch(basename, &(values[fTreeArrayIndex]), list);
+    if(tree!=nullptr)
+    {
+      tree->Branch(basename, &(values[fTreeArrayIndex]), list);
+    }
   }
 
   if (kDEBUG) {
@@ -778,7 +785,10 @@ void  QwMollerADC_Channel::ConstructBranch(TTree *tree, TString &prefix)
   if (IsNameEmpty()) return;
 
   TString basename = prefix + GetElementName();
-  tree->Branch(basename,&fHardwareBlockSum,basename+"/D");
+  if(tree!=nullptr)
+  {
+    tree->Branch(basename,&fHardwareBlockSum,basename+"/D");
+  }
   if (kDEBUG){
     std::cerr << "QwMollerADC_Channel::ConstructBranchAndVector: fTreeArrayIndex==" << fTreeArrayIndex
               << "; fTreeArrayNumEntries==" << fTreeArrayNumEntries

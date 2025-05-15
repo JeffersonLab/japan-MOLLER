@@ -155,6 +155,58 @@ foreach(_lib IN LISTS ROOT_FIND_COMPONENTS ROOT_LIB_FLAGS)
     endif()
   endif()
 endforeach()
+
+# Special handling for experimental components
+if(ROOT_FIND_COMPONENTS MATCHES "RNTuple")
+  # First try for the dedicated library
+  find_library(ROOT_ROOTNTuple_LIBRARY ROOTNTuple HINTS ${ROOT_LIBRARY_DIR} NO_CMAKE_ENVIRONMENT_PATH)
+  
+  if(ROOT_ROOTNTuple_LIBRARY)
+    # Found dedicated library
+    add_library(ROOT::RNTuple SHARED IMPORTED)
+    set_target_properties(ROOT::RNTuple PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${ROOT_INCLUDE_DIR}"
+      IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+      IMPORTED_LOCATION "${ROOT_ROOTNTuple_LIBRARY}"
+    )
+    list(APPEND ROOT_LIBRARIES ${ROOT_ROOTNTuple_LIBRARY})
+    list(APPEND targetlist ROOT::RNTuple)
+    list(REMOVE_ITEM ROOT_FIND_COMPONENTS RNTuple)
+    message(STATUS "Found RNTuple library: ${ROOT_ROOTNTuple_LIBRARY}")
+  else()
+    # Check if we can just use RIO which includes RNTuple functionality
+    find_library(ROOT_RIO_LIBRARY RIO HINTS ${ROOT_LIBRARY_DIR} NO_CMAKE_ENVIRONMENT_PATH)
+    if(ROOT_RIO_LIBRARY)
+      # Create alias target for RNTuple
+      add_library(ROOT::RNTuple INTERFACE IMPORTED)
+      set_target_properties(ROOT::RNTuple PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${ROOT_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES "ROOT::RIO"
+      )
+      list(REMOVE_ITEM ROOT_FIND_COMPONENTS RNTuple)
+      message(STATUS "Using ROOT::RIO for RNTuple functionality")
+    else()
+      # Check if RNTuple is available via the root-config command
+      execute_process(
+        COMMAND ${ROOT_CONFIG_EXEC} --has-rntuple
+        OUTPUT_VARIABLE ROOT_HAS_RNTUPLE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+      
+      if(ROOT_HAS_RNTUPLE STREQUAL "yes")
+        # Create alias using ROOT core libraries
+        add_library(ROOT::RNTuple INTERFACE IMPORTED)
+        set_target_properties(ROOT::RNTuple PROPERTIES
+          INTERFACE_INCLUDE_DIRECTORIES "${ROOT_INCLUDE_DIR}"
+          INTERFACE_LINK_LIBRARIES "ROOT::Core;ROOT::RIO"
+        )
+        list(REMOVE_ITEM ROOT_FIND_COMPONENTS RNTuple)
+        message(STATUS "RNTuple support enabled through ROOT core libraries")
+      endif()
+    endif()
+  endif()
+endif()
+
 unset(uselibnew)
 
 if(ROOT_LIBRARIES)

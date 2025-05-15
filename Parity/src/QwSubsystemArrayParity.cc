@@ -614,6 +614,10 @@ Bool_t QwSubsystemArrayParity::CheckBadEventRange(){
 }
 
 void  QwSubsystemArrayParity::ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values){
+  if(tree==nullptr)
+  {
+    return;
+  }
   QwSubsystemArray::ConstructBranchAndVector(tree, prefix, values);
   if (prefix.Contains("yield_") || prefix==""){
     values.push_back(0.0);

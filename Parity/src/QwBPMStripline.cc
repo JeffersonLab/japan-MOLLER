@@ -845,6 +845,10 @@ void  QwBPMStripline<T>::FillHistograms()
 template<typename T>
 void  QwBPMStripline<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
+  if(tree == nullptr)
+  {
+    return;
+  }
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing trees.
   }
@@ -874,6 +878,10 @@ void  QwBPMStripline<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, 
 template<typename T>
 void  QwBPMStripline<T>::ConstructBranch(TTree *tree, TString &prefix)
 {
+  if(tree == nullptr)
+  {
+    return;
+  }
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing trees.
   }

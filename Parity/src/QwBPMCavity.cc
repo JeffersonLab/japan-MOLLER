@@ -658,6 +658,10 @@ void  QwBPMCavity::FillHistograms()
 
 void  QwBPMCavity::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
+  if(tree==nullptr) {
+    QwError << "QwBPMCavity::ConstructBranchAndVector: tree is null" << QwLog::endl;
+    return;
+  }
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing trees.
   }

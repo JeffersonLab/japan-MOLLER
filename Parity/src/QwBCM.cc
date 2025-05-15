@@ -486,6 +486,10 @@ void QwBCM<T>::FillHistograms()
 template<typename T>
 void QwBCM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
+  if(tree==nullptr) {
+    QwError << "QwBCM::ConstructBranchAndVector: tree is null" << QwLog::endl;
+    return;
+  }
   if (this->GetElementName()==""){
     //  This channel is not used, so skip
   } else

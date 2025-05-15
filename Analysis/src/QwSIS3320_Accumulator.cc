@@ -244,6 +244,10 @@ void QwSIS3320_Accumulator::Ratio(const QwSIS3320_Accumulator &numer, const QwSI
 
 void  QwSIS3320_Accumulator::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
+  if(tree==nullptr)
+  {
+    return;
+  }
   if (IsNameEmpty()) {
     //  This accumulator is not used, so skip setting up the tree.
   } else {

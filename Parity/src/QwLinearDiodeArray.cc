@@ -518,11 +518,10 @@ QwLinearDiodeArray& QwLinearDiodeArray::operator-= (const QwLinearDiodeArray &va
 
 void QwLinearDiodeArray::Ratio(QwLinearDiodeArray &numer, QwLinearDiodeArray &denom)
 {
-  // this function is called when forming asymmetries. In this case waht we actually want for the
-  // LinearArray is the difference only not the asymmetries
-
-  *this=numer;
-  this->fEffectiveCharge.Ratio(numer.fEffectiveCharge,denom.fEffectiveCharge);
+  if (GetElementName()!=""){
+    *this = numer;
+    this->fEffectiveCharge.Ratio(numer.fEffectiveCharge, denom.fEffectiveCharge);
+  }
   return;
 }
 
@@ -621,6 +620,10 @@ void  QwLinearDiodeArray::FillHistograms()
 
 void  QwLinearDiodeArray::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
+  if(tree==nullptr){
+    QwMessage << "QwLinearDiodeArray::ConstructBranchAndVector: tree is null" << QwLog::endl;
+    return;
+  }
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing trees.
   }

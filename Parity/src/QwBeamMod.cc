@@ -792,6 +792,11 @@ void  QwBeamMod::FillHistograms()
 
 void QwBeamMod::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values)
 {
+  if(tree == NULL) {
+    QwError << "QwBeamMod::ConstructBranchAndVector:  "
+      << "Tree pointer is NULL." << QwLog::endl;
+    return;
+  }
   TString basename;
   
   for(size_t i = 0; i < fModChannel.size(); i++){
