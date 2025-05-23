@@ -357,6 +357,10 @@ void QwScaler::FillHistograms()
 
 void QwScaler::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values)
 {
+  if(tree == nullptr) {
+    QwError << "QwScaler::ConstructBranchAndVector: tree is null" << QwLog::endl;
+    return;
+  }
   for (size_t i = 0; i < fScaler.size(); i++) {
     fScaler.at(i)->ConstructBranchAndVector(tree, prefix, values);
   }

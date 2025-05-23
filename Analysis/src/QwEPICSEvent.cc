@@ -166,6 +166,10 @@ Int_t QwEPICSEvent::LoadChannelMap(TString mapfile)
 /// \brief Construct the branch and tree vector
 void QwEPICSEvent::ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values)
 {
+  if(tree==nullptr) {
+    QwError << "QwEPICSEvent::ConstructBranchAndVector: tree is null" << QwLog::endl;
+    return;
+  }
   fTreeArrayIndex = values.size();
   Int_t treeindex = fTreeArrayIndex;
   for (size_t tagindex = 0; tagindex < fEPICSVariableType.size(); tagindex++) {

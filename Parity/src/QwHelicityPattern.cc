@@ -851,6 +851,10 @@ void  QwHelicityPattern::FillHistograms()
 
 void QwHelicityPattern::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values)
 {
+  if(tree==nullptr)
+  {
+    return;
+  }
 TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length())+"BurstCounter";
   tree->Branch(basename,&fBurstCounter,basename+"/S");
   TString newprefix = "yield_" + prefix;
@@ -872,6 +876,10 @@ TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix
 
 void QwHelicityPattern::ConstructBranch(TTree *tree, TString & prefix)
 {
+  if(tree==nullptr)
+  {
+    return;
+  }
   TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length())+"BurstCounter";
   tree->Branch(basename,&fBurstCounter,basename+"/S");
 
