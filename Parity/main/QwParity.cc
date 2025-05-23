@@ -338,12 +338,37 @@ Int_t main(Int_t argc, Char_t* argv[])
 	  // Fill the histograms
 	  historootfile->FillHistograms(ringoutput);
 
-	  // Fill mps tree branches
-	  if (use_rntuple) {
-	    treerootfile->FillRNTuple("evt");
-	  } else {
-	    treerootfile->FillTree("evt");
-	  }
+
+    if (use_rntuple) 
+    {
+      
+      // Create a vector to hold values
+      std::vector<Double_t> values;
+      // Reserve space to avoid reallocation
+      values.reserve(10000); // Adjust size based on experiment needs
+      
+      // Fill vector with data
+      ringoutput.FillTreeVector(values);
+      
+      // Fill RNTuple directly with vector
+      treerootfile->FillRNTupleWithVector("evt", values);
+      
+     /*
+     auto tree_it = fTreeByName.find("evt");
+     if (tree_it != fTreeByName.end() && !tree_it->second.empty()) {
+       QwRootTree* roottree = tree_it->second.back();
+       
+       // Get the tree to populate its vector internally
+       roottree->FillTreeBranches(ringoutput);
+       
+       // Now use that already-populated vector for the RNTuple
+       treerootfile->FillRNTupleWithVector("evt", roottree->GetVector());
+       */
+    } 
+    else 
+    {
+      treerootfile->FillTree("evt");
+    }
 
 	  // Process data handlers
           datahandlerarray_evt.ProcessDataHandlerEntry();
@@ -361,11 +386,13 @@ Int_t main(Int_t argc, Char_t* argv[])
             patternsum.AccumulatePairRunningSum(helicitypattern);
 
 	    // Fill pair tree branches
-	    if (use_rntuple) {
-	      treerootfile->FillRNTuple("pr");
-	    } else {
-	      treerootfile->FillTree("pr");
-	    }
+      if (use_rntuple) {
+        std::vector<Double_t> values;
+        helicitypattern.GetPairYield().FillTreeVector(values);
+        treerootfile->FillRNTupleWithVector("pr", values);
+      } else {
+        treerootfile->FillTree("pr");
+      }
 	    
 	    // Clear the data
 	    helicitypattern.ClearPairData();
@@ -380,7 +407,9 @@ Int_t main(Int_t argc, Char_t* argv[])
 
               // Fill helicity tree branches
               if (use_rntuple) {
-                treerootfile->FillRNTuple("mul");
+                std::vector<Double_t> values;
+                helicitypattern.FillTreeVector(values);
+                treerootfile->FillRNTupleWithVector("mul", values);
               } else {
                 treerootfile->FillTree("mul");
               }
@@ -421,7 +450,9 @@ Int_t main(Int_t argc, Char_t* argv[])
 
                 // Fill burst tree branches
                 if (use_rntuple) {
-                  burstrootfile->FillRNTuple("burst");
+                  std::vector<Double_t> values;
+                  patternsum_per_burst.FillTreeVector(values);
+                  burstrootfile->FillRNTupleWithVector("burst", values);
                 } else {
                   burstrootfile->FillTree("burst");
                 }
@@ -479,7 +510,9 @@ Int_t main(Int_t argc, Char_t* argv[])
 
       // Fill burst tree branches
       if (use_rntuple) {
-        burstrootfile->FillRNTuple("burst");
+        std::vector<Double_t> values;
+        patternsum_per_burst.FillTreeVector(values);
+        burstrootfile->FillRNTupleWithVector("burst", values);
       } else {
         burstrootfile->FillTree("burst");
       }

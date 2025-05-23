@@ -674,6 +674,7 @@ void QwSubsystemArray::FillTreeVector(std::vector<Double_t>& values) const
 {
   // Fill the event number and event type
   size_t index = fTreeArrayIndex;
+  values.resize(values.size() + 5);
   values[index++] = this->GetCodaEventNumber();
   values[index++] = this->GetCodaEventType();
   values[index++] = this->fCleanParameter[0];

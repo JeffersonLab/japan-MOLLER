@@ -97,8 +97,8 @@ link_directories(${Boost_LIBRARY_DIR})
 #----------------------------------------------------------------------------
 # ROOT
 #
-set(minimum_root_version 6.0)
-find_package(ROOT ${minimum_root_version} REQUIRED New Gui)
+set(minimum_root_version 6.22)
+find_package(ROOT ${minimum_root_version} REQUIRED RNTuple)
 config_add_dependency(ROOT ${minimum_root_version})
 
 
@@ -196,6 +196,7 @@ target_link_libraries(${PROJECT_NAME}
     eviowrapper
   PUBLIC
     ROOT::Libraries
+    ROOT::RNTuple  # Add this line to explicitly link against RNTuple
     ${MYSQLPP_LIBRARIES}
     ${Boost_LIBRARIES}
   )

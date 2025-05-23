@@ -41,7 +41,8 @@ using std::type_info;
 class QwRootTree {
 
   public:
-
+    /// Get the vector of values
+    const std::vector<Double_t>& GetVector() const { return fVector; }
     /// Constructor with name, and description
     QwRootTree(const std::string& name, const std::string& desc, const std::string& prefix = "")
     : fName(name),fDesc(desc),fPrefix(prefix),fType("type undefined"),
@@ -306,7 +307,7 @@ class QwRootFile {
     QwRootFile(const TString& run_label);
     /// \brief Destructor
     virtual ~QwRootFile();
-
+    void FillRNTupleWithVector(const char* name, const std::vector<Double_t>& values);
 
     /// \brief Define the configuration options
     static void DefineOptions(QwOptions &options);

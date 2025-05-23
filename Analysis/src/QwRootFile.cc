@@ -404,7 +404,7 @@ void QwRootFile::ConstructRNTupleBranches(const char* name, const char* title, T
   fRNTupleWriters[name] = std::move(writer);
 }
 
-void QwRootFile::FillRNTuple(const char* name)
+void QwRootFile::FillRNTuple(const char* name)//should not be used
 {
   if (!fUseRNTuple) return;
   
@@ -412,32 +412,66 @@ void QwRootFile::FillRNTuple(const char* name)
   auto fields_it = fRNTupleFields.find(name);
   auto count_it = fRNTupleFieldCount.find(name);
   
-  if (writer_it != fRNTupleWriters.end() && 
-      fields_it != fRNTupleFields.end() &&
-      count_it != fRNTupleFieldCount.end()) {
+  if(writer_it != fRNTupleWriters.end() && 
+  fields_it != fRNTupleFields.end() &&
+  count_it != fRNTupleFieldCount.end()) {
+  
     
-    // Get the corresponding tree to access its values
-    TTree* tree = dynamic_cast<TTree*>(fRootFile->Get(name));
-    if (tree) {
-      // Read values from tree's current entry
-      std::vector<Double_t> values(count_it->second);
+    // Find the tree in the internal map
+    auto tree_it = fTreeByName.find(name);
+    if (tree_it != fTreeByName.end() && !tree_it->second.empty()) 
+    {
+      QwRootTree* roottree = tree_it->second.back();
       
-      // Get the current set of values that would be filled into the tree
-      void* addr = tree->GetBranch("values")->GetAddress();
-      if (addr) {
-        Double_t* data = static_cast<Double_t*>(addr);
-        for (size_t i = 0; i < count_it->second; i++) {
-          values[i] = data[i];
-          // Update the corresponding RNTuple field
-          if (i < fields_it->second.size()) {
-            *(fields_it->second[i]) = values[i];
-          }
-        }
+      // Directly access the vector of values from QwRootTree
+      const std::vector<Double_t>& values = roottree->GetVector();
+      
+      // Copy values to RNTuple fields
+      for (size_t i = 0; i < values.size() && i < fields_it->second.size(); i++) 
+      {
+        *(fields_it->second[i]) = values[i];
       }
     }
     
-    // Fill the RNTuple with the updated field values
+    // Always fill the RNTuple
     writer_it->second->Fill();
+  }
+}
+
+/**
+ * Fill an RNTuple with values directly from a vector
+ * @param name Name of the RNTuple
+ * @param values Vector of values to use for filling the RNTuple
+ */
+void QwRootFile::FillRNTupleWithVector(const char* name, const std::vector<Double_t>& values)
+{
+  if (!fUseRNTuple) return;
+  
+  auto writer_it = fRNTupleWriters.find(name);
+  auto fields_it = fRNTupleFields.find(name);
+  
+  if (writer_it != fRNTupleWriters.end() && fields_it != fRNTupleFields.end()) 
+  {
+    
+    // Copy values to RNTuple fields
+    for (size_t i = 0; i < values.size() && i < fields_it->second.size(); i++) 
+    {
+      *(fields_it->second[i]) = values[i];
+    }
+    
+    // Fill the RNTuple
+    if(values.size()>0)
+ /*   {
+          QwMessage << "Filling RNTuple '" << name << "' with " 
+        << (values.size() < fields_it->second.size() ? values.size() : fields_it->second.size())
+        << " values" << QwLog::endl;
+    }*/
+    writer_it->second->Fill();
+    
+  } 
+  else 
+  {
+    QwMessage << "RNTuple '" << name << "' not found for filling with vector" << QwLog::endl;
   }
 }
 

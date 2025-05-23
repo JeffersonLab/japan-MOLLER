@@ -136,20 +136,32 @@ void QwLog::ProcessOptions(QwOptions* options)
  */
 bool QwLog::IsDebugFunction(const string func_sig)
 {
-  // If not in our cached list
-  if (fIsDebugFunction.find(func_sig) == fIsDebugFunction.end()) {
-    // Look through all regexes
-    fIsDebugFunction[func_sig] = false;
-    for (size_t i = 0; i < fDebugFunctionRegexString.size(); i++) {
-      // When we find a match, cache it and break out
-      boost::regex regex(fDebugFunctionRegexString.at(i));
-      if (boost::regex_match(func_sig, regex)) {
-        fIsDebugFunction[func_sig] = true;
-        break;
+  // Skip empty signatures and disable if no debug patterns provided
+  if (func_sig.empty() || fDebugFunctionRegexString.empty())
+    return false;
+    
+  try {
+    // If not in our cached list
+    if (fIsDebugFunction.find(func_sig) == fIsDebugFunction.end()) {
+      // Make a copy of the string to avoid reference issues
+      std::string func_sig_copy = func_sig;
+      
+      // Look through all regexes
+      fIsDebugFunction[func_sig_copy] = false;
+      for (size_t i = 0; i < fDebugFunctionRegexString.size(); i++) {
+        // When we find a match, cache it and break out
+        boost::regex regex(fDebugFunctionRegexString.at(i));
+        if (boost::regex_match(func_sig_copy, regex)) {
+          fIsDebugFunction[func_sig_copy] = true;
+          break;
+        }
       }
     }
+    return fIsDebugFunction[func_sig];
+  } catch (...) {
+    // If anything goes wrong, just return false
+    return false;
   }
-  return fIsDebugFunction[func_sig];
 }
 
 /*! Initialize the log file with name 'name'
@@ -197,7 +209,7 @@ QwLog& QwLog::operator()(
   fLogLevel = level;
 
   // Override log level of this sink when in a debugged function
-  if (IsDebugFunction(func_sig)) fLogLevel = QwLog::kAlways;
+//  if (IsDebugFunction(func_sig)) fLogLevel = QwLog::kAlways;
 
   if (fScreen && fLogLevel <= fScreenThreshold) {
     if (fScreenAtNewLine) {
