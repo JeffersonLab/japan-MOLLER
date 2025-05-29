@@ -473,6 +473,28 @@ void  QwEnergyCalculator::FillTreeVector(std::vector<Double_t> &values) const
   return;
 }
 
+//*****************************************************************//
+void QwEnergyCalculator::ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix)
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip constructing RNTuple fields.
+  }
+  else
+    fEnergyChange.ConstructRNTupleFields(rntuple, prefix);
+  return;
+}
+
+//*****************************************************************//
+void QwEnergyCalculator::FillRNTupleVector(std::vector<Double_t>& values) const
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip filling the RNTuple.
+  }
+  else
+    fEnergyChange.FillRNTupleVector(values);
+  return;
+}
+
 #ifdef __USE_DATABASE__
 std::vector<QwDBInterface> QwEnergyCalculator::GetDBEntry()
 {

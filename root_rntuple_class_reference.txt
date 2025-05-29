@@ -1,0 +1,365 @@
+ROOT::RNTuple Class Referencefinal
+NTuple-related classes
+Representation of an RNTuple data set in a ROOT file.
+
+The class points to the header and footer keys, which in turn have the references to the pages (via page lists). Only the RNTuple key will be listed in the list of keys. Like TBaskets, the pages are "invisible" keys. Byte offset references in the RNTuple header and footer reference directly the data part of page records, skipping the TFile key part.
+
+In the list of keys, this object appears as "ROOT::RNTuple". It is the user-facing representation of an RNTuple data set in a ROOT file and it provides an API entry point to an RNTuple stored in a ROOT file. Its main purpose is to construct a page source for an RNTuple, which in turn can be used to read an RNTuple with an RDF or an RNTupleReader.
+
+For instance, for an RNTuple called "Events" in a ROOT file, usage can be
+
+auto f = TFile::Open("data.root");
+auto ntpl = f->Get<ROOT::RNTuple>("Events");
+auto reader = RNTupleReader::Open(ntpl);
+Definition at line 69 of file RNTuple.hxx.
+
+Public Member Functions
+ 	RNTuple ()=default
+ 
+ 	~RNTuple ()=default
+ 
+std::uint64_t 	GetLenFooter () const
+ 
+std::uint64_t 	GetLenHeader () const
+ 
+std::uint64_t 	GetMaxKeySize () const
+ 
+std::uint64_t 	GetNBytesFooter () const
+ 
+std::uint64_t 	GetNBytesHeader () const
+ 
+std::uint64_t 	GetSeekFooter () const
+ 
+std::uint64_t 	GetSeekHeader () const
+ 
+std::uint16_t 	GetVersionEpoch () const
+ 
+std::uint16_t 	GetVersionMajor () const
+ 
+std::uint16_t 	GetVersionMinor () const
+ 
+std::uint16_t 	GetVersionPatch () const
+ 
+TClass * 	IsA () const
+ 
+Long64_t 	Merge (TCollection *input, TFileMergeInfo *mergeInfo)
+ 	RNTuple implements the hadd MergeFile interface Merge this NTuple with the input list entries.
+ 
+void 	Streamer (TBuffer &)
+ 
+void 	StreamerNVirtual (TBuffer &ClassDef_StreamerNVirtual_b)
+ 
+Static Public Member Functions
+static TClass * 	Class ()
+ 
+static const char * 	Class_Name ()
+ 
+static constexpr Version_t 	Class_Version ()
+ 	NOTE: if you change this version you also need to update RTFNTuple::fClassVersion in RMiniFile.cxx.
+ 
+static const char * 	DeclFileName ()
+ 
+Static Public Attributes
+static constexpr std::uint16_t 	kVersionEpoch = 1
+ 
+static constexpr std::uint16_t 	kVersionMajor = 0
+ 
+static constexpr std::uint16_t 	kVersionMinor = 0
+ 
+static constexpr std::uint16_t 	kVersionPatch = 0
+ 
+Private Attributes
+TFile * 	fFile = nullptr
+ 	! The file from which the ntuple was streamed, registered in the custom streamer
+ 
+std::uint64_t 	fLenFooter = 0
+ 	The size of the uncompressed ntuple footer.
+ 
+std::uint64_t 	fLenHeader = 0
+ 	The size of the uncompressed ntuple header.
+ 
+std::uint64_t 	fMaxKeySize = 0
+ 	The maximum size for a TKey payload. Payloads bigger than this size will be written as multiple blobs.
+ 
+std::uint64_t 	fNBytesFooter = 0
+ 	The size of the compressed ntuple footer.
+ 
+std::uint64_t 	fNBytesHeader = 0
+ 	The size of the compressed ntuple header.
+ 
+std::uint64_t 	fSeekFooter = 0
+ 	The file offset of the footer excluding the TKey part.
+ 
+std::uint64_t 	fSeekHeader = 0
+ 	The file offset of the header excluding the TKey part.
+ 
+std::uint16_t 	fVersionEpoch = kVersionEpoch
+ 	Version of the RNTuple binary format that the writer supports (see specification).
+ 
+std::uint16_t 	fVersionMajor = kVersionMajor
+ 	Changing the major version indicates forward incompatible changes; such changes should correspond to a new bit in the feature flag of the RNTuple header.
+ 
+std::uint16_t 	fVersionMinor = kVersionMinor
+ 	Changing the minor version indicates new optional fields added to the RNTuple meta-data.
+ 
+std::uint16_t 	fVersionPatch = kVersionPatch
+ 	Changing the patch version indicates new backported features from newer binary format versions.
+ 
+Friends
+class 	Experimental::Internal::RNTupleFileWriter
+ 
+class 	Experimental::Internal::RPageSourceFile
+ 
+ROOT::RNTuple 	ROOT::Experimental::Internal::CreateAnchor (std::uint16_t versionEpoch, std::uint16_t versionMajor, std::uint16_t versionMinor, std::uint16_t versionPatch, std::uint64_t seekHeader, std::uint64_t nbytesHeader, std::uint64_t lenHeader, std::uint64_t seekFooter, std::uint64_t nbytesFooter, std::uint64_t lenFooter, std::uint64_t maxKeySize)
+ 
+#include <ROOT/RNTuple.hxx>
+
+Constructor & Destructor Documentation
+◆ RNTuple()
+ROOT::RNTuple::RNTuple	(		)	
+default
+◆ ~RNTuple()
+ROOT::RNTuple::~RNTuple	(		)	
+default
+Member Function Documentation
+◆ Class()
+static TClass * ROOT::RNTuple::Class	(		)	
+static
+Returns
+TClass describing this class
+◆ Class_Name()
+static const char * ROOT::RNTuple::Class_Name	(		)	
+static
+Returns
+Name of this class
+◆ Class_Version()
+static constexpr Version_t ROOT::RNTuple::Class_Version	(		)	
+inlinestaticconstexpr
+NOTE: if you change this version you also need to update RTFNTuple::fClassVersion in RMiniFile.cxx.
+
+Returns
+Version of this class
+Definition at line 136 of file RNTuple.hxx.
+
+◆ DeclFileName()
+static const char * ROOT::RNTuple::DeclFileName	(		)	
+inlinestatic
+Returns
+Name of the file containing the class declaration
+Definition at line 136 of file RNTuple.hxx.
+
+◆ GetLenFooter()
+std::uint64_t ROOT::RNTuple::GetLenFooter	(		)	const
+inline
+Definition at line 128 of file RNTuple.hxx.
+
+◆ GetLenHeader()
+std::uint64_t ROOT::RNTuple::GetLenHeader	(		)	const
+inline
+Definition at line 124 of file RNTuple.hxx.
+
+◆ GetMaxKeySize()
+std::uint64_t ROOT::RNTuple::GetMaxKeySize	(		)	const
+inline
+Definition at line 129 of file RNTuple.hxx.
+
+◆ GetNBytesFooter()
+std::uint64_t ROOT::RNTuple::GetNBytesFooter	(		)	const
+inline
+Definition at line 127 of file RNTuple.hxx.
+
+◆ GetNBytesHeader()
+std::uint64_t ROOT::RNTuple::GetNBytesHeader	(		)	const
+inline
+Definition at line 123 of file RNTuple.hxx.
+
+◆ GetSeekFooter()
+std::uint64_t ROOT::RNTuple::GetSeekFooter	(		)	const
+inline
+Definition at line 126 of file RNTuple.hxx.
+
+◆ GetSeekHeader()
+std::uint64_t ROOT::RNTuple::GetSeekHeader	(		)	const
+inline
+Definition at line 122 of file RNTuple.hxx.
+
+◆ GetVersionEpoch()
+std::uint16_t ROOT::RNTuple::GetVersionEpoch	(		)	const
+inline
+Definition at line 117 of file RNTuple.hxx.
+
+◆ GetVersionMajor()
+std::uint16_t ROOT::RNTuple::GetVersionMajor	(		)	const
+inline
+Definition at line 118 of file RNTuple.hxx.
+
+◆ GetVersionMinor()
+std::uint16_t ROOT::RNTuple::GetVersionMinor	(		)	const
+inline
+Definition at line 119 of file RNTuple.hxx.
+
+◆ GetVersionPatch()
+std::uint16_t ROOT::RNTuple::GetVersionPatch	(		)	const
+inline
+Definition at line 120 of file RNTuple.hxx.
+
+◆ IsA()
+TClass * ROOT::RNTuple::IsA	(		)	const
+inline
+Returns
+TClass describing current object
+Definition at line 136 of file RNTuple.hxx.
+
+◆ Merge()
+Long64_t ROOT::RNTuple::Merge	(	TCollection *	input,
+TFileMergeInfo *	mergeInfo )
+RNTuple implements the hadd MergeFile interface Merge this NTuple with the input list entries.
+
+Definition at line 45 of file RNTupleMerger.cxx.
+
+◆ Streamer()
+void ROOT::RNTuple::Streamer	(	TBuffer &	buf	)	
+Definition at line 27 of file RNTuple.cxx.
+
+◆ StreamerNVirtual()
+void ROOT::RNTuple::StreamerNVirtual	(	TBuffer &	ClassDef_StreamerNVirtual_b	)	
+inline
+Definition at line 136 of file RNTuple.hxx.
+
+Friends And Related Symbol Documentation
+◆ Experimental::Internal::RNTupleFileWriter
+friend class Experimental::Internal::RNTupleFileWriter
+friend
+Definition at line 70 of file RNTuple.hxx.
+
+◆ Experimental::Internal::RPageSourceFile
+friend class Experimental::Internal::RPageSourceFile
+friend
+Definition at line 71 of file RNTuple.hxx.
+
+◆ ROOT::Experimental::Internal::CreateAnchor
+ROOT::RNTuple ROOT::Experimental::Internal::CreateAnchor	(	std::uint16_t	versionEpoch,
+std::uint16_t	versionMajor,
+std::uint16_t	versionMinor,
+std::uint16_t	versionPatch,
+std::uint64_t	seekHeader,
+std::uint64_t	nbytesHeader,
+std::uint64_t	lenHeader,
+std::uint64_t	seekFooter,
+std::uint64_t	nbytesFooter,
+std::uint64_t	lenFooter,
+std::uint64_t	maxKeySize )
+friend
+Member Data Documentation
+◆ fFile
+TFile* ROOT::RNTuple::fFile = nullptr
+private
+! The file from which the ntuple was streamed, registered in the custom streamer
+
+Definition at line 111 of file RNTuple.hxx.
+
+◆ fLenFooter
+std::uint64_t ROOT::RNTuple::fLenFooter = 0
+private
+The size of the uncompressed ntuple footer.
+
+Definition at line 107 of file RNTuple.hxx.
+
+◆ fLenHeader
+std::uint64_t ROOT::RNTuple::fLenHeader = 0
+private
+The size of the uncompressed ntuple header.
+
+Definition at line 101 of file RNTuple.hxx.
+
+◆ fMaxKeySize
+std::uint64_t ROOT::RNTuple::fMaxKeySize = 0
+private
+The maximum size for a TKey payload. Payloads bigger than this size will be written as multiple blobs.
+
+Definition at line 109 of file RNTuple.hxx.
+
+◆ fNBytesFooter
+std::uint64_t ROOT::RNTuple::fNBytesFooter = 0
+private
+The size of the compressed ntuple footer.
+
+Definition at line 105 of file RNTuple.hxx.
+
+◆ fNBytesHeader
+std::uint64_t ROOT::RNTuple::fNBytesHeader = 0
+private
+The size of the compressed ntuple header.
+
+Definition at line 99 of file RNTuple.hxx.
+
+◆ fSeekFooter
+std::uint64_t ROOT::RNTuple::fSeekFooter = 0
+private
+The file offset of the footer excluding the TKey part.
+
+Definition at line 103 of file RNTuple.hxx.
+
+◆ fSeekHeader
+std::uint64_t ROOT::RNTuple::fSeekHeader = 0
+private
+The file offset of the header excluding the TKey part.
+
+Definition at line 97 of file RNTuple.hxx.
+
+◆ fVersionEpoch
+std::uint16_t ROOT::RNTuple::fVersionEpoch = kVersionEpoch
+private
+Version of the RNTuple binary format that the writer supports (see specification).
+
+Changing the epoch indicates backward-incompatible changes
+
+Definition at line 87 of file RNTuple.hxx.
+
+◆ fVersionMajor
+std::uint16_t ROOT::RNTuple::fVersionMajor = kVersionMajor
+private
+Changing the major version indicates forward incompatible changes; such changes should correspond to a new bit in the feature flag of the RNTuple header.
+
+For the pre-release epoch 0, indicates the release candidate number
+
+Definition at line 91 of file RNTuple.hxx.
+
+◆ fVersionMinor
+std::uint16_t ROOT::RNTuple::fVersionMinor = kVersionMinor
+private
+Changing the minor version indicates new optional fields added to the RNTuple meta-data.
+
+Definition at line 93 of file RNTuple.hxx.
+
+◆ fVersionPatch
+std::uint16_t ROOT::RNTuple::fVersionPatch = kVersionPatch
+private
+Changing the patch version indicates new backported features from newer binary format versions.
+
+Definition at line 95 of file RNTuple.hxx.
+
+◆ kVersionEpoch
+constexpr std::uint16_t ROOT::RNTuple::kVersionEpoch = 1
+staticconstexpr
+Definition at line 79 of file RNTuple.hxx.
+
+◆ kVersionMajor
+constexpr std::uint16_t ROOT::RNTuple::kVersionMajor = 0
+staticconstexpr
+Definition at line 80 of file RNTuple.hxx.
+
+◆ kVersionMinor
+constexpr std::uint16_t ROOT::RNTuple::kVersionMinor = 0
+staticconstexpr
+Definition at line 81 of file RNTuple.hxx.
+
+◆ kVersionPatch
+constexpr std::uint16_t ROOT::RNTuple::kVersionPatch = 0
+staticconstexpr
+Definition at line 82 of file RNTuple.hxx.
+
+The documentation for this class was generated from the following files:
+tree/ntuple/v7/inc/ROOT/RNTuple.hxx
+tree/ntuple/v7/src/RNTuple.cxx
+tree/ntuple/v7/src/RNTupleMerger.cxx

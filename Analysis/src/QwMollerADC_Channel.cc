@@ -2,10 +2,19 @@
  
 // System headers
 #include <stdexcept>
+#include <iomanip> // For std::setprecision and std::setw
+
+// ROOT RNTuple headers
+#include <ROOT/RNTuple.hxx>
+#include <ROOT/RNTupleModel.hxx>
+#include <ROOT/RNTupleWriter.hxx>
+#include <ROOT/RField.hxx>
+#include <ROOT/REntry.hxx>
 
 // Qweak headers
 #include "QwLog.h"
 #include "QwUnits.h"
+#include "QwRNTupleFile.h"
 #include "QwBlinder.h"
 #include "QwHistogramHelper.h"
 #ifdef __USE_DATABASE__
@@ -332,7 +341,7 @@ void QwMollerADC_Channel::SetHardwareSum(Double_t hwsum, UInt_t sequencenumber)
     block[i] = hwsum / fBlocksPerEvent;
   }
   SetEventData(block);
-  delete block;
+  delete[] block;  // Fix: Use delete[] for arrays allocated with new[]
   return;
 }
 
@@ -543,10 +552,10 @@ void QwMollerADC_Channel::PrintInfo() const
   std::cout<<"fSoftwareBlockSum_raw= "<<fSoftwareBlockSum_raw<<"\n";
   std::cout<<"fBlock ";
   for (Int_t i = 0; i < fBlocksPerEvent; i++)
-    std::cout << " : " <<std::setprecision(8) << fBlock[i];
+    std::cout << " : " << fBlock[i];
   std::cout << std::endl;
 
-  std::cout << "fHardwareBlockSum = "<<std::setprecision(8) <<fHardwareBlockSum << std::endl;
+  std::cout << "fHardwareBlockSum = " << fHardwareBlockSum << std::endl;
   std::cout << "fHardwareBlockSumM2 = "<<fHardwareBlockSumM2 << std::endl;
   std::cout << "fHardwareBlockSumError = "<<fHardwareBlockSumError << std::endl;
 
@@ -772,6 +781,7 @@ void  QwMollerADC_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix
   }
 }
 
+
 void  QwMollerADC_Channel::ConstructBranch(TTree *tree, TString &prefix)
 {
   //  This channel is not used, so skip setting up the tree.
@@ -853,6 +863,218 @@ void  QwMollerADC_Channel::FillTreeVector(std::vector<Double_t> &values) const
           values[index++] = this->fSequenceNumber;
       }
   }
+}
+
+void QwMollerADC_Channel::ConstructRNTupleFields(class QwRNTuple *rntuple, const TString &prefix)
+{
+  //  This channel is not used, so skip setting up the RNTuple.
+  if (IsNameEmpty()) return;
+
+  //  Decide what to store based on prefix
+  SetDataToSaveByPrefix(prefix);
+
+  TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
+  std::string base_str = basename.Data();  // Convert TString to std::string
+
+  bHw_sum =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum");
+  bHw_sum_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum_raw");
+  bBlock =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block");
+  bBlock_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block_raw");
+  bNum_samples = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "num_samples");
+  bDevice_Error_Code = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "Device_Error_Code");
+  bSequence_number = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "sequence_number");
+
+  if (gQwHists.MatchDeviceParamsFromList(basename.Data())
+    && (bHw_sum || bBlock || bNum_samples || bDevice_Error_Code ||
+        bHw_sum_raw || bBlock_raw || bSequence_number)) {
+
+    if (bHw_sum) {
+      std::string field_name = base_str + "_hw_sum";
+      rntuple->AddField<Double_t>(field_name);
+      if (fDataToSave == kMoments) {
+        std::string m2_field = base_str + "_hw_sum_m2";
+        rntuple->AddField<Double_t>(m2_field);
+        std::string err_field = base_str + "_hw_sum_err";
+        rntuple->AddField<Double_t>(err_field);
+      }
+    }
+
+    if (bBlock) {
+      std::string block0_field = base_str + "_block0";
+      std::string block1_field = base_str + "_block1";
+      std::string block2_field = base_str + "_block2";
+      std::string block3_field = base_str + "_block3";
+      rntuple->AddField<Double_t>(block0_field);
+      rntuple->AddField<Double_t>(block1_field);
+      rntuple->AddField<Double_t>(block2_field);
+      rntuple->AddField<Double_t>(block3_field);
+    }
+
+    if (bNum_samples) {
+      std::string num_samples_field = base_str + "_num_samples";
+      rntuple->AddField<Double_t>(num_samples_field);
+    }
+
+    if (bDevice_Error_Code) {
+      std::string error_code_field = base_str + "_Device_Error_Code";
+      rntuple->AddField<Double_t>(error_code_field);
+    }
+
+    if (fDataToSave == kRaw) {
+      if (bHw_sum_raw) {
+        std::string hw_sum_raw_field = base_str + "_hw_sum_raw";
+        rntuple->AddField<Double_t>(hw_sum_raw_field);
+      }
+      if (bBlock_raw) {
+        std::string block0_raw_field = base_str + "_block0_raw";
+        std::string block1_raw_field = base_str + "_block1_raw";
+        std::string block2_raw_field = base_str + "_block2_raw";
+        std::string block3_raw_field = base_str + "_block3_raw";
+        rntuple->AddField<Double_t>(block0_raw_field);
+        rntuple->AddField<Double_t>(block1_raw_field);
+        rntuple->AddField<Double_t>(block2_raw_field);
+        rntuple->AddField<Double_t>(block3_raw_field);
+      }
+
+      for(int i = 0; i < 4; i++){
+        if (bBlock_raw) {
+          std::string sumSq1_field = base_str + "_SumSq1_" + std::to_string(i);
+          std::string sumSq2_field = base_str + "_SumSq2_" + std::to_string(i);
+          std::string rawMin_field = base_str + "_RawMin_" + std::to_string(i);
+          std::string rawMax_field = base_str + "_RawMax_" + std::to_string(i);
+          rntuple->AddField<Double_t>(sumSq1_field);
+          rntuple->AddField<Double_t>(sumSq2_field);
+          rntuple->AddField<Double_t>(rawMin_field);
+          rntuple->AddField<Double_t>(rawMax_field);
+        }
+      }
+
+      if (bSequence_number) {
+        std::string seq_num_field = base_str + "_sequence_number";
+        rntuple->AddField<Double_t>(seq_num_field);
+      }
+    }
+  }
+}
+
+void QwMollerADC_Channel::ConstructRNTupleFields(std::shared_ptr<ROOT::RNTupleModel> model, std::string& prefix, std::vector<Double_t>& vector, std::vector<std::shared_ptr<Double_t>>& fields)
+{
+  //  This channel is not used, so skip setting up the RNTuple.
+  if (IsNameEmpty()) return;
+
+  //  Decide what to store based on prefix
+  SetDataToSaveByPrefix(TString(prefix.c_str()));
+
+  std::string basename = prefix + GetElementName().Data();
+
+  bHw_sum =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum");
+  bHw_sum_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum_raw");
+  bBlock =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block");
+  bBlock_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block_raw");
+  bNum_samples = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "num_samples");
+  bDevice_Error_Code = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "Device_Error_Code");
+  bSequence_number = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "sequence_number");
+
+  fTreeArrayIndex = vector.size();
+
+  if (gQwHists.MatchDeviceParamsFromList(basename.c_str())
+    && (bHw_sum || bBlock || bNum_samples || bDevice_Error_Code ||
+        bHw_sum_raw || bBlock_raw || bSequence_number)) {
+
+    if (bHw_sum) {
+      auto field_hw_sum = model->MakeField<Double_t>(basename + "_hw_sum");
+      fields.push_back(field_hw_sum);
+      vector.push_back(0.0);
+      if (fDataToSave == kMoments) {
+        auto field_hw_sum_m2 = model->MakeField<Double_t>(basename + "_hw_sum_m2");
+        fields.push_back(field_hw_sum_m2);
+        vector.push_back(0.0);
+        auto field_hw_sum_err = model->MakeField<Double_t>(basename + "_hw_sum_err");
+        fields.push_back(field_hw_sum_err);
+        vector.push_back(0.0);
+      }
+    }
+
+    if (bBlock) {
+      auto field_block0 = model->MakeField<Double_t>(basename + "_block0");
+      fields.push_back(field_block0);
+      vector.push_back(0.0);
+      auto field_block1 = model->MakeField<Double_t>(basename + "_block1");
+      fields.push_back(field_block1);
+      vector.push_back(0.0);
+      auto field_block2 = model->MakeField<Double_t>(basename + "_block2");
+      fields.push_back(field_block2);
+      vector.push_back(0.0);
+      auto field_block3 = model->MakeField<Double_t>(basename + "_block3");
+      fields.push_back(field_block3);
+      vector.push_back(0.0);
+    }
+
+    if (bNum_samples) {
+      auto field_num_samples = model->MakeField<Double_t>(basename + "_num_samples");
+      fields.push_back(field_num_samples);
+      vector.push_back(0.0);
+    }
+
+    if (bDevice_Error_Code) {
+      auto field_device_error = model->MakeField<Double_t>(basename + "_Device_Error_Code");
+      fields.push_back(field_device_error);
+      vector.push_back(0.0);
+    }
+
+    if (fDataToSave == kRaw) {
+      if (bHw_sum_raw) {
+        auto field_hw_sum_raw = model->MakeField<Double_t>(basename + "_hw_sum_raw");
+        fields.push_back(field_hw_sum_raw);
+        vector.push_back(0.0);
+      }
+      if (bBlock_raw) {
+        auto field_block0_raw = model->MakeField<Double_t>(basename + "_block0_raw");
+        fields.push_back(field_block0_raw);
+        vector.push_back(0.0);
+        auto field_block1_raw = model->MakeField<Double_t>(basename + "_block1_raw");
+        fields.push_back(field_block1_raw);
+        vector.push_back(0.0);
+        auto field_block2_raw = model->MakeField<Double_t>(basename + "_block2_raw");
+        fields.push_back(field_block2_raw);
+        vector.push_back(0.0);
+        auto field_block3_raw = model->MakeField<Double_t>(basename + "_block3_raw");
+        fields.push_back(field_block3_raw);
+        vector.push_back(0.0);
+      }
+
+      for(int i = 0; i < 4; i++){
+        if (bBlock_raw) {
+          auto field_SumSq1 = model->MakeField<Double_t>(basename + "_SumSq1_" + std::to_string(i));
+          fields.push_back(field_SumSq1);
+          vector.push_back(0.0);
+          auto field_SumSq2 = model->MakeField<Double_t>(basename + "_SumSq2_" + std::to_string(i));
+          fields.push_back(field_SumSq2);
+          vector.push_back(0.0);
+          auto field_RawMin = model->MakeField<Double_t>(basename + "_RawMin_" + std::to_string(i));
+          fields.push_back(field_RawMin);
+          vector.push_back(0.0);
+          auto field_RawMax = model->MakeField<Double_t>(basename + "_RawMax_" + std::to_string(i));
+          fields.push_back(field_RawMax);
+          vector.push_back(0.0);
+        }
+      }
+
+      if (bSequence_number) {
+        auto field_sequence_number = model->MakeField<Double_t>(basename + "_sequence_number");
+        fields.push_back(field_sequence_number);
+        vector.push_back(0.0);
+      }
+    }
+  }
+
+  fTreeArrayNumEntries = vector.size() - fTreeArrayIndex;
+}
+
+void QwMollerADC_Channel::FillRNTupleVector(std::vector<Double_t> &values) const
+{
+  // Use the same logic as FillTreeVector - they should be identical
+  this->FillTreeVector(values);
 }
 
 QwMollerADC_Channel& QwMollerADC_Channel::operator= (const QwMollerADC_Channel &value)
@@ -1296,11 +1518,6 @@ void QwMollerADC_Channel::DivideBy(const QwMollerADC_Channel &denom)
   *this /= denom;
 }
 
-
-
-
-
-
 /** Moments and uncertainty calculation on the running sums and averages
  * The calculation of the first and second moments of the running sum is not
  * completely straightforward due to numerical instabilities associated with
@@ -1537,23 +1754,22 @@ void QwMollerADC_Channel::CalculateRunningAverage()
 
 void QwMollerADC_Channel::PrintValue() const
 {
-  QwMessage << std::setprecision(8)
-            << std::setw(18) << std::left << GetSubsystemName()    << " "
-            << std::setw(18) << std::left << GetModuleType()       << " "
-            << std::setw(18) << std::left << GetElementName()      << " "
-            << std::setw(12) << std::left << GetHardwareSum()      << " +/- "
-            << std::setw(12) << std::left << GetHardwareSumError() << " sig "
-            << std::setw(12) << std::left << GetHardwareSumWidth() << " "
-            << std::setw(10) << std::left << GetGoodEventCount()   << " "
-            << std::setw(12) << std::left << GetBlockValue(0)      << " +/- "
-            << std::setw(12) << std::left << GetBlockErrorValue(0) << " "
-            << std::setw(12) << std::left << GetBlockValue(1)      << " +/- "
-            << std::setw(12) << std::left << GetBlockErrorValue(1) << " "
-            << std::setw(12) << std::left << GetBlockValue(2)      << " +/- "
-            << std::setw(12) << std::left << GetBlockErrorValue(2) << " "
-            << std::setw(12) << std::left << GetBlockValue(3)      << " +/- "
-            << std::setw(12) << std::left << GetBlockErrorValue(3) << " "
-            << std::setw(12) << std::left << fGoodEventCount       << " "
+  QwMessage << GetSubsystemName()    << " "
+            << GetModuleType()       << " "
+            << GetElementName()      << " "
+            << GetHardwareSum()      << " +/- "
+            << GetHardwareSumError() << " sig "
+            << GetHardwareSumWidth() << " "
+            << GetGoodEventCount()   << " "
+            << GetBlockValue(0)      << " +/- "
+            << GetBlockErrorValue(0) << " "
+            << GetBlockValue(1)      << " +/- "
+            << GetBlockErrorValue(1) << " "
+            << GetBlockValue(2)      << " +/- "
+            << GetBlockErrorValue(2) << " "
+            << GetBlockValue(3)      << " +/- "
+            << GetBlockErrorValue(3) << " "
+            << fGoodEventCount       << " "
             << QwLog::endl;
   /*
     //for Debudding

@@ -15,7 +15,7 @@ using std::type_info;
 // Qweak headers
 #include "QwOptions.h"
 #include "TMapFile.h"
-
+#include "QwRNTupleFile.h"
 
 // If one defines more than this number of words in the full ntuple,
 // the results are going to get very very crazy.
@@ -422,6 +422,39 @@ class QwRootFile {
     }
 
 
+    //=== RNTuple Support Methods ===
+    
+    /// \brief Enable RNTuple mode (alternative to TTree)
+    void EnableRNTupleMode(bool enable = true) { fUseRNTuple = enable; }
+    
+    /// \brief Check if RNTuple mode is enabled
+    bool IsRNTupleModeEnabled() const { return fUseRNTuple; }
+    
+    /// \brief Construct the RNTuple fields of a generic object
+    template < class T >
+    void ConstructRNTupleFields(const std::string& name, const std::string& desc, T& object, const std::string& prefix = "");
+    
+    /// \brief Fill the RNTuple fields of a generic object by name
+    template < class T >
+    void FillRNTupleFields(const std::string& name, const T& object);
+    
+    /// \brief Fill the RNTuple fields of a generic object by type only
+    template < class T >
+    void FillRNTupleFields(const T& object);
+    
+    /// Create a new RNTuple with name and description
+    void NewRNTuple(const std::string& name, const std::string& desc);
+    
+    /// Fill the RNTuple with name
+    Int_t FillRNTuple(const std::string& name);
+    
+    /// Fill all registered RNTuples
+    Int_t FillRNTuples();
+    
+    /// Print registered RNTuples
+    void PrintRNTuples() const;
+
+
     /// Write any object to the ROOT file (only valid for TFile)
     template < class T >
     Int_t WriteObject(const T* obj, const char* name, Option_t* option = "", Int_t bufsize = 0) {
@@ -611,6 +644,35 @@ class QwRootFile {
     /// Maximum tree size
     static const Long64_t kMaxTreeSize;
     static const Int_t    kMaxMapFileSize;
+
+    //=== RNTuple Support Members ===
+    
+    /// RNTuple mode flag
+    bool fUseRNTuple;
+    
+    /// RNTuple file wrapper (only created when needed)
+    QwRNTupleFile* fRNTupleFile;
+    
+    /// Run label for file naming
+    TString fRunLabel;
+    
+    /// Pointer to options (needed for RNTuple file creation)
+    QwOptions* fOptions;
+    
+    /// List of excluded RNTuples
+    std::vector< TPRegexp > fDisabledRNTuples;
+    
+    /// Add regexp to list of disabled RNTuple names
+    void DisableRNTuple(const TString& regexp) {
+      fDisabledRNTuples.push_back(regexp);
+    }
+    
+    /// Does this RNTuple name match a disabled RNTuple name?
+    bool IsRNTupleDisabled(const std::string& name) {
+      for (size_t i = 0; i < fDisabledRNTuples.size(); i++)
+        if (fDisabledRNTuples.at(i).Match(name)) return true;
+      return false;
+    }
 };
 
 /**
@@ -828,6 +890,67 @@ Int_t QwRootFile::WriteParamFileList(const TString &name, T& object)
     }
   }
   return retval;
+}
+
+//=== RNTuple Template Method Implementations ===
+
+/**
+ * Construct the RNTuple fields of a generic object
+ * @param name Name for RNTuple
+ * @param desc Description for RNTuple
+ * @param object Subsystem array
+ * @param prefix Prefix for the RNTuple
+ */
+template < class T >
+void QwRootFile::ConstructRNTupleFields(
+        const std::string& name,
+        const std::string& desc,
+        T& object,
+        const std::string& prefix)
+{
+  // Only proceed if RNTuple mode is enabled
+  if (!fUseRNTuple) return;
+  
+  // Return if we do not want this RNTuple information
+  if (IsRNTupleDisabled(name)) return;
+
+  // Create RNTuple file wrapper if needed
+  if (!fRNTupleFile) {
+    fRNTupleFile = new QwRNTupleFile(fRunLabel);
+    fRNTupleFile->ProcessOptions(*fOptions); // Assume options are available
+  }
+
+  // Delegate to RNTuple file wrapper
+  fRNTupleFile->ConstructRNTupleFields(name, desc, object, prefix);
+}
+
+/**
+ * Fill the RNTuple fields of a generic object by name
+ * @param name Name for RNTuple
+ * @param object Subsystem array
+ */
+template < class T >
+void QwRootFile::FillRNTupleFields(const std::string& name, const T& object)
+{
+  // Only proceed if RNTuple mode is enabled
+  if (!fUseRNTuple || !fRNTupleFile) return;
+  
+  // Delegate to RNTuple file wrapper
+  fRNTupleFile->FillRNTupleFields(name, object);
+}
+
+/**
+ * Fill the RNTuple fields of a generic object by type only
+ * @param object Subsystem array
+ */
+template < class T >
+void QwRootFile::FillRNTupleFields(const T& object)
+{
+  // Only proceed if RNTuple mode is enabled
+  if (!fUseRNTuple || !fRNTupleFile) return;
+  
+  // Delegate to RNTuple file wrapper
+  fRNTupleFile->FillRNTupleFields(object);
 }
 
 

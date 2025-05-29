@@ -20,6 +20,7 @@
 #include "VQwHardwareChannel.h"
 
 // Forward declarations
+class QwRNTuple;
 #ifdef __USE_DATABASE__
 class QwDBInterface;
 #endif // __USE_DATABASE__
@@ -113,6 +114,8 @@ class  QwHaloMonitor : public VQwDataElement{
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
   void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix);
+  void  FillRNTupleVector(std::vector<Double_t>& values) const;
 
   VQwHardwareChannel* GetScaler(){
     return &fHalo_Counter;

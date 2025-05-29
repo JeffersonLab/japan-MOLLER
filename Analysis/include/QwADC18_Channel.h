@@ -9,6 +9,10 @@
 
 // System headers
 #include <vector>
+#include <memory>
+
+// ROOT headers
+#include <ROOT/RNTupleModel.hxx>
 
 // Qweak headers
 #include "VQwHardwareChannel.h"
@@ -18,6 +22,7 @@
 class TTree;
 class QwBlinder;
 class QwParameterFile;
+class QwRNTuple;
 #ifdef __USE_DATABASE__
 class QwErrDBInterface;
 #endif
@@ -212,6 +217,10 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  FillTreeVector(std::vector<Double_t> &values) const;
+
+  void ConstructRNTupleFields(class QwRNTuple *rntuple, const TString &prefix);
+  void ConstructRNTupleFields(std::shared_ptr<ROOT::RNTupleModel> model, std::string& prefix, std::vector<Double_t>& vector, std::vector<std::shared_ptr<Double_t>>& fields);
+  void FillRNTupleVector(std::vector<Double_t> &values) const;
 
   Double_t GetAverageVolts() const;
 

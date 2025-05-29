@@ -14,6 +14,7 @@
 #include "VQwHardwareChannel.h"
 #include "QwLog.h"
 #include "QwParameterFile.h"
+#include "QwRNTupleFile.h"
 
 //*****************************************************************
 
@@ -799,8 +800,46 @@ void QwSubsystemArray::push_back(boost::shared_ptr<VQwSubsystem> subsys)
    }
  }
 }
-  
-  
-  
-  
-  
+
+
+/**
+ * Construct the RNTuple fields
+ * @param rntuple RNTuple object
+ * @param prefix Prefix
+ */
+void QwSubsystemArray::ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix)
+{
+  // Add event metadata fields
+  if (prefix == "" || prefix.Index("yield_") == 0) {
+    rntuple->AddField<UInt_t>("CodaEventNumber");
+    rntuple->AddField<UInt_t>("CodaEventType");
+    rntuple->AddField<Double_t>("Coda_CleanData");
+    rntuple->AddField<Double_t>("Coda_ScanData1");
+    rntuple->AddField<Double_t>("Coda_ScanData2");
+  }
+
+  // Construct fields for all subsystems
+  for (iterator subsys = begin(); subsys != end(); ++subsys) {
+    VQwSubsystem* subsys_ptr = dynamic_cast<VQwSubsystem*>(subsys->get());
+    subsys_ptr->ConstructRNTupleFields(rntuple, prefix);
+  }
+}
+
+
+/**
+ * Fill the RNTuple vector
+ * @param values Vector of values
+ */
+void QwSubsystemArray::FillRNTupleVector(std::vector<Double_t>& values) const
+{
+  // For now, delegate to the existing tree method for compatibility
+  FillTreeVector(values);
+}
+
+
+//*****************************************************************
+
+
+
+
+
