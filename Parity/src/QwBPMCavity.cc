@@ -899,3 +899,44 @@ void QwBPMCavity::SetSubElementCalibrationFactor(Int_t j, Double_t value)
   fElement[j].SetCalibrationFactor(value);
 }
 
+//*****************************************************************//
+void QwBPMCavity::ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix)
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip constructing RNTuple fields.
+  }
+  else {
+    TString thisprefix=prefix;
+    if(prefix.Contains("asym_"))
+      thisprefix.ReplaceAll("asym_","diff_");
+
+    TString mutablePrefix = prefix; // Create a mutable copy
+    SetRootSaveStatus(mutablePrefix);
+
+    fElement[kQElem].ConstructRNTupleFields(rntuple, prefix);
+    size_t i = 0;
+    for(i=kXAxis;i<kNumAxes;i++){
+      if (bFullSave) fElement[i].ConstructRNTupleFields(rntuple, thisprefix);
+      fAbsPos[i].ConstructRNTupleFields(rntuple, thisprefix);
+    }
+  }
+  return;
+}
+
+//*****************************************************************//
+void QwBPMCavity::FillRNTupleVector(std::vector<Double_t>& values) const
+{
+  if (GetElementName()=="") {
+    //  This channel is not used, so skip filling the RNTuple.
+  }
+  else {
+    fElement[kQElem].FillRNTupleVector(values);
+    size_t i = 0;
+    for(i=kXAxis;i<kNumAxes;i++){
+      if (bFullSave) fElement[i].FillRNTupleVector(values);
+      fAbsPos[i].FillRNTupleVector(values);
+    }
+  }
+  return;
+}
+

@@ -1,4 +1,5 @@
 #include "QwRootFile.h"
+#include "QwRNTupleFile.h"
 #include "QwRunCondition.h"
 #include "TH1.h"
 
@@ -20,7 +21,8 @@ Double_t QwRootTree::kUnitsValue[] = { 1e-6, 1e-9, 1e-3, 1 , 1e-3, 1};
 QwRootFile::QwRootFile(const TString& run_label)
   : fRootFile(0), fMakePermanent(0),
     fMapFile(0), fEnableMapFile(kFALSE),
-    fUpdateInterval(-1)
+    fUpdateInterval(-1), fUseRNTuple(false), fRNTupleFile(nullptr), 
+    fRunLabel(run_label), fOptions(&gQwOptions)
 {
   // Process the configuration options
   ProcessOptions(gQwOptions);
@@ -139,6 +141,12 @@ QwRootFile::~QwRootFile()
     }
   }
 
+  // Clean up RNTuple file wrapper
+  if (fRNTupleFile) {
+    delete fRNTupleFile;
+    fRNTupleFile = nullptr;
+  }
+
   // Delete Qweak ROOT trees
   std::map< const std::string, std::vector<QwRootTree*> >::iterator map_iter;
   std::vector<QwRootTree*>::iterator vec_iter;
@@ -234,6 +242,17 @@ void QwRootFile::DefineOptions(QwOptions &options)
   options.AddOptions("ROOT performance options")
     ("compression-level", po::value<int>()->default_value(1),
      "TFile compression level");
+
+  // Define RNTuple options
+  options.AddOptions("RNTuple options")
+    ("enable-rntuple", po::value<bool>()->default_bool_value(false),
+     "enable RNTuple output format instead of TTree");
+  options.AddOptions("RNTuple options")
+    ("disable-rntuple", po::value<std::vector<std::string>>()->composing(),
+     "disable output to specific RNTuple regex");
+  
+  // Define RNTuple-specific options via the wrapper class
+  QwRNTupleFile::DefineOptions(options);
 }
 
 
@@ -301,6 +320,17 @@ void QwRootFile::ProcessOptions(QwOptions &options)
               << QwLog::endl;
   }
   fAutoSave  = options.GetValue<int>("autosave");
+
+  // Process RNTuple options
+  fUseRNTuple = options.GetValue<bool>("enable-rntuple");
+  
+  // Process disabled RNTuples if RNTuple mode is enabled
+  if (fUseRNTuple) {
+    auto disabled_rntuple_v = options.GetValueVector<std::string>("disable-rntuple");
+    std::for_each(disabled_rntuple_v.begin(), disabled_rntuple_v.end(), 
+                  [&](const std::string& s){ this->DisableRNTuple(s); });
+  }
+  
   return;
 }
 
@@ -341,4 +371,49 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
   }
 
   return false;
+}
+
+//=== RNTuple Method Implementations ===
+
+void QwRootFile::NewRNTuple(const std::string& name, const std::string& desc) {
+  // Only proceed if RNTuple mode is enabled
+  if (!fUseRNTuple) return;
+  
+  if (IsRNTupleDisabled(name)) return;
+  
+  // Create RNTuple file wrapper if needed
+  if (!fRNTupleFile) {
+    fRNTupleFile = new QwRNTupleFile(fRunLabel);
+    fRNTupleFile->ProcessOptions(*fOptions);
+  }
+  
+  // Delegate to RNTuple file wrapper
+  fRNTupleFile->NewRNTuple(name, desc);
+}
+
+Int_t QwRootFile::FillRNTuple(const std::string& name) {
+  // Only proceed if RNTuple mode is enabled
+  if (!fUseRNTuple || !fRNTupleFile) return 0;
+  
+  // Delegate to RNTuple file wrapper
+  return fRNTupleFile->FillRNTuple(name);
+}
+
+Int_t QwRootFile::FillRNTuples() {
+  // Only proceed if RNTuple mode is enabled
+  if (!fUseRNTuple || !fRNTupleFile) return 0;
+  
+  // Delegate to RNTuple file wrapper
+  return fRNTupleFile->FillRNTuples();
+}
+
+void QwRootFile::PrintRNTuples() const {
+  // Only proceed if RNTuple mode is enabled
+  if (!fUseRNTuple || !fRNTupleFile) {
+    QwMessage << "RNTuple mode disabled or not initialized" << QwLog::endl;
+    return;
+  }
+  
+  // Delegate to RNTuple file wrapper
+  fRNTupleFile->PrintRNTuples();
 }

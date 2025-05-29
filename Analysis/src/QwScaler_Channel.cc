@@ -12,6 +12,7 @@
 #include <stdexcept>
 
 #include <QwLog.h>
+#include "QwRNTupleFile.h"
 
 
 const Bool_t VQwScaler_Channel::kDEBUG = kFALSE;
@@ -517,7 +518,6 @@ VQwHardwareChannel& VQwScaler_Channel::operator*=(const VQwHardwareChannel *sour
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
-  return *this;
 }
 VQwHardwareChannel& VQwScaler_Channel::operator/=(const VQwHardwareChannel *source)
 {
@@ -832,6 +832,89 @@ void VQwScaler_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *valu
     }
 }
 
+template<unsigned int data_mask, unsigned int data_shift>
+void QwScaler_Channel<data_mask,data_shift>::ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix)
+{
+  if (IsNameEmpty()) {
+    // This channel is not used, so skip setting up the RNTuple fields.
+    return;
+  }
+  
+  // Decide what to store based on prefix
+  SetDataToSaveByPrefix(prefix);
+  
+  TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
+  
+  // Add fields matching the TTree structure
+  std::string base_str = basename.Data();
+  rntuple->AddField<Double_t>(base_str + "_value");
+  
+  if (fDataToSave == kMoments) {
+    rntuple->AddField<Double_t>(base_str + "_value_m2");
+    rntuple->AddField<Double_t>(base_str + "_value_err");
+    rntuple->AddField<Double_t>(base_str + "_num_samples");
+  }
+  
+  rntuple->AddField<Double_t>(base_str + "_Device_Error_Code");
+  
+  if (fDataToSave == kRaw) {
+    rntuple->AddField<Double_t>(base_str + "_raw");
+    if ((~data_mask) != 0) {
+      rntuple->AddField<Double_t>(base_str + "_header");
+    }
+  }
+}
+
+template<unsigned int data_mask, unsigned int data_shift>
+void QwScaler_Channel<data_mask,data_shift>::ConstructRNTupleFields(std::shared_ptr<ROOT::RNTupleModel> model, std::string& prefix, std::vector<Double_t>& vector, std::vector<std::shared_ptr<Double_t>>& fields)
+{
+  if (IsNameEmpty()) {
+    // This channel is not used, so skip setting up the RNTuple fields.
+    return;
+  }
+  
+  // Decide what to store based on prefix
+  SetDataToSaveByPrefix(TString(prefix.c_str()));
+  
+  std::string basename = prefix + GetElementName().Data();
+  
+  // Track starting index for this channel
+  fTreeArrayIndex = vector.size();
+  
+  // Add fields matching the TTree structure
+  fields.push_back(model->MakeField<Double_t>(basename + "_value"));
+  vector.push_back(0.0);
+  
+  if (fDataToSave == kMoments) {
+    fields.push_back(model->MakeField<Double_t>(basename + "_value_m2"));
+    vector.push_back(0.0);
+    fields.push_back(model->MakeField<Double_t>(basename + "_value_err"));
+    vector.push_back(0.0);
+    fields.push_back(model->MakeField<Double_t>(basename + "_num_samples"));
+    vector.push_back(0.0);
+  }
+  
+  fields.push_back(model->MakeField<Double_t>(basename + "_Device_Error_Code"));
+  vector.push_back(0.0);
+  
+  if (fDataToSave == kRaw) {
+    fields.push_back(model->MakeField<Double_t>(basename + "_raw"));
+    vector.push_back(0.0);
+    if ((~data_mask) != 0) {
+      fields.push_back(model->MakeField<Double_t>(basename + "_header"));
+      vector.push_back(0.0);
+    }
+  }
+  
+  fTreeArrayNumEntries = vector.size() - fTreeArrayIndex;
+}
+
+template<unsigned int data_mask, unsigned int data_shift>
+void QwScaler_Channel<data_mask,data_shift>::FillRNTupleVector(std::vector<Double_t> &values) const
+{
+  // Reuse existing tree vector filling logic
+  FillTreeVector(values);
+}
 
 template<>
 VQwHardwareChannel* QwScaler_Channel<0x00ffffff,0>::Clone(VQwDataElement::EDataToSave datatosave) const{

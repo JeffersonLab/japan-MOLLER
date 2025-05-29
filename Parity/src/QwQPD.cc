@@ -939,3 +939,51 @@ void QwQPD::SetSubElementCalibrationFactor(Int_t j, Double_t value)
   return;
 }
 
+//*****************************************************************//
+void QwQPD::ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix)
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip constructing RNTuple fields.
+  }
+  else {
+    TString thisprefix=prefix;
+    if(prefix.Contains("asym_"))
+      thisprefix.ReplaceAll("asym_","diff_");
+
+    TString mutablePrefix = prefix; // Create a mutable copy
+    SetRootSaveStatus(mutablePrefix);
+
+    fEffectiveCharge.ConstructRNTupleFields(rntuple, prefix);
+    Short_t i = 0;
+    if(bFullSave) {
+      for(i=0;i<4;i++) fPhotodiode[i].ConstructRNTupleFields(rntuple, thisprefix);
+    }
+    for(i=kXAxis;i<kNumAxes;i++) {
+      fAbsPos[i].ConstructRNTupleFields(rntuple, thisprefix);
+      fRelPos[i].ConstructRNTupleFields(rntuple, thisprefix);
+    }
+  }
+  return;
+}
+
+//*****************************************************************//
+void QwQPD::FillRNTupleVector(std::vector<Double_t>& values) const
+{
+  if (GetElementName()=="") {
+    //  This channel is not used, so skip filling the RNTuple.
+  }
+  else {
+    fEffectiveCharge.FillRNTupleVector(values);
+    Short_t i = 0;
+    if(bFullSave) {
+      for(i=0;i<4;i++) fPhotodiode[i].FillRNTupleVector(values);
+    }
+
+    for(i=kXAxis;i<kNumAxes;i++){
+      fAbsPos[i].FillRNTupleVector(values);
+      fRelPos[i].FillRNTupleVector(values);
+    }
+  }
+  return;
+}
+

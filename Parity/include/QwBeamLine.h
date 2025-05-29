@@ -127,6 +127,12 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
   void   ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file );
   void   FillTreeVector(std::vector<Double_t> &values) const;
 
+  /// \name RNTuple field construction and maintenance
+  // @{
+  void   ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix);
+  void   FillRNTupleVector(std::vector<Double_t>& values) const;
+  // @}
+
 #ifdef __USE_DATABASE__
   void   FillDB(QwParityDB *db, TString datatype);
   void   FillErrDB(QwParityDB *db, TString datatype);

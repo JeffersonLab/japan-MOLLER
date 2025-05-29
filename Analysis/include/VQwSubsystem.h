@@ -30,6 +30,7 @@
 class VQwHardwareChannel;
 class QwSubsystemArray;
 class QwParameterFile;
+class QwRNTuple;
 
 
 /**
@@ -235,6 +236,21 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   virtual void ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file) = 0;
   /// \brief Fill the tree vector
   virtual void FillTreeVector(std::vector<Double_t>& values) const = 0;
+  // @}
+
+  /// \name RNTuple field construction and maintenance
+  /// These methods are virtual with empty default implementations to maintain
+  /// compatibility with existing subsystems that don't yet support RNTuple.
+  // @{
+  /// \brief Construct the RNTuple fields
+  virtual void ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix) {
+    // Default implementation does nothing - for backward compatibility
+  };
+  /// \brief Fill the RNTuple vector
+  virtual void FillRNTupleVector(std::vector<Double_t>& values) const {
+    // Default implementation delegates to existing tree method for compatibility
+    FillTreeVector(values);
+  };
   // @}
 
 

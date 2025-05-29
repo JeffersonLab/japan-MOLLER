@@ -23,6 +23,7 @@
 // Forward declarations
 class QwDBInterface;
 class QwErrDBInterface;
+class QwRNTuple;
 
 /*****************************************************************
 *  Class:
@@ -133,6 +134,8 @@ class QwBPMCavity : public VQwBPM {
   void    FillTreeVector(std::vector<Double_t> &values) const;
   void    ConstructBranch(TTree *tree, TString &prefix);
   void    ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
+  void    ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix);
+  void    FillRNTupleVector(std::vector<Double_t>& values) const;
 
 
   std::vector<QwDBInterface> GetDBEntry();

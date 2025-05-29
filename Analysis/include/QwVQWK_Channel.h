@@ -14,6 +14,12 @@
 // ROOT headers
 #include "TTree.h"
 
+// System headers
+#include <memory>
+
+// ROOT headers 
+#include <ROOT/RNTupleModel.hxx>
+
 // Qweak headers
 #include "VQwHardwareChannel.h"
 #include "MQwMockable.h"
@@ -21,6 +27,7 @@
 // Forward declarations
 class QwBlinder;
 class QwParameterFile;
+class QwRNTuple;
 #ifdef __USE_DATABASE__
 class QwErrDBInterface;
 #endif
@@ -216,6 +223,10 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  FillTreeVector(std::vector<Double_t> &values) const;
+
+  void  ConstructRNTupleFields(class QwRNTuple *rntuple, const TString &prefix);
+  void  ConstructRNTupleFields(std::shared_ptr<ROOT::RNTupleModel> model, std::string& prefix, std::vector<Double_t>& vector, std::vector<std::shared_ptr<Double_t>>& fields);
+  void  FillRNTupleVector(std::vector<Double_t> &values) const;
 
   Int_t GetRawValue(size_t element) const {
     RangeCheck(element);

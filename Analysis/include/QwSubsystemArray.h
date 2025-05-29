@@ -27,6 +27,7 @@
 // Forward declarations
 class VQwHardwareChannel;
 class QwParameterFile;
+class QwRNTuple;
 
 ///
 /// \ingroup QwAnalysis
@@ -210,6 +211,14 @@ class QwSubsystemArray:
   void ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file);
   /// \brief Fill the vector for this subsystem
   void  FillTreeVector(std::vector<Double_t> &values) const;
+  // @}
+
+  /// \name RNTuple field construction and maintenance
+  // @{
+  /// \brief Construct the RNTuple fields for this subsystem with a prefix
+  void ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix);
+  /// \brief Fill the RNTuple vector for this subsystem
+  void FillRNTupleVector(std::vector<Double_t>& values) const;
   // @}
 
 

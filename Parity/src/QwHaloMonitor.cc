@@ -232,6 +232,30 @@ void  QwHaloMonitor::FillTreeVector(std::vector<Double_t> &values) const
   }
 }
 
+//*****************************************************************//
+void QwHaloMonitor::ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix)
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip constructing RNTuple fields.
+  }
+  else{
+    fHalo_Counter.ConstructRNTupleFields(rntuple, prefix);
+  }
+  return;
+}
+
+//*****************************************************************//
+void QwHaloMonitor::FillRNTupleVector(std::vector<Double_t>& values) const
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip filling the RNTuple.
+  }
+  else{
+    fHalo_Counter.FillRNTupleVector(values);
+  }
+  return;
+}
+
 #ifdef __USE_DATABASE__
 std::vector<QwDBInterface> QwHaloMonitor::GetDBEntry()
 {

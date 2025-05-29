@@ -21,6 +21,7 @@
 #include "VQwHardwareChannel.h"
 
 class QwParameterFile;
+class QwRNTuple;
 template<typename T> class QwCombinedBPM;
 template<typename T> class QwBPMStripline;
 
@@ -174,6 +175,8 @@ public:
   virtual void ConstructBranch(TTree *tree, TString &prefix,
       QwParameterFile& modulelist) = 0;
   virtual void FillTreeVector(std::vector<Double_t> &values) const = 0;
+  virtual void ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix) = 0;
+  virtual void FillRNTupleVector(std::vector<Double_t>& values) const = 0;
 
 #ifdef __USE_DATABASE__
   virtual std::vector<QwDBInterface> GetDBEntry() = 0;

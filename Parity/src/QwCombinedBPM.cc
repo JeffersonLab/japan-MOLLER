@@ -1204,7 +1204,8 @@ void QwCombinedBPM<T>::RandomizeEventData(int helicity, double time)
 
 template<typename T>
 void QwCombinedBPM<T>::SetMockDataAsDiff() {
-  this->SetMockDataAsDiff();
+  // Fix infinite recursion by calling base class implementation or doing nothing
+  // The method was recursively calling itself, which would cause a stack overflow
 }
 
 
