@@ -18,6 +18,7 @@
 #include "QwLog.h"
 #include "QwParameterFile.h"
 #include "QwTypes.h"
+#include "QwRNTupleFile.h"
 
 #ifdef __USE_DATABASE__
 #define MYSQLPP_SSQLS_NO_STATICS
@@ -221,6 +222,39 @@ void QwEPICSEvent::FillTreeVector(std::vector<Double_t>& values) const
       }
     }
   }
+}
+
+/// \brief Construct the RNTuple fields
+void QwEPICSEvent::ConstructRNTupleFields(QwRNTuple *ntuple, TString& prefix)
+{
+  fTreeArrayIndex = 0; // Will be set by ntuple vector size tracking
+  for (size_t tagindex = 0; tagindex < fEPICSVariableType.size(); tagindex++) {
+    if (fEPICSVariableType[tagindex] == kEPICSString ||
+        fEPICSVariableType[tagindex] == kEPICSFloat ||
+        fEPICSVariableType[tagindex] == kEPICSInt) {
+
+      // Determine field name
+      TString name = prefix + fEPICSVariableList[tagindex];
+      name.ReplaceAll(':','_'); // remove colons before creating field
+
+      // Create field
+      std::string field_name = name.Data();
+      ntuple->AddField<Double_t>(field_name);
+
+    } else {
+
+      TString name = fEPICSVariableList[tagindex];
+      QwError << "Unrecognized type for EPICS variable " << name << QwLog::endl;
+
+    }
+  }
+}
+
+/// \brief Fill the RNTuple vector
+void QwEPICSEvent::FillRNTupleVector(std::vector<Double_t>& values) const
+{
+  // Delegate to existing FillTreeVector implementation
+  FillTreeVector(values);
 }
 
 

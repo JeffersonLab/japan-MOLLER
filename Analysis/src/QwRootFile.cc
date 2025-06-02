@@ -324,11 +324,18 @@ void QwRootFile::ProcessOptions(QwOptions &options)
   // Process RNTuple options
   fUseRNTuple = options.GetValue<bool>("enable-rntuple");
   
+  // Debug output to verify RNTuple mode detection
+  QwMessage << "QwRootFile::ProcessOptions: enable-rntuple = " 
+            << (fUseRNTuple ? "TRUE" : "FALSE") << QwLog::endl;
+  
   // Process disabled RNTuples if RNTuple mode is enabled
   if (fUseRNTuple) {
+    QwMessage << "QwRootFile::ProcessOptions: RNTuple mode is ENABLED" << QwLog::endl;
     auto disabled_rntuple_v = options.GetValueVector<std::string>("disable-rntuple");
     std::for_each(disabled_rntuple_v.begin(), disabled_rntuple_v.end(), 
                   [&](const std::string& s){ this->DisableRNTuple(s); });
+  } else {
+    QwMessage << "QwRootFile::ProcessOptions: RNTuple mode is DISABLED" << QwLog::endl;
   }
   
   return;

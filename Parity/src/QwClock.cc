@@ -417,6 +417,34 @@ void QwClock<T>::FillTreeVector(std::vector<Double_t> &values) const
   return;
 }
 
+template<typename T>
+void QwClock<T>::ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix)
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip constructing RNTuple fields.
+  }
+  else {
+    TString thisprefix = prefix;
+    if(prefix.Contains("asym_"))
+      thisprefix.ReplaceAll("asym_","diff_");
+
+    fClock.ConstructRNTupleFields(rntuple, prefix);
+  }
+  return;
+}
+
+template<typename T>
+void QwClock<T>::FillRNTupleVector(std::vector<Double_t>& values) const
+{
+  if (GetElementName()=="") {
+    //  This channel is not used, so skip filling the vector.
+  }
+  else {
+    fClock.FillRNTupleVector(values);
+  }
+  return;
+}
+
 #ifdef __USE_DATABASE__
 /********************************************************/
 template<typename T>
@@ -430,4 +458,4 @@ std::vector<QwDBInterface> QwClock<T>::GetDBEntry()
 
 template class QwClock<QwVQWK_Channel>; 
 template class QwClock<QwSIS3801_Channel>; 
-template class QwClock<QwSIS3801D24_Channel>; 
+template class QwClock<QwSIS3801D24_Channel>;

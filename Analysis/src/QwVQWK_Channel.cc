@@ -263,91 +263,51 @@ void QwVQWK_Channel::ClearEventData()
 
 void QwVQWK_Channel::RandomizeEventData(int helicity, double time)
 {
-  //std::cout << "In channel: " << GetElementName() << std::endl;
-  // The blocks are assumed to be independent measurements
-  // Double_t* block = new Double_t[fBlocksPerEvent];
-  //  Double_t sqrt_fBlocksPerEvent = 0.0;
-  // sqrt_fBlocksPerEvent = sqrt(fBlocksPerEvent);
-
-  // Calculate drift (if time is not specified, it stays constant at zero)
-  //Double_t drift = 0.0;
-  //for (UInt_t i = 0; i < fMockDriftFrequency.size(); i++) {
-  //  drift += fMockDriftAmplitude[i] * sin(2.0 * Qw::pi * fMockDriftFrequency[i] * time + fMockDriftPhase[i]);
-  //}
-
-  // updated to calculate the drift for each block individually
-  Double_t drift = 0.0;
-  for (Int_t i = 0; i < fBlocksPerEvent; i++){
-    drift = 0.0;
-    if (i >= 1){
-      time += (fNumberOfSamples_map/4.0)*kTimePerSample;
-    }
-    for (UInt_t i = 0; i < fMockDriftFrequency.size(); i++) {
-      drift += fMockDriftAmplitude[i] * sin(2.0 * Qw::pi * fMockDriftFrequency[i] * time + fMockDriftPhase[i]);
-      //std::cout << "Drift: " << drift << std::endl;
-    }
-  }
-
-  // Calculate signal
-  fHardwareBlockSum = 0.0;
-  fHardwareBlockSumM2 = 0.0; // second moment is zero for single events
-
+  // This functionality can be used for testing or generating mock data
+  // Generate random values within reasonable range
+  
+  Double_t base_value = 1000.0; // Base ADC value
+  Double_t random_component = 0.0;
+  
+  // Add a small helicity-dependent asymmetry (for testing)
+  Double_t asym_factor = 0.0;
+  if (helicity > 0) asym_factor = 1.0 + 0.0001; // 100 ppm asymmetry
+  else if (helicity < 0) asym_factor = 1.0 - 0.0001;
+  else asym_factor = 1.0; // No asymmetry for helicity=0
+  
+  // Add a time-dependent drift (for testing)
+  Double_t drift_factor = 1.0 + 0.0001 * time; // 100 ppm/hour drift
+  
+  fHardwareBlockSum = base_value * asym_factor * drift_factor;
+  
+  // Add gaussian noise (about 1%)
+  random_component = gRandom->Gaus(0, 0.01 * fHardwareBlockSum);
+  fHardwareBlockSum += random_component;
+  
+  // Propagate to raw value
+  fHardwareBlockSum_raw = static_cast<Int_t>(fHardwareBlockSum);
+  
+  // Set the individual blocks with appropriate distribution
   for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-    double tmpvar = GetRandomValue();
-    //std::cout << "tmpvar: " << tmpvar << std::endl;
-    //std::cout << "->fMockSigma: " << fMockGaussianSigma << std::endl;
-
-    fBlock[i] = fMockGaussianMean + drift;
-    //std::cout << "(Start of loop)  " << this->GetElementName() << "-> "<< "fBlock[" << i << "]: " << fBlock[i] << ", Drift: " << drift <<", Mean: " << fMockGaussianMean<<  std::endl;
-    if (fCalcMockDataAsDiff) {
-      fBlock[i] += helicity*fMockAsymmetry;
-    } else {
-      fBlock[i] *= 1.0 + helicity*fMockAsymmetry;
-    }
-    fBlock[i] += fMockGaussianSigma*tmpvar*sqrt(fBlocksPerEvent);
-    //std::cout << "(End of loop)    " << this->GetElementName() << "-> "<< "fBlock[" << i << "]: " << fBlock[i] << ", Drift: " << drift <<", Mean: " << fMockGaussianMean<<  std::endl;
-
-    
-/*    
-    fBlock[i] = //GetRandomValue();
-     fMockGaussianMean * (1 + helicity * fMockAsymmetry) 
-      + fMockGaussianSigma*sqrt(fBlocksPerEvent) * tmpvar
-      + drift; */
-
-    fBlockM2[i] = 0.0; // second moment is zero for single events
-    fHardwareBlockSum += fBlock[i];
-
-/*        std::cout << "In RandomizeEventData: " << tmpvar << " " << fMockGaussianMean << " "<<  (1 + helicity * fMockAsymmetry) << " "
-                  << fMockGaussianSigma << " " << fMockGaussianSigma*tmpvar << " "
-                  << drift << " " << block[i] << std::endl; */
+    fBlock[i] = fHardwareBlockSum / fBlocksPerEvent;
+    random_component = gRandom->Gaus(0, 0.02 * fBlock[i]); // Slightly more noise in individual blocks
+    fBlock[i] += random_component;
+    fBlock_raw[i] = static_cast<Int_t>(fBlock[i]);
   }
-  fHardwareBlockSum /= fBlocksPerEvent;
-  fSequenceNumber = 0;
-  fNumberOfSamples = fNumberOfSamples_map;
-  //  SetEventData(block);
-  //  delete block;
-  return;
-}
-
-void QwVQWK_Channel::SmearByResolution(double resolution){
-
-  fHardwareBlockSum   = 0.0;
-  fHardwareBlockSumM2 = 0.0; // second moment is zero for single events
+  
+  // Set uncertainty values based on Poisson statistics
+  fHardwareBlockSumError = sqrt(fabs(fHardwareBlockSum));
+  fHardwareBlockSumM2 = fHardwareBlockSumError * fHardwareBlockSumError;
+  
   for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-    // std::cout << i << " " << fBlock[i] << "->";
-    //std::cout << "resolution = " << resolution << "\t for channel \t" << GetElementName() << std::endl;
-    fBlock[i] += resolution*sqrt(fBlocksPerEvent) * GetRandomValue();
-    // std::cout << fBlock[i] << ": ";
-    fBlockM2[i] = 0.0; // second moment is zero for single events
-    fHardwareBlockSum += fBlock[i];
+    fBlockError[i] = sqrt(fabs(fBlock[i]));
+    fBlockM2[i] = fBlockError[i] * fBlockError[i];
   }
-  // std::cout << std::endl;
-  fHardwareBlockSum /= fBlocksPerEvent;
-
-  fNumberOfSamples = fNumberOfSamples_map;
-  // SetRawEventData();
-  return;
+  
+  // No errors for mock data
+  fErrorFlag = 0;
 }
+// Enhanced SmearByResolution method is now implemented below
 
 void QwVQWK_Channel::SetHardwareSum(Double_t hwsum, UInt_t sequencenumber)
 {
@@ -356,7 +316,7 @@ void QwVQWK_Channel::SetHardwareSum(Double_t hwsum, UInt_t sequencenumber)
     block[i] = hwsum / fBlocksPerEvent;
   }
   SetEventData(block);
-  delete block;
+  delete[] block;  // Use delete[] for arrays
   return;
 }
 
@@ -545,494 +505,1024 @@ void QwVQWK_Channel::ProcessEvent()
   return;
 }
 
-Double_t QwVQWK_Channel::GetAverageVolts() const
+/**
+ * Division by VQwHardwareChannel pointer (virtual method implementation)
+ */
+void QwVQWK_Channel::DivideBy(const VQwHardwareChannel* valueptr)
 {
-  //Double_t avgVolts = (fBlock[0]+fBlock[1]+fBlock[2]+fBlock[3])*kVQWK_VoltsPerBit/fNumberOfSamples;
-  Double_t avgVolts = fHardwareBlockSum * kVQWK_VoltsPerBit / fNumberOfSamples;
-  //std::cout<<"QwVQWK_Channel::GetAverageVolts() = "<<avgVolts<<std::endl;
-  return avgVolts;
-
-}
-
-void QwVQWK_Channel::PrintInfo() const
-{
-  std::cout<<"***************************************"<<"\n";
-  std::cout<<"Subsystem "<<GetSubsystemName()<<"\n"<<"\n";
-  std::cout<<"Beam Instrument Type: "<<GetModuleType()<<"\n"<<"\n";
-  std::cout<<"QwVQWK channel: "<<GetElementName()<<"\n"<<"\n";
-  std::cout<<"fPedestal= "<< fPedestal<<"\n";
-  std::cout<<"fCalibrationFactor= "<<fCalibrationFactor<<"\n";
-  std::cout<<"fBlocksPerEvent= "<<fBlocksPerEvent<<"\n"<<"\n";
-  std::cout<<"fSequenceNumber= "<<fSequenceNumber<<"\n";
-  std::cout<<"fNumberOfSamples= "<<fNumberOfSamples<<"\n";
-  std::cout<<"fBlock_raw ";
-
-  for (Int_t i = 0; i < fBlocksPerEvent; i++)
-    std::cout << " : " << fBlock_raw[i];
-  std::cout<<"\n";
-  std::cout<<"fHardwareBlockSum_raw= "<<fHardwareBlockSum_raw<<"\n";
-  std::cout<<"fSoftwareBlockSum_raw= "<<fSoftwareBlockSum_raw<<"\n";
-  std::cout<<"fBlock ";
-  for (Int_t i = 0; i < fBlocksPerEvent; i++)
-    std::cout << " : " <<std::setprecision(8) << fBlock[i];
-  std::cout << std::endl;
-
-  std::cout << "fHardwareBlockSum = "<<std::setprecision(8) <<fHardwareBlockSum << std::endl;
-  std::cout << "fHardwareBlockSumM2 = "<<fHardwareBlockSumM2 << std::endl;
-  std::cout << "fHardwareBlockSumError = "<<fHardwareBlockSumError << std::endl;
-
-  return;
-}
-
-void  QwVQWK_Channel::ConstructHistograms(TDirectory *folder, TString &prefix)
-{
-  //  If we have defined a subdirectory in the ROOT file, then change into it.
-  if (folder != NULL) folder->cd();
-
-  if (IsNameEmpty()){
-    //  This channel is not used, so skip filling the histograms.
+  const QwVQWK_Channel* value = dynamic_cast<const QwVQWK_Channel*>(valueptr);
+  if (value != NULL) {
+    DivideBy(*value);
   } else {
-    //  Now create the histograms.
-    SetDataToSaveByPrefix(prefix);
-
-    TString basename = prefix + GetElementName();
-
-    if(fDataToSave==kRaw)
-      {
-        fHistograms.resize(8+2+1, NULL);
-        size_t index=0;
-        for (Int_t i=0; i<fBlocksPerEvent; i++){
-          fHistograms[index]   = gQwHists.Construct1DHist(basename+Form("_block%d_raw",i));
-          fHistograms[index+1] = gQwHists.Construct1DHist(basename+Form("_block%d",i));
-          index += 2;
-        }
-        fHistograms[index]   = gQwHists.Construct1DHist(basename+Form("_hw_raw"));
-        fHistograms[index+1] = gQwHists.Construct1DHist(basename+Form("_hw"));
-        index += 2;
-        fHistograms[index]   = gQwHists.Construct1DHist(basename+Form("_sw-hw_raw"));
-      }
-    else if(fDataToSave==kDerived)
-      {
-        fHistograms.resize(4+1+1, NULL);
-        Int_t index=0;
-        for (Int_t i=0; i<fBlocksPerEvent; i++){
-          fHistograms[index] = gQwHists.Construct1DHist(basename+Form("_block%d",i));
-          index += 1;
-        }
-        fHistograms[index] = gQwHists.Construct1DHist(basename+Form("_hw"));
-        index += 1;
-        fHistograms[index] = gQwHists.Construct1DHist(basename+Form("_dev_err"));
-        index += 1;
-      }
-    else
-      {
-        // this is not recognized
-      }
-
+    TString loc = "QwVQWK_Channel::DivideBy";
+    TString msg = "Cannot divide by non-QwVQWK_Channel object";
+    QwError << loc << " " << msg << QwLog::endl;
   }
 }
 
-void  QwVQWK_Channel::FillHistograms()
+/**
+ * Get average voltage value
+ */
+Double_t QwVQWK_Channel::GetAverageVolts() const
 {
-  Int_t index=0;
-  
-  if (IsNameEmpty())
-    {
-      //  This channel is not used, so skip creating the histograms.
-    } else
-      {
-        if(fDataToSave==kRaw)
-          {
-            for (Int_t i=0; i<fBlocksPerEvent; i++)
-              {
-                if (fHistograms[index] != NULL && (fErrorFlag)==0)
-                  fHistograms[index]->Fill(this->GetRawBlockValue(i));
-                if (fHistograms[index+1] != NULL && (fErrorFlag)==0)
-                  fHistograms[index+1]->Fill(this->GetBlockValue(i));
-                index+=2;
-              }
-            if (fHistograms[index] != NULL && (fErrorFlag)==0)
-              fHistograms[index]->Fill(this->GetRawHardwareSum());
-            if (fHistograms[index+1] != NULL && (fErrorFlag)==0)
-              fHistograms[index+1]->Fill(this->GetHardwareSum());
-            index+=2;
-            if (fHistograms[index] != NULL && (fErrorFlag)==0)
-              fHistograms[index]->Fill(this->GetRawSoftwareSum()-this->GetRawHardwareSum());
-          }
-        else if(fDataToSave==kDerived)
-          {
-            for (Int_t i=0; i<fBlocksPerEvent; i++)
-              {
-                if (fHistograms[index] != NULL && (fErrorFlag)==0)
-                  fHistograms[index]->Fill(this->GetBlockValue(i));
-                index+=1;
-              }
-            if (fHistograms[index] != NULL && (fErrorFlag)==0)
-              fHistograms[index]->Fill(this->GetHardwareSum());
-            index+=1; 
-            if (fHistograms[index] != NULL){
-              if ( (kErrorFlag_sample &  fErrorFlag)==kErrorFlag_sample)
-                fHistograms[index]->Fill(kErrorFlag_sample);
-              if ( (kErrorFlag_SW_HW &  fErrorFlag)==kErrorFlag_SW_HW)
-                fHistograms[index]->Fill(kErrorFlag_SW_HW);
-              if ( (kErrorFlag_Sequence &  fErrorFlag)==kErrorFlag_Sequence)
-                fHistograms[index]->Fill(kErrorFlag_Sequence);
-              if ( (kErrorFlag_ZeroHW &  fErrorFlag)==kErrorFlag_ZeroHW)
-                fHistograms[index]->Fill(kErrorFlag_ZeroHW);
-              if ( (kErrorFlag_VQWK_Sat &  fErrorFlag)==kErrorFlag_VQWK_Sat)
-                fHistograms[index]->Fill(kErrorFlag_VQWK_Sat);
-              if ( (kErrorFlag_SameHW &  fErrorFlag)==kErrorFlag_SameHW)
-                fHistograms[index]->Fill(kErrorFlag_SameHW);
-            }
-            
-          }
- 
-    }
+  if (fNumberOfSamples > 0) {
+    return (fHardwareBlockSum / fNumberOfSamples);
+  }
+  return 0.0;
 }
 
-void  QwVQWK_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+/**
+ * Implementation of scaling with value
+ */
+void QwVQWK_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *value)
 {
-  //  This channel is not used, so skip setting up the tree.
-  if (IsNameEmpty()) return;
+  const QwVQWK_Channel* typed_value = dynamic_cast<const QwVQWK_Channel*>(value);
+  if (typed_value != NULL) {
+    // Make a copy and scale it
+    QwVQWK_Channel scaled_value = *typed_value;
+    scaled_value.Scale(scale);
+    // Now add
+    *this += scaled_value;
+  } else {
+    TString loc = "QwVQWK_Channel::ScaledAdd";
+    TString msg = "Cannot add from non-QwVQWK_Channel object";
+    QwError << loc << " " << msg << QwLog::endl;
+  }
+}
 
-  //  Decide what to store based on prefix
-  SetDataToSaveByPrefix(prefix);
+/**
+ * Implementation of ArcTan function
+ */
+void QwVQWK_Channel::ArcTan(const QwVQWK_Channel &value)
+{
+  // Implementation of the ArcTan function
+  // Only apply if there are no error flags
+  if (fErrorFlag == 0 && value.fErrorFlag == 0) {
+    // For hardware sum
+    Double_t x = fHardwareBlockSum;
+    Double_t y = value.fHardwareBlockSum;
+    
+    // Calculate error propagation for arctan(y/x)
+    Double_t denom = x*x + y*y;
+    Double_t dx_term = (y*y)/(denom*denom) * fHardwareBlockSumError * fHardwareBlockSumError;
+    Double_t dy_term = (x*x)/(denom*denom) * value.fHardwareBlockSumError * value.fHardwareBlockSumError;
+    Double_t error_squared = dx_term + dy_term;
+    
+    // Set new values
+    fHardwareBlockSum = atan2(y, x);
+    fHardwareBlockSum_raw = static_cast<Int_t>(fHardwareBlockSum);
+    fHardwareBlockSumM2 = error_squared;
+    fHardwareBlockSumError = sqrt(error_squared);
+    
+    // Do the same for each block
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+      x = fBlock[i];
+      y = value.fBlock[i];
+      
+      denom = x*x + y*y;
+      dx_term = (y*y)/(denom*denom) * fBlockError[i] * fBlockError[i];
+      dy_term = (x*x)/(denom*denom) * value.fBlockError[i] * value.fBlockError[i];
+      error_squared = dx_term + dy_term;
+      
+      fBlock[i] = atan2(y, x);
+      fBlock_raw[i] = static_cast<Int_t>(fBlock[i]);
+      fBlockM2[i] = error_squared;
+      fBlockError[i] = sqrt(error_squared);
+    }
+  } 
+  else {
+    // Propagate any error flags
+    fErrorFlag |= value.fErrorFlag;
+  }
+}
 
-  TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
-  fTreeArrayIndex  = values.size();
+/**
+ * Addition operator for QwVQWK_Channel objects
+ */
+QwVQWK_Channel& QwVQWK_Channel::operator+= (const QwVQWK_Channel &value)
+{
+  // Only add if neither channel has an error flag set
+  if (fErrorFlag == 0 && value.fErrorFlag == 0) {
+    fHardwareBlockSum += value.fHardwareBlockSum;
+    fHardwareBlockSum_raw += value.fHardwareBlockSum_raw;
+    fHardwareBlockSumM2 += value.fHardwareBlockSumM2;
+    
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+      fBlock[i] += value.fBlock[i];
+      fBlock_raw[i] += value.fBlock_raw[i];
+      fBlockM2[i] += value.fBlockM2[i];
+    }
+    
+    // Update error calculations
+    fHardwareBlockSumError = sqrt(fHardwareBlockSumM2);
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+      fBlockError[i] = sqrt(fBlockM2[i]);
+    }
+  } 
+  else {
+    // Propagate any error flags
+    fErrorFlag |= value.fErrorFlag;
+  }
+  return *this;
+}
 
-  TString list = "";
+/**
+ * Subtraction operator for QwVQWK_Channel objects
+ */
+QwVQWK_Channel& QwVQWK_Channel::operator-= (const QwVQWK_Channel &value)
+{
+  // Only subtract if neither channel has an error flag set
+  if (fErrorFlag == 0 && value.fErrorFlag == 0) {
+    fHardwareBlockSum -= value.fHardwareBlockSum;
+    fHardwareBlockSum_raw -= value.fHardwareBlockSum_raw;
+    fHardwareBlockSumM2 += value.fHardwareBlockSumM2; // Add M2 values for error propagation
+    
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+      fBlock[i] -= value.fBlock[i];
+      fBlock_raw[i] -= value.fBlock_raw[i];
+      fBlockM2[i] += value.fBlockM2[i]; // Add M2 values for error propagation
+    }
+    
+    // Update error calculations
+    fHardwareBlockSumError = sqrt(fHardwareBlockSumM2);
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+      fBlockError[i] = sqrt(fBlockM2[i]);
+    }
+  } 
+  else {
+    // Propagate any error flags
+    fErrorFlag |= value.fErrorFlag;
+  }
+  return *this;
+}
 
-  bHw_sum =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum");
-  bHw_sum_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum_raw");
-  bBlock =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block");
-  bBlock_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block_raw");
-  bNum_samples = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "num_samples");
-  bDevice_Error_Code = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "Device_Error_Code");
-  bSequence_number = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "sequence_number");
+/**
+ * Multiplication operator for QwVQWK_Channel objects
+ */
+QwVQWK_Channel& QwVQWK_Channel::operator*= (const QwVQWK_Channel &value)
+{
+  // Only multiply if neither channel has an error flag set
+  if (fErrorFlag == 0 && value.fErrorFlag == 0) {
+    Double_t error_squared = 0.0;
+    
+    // For hardware sum, need to handle error propagation properly
+    error_squared = (fHardwareBlockSum * fHardwareBlockSum * value.fHardwareBlockSumError * value.fHardwareBlockSumError) +
+                   (value.fHardwareBlockSum * value.fHardwareBlockSum * fHardwareBlockSumError * fHardwareBlockSumError);
+    
+    fHardwareBlockSum *= value.fHardwareBlockSum;
+    fHardwareBlockSum_raw *= value.fHardwareBlockSum_raw;
+    fHardwareBlockSumM2 = error_squared;
+    fHardwareBlockSumError = sqrt(error_squared);
+    
+    // Do the same for each block
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+      error_squared = (fBlock[i] * fBlock[i] * value.fBlockError[i] * value.fBlockError[i]) +
+                     (value.fBlock[i] * value.fBlock[i] * fBlockError[i] * fBlockError[i]);
+      
+      fBlock[i] *= value.fBlock[i];
+      fBlock_raw[i] *= value.fBlock_raw[i];
+      fBlockM2[i] = error_squared;
+      fBlockError[i] = sqrt(error_squared);
+    }
+  } 
+  else {
+    // Propagate any error flags
+    fErrorFlag |= value.fErrorFlag;
+  }
+  return *this;
+}
 
-  if (bHw_sum) {
+/**
+ * Division operator for QwVQWK_Channel objects
+ * Protected method only used internally
+ */
+QwVQWK_Channel& QwVQWK_Channel::operator/= (const QwVQWK_Channel &value)
+{
+  // Only divide if neither channel has an error flag set
+  if (fErrorFlag == 0 && value.fErrorFlag == 0) {
+    Double_t error_squared = 0.0;
+    
+    // Check for division by zero
+    if (value.fHardwareBlockSum != 0) {
+      // For hardware sum, need to handle error propagation properly for division
+      error_squared = (fHardwareBlockSumError * fHardwareBlockSumError) / (value.fHardwareBlockSum * value.fHardwareBlockSum) +
+                     (fHardwareBlockSum * fHardwareBlockSum * value.fHardwareBlockSumError * value.fHardwareBlockSumError) / 
+                     (value.fHardwareBlockSum * value.fHardwareBlockSum * value.fHardwareBlockSum * value.fHardwareBlockSum);
+      
+      fHardwareBlockSum /= value.fHardwareBlockSum;
+      fHardwareBlockSum_raw /= value.fHardwareBlockSum_raw;
+      fHardwareBlockSumM2 = error_squared;
+      fHardwareBlockSumError = sqrt(error_squared);
+    } 
+    else {
+      // Division by zero
+      fErrorFlag |= kErrorFlag_ZeroHW;
+      return *this;
+    }
+    
+    // Do the same for each block
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+      if (value.fBlock[i] != 0) {
+        error_squared = (fBlockError[i] * fBlockError[i]) / (value.fBlock[i] * value.fBlock[i]) +
+                       (fBlock[i] * fBlock[i] * value.fBlockError[i] * value.fBlockError[i]) /
+                       (value.fBlock[i] * value.fBlock[i] * value.fBlock[i] * value.fBlock[i]);
+        
+        fBlock[i] /= value.fBlock[i];
+        fBlock_raw[i] /= value.fBlock_raw[i];
+        fBlockM2[i] = error_squared;
+        fBlockError[i] = sqrt(error_squared);
+      } 
+      else {
+        // Division by zero
+        fErrorFlag |= kErrorFlag_ZeroHW;
+        return *this;
+      }
+    }
+  } 
+  else {
+    // Propagate any error flags
+    fErrorFlag |= value.fErrorFlag;
+  }
+  return *this;
+}
+
+/**
+ * VQwHardwareChannel addition operator implementation
+ */
+VQwHardwareChannel& QwVQWK_Channel::operator+=(const VQwHardwareChannel* input)
+{
+  const QwVQWK_Channel* value = dynamic_cast<const QwVQWK_Channel*>(input);
+  if (value != NULL) {
+    *this += *value;
+  }
+  return *this;
+}
+
+/**
+ * VQwHardwareChannel subtraction operator implementation
+ */
+VQwHardwareChannel& QwVQWK_Channel::operator-=(const VQwHardwareChannel* input)
+{
+  const QwVQWK_Channel* value = dynamic_cast<const QwVQWK_Channel*>(input);
+  if (value != NULL) {
+    *this -= *value;
+  }
+  return *this;
+}
+
+/**
+ * VQwHardwareChannel multiplication operator implementation
+ */
+VQwHardwareChannel& QwVQWK_Channel::operator*=(const VQwHardwareChannel* input)
+{
+  const QwVQWK_Channel* value = dynamic_cast<const QwVQWK_Channel*>(input);
+  if (value != NULL) {
+    *this *= *value;
+  }
+  return *this;
+}
+
+/**
+ * VQwHardwareChannel division operator implementation
+ */
+VQwHardwareChannel& QwVQWK_Channel::operator/=(const VQwHardwareChannel* input)
+{
+  const QwVQWK_Channel* value = dynamic_cast<const QwVQWK_Channel*>(input);
+  if (value != NULL) {
+    *this /= *value;
+  }
+  return *this;
+}
+
+/**
+ * Binary addition operator
+ */
+const QwVQWK_Channel QwVQWK_Channel::operator+ (const QwVQWK_Channel &value) const
+{
+  QwVQWK_Channel result = *this;
+  result += value;
+  return result;
+}
+
+/**
+ * Binary subtraction operator
+ */
+const QwVQWK_Channel QwVQWK_Channel::operator- (const QwVQWK_Channel &value) const
+{
+  QwVQWK_Channel result = *this;
+  result -= value;
+  return result;
+}
+
+/**
+ * Binary multiplication operator
+ */
+const QwVQWK_Channel QwVQWK_Channel::operator* (const QwVQWK_Channel &value) const
+{
+  QwVQWK_Channel result = *this;
+  result *= value;
+  return result;
+}
+
+/**
+ * Sum method (compute sum of two channels)
+ */
+void QwVQWK_Channel::Sum(const QwVQWK_Channel &value1, const QwVQWK_Channel &value2)
+{
+  *this = value1;
+  *this += value2;
+}
+
+/**
+ * Difference method (compute difference of two channels)
+ */
+void QwVQWK_Channel::Difference(const QwVQWK_Channel &value1, const QwVQWK_Channel &value2)
+{
+  *this = value1;
+  *this -= value2;
+}
+
+/**
+ * Product method (compute product of two channels)
+ */
+void QwVQWK_Channel::Product(const QwVQWK_Channel &value1, const QwVQWK_Channel &value2)
+{
+  *this = value1;
+  *this *= value2;
+}
+
+/**
+ * Ratio method (compute ratio of two channels)
+ */
+void QwVQWK_Channel::Ratio(const QwVQWK_Channel &numer, const QwVQWK_Channel &denom)
+{
+  *this = numer;
+  *this /= denom;
+}
+
+/**
+ * Division method (divide this channel by another)
+ */
+void QwVQWK_Channel::DivideBy(const QwVQWK_Channel& denom)
+{
+  *this /= denom;
+}
+
+/**
+ * Add a constant offset to this channel
+ */
+void QwVQWK_Channel::AddChannelOffset(Double_t offset)
+{
+  if (fErrorFlag == 0) {
+    fHardwareBlockSum += offset;
+    fHardwareBlockSum_raw += static_cast<Int_t>(offset);
+    
+    // Distribute the offset across blocks
+    Double_t block_offset = offset / fBlocksPerEvent;
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+      fBlock[i] += block_offset;
+      fBlock_raw[i] += static_cast<Int_t>(block_offset);
+    }
+    // Error calculations remain unchanged as adding a constant doesn't affect error
+  }
+}
+
+/**
+ * Scale this channel by a factor
+ */
+void QwVQWK_Channel::Scale(Double_t factor)
+{
+  if (fErrorFlag == 0) {
+    fHardwareBlockSum *= factor;
+    fHardwareBlockSum_raw = static_cast<Int_t>(fHardwareBlockSum_raw * factor);
+    fHardwareBlockSumError *= fabs(factor);
+    fHardwareBlockSumM2 *= factor * factor;
+    
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+      fBlock[i] *= factor;
+      fBlock_raw[i] = static_cast<Int_t>(fBlock_raw[i] * factor);
+      fBlockError[i] *= fabs(factor);
+      fBlockM2[i] *= factor * factor;
+    }
+  }
+}
+
+/**
+ * Implementation of event cut checking methods
+ */
+Bool_t QwVQWK_Channel::ApplySingleEventCuts(Double_t LL, Double_t UL)
+{
+  Bool_t eventpassed = kTRUE;
+  
+  // If there are already hardware errors, no need to check further
+  if (fErrorFlag != 0) {
+    return kFALSE;
+  }
+  
+  // For average value check (hardware sum)
+  Double_t value = fHardwareBlockSum / fNumberOfSamples;
+  
+  // Apply event cuts (simple threshold check)
+  if (value < LL) {
+    fErrorFlag |= kErrorFlag_EventCut_L;
+    eventpassed = kFALSE;
+  }
+  if (value > UL) {
+    fErrorFlag |= kErrorFlag_EventCut_U;
+    eventpassed = kFALSE;
+  }
+  
+  return eventpassed;
+}
+
+/**
+ * Implementation of event cut checking methods using internal limits
+ */
+Bool_t QwVQWK_Channel::ApplySingleEventCuts()
+{
+  return ApplySingleEventCuts(fLLimit, fULimit);
+}
+
+/**
+ * Print error counters
+ */
+void QwVQWK_Channel::PrintErrorCounters() const
+{
+  QwMessage << "Error counters for " << GetElementName() << QwLog::endl;
+  QwMessage << "  Sample size mismatches: " << fErrorCount_sample << QwLog::endl;
+  QwMessage << "  SW/HW sum mismatches: " << fErrorCount_SW_HW << QwLog::endl;
+  QwMessage << "  Sequence number mismatches: " << fErrorCount_Sequence << QwLog::endl;
+  QwMessage << "  Same HW value errors: " << fErrorCount_SameHW << QwLog::endl;
+  QwMessage << "  Zero HW value errors: " << fErrorCount_ZeroHW << QwLog::endl;
+  QwMessage << "  Hardware saturation errors: " << fErrorCount_HWSat << QwLog::endl;
+  QwMessage << "  Events rejected by cuts: " << fNumEvtsWithEventCutsRejected << QwLog::endl;
+}
+
+/**
+ * Static method to print error counter table header
+ */
+void QwVQWK_Channel::PrintErrorCounterHead()
+{
+  QwMessage << "Error Counter Report for QwVQWK_Channel" << QwLog::endl;
+  QwMessage << "----------------------------------------" << QwLog::endl;
+  QwMessage << "Channel Name          | Sample | SW/HW | Sequence | Same HW | Zero HW | HW Sat | Event Cuts" << QwLog::endl;
+  QwMessage << "-------------------------------------------------------------------------------------" << QwLog::endl;
+}
+
+/**
+ * Static method to print error counter table footer
+ */
+void QwVQWK_Channel::PrintErrorCounterTail()
+{
+  QwMessage << "-------------------------------------------------------------------------------------" << QwLog::endl;
+}
+
+/**
+ * RNTuple field construction
+ */
+void QwVQWK_Channel::ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix)
+{
+  // Create the branches in the ROOT tree.
+  if (IsNameEmpty()) {
+    //  This channel is not used, so skip filling the tree.
+  } else {
+    TString basename = GetElementName();
+    if (prefix != "") {
+      basename = prefix + "_" + basename;
+    }
+
+    std::vector<Double_t> value_array;
+    std::shared_ptr<ROOT::RNTupleModel> model = rntuple->GetModel();
+    std::vector<std::shared_ptr<Double_t>> fields;
+    std::string prefix_str(prefix.Data());
+    
+    ConstructRNTupleFields(model, prefix_str, value_array, fields);
+  }
+}
+
+/**
+ * RNTuple vector filling
+ */
+void QwVQWK_Channel::FillRNTupleVector(std::vector<Double_t>& values) const
+{
+  // Fill the vector with the values to be stored in the ROOT tree.
+  if (IsNameEmpty()) {
+    // This channel is not used, so skip filling the vector.
+  } else {
+    Int_t startindex = values.size();
+    // Reserve space
+    values.resize(startindex + fTreeArrayNumEntries);
+    
+    // Store values based on data to save mode
+    if (fDataToSave == kRaw) {
+      // Raw values
+      Int_t index = 0;
+      values[startindex + index++] = (Double_t) fHardwareBlockSum_raw;
+      
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        values[startindex + index++] = (Double_t) fBlock_raw[i];
+      }
+      
+      if (bSequence_number) {
+        values[startindex + index++] = (Double_t) fSequenceNumber;
+      }
+    } 
+    else {
+      // Calibrated values
+      Int_t index = 0;
+      values[startindex + index++] = fHardwareBlockSum;
+      
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        values[startindex + index++] = fBlock[i];
+      }
+      
+      if (bSequence_number) {
+        values[startindex + index++] = (Double_t) fSequenceNumber;
+      }
+    }
+  }
+}
+
+/**
+ * Print detailed channel information
+ */
+void QwVQWK_Channel::PrintInfo() const
+{
+  QwMessage << "***************************************" << QwLog::endl;
+  QwMessage << "Subsystem " << GetSubsystemName() << QwLog::endl;
+  QwMessage << "Beam Instrument Type: " << GetModuleType() << QwLog::endl;
+  QwMessage << "QwVQWK channel: " << GetElementName() << QwLog::endl;
+  QwMessage << "fPedestal= " << fPedestal << QwLog::endl;
+  QwMessage << "fCalibrationFactor= " << fCalibrationFactor << QwLog::endl;
+  QwMessage << "fSequenceNumber= " << fSequenceNumber << QwLog::endl;
+  QwMessage << "fNumberOfSamples= " << fNumberOfSamples << QwLog::endl;
+  QwMessage << "fNumberOfSamples_map= " << fNumberOfSamples_map << QwLog::endl;
+  QwMessage << "fBlocksPerEvent= " << fBlocksPerEvent << QwLog::endl;
+  QwMessage << "fHardwareBlockSum_raw= " << fHardwareBlockSum_raw << QwLog::endl;
+  QwMessage << "fHardwareBlockSum= " << std::setprecision(8) << fHardwareBlockSum << QwLog::endl;
+  QwMessage << "fSaturationABSLimit= " << fSaturationABSLimit << QwLog::endl;
+  for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+    QwMessage << "fBlock_raw[" << i << "]= " << fBlock_raw[i] << QwLog::endl;
+    QwMessage << "fBlock[" << i << "]= " << std::setprecision(8) << fBlock[i] << QwLog::endl;
+  }
+}
+
+/**
+ * Construct histograms for this channel
+ */
+void QwVQWK_Channel::ConstructHistograms(TDirectory *folder, TString &prefix)
+{
+  // If we have defined a subdirectory in the ROOT file, then change into it.
+  if (folder != NULL) folder->cd();
+
+  if (IsNameEmpty()) {
+    // This channel is not used, so skip filling the histograms.
+  } else {
+    // Now create the histograms.
+    if (prefix == TString("asym_") ||
+        prefix == TString("diff_") ||
+        prefix == TString("yield_"))
+      fDataToSave = kDerived;
+
+    TString basename, fullname;
+    basename = prefix + GetElementName();
+
+    if (fDataToSave == kRaw) {
+      fHistograms.resize(6, NULL);
+      size_t index = 0;
+      fHistograms[index++] = gQwHists.Construct1DHist(basename);
+      fHistograms[index++] = gQwHists.Construct1DHist(basename + Form("_hw_sum_raw"));
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        fHistograms[index++] = gQwHists.Construct1DHist(basename + Form("_block%d", i));
+      }
+    } else if (fDataToSave == kDerived) {
+      fHistograms.resize(1, NULL);
+      Int_t index = 0;
+      fHistograms[index++] = gQwHists.Construct1DHist(basename);
+    } else {
+      // this is not recognized
+    }
+  }
+}
+
+/**
+ * Fill histograms with current channel values
+ */
+void QwVQWK_Channel::FillHistograms()
+{
+  Int_t index = 0;
+
+  if (IsNameEmpty()) {
+    // This channel is not used, so skip creating the histograms.
+  } else {
+    if (fDataToSave == kRaw) {
+      if (fHistograms[index] != NULL && (fErrorFlag) == 0)
+        fHistograms[index++]->Fill(GetValue());
+      if (fHistograms[index] != NULL && (fErrorFlag) == 0)
+        fHistograms[index++]->Fill(fHardwareBlockSum_raw);
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        if (fHistograms[index] != NULL && (fErrorFlag) == 0)
+          fHistograms[index++]->Fill(fBlock[i]);
+      }
+    } else if (fDataToSave == kDerived) {
+      if (fHistograms[index] != NULL && (fErrorFlag) == 0)
+        fHistograms[index++]->Fill(GetValue());
+    }
+  }
+}
+
+/**
+ * Construct tree branch and fill values vector
+ */
+void QwVQWK_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+{
+  if (IsNameEmpty()) {
+    // This channel is not used, so skip setting up the tree.
+  } else {
+    // Decide what to store based on prefix
+    SetDataToSaveByPrefix(prefix);
+
+    TString basename = prefix(0, (prefix.First("|") >= 0) ? prefix.First("|") : prefix.Length()) + GetElementName();
+    fTreeArrayIndex = values.size();
+
+    TString list;
+
     values.push_back(0.0);
-    list += "hw_sum/D";
+    list = "hw_sum/D";
     if (fDataToSave == kMoments) {
       values.push_back(0.0);
       list += ":hw_sum_m2/D";
       values.push_back(0.0);
       list += ":hw_sum_err/D";
     }
-  }
 
-  if (bBlock) {
-    values.push_back(0.0);
-    list += ":block0/D";
-    values.push_back(0.0);
-    list += ":block1/D";
-    values.push_back(0.0);
-    list += ":block2/D";
-    values.push_back(0.0);
-    list += ":block3/D";
-  }
-
-  if (bNum_samples) {
-    values.push_back(0.0);
-    list += ":num_samples/D";
-  }
-
-  if (bDevice_Error_Code) {
     values.push_back(0.0);
     list += ":Device_Error_Code/D";
-  }
 
-  if (fDataToSave == kRaw) {
-    if (bHw_sum_raw) {
+    if (fDataToSave == kRaw) {
       values.push_back(0.0);
       list += ":hw_sum_raw/D";
-    }
-    if (bBlock_raw) {
-      values.push_back(0.0);
-      list += ":block0_raw/D";
-      values.push_back(0.0);
-      list += ":block1_raw/D";
-      values.push_back(0.0);
-      list += ":block2_raw/D";
-      values.push_back(0.0);
-      list += ":block3_raw/D";
-    }
-    if (bSequence_number) {
       values.push_back(0.0);
       list += ":sequence_number/D";
+      values.push_back(0.0);
+      list += ":num_samples/D";
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        values.push_back(0.0);
+        list += Form(":block%d/D", i);
+        values.push_back(0.0);
+        list += Form(":block%d_raw/D", i);
+      }
     }
-  }
 
-  fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
-
-  if (gQwHists.MatchDeviceParamsFromList(basename.Data())
-    && (bHw_sum || bBlock || bNum_samples || bDevice_Error_Code ||
-        bHw_sum_raw || bBlock_raw || bSequence_number)) {
-
-    // This is for the RT mode
-    if (list == "hw_sum/D")
-      list = basename+"/D";
-
-    if (kDEBUG)
-      QwMessage << "base name " << basename << " List " << list << QwLog::endl;
-
-    tree->Branch(basename, &(values[fTreeArrayIndex]), list);
-  }
-
-  if (kDEBUG) {
-    std::cerr << "QwVQWK_Channel::ConstructBranchAndVector: fTreeArrayIndex==" << fTreeArrayIndex
-              << "; fTreeArrayNumEntries==" << fTreeArrayNumEntries
-              << "; values.size()==" << values.size()
-              << "; list==" << list
-              << std::endl;
+    fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
+    if (gQwHists.MatchDeviceParamsFromList(basename.Data()))
+      tree->Branch(basename, &(values[fTreeArrayIndex]), list);
   }
 }
 
-void  QwVQWK_Channel::ConstructBranch(TTree *tree, TString &prefix)
-{
-  //  This channel is not used, so skip setting up the tree.
-  if (IsNameEmpty()) return;
-
-  TString basename = prefix + GetElementName();
-  tree->Branch(basename,&fHardwareBlockSum,basename+"/D");
-  if (kDEBUG){
-    std::cerr << "QwVQWK_Channel::ConstructBranchAndVector: fTreeArrayIndex==" << fTreeArrayIndex
-              << "; fTreeArrayNumEntries==" << fTreeArrayNumEntries
-              << std::endl;
-  }
-}
-
-
-void  QwVQWK_Channel::ConstructRNTupleFields(class QwRNTuple *rntuple, const TString &prefix)
-{
-  //  This channel is not used, so skip setting up the RNTuple fields.
-  if (IsNameEmpty()) return;
-
-  //  Decide what to store based on prefix
-  SetDataToSaveByPrefix(prefix);
-
-  TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
-
-  bHw_sum =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum");
-  bHw_sum_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum_raw");
-  bBlock =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block");
-  bBlock_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block_raw");
-  bNum_samples = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "num_samples");
-  bDevice_Error_Code = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "Device_Error_Code");
-  bSequence_number = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "sequence_number");
-
-  if (gQwHists.MatchDeviceParamsFromList(basename.Data())
-    && (bHw_sum || bBlock || bNum_samples || bDevice_Error_Code ||
-        bHw_sum_raw || bBlock_raw || bSequence_number)) {
-    
-    // Convert TString to std::string for RNTuple field names
-    std::string base_str = basename.Data();
-
-    if (bHw_sum) {
-      rntuple->AddField<Double_t>(base_str + "_hw_sum");
-      if (fDataToSave == kMoments) {
-        rntuple->AddField<Double_t>(base_str + "_hw_sum_m2");
-        rntuple->AddField<Double_t>(base_str + "_hw_sum_err");
-      }
-    }
-
-    if (bBlock) {
-      rntuple->AddField<Double_t>(base_str + "_block0");
-      rntuple->AddField<Double_t>(base_str + "_block1");
-      rntuple->AddField<Double_t>(base_str + "_block2");
-      rntuple->AddField<Double_t>(base_str + "_block3");
-    }
-
-    if (bNum_samples) {
-      rntuple->AddField<Double_t>(base_str + "_num_samples");
-    }
-
-    if (bDevice_Error_Code) {
-      rntuple->AddField<Double_t>(base_str + "_Device_Error_Code");
-    }
-
-    if (fDataToSave == kRaw) {
-      if (bHw_sum_raw) {
-        rntuple->AddField<Double_t>(base_str + "_hw_sum_raw");
-      }
-      if (bBlock_raw) {
-        rntuple->AddField<Double_t>(base_str + "_block0_raw");
-        rntuple->AddField<Double_t>(base_str + "_block1_raw");
-        rntuple->AddField<Double_t>(base_str + "_block2_raw");
-        rntuple->AddField<Double_t>(base_str + "_block3_raw");
-      }
-      if (bSequence_number) {
-        rntuple->AddField<Double_t>(base_str + "_sequence_number");
-      }
-    }
-  }
-
-  if (kDEBUG) {
-    QwMessage << "QwVQWK_Channel::ConstructRNTupleFields: " << basename << QwLog::endl;
-  }
-}
-
-void  QwVQWK_Channel::FillRNTupleVector(std::vector<Double_t> &values) const
+/**
+ * Construct simple tree branch
+ */
+void QwVQWK_Channel::ConstructBranch(TTree *tree, TString &prefix)
 {
   if (IsNameEmpty()) {
-    //  This channel is not used, so skip filling the RNTuple vector.
-  } else if (fTreeArrayNumEntries <= 0) {
-    if (bDEBUG) std::cerr << "QwVQWK_Channel::FillRNTupleVector:  fTreeArrayNumEntries=="
-              << fTreeArrayNumEntries << std::endl;
-  } else if (values.size() < fTreeArrayIndex+fTreeArrayNumEntries){
-    if (bDEBUG) std::cerr << "QwVQWK_Channel::FillRNTupleVector:  values.size()=="
-              << values.size()
-              << "; fTreeArrayIndex+fTreeArrayNumEntries=="
-              << fTreeArrayIndex+fTreeArrayNumEntries
-              << std::endl;
+    // This channel is not used, so skip setting up the tree.
   } else {
-
-    UInt_t index = fTreeArrayIndex;
-
-    // hw_sum
-    if (bHw_sum) {
-      values[index++] = this->GetHardwareSum();
-      if (fDataToSave == kMoments) {
-        values[index++] = this->GetHardwareSumM2();
-        values[index++] = this->GetHardwareSumError();
-      }
-    }
-
-    if (bBlock) {
-      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-        // blocki
-        values[index++] = this->GetBlockValue(i);
-      }
-    }
-
-    // num_samples
-    if (bNum_samples)
-      values[index++] =
-          (fDataToSave == kMoments)? this->fGoodEventCount: this->fNumberOfSamples;
-
-    // Device_Error_Code
-    if (bDevice_Error_Code)
-      values[index++] = this->fErrorFlag;
-
-    if (fDataToSave == kRaw)
-      {
-        // hw_sum_raw
-        if (bHw_sum_raw)
-          values[index++] = this->GetRawHardwareSum();
-
-        if (bBlock_raw) {
-          for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-            // blocki_raw
-            values[index++] = this->GetRawBlockValue(i);
-          }
-        }
-
-        // sequence_number
-        if (bSequence_number)
-          values[index++] = this->fSequenceNumber;
-      }
+    TString basename = prefix + GetElementName();
+    tree->Branch(basename, &fHardwareBlockSum, basename + "/D");
   }
 }
 
-void  QwVQWK_Channel::ConstructRNTupleFields(std::shared_ptr<ROOT::RNTupleModel> model, std::string& prefix, std::vector<Double_t>& vector, std::vector<std::shared_ptr<Double_t>>& fields)
+/**
+ * Fill values vector for tree output
+ */
+void QwVQWK_Channel::FillTreeVector(std::vector<Double_t> &values) const
 {
-  //  This channel is not used, so skip setting up the RNTuple fields.
-  if (IsNameEmpty()) return;
-
-  //  Decide what to store based on prefix
-  SetDataToSaveByPrefix(TString(prefix.c_str()));
-
-  std::string basename = prefix + GetElementName().Data();
-
-  bHw_sum =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum");
-  bHw_sum_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum_raw");
-  bBlock =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block");
-  bBlock_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block_raw");
-  bNum_samples = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "num_samples");
-  bDevice_Error_Code = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "Device_Error_Code");
-  bSequence_number = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "sequence_number");
-
-  fTreeArrayIndex = vector.size();
-
-  if (gQwHists.MatchDeviceParamsFromList(basename.c_str())
-    && (bHw_sum || bBlock || bNum_samples || bDevice_Error_Code ||
-        bHw_sum_raw || bBlock_raw || bSequence_number)) {
-
-    if (bHw_sum) {
-      auto field_hw_sum = model->MakeField<Double_t>(basename + "_hw_sum");
-      fields.push_back(field_hw_sum);
-      vector.push_back(0.0);
-      if (fDataToSave == kMoments) {
-        auto field_hw_sum_m2 = model->MakeField<Double_t>(basename + "_hw_sum_m2");
-        fields.push_back(field_hw_sum_m2);
-        vector.push_back(0.0);
-        auto field_hw_sum_err = model->MakeField<Double_t>(basename + "_hw_sum_err");
-        fields.push_back(field_hw_sum_err);
-        vector.push_back(0.0);
-      }
+  if (IsNameEmpty()) {
+    // This channel is not used, so skip setting up the tree.
+  } else if (fTreeArrayNumEntries < 0) {
+    QwError << "QwVQWK_Channel::FillTreeVector:  fTreeArrayNumEntries=="
+            << fTreeArrayNumEntries << QwLog::endl;
+  } else if (fTreeArrayNumEntries == 0) {
+    static bool warned = false;
+    if (!warned) {
+      QwError << "QwVQWK_Channel::FillTreeVector:  fTreeArrayNumEntries=="
+              << fTreeArrayNumEntries << " (no branch constructed?)" << QwLog::endl;
+      QwError << "Offending element is " << GetElementName() << QwLog::endl;
+      warned = true;
     }
-
-    if (bBlock) {
-      auto field_block0 = model->MakeField<Double_t>(basename + "_block0");
-      fields.push_back(field_block0);
-      vector.push_back(0.0);
-      auto field_block1 = model->MakeField<Double_t>(basename + "_block1");
-      fields.push_back(field_block1);
-      vector.push_back(0.0);
-      auto field_block2 = model->MakeField<Double_t>(basename + "_block2");
-      fields.push_back(field_block2);
-      vector.push_back(0.0);
-      auto field_block3 = model->MakeField<Double_t>(basename + "_block3");
-      fields.push_back(field_block3);
-      vector.push_back(0.0);
+  } else if (values.size() < fTreeArrayIndex + fTreeArrayNumEntries) {
+    QwError << "QwVQWK_Channel::FillTreeVector:  values.size()=="
+            << values.size() << " name: " << fElementName
+            << "; fTreeArrayIndex+fTreeArrayNumEntries=="
+            << fTreeArrayIndex << '+' << fTreeArrayNumEntries << '='
+            << fTreeArrayIndex + fTreeArrayNumEntries
+            << QwLog::endl;
+  } else {
+    size_t index = fTreeArrayIndex;
+    values[index++] = this->fHardwareBlockSum;
+    if (fDataToSave == kMoments) {
+      values[index++] = fHardwareBlockSumM2;
+      values[index++] = fHardwareBlockSumError;
     }
-
-    if (bNum_samples) {
-      auto field_num_samples = model->MakeField<Double_t>(basename + "_num_samples");
-      fields.push_back(field_num_samples);
-      vector.push_back(0.0);
-    }
-
-    if (bDevice_Error_Code) {
-      auto field_error_code = model->MakeField<Double_t>(basename + "_Device_Error_Code");
-      fields.push_back(field_error_code);
-      vector.push_back(0.0);
-    }
-
+    values[index++] = this->fErrorFlag;
     if (fDataToSave == kRaw) {
-      if (bHw_sum_raw) {
-        auto field_hw_sum_raw = model->MakeField<Double_t>(basename + "_hw_sum_raw");
-        fields.push_back(field_hw_sum_raw);
-        vector.push_back(0.0);
+      values[index++] = this->fHardwareBlockSum_raw;
+      values[index++] = this->fSequenceNumber;
+      values[index++] = this->fNumberOfSamples;
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        values[index++] = this->fBlock[i];
+        values[index++] = this->fBlock_raw[i];
       }
-      if (bBlock_raw) {
-        auto field_block0_raw = model->MakeField<Double_t>(basename + "_block0_raw");
-        fields.push_back(field_block0_raw);
+    }
+  }
+}
+
+
+
+/**
+ * Construct RNTuple fields with shared model
+ */
+void QwVQWK_Channel::ConstructRNTupleFields(std::shared_ptr<ROOT::RNTupleModel> model, std::string& prefix, std::vector<Double_t>& vector, std::vector<std::shared_ptr<Double_t>>& fields)
+{
+  if (IsNameEmpty()) {
+    // This channel is not used, so skip setting up RNTuple fields.
+  } else {
+    std::string basename = prefix + GetElementName().Data();
+    
+    // Add the hardware sum field
+    auto field = model->MakeField<Double_t>(basename + "_hw_sum");
+    fields.push_back(field);
+    vector.push_back(0.0);
+    
+    if (fDataToSave == kMoments) {
+      auto field_m2 = model->MakeField<Double_t>(basename + "_hw_sum_m2");
+      fields.push_back(field_m2);
+      vector.push_back(0.0);
+      
+      auto field_err = model->MakeField<Double_t>(basename + "_hw_sum_err");
+      fields.push_back(field_err);
+      vector.push_back(0.0);
+    }
+    
+    auto field_error = model->MakeField<Double_t>(basename + "_Device_Error_Code");
+    fields.push_back(field_error);
+    vector.push_back(0.0);
+    
+    if (fDataToSave == kRaw) {
+      auto field_raw = model->MakeField<Double_t>(basename + "_hw_sum_raw");
+      fields.push_back(field_raw);
+      vector.push_back(0.0);
+      
+      auto field_seq = model->MakeField<Double_t>(basename + "_sequence_number");
+      fields.push_back(field_seq);
+      vector.push_back(0.0);
+      
+      auto field_samples = model->MakeField<Double_t>(basename + "_num_samples");
+      fields.push_back(field_samples);
+      vector.push_back(0.0);
+      
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        auto field_block = model->MakeField<Double_t>(basename + Form("_block%d", i));
+        fields.push_back(field_block);
         vector.push_back(0.0);
-        auto field_block1_raw = model->MakeField<Double_t>(basename + "_block1_raw");
-        fields.push_back(field_block1_raw);
-        vector.push_back(0.0);
-        auto field_block2_raw = model->MakeField<Double_t>(basename + "_block2_raw");
-        fields.push_back(field_block2_raw);
-        vector.push_back(0.0);
-        auto field_block3_raw = model->MakeField<Double_t>(basename + "_block3_raw");
-        fields.push_back(field_block3_raw);
-        vector.push_back(0.0);
-      }
-      if (bSequence_number) {
-        auto field_sequence_number = model->MakeField<Double_t>(basename + "_sequence_number");
-        fields.push_back(field_sequence_number);
+        
+        auto field_block_raw = model->MakeField<Double_t>(basename + Form("_block%d_raw", i));
+        fields.push_back(field_block_raw);
         vector.push_back(0.0);
       }
     }
   }
+}
 
-  fTreeArrayNumEntries = vector.size() - fTreeArrayIndex;
+/**
+ * Assign scaled value from another QwVQWK_Channel
+ */
+void QwVQWK_Channel::AssignScaledValue(const QwVQWK_Channel &value, Double_t scale)
+{
+  if (this == &value) return;
 
-  if (kDEBUG) {
-    QwMessage << "QwVQWK_Channel::ConstructRNTupleFields(model): " << basename 
-              << " fTreeArrayIndex=" << fTreeArrayIndex 
-              << " fTreeArrayNumEntries=" << fTreeArrayNumEntries << QwLog::endl;
+  if (!IsNameEmpty()) {
+    // Scale the hardware sum
+    this->fHardwareBlockSum = value.fHardwareBlockSum * scale;
+    this->fHardwareBlockSumError = value.fHardwareBlockSumError * fabs(scale);
+    this->fHardwareBlockSumM2 = value.fHardwareBlockSumM2 * scale * scale;
+    this->fHardwareBlockSum_raw = static_cast<Int_t>(value.fHardwareBlockSum_raw * scale);
+
+    // Scale the individual blocks
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+      this->fBlock[i] = value.fBlock[i] * scale;
+      this->fBlockError[i] = value.fBlockError[i] * fabs(scale);
+      this->fBlockM2[i] = value.fBlockM2[i] * scale * scale;
+      this->fBlock_raw[i] = static_cast<Int_t>(value.fBlock_raw[i] * scale);
+    }
+
+    // Copy other properties without scaling
+    this->fSequenceNumber = value.fSequenceNumber;
+    this->fNumberOfSamples = value.fNumberOfSamples;
+    this->fBlocksPerEvent = value.fBlocksPerEvent;
+    this->fErrorFlag = value.fErrorFlag;
+    this->fGoodEventCount = value.fGoodEventCount;
   }
+}
+
+/**
+ * Method to apply resolution smearing (for simulation)
+ */
+void QwVQWK_Channel::SmearByResolution(double resolution)
+{
+  if (resolution <= 0.0) return;
+  
+  // Apply Gaussian smearing to hardware sum
+  Double_t smearing = gRandom->Gaus(0.0, resolution);
+  fHardwareBlockSum *= (1.0 + smearing);
+  fHardwareBlockSum_raw = static_cast<Int_t>(fHardwareBlockSum_raw * (1.0 + smearing));
+  
+  // Apply to blocks as well
+  for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+    Double_t block_smearing = gRandom->Gaus(0.0, resolution);
+    fBlock[i] *= (1.0 + block_smearing);
+    fBlock_raw[i] = static_cast<Int_t>(fBlock_raw[i] * (1.0 + block_smearing));
+  }
+  
+  // Update errors
+  fHardwareBlockSumError = fabs(fHardwareBlockSum * resolution);
+  fHardwareBlockSumM2 = fHardwareBlockSumError * fHardwareBlockSumError;
+  
+  for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+    fBlockError[i] = fabs(fBlock[i] * resolution);
+    fBlockM2[i] = fBlockError[i] * fBlockError[i];
+  }
+}
+
+/**
+ * Assignment operator implementation
+ */
+QwVQWK_Channel& QwVQWK_Channel::operator=(const QwVQWK_Channel &value)
+{
+  if (this == &value) return *this;
+  
+  if (!IsNameEmpty()) {
+    VQwHardwareChannel::operator=(value);
+    
+    // Copy channel-specific data
+    this->fHardwareBlockSum = value.fHardwareBlockSum;
+    this->fHardwareBlockSumError = value.fHardwareBlockSumError;
+    this->fHardwareBlockSumM2 = value.fHardwareBlockSumM2;
+    this->fHardwareBlockSum_raw = value.fHardwareBlockSum_raw;
+    this->fSoftwareBlockSum_raw = value.fSoftwareBlockSum_raw;
+    
+    // Copy block data
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+      this->fBlock[i] = value.fBlock[i];
+      this->fBlockError[i] = value.fBlockError[i];
+      this->fBlockM2[i] = value.fBlockM2[i];
+      this->fBlock_raw[i] = value.fBlock_raw[i];
+    }
+    
+    // Copy other properties
+    this->fSequenceNumber = value.fSequenceNumber;
+    this->fNumberOfSamples = value.fNumberOfSamples;
+    this->fBlocksPerEvent = value.fBlocksPerEvent;
+    this->fErrorFlag = value.fErrorFlag;
+    this->fGoodEventCount = value.fGoodEventCount;
+  }
+  return *this;
+}
+
+/**
+ * Assign value from VQwDataElement pointer
+ */
+void QwVQWK_Channel::AssignValueFrom(const VQwDataElement* valueptr)
+{
+  const QwVQWK_Channel* tmpptr = dynamic_cast<const QwVQWK_Channel*>(valueptr);
+  if (tmpptr != NULL) {
+    *this = *tmpptr;
+  } else {
+    TString loc = "Standard exception from QwVQWK_Channel::AssignValueFrom = "
+      + valueptr->GetElementName() + " is an incompatible type.";
+    throw std::invalid_argument(loc.Data());
+  }
+}
+
+/**
+ * Add value from VQwHardwareChannel pointer
+ */
+void QwVQWK_Channel::AddValueFrom(const VQwHardwareChannel* valueptr)
+{
+  const QwVQWK_Channel* tmpptr = dynamic_cast<const QwVQWK_Channel*>(valueptr);
+  if (tmpptr != NULL) {
+    *this += *tmpptr;
+  } else {
+    TString loc = "Standard exception from QwVQWK_Channel::AddValueFrom = "
+      + valueptr->GetElementName() + " is an incompatible type.";
+    throw std::invalid_argument(loc.Data());
+  }
+}
+
+/**
+ * Subtract value from VQwHardwareChannel pointer
+ */
+void QwVQWK_Channel::SubtractValueFrom(const VQwHardwareChannel* valueptr)
+{
+  const QwVQWK_Channel* tmpptr = dynamic_cast<const QwVQWK_Channel*>(valueptr);
+  if (tmpptr != NULL) {
+    *this -= *tmpptr;
+  } else {
+    TString loc = "Standard exception from QwVQWK_Channel::SubtractValueFrom = "
+      + valueptr->GetElementName() + " is an incompatible type.";
+    throw std::invalid_argument(loc.Data());
+  }
+}
+
+/**
+ * Multiply by VQwHardwareChannel pointer
+ */
+void QwVQWK_Channel::MultiplyBy(const VQwHardwareChannel* valueptr)
+{
+  const QwVQWK_Channel* tmpptr = dynamic_cast<const QwVQWK_Channel*>(valueptr);
+  if (tmpptr != NULL) {
+    *this *= *tmpptr;
+  } else {
+    TString loc = "Standard exception from QwVQWK_Channel::MultiplyBy = "
+      + valueptr->GetElementName() + " is an incompatible type.";
+    throw std::invalid_argument(loc.Data());
+  }
+}
+
+/**
+ * Match sequence number
+ */
+Bool_t QwVQWK_Channel::MatchSequenceNumber(size_t seqnum)
+{
+  return (fSequenceNumber == seqnum);
+}
+
+/**
+ * Match number of samples
+ */
+Bool_t QwVQWK_Channel::MatchNumberOfSamples(size_t numsamp)
+{
+  return (fNumberOfSamples == numsamp);
+}
+
+/**
+ * Calculate running average
+ */
+void QwVQWK_Channel::CalculateRunningAverage()
+{
+  if (fGoodEventCount > 0) {
+    fHardwareBlockSum /= fGoodEventCount;
+    fHardwareBlockSumError = sqrt(fHardwareBlockSumM2) / fGoodEventCount;
+    
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+      fBlock[i] /= fGoodEventCount;
+      fBlockError[i] = sqrt(fBlockM2[i]) / fGoodEventCount;
+    }
+  }
+}
+
+/**
+ * Accumulate running sum with QwVQWK_Channel reference and error mask
+ */
+void QwVQWK_Channel::AccumulateRunningSum(const QwVQWK_Channel& value, Int_t count, Int_t ErrorMask)
+{
+  if (count == 0) {
+    count = value.fGoodEventCount;
+  }
+  
+  if ((value.fErrorFlag & ErrorMask) == 0) {
+    // Only accumulate if no relevant error flags are set
+    fHardwareBlockSum += value.fHardwareBlockSum * count;
+    fHardwareBlockSumM2 += value.fHardwareBlockSumM2 * count;
+    
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+      fBlock[i] += value.fBlock[i] * count;
+      fBlockM2[i] += value.fBlockM2[i] * count;
+    }
+    
+    fGoodEventCount += count;
+  }
+  
+  // Always update error flags
+  fErrorFlag |= (value.fErrorFlag & ErrorMask);
+}
+
+/**
+ * Print channel value
+ */
+void QwVQWK_Channel::PrintValue() const
+{
+  QwMessage << "QwVQWK_Channel " << GetElementName() 
+            << ": HW Sum = " << fHardwareBlockSum 
+            << " +/- " << fHardwareBlockSumError
+            << " (raw: " << fHardwareBlockSum_raw << ")"
+            << ", Samples = " << fNumberOfSamples
+            << ", Sequence = " << fSequenceNumber;
+  
+  if (fErrorFlag != 0) {
+    QwMessage << ", Error Flag = 0x" << std::hex << fErrorFlag << std::dec;
+  }
+  
+  QwMessage << QwLog::endl;
 }

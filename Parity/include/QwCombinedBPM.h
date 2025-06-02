@@ -147,6 +147,8 @@ class QwCombinedBPM : public VQwBPM {
   void    ConstructBranch(TTree *tree, TString &prefix);
   void    ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
   void    FillTreeVector(std::vector<Double_t> &values) const;
+  void    ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix);
+  void    FillRNTupleVector(std::vector<Double_t>& values) const;
 
 //------------------------------------------------------------------------------------------------
   void    RandomizeEventData(int helicity = 0, double time = 0.0);

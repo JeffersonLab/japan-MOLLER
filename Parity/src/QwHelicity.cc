@@ -1457,11 +1457,20 @@ void  QwHelicity::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile&
 
 void  QwHelicity::FillTreeVector(std::vector<Double_t> &values) const
 {
-
   size_t index=fTreeArrayIndex;
+  
+  // Add bounds checking to prevent segmentation fault
   if(fHistoType==kHelSaveMPS)
     {
-      // values[index++] = fHelicityActual;
+      size_t required_size = index + 6 + fWord.size(); // 6 basic fields (actual_helicity commented out) + word array
+      if (values.size() < required_size) {
+        QwError << "QwHelicity::FillTreeVector: Vector too small! Required: " 
+                << required_size << ", Available: " << values.size() 
+                << ", Starting index: " << index << QwLog::endl;
+        return;
+      }
+      
+      // values[index++] = fHelicityActual;  // commented out to match ConstructBranchAndVector
       values[index++] = fHelicityDelayed;
       values[index++] = fHelicityReported;
       values[index++] = fPatternPhaseNumber;
@@ -1473,6 +1482,14 @@ void  QwHelicity::FillTreeVector(std::vector<Double_t> &values) const
     }
   else if(fHistoType==kHelSavePattern)
     {
+      size_t required_size = index + 6 + fWord.size(); // 6 basic fields + word array
+      if (values.size() < required_size) {
+        QwError << "QwHelicity::FillTreeVector: Vector too small! Required: " 
+                << required_size << ", Available: " << values.size() 
+                << ", Starting index: " << index << QwLog::endl;
+        return;
+      }
+      
       values[index++] = fHelicityActual;
       values[index++] = fActualPatternPolarity;
       values[index++] = fPreviousPatternPolarity;

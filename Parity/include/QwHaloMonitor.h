@@ -25,6 +25,8 @@ class QwRNTuple;
 class QwDBInterface;
 #endif // __USE_DATABASE__
 
+class QwRNTuple;
+
 /*****************************************************************
 *  Class: QwHaloMonitor handles the halo counters. This use
           QwSIS3801_Channel scaler channels.

@@ -539,6 +539,28 @@ void QwBCM<T>::FillTreeVector(std::vector<Double_t> &values) const
     }
 }
 
+template<typename T>
+void QwBCM<T>::ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix)
+{
+  if (this->GetElementName()==""){
+    //  This channel is not used, so skip constructing RNTuple fields.
+  } else
+    {
+      fBeamCurrent.ConstructRNTupleFields(rntuple, prefix);
+    }
+}
+
+template<typename T>
+void QwBCM<T>::FillRNTupleVector(std::vector<Double_t>& values) const
+{
+  if (this->GetElementName()==""){
+    //  This channel is not used, so skip filling the vector.
+  } else
+    {
+      fBeamCurrent.FillRNTupleVector(values);
+    }
+}
+
 #ifdef __USE_DATABASE__
 template<typename T>
 std::vector<QwDBInterface> QwBCM<T>::GetDBEntry()

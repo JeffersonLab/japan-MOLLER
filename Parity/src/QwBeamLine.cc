@@ -2440,7 +2440,7 @@ void QwBeamLine::ConstructBranchAndVector(TTree *tree, TString & prefix, std::ve
     fHaloMonitor[i].ConstructBranchAndVector(tree, prefix, values);
   for(size_t i = 0; i <fBCMCombo.size();i++)
     fBCMCombo[i].get()->ConstructBranchAndVector(tree, prefix, values);
-  for(size_t i = 0; i <fBPMCombo.size();i)
+  for(size_t i = 0; i <fBPMCombo.size();i++)
     fBPMCombo[i].get()->ConstructBranchAndVector(tree, prefix, values);
   for(size_t i = 0; i <fECalculator.size();i++)
     fECalculator[i].ConstructBranchAndVector(tree, prefix, values);
@@ -2462,7 +2462,7 @@ void QwBeamLine::ConstructBranch(TTree *tree, TString & prefix)
   for(size_t i = 0; i < fBCM.size(); i++)
     fBCM[i].get()->ConstructBranch(tree, prefix);
   for(size_t i = 0; i <fCavity.size(); i++)
-    fStripline[i].get()->ConstructBranch(tree, prefix);
+    fCavity[i].ConstructBranch(tree, prefix);
   for(size_t i = 0; i < fHaloMonitor.size(); i++)
     fHaloMonitor[i].ConstructBranch(tree, prefix);
   for(size_t i = 0; i <fBCMCombo.size();i++)

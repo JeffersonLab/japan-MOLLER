@@ -16,6 +16,7 @@
 #include "QwHelicity.h"
 #include "QwBlinder.h"
 #include "VQwDataElement.h"
+#include "QwRNTupleFile.h"
 
 #include "QwPromptSummary.h"
 
@@ -926,6 +927,34 @@ void QwHelicityPattern::FillTreeVector(std::vector<Double_t> &values) const
       fAsymmetry2.FillTreeVector(values);
     }
   }
+}
+
+void QwHelicityPattern::ConstructRNTupleFields(QwRNTuple *ntuple, TString &prefix)
+{
+  TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length())+"BurstCounter";
+  ntuple->AddField<UShort_t>(basename.Data());
+  
+  TString newprefix = "yield_" + prefix;
+  fYield.ConstructRNTupleFields(ntuple, newprefix);
+  newprefix = "asym_" + prefix;
+  fAsymmetry.ConstructRNTupleFields(ntuple, newprefix);
+
+  if (fEnableDifference) {
+    newprefix = "diff_" + prefix;
+    fDifference.ConstructRNTupleFields(ntuple, newprefix);
+  }
+  if (fEnableAlternateAsym) {
+    newprefix = "asym1_" + prefix;
+    fAsymmetry1.ConstructRNTupleFields(ntuple, newprefix);
+    newprefix = "asym2_" + prefix;
+    fAsymmetry2.ConstructRNTupleFields(ntuple, newprefix);
+  }
+}
+
+void QwHelicityPattern::FillRNTupleVector(std::vector<Double_t> &values) const
+{
+  // Delegate to existing FillTreeVector implementation
+  FillTreeVector(values);
 }
 
 #ifdef __USE_DATABASE__

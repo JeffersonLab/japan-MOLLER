@@ -363,6 +363,14 @@ class QwRootFile {
     /// Create a new tree with name and description
     void NewTree(const std::string& name, const std::string& desc) {
       if (IsTreeDisabled(name)) return;
+      
+      // Check if RNTuple mode is enabled
+      if (fUseRNTuple) {
+        QwMessage << "Creating RNTuple instead of TTree for: " << name << QwLog::endl;
+        NewRNTuple(name, desc);
+        return;
+      }
+      
       this->cd();
       QwRootTree *tree = 0;
       if (! HasTreeByName(name)) {
@@ -381,12 +389,22 @@ class QwRootFile {
 
     /// Fill the tree with name
     Int_t FillTree(const std::string& name) {
+      // Check if RNTuple mode is enabled
+      if (fUseRNTuple) {
+        return FillRNTuple(name);
+      }
+      
       if (! HasTreeByName(name)) return 0;
       else return fTreeByName[name].front()->Fill();
     }
 
     /// Fill all registered trees
     Int_t FillTrees() {
+      // Check if RNTuple mode is enabled
+      if (fUseRNTuple) {
+        return FillRNTuples();
+      }
+      
       // Loop over all registered tree names
       Int_t retval = 0;
       std::map< const std::string, std::vector<QwRootTree*> >::iterator iter;
@@ -716,6 +734,13 @@ void QwRootFile::ConstructTreeBranches(
   // Return if we do not want this tree information
   if (IsTreeDisabled(name)) return;
 
+  // Check if RNTuple mode is enabled
+  if (fUseRNTuple) {
+    QwMessage << "Using RNTuple for tree branches: " << name << QwLog::endl;
+    ConstructRNTupleFields(name, desc, object, prefix);
+    return;
+  }
+
   // Pointer to new tree
   QwRootTree* tree = 0;
 
@@ -769,6 +794,12 @@ void QwRootFile::FillTreeBranches(
         const std::string& name,
         const T& object)
 {
+  // Check if RNTuple mode is enabled
+  if (fUseRNTuple) {
+    FillRNTupleFields(name, object);
+    return;
+  }
+
   // If this name has no registered trees
   if (! HasTreeByName(name)) return;
   // If this type has no registered trees
@@ -794,6 +825,12 @@ template < class T >
 void QwRootFile::FillTreeBranches(
         const T& object)
 {
+  // Check if RNTuple mode is enabled
+  if (fUseRNTuple) {
+    FillRNTupleFields(object);
+    return;
+  }
+
   // If this address has no registered trees
   if (! HasTreeByAddr(object)) return;
 

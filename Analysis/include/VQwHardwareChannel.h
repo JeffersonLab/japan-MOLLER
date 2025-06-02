@@ -23,6 +23,7 @@ class TTree;
 class QwDBInterface;
 class QwParameterFile;
 class QwErrDBInterface;
+class QwRNTuple;
 
 class VQwHardwareChannel: public VQwDataElement {
 /****************************************************************//**
@@ -197,6 +198,9 @@ public:
   virtual void ConstructBranch(TTree *tree, TString &prefix) = 0;
   void ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
   virtual void FillTreeVector(std::vector<Double_t>& values) const = 0;
+  
+  /// \brief Construct RNTuple fields for this hardware channel
+  virtual void ConstructRNTupleFields(class QwRNTuple* rntuple, const TString& prefix) = 0;
 
   virtual void CopyParameters(const VQwHardwareChannel* valueptr){};
 

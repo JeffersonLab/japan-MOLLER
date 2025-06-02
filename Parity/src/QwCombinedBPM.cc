@@ -1127,6 +1127,50 @@ void  QwCombinedBPM<T>::FillTreeVector(std::vector<Double_t> &values) const
 }
 
 template<typename T>
+void  QwCombinedBPM<T>::ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix)
+{
+  if (this->GetElementName()==""){
+    //  This channel is not used, so skip constructing RNTuple fields.
+  } else {
+    TString thisprefix = prefix;
+    if(prefix.Contains("asym_"))
+      thisprefix.ReplaceAll("asym_","diff_");
+    
+    // Set root save status similar to other methods
+    TString mutablePrefix = prefix; // Create a mutable copy
+    this->SetRootSaveStatus(mutablePrefix);
+    
+    fEffectiveCharge.ConstructRNTupleFields(rntuple, prefix);
+    
+    for(Short_t axis=kXAxis;axis<kNumAxes;axis++){
+      fSlope[axis].ConstructRNTupleFields(rntuple, thisprefix);
+      fIntercept[axis].ConstructRNTupleFields(rntuple, thisprefix);
+      fAbsPos[axis].ConstructRNTupleFields(rntuple, thisprefix);
+      fMinimumChiSquare[axis].ConstructRNTupleFields(rntuple, thisprefix);
+    }
+  }
+  return;
+}
+
+template<typename T>
+void  QwCombinedBPM<T>::FillRNTupleVector(std::vector<Double_t>& values) const
+{
+  if (this->GetElementName()==""){
+    //  This channel is not used, so skip filling the vector.
+  } else {
+    fEffectiveCharge.FillRNTupleVector(values);
+    
+    for(Short_t axis=kXAxis;axis<kNumAxes;axis++){
+      fSlope[axis].FillRNTupleVector(values);
+      fIntercept[axis].FillRNTupleVector(values);
+      fAbsPos[axis].FillRNTupleVector(values);
+      fMinimumChiSquare[axis].FillRNTupleVector(values);
+    }
+  }
+  return;
+}
+
+template<typename T>
 void QwCombinedBPM<T>::SetEventCutMode(Int_t bcuts)
 {
 

@@ -21,6 +21,7 @@ using std::string;
 
 // Forward declarations
 class QwParityDB;
+class QwRNTuple;
 
 
 class QwEPICSEvent
@@ -101,6 +102,11 @@ class QwEPICSEvent
   void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values);
   /// \brief Fill the tree vector
   void FillTreeVector(std::vector<Double_t>& values) const;
+
+  /// \brief Construct the RNTuple fields
+  void ConstructRNTupleFields(QwRNTuple *ntuple, TString& prefix);
+  /// \brief Fill the RNTuple vector
+  void FillRNTupleVector(std::vector<Double_t>& values) const;
 
 
  public:

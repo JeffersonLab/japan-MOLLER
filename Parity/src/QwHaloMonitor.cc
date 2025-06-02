@@ -134,7 +134,6 @@ void QwHaloMonitor::PrintInfo() const
 }
 
 Bool_t QwHaloMonitor::CheckForBurpFail(const VQwDataElement *ev_error){
-  Short_t i=0;
   Bool_t burpstatus = kFALSE;
   try {
     if(typeid(*ev_error)==typeid(*this)) {

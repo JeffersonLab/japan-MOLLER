@@ -87,6 +87,10 @@ class QwCombinedBCM : public QwBCM<T> {
   VQwBCM& operator=  (const VQwBCM &value);
   QwCombinedBCM& operator=  (const QwCombinedBCM &value);
 
+  // Override RNTuple methods
+  void  ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix);
+  void  FillRNTupleVector(std::vector<Double_t>& values) const;
+
   /*
   void AccumulateRunningSum(const VQwBCM &value);
   void DeaccumulateRunningSum(VQwBCM &value);

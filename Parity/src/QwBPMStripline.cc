@@ -1116,7 +1116,9 @@ void QwBPMStripline<T>::RandomizeEventData(int helicity, double time)
 
 template<typename T>
 void QwBPMStripline<T>::SetMockDataAsDiff() {
-  this->SetMockDataAsDiff();
+  for(size_t i=kXAxis;i<kNumAxes;i++){
+    fAbsPos[i].SetMockDataAsDiff();
+  }
 }
 
 
@@ -1301,3 +1303,58 @@ template class QwBPMStripline<QwVQWK_Channel>;
 template class QwBPMStripline<QwSIS3801_Channel>; 
 template class QwBPMStripline<QwSIS3801D24_Channel>;
 template class QwBPMStripline<QwMollerADC_Channel>;
+
+template<typename T>
+void QwBPMStripline<T>::ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix)
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip constructing RNTuple fields.
+  }
+  else {
+    TString thisprefix = prefix;
+    if(prefix.Contains("asym_"))
+      thisprefix.ReplaceAll("asym_","diff_");
+
+    TString mutablePrefix = prefix; // Create a mutable copy
+    SetRootSaveStatus(mutablePrefix);
+
+    fEffectiveCharge.ConstructRNTupleFields(rntuple, prefix);
+    fEllipticity.ConstructRNTupleFields(rntuple, prefix);
+    
+    Short_t i = 0;
+    if(bFullSave) {
+      for(i=0; i<4; i++) fWire[i].ConstructRNTupleFields(rntuple, thisprefix);
+    }
+    
+    for(i=kXAxis; i<kNumAxes; i++) {
+      // Do not output the relative positions to RNTuples (following the pattern from ConstructBranch)
+      // fRelPos[i].ConstructRNTupleFields(rntuple, thisprefix);
+      fAbsPos[i].ConstructRNTupleFields(rntuple, thisprefix);
+    }
+  }
+  return;
+}
+
+template<typename T>
+void QwBPMStripline<T>::FillRNTupleVector(std::vector<Double_t>& values) const
+{
+  if (GetElementName()=="") {
+    //  This channel is not used, so skip filling the vector.
+  }
+  else {
+    fEffectiveCharge.FillRNTupleVector(values);
+    fEllipticity.FillRNTupleVector(values);
+    
+    Short_t i = 0;
+    if(bFullSave) {
+      for(i=0; i<4; i++) fWire[i].FillRNTupleVector(values);
+    }
+    
+    for(i=kXAxis; i<kNumAxes; i++) {
+      // Do not output the relative positions to RNTuples (following the pattern from FillTreeVector)
+      // fRelPos[i].FillRNTupleVector(values);
+      fAbsPos[i].FillRNTupleVector(values);
+    }
+  }
+  return;
+}
