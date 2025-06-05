@@ -1,6 +1,6 @@
 void analyze_all_rntuples() {
     // Open the ROOT file
-    TFile* file = TFile::Open("4_rntuple.root", "READ");
+    TFile* file = TFile::Open("../4_rntuple.root", "READ");
     if (!file || file->IsZombie()) {
         cout << "Error: Could not open file 4_rntuple.root" << endl;
         return;
@@ -33,7 +33,7 @@ void analyze_all_rntuples() {
         
         try {
             // Open the RNTuple reader
-            auto reader = ROOT::RNTupleReader::Open(name, "4_rntuple.root");
+            auto reader = ROOT::RNTupleReader::Open(name, "../4_rntuple.root");
             
             // Get the descriptor
             const auto& descriptor = reader->GetDescriptor();

@@ -8,7 +8,7 @@
 
 void inspect_fields() {
     // Open the ROOT file
-    TFile* file = TFile::Open("4_rntuple.root", "READ");
+    TFile* file = TFile::Open("../4_rntuple.root", "READ");
     if (!file || file->IsZombie()) {
         std::cout << "Error: Could not open file 4_rntuple.root" << std::endl;
         return;
@@ -32,7 +32,7 @@ void inspect_fields() {
             
             try {
                 // Open the RNTuple reader
-                auto reader = ROOT::RNTupleReader::Open(keyName, "4_rntuple.root");
+                auto reader = ROOT::RNTupleReader::Open(keyName, "../4_rntuple.root");
                 
                 // Get the descriptor to access field information
                 const auto& descriptor = reader->GetDescriptor();

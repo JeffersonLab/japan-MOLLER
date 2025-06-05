@@ -1,5 +1,5 @@
 void check_data_content() {
-    TFile* file = TFile::Open("4_rntuple.root", "READ");
+    TFile* file = TFile::Open("../4_rntuple.root", "READ");
     if (!file || file->IsZombie()) {
         cout << "Error: Could not open file 4_rntuple.root" << endl;
         return;
@@ -8,7 +8,7 @@ void check_data_content() {
     cout << "=== Data Content Analysis ===" << endl;
     
     try {
-        auto reader = ROOT::RNTupleReader::Open("evt", "4_rntuple.root");
+        auto reader = ROOT::RNTupleReader::Open("evt", "../4_rntuple.root");
         
         // Check various fields for non-zero values
         auto cleanData = reader->GetModel().GetDefaultEntry().GetPtr<double>("Coda_CleanData");
