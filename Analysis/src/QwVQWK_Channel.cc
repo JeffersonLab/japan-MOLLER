@@ -986,17 +986,52 @@ void QwVQWK_Channel::ConstructRNTupleFields(QwRNTuple* rntuple, const TString& p
   if (IsNameEmpty()) {
     //  This channel is not used, so skip filling the tree.
   } else {
-    TString basename = GetElementName();
-    if (prefix != "") {
-      basename = prefix + "_" + basename;
-    }
-
-    std::vector<Double_t> value_array;
-    std::shared_ptr<ROOT::RNTupleModel> model = rntuple->GetModel();
-    std::vector<std::shared_ptr<Double_t>> fields;
-    std::string prefix_str(prefix.Data());
+    // Apply same prefix processing as other methods to ensure field name consistency
+    TString prefix_tstring(prefix);
+    TString basename = prefix_tstring(0, (prefix_tstring.First("|") >= 0)? prefix_tstring.First("|"): prefix_tstring.Length()) + GetElementName();
     
-    ConstructRNTupleFields(model, prefix_str, value_array, fields);
+    // Decide what to store based on prefix (matching FillTreeVector logic)
+    SetDataToSaveByPrefix(prefix);
+    
+    // Add fields to the RNTuple using the AddField method, which properly registers them
+    rntuple->AddField<Double_t>(std::string(basename.Data()) + "_hw_sum");
+    
+    if (fDataToSave == kMoments) {
+      rntuple->AddField<Double_t>(std::string(basename.Data()) + "_hw_sum_m2");
+      rntuple->AddField<Double_t>(std::string(basename.Data()) + "_hw_sum_err");
+    }
+    
+    rntuple->AddField<Double_t>(std::string(basename.Data()) + "_Device_Error_Code");
+    
+    if (fDataToSave == kRaw) {
+      rntuple->AddField<Double_t>(std::string(basename.Data()) + "_hw_sum_raw");
+      rntuple->AddField<Double_t>(std::string(basename.Data()) + "_sequence_number");
+      rntuple->AddField<Double_t>(std::string(basename.Data()) + "_num_samples");
+      
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        rntuple->AddField<Double_t>(std::string(basename.Data()) + Form("_block%d", i));
+        rntuple->AddField<Double_t>(std::string(basename.Data()) + Form("_block%d_raw", i));
+      }
+    }
+    
+    // Set up the tree array index and number of entries for vector filling
+    fTreeArrayIndex = rntuple->GetVector().size();
+    
+    // Calculate expected number of entries based on what we added
+    fTreeArrayNumEntries = 2; // hw_sum + Device_Error_Code
+    if (fDataToSave == kMoments) {
+      fTreeArrayNumEntries += 2; // hw_sum_m2 + hw_sum_err  
+    }
+    if (fDataToSave == kRaw) {
+      fTreeArrayNumEntries += 3; // hw_sum_raw + sequence_number + num_samples
+      fTreeArrayNumEntries += 2 * fBlocksPerEvent; // block + block_raw for each block
+    }
+    
+    QwVerbose << "QwVQWK_Channel::ConstructRNTupleFields: " << basename 
+              << " fTreeArrayIndex=" << fTreeArrayIndex 
+              << " fTreeArrayNumEntries=" << fTreeArrayNumEntries 
+              << " total vector size=" << rntuple->GetVector().size() 
+              << QwLog::endl;
   }
 }
 
@@ -1009,37 +1044,20 @@ void QwVQWK_Channel::FillRNTupleVector(std::vector<Double_t>& values) const
   if (IsNameEmpty()) {
     // This channel is not used, so skip filling the vector.
   } else {
-    Int_t startindex = values.size();
-    // Reserve space
-    values.resize(startindex + fTreeArrayNumEntries);
-    
-    // Store values based on data to save mode
-    if (fDataToSave == kRaw) {
-      // Raw values
-      Int_t index = 0;
-      values[startindex + index++] = (Double_t) fHardwareBlockSum_raw;
-      
-      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-        values[startindex + index++] = (Double_t) fBlock_raw[i];
+    // Check if RNTuple fields were properly constructed
+    if (fTreeArrayNumEntries <= 0) {
+      // Legacy interface detected - warn and skip to prevent segfault
+      static bool warned = false;
+      if (!warned) {
+        QwError << "QwVQWK_Channel::FillRNTupleVector: Cannot fill RNTuple fields created with legacy interface for " 
+                << GetElementName() << ". fTreeArrayNumEntries=" << fTreeArrayNumEntries << QwLog::endl;
+        warned = true;
       }
-      
-      if (bSequence_number) {
-        values[startindex + index++] = (Double_t) fSequenceNumber;
-      }
-    } 
-    else {
-      // Calibrated values
-      Int_t index = 0;
-      values[startindex + index++] = fHardwareBlockSum;
-      
-      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-        values[startindex + index++] = fBlock[i];
-      }
-      
-      if (bSequence_number) {
-        values[startindex + index++] = (Double_t) fSequenceNumber;
-      }
+      return;
     }
+    
+    // Proceed with standard FillTreeVector() logic since indices are properly set up
+    FillTreeVector(values);
   }
 }
 
@@ -1248,46 +1266,48 @@ void QwVQWK_Channel::ConstructRNTupleFields(std::shared_ptr<ROOT::RNTupleModel> 
   if (IsNameEmpty()) {
     // This channel is not used, so skip setting up RNTuple fields.
   } else {
-    std::string basename = prefix + GetElementName().Data();
+    // Apply same prefix processing as legacy method to ensure field name consistency
+    TString prefix_tstring(prefix.c_str());
+    TString basename = prefix_tstring(0, (prefix_tstring.First("|") >= 0)? prefix_tstring.First("|"): prefix_tstring.Length()) + GetElementName();
     
     // Add the hardware sum field
-    auto field = model->MakeField<Double_t>(basename + "_hw_sum");
+    auto field = model->MakeField<Double_t>(basename.Data() + std::string("_hw_sum"));
     fields.push_back(field);
     vector.push_back(0.0);
     
     if (fDataToSave == kMoments) {
-      auto field_m2 = model->MakeField<Double_t>(basename + "_hw_sum_m2");
+      auto field_m2 = model->MakeField<Double_t>(basename.Data() + std::string("_hw_sum_m2"));
       fields.push_back(field_m2);
       vector.push_back(0.0);
       
-      auto field_err = model->MakeField<Double_t>(basename + "_hw_sum_err");
+      auto field_err = model->MakeField<Double_t>(basename.Data() + std::string("_hw_sum_err"));
       fields.push_back(field_err);
       vector.push_back(0.0);
     }
     
-    auto field_error = model->MakeField<Double_t>(basename + "_Device_Error_Code");
+    auto field_error = model->MakeField<Double_t>(basename.Data() + std::string("_Device_Error_Code"));
     fields.push_back(field_error);
     vector.push_back(0.0);
     
     if (fDataToSave == kRaw) {
-      auto field_raw = model->MakeField<Double_t>(basename + "_hw_sum_raw");
+      auto field_raw = model->MakeField<Double_t>(basename.Data() + std::string("_hw_sum_raw"));
       fields.push_back(field_raw);
       vector.push_back(0.0);
       
-      auto field_seq = model->MakeField<Double_t>(basename + "_sequence_number");
+      auto field_seq = model->MakeField<Double_t>(basename.Data() + std::string("_sequence_number"));
       fields.push_back(field_seq);
       vector.push_back(0.0);
       
-      auto field_samples = model->MakeField<Double_t>(basename + "_num_samples");
+      auto field_samples = model->MakeField<Double_t>(basename.Data() + std::string("_num_samples"));
       fields.push_back(field_samples);
       vector.push_back(0.0);
       
       for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-        auto field_block = model->MakeField<Double_t>(basename + Form("_block%d", i));
+        auto field_block = model->MakeField<Double_t>(basename.Data() + std::string(Form("_block%d", i)));
         fields.push_back(field_block);
         vector.push_back(0.0);
         
-        auto field_block_raw = model->MakeField<Double_t>(basename + Form("_block%d_raw", i));
+        auto field_block_raw = model->MakeField<Double_t>(basename.Data() + std::string(Form("_block%d_raw", i)));
         fields.push_back(field_block_raw);
         vector.push_back(0.0);
       }

@@ -1,0 +1,38 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug QwParity with RNTuple",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/qwparity",
+      "args": [
+        "-r", "4",
+        "--config", "qwparity_simple.conf",
+        "--detectors", "mock_newdets.map",
+        "--datahandlers", "mock_datahandlers.map",
+        "--data", ".",
+        "--rootfiles", ".",
+        "--enable-rntuple"
+      ],
+      "cwd": "${workspaceFolder}",
+      "MIMode": "gdb"
+    },
+    {
+      "name": "Debug QwParity without RNTuple",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/qwparity",
+      "args": [
+        "-r", "4",
+        "--config", "qwparity_simple.conf",
+        "--detectors", "mock_newdets.map",
+        "--datahandlers", "mock_datahandlers.map",
+        "--data", ".",
+        "--rootfiles", "."
+      ],
+      "cwd": "${workspaceFolder}",
+      "MIMode": "gdb"
+    }
+  ]
+}

@@ -20,7 +20,6 @@ using std::type_info;
 #include <ROOT/RNTupleWriter.hxx>
 #include <ROOT/RNTupleReader.hxx>
 #include <ROOT/RField.hxx>
-#include <ROOT/REntry.hxx>
 
 // Qweak headers
 #include "QwOptions.h"
@@ -80,10 +79,6 @@ class QwRNTuple {
       fCurrentEvent(0), fNumEventsCycle(0), fNumEventsToSave(0), fNumEventsToSkip(0) {
       QwMessage << "Existing RNTuple: " << ntuple->GetName() << ", " << ntuple->GetDesc() << QwLog::endl;
       fModel = ntuple->fModel;
-      // Create entry from the model using proper API
-      if (fModel) {
-        fEntry = fModel->CreateEntry();
-      }
     }
 
     /// Constructor with name, description, and object
@@ -105,7 +100,6 @@ class QwRNTuple {
       fCurrentEvent(0), fNumEventsCycle(0), fNumEventsToSave(0), fNumEventsToSkip(0) {
       QwMessage << "Existing RNTuple: " << ntuple->GetName() << ", " << ntuple->GetDesc() << QwLog::endl;
       fModel = ntuple->fModel;
-      // Note: Cannot copy unique_ptr entries, will create new one
 
       // Construct fields and vector
       ConstructFieldsAndVector(object);
@@ -144,9 +138,6 @@ class QwRNTuple {
                 << QwLog::endl;
         exit(-1);
       }
-      
-      // Note: Entry creation is deferred until first Fill() call to ensure
-      // all fields are properly constructed in the model
     }
 
   public:
@@ -172,6 +163,12 @@ class QwRNTuple {
         
         // Store the actual field pointer to keep it alive
         fFieldPtrs.push_back(std::static_pointer_cast<void>(field));
+        
+        // Store field name for mapping
+        fFieldNames.push_back(fieldName);
+        
+        // Store field type for type-aware filling
+        fFieldTypes.push_back(typeid(T).name());
         
         // For Double_t fields, also store in the typed container
         if constexpr (std::is_same_v<T, Double_t>) {
@@ -232,11 +229,22 @@ class QwRNTuple {
       QwMessage << QwLog::endl;
     }
 
+
+
     /// Get the model pointer for low level operations
     std::shared_ptr<ROOT::RNTupleModel> GetModel() const { return fModel; };
 
-    /// Get the entry pointer for low level operations
-    std::unique_ptr<ROOT::REntry>& GetEntry() { return fEntry; };
+    /// Get the vector for data transfer
+    std::vector<Double_t>& GetVector() { return fVector; };
+
+    /// Get the fields for data transfer
+    std::vector<std::shared_ptr<Double_t>>& GetFields() { return fFields; };
+
+    /// Get the field names for data transfer
+    const std::vector<std::string>& GetFieldNames() const { return fFieldNames; }
+    
+    /// Get the field types for type-aware filling
+    const std::vector<std::string>& GetFieldTypes() const { return fFieldTypes; };
 
   friend class QwRNTupleFile;
 
@@ -244,7 +252,6 @@ class QwRNTuple {
 
     /// Model and entry pointers
     std::shared_ptr<ROOT::RNTupleModel> fModel;
-    std::unique_ptr<ROOT::REntry> fEntry;
     
     /// Vector of field values (similar to TTree approach)
     std::vector<Double_t> fVector;
@@ -254,6 +261,12 @@ class QwRNTuple {
     
     /// Vector of field pointers (type-erased) to keep them alive
     std::vector<std::shared_ptr<void>> fFieldPtrs;
+    
+    /// Field name to index mapping for data transfer
+    std::vector<std::string> fFieldNames;
+    
+    /// Field type information for type-aware filling
+    std::vector<std::string> fFieldTypes;
 
     /// Name, description
     const std::string fName;
@@ -373,14 +386,67 @@ class QwRNTupleFile {
     /// Fill the RNTuple with name
     Int_t FillRNTuple(const std::string& name) {
       if (! HasRNTupleByName(name)) return 0;
+      
       // Fill all registered objects for this RNTuple
       std::vector<QwRNTuple*>& ntuples = fRNTupleByName[name];
       for (auto* ntuple : ntuples) {
         ntuple->Fill();
       }
+      
       // Actually write to RNTuple using the writer
-      if (fRNTupleWriters.find(name) != fRNTupleWriters.end()) {
-        return fRNTupleWriters[name]->Fill();
+      if (fRNTupleWriters.find(name) != fRNTupleWriters.end() && 
+          fConsolidatedFields.find(name) != fConsolidatedFields.end()) {
+        
+        // Collect data from all registered ntuples for this RNTuple
+        if (!ntuples.empty()) {
+          try {
+            // Transfer data from QwRNTuple vectors to the writer's consolidated fields
+            const auto& consolidated_fields = fConsolidatedFields[name];
+            
+            for (auto* ntuple : ntuples) {
+              const auto& vector = ntuple->GetVector();
+              const auto& field_names = ntuple->GetFieldNames();
+              const auto& field_types = ntuple->GetFieldTypes();
+              
+              // Transfer each field's data to the corresponding consolidated field
+              for (size_t i = 0; i < std::min({vector.size(), field_names.size(), field_types.size()}); ++i) {
+                const std::string& field_name = field_names[i];
+                const std::string& field_type = field_types[i];
+                
+                auto field_it = consolidated_fields.find(field_name);
+                if (field_it != consolidated_fields.end()) {
+                  // Cast back to the correct type and assign the value
+                  if (field_type == typeid(Double_t).name()) {
+                    auto double_field = std::static_pointer_cast<Double_t>(field_it->second);
+                    if (double_field) {
+                      *double_field = vector[i];
+                      QwVerbose << "Filled field " << field_name << " with value " << vector[i] << QwLog::endl;
+                    }
+                  } else if (field_type == typeid(Float_t).name()) {
+                    auto float_field = std::static_pointer_cast<Float_t>(field_it->second);
+                    if (float_field) {
+                      *float_field = static_cast<Float_t>(vector[i]);
+                    }
+                  } else if (field_type == typeid(Int_t).name()) {
+                    auto int_field = std::static_pointer_cast<Int_t>(field_it->second);
+                    if (int_field) {
+                      *int_field = static_cast<Int_t>(vector[i]);
+                    }
+                  }
+                  // Add more types as needed
+                } else {
+                  QwVerbose << "Field " << field_name << " not found in consolidated fields" << QwLog::endl;
+                }
+              }
+            }
+            
+            // Fill the entry - the writer will use the consolidated field pointers
+            return fRNTupleWriters[name]->Fill();
+            
+          } catch (const std::exception& e) {
+            QwError << "Exception in FillRNTuple for " << name << ": " << e.what() << QwLog::endl;
+          }
+        }
       }
       return 0;
     }
@@ -472,6 +538,7 @@ class QwRNTupleFile {
     /// RNTuple containers
     std::map<const std::string, std::vector<QwRNTuple*>> fRNTupleByName;
     std::map<const std::string, std::unique_ptr<ROOT::RNTupleWriter>> fRNTupleWriters;
+    std::map<const std::string, std::map<std::string, std::shared_ptr<void>>> fConsolidatedFields;
     std::set<std::string> fDisabledRNTuples;
 
     /// Directory management (same as QwRootFile)
@@ -490,17 +557,55 @@ class QwRNTupleFile {
     void CreateRNTupleWriter(const std::string& name) {
       if (fRNTupleWriters.find(name) == fRNTupleWriters.end() && 
           HasRNTupleByName(name) && !fRNTupleByName[name].empty()) {
-        auto source_model = fRNTupleByName[name].front()->GetModel();
-        if (source_model && fRootFile) {
+        if (fRootFile) {
           try {
-            // Create a new model with same structure for the writer
-            std::unique_ptr<ROOT::RNTupleModel> writer_model = ROOT::RNTupleModel::Create();
+            QwMessage << "Creating RNTuple writer for " << name 
+                      << " using consolidated model to file " << fRootFile->GetName() << QwLog::endl;
             
-            // Create writer with the new model
-            fRNTupleWriters[name] = std::unique_ptr<ROOT::RNTupleWriter>(
-              ROOT::RNTupleWriter::Append(std::move(writer_model), name, *fRootFile).release());
+            // Create a new model for the writer since ROOT requires unique ownership
+            auto writer_model = ROOT::RNTupleModel::Create();
             
-            QwMessage << "RNTuple writer created for " << name << QwLog::endl;
+            // Consolidate all field definitions from QwRNTuple objects into the writer's model
+            // This is necessary because RNTupleWriter requires exclusive ownership of the model
+            std::map<std::string, std::shared_ptr<void>> consolidated_fields;
+            
+            for (auto* qw_ntuple : fRNTupleByName[name]) {
+              const auto& field_names = qw_ntuple->GetFieldNames();
+              const auto& field_types = qw_ntuple->GetFieldTypes();
+              
+              for (size_t i = 0; i < field_names.size(); ++i) {
+                const std::string& field_name = field_names[i];
+                const std::string& field_type = field_types[i];
+                
+                // Avoid duplicate fields (multiple QwRNTuple objects may define the same fields)
+                if (consolidated_fields.find(field_name) == consolidated_fields.end()) {
+                  // Add field to writer model based on type
+                  if (field_type == typeid(Double_t).name()) {
+                    auto field_ptr = writer_model->MakeField<Double_t>(field_name);
+                    consolidated_fields[field_name] = std::static_pointer_cast<void>(field_ptr);
+                  } else if (field_type == typeid(Float_t).name()) {
+                    auto field_ptr = writer_model->MakeField<Float_t>(field_name);
+                    consolidated_fields[field_name] = std::static_pointer_cast<void>(field_ptr);
+                  } else if (field_type == typeid(Int_t).name()) {
+                    auto field_ptr = writer_model->MakeField<Int_t>(field_name);
+                    consolidated_fields[field_name] = std::static_pointer_cast<void>(field_ptr);
+                  }
+                  // Add more types as needed
+                  QwVerbose << "Added field " << field_name << " of type " << field_type 
+                           << " to writer model" << QwLog::endl;
+                }
+              }
+            }
+            
+            // Store consolidated field pointers for data transfer during Fill operations
+            fConsolidatedFields[name] = std::move(consolidated_fields);
+            
+            // Now create the writer with the properly constructed model
+            // ROOT::RNTupleWriter takes unique ownership of the model via std::move
+            fRNTupleWriters[name] = ROOT::RNTupleWriter::Append(std::move(writer_model), name, *fRootFile);
+            
+            QwMessage << "RNTuple writer created for " << name 
+                      << " writing to " << fRootFile->GetName() << QwLog::endl;
           } catch (const std::exception& e) {
             QwError << "Exception creating RNTuple writer for " << name << ": " 
                    << e.what() << QwLog::endl;

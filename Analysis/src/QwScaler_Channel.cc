@@ -876,32 +876,34 @@ void QwScaler_Channel<data_mask,data_shift>::ConstructRNTupleFields(std::shared_
   // Decide what to store based on prefix
   SetDataToSaveByPrefix(TString(prefix.c_str()));
   
-  std::string basename = prefix + GetElementName().Data();
+  // Apply same prefix processing as legacy method to ensure field name consistency
+  TString prefix_tstring(prefix.c_str());
+  TString basename = prefix_tstring(0, (prefix_tstring.First("|") >= 0)? prefix_tstring.First("|"): prefix_tstring.Length()) + GetElementName();
   
   // Track starting index for this channel
   fTreeArrayIndex = vector.size();
   
   // Add fields matching the TTree structure
-  fields.push_back(model->MakeField<Double_t>(basename + "_value"));
+  fields.push_back(model->MakeField<Double_t>(basename.Data() + std::string("_value")));
   vector.push_back(0.0);
   
   if (fDataToSave == kMoments) {
-    fields.push_back(model->MakeField<Double_t>(basename + "_value_m2"));
+    fields.push_back(model->MakeField<Double_t>(basename.Data() + std::string("_value_m2")));
     vector.push_back(0.0);
-    fields.push_back(model->MakeField<Double_t>(basename + "_value_err"));
+    fields.push_back(model->MakeField<Double_t>(basename.Data() + std::string("_value_err")));
     vector.push_back(0.0);
-    fields.push_back(model->MakeField<Double_t>(basename + "_num_samples"));
+    fields.push_back(model->MakeField<Double_t>(basename.Data() + std::string("_num_samples")));
     vector.push_back(0.0);
   }
   
-  fields.push_back(model->MakeField<Double_t>(basename + "_Device_Error_Code"));
+  fields.push_back(model->MakeField<Double_t>(basename.Data() + std::string("_Device_Error_Code")));
   vector.push_back(0.0);
   
   if (fDataToSave == kRaw) {
-    fields.push_back(model->MakeField<Double_t>(basename + "_raw"));
+    fields.push_back(model->MakeField<Double_t>(basename.Data() + std::string("_raw")));
     vector.push_back(0.0);
     if ((~data_mask) != 0) {
-      fields.push_back(model->MakeField<Double_t>(basename + "_header"));
+      fields.push_back(model->MakeField<Double_t>(basename.Data() + std::string("_header")));
       vector.push_back(0.0);
     }
   }
@@ -912,7 +914,34 @@ void QwScaler_Channel<data_mask,data_shift>::ConstructRNTupleFields(std::shared_
 template<unsigned int data_mask, unsigned int data_shift>
 void QwScaler_Channel<data_mask,data_shift>::FillRNTupleVector(std::vector<Double_t> &values) const
 {
-  // Reuse existing tree vector filling logic
+  if (IsNameEmpty()) {
+    //  This channel is not used, so skip filling the RNTuple vector.
+    return;
+  }
+  
+  if (fTreeArrayNumEntries <= 0) {
+    // If fTreeArrayNumEntries is not set (legacy interface), we need to determine
+    // the field order manually to match what was created in ConstructRNTupleFields
+    static bool warned = false;
+    if (!warned) {
+      QwError << "QwScaler_Channel::FillRNTupleVector: Cannot fill RNTuple fields created with legacy interface" << QwLog::endl;
+      QwError << "Element: " << GetElementName() << " - RNTuple field creation and filling interfaces are mismatched" << QwLog::endl;
+      QwError << "Use ConstructRNTupleFields(model, prefix, vector, fields) instead of ConstructRNTupleFields(rntuple, prefix)" << QwLog::endl;
+      warned = true;
+    }
+    return;
+  }
+  
+  if (values.size() < fTreeArrayIndex + fTreeArrayNumEntries) {
+    QwError << "QwScaler_Channel::FillRNTupleVector:  values.size()=="
+            << values.size()
+            << "; fTreeArrayIndex+fTreeArrayNumEntries=="
+            << fTreeArrayIndex+fTreeArrayNumEntries
+            << QwLog::endl;
+    return;
+  }
+
+  // Reuse existing tree vector filling logic since the new interface sets up the indices properly
   FillTreeVector(values);
 }
 

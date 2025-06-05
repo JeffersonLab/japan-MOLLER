@@ -1,0 +1,15 @@
+[31mError: Environment variable QW_PRMINPUT undefined![0m
+[31mWarning: [0mUsing current directory instead.
+. is a directory; adding it to the search path
+[31mError: Environment variable QWANALYSIS undefined![0m
+[31mWarning: [0mUsing current directory instead.
+./Parity/prminput is a directory; adding it to the search path
+[31mError: Environment variable QWANALYSIS undefined![0m
+[31mWarning: [0mUsing current directory instead.
+./Analysis/prminput is a directory; adding it to the search path
+Adding user-defined configuration file qwparity.conf
+Adding user-defined configuration file qweak_mysql.conf
+Config files:
+qwparity.conf
+qweak_mysql.conf
+[31mError: Could not find any parameter file with name qwparity.conf. Parameter file will remain empty.[0m

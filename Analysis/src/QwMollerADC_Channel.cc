@@ -965,7 +965,9 @@ void QwMollerADC_Channel::ConstructRNTupleFields(std::shared_ptr<ROOT::RNTupleMo
   //  Decide what to store based on prefix
   SetDataToSaveByPrefix(TString(prefix.c_str()));
 
-  std::string basename = prefix + GetElementName().Data();
+  // Apply same prefix processing as legacy method to ensure field name consistency
+  TString prefix_tstring(prefix.c_str());
+  TString basename = prefix_tstring(0, (prefix_tstring.First("|") >= 0)? prefix_tstring.First("|"): prefix_tstring.Length()) + GetElementName();
 
   bHw_sum =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum");
   bHw_sum_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum_raw");
@@ -977,91 +979,91 @@ void QwMollerADC_Channel::ConstructRNTupleFields(std::shared_ptr<ROOT::RNTupleMo
 
   fTreeArrayIndex = vector.size();
 
-  if (gQwHists.MatchDeviceParamsFromList(basename.c_str())
+  if (gQwHists.MatchDeviceParamsFromList(basename.Data())
     && (bHw_sum || bBlock || bNum_samples || bDevice_Error_Code ||
         bHw_sum_raw || bBlock_raw || bSequence_number)) {
 
     if (bHw_sum) {
-      auto field_hw_sum = model->MakeField<Double_t>(basename + "_hw_sum");
+      auto field_hw_sum = model->MakeField<Double_t>(basename.Data() + std::string("_hw_sum"));
       fields.push_back(field_hw_sum);
       vector.push_back(0.0);
       if (fDataToSave == kMoments) {
-        auto field_hw_sum_m2 = model->MakeField<Double_t>(basename + "_hw_sum_m2");
+        auto field_hw_sum_m2 = model->MakeField<Double_t>(basename.Data() + std::string("_hw_sum_m2"));
         fields.push_back(field_hw_sum_m2);
         vector.push_back(0.0);
-        auto field_hw_sum_err = model->MakeField<Double_t>(basename + "_hw_sum_err");
+        auto field_hw_sum_err = model->MakeField<Double_t>(basename.Data() + std::string("_hw_sum_err"));
         fields.push_back(field_hw_sum_err);
         vector.push_back(0.0);
       }
     }
 
     if (bBlock) {
-      auto field_block0 = model->MakeField<Double_t>(basename + "_block0");
+      auto field_block0 = model->MakeField<Double_t>(basename.Data() + std::string("_block0"));
       fields.push_back(field_block0);
       vector.push_back(0.0);
-      auto field_block1 = model->MakeField<Double_t>(basename + "_block1");
+      auto field_block1 = model->MakeField<Double_t>(basename.Data() + std::string("_block1"));
       fields.push_back(field_block1);
       vector.push_back(0.0);
-      auto field_block2 = model->MakeField<Double_t>(basename + "_block2");
+      auto field_block2 = model->MakeField<Double_t>(basename.Data() + std::string("_block2"));
       fields.push_back(field_block2);
       vector.push_back(0.0);
-      auto field_block3 = model->MakeField<Double_t>(basename + "_block3");
+      auto field_block3 = model->MakeField<Double_t>(basename.Data() + std::string("_block3"));
       fields.push_back(field_block3);
       vector.push_back(0.0);
     }
 
     if (bNum_samples) {
-      auto field_num_samples = model->MakeField<Double_t>(basename + "_num_samples");
+      auto field_num_samples = model->MakeField<Double_t>(basename.Data() + std::string("_num_samples"));
       fields.push_back(field_num_samples);
       vector.push_back(0.0);
     }
 
     if (bDevice_Error_Code) {
-      auto field_device_error = model->MakeField<Double_t>(basename + "_Device_Error_Code");
+      auto field_device_error = model->MakeField<Double_t>(basename.Data() + std::string("_Device_Error_Code"));
       fields.push_back(field_device_error);
       vector.push_back(0.0);
     }
 
     if (fDataToSave == kRaw) {
       if (bHw_sum_raw) {
-        auto field_hw_sum_raw = model->MakeField<Double_t>(basename + "_hw_sum_raw");
+        auto field_hw_sum_raw = model->MakeField<Double_t>(basename.Data() + std::string("_hw_sum_raw"));
         fields.push_back(field_hw_sum_raw);
         vector.push_back(0.0);
       }
       if (bBlock_raw) {
-        auto field_block0_raw = model->MakeField<Double_t>(basename + "_block0_raw");
+        auto field_block0_raw = model->MakeField<Double_t>(basename.Data() + std::string("_block0_raw"));
         fields.push_back(field_block0_raw);
         vector.push_back(0.0);
-        auto field_block1_raw = model->MakeField<Double_t>(basename + "_block1_raw");
+        auto field_block1_raw = model->MakeField<Double_t>(basename.Data() + std::string("_block1_raw"));
         fields.push_back(field_block1_raw);
         vector.push_back(0.0);
-        auto field_block2_raw = model->MakeField<Double_t>(basename + "_block2_raw");
+        auto field_block2_raw = model->MakeField<Double_t>(basename.Data() + std::string("_block2_raw"));
         fields.push_back(field_block2_raw);
         vector.push_back(0.0);
-        auto field_block3_raw = model->MakeField<Double_t>(basename + "_block3_raw");
+        auto field_block3_raw = model->MakeField<Double_t>(basename.Data() + std::string("_block3_raw"));
         fields.push_back(field_block3_raw);
         vector.push_back(0.0);
       }
 
       for(int i = 0; i < 4; i++){
         if (bBlock_raw) {
-          auto field_SumSq1 = model->MakeField<Double_t>(basename + "_SumSq1_" + std::to_string(i));
+          auto field_SumSq1 = model->MakeField<Double_t>(basename.Data() + std::string("_SumSq1_") + std::to_string(i));
           fields.push_back(field_SumSq1);
           vector.push_back(0.0);
-          auto field_SumSq2 = model->MakeField<Double_t>(basename + "_SumSq2_" + std::to_string(i));
+          auto field_SumSq2 = model->MakeField<Double_t>(basename.Data() + std::string("_SumSq2_") + std::to_string(i));
           fields.push_back(field_SumSq2);
           vector.push_back(0.0);
-          auto field_RawMin = model->MakeField<Double_t>(basename + "_RawMin_" + std::to_string(i));
+          auto field_RawMin = model->MakeField<Double_t>(basename.Data() + std::string("_RawMin_") + std::to_string(i));
           fields.push_back(field_RawMin);
           vector.push_back(0.0);
-          auto field_RawMax = model->MakeField<Double_t>(basename + "_RawMax_" + std::to_string(i));
+          auto field_RawMax = model->MakeField<Double_t>(basename.Data() + std::string("_RawMax_") + std::to_string(i));
           fields.push_back(field_RawMax);
           vector.push_back(0.0);
         }
       }
 
       if (bSequence_number) {
-        auto field_sequence_number = model->MakeField<Double_t>(basename + "_sequence_number");
+        auto field_sequence_number = model->MakeField<Double_t>(basename.Data() + std::string("_sequence_number"));
         fields.push_back(field_sequence_number);
         vector.push_back(0.0);
       }
@@ -1073,7 +1075,39 @@ void QwMollerADC_Channel::ConstructRNTupleFields(std::shared_ptr<ROOT::RNTupleMo
 
 void QwMollerADC_Channel::FillRNTupleVector(std::vector<Double_t> &values) const
 {
-  // Use the same logic as FillTreeVector - they should be identical
+  if (IsNameEmpty()) {
+    //  This channel is not used, so skip filling the RNTuple vector.
+    return;
+  }
+  
+  if (fTreeArrayNumEntries <= 0) {
+    // If fTreeArrayNumEntries is not set (legacy interface), we need to determine
+    // the field order manually to match what was created in ConstructRNTupleFields
+    if (bDEBUG) std::cerr << "QwMollerADC_Channel::FillRNTupleVector: fTreeArrayNumEntries=="
+              << fTreeArrayNumEntries << " (legacy interface assumed)" << std::endl;
+    
+    // For legacy interface, we don't have array indices set up, so we can't use FillTreeVector
+    // We need to warn about this and skip filling to avoid segmentation fault
+    static bool warned = false;
+    if (!warned) {
+      QwError << "QwMollerADC_Channel::FillRNTupleVector: Cannot fill RNTuple fields created with legacy interface" << QwLog::endl;
+      QwError << "Element: " << GetElementName() << " - RNTuple field creation and filling interfaces are mismatched" << QwLog::endl;
+      QwError << "Use ConstructRNTupleFields(model, prefix, vector, fields) instead of ConstructRNTupleFields(rntuple, prefix)" << QwLog::endl;
+      warned = true;
+    }
+    return;
+  }
+  
+  if (values.size() < fTreeArrayIndex + fTreeArrayNumEntries) {
+    if (bDEBUG) std::cerr << "QwMollerADC_Channel::FillRNTupleVector:  values.size()=="
+              << values.size()
+              << "; fTreeArrayIndex+fTreeArrayNumEntries=="
+              << fTreeArrayIndex+fTreeArrayNumEntries
+              << std::endl;
+    return;
+  }
+
+  // Use the same logic as FillTreeVector since the new interface sets up the indices properly
   this->FillTreeVector(values);
 }
 
