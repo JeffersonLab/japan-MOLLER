@@ -23,6 +23,7 @@
 #include "QwMollerADC_Channel.h"
 
 // Forward declarations
+class QwRNTuple;
 #ifdef __USE_DATABASE__
 class QwDBInterface;
 #endif // __USE_DATABASE__
@@ -114,6 +115,8 @@ class QwEnergyCalculator : public VQwDataElement{
     void    ConstructBranch(TTree *tree, TString &prefix);
     void    ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file);
     void    FillTreeVector(std::vector<Double_t> &values) const;
+    void    ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix);
+    void    FillRNTupleVector(std::vector<Double_t>& values) const;
 
     VQwHardwareChannel* GetEnergy(){
       return &fEnergyChange;

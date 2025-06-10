@@ -14,6 +14,9 @@ Last Modified: August 1, 2018 1:39 PM
 #ifndef VQWDATAHANDLER_H_
 #define VQWDATAHANDLER_H_
 
+// Forward declarations
+class QwRNTuple;
+
 // Qweak headers
 #include "QwHelicityPattern.h"
 #include "QwSubsystemArrayParity.h"
@@ -25,6 +28,7 @@ class QwParameterFile;
 class QwRootFile;
 class QwPromptSummary;
 class QwDataHandlerArray;
+class QwRNTuple;
 
 class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublishable_child<QwDataHandlerArray,VQwDataHandler> {
 
@@ -101,8 +105,17 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
 
     // Fill the vector for this subsystem
     void FillTreeVector(std::vector<Double_t> &values) const;
+    
+    /// \brief Fill the RNTuple vector
+    virtual void FillRNTupleVector(std::vector<Double_t>& values) const {
+      // Default implementation delegates to existing tree method for compatibility
+      FillTreeVector(values);
+    };
 
     void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values);
+    
+    /// \brief Construct the RNTuple fields for this data handler
+    virtual void ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix);
 
     void SetRunLabel(TString x) {
       run_label = x;
@@ -180,6 +193,7 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
    Bool_t fKeepRunningSum;
    Bool_t fRunningsumFillsTree;
    VQwDataHandler *fRunningsum;
+
 };
 
 #endif // VQWDATAHANDLER_H_

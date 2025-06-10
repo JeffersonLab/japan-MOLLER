@@ -25,6 +25,7 @@ class QwDBInterface;
 class QwErrDBInterface;
 #endif // __USE_DATABASE__
 
+class QwRNTuple;
 template<typename T> class QwCombinedBCM;
 template<typename T> class QwBCM;
 
@@ -89,6 +90,8 @@ public:
   virtual void ConstructBranch(TTree *tree, TString &prefix) = 0;
   virtual void ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist) = 0;
   virtual void FillTreeVector(std::vector<Double_t> &values) const = 0;
+  virtual void ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix) = 0;
+  virtual void FillRNTupleVector(std::vector<Double_t>& values) const = 0;
 
 //----------------------------------------------------------------------------------------------------------------
   virtual void ApplyResolutionSmearing()

@@ -1,0 +1,102 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "VTune: Hotspots Analysis",
+            "type": "shell",
+            "command": "vtune",
+            "args": [
+                "-collect", "hotspots",
+                "-result-dir", "vtune_results_hotspots",
+                "--", 
+                "./build/qwmockdatagenerator", 
+                "-r", "4", 
+                "-e", "1:20000", 
+                "--config", "Parity/prminput/qwparity_simple.conf",
+                "--detectors", "Parity/prminput/mock_newdets.map",
+                "--data", ".",
+                "--enable-rntuple"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "VTune: Memory Analysis",
+            "type": "shell", 
+            "command": "vtune",
+            "args": [
+                "-collect", "memory-consumption",
+                "-result-dir", "vtune_results_memory",
+                "--",
+                "./build/qwmockdatagenerator",
+                "-r", "4",
+                "-e", "1:20000", 
+                "--config", "Parity/prminput/qwparity_simple.conf",
+                "--detectors", "Parity/prminput/mock_newdets.map",
+                "--data", ".",
+                "--enable-rntuple"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "VTune: Threading Analysis",
+            "type": "shell",
+            "command": "vtune",
+            "args": [
+                "-collect", "threading",
+                "-result-dir", "vtune_results_threading",
+                "--",
+                "./build/qwmockdatagenerator",
+                "-r", "4",
+                "-e", "1:20000",
+                "--config", "Parity/prminput/qwparity_simple.conf",
+                "--detectors", "Parity/prminput/mock_newdets.map",
+                "--data", ".",
+                "--enable-rntuple"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "VTune: Open GUI",
+            "type": "shell",
+            "command": "vtune-gui",
+            "args": [],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": []
+        }
+    ]
+}

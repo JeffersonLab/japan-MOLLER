@@ -24,6 +24,7 @@ using namespace std;
 #include "QwRootFile.h"
 #include "QwVQWK_Channel.h"
 #include "QwPromptSummary.h"
+#include "QwRNTupleFile.h"
 
 #define MYSQLPP_SSQLS_NO_STATICS
 #ifdef __USE_DATABASE__
@@ -546,4 +547,18 @@ void VQwDataHandler::FillDB(QwParityDB *db, TString datatype)
   return;
 }
 #endif // __USE_DATABASE__
+
+/**
+ * Construct RNTuple fields for data handler
+ * Default implementation delegates to the output variables' RNTuple construction
+ */
+void VQwDataHandler::ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix)
+{
+  // Delegate to each output variable to construct its RNTuple fields
+  for (size_t i = 0; i < fOutputVar.size(); ++i) {
+    if (fOutputVar.at(i)) {
+      fOutputVar.at(i)->ConstructRNTupleFields(rntuple, prefix);
+    }
+  }
+}
 

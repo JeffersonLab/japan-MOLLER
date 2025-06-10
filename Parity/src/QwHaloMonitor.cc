@@ -134,7 +134,6 @@ void QwHaloMonitor::PrintInfo() const
 }
 
 Bool_t QwHaloMonitor::CheckForBurpFail(const VQwDataElement *ev_error){
-  Short_t i=0;
   Bool_t burpstatus = kFALSE;
   try {
     if(typeid(*ev_error)==typeid(*this)) {
@@ -230,6 +229,30 @@ void  QwHaloMonitor::FillTreeVector(std::vector<Double_t> &values) const
     fHalo_Counter.FillTreeVector(values);
     // this functions doesn't do anything yet
   }
+}
+
+//*****************************************************************//
+void QwHaloMonitor::ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix)
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip constructing RNTuple fields.
+  }
+  else{
+    fHalo_Counter.ConstructRNTupleFields(rntuple, prefix);
+  }
+  return;
+}
+
+//*****************************************************************//
+void QwHaloMonitor::FillRNTupleVector(std::vector<Double_t>& values) const
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip filling the RNTuple.
+  }
+  else{
+    fHalo_Counter.FillRNTupleVector(values);
+  }
+  return;
 }
 
 #ifdef __USE_DATABASE__

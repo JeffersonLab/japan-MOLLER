@@ -434,3 +434,28 @@ template class QwCombinedBCM<QwADC18_Channel>;
 template class QwCombinedBCM<QwSIS3801_Channel>;
 template class QwCombinedBCM<QwSIS3801D24_Channel>;
 template class QwCombinedBCM<QwMollerADC_Channel>;
+
+/**********************************************************/
+template<typename T>
+void  QwCombinedBCM<T>::ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix)
+{
+  if (this->GetElementName()==""){
+    //  This channel is not used, so skip constructing RNTuple fields.
+  } else {
+    this->fBeamCurrent.ConstructRNTupleFields(rntuple, prefix);
+  }
+  return;
+}
+
+template<typename T>
+void  QwCombinedBCM<T>::FillRNTupleVector(std::vector<Double_t>& values) const
+{
+  if (this->GetElementName()==""){
+    //  This channel is not used, so skip filling the vector.
+  } else {
+    this->fBeamCurrent.FillRNTupleVector(values);
+  }
+  return;
+}
+
+/********************************************************/

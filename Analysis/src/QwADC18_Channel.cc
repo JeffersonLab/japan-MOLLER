@@ -7,6 +7,7 @@
 #include <TTree.h>
 
 // Qweak headers
+#include "QwRNTupleFile.h"
 #include "QwLog.h"
 #include "QwUnits.h"
 #include "QwBlinder.h"
@@ -1403,3 +1404,114 @@ void QwADC18_Channel::AddErrEntriesToList(std::vector<QwErrDBInterface> &row_lis
   
 }
 #endif
+
+void QwADC18_Channel::ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix)
+{
+  if (IsNameEmpty()) {
+    // This channel is not used, so skip setting up the RNTuple fields.
+    return;
+  }
+  
+  // Decide what to store based on prefix
+  SetDataToSaveByPrefix(prefix);
+  
+  TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
+  
+  // Convert TString to std::string for the RNTuple field names
+  std::string base_str = basename.Data();
+  
+  // Add fields matching the TTree structure
+  rntuple->AddField<Double_t>(base_str + "_value");
+  
+  if (fDataToSave == kMoments) {
+    rntuple->AddField<Double_t>(base_str + "_value_m2");
+    rntuple->AddField<Double_t>(base_str + "_value_err");
+  }
+  
+  rntuple->AddField<Double_t>(base_str + "_Device_Error_Code");
+  
+  if (fDataToSave == kRaw) {
+    rntuple->AddField<Double_t>(base_str + "_raw");
+    rntuple->AddField<Double_t>(base_str + "_diff");
+    rntuple->AddField<Double_t>(base_str + "_peak");
+    rntuple->AddField<Double_t>(base_str + "_base");
+  }
+}
+
+void QwADC18_Channel::ConstructRNTupleFields(std::shared_ptr<ROOT::RNTupleModel> model, std::string& prefix, std::vector<Double_t>& vector, std::vector<std::shared_ptr<Double_t>>& fields)
+{
+  if (IsNameEmpty()) {
+    // This channel is not used, so skip setting up the RNTuple fields.
+    return;
+  }
+  
+  // Decide what to store based on prefix
+  SetDataToSaveByPrefix(TString(prefix.c_str()));
+  
+  // Apply same prefix processing as legacy method to ensure field name consistency
+  TString prefix_tstring(prefix.c_str());
+  TString basename = prefix_tstring(0, (prefix_tstring.First("|") >= 0)? prefix_tstring.First("|"): prefix_tstring.Length()) + GetElementName();
+  
+  // Track starting index for this channel
+  fTreeArrayIndex = vector.size();
+  
+  // Add fields matching the TTree structure
+  fields.push_back(model->MakeField<Double_t>(basename.Data() + std::string("_value")));
+  vector.push_back(0.0);
+  
+  if (fDataToSave == kMoments) {
+    fields.push_back(model->MakeField<Double_t>(basename.Data() + std::string("_value_m2")));
+    vector.push_back(0.0);
+    fields.push_back(model->MakeField<Double_t>(basename.Data() + std::string("_value_err")));
+    vector.push_back(0.0);
+  }
+  
+  fields.push_back(model->MakeField<Double_t>(basename.Data() + std::string("_Device_Error_Code")));
+  vector.push_back(0.0);
+  
+  if (fDataToSave == kRaw) {
+    fields.push_back(model->MakeField<Double_t>(basename.Data() + std::string("_raw")));
+    vector.push_back(0.0);
+    fields.push_back(model->MakeField<Double_t>(basename.Data() + std::string("_diff")));
+    vector.push_back(0.0);
+    fields.push_back(model->MakeField<Double_t>(basename.Data() + std::string("_peak")));
+    vector.push_back(0.0);
+    fields.push_back(model->MakeField<Double_t>(basename.Data() + std::string("_base")));
+    vector.push_back(0.0);
+  }
+  
+  fTreeArrayNumEntries = vector.size() - fTreeArrayIndex;
+}
+
+void QwADC18_Channel::FillRNTupleVector(std::vector<Double_t> &values) const
+{
+  if (IsNameEmpty()) {
+    //  This channel is not used, so skip filling the RNTuple vector.
+    return;
+  }
+  
+  if (fTreeArrayNumEntries <= 0) {
+    // If fTreeArrayNumEntries is not set (legacy interface), we need to determine
+    // the field order manually to match what was created in ConstructRNTupleFields
+    static bool warned = false;
+    if (!warned) {
+      QwError << "QwADC18_Channel::FillRNTupleVector: Cannot fill RNTuple fields created with legacy interface" << QwLog::endl;
+      QwError << "Element: " << GetElementName() << " - RNTuple field creation and filling interfaces are mismatched" << QwLog::endl;
+      QwError << "Use ConstructRNTupleFields(model, prefix, vector, fields) instead of ConstructRNTupleFields(rntuple, prefix)" << QwLog::endl;
+      warned = true;
+    }
+    return;
+  }
+  
+  if (values.size() < fTreeArrayIndex + fTreeArrayNumEntries) {
+    QwError << "QwADC18_Channel::FillRNTupleVector:  values.size()=="
+            << values.size()
+            << "; fTreeArrayIndex+fTreeArrayNumEntries=="
+            << fTreeArrayIndex+fTreeArrayNumEntries
+            << QwLog::endl;
+    return;
+  }
+
+  // Reuse existing tree vector filling logic since the new interface sets up the indices properly
+  FillTreeVector(values);
+}

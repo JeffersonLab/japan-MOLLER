@@ -22,6 +22,7 @@
 
 // Forward declarations
 class QwHelicity;
+class QwRNTuple;
 
 ///
 /// \ingroup QwAnalysis_ADC
@@ -173,6 +174,9 @@ class QwHelicityPattern {
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile &trim_tree);
   void  FillTreeVector(std::vector<Double_t> &values) const;
+
+  void  ConstructRNTupleFields(QwRNTuple *ntuple, TString &prefix);
+  void  FillRNTupleVector(std::vector<Double_t> &values) const;
 
 #ifdef __USE_DATABASE__
   void  FillDB(QwParityDB *db);

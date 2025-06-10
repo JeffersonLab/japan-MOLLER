@@ -25,6 +25,7 @@ class QwDBInterface;
 class QwErrDBInterface;
 #endif // __USE_DATABASE__
 class QwPromptSummary;
+class QwRNTuple;
 
 /*****************************************************************
 *  Class:
@@ -163,6 +164,8 @@ class QwBPMStripline : public VQwBPM {
   void    ConstructBranch(TTree *tree, TString &prefix);
   void    ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
   void    FillTreeVector(std::vector<Double_t> &values) const;
+  void    ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix);
+  void    FillRNTupleVector(std::vector<Double_t>& values) const;
 
 
 #ifdef __USE_DATABASE__

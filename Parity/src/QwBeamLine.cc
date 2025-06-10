@@ -2462,7 +2462,7 @@ void QwBeamLine::ConstructBranch(TTree *tree, TString & prefix)
   for(size_t i = 0; i < fBCM.size(); i++)
     fBCM[i].get()->ConstructBranch(tree, prefix);
   for(size_t i = 0; i <fCavity.size(); i++)
-    fStripline[i].get()->ConstructBranch(tree, prefix);
+    fCavity[i].ConstructBranch(tree, prefix);
   for(size_t i = 0; i < fHaloMonitor.size(); i++)
     fHaloMonitor[i].ConstructBranch(tree, prefix);
   for(size_t i = 0; i <fBCMCombo.size();i++)
@@ -2867,18 +2867,19 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
   
   // try to access halo mean and its error
   if(local_print_flag)  QwMessage <<  QwColor(Qw::kGreen) << "Halo Monitors" <<QwLog::endl;
-
   for(i=0; i< fHaloMonitor.size(); i++) {
     interface.clear();
     interface = fHaloMonitor[i].GetDBEntry();
     for (j=0; j<interface.size(); j++){
-      interface.at(j).SetAnalysisID( analysis_id );
+      interface.at(j).SetAnalysisID( analysis_id ) ;
       interface.at(j).SetMonitorID( db );
       interface.at(j).SetMeasurementTypeID( measurement_type_halo );
       interface.at(j).PrintStatus( local_print_flag );
       interface.at(j).AddThisEntryToList( entrylist );
     }
+    if(local_print_flag) printf("\n");
   }
+
 
   if(local_print_flag){
     QwMessage << QwColor(Qw::kGreen)   << "Entrylist Size : "
@@ -3201,3 +3202,37 @@ void QwBeamLine::WritePromptSummary(QwPromptSummary *ps, TString type)
   
     return;
 };
+
+//*****************************************************************//
+void QwBeamLine::ConstructRNTupleFields(QwRNTuple* rntuple, const TString& prefix)
+{
+  for(size_t i = 0; i < fClock.size(); i++)
+    fClock[i].get()->ConstructRNTupleFields(rntuple, prefix);
+  for(size_t i = 0; i < fStripline.size(); i++)
+    fStripline[i].get()->ConstructRNTupleFields(rntuple, prefix);
+  for(size_t i = 0; i < fQPD.size(); i++)
+    fQPD[i].ConstructRNTupleFields(rntuple, prefix);
+  for(size_t i = 0; i < fLinearArray.size(); i++)
+    fLinearArray[i].ConstructRNTupleFields(rntuple, prefix);
+  for(size_t i = 0; i < fCavity.size(); i++)
+    fCavity[i].ConstructRNTupleFields(rntuple, prefix);
+  for(size_t i = 0; i < fBCM.size(); i++)
+    fBCM[i].get()->ConstructRNTupleFields(rntuple, prefix);
+  for(size_t i = 0; i < fHaloMonitor.size(); i++)
+    fHaloMonitor[i].ConstructRNTupleFields(rntuple, prefix);
+  for(size_t i = 0; i <fBCMCombo.size();i++)
+    fBCMCombo[i].get()->ConstructRNTupleFields(rntuple, prefix);
+  for(size_t i = 0; i <fBPMCombo.size();i++)
+    fBPMCombo[i].get()->ConstructRNTupleFields(rntuple, prefix);
+  for(size_t i = 0; i <fECalculator.size();i++)
+    fECalculator[i].ConstructRNTupleFields(rntuple, prefix);
+
+  return;
+}
+
+//*****************************************************************//
+void QwBeamLine::FillRNTupleVector(std::vector<Double_t>& values) const
+{
+  // For now, delegate to the existing tree method for compatibility
+  FillTreeVector(values);
+}

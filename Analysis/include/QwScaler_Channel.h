@@ -10,9 +10,11 @@
 
 // System headers
 #include <vector>
+#include <memory>
 
 // ROOT headers
 #include "TTree.h"
+#include <ROOT/RNTupleModel.hxx>
 
 // Qweak headers
 #include "VQwHardwareChannel.h"
@@ -20,6 +22,7 @@
 
 // Forward declarations
 class QwParameterFile;
+class QwRNTuple;
 
 ///
 /// \ingroup QwAnalysis_ADC
@@ -186,6 +189,10 @@ public:
   virtual void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) = 0;
   virtual void  FillTreeVector(std::vector<Double_t> &values) const = 0;
   void  ConstructBranch(TTree *tree, TString &prefix);
+  
+  virtual void ConstructRNTupleFields(class QwRNTuple *rntuple, const TString &prefix) = 0;
+  virtual void ConstructRNTupleFields(std::shared_ptr<ROOT::RNTupleModel> model, std::string& prefix, std::vector<Double_t>& vector, std::vector<std::shared_ptr<Double_t>>& fields) = 0;
+  virtual void FillRNTupleVector(std::vector<Double_t> &values) const = 0;
 
 
   void AccumulateRunningSum(const VQwScaler_Channel &value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
@@ -267,7 +274,10 @@ class QwScaler_Channel: public VQwScaler_Channel
 
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
   void  FillTreeVector(std::vector<Double_t> &values) const;
-
+  
+  void ConstructRNTupleFields(class QwRNTuple *rntuple, const TString &prefix);
+  void ConstructRNTupleFields(std::shared_ptr<ROOT::RNTupleModel> model, std::string& prefix, std::vector<Double_t>& vector, std::vector<std::shared_ptr<Double_t>>& fields);
+  void FillRNTupleVector(std::vector<Double_t> &values) const;
 
 };
 
