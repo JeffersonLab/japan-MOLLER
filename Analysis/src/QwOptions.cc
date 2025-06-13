@@ -397,3 +397,16 @@ std::pair<int,int> QwOptions::GetIntValuePair(const std::string& key)
 
   return mypair;
 }
+
+void QwRootFile::DefineOptions(QwOptions &options)
+{
+  // Existing options...
+
+  // Add RNTuple options
+  options.AddOptions("ROOT output options")
+    ("use-rntuple", po::value<bool>()->default_bool_value(false),
+     "Use RNTuple format instead of TTree");
+  options.AddOptions("ROOT output options")
+    ("rntuple-compression", po::value<std::string>()->default_value("zstd"),
+     "RNTuple compression algorithm (none, zlib, lzma, lz4, zstd)");
+}
