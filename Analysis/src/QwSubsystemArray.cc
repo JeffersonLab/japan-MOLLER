@@ -566,11 +566,15 @@ void  QwSubsystemArray::PrintInfo() const
  * @param prefix Prefix
  * @param values Vector of values
  */
-void  QwSubsystemArray::ConstructBranchAndVector(
+void QwSubsystemArray::ConstructBranchAndVector(
         TTree *tree,
         TString& prefix,
         std::vector<Double_t>& values)
 {
+  if(tree == nullptr) {
+    QwError << "QwSubsystemArray::ConstructBranchAndVector: tree is null" << QwLog::endl;
+    return;
+  }
   fTreeArrayIndex = values.size();
 
   // Each tree should only contain event number and type once, but will
@@ -581,18 +585,21 @@ void  QwSubsystemArray::ConstructBranchAndVector(
   values.push_back(0.0);
   values.push_back(0.0);
   values.push_back(0.0);
-  if (prefix == "" || prefix.Index("yield_") == 0) {
+  
+  // Only try to create branches if tree pointer is valid
+  if (tree != nullptr && (prefix == "" || prefix.Index("yield_") == 0)) {
     tree->Branch("CodaEventNumber",&(values[fTreeArrayIndex]),"CodaEventNumber/D");
     tree->Branch("CodaEventType",&(values[fTreeArrayIndex+1]),"CodaEventType/D");
     tree->Branch("Coda_CleanData",&(values[fTreeArrayIndex+2]),"Coda_CleanData/D");
     tree->Branch("Coda_ScanData1",&(values[fTreeArrayIndex+3]),"Coda_ScanData1/D");
     tree->Branch("Coda_ScanData2",&(values[fTreeArrayIndex+4]),"Coda_ScanData2/D");
   }
+  
+  // Continue with the rest of the function...
   for (iterator subsys = begin(); subsys != end(); ++subsys) {
     VQwSubsystem* subsys_ptr = dynamic_cast<VQwSubsystem*>(subsys->get());
     subsys_ptr->ConstructBranchAndVector(tree, prefix, values);
   }
-
 }
 
 
@@ -667,6 +674,7 @@ void QwSubsystemArray::FillTreeVector(std::vector<Double_t>& values) const
 {
   // Fill the event number and event type
   size_t index = fTreeArrayIndex;
+  values.resize(values.size() + 5);
   values[index++] = this->GetCodaEventNumber();
   values[index++] = this->GetCodaEventType();
   values[index++] = this->fCleanParameter[0];
@@ -799,8 +807,8 @@ void QwSubsystemArray::push_back(boost::shared_ptr<VQwSubsystem> subsys)
    }
  }
 }
-  
-  
-  
-  
-  
+
+
+
+
+

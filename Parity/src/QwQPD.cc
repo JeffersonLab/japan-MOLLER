@@ -702,6 +702,10 @@ void  QwQPD::FillHistograms()
 
 void  QwQPD::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
+  if(tree==nullptr) {
+    std::cerr << "QwQPD::ConstructBranchAndVector: tree is null" << std::endl;
+    return;
+  }
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing trees.
   }

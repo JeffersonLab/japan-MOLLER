@@ -1,9 +1,34 @@
+// NOTE: The RNTuple classes are experimental at this point.
+// Functionality, interface, and data format is still subject to changes.
+// Do not use for real data!
+ 
+// Until C++ runtime modules are universally used, we explicitly load the ntuple library.  Otherwise
+// triggering autoloading from the use of templated types would require an exhaustive enumeration
+// of "all" template instances in the LinkDef file.
+
+//Some examples show this, but it causes a lot of problems:
+//R__LOAD_LIBRARY(ROOTNTuple)
+
 #include "QwRootFile.h"
 #include "QwRunCondition.h"
 #include "TH1.h"
 
 #include <unistd.h>
 #include <cstdio>
+
+// Include ROOT RNTuple headers
+#include "ROOT/RNTuple.hxx"
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RNTupleWriter.hxx"
+
+#include "QwSubsystemArrayParity.h"
+#include "QwHelicityPattern.h"
+#include "QwEPICSEvent.h"
+// Include headers for any other types used in template instantiations
+
+using RNTupleModel = ROOT::Experimental::RNTupleModel;
+//using RNTupleReader = ROOT::Experimental::RNTupleReader;//This doesn't seem to exist, despite being in examples
+using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
 
 std::string QwRootFile::fDefaultRootFileDir = ".";
 std::string QwRootFile::fDefaultRootFileStem = "Qweak_";
@@ -342,3 +367,115 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
 
   return false;
 }
+
+template<typename T>
+void QwRootFile::ConstructRNTupleBranches(const char* name, const char* title, T& subsys, const char* prefix)
+{
+  if (!fUseRNTuple)
+  {
+    return;
+  }
+  // Create an RNTuple model
+  auto model = ROOT::Experimental::RNTupleModel::Create();
+
+  // First, create a temporary tree to get branch information
+  TString prefix_str(prefix);
+
+  // Create a vector to determine how many fields we need
+  std::vector<Double_t> tmp_values;
+  subsys.ConstructBranchAndVector(nullptr, prefix_str, tmp_values);
+
+  // Create fields in the RNTuple model for each value
+  std::vector<std::shared_ptr<Double_t>> fields;
+  for (size_t i = 0; i < tmp_values.size(); i++) 
+  {
+    // Create a generic field name based on the prefix and index
+    std::string field_name = std::string(prefix) + "value_" + std::to_string(i);
+    auto field = model->MakeField<Double_t>(field_name, 0.0);
+    fields.push_back(field);
+  }
+
+  // Store just the fields and field count
+  fRNTupleFields[name] = fields;
+  fRNTupleFieldCount[name] = tmp_values.size();
+
+  // Create the RNTuple writer (model ownership transfers to writer)
+  auto writer = ROOT::Experimental::RNTupleWriter::Recreate(std::move(model), name, fRootFile->GetName());
+  fRNTupleWriters[name] = std::move(writer);
+}
+
+void QwRootFile::FillRNTuple(const char* name)//should not be used
+{
+  if (!fUseRNTuple) return;
+  
+  auto writer_it = fRNTupleWriters.find(name);
+  auto fields_it = fRNTupleFields.find(name);
+  auto count_it = fRNTupleFieldCount.find(name);
+  
+  if(writer_it != fRNTupleWriters.end() && 
+  fields_it != fRNTupleFields.end() &&
+  count_it != fRNTupleFieldCount.end()) {
+  
+    
+    // Find the tree in the internal map
+    auto tree_it = fTreeByName.find(name);
+    if (tree_it != fTreeByName.end() && !tree_it->second.empty()) 
+    {
+      QwRootTree* roottree = tree_it->second.back();
+      
+      // Directly access the vector of values from QwRootTree
+      const std::vector<Double_t>& values = roottree->GetVector();
+      
+      // Copy values to RNTuple fields
+      for (size_t i = 0; i < values.size() && i < fields_it->second.size(); i++) 
+      {
+        *(fields_it->second[i]) = values[i];
+      }
+    }
+    
+    // Always fill the RNTuple
+    writer_it->second->Fill();
+  }
+}
+
+/**
+ * Fill an RNTuple with values directly from a vector
+ * @param name Name of the RNTuple
+ * @param values Vector of values to use for filling the RNTuple
+ */
+void QwRootFile::FillRNTupleWithVector(const char* name, const std::vector<Double_t>& values)
+{
+  if (!fUseRNTuple) return;
+  
+  auto writer_it = fRNTupleWriters.find(name);
+  auto fields_it = fRNTupleFields.find(name);
+  
+  if (writer_it != fRNTupleWriters.end() && fields_it != fRNTupleFields.end()) 
+  {
+    
+    // Copy values to RNTuple fields
+    for (size_t i = 0; i < values.size() && i < fields_it->second.size(); i++) 
+    {
+      *(fields_it->second[i]) = values[i];
+    }
+    
+    // Fill the RNTuple
+    if(values.size()>0)
+ /*   {
+          QwMessage << "Filling RNTuple '" << name << "' with " 
+        << (values.size() < fields_it->second.size() ? values.size() : fields_it->second.size())
+        << " values" << QwLog::endl;
+    }*/
+    writer_it->second->Fill();
+    
+  } 
+  else 
+  {
+    QwMessage << "RNTuple '" << name << "' not found for filling with vector" << QwLog::endl;
+  }
+}
+
+// Explicit template instantiations
+template void QwRootFile::ConstructRNTupleBranches<QwSubsystemArrayParity>(const char*, const char*, QwSubsystemArrayParity&, const char*);
+template void QwRootFile::ConstructRNTupleBranches<QwHelicityPattern>(const char*, const char*, QwHelicityPattern&, const char*);
+template void QwRootFile::ConstructRNTupleBranches<QwEPICSEvent>(const char*, const char*, QwEPICSEvent&, const char*);
