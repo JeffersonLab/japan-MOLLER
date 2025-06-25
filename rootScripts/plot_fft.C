@@ -98,6 +98,7 @@ void plot_fft(Int_t first_event=0, Int_t num_events=1000)
   //  The data structure in the tree for each branch has 13 Double_t values.  We will
   //  just want to take the first one "[0]".
    Double_t chan_data[13];
+   mytree->ResetBranchAddresses();
    mytree->SetBranchAddress(chan_name,&chan_data);
 
    Long64_t nentries = mytree->GetEntries();
@@ -184,7 +185,7 @@ void plot_fft(Int_t first_event=0, Int_t num_events=1000)
    FFTmag->GetXaxis()->SetRangeUser(0,frequency_lim);
    FFTmag->Draw();
 
-  
+   hr->Delete();
    
    delete fft_own;
    delete [] in;
@@ -209,6 +210,7 @@ void plot_block_fft(Int_t first_event=0, Int_t num_events=1000)
   //  The data structure in the tree for each branch has 13 Double_t values.  We will
   //  just want to take the first one "[0]".
    Double_t chan_data[13];
+   mytree->ResetBranchAddresses();
    mytree->SetBranchAddress(chan_name,&chan_data);
 
    Long64_t nentries = mytree->GetEntries();
@@ -301,7 +303,7 @@ void plot_block_fft(Int_t first_event=0, Int_t num_events=1000)
    FFTmag->GetXaxis()->SetRangeUser(0,frequency_lim);
    FFTmag->Draw();
 
-  
+   hr->Delete();
    
    delete fft_own;
    delete [] in;
