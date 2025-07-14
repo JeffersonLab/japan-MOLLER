@@ -12,6 +12,12 @@ using std::type_info;
 #include "TPRegexp.h"
 #include "TSystem.h"
 
+// RNTuple headers (modern ROOT namespace)
+#include "ROOT/RNTuple.hxx"
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+#include "ROOT/RNTupleWriter.hxx"
+
 // Qweak headers
 #include "QwOptions.h"
 #include "TMapFile.h"
@@ -263,6 +269,174 @@ class QwRootTree {
     }
 };
 
+/**
+ *  \class QwRootNTuple
+ *  \ingroup QwAnalysis
+ *  \brief A wrapper class for a ROOT RNTuple
+ *
+ * This class provides the functionality to write to ROOT RNTuples using a vector
+ * of doubles, similar to QwRootTree but using the newer RNTuple format.
+ */
+class QwRootNTuple {
+
+  public:
+
+    /// Constructor with name and description
+    QwRootNTuple(const std::string& name, const std::string& desc, const std::string& prefix = "")
+    : fName(name), fDesc(desc), fPrefix(prefix), fType("type undefined"),
+      fCurrentEvent(0), fNumEventsCycle(0), fNumEventsToSave(0), fNumEventsToSkip(0) {
+      // Create RNTuple model
+      fModel = ROOT::RNTupleModel::Create();
+    }
+
+    /// Constructor with name, description, and object
+    template < class T >
+    QwRootNTuple(const std::string& name, const std::string& desc, T& object, const std::string& prefix = "")
+    : fName(name), fDesc(desc), fPrefix(prefix), fType("type undefined"),
+      fCurrentEvent(0), fNumEventsCycle(0), fNumEventsToSave(0), fNumEventsToSkip(0) {
+      // Create RNTuple model
+      fModel = ROOT::RNTupleModel::Create();
+      
+      // Construct fields and vector
+      ConstructFieldsAndVector(object);
+    }
+
+    /// Destructor
+    virtual ~QwRootNTuple() { 
+      if (fWriter) {
+        fWriter.reset();
+      }
+    }
+
+  private:
+
+    /// Construct the fields and vector for generic objects
+    template < class T >
+    void ConstructFieldsAndVector(T& object) {
+      // Reserve space for the field vector
+      fVector.reserve(BRANCH_VECTOR_MAX_SIZE);
+      
+      // Associate fields with vector - similar to ConstructBranchAndVector but for RNTuple
+      TString prefix = Form("%s", fPrefix.c_str());
+      object.ConstructNTupleAndVector(fModel, prefix, fVector, fFieldPtrs);
+      
+      // Store the type of object
+      fType = typeid(object).name();
+
+      // Check memory reservation
+      if (fVector.size() > BRANCH_VECTOR_MAX_SIZE) {
+        QwError << "The field vector is too large: " << fVector.size() << " fields!  "
+                << "The maximum size is " << BRANCH_VECTOR_MAX_SIZE << "."
+                << QwLog::endl;
+        exit(-1);
+      }
+    }
+
+  public:
+
+    /// Initialize the RNTuple writer with a file
+    void InitializeWriter(TFile* file) {
+      if (!fModel) {
+        QwError << "RNTuple model not created for " << fName << QwLog::endl;
+        return;
+      }
+      
+      // For now, provide a warning that RNTuples are not fully implemented
+      QwWarning << "RNTuple support is not yet fully implemented. " 
+                << "The --enable-rntuples option is recognized but RNTuples will not be created." 
+                << QwLog::endl;
+      
+      // TODO: Implement proper RNTuple writer initialization
+      // This would require major changes to how data is structured and written
+      // auto options = ROOT::RNTupleWriteOptions();
+      // fWriter = ROOT::RNTupleWriter::Recreate(std::move(fModel), fName, filename, options);
+    }
+
+    /// Fill the fields for generic objects
+    template < class T >
+    void FillNTupleFields(const T& object) {
+      if (typeid(object).name() == fType) {
+        // Fill the field vector
+        object.FillNTupleVector(fVector);
+        
+        // Copy vector data to field pointers
+        for (size_t i = 0; i < fVector.size() && i < fFieldPtrs.size(); ++i) {
+          *(fFieldPtrs[i]) = fVector[i];
+        }
+      } else {
+        QwError << "Attempting to fill RNTuple vector for type " << fType << " with "
+                << "object of type " << typeid(object).name() << QwLog::endl;
+        exit(-1);
+      }
+    }
+
+    /// Fill the RNTuple
+    void Fill() {
+      fCurrentEvent++;
+
+      // RNTuple prescaling
+      if (fNumEventsCycle > 0) {
+        fCurrentEvent %= fNumEventsCycle;
+        if (fCurrentEvent > fNumEventsToSave)
+          return;
+      }
+
+      // Fill the RNTuple
+      if (fWriter) {
+        fWriter->Fill();
+      }
+    }
+
+    /// Get the name of the RNTuple
+    const std::string& GetName() const { return fName; }
+    /// Get the description of the RNTuple
+    const std::string& GetDesc() const { return fDesc; }
+    /// Get the prefix of the RNTuple
+    const std::string& GetPrefix() const { return fPrefix; }
+    /// Get the object type
+    std::string GetType() const { return fType; }
+
+    /// Set prescaling parameters
+    void SetPrescaling(UInt_t num_to_save, UInt_t num_to_skip) {
+      fNumEventsToSave = num_to_save;
+      fNumEventsToSkip = num_to_skip;
+      fNumEventsCycle = fNumEventsToSave + fNumEventsToSkip;
+    }
+
+    /// Print the RNTuple name and description
+    void Print() const {
+      QwMessage << GetName() << ", " << GetType();
+      if (fPrefix != "")
+        QwMessage << " (prefix " << GetPrefix() << ")";
+      QwMessage << QwLog::endl;
+    }
+
+  private:
+
+    /// RNTuple model and writer
+    std::unique_ptr<ROOT::RNTupleModel> fModel;
+    std::unique_ptr<ROOT::RNTupleWriter> fWriter;
+    
+    /// Vector of values and field pointers
+    std::vector<Double_t> fVector;
+    std::vector<Double_t*> fFieldPtrs;
+
+    /// Name, description, prefix
+    const std::string fName;
+    const std::string fDesc;
+    const std::string fPrefix;
+
+    /// Object type
+    std::string fType;
+
+    /// RNTuple prescaling parameters
+    UInt_t fCurrentEvent;
+    UInt_t fNumEventsCycle;
+    UInt_t fNumEventsToSave;
+    UInt_t fNumEventsToSkip;
+
+  friend class QwRootFile;
+};
 
 
 /**
@@ -335,6 +509,16 @@ class QwRootFile {
     template < class T >
     void FillTreeBranches(const T& object);
 
+    /// \brief Construct the RNTuple fields of a generic object
+    template < class T >
+    void ConstructNTupleFields(const std::string& name, const std::string& desc, T& object, const std::string& prefix = "");
+    /// \brief Fill the RNTuple fields of a generic object by name
+    template < class T >
+    void FillNTupleFields(const std::string& name, const T& object);
+    /// \brief Fill the RNTuple fields of a generic object by type only
+    template < class T >
+    void FillNTupleFields(const T& object);
+
 
     template < class T >
       Int_t WriteParamFileList(const TString& name, T& object);
@@ -373,6 +557,22 @@ class QwRootFile {
       fTreeByName[name].push_back(tree);
     }
 
+    /// Create a new RNTuple with name and description
+    void NewNTuple(const std::string& name, const std::string& desc) {
+      if (IsTreeDisabled(name) || !fEnableRNTuples) return;
+      QwRootNTuple *ntuple = 0;
+      if (! HasNTupleByName(name)) {
+        ntuple = new QwRootNTuple(name, desc);
+        // Initialize the writer with our file
+        ntuple->InitializeWriter(fRootFile);
+      } else {
+        // For simplicity, don't support copying existing RNTuples yet
+        QwError << "Cannot create duplicate RNTuple: " << name << QwLog::endl;
+        return;
+      }
+      fNTupleByName[name].push_back(ntuple);
+    }
+
     /// Get the tree with name
     TTree* GetTree(const std::string& name) {
       if (! HasTreeByName(name)) return 0;
@@ -394,6 +594,22 @@ class QwRootFile {
         retval += iter->second.front()->Fill();
       }
       return retval;
+    }
+
+    /// Fill the RNTuple with name
+    void FillNTuple(const std::string& name) {
+      if (HasNTupleByName(name)) {
+        fNTupleByName[name].front()->Fill();
+      }
+    }
+
+    /// Fill all registered RNTuples
+    void FillNTuples() {
+      // Loop over all registered RNTuple names
+      std::map< const std::string, std::vector<QwRootNTuple*> >::iterator iter;
+      for (iter = fNTupleByName.begin(); iter != fNTupleByName.end(); iter++) {
+        iter->second.front()->Fill();
+      }
     }
 
     /// Print registered trees
@@ -560,6 +776,14 @@ class QwRootFile {
     std::map< const std::type_index , std::vector<QwRootTree*> > fTreeByType;
     // ... Are type_index objects really unique? Let's hope so.
 
+    /// RNTuple names, addresses, and types
+    std::map< const std::string, std::vector<QwRootNTuple*> > fNTupleByName;
+    std::map< const void*      , std::vector<QwRootNTuple*> > fNTupleByAddr;
+    std::map< const std::type_index , std::vector<QwRootNTuple*> > fNTupleByType;
+
+    /// RNTuple support flag
+    Bool_t fEnableRNTuples;
+
     /// Is a tree registered for this name
     bool HasTreeByName(const std::string& name) {
       if (fTreeByName.count(name) == 0) return false;
@@ -577,6 +801,26 @@ class QwRootFile {
     bool HasTreeByAddr(const T& object) {
       const void* addr = static_cast<const void*>(&object);
       if (fTreeByAddr.count(addr) == 0) return false;
+      else return true;
+    }
+
+    /// Is an RNTuple registered for this name
+    bool HasNTupleByName(const std::string& name) {
+      if (fNTupleByName.count(name) == 0) return false;
+      else return true;
+    }
+    /// Is an RNTuple registered for this type
+    template < class T >
+    bool HasNTupleByType(const T& object) {
+      const std::type_index type = typeid(object);
+      if (fNTupleByType.count(type) == 0) return false;
+      else return true;
+    }
+    /// Is an RNTuple registered for this object
+    template < class T >
+    bool HasNTupleByAddr(const T& object) {
+      const void* addr = static_cast<const void*>(&object);
+      if (fNTupleByAddr.count(addr) == 0) return false;
       else return true;
     }
 
@@ -741,6 +985,105 @@ void QwRootFile::FillTreeBranches(
   // Fill the trees with the correct address
   for (size_t tree = 0; tree < fTreeByAddr[addr].size(); tree++) {
     fTreeByAddr[addr].at(tree)->FillTreeBranches(object);
+  }
+}
+
+
+/**
+ * Construct the RNTuple fields of a generic object
+ * @param name Name for RNTuple
+ * @param desc Description for RNTuple
+ * @param object Subsystem array
+ * @param prefix Prefix for the RNTuple
+ */
+template < class T >
+void QwRootFile::ConstructNTupleFields(
+        const std::string& name,
+        const std::string& desc,
+        T& object,
+        const std::string& prefix)
+{
+  // Return if we do not want this RNTuple information or RNTuples are disabled
+  if (IsTreeDisabled(name) || !fEnableRNTuples) return;
+
+  // Pointer to new RNTuple
+  QwRootNTuple* ntuple = 0;
+
+  // If the RNTuple does not exist yet, create it
+  if (fNTupleByName.count(name) == 0) {
+
+    // New RNTuple with name, description, object, prefix
+    ntuple = new QwRootNTuple(name, desc, object, prefix);
+
+    // Initialize the writer with our file
+    ntuple->InitializeWriter(fRootFile);
+
+    // Settings only relevant for new RNTuples
+    if (name == "evt")
+      ntuple->SetPrescaling(fNumMpsEventsToSave, fNumMpsEventsToSkip);
+    else if (name == "mul")
+      ntuple->SetPrescaling(fNumHelEventsToSave, fNumHelEventsToSkip);
+
+  } else {
+
+    // For simplicity, don't support multiple RNTuples with same name yet
+    QwError << "Cannot create duplicate RNTuple: " << name << QwLog::endl;
+    return;
+  }
+
+   // Add the fields to the list of RNTuples by name, object, type
+  const void* addr = static_cast<const void*>(&object);
+  const std::type_index type = typeid(object);
+  fNTupleByName[name].push_back(ntuple);
+  fNTupleByAddr[addr].push_back(ntuple);
+  fNTupleByType[type].push_back(ntuple);
+}
+
+
+/**
+ * Fill the RNTuple fields of a generic object by name
+ * @param name Name for RNTuple
+ * @param object Subsystem array
+ */
+template < class T >
+void QwRootFile::FillNTupleFields(
+        const std::string& name,
+        const T& object)
+{
+  // If this name has no registered RNTuples
+  if (! HasNTupleByName(name)) return;
+  // If this type has no registered RNTuples
+  if (! HasNTupleByType(object)) return;
+
+  // Get the address of the object
+  const void* addr = static_cast<const void*>(&object);
+
+  // Fill the RNTuples with the correct address
+  for (size_t ntuple = 0; ntuple < fNTupleByAddr[addr].size(); ntuple++) {
+    if (fNTupleByAddr[addr].at(ntuple)->GetName() == name) {
+      fNTupleByAddr[addr].at(ntuple)->FillNTupleFields(object);
+    }
+  }
+}
+
+
+/**
+ * Fill the RNTuple fields of a generic object by type only
+ * @param object Subsystem array
+ */
+template < class T >
+void QwRootFile::FillNTupleFields(
+        const T& object)
+{
+  // If this address has no registered RNTuples
+  if (! HasNTupleByAddr(object)) return;
+
+  // Get the address of the object
+  const void* addr = static_cast<const void*>(&object);
+
+  // Fill the RNTuples with the correct address
+  for (size_t ntuple = 0; ntuple < fNTupleByAddr[addr].size(); ntuple++) {
+    fNTupleByAddr[addr].at(ntuple)->FillNTupleFields(object);
   }
 }
 

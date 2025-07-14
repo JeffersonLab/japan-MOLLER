@@ -13,6 +13,8 @@
 #include "TFile.h"
 #include "TROOT.h"
 #include "TMath.h"
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
 
 // Qweak headers
 #include "QwLog.h"
@@ -197,6 +199,56 @@ void QwEPICSEvent::ConstructBranchAndVector(TTree *tree, TString& prefix, std::v
 
 /// \brief Fill the tree vector
 void QwEPICSEvent::FillTreeVector(std::vector<Double_t>& values) const
+{
+  Int_t treeindex = fTreeArrayIndex;
+  for (size_t tagindex = 0; tagindex < fEPICSVariableType.size(); tagindex++) {
+    switch (fEPICSVariableType[tagindex]) {
+      case kEPICSFloat:
+      case kEPICSInt: {
+        // Add value to vector
+        values[treeindex] = fEPICSDataEvent[tagindex].Value;
+        treeindex++;
+        break;
+      }
+      case kEPICSString: {
+        // Add value to vector
+        values[treeindex] = static_cast<Double_t>(fEPICSDataEvent[tagindex].StringValue.Hash());
+        treeindex++;
+        break;
+      }
+      default: {
+        TString name = fEPICSVariableList[tagindex];
+        QwError << "Unrecognized type for EPICS variable " << name << QwLog::endl;
+        break;
+      }
+    }
+  }
+}
+
+void QwEPICSEvent::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs)
+{
+  fTreeArrayIndex = values.size();
+  for (size_t tagindex = 0; tagindex < fEPICSVariableType.size(); tagindex++) {
+    if (fEPICSVariableType[tagindex] == kEPICSString ||
+        fEPICSVariableType[tagindex] == kEPICSFloat ||
+        fEPICSVariableType[tagindex] == kEPICSInt) {
+
+    	// Add element to vector
+    	values.push_back(0.0);
+    	fieldPtrs.push_back(&values.back());
+
+    	// Determine field name
+    	TString name = fEPICSVariableList[tagindex];
+    	name.ReplaceAll(':','_'); // remove colons before creating field
+
+    	// Create RNTuple field
+    	model->MakeField<Double_t>(name.Data());
+    }
+  }
+  fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
+}
+
+void QwEPICSEvent::FillNTupleVector(std::vector<Double_t>& values) const
 {
   Int_t treeindex = fTreeArrayIndex;
   for (size_t tagindex = 0; tagindex < fEPICSVariableType.size(); tagindex++) {

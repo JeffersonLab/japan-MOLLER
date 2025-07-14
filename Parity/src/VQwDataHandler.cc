@@ -18,6 +18,10 @@ using namespace std;
 //header file
 #include "VQwDataHandler.h"
 
+// ROOT headers for RNTuple support
+#include <ROOT/RNTupleModel.hxx>
+#include <ROOT/RNTupleWriter.hxx>
+
 //#include "QwCombiner.h"
 
 #include "QwParameterFile.h"
@@ -306,6 +310,22 @@ void VQwDataHandler::FillTreeVector(std::vector<Double_t>& values) const
   for (size_t i = 0; i < fOutputVar.size(); ++i) {
     if (fOutputVar.at(i) == NULL) {continue;}
     fOutputVar.at(i)->FillTreeVector(values);
+  }
+}
+
+void VQwDataHandler::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs)
+{
+  for (size_t i = 0; i < fOutputVar.size(); ++i) {
+    fOutputVar.at(i)->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+  }
+}
+
+void VQwDataHandler::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  // Fill the data element
+  for (size_t i = 0; i < fOutputVar.size(); ++i) {
+    if (fOutputVar.at(i) == NULL) {continue;}
+    fOutputVar.at(i)->FillNTupleVector(values);
   }
 }
 

@@ -10,6 +10,10 @@
 // System headers
 #include <stdexcept>
 
+// ROOT headers
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+
 // Qweak headers
 #ifdef __USE_DATABASE__
 #include "QwDBInterface.h"
@@ -1124,6 +1128,47 @@ void  QwCombinedBPM<T>::FillTreeVector(std::vector<Double_t> &values) const
     }
   }
   return;
+}
+
+template<typename T>
+void QwCombinedBPM<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs)
+{
+  if (this->GetElementName()==""){
+    //  This channel is not used, so skip constructing RNTuple.
+  } else
+    {
+      TString thisprefix=prefix;
+      if(prefix.Contains("asym_"))
+	thisprefix.ReplaceAll("asym_","diff_");
+
+      this->SetRootSaveStatus(prefix);
+
+      fEffectiveCharge.ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+      for(Short_t axis=kXAxis;axis<kNumAxes;axis++){
+	fSlope[axis].ConstructNTupleAndVector(model, thisprefix, values, fieldPtrs);
+	fIntercept[axis].ConstructNTupleAndVector(model, thisprefix, values, fieldPtrs);
+	fAbsPos[axis].ConstructNTupleAndVector(model, thisprefix, values, fieldPtrs);
+	fMinimumChiSquare[axis].ConstructNTupleAndVector(model, thisprefix, values, fieldPtrs);
+      }
+    }
+}
+
+template<typename T>
+void QwCombinedBPM<T>::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (this->GetElementName()==""){
+    //  This channel is not used, so skip filling the RNTuple.
+  }
+  else{
+    fEffectiveCharge.FillNTupleVector(values);
+
+    for(Short_t axis=kXAxis;axis<kNumAxes;axis++){
+      fSlope[axis].FillNTupleVector(values);
+      fIntercept[axis].FillNTupleVector(values);
+      fAbsPos[axis].FillNTupleVector(values);
+      fMinimumChiSquare[axis].FillNTupleVector(values);
+    }
+  }
 }
 
 template<typename T>

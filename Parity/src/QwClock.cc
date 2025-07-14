@@ -10,6 +10,10 @@
 // System headers
 #include <stdexcept>
 
+// ROOT headers
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+
 // Qweak database headers
 #ifdef __USE_DATABASE__
 #include "QwDBInterface.h"
@@ -415,6 +419,29 @@ void QwClock<T>::FillTreeVector(std::vector<Double_t> &values) const
       // this functions doesn't do anything yet
     }
   return;
+}
+
+template<typename T>
+void QwClock<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs)
+{
+  if (this->GetElementName()==""){
+    //  This channel is not used, so skip RNTuple construction
+  } else
+    {
+      fClock.ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+    }
+}
+
+template<typename T>
+void QwClock<T>::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (this->GetElementName()==""){
+    //  This channel is not used, so skip filling the RNTuple.
+  } else
+    {
+      fClock.FillNTupleVector(values);
+      // this functions doesn't do anything yet
+    }
 }
 
 #ifdef __USE_DATABASE__

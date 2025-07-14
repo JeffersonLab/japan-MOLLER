@@ -14,6 +14,7 @@
 
 // ROOT headers
 #include <TTree.h>
+#include <ROOT/RNTupleModel.hxx>
 
 #include "QwParameterFile.h"
 #include "VQwDataElement.h"
@@ -73,6 +74,8 @@ public:
   virtual void ConstructBranch(TTree *tree, TString &prefix) = 0;
   virtual void ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist) = 0;
   virtual void FillTreeVector(std::vector<Double_t> &values) const = 0;
+  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs) = 0;
+  virtual void FillNTupleVector(std::vector<Double_t>& values) const = 0;
 
 #ifdef __USE_DATABASE__
   virtual std::vector<QwDBInterface> GetDBEntry() = 0;

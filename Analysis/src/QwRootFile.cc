@@ -20,7 +20,7 @@ Double_t QwRootTree::kUnitsValue[] = { 1e-6, 1e-9, 1e-3, 1 , 1e-3, 1};
 QwRootFile::QwRootFile(const TString& run_label)
   : fRootFile(0), fMakePermanent(0),
     fMapFile(0), fEnableMapFile(kFALSE),
-    fUpdateInterval(-1)
+    fUpdateInterval(-1), fEnableRNTuples(kFALSE)
 {
   // Process the configuration options
   ProcessOptions(gQwOptions);
@@ -262,6 +262,9 @@ void QwRootFile::ProcessOptions(QwOptions &options)
   }
 #endif
   fUseTemporaryFile = options.GetValue<bool>("write-temporary-rootfiles");
+
+  // Option 'enable-rntuples' to enable RNTuple output
+  fEnableRNTuples = options.GetValue<bool>("enable-rntuples");
 
   // Options 'disable-trees' and 'disable-histos' for disabling
   // tree and histogram output
