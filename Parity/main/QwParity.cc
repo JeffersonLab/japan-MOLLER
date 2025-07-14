@@ -596,12 +596,12 @@ Int_t main(Int_t argc, Char_t* argv[])
      *  segfault; but in addition to that we should delete them      *
      *  here, in case we run over multiple runs at a time.           */
     if (treerootfile == historootfile) {
-      treerootfile->Write(0,TObject::kOverwrite);
+      treerootfile->Close();
       delete treerootfile; treerootfile = 0; burstrootfile = 0; historootfile = 0;
     } else {
-      treerootfile->Write(0,TObject::kOverwrite);
-      burstrootfile->Write(0,TObject::kOverwrite);
-      historootfile->Write(0,TObject::kOverwrite);
+      treerootfile->Close();
+      burstrootfile->Close();
+      historootfile->Close();
       delete treerootfile; treerootfile = 0;
       delete burstrootfile; burstrootfile = 0;
       delete historootfile; historootfile = 0;

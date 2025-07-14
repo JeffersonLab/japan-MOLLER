@@ -886,16 +886,16 @@ void  QwVQWK_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleMode
 
   if (bHw_sum) {
     values.push_back(0.0);
-    auto field = model->MakeField<Double_t>(TString::Format("%s.hw_sum", basename.Data()).Data());
+    auto field = model->MakeField<Double_t>(TString::Format("%s_hw_sum", basename.Data()).Data());
     fieldPtrs.push_back(field.get());
     
     if (fDataToSave == kMoments) {
       values.push_back(0.0);
-      auto field_m2 = model->MakeField<Double_t>(TString::Format("%s.hw_sum_m2", basename.Data()).Data());
+      auto field_m2 = model->MakeField<Double_t>(TString::Format("%s_hw_sum_m2", basename.Data()).Data());
       fieldPtrs.push_back(field_m2.get());
       
       values.push_back(0.0);
-      auto field_err = model->MakeField<Double_t>(TString::Format("%s.hw_sum_err", basename.Data()).Data());
+      auto field_err = model->MakeField<Double_t>(TString::Format("%s_hw_sum_err", basename.Data()).Data());
       fieldPtrs.push_back(field_err.get());
     }
   }
@@ -903,41 +903,41 @@ void  QwVQWK_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleMode
   if (bBlock) {
     for (Int_t i = 0; i < fBlocksPerEvent; i++) {
       values.push_back(0.0);
-      auto field = model->MakeField<Double_t>(TString::Format("%s.block%d", basename.Data(), i).Data());
+      auto field = model->MakeField<Double_t>(TString::Format("%s_block%d", basename.Data(), i).Data());
       fieldPtrs.push_back(field.get());
     }
   }
 
   if (bNum_samples) {
     values.push_back(0.0);
-    auto field = model->MakeField<Double_t>(TString::Format("%s.num_samples", basename.Data()).Data());
+    auto field = model->MakeField<Double_t>(TString::Format("%s_num_samples", basename.Data()).Data());
     fieldPtrs.push_back(field.get());
   }
 
   if (bDevice_Error_Code) {
     values.push_back(0.0);
-    auto field = model->MakeField<Double_t>(TString::Format("%s.Device_Error_Code", basename.Data()).Data());
+    auto field = model->MakeField<Double_t>(TString::Format("%s_Device_Error_Code", basename.Data()).Data());
     fieldPtrs.push_back(field.get());
   }
 
   if (fDataToSave == kRaw) {
     if (bHw_sum_raw) {
       values.push_back(0.0);
-      auto field = model->MakeField<Double_t>(TString::Format("%s.hw_sum_raw", basename.Data()).Data());
+      auto field = model->MakeField<Double_t>(TString::Format("%s_hw_sum_raw", basename.Data()).Data());
       fieldPtrs.push_back(field.get());
     }
 
     if (bBlock_raw) {
       for (Int_t i = 0; i < fBlocksPerEvent; i++) {
         values.push_back(0.0);
-        auto field = model->MakeField<Double_t>(TString::Format("%s.block%d_raw", basename.Data(), i).Data());
+        auto field = model->MakeField<Double_t>(TString::Format("%s_block%d_raw", basename.Data(), i).Data());
         fieldPtrs.push_back(field.get());
       }
     }
 
     if (bSequence_number) {
       values.push_back(0.0);
-      auto field = model->MakeField<Double_t>(TString::Format("%s.sequence_number", basename.Data()).Data());
+      auto field = model->MakeField<Double_t>(TString::Format("%s_sequence_number", basename.Data()).Data());
       fieldPtrs.push_back(field.get());
     }
   }
