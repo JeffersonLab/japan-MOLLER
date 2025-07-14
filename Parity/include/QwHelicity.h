@@ -13,6 +13,9 @@
 
 // ROOT headers
 #include "TTree.h"
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RNTupleWriter.hxx"
+#include "ROOT/RField.hxx"
 
 // Qweak headers
 #include "VQwSubsystemParity.h"
@@ -137,6 +140,10 @@ class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHeli
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file);
   void  FillTreeVector(std::vector<Double_t> &values) const;
+
+  using VQwSubsystem::ConstructNTupleAndVector;
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, std::vector<Double_t> &values, std::vector<Double_t*>& fieldPtrs);
+  void  FillNTupleVector(std::vector<Double_t> &values) const;
 
 #ifdef __USE_DATABASE__
   void  FillDB(QwParityDB *db, TString type);

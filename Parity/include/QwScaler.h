@@ -8,6 +8,10 @@
 // Boost headers
 #include <boost/shared_ptr.hpp>
 
+// ROOT headers
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+
 // Qweak headers
 #include "VQwSubsystemParity.h"
 #include "QwScaler_Channel.h"
@@ -64,6 +68,10 @@ class QwScaler: public VQwSubsystemParity, public MQwSubsystemCloneable<QwScaler
     void  ConstructBranch(TTree *tree, TString& prefix) { };
     void  ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file) { };
     void  FillTreeVector(std::vector<Double_t> &values) const;
+
+    // RNTuple methods
+    void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs);
+    void FillNTupleVector(std::vector<Double_t>& values) const;
 
     Bool_t Compare(VQwSubsystem *source);
 

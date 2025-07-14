@@ -186,6 +186,8 @@ public:
   virtual void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) = 0;
   virtual void  FillTreeVector(std::vector<Double_t> &values) const = 0;
   void  ConstructBranch(TTree *tree, TString &prefix);
+  virtual void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs) = 0;
+  virtual void  FillNTupleVector(std::vector<Double_t>& values) const = 0;
 
 
   void AccumulateRunningSum(const VQwScaler_Channel &value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
@@ -267,6 +269,8 @@ class QwScaler_Channel: public VQwScaler_Channel
 
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
   void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs);
+  void  FillNTupleVector(std::vector<Double_t>& values) const;
 
 
 };

@@ -865,6 +865,99 @@ void  QwVQWK_Channel::FillTreeVector(std::vector<Double_t> &values) const
   }
 }
 
+void  QwVQWK_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, std::vector<Double_t> &values, std::vector<Double_t*> &fieldPtrs)
+{
+  //  This channel is not used, so skip setting up the RNTuple.
+  if (IsNameEmpty()) return;
+
+  //  Decide what to store based on prefix
+  SetDataToSaveByPrefix(prefix);
+
+  TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
+  fTreeArrayIndex  = values.size();
+
+  bHw_sum =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum");
+  bHw_sum_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum_raw");
+  bBlock =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block");
+  bBlock_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block_raw");
+  bNum_samples = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "num_samples");
+  bDevice_Error_Code = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "Device_Error_Code");
+  bSequence_number = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "sequence_number");
+
+  if (bHw_sum) {
+    values.push_back(0.0);
+    auto field = model->MakeField<Double_t>(TString::Format("%s.hw_sum", basename.Data()).Data());
+    fieldPtrs.push_back(field.get());
+    
+    if (fDataToSave == kMoments) {
+      values.push_back(0.0);
+      auto field_m2 = model->MakeField<Double_t>(TString::Format("%s.hw_sum_m2", basename.Data()).Data());
+      fieldPtrs.push_back(field_m2.get());
+      
+      values.push_back(0.0);
+      auto field_err = model->MakeField<Double_t>(TString::Format("%s.hw_sum_err", basename.Data()).Data());
+      fieldPtrs.push_back(field_err.get());
+    }
+  }
+
+  if (bBlock) {
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+      values.push_back(0.0);
+      auto field = model->MakeField<Double_t>(TString::Format("%s.block%d", basename.Data(), i).Data());
+      fieldPtrs.push_back(field.get());
+    }
+  }
+
+  if (bNum_samples) {
+    values.push_back(0.0);
+    auto field = model->MakeField<Double_t>(TString::Format("%s.num_samples", basename.Data()).Data());
+    fieldPtrs.push_back(field.get());
+  }
+
+  if (bDevice_Error_Code) {
+    values.push_back(0.0);
+    auto field = model->MakeField<Double_t>(TString::Format("%s.Device_Error_Code", basename.Data()).Data());
+    fieldPtrs.push_back(field.get());
+  }
+
+  if (fDataToSave == kRaw) {
+    if (bHw_sum_raw) {
+      values.push_back(0.0);
+      auto field = model->MakeField<Double_t>(TString::Format("%s.hw_sum_raw", basename.Data()).Data());
+      fieldPtrs.push_back(field.get());
+    }
+
+    if (bBlock_raw) {
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        values.push_back(0.0);
+        auto field = model->MakeField<Double_t>(TString::Format("%s.block%d_raw", basename.Data(), i).Data());
+        fieldPtrs.push_back(field.get());
+      }
+    }
+
+    if (bSequence_number) {
+      values.push_back(0.0);
+      auto field = model->MakeField<Double_t>(TString::Format("%s.sequence_number", basename.Data()).Data());
+      fieldPtrs.push_back(field.get());
+    }
+  }
+
+  fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
+
+  if (kDEBUG) {
+    std::cerr << "QwVQWK_Channel::ConstructNTupleAndVector: fTreeArrayIndex==" << fTreeArrayIndex
+              << "; fTreeArrayNumEntries==" << fTreeArrayNumEntries
+              << "; values.size()==" << values.size()
+              << std::endl;
+  }
+}
+
+void  QwVQWK_Channel::FillNTupleVector(std::vector<Double_t> &values) const
+{
+  // Use the same filling logic as FillTreeVector since RNTuples use the same data
+  FillTreeVector(values);
+}
+
 // VQwDataElement& QwVQWK_Channel::operator= (const  VQwDataElement& data_value)
 // {
 //   QwVQWK_Channel * value;

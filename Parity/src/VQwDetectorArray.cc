@@ -10,6 +10,10 @@
 // System headers
 #include <sstream>
 
+// ROOT headers for RNTuple support
+#include <ROOT/RNTupleModel.hxx>
+#include <ROOT/RNTupleWriter.hxx>
+
 // Qweak headers
 #include "QwSubsystemArray.h"
 #include "QwLog.h"
@@ -1339,6 +1343,30 @@ void VQwDetectorArray::FillTreeVector(std::vector<Double_t> &values) const {
 
     for (size_t i=0;i<fCombinedPMT.size();i++)
      fCombinedPMT[i].FillTreeVector(values);
+
+    return;
+
+}
+
+void VQwDetectorArray::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs) {
+
+    for (size_t i=0;i<fIntegrationPMT.size();i++)
+     fIntegrationPMT[i].ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+
+    for (size_t i=0;i<fCombinedPMT.size();i++)
+     fCombinedPMT[i].ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+
+    return;
+
+}
+
+void VQwDetectorArray::FillNTupleVector(std::vector<Double_t>& values) const {
+
+    for (size_t i=0;i<fIntegrationPMT.size();i++)
+     fIntegrationPMT[i].FillNTupleVector(values);
+
+    for (size_t i=0;i<fCombinedPMT.size();i++)
+     fCombinedPMT[i].FillNTupleVector(values);
 
     return;
 

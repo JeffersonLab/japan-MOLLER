@@ -855,6 +855,179 @@ void  QwMollerADC_Channel::FillTreeVector(std::vector<Double_t> &values) const
   }
 }
 
+void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs)
+{
+  if (IsNameEmpty()) {
+    //  This channel is not used, so skip setting up the RNTuple.
+  } else {
+    //  Decide what to store based on prefix
+    SetDataToSaveByPrefix(prefix);
+
+    TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
+    fTreeArrayIndex  = values.size();
+
+    // Calculate how many elements we need to avoid multiple push_back calls
+    size_t numElements = 0;
+    
+    // Count elements based on what will be saved
+    if (bHw_sum) {
+      numElements += 1; // hw_sum
+      if (fDataToSave == kMoments) numElements += 2; // M2 + error
+    }
+    if (bBlock) numElements += fBlocksPerEvent; // blocks
+    if (bNum_samples) numElements += 1; // num_samples
+    if (bDevice_Error_Code) numElements += 1; // error code
+    
+    if (fDataToSave == kRaw) {
+      if (bHw_sum_raw) numElements += 1; // hw_sum_raw
+      if (bBlock_raw) numElements += fBlocksPerEvent; // block_raw
+      numElements += 16; // fBlockSumSq_raw (4*4)
+      if (bSequence_number) numElements += 1; // sequence_number
+    }
+    
+    // Resize vectors once to avoid reallocation
+    size_t oldSize = values.size();
+    values.resize(oldSize + numElements, 0.0);
+    fieldPtrs.reserve(fieldPtrs.size() + numElements);
+    
+    size_t index = oldSize;
+    
+    // Add fields in the same order as FillTreeVector
+    // hw_sum
+    if (bHw_sum) {
+      fieldPtrs.push_back(&values[index++]);
+      model->MakeField<Double_t>(basename.Data());
+      if (fDataToSave == kMoments) {
+        fieldPtrs.push_back(&values[index++]);
+        model->MakeField<Double_t>((basename + "_m2").Data());
+        fieldPtrs.push_back(&values[index++]);
+        model->MakeField<Double_t>((basename + "_err").Data());
+      }
+    }
+
+    if (bBlock) {
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        fieldPtrs.push_back(&values[index++]);
+        model->MakeField<Double_t>((basename + Form("_block%d", i)).Data());
+      }
+    }
+
+    // num_samples
+    if (bNum_samples) {
+      fieldPtrs.push_back(&values[index++]);
+      model->MakeField<Double_t>((basename + "_num_samples").Data());
+    }
+
+    // Device_Error_Code
+    if (bDevice_Error_Code) {
+      fieldPtrs.push_back(&values[index++]);
+      model->MakeField<Double_t>((basename + "_Device_Error_Code").Data());
+    }
+
+    if (fDataToSave == kRaw) {
+      // hw_sum_raw
+      if (bHw_sum_raw) {
+        fieldPtrs.push_back(&values[index++]);
+        model->MakeField<Double_t>((basename + "_raw").Data());
+      }
+
+      if (bBlock_raw) {
+        for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+          fieldPtrs.push_back(&values[index++]);
+          model->MakeField<Double_t>((basename + Form("_block%d_raw", i)).Data());
+        }
+      }
+
+      for(int i = 0; i < 4; i++){
+        fieldPtrs.push_back(&values[index++]);
+        model->MakeField<Double_t>((basename + Form("_sumsq%d_low", i)).Data());
+        fieldPtrs.push_back(&values[index++]);
+        model->MakeField<Double_t>((basename + Form("_sumsq%d_high", i)).Data());
+        fieldPtrs.push_back(&values[index++]);
+        model->MakeField<Double_t>((basename + Form("_min%d", i)).Data());
+        fieldPtrs.push_back(&values[index++]);
+        model->MakeField<Double_t>((basename + Form("_max%d", i)).Data());
+      }
+      
+      // sequence_number
+      if (bSequence_number) {
+        fieldPtrs.push_back(&values[index++]);
+        model->MakeField<Double_t>((basename + "_sequence_number").Data());
+      }
+    }
+
+    fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
+  }
+}
+
+void  QwMollerADC_Channel::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (IsNameEmpty()) {
+    //  This channel is not used, so skip filling.
+  } else if (fTreeArrayNumEntries <= 0) {
+    if (bDEBUG) std::cerr << "QwMollerADC_Channel::FillNTupleVector:  fTreeArrayNumEntries=="
+              << fTreeArrayNumEntries << std::endl;
+  } else if (values.size() < fTreeArrayIndex+fTreeArrayNumEntries){
+    if (bDEBUG) std::cerr << "QwMollerADC_Channel::FillNTupleVector:  values.size()=="
+              << values.size()
+              << "; fTreeArrayIndex+fTreeArrayNumEntries=="
+              << fTreeArrayIndex+fTreeArrayNumEntries
+              << std::endl;
+  } else {
+
+    UInt_t index = fTreeArrayIndex;
+
+    // hw_sum
+    if (bHw_sum) {
+      values[index++] = this->GetHardwareSum();
+      if (fDataToSave == kMoments) {
+        values[index++] = this->GetHardwareSumM2();
+        values[index++] = this->GetHardwareSumError();
+      }
+    }
+
+    if (bBlock) {
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        // blocki
+        values[index++] = this->GetBlockValue(i);
+      }
+    }
+
+    // num_samples
+    if (bNum_samples)
+      values[index++] =
+          (fDataToSave == kMoments)? this->fGoodEventCount: this->fNumberOfSamples;
+
+    // Device_Error_Code
+    if (bDevice_Error_Code)
+      values[index++] = this->fErrorFlag;
+
+    if (fDataToSave == kRaw)
+      {
+        // hw_sum_raw
+        if (bHw_sum_raw)
+          values[index++] = this->GetRawHardwareSum();
+
+        if (bBlock_raw) {
+          for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+            // blocki_raw
+            values[index++] = this->GetRawBlockValue(i);
+          }
+        }
+
+        for(int i = 0; i < 4; i++){
+        values[index++] = fBlockSumSq_raw[i] & 0xffffffff;
+        values[index++] = fBlockSumSq_raw[i] >> 32;
+        values[index++] = fBlock_min[i];
+        values[index++] = fBlock_max[i];
+        }
+        // sequence_number
+        if (bSequence_number)
+          values[index++] = this->fSequenceNumber;
+      }
+  }
+}
+
 QwMollerADC_Channel& QwMollerADC_Channel::operator= (const QwMollerADC_Channel &value)
 {
   if(this ==&value) return *this;

@@ -16,6 +16,10 @@
 #include <iostream>
 #include <stdexcept>
 
+// ROOT headers for RNTuple support
+#include <ROOT/RNTupleModel.hxx>
+#include <ROOT/RNTupleWriter.hxx>
+
 // Qweak headers
 #include "QwLog.h"
 #include "QwParameterFile.h"
@@ -828,6 +832,36 @@ void QwBeamMod::FillTreeVector(std::vector<Double_t> &values) const
   //  if ((i+1)%8==0) std::cout << std::endl;
   // }
 
+}
+
+void QwBeamMod::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs)
+{
+  TString basename;
+  
+  for(size_t i = 0; i < fModChannel.size(); i++){
+    fModChannel[i]->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+  }
+  
+  fTreeArrayIndex  = values.size();
+  for (size_t i=0; i<fWord.size(); i++) {
+    basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length());
+    basename += fWord[i].fWordName;
+    values.push_back(0.0);
+    fieldPtrs.push_back(&(values.back()));
+    model->MakeField<Double_t>(basename.Data());
+  }
+}
+
+void QwBeamMod::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  size_t index = fTreeArrayIndex;
+  
+  for (size_t i = 0; i < fModChannel.size(); i++){
+    fModChannel[i]->FillNTupleVector(values);
+  }
+  for (size_t i = 0; i < fWord.size(); i++){
+    values[index++] = fWord[i].fValue;
+  }
 }
 
 
