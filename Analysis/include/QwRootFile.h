@@ -303,8 +303,17 @@ class QwRootNTuple {
 
     /// Destructor
     virtual ~QwRootNTuple() { 
+      Close();
+    }
+
+    /// Close and finalize the RNTuple writer
+    void Close() {
       if (fWriter) {
-        fWriter.reset();
+        QwMessage << "Closing RNTuple '" << fName << "' writer" << QwLog::endl;
+        // Explicitly commit any remaining data and close the writer
+        // This ensures all data is written to the file before destruction
+        fWriter.reset();  // This calls the destructor which should finalize the RNTuple
+        QwMessage << "Closed RNTuple '" << fName << "' writer" << QwLog::endl;
       }
     }
 
@@ -341,15 +350,23 @@ class QwRootNTuple {
         return;
       }
       
-      // For now, provide a warning that RNTuples are not fully implemented
-      QwWarning << "RNTuple support is not yet fully implemented. " 
-                << "The --enable-rntuples option is recognized but RNTuples will not be created." 
-                << QwLog::endl;
+      // Before creating the writer, ensure all fields are added to the model
+      // The field pointers should already be set up by ConstructFieldsAndVector
+      if (fFieldPtrs.empty()) {
+        QwError << "No fields defined in RNTuple model for " << fName << QwLog::endl;
+        return;
+      }
       
-      // TODO: Implement proper RNTuple writer initialization
-      // This would require major changes to how data is structured and written
-      // auto options = ROOT::RNTupleWriteOptions();
-      // fWriter = ROOT::RNTupleWriter::Recreate(std::move(fModel), fName, filename, options);
+      try {
+        // Create the writer with the model (transfers ownership)
+        // Use Append to add RNTuple to existing TFile
+        fWriter = ROOT::RNTupleWriter::Append(std::move(fModel), fName, *file);
+        
+        QwMessage << "Created RNTuple '" << fName << "' in file " << file->GetName() << QwLog::endl;
+        
+      } catch (const std::exception& e) {
+        QwError << "Failed to create RNTuple writer for '" << fName << "': " << e.what() << QwLog::endl;
+      }
     }
 
     /// Fill the fields for generic objects
@@ -359,10 +376,22 @@ class QwRootNTuple {
         // Fill the field vector
         object.FillNTupleVector(fVector);
         
-        // Copy vector data to field pointers
+        // Debug output
+        QwMessage << "Filling RNTuple " << fName << " with " << fVector.size() 
+                  << " values and " << fFieldPtrs.size() << " field pointers" << QwLog::endl;
+        
+        // Use the field pointers - they should remain valid after model is moved
         for (size_t i = 0; i < fVector.size() && i < fFieldPtrs.size(); ++i) {
-          *(fFieldPtrs[i]) = fVector[i];
+          if (fFieldPtrs[i] != nullptr) {
+            *(fFieldPtrs[i]) = fVector[i];
+            //QwMessage << "Set field " << i << " to value " << fVector[i] << QwLog::endl;
+          } else {
+            QwMessage << "Field " << i << " has nullptr pointer, skipping" << QwLog::endl;
+          }
         }
+        
+        // CRITICAL: Actually commit the data to the RNTuple
+        Fill();
       } else {
         QwError << "Attempting to fill RNTuple vector for type " << fType << " with "
                 << "object of type " << typeid(object).name() << QwLog::endl;
@@ -420,6 +449,9 @@ class QwRootNTuple {
     /// Vector of values and field pointers
     std::vector<Double_t> fVector;
     std::vector<Double_t*> fFieldPtrs;
+    
+    /// Shared pointers to fields (these remain valid after model is moved)
+    std::vector<std::shared_ptr<Double_t>> fSharedFieldPtrs;
 
     /// Name, description, prefix
     const std::string fName;
@@ -672,6 +704,14 @@ class QwRootFile {
     void Map()    { if (fRootFile) fRootFile->Map(); }
     void Close()  {
       if (!fMakePermanent) fMakePermanent = HasAnyFilled();
+      
+      // Close all RNTuples before closing the file
+      for (auto& pair : fNTupleByName) {
+        for (auto& ntuple : pair.second) {
+          if (ntuple) ntuple->Close();
+        }
+      }
+      
       if (fMapFile) fMapFile->Close();
       if (fRootFile) fRootFile->Close();
     }
@@ -1003,8 +1043,8 @@ void QwRootFile::ConstructNTupleFields(
         T& object,
         const std::string& prefix)
 {
-  // Return if we do not want this RNTuple information or RNTuples are disabled
-  if (IsTreeDisabled(name) || !fEnableRNTuples) return;
+  // Return if RNTuples are disabled
+  if (!fEnableRNTuples) return;
 
   // Pointer to new RNTuple
   QwRootNTuple* ntuple = 0;

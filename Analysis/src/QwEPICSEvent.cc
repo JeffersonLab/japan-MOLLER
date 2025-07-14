@@ -235,14 +235,23 @@ void QwEPICSEvent::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>&
 
     	// Add element to vector
     	values.push_back(0.0);
-    	fieldPtrs.push_back(&values.back());
 
     	// Determine field name
     	TString name = fEPICSVariableList[tagindex];
     	name.ReplaceAll(':','_'); // remove colons before creating field
+    	name.ReplaceAll('.','_'); // remove dots before creating field
 
-    	// Create RNTuple field
-    	model->MakeField<Double_t>(name.Data());
+    	// Create RNTuple field (handle duplicate field names gracefully)
+    	// Note: Unlike TTrees which allow duplicate branch names, RNTuples require unique field names
+    	try {
+    	  auto field = model->MakeField<Double_t>(name.Data());
+    	  fieldPtrs.push_back(field.get());
+    	} catch (const std::exception& e) {
+    	  // Field already exists - this mimics TTree behavior where duplicate branches are allowed
+    	  // We still reserve space in the vector but use a nullptr for the field pointer
+    	  fieldPtrs.push_back(nullptr);
+    	  QwWarning << "EPICS field '" << name << "' already exists in RNTuple model, skipping duplicate creation" << QwLog::endl;
+    	}
     }
   }
   fTreeArrayNumEntries = values.size() - fTreeArrayIndex;

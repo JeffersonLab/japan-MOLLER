@@ -312,6 +312,10 @@ void QwRootFile::ProcessOptions(QwOptions &options)
  * histograms.
  */
 Bool_t QwRootFile::HasAnyFilled(void) {
+  // Check if we have any RNTuples with data
+  if (!fNTupleByName.empty()) {
+    return true;  // If RNTuples exist, assume they have data
+  }
   return this->HasAnyFilled(fRootFile);
 }
 Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
