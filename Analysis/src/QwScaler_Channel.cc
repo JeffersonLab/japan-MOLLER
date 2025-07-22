@@ -260,6 +260,10 @@ void  VQwScaler_Channel::FillHistograms()
 template<unsigned int data_mask, unsigned int data_shift>
 void QwScaler_Channel<data_mask,data_shift>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
+  if(tree==nullptr) {
+    QwError << "QwScaler_Channel::ConstructBranchAndVector: tree is null" << QwLog::endl;
+    return;
+  }
   if (IsNameEmpty()){
     //  This channel is not used, so skip setting up the tree.
   } else {

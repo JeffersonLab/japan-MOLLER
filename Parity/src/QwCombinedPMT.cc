@@ -393,6 +393,11 @@ void  QwCombinedPMT::FillHistograms()
 
 void  QwCombinedPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
+  if(tree == nullptr)
+  {
+    QwError << "QwCombinedPMT::ConstructBranchAndVector: tree is null" << QwLog::endl;
+    return;
+  }
   if (GetElementName()=="")
     {
       //  This channel is not used, so skip

@@ -427,6 +427,11 @@ void  QwIntegrationPMT::FillHistograms()
 
 void  QwIntegrationPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
+  if(tree == nullptr)
+  {
+    QwError << "QwIntegrationPMT::ConstructBranchAndVector: tree is null" << QwLog::endl;
+    return;
+  }
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
   } else

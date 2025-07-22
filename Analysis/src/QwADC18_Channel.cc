@@ -566,6 +566,10 @@ void  QwADC18_Channel::FillHistograms()
 
 void  QwADC18_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
+  if(tree==nullptr){
+    QwError << "QwADC18_Channel::ConstructBranchAndVector:  tree==NULL" << QwLog::endl;
+    return;
+  }
   if (IsNameEmpty()){
     //  This channel is not used, so skip setting up the tree.
   } else {
