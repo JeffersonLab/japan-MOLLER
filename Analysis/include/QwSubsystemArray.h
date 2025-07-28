@@ -215,12 +215,12 @@ class QwSubsystemArray:
   void  FillTreeVector(std::vector<Double_t> &values) const;
   
   /// \brief Construct RNTuple fields and vector for this subsystem
-  void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs) {
+  void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) {
     TString tmpstr("");
     ConstructNTupleAndVector(model, tmpstr, values, fieldPtrs);
   };
   /// \brief Construct RNTuple fields and vector for this subsystem with a prefix
-  void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs);
+  void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
   /// \brief Fill the RNTuple vector for this subsystem
   void FillNTupleVector(std::vector<Double_t>& values) const;
   // @}

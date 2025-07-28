@@ -118,7 +118,7 @@ class QwEnergyCalculator : public VQwDataElement{
     void    ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file);
     void    FillTreeVector(std::vector<Double_t> &values) const;
 
-    void    ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs);
+    void    ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
     void    FillNTupleVector(std::vector<Double_t>& values) const;
 
     VQwHardwareChannel* GetEnergy(){

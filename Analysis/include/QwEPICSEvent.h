@@ -105,7 +105,7 @@ class QwEPICSEvent
   void FillTreeVector(std::vector<Double_t>& values) const;
 
   /// \brief Construct the RNTuple fields and vector
-  void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs);
+  void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
   /// \brief Fill the RNTuple vector
   void FillNTupleVector(std::vector<Double_t>& values) const;
 

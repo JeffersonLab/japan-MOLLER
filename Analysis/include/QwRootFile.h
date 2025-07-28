@@ -325,7 +325,7 @@ class QwRootNTuple {
       // Reserve space for the field vector
       fVector.reserve(BRANCH_VECTOR_MAX_SIZE);
       
-      // Associate fields with vector - similar to ConstructBranchAndVector but for RNTuple
+      // Associate fields with vector - now using shared field pointers
       TString prefix = Form("%s", fPrefix.c_str());
       object.ConstructNTupleAndVector(fModel, prefix, fVector, fFieldPtrs);
       
@@ -351,8 +351,7 @@ class QwRootNTuple {
       }
       
       // Before creating the writer, ensure all fields are added to the model
-      // The field pointers should already be set up by ConstructFieldsAndVector
-      if (fFieldPtrs.empty()) {
+      if (fVector.empty()) {
         QwError << "No fields defined in RNTuple model for " << fName << QwLog::endl;
         return;
       }
@@ -380,18 +379,29 @@ class QwRootNTuple {
         QwMessage << "Filling RNTuple " << fName << " with " << fVector.size() 
                   << " values and " << fFieldPtrs.size() << " field pointers" << QwLog::endl;
         
-        // Use the field pointers - they should remain valid after model is moved
-        for (size_t i = 0; i < fVector.size() && i < fFieldPtrs.size(); ++i) {
-          if (fFieldPtrs[i] != nullptr) {
-            *(fFieldPtrs[i]) = fVector[i];
-            //QwMessage << "Set field " << i << " to value " << fVector[i] << QwLog::endl;
-          } else {
-            QwMessage << "Field " << i << " has nullptr pointer, skipping" << QwLog::endl;
+        // Use the shared field pointers which remain valid
+        if (fWriter) {
+          for (size_t i = 0; i < fVector.size() && i < fFieldPtrs.size(); ++i) {
+            if (fFieldPtrs[i]) {
+              *(fFieldPtrs[i]) = fVector[i];
+              QwMessage << "Set field " << i << " to value " << fVector[i] << QwLog::endl;
+            } else {
+              QwMessage << "Field " << i << " has null pointer, skipping" << QwLog::endl;
+            }
           }
+          
+          // CRITICAL: Actually commit the data to the RNTuple
+          fWriter->Fill();
+          
+          // Update event counter
+          fCurrentEvent++;
+          // RNTuple prescaling
+          if (fNumEventsCycle > 0) {
+            fCurrentEvent %= fNumEventsCycle;
+          }
+        } else {
+          QwError << "RNTuple writer not initialized for " << fName << QwLog::endl;
         }
-        
-        // CRITICAL: Actually commit the data to the RNTuple
-        Fill();
       } else {
         QwError << "Attempting to fill RNTuple vector for type " << fType << " with "
                 << "object of type " << typeid(object).name() << QwLog::endl;
@@ -399,21 +409,10 @@ class QwRootNTuple {
       }
     }
 
-    /// Fill the RNTuple
+    /// Fill the RNTuple (called by FillTree wrapper methods)
     void Fill() {
-      fCurrentEvent++;
-
-      // RNTuple prescaling
-      if (fNumEventsCycle > 0) {
-        fCurrentEvent %= fNumEventsCycle;
-        if (fCurrentEvent > fNumEventsToSave)
-          return;
-      }
-
-      // Fill the RNTuple
-      if (fWriter) {
-        fWriter->Fill();
-      }
+      // This method is now called indirectly - the actual filling happens in FillNTupleFields
+      // Just here for compatibility with the tree interface
     }
 
     /// Get the name of the RNTuple
@@ -446,12 +445,9 @@ class QwRootNTuple {
     std::unique_ptr<ROOT::RNTupleModel> fModel;
     std::unique_ptr<ROOT::RNTupleWriter> fWriter;
     
-    /// Vector of values and field pointers
+    /// Vector of values and shared field pointers (for RNTuple)
     std::vector<Double_t> fVector;
-    std::vector<Double_t*> fFieldPtrs;
-    
-    /// Shared pointers to fields (these remain valid after model is moved)
-    std::vector<std::shared_ptr<Double_t>> fSharedFieldPtrs;
+    std::vector<std::shared_ptr<Double_t>> fFieldPtrs;
 
     /// Name, description, prefix
     const std::string fName;
