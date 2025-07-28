@@ -855,8 +855,9 @@ void  QwMollerADC_Channel::FillTreeVector(std::vector<Double_t> &values) const
   }
 }
 
-void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs)
+void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
+  //For rntuple 
   if (IsNameEmpty()) {
     //  This channel is not used, so skip setting up the RNTuple.
   } else {
@@ -890,69 +891,54 @@ void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupl
     values.resize(oldSize + numElements, 0.0);
     fieldPtrs.reserve(fieldPtrs.size() + numElements);
     
-    size_t index = oldSize;
-    
     // Add fields in the same order as FillTreeVector
     // hw_sum
     if (bHw_sum) {
-      fieldPtrs.push_back(&values[index++]);
-      model->MakeField<Double_t>(basename.Data());
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
       if (fDataToSave == kMoments) {
-        fieldPtrs.push_back(&values[index++]);
-        model->MakeField<Double_t>((basename + "_m2").Data());
-        fieldPtrs.push_back(&values[index++]);
-        model->MakeField<Double_t>((basename + "_err").Data());
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_m2").Data()));
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_err").Data()));
       }
     }
 
     if (bBlock) {
       for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-        fieldPtrs.push_back(&values[index++]);
-        model->MakeField<Double_t>((basename + Form("_block%d", i)).Data());
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_block%d", i)).Data()));
       }
     }
 
     // num_samples
     if (bNum_samples) {
-      fieldPtrs.push_back(&values[index++]);
-      model->MakeField<Double_t>((basename + "_num_samples").Data());
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_num_samples").Data()));
     }
 
     // Device_Error_Code
     if (bDevice_Error_Code) {
-      fieldPtrs.push_back(&values[index++]);
-      model->MakeField<Double_t>((basename + "_Device_Error_Code").Data());
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_Device_Error_Code").Data()));
     }
 
     if (fDataToSave == kRaw) {
       // hw_sum_raw
       if (bHw_sum_raw) {
-        fieldPtrs.push_back(&values[index++]);
-        model->MakeField<Double_t>((basename + "_raw").Data());
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_raw").Data()));
       }
 
       if (bBlock_raw) {
         for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-          fieldPtrs.push_back(&values[index++]);
-          model->MakeField<Double_t>((basename + Form("_block%d_raw", i)).Data());
+          fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_block%d_raw", i)).Data()));
         }
       }
 
       for(int i = 0; i < 4; i++){
-        fieldPtrs.push_back(&values[index++]);
-        model->MakeField<Double_t>((basename + Form("_sumsq%d_low", i)).Data());
-        fieldPtrs.push_back(&values[index++]);
-        model->MakeField<Double_t>((basename + Form("_sumsq%d_high", i)).Data());
-        fieldPtrs.push_back(&values[index++]);
-        model->MakeField<Double_t>((basename + Form("_min%d", i)).Data());
-        fieldPtrs.push_back(&values[index++]);
-        model->MakeField<Double_t>((basename + Form("_max%d", i)).Data());
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_sumsq%d_low", i)).Data()));
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_sumsq%d_high", i)).Data()));
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_min%d", i)).Data()));
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_max%d", i)).Data()));
       }
       
       // sequence_number
       if (bSequence_number) {
-        fieldPtrs.push_back(&values[index++]);
-        model->MakeField<Double_t>((basename + "_sequence_number").Data());
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_sequence_number").Data()));
       }
     }
 

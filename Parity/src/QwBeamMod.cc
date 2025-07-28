@@ -834,7 +834,7 @@ void QwBeamMod::FillTreeVector(std::vector<Double_t> &values) const
 
 }
 
-void QwBeamMod::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs)
+void QwBeamMod::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   TString basename;
   
@@ -847,8 +847,7 @@ void QwBeamMod::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& mo
     basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length());
     basename += fWord[i].fWordName;
     values.push_back(0.0);
-    fieldPtrs.push_back(&(values.back()));
-    model->MakeField<Double_t>(basename.Data());
+    fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
   }
 }
 

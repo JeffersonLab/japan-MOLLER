@@ -686,13 +686,13 @@ void QwSubsystemArray::FillTreeVector(std::vector<Double_t>& values) const
  * @param model RNTuple model
  * @param prefix Prefix
  * @param values Vector of values  
- * @param fieldPtrs Vector of field pointers
+ * @param fieldPtrs Vector of shared field pointers
  */
 void QwSubsystemArray::ConstructNTupleAndVector(
     std::unique_ptr<ROOT::RNTupleModel>& model,
     TString& prefix,
     std::vector<Double_t>& values,
-    std::vector<Double_t*>& fieldPtrs)
+    std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   fTreeArrayIndex = values.size();
 
@@ -703,7 +703,7 @@ void QwSubsystemArray::ConstructNTupleAndVector(
   values.push_back(0.0);
   values.push_back(0.0);
   
-  // Add corresponding field pointers
+  // Add corresponding field pointers and create fields
   if (prefix == "" || prefix.Index("yield_") == 0) {
     auto eventNumField = model->MakeField<Double_t>("CodaEventNumber");
     auto eventTypeField = model->MakeField<Double_t>("CodaEventType");
@@ -711,11 +711,11 @@ void QwSubsystemArray::ConstructNTupleAndVector(
     auto scanData1Field = model->MakeField<Double_t>("Coda_ScanData1");
     auto scanData2Field = model->MakeField<Double_t>("Coda_ScanData2");
     
-    fieldPtrs.push_back(eventNumField.get());
-    fieldPtrs.push_back(eventTypeField.get());
-    fieldPtrs.push_back(cleanDataField.get());
-    fieldPtrs.push_back(scanData1Field.get());
-    fieldPtrs.push_back(scanData2Field.get());
+    fieldPtrs.push_back(eventNumField);
+    fieldPtrs.push_back(eventTypeField);
+    fieldPtrs.push_back(cleanDataField);
+    fieldPtrs.push_back(scanData1Field);
+    fieldPtrs.push_back(scanData2Field);
   } else {
     // Still reserve space but don't create duplicate fields
     fieldPtrs.push_back(nullptr);

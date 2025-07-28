@@ -240,9 +240,9 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   virtual void FillTreeVector(std::vector<Double_t>& values) const = 0;
   
   /// \brief Construct the RNTuple fields and vector
-  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs) = 0;
+  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
   /// \brief Construct the RNTuple fields and vector  
-  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs) {
+  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) {
     TString tmpstr("");
     ConstructNTupleAndVector(model, tmpstr, values, fieldPtrs);
   };

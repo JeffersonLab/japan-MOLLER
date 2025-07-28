@@ -235,7 +235,7 @@ void QwMollerDetector::FillTreeVector(std::vector<Double_t> &values) const {
   }
 }
 
-void QwMollerDetector::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs)
+void QwMollerDetector::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
     for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){

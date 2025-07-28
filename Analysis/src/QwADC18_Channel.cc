@@ -656,7 +656,7 @@ void  QwADC18_Channel::FillTreeVector(std::vector<Double_t> &values) const
   }
 }
 
-void  QwADC18_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs)
+void  QwADC18_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (IsNameEmpty()){
     //  This channel is not used, so skip setting up the RNTuple.
@@ -677,36 +677,22 @@ void  QwADC18_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleMod
     values.resize(oldSize + numElements, 0.0);
     fieldPtrs.reserve(fieldPtrs.size() + numElements);
     
-    size_t index = oldSize;
-    
     // Main value
-    fieldPtrs.push_back(&values[index++]);
-    model->MakeField<Double_t>(basename.Data());
+    fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
     
     if (fDataToSave == kMoments) {
-      fieldPtrs.push_back(&values[index++]);
-      model->MakeField<Double_t>((basename + "_m2").Data());
-      
-      fieldPtrs.push_back(&values[index++]);
-      model->MakeField<Double_t>((basename + "_err").Data());
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_m2").Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_err").Data()));
     }
 
     // Device error code
-    fieldPtrs.push_back(&values[index++]);
-    model->MakeField<Double_t>((basename + "_Device_Error_Code").Data());
+    fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_Device_Error_Code").Data()));
 
     if (fDataToSave == kRaw){
-      fieldPtrs.push_back(&values[index++]);
-      model->MakeField<Double_t>((basename + "_raw").Data());
-      
-      fieldPtrs.push_back(&values[index++]);
-      model->MakeField<Double_t>((basename + "_diff").Data());
-      
-      fieldPtrs.push_back(&values[index++]);
-      model->MakeField<Double_t>((basename + "_peak").Data());
-      
-      fieldPtrs.push_back(&values[index++]);
-      model->MakeField<Double_t>((basename + "_base").Data());
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_raw").Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_diff").Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_peak").Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_base").Data()));
     }
 
     fTreeArrayNumEntries = values.size() - fTreeArrayIndex;

@@ -1131,7 +1131,7 @@ void  QwCombinedBPM<T>::FillTreeVector(std::vector<Double_t> &values) const
 }
 
 template<typename T>
-void QwCombinedBPM<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<Double_t*>& fieldPtrs)
+void QwCombinedBPM<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip constructing RNTuple.
