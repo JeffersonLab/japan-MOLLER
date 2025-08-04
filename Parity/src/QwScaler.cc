@@ -5,6 +5,10 @@
 
 #include "QwScaler.h"
 
+// ROOT headers
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+
 // Qweak headers
 #include "QwParameterFile.h"
 
@@ -366,6 +370,20 @@ void QwScaler::FillTreeVector(std::vector<Double_t> &values) const
 {
   for(size_t i = 0; i < fScaler.size(); i++) {
     fScaler.at(i)->FillTreeVector(values);
+  }
+}
+
+void QwScaler::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  for (size_t i = 0; i < fScaler.size(); i++) {
+    fScaler.at(i)->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+  }
+}
+
+void QwScaler::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  for(size_t i = 0; i < fScaler.size(); i++) {
+    fScaler.at(i)->FillNTupleVector(values);
   }
 }
 

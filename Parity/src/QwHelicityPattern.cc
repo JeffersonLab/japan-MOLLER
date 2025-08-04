@@ -10,6 +10,10 @@
 // System headers
 #include <stdexcept>
 
+// ROOT headers
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+
 // Qweak headers
 #include "QwLog.h"
 #include "QwHistogramHelper.h"
@@ -434,10 +438,13 @@ void  QwHelicityPattern::CalculatePairAsymmetry()
 Bool_t QwHelicityPattern::IsGoodAsymmetry()
 {
   Bool_t complete_and_good = kFALSE;
+  std::cout << "DEBUG QwHelicityPattern::IsGoodAsymmetry: IsCompletePattern()=" << IsCompletePattern() << std::endl;
   if (IsCompletePattern()){
     CalculateAsymmetry();
     complete_and_good = fPatternIsGood;
+    std::cout << "DEBUG QwHelicityPattern::IsGoodAsymmetry: after CalculateAsymmetry, fPatternIsGood=" << fPatternIsGood << std::endl;
   }
+  std::cout << "DEBUG QwHelicityPattern::IsGoodAsymmetry: returning " << complete_and_good << std::endl;
   return complete_and_good;
 };
 
@@ -562,6 +569,7 @@ void  QwHelicityPattern::CalculateAsymmetry()
   } else {
     //  This is a good pattern.
     //  Calculate the asymmetry.
+    std::cout << "DEBUG QwHelicityPattern::CalculateAsymmetry: Setting fPatternIsGood=kTRUE for pattern " << fCurrentPatternNumber << std::endl;
     fPatternIsGood = kTRUE;
     fQuartetNumber++;//Then increment the quartet number
     //std::cout<<" quartet count ="<<fQuartetNumber<<"\n";
@@ -836,7 +844,9 @@ void  QwHelicityPattern::ConstructHistograms(TDirectory *folder)
 
 void  QwHelicityPattern::FillHistograms()
 {
+  std::cout << "DEBUG QwHelicityPattern::FillHistograms: fPatternIsGood=" << fPatternIsGood << std::endl;
   if (fPatternIsGood) {
+    std::cout << "DEBUG QwHelicityPattern::FillHistograms: Filling histograms for good pattern" << std::endl;
     fYield.FillHistograms();
     fAsymmetry.FillHistograms();
     if (fEnableDifference) {
@@ -846,6 +856,8 @@ void  QwHelicityPattern::FillHistograms()
       fAsymmetry1.FillHistograms();
       fAsymmetry2.FillHistograms();
     }
+  } else {
+    std::cout << "DEBUG QwHelicityPattern::FillHistograms: Skipping histogram fill - pattern not good" << std::endl;
   }
 }
 
@@ -924,6 +936,44 @@ void QwHelicityPattern::FillTreeVector(std::vector<Double_t> &values) const
     if (fEnableAlternateAsym) {
       fAsymmetry1.FillTreeVector(values);
       fAsymmetry2.FillTreeVector(values);
+    }
+  }
+}
+
+void QwHelicityPattern::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length())+"BurstCounter";
+  // Note: fBurstCounter is a Short_t, but we're only creating Double_t fields for now
+  // This maintains compatibility with the existing TTree structure
+  
+  TString newprefix = "yield_" + prefix;
+  fYield.ConstructNTupleAndVector(model, newprefix, values, fieldPtrs);
+  newprefix = "asym_" + prefix;
+  fAsymmetry.ConstructNTupleAndVector(model, newprefix, values, fieldPtrs);
+
+  if (fEnableDifference) {
+    newprefix = "diff_" + prefix;
+    fDifference.ConstructNTupleAndVector(model, newprefix, values, fieldPtrs);
+  }
+  if (fEnableAlternateAsym) {
+    newprefix = "asym1_" + prefix;
+    fAsymmetry1.ConstructNTupleAndVector(model, newprefix, values, fieldPtrs);
+    newprefix = "asym2_" + prefix;
+    fAsymmetry2.ConstructNTupleAndVector(model, newprefix, values, fieldPtrs);
+  }
+}
+
+void QwHelicityPattern::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (fPatternIsGood) {
+    fYield.FillNTupleVector(values);
+    fAsymmetry.FillNTupleVector(values);
+    if (fEnableDifference) {
+      fDifference.FillNTupleVector(values);
+    }
+    if (fEnableAlternateAsym) {
+      fAsymmetry1.FillNTupleVector(values);
+      fAsymmetry2.FillNTupleVector(values);
     }
   }
 }
