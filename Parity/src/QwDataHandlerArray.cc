@@ -406,6 +406,7 @@ void  QwDataHandlerArray::ConstructHistograms(TDirectory *folder, TString &prefi
 
 void  QwDataHandlerArray::FillHistograms()
 {
+  std::cout << "DEBUG QwDataHandlerArray::FillHistograms: empty()=" << empty() << " size()=" << size() << std::endl;
   if (!empty())
     std::for_each(begin(), end(), boost::mem_fn(&VQwDataHandler::FillHistograms));
 }

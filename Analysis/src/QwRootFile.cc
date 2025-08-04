@@ -201,6 +201,11 @@ void QwRootFile::DefineOptions(QwOptions &options)
     ("disable-slow-tree", po::value<bool>()->default_bool_value(false),
      "disable slow control tree");
 
+  // Define the RNTuple options
+  options.AddOptions("ROOT output options")
+    ("enable-rntuples", po::value<bool>()->default_bool_value(false),
+     "enable RNTuple output");
+
   // Define the tree output prescaling options
   options.AddOptions("ROOT output options")
     ("num-mps-accepted-events", po::value<int>()->default_value(0),
@@ -312,40 +317,90 @@ void QwRootFile::ProcessOptions(QwOptions &options)
  * histograms.
  */
 Bool_t QwRootFile::HasAnyFilled(void) {
-  // Check if we have any RNTuples with data
-  if (!fNTupleByName.empty()) {
-    return true;  // If RNTuples exist, assume they have data
-  }
   return this->HasAnyFilled(fRootFile);
 }
 Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
-  if (!d) return false;
+  if (!d) {
+    QwOut << "DEBUG HasAnyFilled: Directory is null" << QwLog::endl;
+    return false;
+  }
+  
+  // First check if any in-memory trees have been filled
+  for (auto& pair : fTreeByName) {
+    for (auto& tree : pair.second) {
+      if (tree && tree->GetTree()) {
+        Long64_t entries = tree->GetTree()->GetEntries();
+        if (entries > 0) {
+          QwOut << "DEBUG HasAnyFilled: Found filled in-memory tree '" << pair.first << "' with " << entries << " entries" << QwLog::endl;
+          return true;
+        }
+      }
+    }
+  }
+  
+  // Then check if any RNTuples have been filled
+  for (auto& pair : fNTupleByName) {
+    for (auto& ntuple : pair.second) {
+      if (ntuple && ntuple->fCurrentEvent > 0) {
+        QwOut << "DEBUG HasAnyFilled: Found filled RNTuple with " << ntuple->fCurrentEvent << " events" << QwLog::endl;
+        return true;
+      }
+    }
+  }
+
   TList* l = d->GetListOfKeys();
+  QwOut << "DEBUG HasAnyFilled: Directory has " << l->GetEntries() << " keys" << QwLog::endl;
 
   for( int i=0; i < l->GetEntries(); ++i) {
     const char* name = l->At(i)->GetName();
     TObject* obj = d->FindObjectAny(name);
 
+    QwOut << "DEBUG HasAnyFilled: Checking object '" << name << "'" << QwLog::endl;
+
     // Objects which can't be found don't count.
-    if (!obj) continue;
+    if (!obj) {
+      QwOut << "DEBUG HasAnyFilled: Object '" << name << "' not found" << QwLog::endl;
+      continue;
+    }
 
     // Lists of parameter files, map files, and job conditions don't count.
-    if ( TString(name).Contains("parameter_file") ) continue;
-    if ( TString(name).Contains("mapfile") ) continue;
-    if ( TString(name).Contains("_condition") ) continue;
+    if ( TString(name).Contains("parameter_file") ) {
+      QwMessage << "DEBUG HasAnyFilled: Skipping parameter_file '" << name << "'" << QwLog::endl;
+      continue;
+    }
+    if ( TString(name).Contains("mapfile") ) {
+      QwMessage << "DEBUG HasAnyFilled: Skipping mapfile '" << name << "'" << QwLog::endl;
+      continue;
+    }
+    if ( TString(name).Contains("_condition") ) {
+      QwMessage << "DEBUG HasAnyFilled: Skipping condition '" << name << "'" << QwLog::endl;
+      continue;
+    }
     //  The EPICS tree doesn't count
-    if ( TString(name).Contains("slow") ) continue;
+    if ( TString(name).Contains("slow") ) {
+      QwMessage << "DEBUG HasAnyFilled: Skipping slow '" << name << "'" << QwLog::endl;
+      continue;
+    }
 
     // Recursively check subdirectories.
-    if (obj->IsA()->InheritsFrom( "TDirectory" ))
+    if (obj->IsA()->InheritsFrom( "TDirectory" )) {
+      QwMessage << "DEBUG HasAnyFilled: Recursively checking directory '" << name << "'" << QwLog::endl;
       if (this->HasAnyFilled( (TDirectory*)obj )) return true;
+    }
 
-    if (obj->IsA()->InheritsFrom( "TTree" ))
-      if ( ((TTree*) obj)->GetEntries() ) return true;
+    if (obj->IsA()->InheritsFrom( "TTree" )) {
+      Long64_t entries = ((TTree*) obj)->GetEntries();
+      QwMessage << "DEBUG HasAnyFilled: TTree '" << name << "' has " << entries << " entries" << QwLog::endl;
+      if ( entries ) return true;
+    }
 
-    if (obj->IsA()->InheritsFrom( "TH1" ))
-      if ( ((TH1*) obj)->GetEntries() ) return true;
+    if (obj->IsA()->InheritsFrom( "TH1" )) {
+      Double_t entries = ((TH1*) obj)->GetEntries();
+      QwMessage << "DEBUG HasAnyFilled: Histogram '" << name << "' has " << entries << " entries" << QwLog::endl;
+      if ( entries ) return true;
+    }
   }
 
+  QwMessage << "DEBUG HasAnyFilled: No filled objects found" << QwLog::endl;
   return false;
 }

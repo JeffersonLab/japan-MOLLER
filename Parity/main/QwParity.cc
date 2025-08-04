@@ -64,7 +64,6 @@ Int_t main(Int_t argc, Char_t* argv[])
   gQwOptions.AddOptions()("single-output-file", po::value<bool>()->default_bool_value(false), "Write a single output file");
   gQwOptions.AddOptions()("print-errorcounters", po::value<bool>()->default_bool_value(true), "Print summary of error counters");
   gQwOptions.AddOptions()("write-promptsummary", po::value<bool>()->default_bool_value(false), "Write PromptSummary");
-  gQwOptions.AddOptions()("enable-rntuples", po::value<bool>()->default_bool_value(false), "Enable RNTuple output (experimental ROOT feature)");
 
   ///  Without anything, print usage
   if (argc == 1) {
@@ -596,12 +595,32 @@ Int_t main(Int_t argc, Char_t* argv[])
      *  segfault; but in addition to that we should delete them      *
      *  here, in case we run over multiple runs at a time.           */
     if (treerootfile == historootfile) {
-      treerootfile->Close();
+      // Use different write methods based on output format
+      if (gQwOptions.GetValue<bool>("enable-rntuples") && gQwOptions.GetValue<bool>("disable-trees")) {
+        // RNTuple-only mode: use Close() for proper RNTuple finalization
+        treerootfile->Close();
+      } else {
+        // TTree mode or mixed mode: use Write() for explicit tree writing
+        treerootfile->Write(0, TObject::kOverwrite);
+        treerootfile->Close();
+      }
       delete treerootfile; treerootfile = 0; burstrootfile = 0; historootfile = 0;
     } else {
-      treerootfile->Close();
-      burstrootfile->Close();
-      historootfile->Close();
+      // Use different write methods based on output format
+      if (gQwOptions.GetValue<bool>("enable-rntuples") && gQwOptions.GetValue<bool>("disable-trees")) {
+        // RNTuple-only mode: use Close() for proper RNTuple finalization
+        treerootfile->Close();
+        burstrootfile->Close();
+        historootfile->Close();
+      } else {
+        // TTree mode or mixed mode: use Write() for explicit tree writing
+        treerootfile->Write(0, TObject::kOverwrite);
+        burstrootfile->Write(0, TObject::kOverwrite);
+        historootfile->Write(0, TObject::kOverwrite);
+        treerootfile->Close();
+        burstrootfile->Close();
+        historootfile->Close();
+      }
       delete treerootfile; treerootfile = 0;
       delete burstrootfile; burstrootfile = 0;
       delete historootfile; historootfile = 0;
