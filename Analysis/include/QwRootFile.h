@@ -97,8 +97,22 @@ class QwRootTree {
 
     /// Construct the tree
     void ConstructNewTree() {
-      QwMessage << "New tree: " << fName << ", " << fDesc << QwLog::endl;
+      QwOut << "DEBUG ConstructNewTree: Creating tree '" << fName << "', desc: '" << fDesc << "'" << QwLog::endl;
+      QwOut << "DEBUG ConstructNewTree: gDirectory before creation: " << (gDirectory ? gDirectory->GetName() : "NULL") << QwLog::endl;
+      
       fTree = new TTree(fName.c_str(), fDesc.c_str());
+      
+      QwOut << "DEBUG ConstructNewTree: Tree created at address: " << fTree << QwLog::endl;
+      QwOut << "DEBUG ConstructNewTree: Tree directory after creation: " << (fTree->GetDirectory() ? fTree->GetDirectory()->GetName() : "NULL") << QwLog::endl;
+      
+      // Ensure tree is in the current directory
+      if (gDirectory) {
+        fTree->SetDirectory(gDirectory);
+        QwOut << "DEBUG ConstructNewTree: Set tree '" << fName << "' directory to: " << gDirectory->GetName() << QwLog::endl;
+        QwOut << "DEBUG ConstructNewTree: Tree directory after SetDirectory: " << (fTree->GetDirectory() ? fTree->GetDirectory()->GetName() : "NULL") << QwLog::endl;
+      } else {
+        QwOut << "DEBUG ConstructNewTree: WARNING - gDirectory is NULL!" << QwLog::endl;
+      }
     }
 
     void ConstructUnitsBranch() {
@@ -384,7 +398,6 @@ class QwRootNTuple {
           for (size_t i = 0; i < fVector.size() && i < fFieldPtrs.size(); ++i) {
             if (fFieldPtrs[i]) {
               *(fFieldPtrs[i]) = fVector[i];
-              QwMessage << "Set field " << i << " to value " << fVector[i] << QwLog::endl;
             } else {
               QwMessage << "Field " << i << " has null pointer, skipping" << QwLog::endl;
             }
@@ -566,7 +579,15 @@ class QwRootFile {
       static Int_t update_count = 0;
       update_count++;
       if ((fUpdateInterval > 0) && ( update_count % fUpdateInterval == 0)) Update();
-      if (! HasDirByType(object)) return;
+      
+      // Debug directory registration
+      std::string type = typeid(object).name();
+      bool hasDir = HasDirByType(object);
+      QwMessage << "DEBUG QwRootFile::FillHistograms: type=" << type 
+                << " hasDir=" << hasDir 
+                << " fDirsByType.count=" << fDirsByType.count(type) << QwLog::endl;
+      
+      if (! hasDir) return;
       // Fill histograms
       object.FillHistograms();
     }
@@ -699,7 +720,25 @@ class QwRootFile {
     void ls()     { if (fMapFile) fMapFile->ls();     if (fRootFile) fRootFile->ls(); }
     void Map()    { if (fRootFile) fRootFile->Map(); }
     void Close()  {
+      QwOut << "DEBUG QwRootFile::Close: Starting close process" << QwLog::endl;
+      
+      // Debug: List trees before closing
+      QwOut << "DEBUG QwRootFile::Close: Trees in fTreeByName: " << fTreeByName.size() << QwLog::endl;
+      for (auto iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++) {
+        QwOut << "DEBUG QwRootFile::Close: Tree '" << iter->first << "' has " << iter->second.size() << " instances" << QwLog::endl;
+        if (!iter->second.empty() && iter->second.front()) {
+          TTree* tree = iter->second.front()->GetTree();
+          if (tree) {
+            Long64_t entries = tree->GetEntries();
+            QwOut << "DEBUG QwRootFile::Close: Tree '" << iter->first << "' has " << entries << " entries" << QwLog::endl;
+          }
+        }
+      }
+      
+      // Check if we should make the file permanent - restore original logic
       if (!fMakePermanent) fMakePermanent = HasAnyFilled();
+      
+      QwOut << "DEBUG QwRootFile::Close: fMakePermanent=" << fMakePermanent << QwLog::endl;
       
       // Close all RNTuples before closing the file
       for (auto& pair : fNTupleByName) {
@@ -708,8 +747,43 @@ class QwRootFile {
         }
       }
       
+      // CRITICAL FIX: Explicitly write all trees before closing!
+      if (fRootFile) {
+        QwOut << "DEBUG QwRootFile::Close: Writing trees to file" << QwLog::endl;
+        for (auto iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++) {
+          if (!iter->second.empty() && iter->second.front()) {
+            TTree* tree = iter->second.front()->GetTree();
+            if (tree && tree->GetEntries() > 0) {
+              QwOut << "DEBUG QwRootFile::Close: Writing tree '" << iter->first << "' with " << tree->GetEntries() << " entries" << QwLog::endl;
+              tree->Write();
+            }
+          }
+        }
+      }
+      
+      // Close the file and handle renaming
+      if (fRootFile) {
+        TString rootfilename = fRootFile->GetName();
+        QwOut << "DEBUG QwRootFile::Close: Closing file '" << rootfilename << "'" << QwLog::endl;
+        
+        fRootFile->Close();
+        // Note: Don't delete fRootFile here - let destructor handle it
+        
+        // Handle file renaming for temporary files
+        if (fUseTemporaryFile && fMakePermanent) {
+          int err = rename( rootfilename.Data(), fPermanentName.Data() );
+          if (err) {
+            QwWarning << "Couldn't rename " << rootfilename << " to " << fPermanentName << QwLog::endl;
+          } else {
+            QwMessage << "Was able to rename " << rootfilename << " to " << fPermanentName << QwLog::endl;
+            QwMessage << "Root file is " << fPermanentName << QwLog::endl;
+          }
+        }
+      }
+      
       if (fMapFile) fMapFile->Close();
-      if (fRootFile) fRootFile->Close();
+      
+      QwOut << "DEBUG QwRootFile::Close: Close complete" << QwLog::endl;
     }
 
     // Wrapped functionality
@@ -941,7 +1015,9 @@ void QwRootFile::ConstructTreeBranches(
   if (fTreeByName.count(name) == 0) {
 
     // Go to top level directory
+    QwOut << "DEBUG ConstructTreeBranches: Before cd(), gDirectory: " << (gDirectory ? gDirectory->GetName() : "NULL") << QwLog::endl;
     this->cd();
+    QwOut << "DEBUG ConstructTreeBranches: After cd(), gDirectory: " << (gDirectory ? gDirectory->GetName() : "NULL") << QwLog::endl;
 
     // New tree with name, description, object, prefix
     tree = new QwRootTree(name, desc, object, prefix);
@@ -1177,6 +1253,11 @@ void QwRootFile::ConstructHistograms(const std::string& name, T& object)
             fRootFile->GetDirectory(("/" + name).c_str()) :
             fRootFile->GetDirectory("/")->mkdir(name.c_str());
     fDirsByType[type].push_back(name);
+    
+    QwMessage << "DEBUG QwRootFile::ConstructHistograms: name=" << name 
+              << " type=" << type 
+              << " fDirsByType[type].size()=" << fDirsByType[type].size() << QwLog::endl;
+    
     object.ConstructHistograms(fDirsByName[name]);
   }
 
