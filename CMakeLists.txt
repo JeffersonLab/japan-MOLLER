@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 
+# CMake Commands Includes
+include(ExternalProject)
+
 # Name of this project
 project(QwAnalysis VERSION 2.0.0 LANGUAGES CXX)
 
@@ -100,6 +103,21 @@ link_directories(${Boost_LIBRARY_DIR})
 set(minimum_root_version 6.0)
 find_package(ROOT ${minimum_root_version} REQUIRED New Gui)
 config_add_dependency(ROOT ${minimum_root_version})
+
+
+#----------------------------------------------------------------------------
+# Panguin
+#
+ExternalProject_Add(
+	panguin_proj
+	GIT_REPOSITORY https://github.com/JeffersonLab/panguin.git
+	GIT_TAG        7aa35c4591cd80e57428d09d82a9e520ee160e8a # release-2.5
+	DEPENDS      ${ROOT}
+	DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR}/panguin
+	SOURCE_DIR   ${CMAKE_CURRENT_LIST_DIR}/panguin
+	BINARY_DIR   ${CMAKE_CURRENT_LIST_DIR}/panguin
+	INSTALL_DIR  ${CMAKE_INSTALL_PREFIX}/panguin
+)
 
 
 #----------------------------------------------------------------------------
