@@ -67,7 +67,7 @@ bcm,              BCM1H15,        resolution    0.0
 
 !CombinedBCM parameters
 !device_type,     device_name,    asym,         mean,         sigma(jitter)
-combinedbcm,      bcm_target,     0.0,          100.0,        0.02 !0.02
+combinedbcm,      bcm_target,     0.0,           65.0,        0.02 !0.02
 
 !CombinedBCM drifts are defined as amplitude (abs unit),  phase shift (rad), frequency (Hz)
 !combinedbcm,     bcm_target,     drift         2.0,          0.8,          0.03
