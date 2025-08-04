@@ -117,16 +117,18 @@ separate_arguments(ROOT_CXXFLAG_LIST)
 separate_arguments(ROOT_LIB_FLAGS)
 string(REPLACE "-l" "" ROOT_LIB_FLAGS "${ROOT_LIB_FLAGS}")
 
-# libNew is currently broken with C++17 or higher. See
-# https://root-forum.cern.ch/t/aborting-with-std-align-val-t-is-not-implemented-yet-rhel-9-2/55989/17
 string(REGEX MATCH "(^| +)-std=([^ ]*)\\+\\+(..)" _cxx_std "${ROOT_CXX_FLAGS}")
 set(uselibnew TRUE)
-if(CMAKE_MATCH_COUNT EQUAL 3)
-  if(${CMAKE_MATCH_3} GREATER_EQUAL 17)
+if(${ROOT_VERSION} VERSION_LESS 6.32)
+  if(CMAKE_MATCH_COUNT EQUAL 3)
+    # libNew is broken with C++17 or higher and ROOT < 6.32. See
+    # https://root-forum.cern.ch/t/aborting-with-std-align-val-t-is-not-implemented-yet-rhel-9-2/55989/17
+    if(${CMAKE_MATCH_3} GREATER_EQUAL 17)
+      set(uselibnew FALSE)
+    endif()
+  elseif(${CMAKE_CXX_STANDARD} GREATER_EQUAL 17)
     set(uselibnew FALSE)
   endif()
-elseif(${CMAKE_CXX_STANDARD} GREATER_EQUAL 17)
-  set(uselibnew FALSE)
 endif()
 unset(_cxx_std)
 

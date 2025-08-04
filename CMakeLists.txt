@@ -187,7 +187,8 @@ target_compile_options(${PROJECT_NAME}
     ${${PROJECT_NAME_UC}_DIAG_FLAGS_LIST}
   )
 
-if(${CMAKE_CXX_STANDARD} LESS 17)
+# TMapFile is broken with C++17 or higher and ROOT < 6.32
+if(${CMAKE_CXX_STANDARD} LESS 17 OR ${ROOT_VERSION} VERSION_GREATER_EQUAL 6.32)
   target_compile_definitions(${PROJECT_NAME} PUBLIC QW_ENABLE_MAPFILE)
 endif()
 
