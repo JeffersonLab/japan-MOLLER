@@ -499,7 +499,6 @@ void  QwSubsystemArray::ConstructHistograms(TDirectory *folder, TString &prefix)
 
 void  QwSubsystemArray::FillHistograms()
 {
-  std::cout << "DEBUG QwSubsystemArray::FillHistograms: empty()=" << empty() << " size()=" << size() << std::endl;
   if (!empty())
     std::for_each(begin(), end(), boost::mem_fn(&VQwSubsystem::FillHistograms));
 }
