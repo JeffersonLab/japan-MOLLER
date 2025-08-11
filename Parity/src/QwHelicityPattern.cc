@@ -438,13 +438,10 @@ void  QwHelicityPattern::CalculatePairAsymmetry()
 Bool_t QwHelicityPattern::IsGoodAsymmetry()
 {
   Bool_t complete_and_good = kFALSE;
-  std::cout << "DEBUG QwHelicityPattern::IsGoodAsymmetry: IsCompletePattern()=" << IsCompletePattern() << std::endl;
   if (IsCompletePattern()){
     CalculateAsymmetry();
     complete_and_good = fPatternIsGood;
-    std::cout << "DEBUG QwHelicityPattern::IsGoodAsymmetry: after CalculateAsymmetry, fPatternIsGood=" << fPatternIsGood << std::endl;
   }
-  std::cout << "DEBUG QwHelicityPattern::IsGoodAsymmetry: returning " << complete_and_good << std::endl;
   return complete_and_good;
 };
 
@@ -569,7 +566,6 @@ void  QwHelicityPattern::CalculateAsymmetry()
   } else {
     //  This is a good pattern.
     //  Calculate the asymmetry.
-    std::cout << "DEBUG QwHelicityPattern::CalculateAsymmetry: Setting fPatternIsGood=kTRUE for pattern " << fCurrentPatternNumber << std::endl;
     fPatternIsGood = kTRUE;
     fQuartetNumber++;//Then increment the quartet number
     //std::cout<<" quartet count ="<<fQuartetNumber<<"\n";
@@ -844,9 +840,7 @@ void  QwHelicityPattern::ConstructHistograms(TDirectory *folder)
 
 void  QwHelicityPattern::FillHistograms()
 {
-  std::cout << "DEBUG QwHelicityPattern::FillHistograms: fPatternIsGood=" << fPatternIsGood << std::endl;
   if (fPatternIsGood) {
-    std::cout << "DEBUG QwHelicityPattern::FillHistograms: Filling histograms for good pattern" << std::endl;
     fYield.FillHistograms();
     fAsymmetry.FillHistograms();
     if (fEnableDifference) {
@@ -857,7 +851,6 @@ void  QwHelicityPattern::FillHistograms()
       fAsymmetry2.FillHistograms();
     }
   } else {
-    std::cout << "DEBUG QwHelicityPattern::FillHistograms: Skipping histogram fill - pattern not good" << std::endl;
   }
 }
 
