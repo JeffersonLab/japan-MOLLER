@@ -94,6 +94,8 @@ void OnlineGUI::CreateGUI(const TGWindow *p, UInt_t w, UInt_t h)
     // Initialize RNTuples
     GetRootNTuple();
     GetNTupleVars();
+    // Initialize DataFrame for large dataset support
+    InitializeDataFrame();
     for(UInt_t i=0; i<fRootTree.size(); i++) {
       if(fRootTree[i]==0) {
 	fRootTree.erase(fRootTree.begin() + i);
@@ -362,7 +364,10 @@ void OnlineGUI::DoDraw()
       if (treeIndex <= fRootTree.size()) {
         TreeDraw(drawcommand);
       } else if (ntupleIndex <= fRootNTuple.size()) {
-        NTupleDraw(drawcommand);
+        // Always use DataFrame for RNTuple variables
+        if(fVerbosity>=2)
+          cout << "Using DataFrame for RNTuple variable: " << drawcommand[0] << endl;
+        DataFrameDraw(drawcommand);
       } else {
         TreeDraw(drawcommand); // Fallback to TreeDraw for backwards compatibility
       }
@@ -660,6 +665,7 @@ void OnlineGUI::GetRootNTuple() {
   // Utility to search a ROOT File for RNTuples
   // Fills the fRootNTuple vector
   fRootNTuple.clear();
+  fRootNTupleNames.clear();
   
   std::list<TString> found;
   for(UInt_t i=0; i<fileObjects.size(); i++) {
@@ -680,8 +686,10 @@ void OnlineGUI::GetRootNTuple() {
     try {
       // Get the file name to use with RNTupleReader
       TString fileName = fRootFile->GetName();
-      auto ntuple = ROOT::RNTupleReader::Open(found.front().Data(), fileName.Data());
+      TString ntupleName = found.front();
+      auto ntuple = ROOT::RNTupleReader::Open(ntupleName.Data(), fileName.Data());
       fRootNTuple.push_back(std::move(ntuple));
+      fRootNTupleNames.push_back(ntupleName);
       found.pop_front();
     } catch (std::exception& e) {
       if(fVerbosity>=1)
@@ -1004,6 +1012,8 @@ Int_t OnlineGUI::OpenRootFile() {
     // Initialize RNTuples
     GetRootNTuple();
     GetNTupleVars();
+    // Initialize DataFrame for large dataset support
+    InitializeDataFrame();
     for(UInt_t i=0; i<fRootTree.size(); i++) {
       if(fRootTree[i]==0) {
 	fRootTree.erase(fRootTree.begin() + i);
@@ -1279,10 +1289,23 @@ void OnlineGUI::NTupleDraw(vector <TString> command) {
       // Sample some data to determine range
       auto sampleSize = std::min(static_cast<decltype(nEntries)>(1000), nEntries);
       Double_t minVal = 1e30, maxVal = -1e30;
-      for (decltype(nEntries) i = 0; i < sampleSize; i++) {
-        Double_t val = view(i);
-        if (val < minVal) minVal = val;
-        if (val > maxVal) maxVal = val;
+      
+      // For large datasets, sample more strategically (beginning, middle, end)
+      if (nEntries > 10000) {
+        decltype(nEntries) step = nEntries / sampleSize;
+        for (decltype(nEntries) i = 0; i < sampleSize; i++) {
+          decltype(nEntries) sampleIndex = (i * step) % nEntries;
+          Double_t val = view(sampleIndex);
+          if (val < minVal) minVal = val;
+          if (val > maxVal) maxVal = val;
+        }
+      } else {
+        // For smaller datasets, sample sequentially from the beginning
+        for (decltype(nEntries) i = 0; i < sampleSize; i++) {
+          Double_t val = view(i);
+          if (val < minVal) minVal = val;
+          if (val > maxVal) maxVal = val;
+        }
       }
       
       // Create histogram
@@ -1393,6 +1416,8 @@ void OnlineGUI::PrintPages() {
     // Initialize RNTuples
     GetRootNTuple();
     GetNTupleVars();
+    // Initialize DataFrame for large dataset support
+    InitializeDataFrame();
     for(UInt_t i=0; i<fRootTree.size(); i++) {
       if(fRootTree[i]==0) {
 	fRootTree.erase(fRootTree.begin() + i);
@@ -1517,6 +1542,191 @@ void OnlineGUI::CloseGUI()
 {
   // Routine to take care of the Exit GUI button
   fMain->SendCloseMessage();
+}
+
+void OnlineGUI::InitializeDataFrame() {
+  // Initialize RDataFrame for large dataset processing
+  // This will be created on-demand when needed
+  fDataFrame.reset();
+  
+  if(fVerbosity>=2)
+    cout << "DataFrame initialization deferred until needed" << endl;
+}
+
+void OnlineGUI::DataFrameDraw(vector <TString> command) {
+  // Called by DoDraw(), this will plot an RNTuple Variable using RDataFrame
+  // for efficient processing of large datasets
+
+  TString var = command[0];
+
+  //  Check to see if we're projecting to a specific histogram
+  TString histoname = command[0](TRegexp(">>.+(?"));
+  if (histoname.Length()>0){
+    histoname.Remove(0,2);
+    Int_t bracketindex = histoname.First("(");
+    if (bracketindex>0) histoname.Remove(bracketindex);
+    if(fVerbosity>=3)
+      std::cout << histoname << " "<< command[0](TRegexp(">>.+(?")) <<std::endl;
+  } else {
+    histoname = "htemp";
+  }
+  
+  // Combine the cuts (definecuts and specific cuts)
+  TString cutExpression = "";
+  if(command.size()>1) {
+    cutExpression = command[1];
+    vector <TString> cutIdents = fConfig->GetCutIdent();
+    for(UInt_t i=0; i<cutIdents.size(); i++) {
+      if(cutExpression.Contains(cutIdents[i])) {
+	TString cut_found = (TString)fConfig->GetDefinedCut(cutIdents[i]);
+	cutExpression.ReplaceAll(cutIdents[i],cut_found);
+      }
+    }
+  }
+
+  // Determine which RNTuple the variable comes from
+  UInt_t iNTuple;
+  if(command[4].IsNull()) {
+    iNTuple = GetNTupleIndex(var);
+    if(fVerbosity>=2)
+      cout<<"got NTuple index from variable "<<iNTuple<<endl;
+  } else {
+    // For now, use first available RNTuple if name specified
+    iNTuple = 0;
+    if(fVerbosity>=2)
+      cout<<"got NTuple index from command "<<iNTuple<<endl;
+  }
+  
+  // Check if we found a valid RNTuple
+  if (iNTuple >= fRootNTuple.size()) {
+    BadDraw("Variable " + var + " not found in any RNTuple");
+    return;
+  }
+  
+  TString drawopt = command[2];
+
+  if(fVerbosity>=3)
+    cout<<"\tDataFrame draw option:"<<drawopt<<" and histo name "<<histoname<<endl;
+  
+  Int_t errcode=0;
+  if (iNTuple < fRootNTuple.size() && fRootNTuple[iNTuple] != nullptr) {
+    if(fVerbosity>=1){
+      cout<<__PRETTY_FUNCTION__<<"\t"<<__LINE__<<endl;
+      cout<<command[0]<<"\t"<<command[1]<<"\t"<<command[2]<<"\t"<<command[3]
+	  <<"\t"<<command[4]<<endl;
+      if(fVerbosity>=2)
+	cout<<"\tProcessing from RNTuple using DataFrame: "<<iNTuple<<endl;
+    }
+
+    // Get the correct RNTuple name for this index
+    TString ntupleName = fRootNTupleNames[iNTuple];
+    TString fileName = fRootFile->GetName();
+    
+    if(fVerbosity>=2)
+      cout << "Using DataFrame with RNTuple: " << ntupleName << " for variable: " << var << endl;
+    
+    try {
+      // Create DataFrame from the correct RNTuple
+      ROOT::RDataFrame df(ntupleName.Data(), fileName.Data());
+      
+      // Apply cuts if specified
+      if (!cutExpression.IsNull()) {
+        auto filteredDf = df.Filter(cutExpression.Data());
+        if(fVerbosity>=2)
+          cout << "Applied cut: " << cutExpression << endl;
+        
+        // Create histogram using DataFrame with proper model
+        auto histTitle = command[3].IsNull() ? var : command[3];
+        ROOT::RDF::TH1DModel model{histoname.Data(), histTitle.Data(), 100, 0., 0.};
+        auto hist = filteredDf.Histo1D(model, var.Data());
+        
+        // Force computation of the histogram
+        hist->GetEntries(); // This triggers computation
+        
+        // Check if histogram has entries
+        if (hist->GetEntries() > 0) {
+          // Get the actual histogram pointer and clone it for safety
+          TH1D* histPtr = (TH1D*)hist->Clone();
+          
+          // Set histogram title if specified
+          if(!command[3].IsNull()) {
+            TString tmpstring(var);
+            tmpstring += cutExpression;
+            tmpstring += drawopt;
+            tmpstring += command[3];
+            TString myMD5 = tmpstring.MD5();
+            histPtr->SetNameTitle(myMD5, command[3]);
+          }
+          
+          // Draw the histogram to the current pad
+          histPtr->Draw(drawopt);
+          gPad->Update(); // Force canvas update
+          errcode = 1; // Success
+          
+          if (command[5].EqualTo("grid")){
+            gPad->SetGrid();
+          }
+          
+          if(fVerbosity>=3)
+            cout<<"Finished DataFrame drawing with "<<histPtr->GetEntries()<<" entries"<<endl;
+        } else {
+          BadDraw("No entries passed cuts in DataFrame");
+          errcode = 0;
+        }
+      } else {
+        // No cuts - create histogram directly
+        auto histTitle = command[3].IsNull() ? var : command[3];
+        ROOT::RDF::TH1DModel model{histoname.Data(), histTitle.Data(), 100, 0., 0.};
+        auto hist = df.Histo1D(model, var.Data());
+        
+        // Force computation of the histogram
+        hist->GetEntries(); // This triggers computation
+        
+        // Check if histogram has entries
+        if (hist->GetEntries() > 0) {
+          // Get the actual histogram pointer and clone it for safety
+          TH1D* histPtr = (TH1D*)hist->Clone();
+          
+          // Set histogram title if specified
+          if(!command[3].IsNull()) {
+            TString tmpstring(var);
+            tmpstring += drawopt;
+            tmpstring += command[3];
+            TString myMD5 = tmpstring.MD5();
+            histPtr->SetNameTitle(myMD5, command[3]);
+          }
+          
+          // Draw the histogram to the current pad
+          histPtr->Draw(drawopt);
+          gPad->Update(); // Force canvas update
+          errcode = 1; // Success
+          
+          if (command[5].EqualTo("grid")){
+            gPad->SetGrid();
+          }
+          
+          if(fVerbosity>=3)
+            cout<<"Finished DataFrame drawing with "<<histPtr->GetEntries()<<" entries"<<endl;
+        } else {
+          BadDraw("No entries in DataFrame");
+          errcode = 0;
+        }
+      }
+      
+    } catch (std::exception& e) {
+      BadDraw(TString("DataFrame error: ") + e.what());
+      errcode = -1;
+    }
+    
+  } else {
+    BadDraw(var+" not found in RNTuple for DataFrame");
+    if (fConfig->IsMonitor()){
+      // Maybe we missed it... look again
+      GetFileObjects();
+      GetRootNTuple();
+      GetNTupleVars();
+    }
+  }
 }
 
 OnlineGUI::~OnlineGUI()
