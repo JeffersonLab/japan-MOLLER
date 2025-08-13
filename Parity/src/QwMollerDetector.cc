@@ -16,6 +16,10 @@
 #include <stdexcept>
 #include <iomanip>
 
+// ROOT headers  
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+
 // Qweak headers
 #include "QwLog.h"
 #include "QwParameterFile.h"
@@ -227,6 +231,24 @@ void QwMollerDetector::FillTreeVector(std::vector<Double_t> &values) const {
   for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
     for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
       fSTR7200_Channel[i][j].FillTreeVector(values);
+    }
+  }
+}
+
+void QwMollerDetector::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
+    for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
+      fSTR7200_Channel[i][j].ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+    }
+  }
+}
+
+void QwMollerDetector::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
+    for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
+      fSTR7200_Channel[i][j].FillNTupleVector(values);
     }
   }
 }

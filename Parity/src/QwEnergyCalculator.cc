@@ -10,6 +10,10 @@
 // System headers
 #include <stdexcept>
 
+// ROOT headers for RNTuple support
+#include <ROOT/RNTupleModel.hxx>
+#include <ROOT/RNTupleWriter.hxx>
+
 // Qweak headers
 #ifdef __USE_DATABASE__
 #include "QwDBInterface.h"
@@ -470,6 +474,31 @@ void  QwEnergyCalculator::FillTreeVector(std::vector<Double_t> &values) const
   }
   else
     fEnergyChange.FillTreeVector(values);
+  return;
+}
+
+void  QwEnergyCalculator::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip construction.
+  }
+  else{
+    TString thisprefix=prefix;
+    if(prefix.Contains("asym_"))
+      thisprefix.ReplaceAll("asym_","diff_");
+    
+    fEnergyChange.ConstructNTupleAndVector(model, thisprefix, values, fieldPtrs);
+  }
+  return;
+}
+
+void  QwEnergyCalculator::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip filling.
+  }
+  else
+    fEnergyChange.FillNTupleVector(values);
   return;
 }
 

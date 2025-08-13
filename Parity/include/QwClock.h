@@ -121,6 +121,8 @@ class QwClock : public VQwClock {
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
   void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+  void  FillNTupleVector(std::vector<Double_t>& values) const;
 
 #ifdef __USE_DATABASE__
   std::vector<QwDBInterface> GetDBEntry();
