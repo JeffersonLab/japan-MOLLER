@@ -11,10 +11,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        LCG: ["LCG_107a/x86_64-ubuntu2404-gcc11-opt",
-              "LCG_107a/x86_64-ubuntu2404-clang15-opt",
-              "LCG_106/x86_64-ubuntu2404-gcc11-opt",
-              "LCG_106/x86_64-ubuntu2404-clang15-opt"]
+        LCG: ["LCG_106/x86_64-el9-gcc13-opt",
+              "LCG_107/x86_64-el9-clang16-opt",
+              "LCG_107/x86_64-el9-gcc14-opt",
+              "LCG_108/x86_64-el9-clang19-opt",
+              "LCG_108/x86_64-el9-gcc15-opt"]
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
