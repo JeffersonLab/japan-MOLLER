@@ -27,6 +27,9 @@ jobs:
         with:
           release-platform: ${{ matrix.LCG }}
           run: |
+            # Set BOOST_INC_DIR to point to LCG-provided Boost installation
+            export BOOST_INC_DIR="/cvmfs/sft.cern.ch/lcg/views/${{ matrix.LCG }}/include"
+            
             # Generate setup scripts
             chmod +x SetupFiles/make_SET_ME_UP
             SetupFiles/make_SET_ME_UP
