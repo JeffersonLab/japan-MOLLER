@@ -7,12 +7,12 @@ on:
 
 jobs:
   linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
-        LCG: ["LCG_101/x86_64-ubuntu2004-gcc9-opt",
-              "LCG_99/x86_64-ubuntu2004-gcc9-opt"]
+        LCG: ["LCG_107a/x86_64-ubuntu2404-gcc11-opt",
+              "LCG_106/x86_64-ubuntu2404-gcc11-opt"]
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -47,8 +47,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        LCG: ["LCG_101/x86_64-mac1015-clang120-opt",
-              "LCG_99/x86_64-mac1015-clang120-opt"]
+        LCG: ["LCG_107a/x86_64-mac1015-clang120-opt",
+              "LCG_106/x86_64-mac1015-clang120-opt"]
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
