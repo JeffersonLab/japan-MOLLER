@@ -1,0 +1,76 @@
+name: Build LCG on CVMFS
+
+on: [push, pull_request]
+
+jobs:
+  linux:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        LCG: ["LCG_101/x86_64-ubuntu2004-gcc9-opt",
+              "LCG_99/x86_64-ubuntu2004-gcc9-opt"]
+    steps:
+    - uses: actions/checkout@v3
+    - uses: cvmfs-contrib/github-action-cvmfs@v3
+      with:
+        cvmfs_repositories: 'sft.cern.ch,geant4.cern.ch'
+    - name: Create qwparity.conf symlink
+      run: ln -sf Parity/prminput/qwparity_simple.conf qwparity.conf
+    - uses: aidasoft/run-lcg-view@v1
+      with:
+        release-platform: ${{ matrix.LCG }}
+        run: |
+          # Generate setup scripts
+          chmod +x SetupFiles/make_SET_ME_UP
+          SetupFiles/make_SET_ME_UP
+          
+          # Build the project
+          cmake -Bbuild -S.
+          cmake --build build
+          
+          # Run the mock data generator and analysis test
+          source SetupFiles/SET_ME_UP.bash
+          if [ -f Tests/004_qwparity.sh ]; then
+            chmod +x Tests/004_qwparity.sh
+            Tests/004_qwparity.sh
+          else
+            echo "Test script Tests/004_qwparity.sh not found"
+            exit 1
+          fi
+
+  macos:
+    runs-on: macos-11
+    strategy:
+      fail-fast: false
+      matrix:
+        LCG: ["LCG_101/x86_64-mac1015-clang120-opt",
+              "LCG_99/x86_64-mac1015-clang120-opt"]
+    steps:
+    - uses: actions/checkout@v3
+    - uses: cvmfs-contrib/github-action-cvmfs@v3
+      with:
+        cvmfs_repositories: 'sft.cern.ch,geant4.cern.ch'
+    - name: Create qwparity.conf symlink
+      run: ln -sf Parity/prminput/qwparity_simple.conf qwparity.conf
+    - uses: aidasoft/run-lcg-view@v1
+      with:
+        release-platform: ${{ matrix.LCG }}
+        run: |
+          # Generate setup scripts
+          chmod +x SetupFiles/make_SET_ME_UP
+          SetupFiles/make_SET_ME_UP
+          
+          # Build the project
+          cmake -Bbuild -S.
+          cmake --build build
+          
+          # Run the mock data generator and analysis test  
+          source SetupFiles/SET_ME_UP.bash
+          if [ -f Tests/004_qwparity.sh ]; then
+            chmod +x Tests/004_qwparity.sh
+            Tests/004_qwparity.sh
+          else
+            echo "Test script Tests/004_qwparity.sh not found"
+            exit 1
+          fi
