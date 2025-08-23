@@ -3,7 +3,12 @@ name: Build LCG on CVMFS
 
 on:
   push:
+    branches: [ main ]
   pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   linux:
@@ -13,9 +18,7 @@ jobs:
       matrix:
         LCG: ["LCG_106/x86_64-el9-gcc13-opt",
               "LCG_107/x86_64-el9-clang16-opt",
-              "LCG_107/x86_64-el9-gcc14-opt",
-              "LCG_108/x86_64-el9-clang19-opt",
-              "LCG_108/x86_64-el9-gcc15-opt"]
+              "LCG_107/x86_64-el9-gcc14-opt"]
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -39,7 +42,7 @@ jobs:
 
             # Build the project
             cmake -Bbuild -S.
-            cmake --build build
+            cmake --build build -j$(nproc)
 
             # Run the mock data generator and analysis test
             source SetupFiles/SET_ME_UP.bash
