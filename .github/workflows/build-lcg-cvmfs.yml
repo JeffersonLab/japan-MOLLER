@@ -44,12 +44,11 @@ jobs:
             cmake -Bbuild -S.
             cmake --build build -j$(nproc)
 
-            # Run the mock data generator and analysis test
+            # Run the mock data generator and analysis as described in README
             source SetupFiles/SET_ME_UP.bash
-            if [ -f Tests/004_qwparity.sh ]; then
-              chmod +x Tests/004_qwparity.sh
-              Tests/004_qwparity.sh
-            else
-              echo "Test script Tests/004_qwparity.sh not found"
-              exit 1
-            fi
+            
+            # Generate mock data
+            build/qwmockdatagenerator -r 4 -e 1:20000 --config qwparity_simple.conf --detectors mock_newdets.map --data .
+            
+            # Analyze the generated mock data
+            build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles .
