@@ -875,15 +875,10 @@ void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupl
 
     // For kMoments mode (running sum trees), enable all statistical fields regardless of histogram configuration
     if (fDataToSave == kMoments) {
-      std::cerr << "DEBUG: QwMollerADC_Channel kMoments mode detected for " << GetElementName() 
-                << " - Enabling all statistical fields" << std::endl;
       bHw_sum = true;
       bBlock = true;
       bNum_samples = true;
       bDevice_Error_Code = true;
-    } else {
-      std::cerr << "DEBUG: QwMollerADC_Channel fDataToSave=" << fDataToSave 
-                << " for " << GetElementName() << std::endl;
     }
 
     TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();

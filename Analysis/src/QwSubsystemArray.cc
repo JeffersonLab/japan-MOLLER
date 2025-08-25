@@ -697,11 +697,6 @@ void QwSubsystemArray::ConstructNTupleAndVector(
   fTreeArrayIndex = values.size();
 
   // Debug output for eventsum
-  if (prefix.Contains("stat")) {
-    QwOut << "DEBUG: QwSubsystemArray::ConstructNTupleAndVector for prefix '" << prefix 
-          << "' has " << this->size() << " subsystems" << QwLog::endl;
-  }
-
   // Reserve space for event metadata
   values.push_back(0.0);
   values.push_back(0.0);
