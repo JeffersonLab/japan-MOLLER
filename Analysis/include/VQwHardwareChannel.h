@@ -229,12 +229,25 @@ public:
   /*! \brief Set the flag indicating if raw or derived values are
    *         in this data element based on prefix */
   void SetDataToSaveByPrefix(const TString& prefix) {
-    if (prefix.Contains("asym_")
-     || prefix.Contains("diff_")
-     || prefix.Contains("yield_"))
-      fDataToSave = kDerived;
-    if (prefix.Contains("stat"))
+    std::cerr << "DEBUG: SetDataToSaveByPrefix called with prefix='" << prefix << "' for " << GetElementName() << std::endl;
+    
+    // Check for stat first since it has priority
+    if (prefix.Contains("stat")) {
       fDataToSave = kMoments; // stat has priority
+      std::cerr << "DEBUG: Set fDataToSave=kMoments(" << kMoments << ") due to stat" << std::endl;
+    }
+    else if (prefix.Contains("asym_")
+     || prefix.Contains("diff_")
+     || prefix.Contains("yield_")) {
+      fDataToSave = kDerived;
+      std::cerr << "DEBUG: Set fDataToSave=kDerived(" << kDerived << ") due to asym_/diff_/yield_" << std::endl;
+    }
+    else if (prefix.IsNull() || prefix.Length() == 0) {
+      fDataToSave = kDerived; // Default for evt tree - store individual antenna values, not full raw breakdown
+      std::cerr << "DEBUG: Set fDataToSave=kDerived(" << kDerived << ") due to null/empty prefix" << std::endl;
+    }
+    std::cerr << "DEBUG: Final fDataToSave=" << fDataToSave << " for " << GetElementName() << std::endl;
+    // Note: kRaw mode is only used when explicitly requested, not as default
   }
 
   /*! \brief Checks that the requested element is in range, to be

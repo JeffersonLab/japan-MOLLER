@@ -864,16 +864,80 @@ void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupl
     //  Decide what to store based on prefix
     SetDataToSaveByPrefix(prefix);
 
+    // Set the boolean flags just like in ConstructBranchAndVector
+    bHw_sum =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum");
+    bHw_sum_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum_raw");
+    bBlock =      gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block");
+    bBlock_raw =  gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block_raw");
+    bNum_samples = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "num_samples");
+    bDevice_Error_Code = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "Device_Error_Code");
+    bSequence_number = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "sequence_number");
+
+    // For kMoments mode (running sum trees), enable all statistical fields regardless of histogram configuration
+    if (fDataToSave == kMoments) {
+      std::cerr << "DEBUG: QwMollerADC_Channel kMoments mode detected for " << GetElementName() 
+                << " - Enabling all statistical fields" << std::endl;
+      bHw_sum = true;
+      bBlock = true;
+      bNum_samples = true;
+      bDevice_Error_Code = true;
+    } else {
+      std::cerr << "DEBUG: QwMollerADC_Channel fDataToSave=" << fDataToSave 
+                << " for " << GetElementName() << std::endl;
+    }
+
     TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
     fTreeArrayIndex  = values.size();
 
+    // For derived data (yield_, asym_, diff_), only store the main value to match TTree format
+    if (fDataToSave == kDerived) {
+      // Only store the main hardware sum value, just like the original tree
+      values.resize(values.size() + 1, 0.0);
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      fTreeArrayNumEntries = 1;
+      return;
+    }
+
+    // For moments data (stat prefix), use the same structure as TTree to get exact field count match
+    if (fDataToSave == kMoments) {
+      // Create the same structure as TTree kMoments mode
+      if (bHw_sum) {
+        values.push_back(0.0);
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum").Data()));
+        values.push_back(0.0);
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum_m2").Data()));
+        values.push_back(0.0);
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum_err").Data()));
+      }
+
+      if (bBlock) {
+        for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+          values.push_back(0.0);
+          fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_block%d", i)).Data()));
+        }
+      }
+
+      if (bNum_samples) {
+        values.push_back(0.0);
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_num_samples").Data()));
+      }
+
+      if (bDevice_Error_Code) {
+        values.push_back(0.0);
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_Device_Error_Code").Data()));
+      }
+
+      fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
+      return;
+    }
+
+    // For raw data, use the full detailed format
     // Calculate how many elements we need to avoid multiple push_back calls
     size_t numElements = 0;
     
     // Count elements based on what will be saved
     if (bHw_sum) {
       numElements += 1; // hw_sum
-      if (fDataToSave == kMoments) numElements += 2; // M2 + error
     }
     if (bBlock) numElements += fBlocksPerEvent; // blocks
     if (bNum_samples) numElements += 1; // num_samples
@@ -895,10 +959,6 @@ void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupl
     // hw_sum
     if (bHw_sum) {
       fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
-      if (fDataToSave == kMoments) {
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_m2").Data()));
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_err").Data()));
-      }
     }
 
     if (bBlock) {
@@ -963,13 +1023,23 @@ void  QwMollerADC_Channel::FillNTupleVector(std::vector<Double_t>& values) const
 
     UInt_t index = fTreeArrayIndex;
 
+    // For derived data (yield_, asym_, diff_), only fill the main value to match TTree format
+    if (fDataToSave == kDerived) {
+      values[index] = this->GetHardwareSum();
+      return;
+    }
+
+    // For moments data (stat prefix), delegate to TTree behavior for exact match
+    if (fDataToSave == kMoments) {
+      // Use the existing TTree fill logic to ensure exact matching
+      FillTreeVector(values);
+      return;
+    }
+
+    // For raw data, use the full detailed format
     // hw_sum
     if (bHw_sum) {
       values[index++] = this->GetHardwareSum();
-      if (fDataToSave == kMoments) {
-        values[index++] = this->GetHardwareSumM2();
-        values[index++] = this->GetHardwareSumError();
-      }
     }
 
     if (bBlock) {
@@ -981,8 +1051,7 @@ void  QwMollerADC_Channel::FillNTupleVector(std::vector<Double_t>& values) const
 
     // num_samples
     if (bNum_samples)
-      values[index++] =
-          (fDataToSave == kMoments)? this->fGoodEventCount: this->fNumberOfSamples;
+      values[index++] = this->fNumberOfSamples;
 
     // Device_Error_Code
     if (bDevice_Error_Code)

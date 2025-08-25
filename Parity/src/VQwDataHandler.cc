@@ -299,6 +299,45 @@ void VQwDataHandler::FillTreeBranches(QwRootFile *treerootfile)
   }
 }
 
+void VQwDataHandler::ConstructNTupleFields(
+    QwRootFile *treerootfile,
+    const std::string& treeprefix,
+    const std::string& branchprefix)
+{
+  if (fTreeName.size() > 0) {
+    if (fOutputVar.size() == 0) {
+      QwWarning << "No data handler output; not creating RNTuple "
+                << treeprefix + fTreeName
+                << QwLog::endl;
+    } else {
+      TString tmp_branchprefix(branchprefix.c_str());
+      if (tmp_branchprefix.Contains("stat") && fKeepRunningSum 
+	  && fRunningsum!=NULL){
+	fRunningsumFillsTree = kTRUE;
+      } else {
+	fRunningsumFillsTree = kFALSE;
+      }
+      fTreeName = treeprefix+fTreeName;
+      if (fRunningsumFillsTree) {
+	treerootfile->ConstructNTupleFields(fTreeName, fTreeComment, *fRunningsum, fPrefix+branchprefix);
+      }else {
+	treerootfile->ConstructNTupleFields(fTreeName, fTreeComment, *this, fPrefix+branchprefix);
+      }
+    }
+  }
+}
+
+void VQwDataHandler::FillNTupleFields(QwRootFile *treerootfile)
+{
+  if (fTreeName.size()>0){
+    if (fRunningsumFillsTree) {
+      treerootfile->FillNTupleFields(*fRunningsum);
+    } else {
+      treerootfile->FillNTupleFields(*this);
+    }
+  }
+}
+
 
 /**
  * Fill the tree vector

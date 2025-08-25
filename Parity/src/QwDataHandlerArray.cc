@@ -369,6 +369,27 @@ void  QwDataHandlerArray::FillTreeBranches(QwRootFile *treerootfile)
   }
 }
 
+void  QwDataHandlerArray::ConstructNTupleFields(
+    QwRootFile *treerootfile,
+    const std::string& treeprefix,
+    const std::string& branchprefix)
+{
+  if (!empty()){
+    for (iterator handler = begin(); handler != end(); ++handler) {
+      handler->get()->ConstructNTupleFields(treerootfile, treeprefix, branchprefix);
+    }
+  }
+}
+
+void  QwDataHandlerArray::FillNTupleFields(QwRootFile *treerootfile)
+{
+  if (!empty()){
+    for (iterator handler = begin(); handler != end(); ++handler) {
+      handler->get()->FillNTupleFields(treerootfile);
+    }
+  }
+}
+
 
 
 //*****************************************************************

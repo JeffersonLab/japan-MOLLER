@@ -94,6 +94,13 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
         const std::string& branchprefix = "");
     virtual void FillTreeBranches(QwRootFile *treerootfile);
 
+    /// \brief RNTuple methods
+    virtual void ConstructNTupleFields(
+        QwRootFile *treerootfile,
+        const std::string& treeprefix = "",
+        const std::string& branchprefix = "");
+    virtual void FillNTupleFields(QwRootFile *treerootfile);
+
     /// \brief Construct the histograms in a folder with a prefix
     virtual void  ConstructHistograms(TDirectory *folder, TString &prefix) { };
     /// \brief Fill the histograms

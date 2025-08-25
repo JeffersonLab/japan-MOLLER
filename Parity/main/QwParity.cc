@@ -230,6 +230,13 @@ Int_t main(Int_t argc, Char_t* argv[])
     datahandlerarray_mul.ConstructTreeBranches(treerootfile);
     datahandlerarray_burst.ConstructTreeBranches(burstrootfile, "burst_", "|stat");
 
+    // Construct RNTuple fields for data handlers if enabled
+    if (gQwOptions.GetValue<bool>("enable-rntuples")) {
+      datahandlerarray_evt.ConstructNTupleFields(treerootfile, "evt_");
+      datahandlerarray_mul.ConstructNTupleFields(treerootfile);
+      datahandlerarray_burst.ConstructNTupleFields(burstrootfile, "burst_", "|stat");
+    }
+
     treerootfile->ConstructTreeBranches("evts", "Running sum tree", eventsum, "|stat");
     treerootfile->ConstructTreeBranches("muls", "Running sum tree", patternsum, "|stat");
     burstrootfile->ConstructTreeBranches("bursts", "Burst running sum tree", burstsum, "|stat");
@@ -365,6 +372,11 @@ Int_t main(Int_t argc, Char_t* argv[])
           // Fill data handler tree branches
           datahandlerarray_evt.FillTreeBranches(treerootfile);
 
+          // Fill data handler RNTuple fields if enabled
+          if (gQwOptions.GetValue<bool>("enable-rntuples")) {
+            datahandlerarray_evt.FillNTupleFields(treerootfile);
+          }
+
           // Load the event into the helicity pattern
           helicitypattern.LoadEventData(ringoutput);
 
@@ -416,6 +428,11 @@ Int_t main(Int_t argc, Char_t* argv[])
               // Fill data handler tree branches
               datahandlerarray_mul.FillTreeBranches(treerootfile);
 
+              // Fill data handler RNTuple fields if enabled
+              if (gQwOptions.GetValue<bool>("enable-rntuples")) {
+                datahandlerarray_mul.FillNTupleFields(treerootfile);
+              }
+
               // Fill the pattern into the sum for this burst
               patternsum_per_burst.AccumulateRunningSum(helicitypattern);
 
@@ -458,6 +475,11 @@ Int_t main(Int_t argc, Char_t* argv[])
 
                 // Fill data handler tree branches
                 datahandlerarray_burst.FillTreeBranches(burstrootfile);
+
+                // Fill data handler RNTuple fields if enabled
+                if (gQwOptions.GetValue<bool>("enable-rntuples")) {
+                  datahandlerarray_burst.FillNTupleFields(burstrootfile);
+                }
 
 		helicitypattern.IncrementBurstCounter();
 		datahandlerarray_mul.UpdateBurstCounter(helicitypattern.GetBurstCounter());
@@ -519,6 +541,11 @@ Int_t main(Int_t argc, Char_t* argv[])
 
       // Fill data handler tree branches
       datahandlerarray_burst.FillTreeBranches(burstrootfile);
+
+      // Fill data handler RNTuple fields if enabled
+      if (gQwOptions.GetValue<bool>("enable-rntuples")) {
+        datahandlerarray_burst.FillNTupleFields(burstrootfile);
+      }
       patternsum_per_burst.PrintIndexMapFile(run_number);
     }
 
