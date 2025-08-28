@@ -15,8 +15,10 @@ using std::string;
 #include "Rtypes.h"
 #include "TString.h"
 #include "TTree.h"
+#ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTupleModel.hxx"
 #include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "QwOptions.h"

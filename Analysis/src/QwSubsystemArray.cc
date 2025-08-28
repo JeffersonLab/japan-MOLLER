@@ -681,6 +681,7 @@ void QwSubsystemArray::FillTreeVector(std::vector<Double_t>& values) const
   }
 }
 
+#ifdef HAS_RNTUPLE_SUPPORT
 /**
  * Construct the RNTuple fields and vector
  * @param model RNTuple model
@@ -732,7 +733,9 @@ void QwSubsystemArray::ConstructNTupleAndVector(
     subsys_ptr->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
   }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
+#ifdef HAS_RNTUPLE_SUPPORT
 /**
  * Fill the RNTuple vector
  * @param values Vector of values
@@ -753,6 +756,7 @@ void QwSubsystemArray::FillNTupleVector(std::vector<Double_t>& values) const
     subsys_ptr->FillNTupleVector(values);
   }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 
 

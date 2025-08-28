@@ -11,8 +11,10 @@
 #include <stdexcept>
 
 // ROOT headers for RNTuple support
+#ifdef HAS_RNTUPLE_SUPPORT
 #include <ROOT/RNTupleModel.hxx>
 #include <ROOT/RNTupleWriter.hxx>
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak database headers
 #ifdef __USE_DATABASE__

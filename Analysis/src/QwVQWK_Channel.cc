@@ -865,6 +865,7 @@ void  QwVQWK_Channel::FillTreeVector(std::vector<Double_t> &values) const
   }
 }
 
+#ifdef HAS_RNTUPLE_SUPPORT
 void  QwVQWK_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, std::vector<Double_t> &values, std::vector<std::shared_ptr<Double_t>> &fieldPtrs)
 {
   //  This channel is not used, so skip setting up the RNTuple.
@@ -1020,6 +1021,7 @@ void  QwVQWK_Channel::FillNTupleVector(std::vector<Double_t> &values) const
     FillTreeVector(values);
   }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 // VQwDataElement& QwVQWK_Channel::operator= (const  VQwDataElement& data_value)
 // {

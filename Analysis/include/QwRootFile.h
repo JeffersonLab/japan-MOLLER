@@ -12,11 +12,13 @@ using std::type_info;
 #include "TPRegexp.h"
 #include "TSystem.h"
 
-// RNTuple headers (modern ROOT namespace)
+// RNTuple headers (modern ROOT namespace) - only if supported
+#ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTuple.hxx"
 #include "ROOT/RNTupleModel.hxx"
 #include "ROOT/RField.hxx"
 #include "ROOT/RNTupleWriter.hxx"
+#endif
 
 // Qweak headers
 #include "QwOptions.h"
@@ -277,6 +279,7 @@ class QwRootTree {
     }
 };
 
+#ifdef HAS_RNTUPLE_SUPPORT
 /**
  *  \class QwRootNTuple
  *  \ingroup QwAnalysis
@@ -464,6 +467,7 @@ class QwRootNTuple {
 
   friend class QwRootFile;
 };
+#endif // HAS_RNTUPLE_SUPPORT
 
 
 /**
@@ -536,6 +540,7 @@ class QwRootFile {
     template < class T >
     void FillTreeBranches(const T& object);
 
+#ifdef HAS_RNTUPLE_SUPPORT
     /// \brief Construct the RNTuple fields of a generic object
     template < class T >
     void ConstructNTupleFields(const std::string& name, const std::string& desc, T& object, const std::string& prefix = "");
@@ -545,6 +550,7 @@ class QwRootFile {
     /// \brief Fill the RNTuple fields of a generic object by type only
     template < class T >
     void FillNTupleFields(const T& object);
+#endif // HAS_RNTUPLE_SUPPORT
 
 
     template < class T >
@@ -589,6 +595,7 @@ class QwRootFile {
       fTreeByName[name].push_back(tree);
     }
 
+#ifdef HAS_RNTUPLE_SUPPORT
     /// Create a new RNTuple with name and description
     void NewNTuple(const std::string& name, const std::string& desc) {
       if (IsTreeDisabled(name) || !fEnableRNTuples) return;
@@ -604,6 +611,7 @@ class QwRootFile {
       }
       fNTupleByName[name].push_back(ntuple);
     }
+#endif // HAS_RNTUPLE_SUPPORT
 
     /// Get the tree with name
     TTree* GetTree(const std::string& name) {
@@ -628,12 +636,14 @@ class QwRootFile {
       return retval;
     }
 
+#ifdef HAS_RNTUPLE_SUPPORT
     /// Fill the RNTuple with name
     void FillNTuple(const std::string& name) {
       if (HasNTupleByName(name)) {
         fNTupleByName[name].front()->Fill();
       }
     }
+#endif // HAS_RNTUPLE_SUPPORT
 
     /// Fill all registered RNTuples
     void FillNTuples() {
@@ -722,13 +732,14 @@ class QwRootFile {
       if (!fMakePermanent) fMakePermanent = HasAnyFilled();
       
 
-      
+#ifdef HAS_RNTUPLE_SUPPORT      
       // Close all RNTuples before closing the file
       for (auto& pair : fNTupleByName) {
         for (auto& ntuple : pair.second) {
           if (ntuple) ntuple->Close();
         }
       }
+#endif // HAS_RNTUPLE_SUPPORT
       
       // CRITICAL FIX: Explicitly write all trees before closing!
       if (fRootFile) {
@@ -868,6 +879,7 @@ class QwRootFile {
     std::map< const std::type_index , std::vector<QwRootTree*> > fTreeByType;
     // ... Are type_index objects really unique? Let's hope so.
 
+#ifdef HAS_RNTUPLE_SUPPORT
     /// RNTuple names, addresses, and types
     std::map< const std::string, std::vector<QwRootNTuple*> > fNTupleByName;
     std::map< const void*      , std::vector<QwRootNTuple*> > fNTupleByAddr;
@@ -875,6 +887,7 @@ class QwRootFile {
 
     /// RNTuple support flag
     Bool_t fEnableRNTuples;
+#endif // HAS_RNTUPLE_SUPPORT
 
     /// Is a tree registered for this name
     bool HasTreeByName(const std::string& name) {
@@ -896,6 +909,7 @@ class QwRootFile {
       else return true;
     }
 
+#ifdef HAS_RNTUPLE_SUPPORT
     /// Is an RNTuple registered for this name
     bool HasNTupleByName(const std::string& name) {
       if (fNTupleByName.count(name) == 0) return false;
@@ -915,6 +929,7 @@ class QwRootFile {
       if (fNTupleByAddr.count(addr) == 0) return false;
       else return true;
     }
+#endif // HAS_RNTUPLE_SUPPORT
 
     /// Directories
     std::map< const std::string, TDirectory* > fDirsByName;
@@ -1082,6 +1097,7 @@ void QwRootFile::FillTreeBranches(
 }
 
 
+#ifdef HAS_RNTUPLE_SUPPORT
 /**
  * Construct the RNTuple fields of a generic object
  * @param name Name for RNTuple
@@ -1179,6 +1195,7 @@ void QwRootFile::FillNTupleFields(
     fNTupleByAddr[addr].at(ntuple)->FillNTupleFields(object);
   }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 
 /**

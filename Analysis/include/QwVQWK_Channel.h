@@ -15,7 +15,9 @@
 #include "TTree.h"
 
 // RNTuple headers  
+#ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTupleModel.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "VQwHardwareChannel.h"

@@ -355,6 +355,7 @@ void QwScaler_Channel<data_mask,data_shift>::FillTreeVector(std::vector<Double_t
   
 }
 
+#ifdef HAS_RNTUPLE_SUPPORT
 template<unsigned int data_mask, unsigned int data_shift>
 void QwScaler_Channel<data_mask,data_shift>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
@@ -444,6 +445,7 @@ void QwScaler_Channel<data_mask,data_shift>::FillNTupleVector(std::vector<Double
     }
   }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 
 void VQwScaler_Channel::AssignValueFrom(const VQwDataElement* valueptr){

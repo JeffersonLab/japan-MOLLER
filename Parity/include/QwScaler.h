@@ -9,8 +9,10 @@
 #include <boost/shared_ptr.hpp>
 
 // ROOT headers
+#ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTupleModel.hxx"
 #include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "VQwSubsystemParity.h"

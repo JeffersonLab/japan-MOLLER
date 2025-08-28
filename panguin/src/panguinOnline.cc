@@ -91,9 +91,11 @@ void OnlineGUI::CreateGUI(const TGWindow *p, UInt_t w, UInt_t h)
     GetFileObjects();
     GetRootTree();
     GetTreeVars();
+#ifdef HAS_RNTUPLE_SUPPORT
     // Initialize RNTuples
     GetRootNTuple();
     GetNTupleVars();
+#endif // HAS_RNTUPLE_SUPPORT
     // Initialize DataFrame for large dataset support
     InitializeDataFrame();
     for(UInt_t i=0; i<fRootTree.size(); i++) {
@@ -359,15 +361,19 @@ void OnlineGUI::DoDraw()
     } else {
       // Check if variable is in Trees or RNTuples
       UInt_t treeIndex = GetTreeIndex(drawcommand[0]);
+#ifdef HAS_RNTUPLE_SUPPORT
       UInt_t ntupleIndex = GetNTupleIndex(drawcommand[0]);
+#endif
       
       if (treeIndex <= fRootTree.size()) {
         TreeDraw(drawcommand);
+#ifdef HAS_RNTUPLE_SUPPORT
       } else if (ntupleIndex <= fRootNTuple.size()) {
         // Always use DataFrame for RNTuple variables
         if(fVerbosity>=2)
           cout << "Using DataFrame for RNTuple variable: " << drawcommand[0] << endl;
         DataFrameDraw(drawcommand);
+#endif // HAS_RNTUPLE_SUPPORT
       } else {
         TreeDraw(drawcommand); // Fallback to TreeDraw for backwards compatibility
       }
@@ -661,6 +667,7 @@ UInt_t OnlineGUI::GetTreeIndexFromName(TString name) {
   return fRootTree.size()+1;
 }
 
+#ifdef HAS_RNTUPLE_SUPPORT
 void OnlineGUI::GetRootNTuple() {
   // Utility to search a ROOT File for RNTuples
   // Fills the fRootNTuple vector
@@ -797,6 +804,7 @@ UInt_t OnlineGUI::GetNTupleIndex(TString var) {
 
   return fRootNTuple.size()+1;
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 void OnlineGUI::MacroDraw(vector <TString> command) {
   // Called by DoDraw(), this will make a call to the defined macro, and
@@ -1009,9 +1017,11 @@ Int_t OnlineGUI::OpenRootFile() {
   if (fUpdate) { // Only do this stuff if their are valid keys
     GetRootTree();
     GetTreeVars();
+#ifdef HAS_RNTUPLE_SUPPORT
     // Initialize RNTuples
     GetRootNTuple();
     GetNTupleVars();
+#endif // HAS_RNTUPLE_SUPPORT
     // Initialize DataFrame for large dataset support
     InitializeDataFrame();
     for(UInt_t i=0; i<fRootTree.size(); i++) {
@@ -1206,6 +1216,7 @@ void OnlineGUI::TreeDraw(vector <TString> command) {
   }
 }
 
+#ifdef HAS_RNTUPLE_SUPPORT
 void OnlineGUI::NTupleDraw(vector <TString> command) {
   // Called by DoDraw(), this will plot an RNTuple Variable
 
@@ -1372,6 +1383,7 @@ void OnlineGUI::NTupleDraw(vector <TString> command) {
     }
   }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 void OnlineGUI::PrintToFile()
 {

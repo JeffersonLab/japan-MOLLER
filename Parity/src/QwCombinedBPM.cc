@@ -11,8 +11,10 @@
 #include <stdexcept>
 
 // ROOT headers
+#ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTupleModel.hxx"
 #include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #ifdef __USE_DATABASE__

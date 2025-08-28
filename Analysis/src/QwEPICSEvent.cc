@@ -13,8 +13,10 @@
 #include "TFile.h"
 #include "TROOT.h"
 #include "TMath.h"
+#ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTupleModel.hxx"
 #include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "QwLog.h"
@@ -225,6 +227,7 @@ void QwEPICSEvent::FillTreeVector(std::vector<Double_t>& values) const
   }
 }
 
+#ifdef HAS_RNTUPLE_SUPPORT
 void QwEPICSEvent::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   fTreeArrayIndex = values.size();
@@ -283,6 +286,7 @@ void QwEPICSEvent::FillNTupleVector(std::vector<Double_t>& values) const
     }
   }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 
 Int_t QwEPICSEvent::AddEPICSTag(

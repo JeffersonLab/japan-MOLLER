@@ -19,9 +19,11 @@
 #include "Rtypes.h"
 #include "TROOT.h"
 #include "TFile.h"
+#ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTuple.hxx"
 #include "ROOT/RNTupleModel.hxx"
 #include "ROOT/RField.hxx"
+#endif
 
 // Qweak headers
 #include "QwLog.h"

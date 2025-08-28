@@ -17,7 +17,9 @@
 #include "VQwDataElement.h"
 
 // ROOT headers
+#ifdef HAS_RNTUPLE_SUPPORT
 #include <ROOT/RNTupleModel.hxx>
+#endif // HAS_RNTUPLE_SUPPORT
 
 // ROOT forward declarations
 class TTree;

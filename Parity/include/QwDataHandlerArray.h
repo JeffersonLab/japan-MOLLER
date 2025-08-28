@@ -18,8 +18,12 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/mem_fn.hpp>
 
-// RNTuple headers
+// ROOT headers
+#ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTupleModel.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
+
+// Qweak headers
 
 #include "QwDataHandlerArray.h"
 #include "VQwDataHandler.h"
