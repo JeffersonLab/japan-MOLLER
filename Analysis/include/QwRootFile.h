@@ -317,11 +317,9 @@ class QwRootNTuple {
     /// Close and finalize the RNTuple writer
     void Close() {
       if (fWriter) {
-        QwMessage << "Closing RNTuple '" << fName << "' writer" << QwLog::endl;
         // Explicitly commit any remaining data and close the writer
         // This ensures all data is written to the file before destruction
         fWriter.reset();  // This calls the destructor which should finalize the RNTuple
-        QwMessage << "Closed RNTuple '" << fName << "' writer" << QwLog::endl;
       }
     }
 
@@ -383,17 +381,11 @@ class QwRootNTuple {
         // Fill the field vector
         object.FillNTupleVector(fVector);
         
-        // Debug output
-        QwMessage << "Filling RNTuple " << fName << " with " << fVector.size() 
-                  << " values and " << fFieldPtrs.size() << " field pointers" << QwLog::endl;
-        
         // Use the shared field pointers which remain valid
         if (fWriter) {
           for (size_t i = 0; i < fVector.size() && i < fFieldPtrs.size(); ++i) {
             if (fFieldPtrs[i]) {
               *(fFieldPtrs[i]) = fVector[i];
-            } else {
-              QwMessage << "Field " << i << " has null pointer, skipping" << QwLog::endl;
             }
           }
           
