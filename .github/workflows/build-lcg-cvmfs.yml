@@ -1,0 +1,62 @@
+---
+name: Build LCG on CVMFS
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        LCG: ["LCG_106/x86_64-el9-gcc13-opt",
+              "LCG_107/x86_64-el9-clang16-opt",
+              "LCG_107/x86_64-el9-gcc14-opt"]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cvmfs-contrib/github-action-cvmfs@v3
+        with:
+          cvmfs_repositories: 'sft.cern.ch,geant4.cern.ch'
+      - name: Create qwparity.conf symlink
+        run: ln -sf Parity/prminput/qwparity_simple.conf qwparity.conf
+      - uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.LCG }}
+          run: |
+            echo "::group::Configuration"
+            # Set BOOST_INC_DIR and BOOST_LIB_DIR to point to
+            # LCG-provided Boost installation
+            LCG_PATH="/cvmfs/sft.cern.ch/lcg/views/${{ matrix.LCG }}"
+            export BOOST_INC_DIR="${LCG_PATH}/include"
+            export BOOST_LIB_DIR="${LCG_PATH}/lib"
+
+            # Generate setup scripts
+            chmod +x SetupFiles/make_SET_ME_UP
+            SetupFiles/make_SET_ME_UP
+            echo "::endgroup::"
+
+            echo "::group::Compilation"
+            # Build the project
+            cmake -Bbuild -S.
+            cmake --build build -j$(nproc)
+            echo "::endgroup::"
+
+            echo "::group::Mock data generation"
+            # Run the mock data generator and analysis as described in README
+            source SetupFiles/SET_ME_UP.bash
+            
+            # Generate mock data
+            build/qwmockdatagenerator -r 4 -e 1:20000 --config qwparity_simple.conf --detectors mock_newdets.map --data .
+            echo "::endgroup::"
+            
+            echo "::group::Mock data analysis"
+            # Analyze the generated mock data
+            build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles .
+            echo "::endgroup::"
