@@ -12,6 +12,16 @@ mrc@jlab.org\
 Shashini Chandrasena\
 shashini@jlab.org
 
+
+# Resources:
+* JAPAn wiki: https://moller.jlab.org/wiki/index.php/Analyzer_Documentation_Portal
+* JAPan doxygen : https://hallaweb.jlab.org/parity/prex/japan/Doxygen/html/index.html 
+* Ryan’s talk : https://moller-docdb.physics.sunysb.edu/DocDB/0013/001396/001/JAPAN_INTRODUCTION_PDF.pdf 
+* MOLLER CDR report
+* Github guide: https://github.com/JeffersonLab/japan-MOLLER/blob/main/Guide/Guide.md
+
+
+
 Running QwMockDataGenerator
 ===========================
 
