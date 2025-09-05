@@ -1,14 +1,16 @@
 # QwMockData Root Guide
 
-July 29, 2024\
-Version 1.1
+September 05, 2025\
+Version 1.1.1
 
 
-shashini
+
 If you have any questions or suggestions for the guide, please send an
 email to:\
 Ryan Conaway\
-mrc@jlab.org
+mrc@jlab.org\
+Shashini Chandrasena\
+shashini@jlab.org
 
 Running QwMockDataGenerator
 ===========================
