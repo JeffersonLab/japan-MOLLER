@@ -23,6 +23,10 @@ sudo apt-get install -y \
     clang-tidy \
     clang-format \
     libboost-all-dev \
+    libxcb-shm0 \
+    libxcb-render0 \
+    libxpm4 \
+    libxrender1 \
     python3 \
     python3-pip
 
