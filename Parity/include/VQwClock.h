@@ -50,7 +50,7 @@ public:
   virtual void  FillHistograms() = 0;
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   virtual void SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel) = 0;
-  virtual void Ratio( const VQwClock &numer, const VQwClock &denom)
+  virtual void Ratio( const VQwClock &/*numer*/, const VQwClock &/*denom*/)
     { std::cerr << "Ratio not defined! (VQwClock)" << std::endl; }
   virtual void ClearEventData() = 0;
 
