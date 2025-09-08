@@ -23,8 +23,6 @@ sudo apt-get install -y \
     clang-tidy \
     clang-format \
     libboost-all-dev \
-    libroot-dev \
-    root-system-bin \
     python3 \
     python3-pip
 
