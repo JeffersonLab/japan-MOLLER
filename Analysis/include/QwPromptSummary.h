@@ -64,7 +64,7 @@ class PromptSummaryElement :  public TObject
   void SetDifferenceUnit       (const TString  in) { fAsymDiffUnit=in; };
 
   // Yield 
-  const Double_t GetNumGoodEvents ()    {
+  Double_t GetNumGoodEvents ()    {
     //  Returns the number of entries corresponding to the asymmetry error/width ratio
     if(fAsymDiffError!=0){
       Double_t temp = (fAsymDiffWidth/fAsymDiffError);
@@ -74,23 +74,23 @@ class PromptSummaryElement :  public TObject
     }
   };
     
-  const Double_t GetYield         () { return fYield; };
-  const Double_t GetYieldError    () { return fYieldError; };
-  const Double_t GetYieldWidth    () { return fYieldWidth; };
-  const TString  GetYieldUnit     () { return  fYieldUnit; };
+  Double_t GetYield         () { return fYield; };
+  Double_t GetYieldError    () { return fYieldError; };
+  Double_t GetYieldWidth    () { return fYieldWidth; };
+  TString  GetYieldUnit     () { return  fYieldUnit; };
 
   // Asymmetry : 
-  const Double_t GetAsymmetry     () { return fAsymDiff; };
-  const Double_t GetAsymmetryError() { return fAsymDiffError; };
-  const Double_t GetAsymmetryWidth() { return fAsymDiffWidth; };
-  const TString  GetAsymmetryUnit () { return fAsymDiffUnit; };
+  Double_t GetAsymmetry     () { return fAsymDiff; };
+  Double_t GetAsymmetryError() { return fAsymDiffError; };
+  Double_t GetAsymmetryWidth() { return fAsymDiffWidth; };
+  TString  GetAsymmetryUnit () { return fAsymDiffUnit; };
 
 
   // Difference : 
-  const Double_t GetDifference     () { return fAsymDiff; };
-  const Double_t GetDifferenceError() { return fAsymDiffError; };
-  const Double_t GetDifferenceWidth() { return fAsymDiffWidth; };
-  const TString  GetDifferenceUnit () { return fAsymDiffUnit; };
+  Double_t GetDifference     () { return fAsymDiff; };
+  Double_t GetDifferenceError() { return fAsymDiffError; };
+  Double_t GetDifferenceWidth() { return fAsymDiffWidth; };
+  TString  GetDifferenceUnit () { return fAsymDiffUnit; };
 
   void Set(TString type, const Double_t a, const Double_t a_err, const Double_t a_width);
 
@@ -144,13 +144,13 @@ class QwPromptSummary  :  public TObject
   std::vector<PromptSummaryElement*> fElementList; 
 
   void SetRunNumber(const Int_t in) {fRunNumber = in;};
-  const Int_t GetRunNumber() {return fRunNumber;};
+  Int_t GetRunNumber() {return fRunNumber;};
   
   void SetRunletNumber(const Int_t in) {fRunletNumber = in;};
-  const Int_t GetRunletNumber() {return fRunletNumber;};
+  Int_t GetRunletNumber() {return fRunletNumber;};
 
   void SetPatternSize(const Int_t in) { fPatternSize=in; };
-  const Int_t GetPatternSize() { return fPatternSize; };
+  Int_t GetPatternSize() { return fPatternSize; };
 
   void AddElement(PromptSummaryElement *in);
   PromptSummaryElement* GetElementByName(TString name);

@@ -17,7 +17,7 @@ void QwScaler::DefineOptions(QwOptions &options)
   // Define command line options
 }
 
-void QwScaler::ProcessOptions(QwOptions &options)
+void QwScaler::ProcessOptions(QwOptions &/*options*/)
 {
   // Handle command line options
 }
@@ -279,7 +279,7 @@ void QwScaler::ClearEventData()
  * @param num_words Number of words left in buffer
  * @return Number of words read
  */
-Int_t QwScaler::ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words)
+Int_t QwScaler::ProcessConfigurationBuffer(const ROCID_t /*roc_id*/, const BankID_t /*bank_id*/, UInt_t* /*buffer*/, UInt_t /*num_words*/)
 {
   return 0;
 }
@@ -482,7 +482,7 @@ void QwScaler::CalculateRunningAverage()
   }
 }
 
-Int_t QwScaler::LoadEventCuts(TString filename)
+Int_t QwScaler::LoadEventCuts(TString /*filename*/)
 {
   return 0;
 }

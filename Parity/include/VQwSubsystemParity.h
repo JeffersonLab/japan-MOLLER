@@ -54,10 +54,10 @@ class VQwSubsystemParity: virtual public VQwSubsystem {
 
     /// \brief Fill the database with MPS-based variables
     ///        Note that most subsystems don't need to do this.
-    virtual void FillDB_MPS(QwParityDB *db, TString type) {};
+    virtual void FillDB_MPS(QwParityDB * /*db*/, TString /*type*/) {};
     /// \brief Fill the database
-    virtual void FillDB(QwParityDB *db, TString type) { };
-    virtual void FillErrDB(QwParityDB *db, TString type) { };
+    virtual void FillDB(QwParityDB * /*db*/, TString /*type*/) { };
+    virtual void FillErrDB(QwParityDB * /*db*/, TString /*type*/) { };
 
     // VQwSubsystem routine is overridden. Call it at the beginning by VQwSubsystem::operator=(value)
     virtual VQwSubsystem& operator=  (VQwSubsystem *value) = 0;
@@ -117,8 +117,8 @@ class VQwSubsystemParity: virtual public VQwSubsystem {
       return 0;
     };
     virtual void LoadEventCuts_Init() {};
-    virtual void LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, Int_t &eventcut_flag) {};
-    virtual void LoadEventCuts_Fin(Int_t &eventcut_flag) {};
+    virtual void LoadEventCuts_Line(QwParameterFile & /*mapstr*/, TString & /*varvalue*/, Int_t & /*eventcut_flag*/) {};
+    virtual void LoadEventCuts_Fin(Int_t & /*eventcut_flag*/) {};
     /// \brief Apply the single event cuts
     virtual Bool_t ApplySingleEventCuts() = 0;
     /// \brief Report the number of events failed due to HW and event cut failures
@@ -141,19 +141,19 @@ class VQwSubsystemParity: virtual public VQwSubsystem {
 
 
     /// \brief Blind the asymmetry of this subsystem
-    virtual void Blind(const QwBlinder *blinder) { return; };
+    virtual void Blind(const QwBlinder * /*blinder*/) { return; };
     /// \brief Blind the difference of this subsystem
-    virtual void Blind(const QwBlinder *blinder, const VQwSubsystemParity* subsys) { return; };
+    virtual void Blind(const QwBlinder * /*blinder*/, const VQwSubsystemParity* /*subsys*/) { return; };
 
     /// \brief Print values of all channels
     virtual void PrintValue() const { };
 
-    virtual void WritePromptSummary(QwPromptSummary *ps, TString type) {};
+    virtual void WritePromptSummary(QwPromptSummary * /*ps*/, TString /*type*/) {};
 
 
     virtual Bool_t CheckForEndOfBurst() const {return kFALSE;};
 
-    virtual void LoadMockDataParameters(TString mapfile) {};
+    virtual void LoadMockDataParameters(TString /*mapfile*/) {};
 	
 }; // class VQwSubsystemParity
 

@@ -31,10 +31,7 @@ class MQwHistograms {
 
     /// Arithmetic assignment operator:  Should only copy event-based data.
     /// In this particular class, there is no event-based data.
-    virtual MQwHistograms& operator=(const MQwHistograms& value) {
-      if (this != &value) {
-        // No event-based data to copy in this class
-      }
+    virtual MQwHistograms& operator=(const MQwHistograms& /*value*/) {
       return *this;
     }
 
