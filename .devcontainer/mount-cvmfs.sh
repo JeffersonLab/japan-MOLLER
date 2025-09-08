@@ -44,11 +44,6 @@ if ! mountpoint -q /cvmfs/geant4.cern.ch; then
     mount_cvmfs "geant4.cern.ch"
 fi
 
-# Mount CERN software repository
-if ! mountpoint -q /cvmfs/sw.cern.ch; then
-    mount_cvmfs "sw.cern.ch"
-fi
-
 # Mount OpenScienceGrid Singularity repository
 if ! mountpoint -q /cvmfs/singularity.opensciencegrid.org; then
     mount_cvmfs "singularity.opensciencegrid.org"
@@ -76,12 +71,6 @@ else
     echo "❌ geant4.cern.ch not mounted"
 fi
 
-if mountpoint -q /cvmfs/sw.cern.ch; then
-    echo "✅ sw.cern.ch mounted successfully"
-else
-    echo "❌ sw.cern.ch not mounted"
-fi
-
 if mountpoint -q /cvmfs/singularity.opensciencegrid.org; then
     echo "✅ singularity.opensciencegrid.org mounted successfully"
     echo "🐳 Available Singularity containers:"
@@ -101,6 +90,5 @@ fi
 echo "🎉 CVMFS setup complete!"
 echo "💡 Usage examples:"
 echo "   LCG environment: source /cvmfs/sft.cern.ch/lcg/views/LCG_XXX/x86_64-*-*-opt/setup.sh"
-echo "   CERN software: ls /cvmfs/sw.cern.ch/"
 echo "   Singularity: singularity exec /cvmfs/singularity.opensciencegrid.org/..."
 echo "   OSG software: ls /cvmfs/oasis.opensciencegrid.org/"
