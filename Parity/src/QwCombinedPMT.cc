@@ -455,7 +455,8 @@ void  QwCombinedPMT::FillTreeVector(std::vector<Double_t> &values) const
   }
 }
 
-void QwCombinedPMT::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwCombinedPMT::ConstructNTupleAndVector(std::unique_ptr<ROOT::Experimental::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (GetElementName()=="")
     {
@@ -477,6 +478,7 @@ void QwCombinedPMT::FillNTupleVector(std::vector<Double_t>& values) const
 //  fAvgADC.FillNTupleVector(values);
   }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
 /********************************************************/

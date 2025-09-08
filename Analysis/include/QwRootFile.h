@@ -645,6 +645,7 @@ class QwRootFile {
     }
 #endif // HAS_RNTUPLE_SUPPORT
 
+#ifdef HAS_RNTUPLE_SUPPORT
     /// Fill all registered RNTuples
     void FillNTuples() {
       // Loop over all registered RNTuple names
@@ -653,6 +654,7 @@ class QwRootFile {
         iter->second.front()->Fill();
       }
     }
+#endif // HAS_RNTUPLE_SUPPORT
 
     /// Print registered trees
     void PrintTrees() const {

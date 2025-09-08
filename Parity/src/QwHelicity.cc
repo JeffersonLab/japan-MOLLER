@@ -13,9 +13,11 @@
 // ROOT headers
 #include "TRegexp.h"
 #include "TMath.h"
+#ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTupleModel.hxx"
 #include "ROOT/RNTupleWriter.hxx"
 #include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "QwHistogramHelper.h"
@@ -1490,7 +1492,8 @@ void  QwHelicity::FillTreeVector(std::vector<Double_t> &values) const
   return;
 }
 
-void QwHelicity::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, std::vector<Double_t> &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwHelicity::ConstructNTupleAndVector(std::unique_ptr<ROOT::Experimental::RNTupleModel>& model, TString &prefix, std::vector<Double_t> &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   SetHistoTreeSave(prefix);
 
@@ -1597,6 +1600,7 @@ void QwHelicity::FillNTupleVector(std::vector<Double_t> &values) const
       }
     }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
 void  QwHelicity::FillDB(QwParityDB *db, TString type)

@@ -15,7 +15,9 @@
 #include <TTree.h>
 
 // RNTuple headers
+#ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTupleModel.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "QwParameterFile.h"
@@ -117,8 +119,10 @@ class  QwHaloMonitor : public VQwDataElement{
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
   void  FillTreeVector(std::vector<Double_t> &values) const;
 
-  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+#ifdef HAS_RNTUPLE_SUPPORT
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::Experimental::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
   void  FillNTupleVector(std::vector<Double_t>& values) const;
+#endif // HAS_RNTUPLE_SUPPORT
 
   VQwHardwareChannel* GetScaler(){
     return &fHalo_Counter;

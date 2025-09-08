@@ -7,8 +7,10 @@
 
 // ROOT headers
 #include <TTree.h>
+#ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTupleModel.hxx"
 #include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "QwMollerADC_Channel.h"
@@ -125,9 +127,11 @@ class QwCombinedPMT : public VQwDataElement {
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
   void  FillTreeVector(std::vector<Double_t> &values) const;
 
+#ifdef HAS_RNTUPLE_SUPPORT
   // RNTuple methods
-  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::Experimental::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
   void  FillNTupleVector(std::vector<Double_t>& values) const;
+#endif // HAS_RNTUPLE_SUPPORT
 
   std::vector<QwDBInterface>  GetDBEntry();
   std::vector<QwErrDBInterface> GetErrDBEntry();

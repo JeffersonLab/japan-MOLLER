@@ -18,9 +18,11 @@ using namespace std;
 //header file
 #include "VQwDataHandler.h"
 
+#ifdef HAS_RNTUPLE_SUPPORT
 // ROOT headers for RNTuple support
 #include <ROOT/RNTupleModel.hxx>
 #include <ROOT/RNTupleWriter.hxx>
+#endif
 
 //#include "QwCombiner.h"
 
@@ -318,11 +320,13 @@ void VQwDataHandler::ConstructNTupleFields(
 	fRunningsumFillsTree = kFALSE;
       }
       fTreeName = treeprefix+fTreeName;
+#ifdef HAS_RNTUPLE_SUPPORT
       if (fRunningsumFillsTree) {
 	treerootfile->ConstructNTupleFields(fTreeName, fTreeComment, *fRunningsum, fPrefix+branchprefix);
       }else {
 	treerootfile->ConstructNTupleFields(fTreeName, fTreeComment, *this, fPrefix+branchprefix);
       }
+#endif
     }
   }
 }
@@ -330,11 +334,13 @@ void VQwDataHandler::ConstructNTupleFields(
 void VQwDataHandler::FillNTupleFields(QwRootFile *treerootfile)
 {
   if (fTreeName.size()>0){
+#ifdef HAS_RNTUPLE_SUPPORT
     if (fRunningsumFillsTree) {
       treerootfile->FillNTupleFields(*fRunningsum);
     } else {
       treerootfile->FillNTupleFields(*this);
     }
+#endif
   }
 }
 
@@ -352,7 +358,8 @@ void VQwDataHandler::FillTreeVector(std::vector<Double_t>& values) const
   }
 }
 
-void VQwDataHandler::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+#ifdef HAS_RNTUPLE_SUPPORT
+void VQwDataHandler::ConstructNTupleAndVector(std::unique_ptr<ROOT::Experimental::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   for (size_t i = 0; i < fOutputVar.size(); ++i) {
     fOutputVar.at(i)->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
@@ -367,6 +374,7 @@ void VQwDataHandler::FillNTupleVector(std::vector<Double_t>& values) const
     fOutputVar.at(i)->FillNTupleVector(values);
   }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 void VQwDataHandler::InitRunningSum()
 {

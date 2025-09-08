@@ -16,9 +16,11 @@
 #include <iostream>
 #include <stdexcept>
 
+#ifdef HAS_RNTUPLE_SUPPORT
 // ROOT headers for RNTuple support
 #include <ROOT/RNTupleModel.hxx>
 #include <ROOT/RNTupleWriter.hxx>
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "QwLog.h"
@@ -834,7 +836,8 @@ void QwBeamMod::FillTreeVector(std::vector<Double_t> &values) const
 
 }
 
-void QwBeamMod::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwBeamMod::ConstructNTupleAndVector(std::unique_ptr<ROOT::Experimental::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   TString basename;
   
@@ -862,6 +865,7 @@ void QwBeamMod::FillNTupleVector(std::vector<Double_t>& values) const
     values[index++] = fWord[i].fValue;
   }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 
 //*****************************************************************

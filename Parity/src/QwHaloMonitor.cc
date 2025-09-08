@@ -11,8 +11,10 @@
 #include <stdexcept>
 
 // ROOT headers for RNTuple support
+#ifdef HAS_RNTUPLE_SUPPORT
 #include <ROOT/RNTupleModel.hxx>
 #include <ROOT/RNTupleWriter.hxx>
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #ifdef __USE_DATABASE__
@@ -236,7 +238,8 @@ void  QwHaloMonitor::FillTreeVector(std::vector<Double_t> &values) const
   }
 }
 
-void  QwHaloMonitor::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+#ifdef HAS_RNTUPLE_SUPPORT
+void  QwHaloMonitor::ConstructNTupleAndVector(std::unique_ptr<ROOT::Experimental::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip construction.
@@ -255,6 +258,7 @@ void  QwHaloMonitor::FillNTupleVector(std::vector<Double_t>& values) const
     fHalo_Counter.FillNTupleVector(values);
   }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
 std::vector<QwDBInterface> QwHaloMonitor::GetDBEntry()

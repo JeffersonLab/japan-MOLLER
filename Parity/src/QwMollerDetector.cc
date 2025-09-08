@@ -237,7 +237,8 @@ void QwMollerDetector::FillTreeVector(std::vector<Double_t> &values) const {
   }
 }
 
-void QwMollerDetector::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwMollerDetector::ConstructNTupleAndVector(std::unique_ptr<ROOT::Experimental::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
     for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
@@ -254,6 +255,7 @@ void QwMollerDetector::FillNTupleVector(std::vector<Double_t>& values) const
     }
   }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 VQwSubsystem&  QwMollerDetector::operator=(VQwSubsystem *value){
   // std::cout << "QwMollerDetector assignment (operator=)" << std::endl;

@@ -855,6 +855,7 @@ void  QwMollerADC_Channel::FillTreeVector(std::vector<Double_t> &values) const
   }
 }
 
+#ifdef HAS_RNTUPLE_SUPPORT
 void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   //For rntuple 
@@ -1077,6 +1078,7 @@ void  QwMollerADC_Channel::FillNTupleVector(std::vector<Double_t>& values) const
       }
   }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 QwMollerADC_Channel& QwMollerADC_Channel::operator= (const QwMollerADC_Channel &value)
 {

@@ -11,8 +11,10 @@
 #include <stdexcept>
 
 // ROOT headers for RNTuple support
+#ifdef HAS_RNTUPLE_SUPPORT
 #include <ROOT/RNTupleModel.hxx>
 #include <ROOT/RNTupleWriter.hxx>
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #ifdef __USE_DATABASE__
@@ -815,7 +817,8 @@ void  QwQPD::FillTreeVector(std::vector<Double_t> &values) const
   return;
 }
 
-void  QwQPD::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+#ifdef HAS_RNTUPLE_SUPPORT
+void  QwQPD::ConstructNTupleAndVector(std::unique_ptr<ROOT::Experimental::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing.
@@ -860,6 +863,7 @@ void  QwQPD::FillNTupleVector(std::vector<Double_t>& values) const
   }
   return;
 }
+#endif
 
 
 

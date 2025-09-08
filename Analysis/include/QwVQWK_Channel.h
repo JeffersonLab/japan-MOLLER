@@ -222,9 +222,11 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  FillTreeVector(std::vector<Double_t> &values) const;
 
+#ifdef HAS_RNTUPLE_SUPPORT
   // RNTuple support methods
   void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, std::vector<Double_t> &values, std::vector<std::shared_ptr<Double_t>> &fieldPtrs);
   void  FillNTupleVector(std::vector<Double_t> &values) const;
+#endif // HAS_RNTUPLE_SUPPORT
 
   Int_t GetRawValue(size_t element) const {
     RangeCheck(element);

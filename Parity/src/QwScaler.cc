@@ -375,7 +375,8 @@ void QwScaler::FillTreeVector(std::vector<Double_t> &values) const
   }
 }
 
-void QwScaler::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwScaler::ConstructNTupleAndVector(std::unique_ptr<ROOT::Experimental::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   for (size_t i = 0; i < fScaler.size(); i++) {
     fScaler.at(i)->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
@@ -388,6 +389,7 @@ void QwScaler::FillNTupleVector(std::vector<Double_t>& values) const
     fScaler.at(i)->FillNTupleVector(values);
   }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 /**
  * Assignment operator

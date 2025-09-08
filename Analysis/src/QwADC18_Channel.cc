@@ -656,6 +656,7 @@ void  QwADC18_Channel::FillTreeVector(std::vector<Double_t> &values) const
   }
 }
 
+#ifdef HAS_RNTUPLE_SUPPORT
 void  QwADC18_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (IsNameEmpty()){
@@ -737,6 +738,7 @@ void  QwADC18_Channel::FillNTupleVector(std::vector<Double_t>& values) const
     }
   }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 
 QwADC18_Channel& QwADC18_Channel::operator= (const QwADC18_Channel &value)

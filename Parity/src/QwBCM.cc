@@ -545,8 +545,9 @@ void QwBCM<T>::FillTreeVector(std::vector<Double_t> &values) const
     }
 }
 
+#ifdef HAS_RNTUPLE_SUPPORT
 template<typename T>
-void QwBCM<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void QwBCM<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::Experimental::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip
@@ -566,6 +567,7 @@ void QwBCM<T>::FillNTupleVector(std::vector<Double_t>& values) const
       fBeamCurrent.FillNTupleVector(values);
     }
 }
+#endif
 
 #ifdef __USE_DATABASE__
 template<typename T>

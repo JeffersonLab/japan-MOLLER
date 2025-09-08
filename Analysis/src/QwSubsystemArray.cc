@@ -683,8 +683,7 @@ void QwSubsystemArray::FillTreeVector(std::vector<Double_t>& values) const
 
 #ifdef HAS_RNTUPLE_SUPPORT
 /**
- * Construct the RNTuple fields and vector
- * @param model RNTuple model
+ * Construct the RNTuple fields and ve
  * @param prefix Prefix
  * @param values Vector of values  
  * @param fieldPtrs Vector of shared field pointers

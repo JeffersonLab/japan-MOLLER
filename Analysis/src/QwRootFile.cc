@@ -20,7 +20,10 @@ Double_t QwRootTree::kUnitsValue[] = { 1e-6, 1e-9, 1e-3, 1 , 1e-3, 1};
 QwRootFile::QwRootFile(const TString& run_label)
   : fRootFile(0), fMakePermanent(0),
     fMapFile(0), fEnableMapFile(kFALSE),
-    fUpdateInterval(-1), fEnableRNTuples(kFALSE)
+    fUpdateInterval(-1)
+#ifdef HAS_RNTUPLE_SUPPORT
+    , fEnableRNTuples(kFALSE)
+#endif // HAS_RNTUPLE_SUPPORT
 {
   // Process the configuration options
   ProcessOptions(gQwOptions);
@@ -201,10 +204,12 @@ void QwRootFile::DefineOptions(QwOptions &options)
     ("disable-slow-tree", po::value<bool>()->default_bool_value(false),
      "disable slow control tree");
 
+#ifdef HAS_RNTUPLE_SUPPORT
   // Define the RNTuple options
   options.AddOptions("ROOT output options")
     ("enable-rntuples", po::value<bool>()->default_bool_value(false),
      "enable RNTuple output");
+#endif // HAS_RNTUPLE_SUPPORT
 
   // Define the tree output prescaling options
   options.AddOptions("ROOT output options")
@@ -268,8 +273,10 @@ void QwRootFile::ProcessOptions(QwOptions &options)
 #endif
   fUseTemporaryFile = options.GetValue<bool>("write-temporary-rootfiles");
 
+#ifdef HAS_RNTUPLE_SUPPORT
   // Option 'enable-rntuples' to enable RNTuple output
   fEnableRNTuples = options.GetValue<bool>("enable-rntuples");
+#endif // HAS_RNTUPLE_SUPPORT
 
   // Options 'disable-trees' and 'disable-histos' for disabling
   // tree and histogram output
@@ -338,6 +345,7 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
     }
   }
   
+#ifdef HAS_RNTUPLE_SUPPORT
   // Then check if any RNTuples have been filled
   for (auto& pair : fNTupleByName) {
     for (auto& ntuple : pair.second) {
@@ -347,6 +355,7 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
       }
     }
   }
+#endif // HAS_RNTUPLE_SUPPORT
 
   TList* l = d->GetListOfKeys();
 
