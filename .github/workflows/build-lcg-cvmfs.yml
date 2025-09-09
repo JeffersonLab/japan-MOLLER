@@ -255,10 +255,6 @@ jobs:
             sqlite3 qwparity.db .dump | tee qwparity-sqlite3.sql
             echo "::endgroup::"
 
-            shopt -s nullglob
-            ls -al ./asan* ./ubsan*
-            chmod a+r ./asan* ./ubsan*
-
             echo "::group:: Profile analysis"
             if [ -f gmon.out ] ; then
               gprof build/qwparity | tee qwparity-profile.txt
@@ -303,6 +299,13 @@ jobs:
             rntuples/summary_*.txt
           retention-days: 7
           if-no-files-found: error
+
+      - name: Ensure sanitizer logs are readable
+        if: always() && (matrix.sanitizer == 'asan' || matrix.sanitizer == 'ubsan')
+        run: |
+          shopt -s nullglob
+          ls -al ./asan* ./ubsan*
+          chmod +r ./asan* ./ubsan*
             
       - name: Upload sanitizer logs
         if: always() && (matrix.sanitizer == 'asan' || matrix.sanitizer == 'ubsan')
