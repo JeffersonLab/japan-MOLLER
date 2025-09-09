@@ -1,4 +1,5 @@
-/**********************************************************\
+/*******************************************************  void     SetValue(Double_t data) { fValue = data; }
+  Double_t GetValue() const        { return fValue; }*\
 * File: QwPMT_Channel.h                                           *
 *                                                          *
 * Author: P. M. King                                       *

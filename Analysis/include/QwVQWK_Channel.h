@@ -142,7 +142,9 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   /// Encode the event data into a CODA buffer
   void  EncodeEventData(std::vector<UInt_t> &buffer);
   /// Decode the event data from a CODA buffer
-  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t index = 0);
+    Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t index=0) {\n    CheckInitialization(\"QwVQWK_Channel::ProcessEvBuffer\");\n    return ProcessEvBufferImpl(buffer, num_words_left, index);\n  }\n  \nprivate:\n  Int_t ProcessEvBufferImpl(UInt_t* buffer, UInt_t num_words_left, UInt_t index=0);
+  
+public:
   /// Process the event data according to pedestal and calibration factor
   void  ProcessEvent();
 

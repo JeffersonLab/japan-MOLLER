@@ -43,9 +43,9 @@ public:
 
   void ProcessOptions();
 
-  /// \brief Post-construction initialization - call this after constructing hardware channels
-  void PostConstructionInit() {
-    ProcessOptions();
+    /// \brief Post-construction initialization - call after constructor to avoid virtual calls during construction
+  virtual void PostConstructionInit() {
+    // Base implementation does nothing - derived classes should override
   }
 
   virtual VQwHardwareChannel* Clone() const{
