@@ -1,9 +1,5 @@
 # AddressSanitizer suppressions for JAPAN-MOLLER Analysis Framework
-# This file contains suppressions for known false positives from external libraries
-# Usage: Set ASAN_OPTIONS=suppressions=.github/asan-suppressions.txt
-
 # ROOT Framework suppressions
-# ROOT has many internal memory management patterns that trigger false positives
 leak:libCore.so
 leak:libTree.so
 leak:libHist.so
@@ -14,29 +10,26 @@ leak:libMathCore.so
 leak:libMatrix.so
 leak:libGui.so
 
-# ROOT's TClass and TROOT singletons are never cleaned up
-leak:TClass::
-leak:TROOT::
-leak:TApplication::
-leak:TSystem::
+# ROOT singletons
+leak:TClass
+leak:TROOT
+leak:TApplication
+leak:TSystem
 
 # ROOT's interpreter (Cling) allocations
-leak:cling::
-leak:clang::
-leak:llvm::
+leak:cling
+leak:clang
+leak:llvm
 
 # Boost library suppressions
-# Boost has some static allocations that are reported as leaks
-leak:boost::
+leak:boost
 
 # EVIO library suppressions
-# EVIO uses custom memory management
-leak:evio::
+leak:evio
 leak:evRead
 leak:evWrite
 
 # System library suppressions
-# glibc allocations that are not actual leaks
 leak:libc.so
 leak:libpthread.so
 leak:libstdc++.so
