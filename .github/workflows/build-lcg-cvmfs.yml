@@ -147,10 +147,6 @@ jobs:
             build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary
             echo "::endgroup::"
 
-            shopt -s nullglob
-            ls -al ./asan* ./ubsan*
-            chmod a+r ./asan* ./ubsan*
-
             echo "::group:: Profile analysis"
             if [ -f gmon.out ] ; then
               gprof build/qwparity | tee qwparity.txt
@@ -184,6 +180,13 @@ jobs:
             summary_*.txt
           retention-days: 7
           if-no-files-found: error
+
+      - name: Ensure sanitizer logs are readable
+        if: always() && (matrix.sanitizer == 'asan' || matrix.sanitizer == 'ubsan')
+        run: |
+          shopt -s nullglob
+          ls -al ./asan* ./ubsan*
+          chmod +r ./asan* ./ubsan*
             
       - name: Upload sanitizer logs
         if: always() && (matrix.sanitizer == 'asan' || matrix.sanitizer == 'ubsan')
