@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   linux:
-    name: ${{ matrix.LCG }} (${{ matrix.sanitizer }})
+    name: ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.compiler }} (${{ matrix.sanitizer }})
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
