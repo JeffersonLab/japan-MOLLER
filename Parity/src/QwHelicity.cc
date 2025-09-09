@@ -1121,7 +1121,7 @@ void QwHelicity::SetEventPatternPhase(Int_t event, Int_t pattern, Int_t phase)
 void QwHelicity::SetFirstBits(UInt_t nbits, UInt_t seed)
 {
   // This gives the predictor a quick start
-  UShort_t firstbits[nbits];
+  UShort_t firstbits[25];  // Always allocate 25 elements
   for (unsigned int i = 0; i < nbits; i++) firstbits[i] = (seed >> i) & 0x1;
   // Set delayed seed
   iseed_Delayed = GetRandomSeed(firstbits);
