@@ -19,7 +19,7 @@ VQwHardwareChannel::VQwHardwareChannel():
   fBurpHoldoff = 10;
   fBurpThreshold = -1.0;
   
-  ProcessOptions();
+  // ProcessOptions(); // Moved to derived classes to avoid virtual call during construction
 }
 
 VQwHardwareChannel::VQwHardwareChannel(const VQwHardwareChannel& value)

@@ -42,12 +42,14 @@ class QwBPMCavity : public VQwBPM {
  public:
   QwBPMCavity() { };
   QwBPMCavity(TString name):VQwBPM(name){
-    InitializeChannel(name);
+    // InitializeChannel(name); // Moved to avoid virtual call during construction
+    // NOTE: Call InitializeChannel(name) explicitly after construction
   };
   QwBPMCavity(TString subsystemname, TString name)
   : VQwBPM(name) {
 	  SetSubsystemName(subsystemname);
-	  InitializeChannel(subsystemname, name);
+	  // InitializeChannel(subsystemname, name); // Moved to avoid virtual call during construction
+	  // NOTE: Call InitializeChannel(subsystemname, name) explicitly after construction
   };
   QwBPMCavity(const QwBPMCavity& source)
   : VQwBPM(source)

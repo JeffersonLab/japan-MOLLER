@@ -43,6 +43,11 @@ public:
 
   void ProcessOptions();
 
+  /// \brief Post-construction initialization - call this after constructing hardware channels
+  void PostConstructionInit() {
+    ProcessOptions();
+  }
+
   virtual VQwHardwareChannel* Clone() const{
     return Clone(this->fDataToSave);
   };
