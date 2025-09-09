@@ -12,6 +12,7 @@ concurrency:
 
 jobs:
   linux:
+    name: ${{ matrix.LCG }} (${{ matrix.sanitizer }})
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -25,6 +26,7 @@ jobs:
             opt: "opt"
             cxxflags: "-march=x86-64-v3 -mtune=generic -g -pg"
             submodules: true
+            sanitizer: "none"
           - release: "LCG_107"
             arch: "x86_64"
             os: "el9"
@@ -32,6 +34,7 @@ jobs:
             opt: "opt"
             cxxflags: "-march=x86-64-v3 -mtune=generic"
             submodules: true
+            sanitizer: "none"
           - release: "LCG_108"
             arch: "x86_64"
             os: "el9"
@@ -39,6 +42,7 @@ jobs:
             opt: "opt"
             cxxflags: "-march=x86-64-v3 -mtune=generic"
             submodules: true
+            sanitizer: "none"
           - release: "LCG_108"
             arch: "x86_64"
             os: "el9"
@@ -46,6 +50,7 @@ jobs:
             opt: "opt"
             cxxflags: "-march=x86-64-v3 -mtune=generic"
             submodules: true
+            sanitizer: "none"
           # Build without submodules
           - release: "LCG_108"
             arch: "x86_64"
@@ -54,6 +59,25 @@ jobs:
             opt: "dbg"
             cxxflags: "-march=x86-64-v3 -mtune=generic"
             submodules: false
+            sanitizer: "none"
+          # AddressSanitizer builds (using clang for better ASAN support)
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "clang16"
+            opt: "opt"
+            cxxflags: "-march=x86-64-v3 -mtune=generic"
+            submodules: true
+            sanitizer: "asan"
+          # UndefinedBehaviorSanitizer builds
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "clang16"
+            opt: "opt"
+            cxxflags: "-march=x86-64-v3 -mtune=generic"
+            submodules: true
+            sanitizer: "ubsan"
     steps:
       - uses: actions/checkout@v5
         with:
@@ -117,7 +141,7 @@ jobs:
             gcc -march=native -Q --help=target | grep -m1 -- '-march='
             echo "::endgroup::"
 
-            echo "::group::Compilation with ccache"
+            echo "::group::Compilation with ccache and optional sanitizers"
             if [[ "${{ matrix.submodules }}" == "true" ]] ; then
               SQLPP_OPTIONS="\
                 -DBUILD_MARIADB_CONNECTOR=ON \
@@ -127,9 +151,19 @@ jobs:
             else
               SQLPP_OPTIONS=""
             fi
+            if [[ "${{ matrix.sanitizer }}" == "asan" ]]; then
+              SANITIZER_OPTIONS="-DUSE_ASAN=ON"
+              echo "Building with AddressSanitizer enabled"
+            elif [[ "${{ matrix.sanitizer }}" == "ubsan" ]]; then
+              SANITIZER_OPTIONS="-DUSE_UBSAN=ON"
+              echo "Building with UndefinedBehaviorSanitizer enabled"
+            else
+              echo "Building without sanitizers"
+            fi
             cmake -Bbuild -S. \
               -Wdev -Werror=dev \
               ${SQLPP_OPTIONS} \
+              ${SANITIZER_OPTIONS} \
               -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache \
               -DCMAKE_INSTALL_PREFIX=install \
               -DCMAKE_CXX_FLAGS="${{ matrix.cxxflags }}" 2>&1 | tee cmake.txt
@@ -149,6 +183,15 @@ jobs:
             # Run the mock data generator and analysis as described in README
             source SetupFiles/SET_ME_UP.bash
 
+            # Set up sanitizer environment if enabled
+            if [[ "${{ matrix.sanitizer }}" == "asan" ]]; then
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:suppressions=${{ github.workspace }}/.github/asan-suppressions.txt:log_path=./asan"
+              echo "AddressSanitizer configured with suppressions"
+            elif [[ "${{ matrix.sanitizer }}" == "ubsan" ]]; then
+              export UBSAN_OPTIONS="abort_on_error=1:suppressions=${{ github.workspace }}/.github/ubsan-suppressions.txt:log_path=./ubsan"
+              echo "UndefinedBehaviorSanitizer configured with suppressions"
+            fi
+            
             # Generate mock data
             /usr/bin/time -v \
             build/qwmockdatagenerator -r 4 -e 1:20000 \
@@ -250,12 +293,22 @@ jobs:
       - name: Upload prompt summary
         uses: actions/upload-artifact@v5
         with:
-          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}-${{ matrix.sanitizer }}
           path: |
             trees/summary_*.txt
             rntuples/summary_*.txt
           retention-days: 7
           if-no-files-found: error
+            
+      - name: Upload sanitizer logs
+        if: always() && (matrix.sanitizer == 'asan' || matrix.sanitizer == 'ubsan')
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanitizer-logs-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
+          path: |
+            ./asan*
+            ./ubsan*
+          if-no-files-found: ignore
 
       - name: Upload database dumps
         uses: actions/upload-artifact@v5
