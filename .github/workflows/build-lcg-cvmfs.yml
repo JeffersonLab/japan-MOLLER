@@ -305,7 +305,7 @@ jobs:
         run: |
           shopt -s nullglob
           ls -al ./asan* ./ubsan*
-          chmod +r ./asan* ./ubsan*
+          sudo chmod +r ./asan* ./ubsan*
             
       - name: Upload sanitizer logs
         if: always() && (matrix.sanitizer == 'asan' || matrix.sanitizer == 'ubsan')
