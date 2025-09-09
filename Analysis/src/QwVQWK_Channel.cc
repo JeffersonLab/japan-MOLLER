@@ -355,7 +355,7 @@ void QwVQWK_Channel::SetHardwareSum(Double_t hwsum, UInt_t sequencenumber)
     block[i] = hwsum / fBlocksPerEvent;
   }
   SetEventData(block);
-  delete block;
+  delete[] block;
   return;
 }
 
