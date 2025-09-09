@@ -24,6 +24,25 @@ jobs:
       - uses: cvmfs-contrib/github-action-cvmfs@v3
         with:
           cvmfs_repositories: 'sft.cern.ch,geant4.cern.ch'
+      - name: Install ccache
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ccache
+      - name: Setup ccache cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-${{ matrix.LCG }}-${{ github.sha }}
+          restore-keys: |
+            ccache-${{ matrix.LCG }}-
+            ccache-
+      - name: Configure ccache
+        run: |
+          ccache --set-config=cache_dir=$HOME/.ccache
+          ccache --set-config=max_size=1G
+          ccache --set-config=compression=true
+          ccache --zero-stats
+          echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
       - name: Create qwparity.conf symlink
         run: ln -sf Parity/prminput/qwparity_simple.conf qwparity.conf
       - uses: aidasoft/run-lcg-view@v1
@@ -43,9 +62,13 @@ jobs:
             echo "::endgroup::"
 
             echo "::group::Compilation"
-            # Build the project
-            cmake -Bbuild -S.
+            # Build the project with ccache
+            cmake -Bbuild -S. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
             cmake --build build -j$(nproc)
+            echo "::endgroup::"
+            
+            echo "::group::ccache statistics"
+            ccache --show-stats
             echo "::endgroup::"
 
             echo "::group::Mock data generation"
