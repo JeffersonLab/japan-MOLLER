@@ -12,6 +12,7 @@ concurrency:
 
 jobs:
   linux:
+    name: ${{ matrix.LCG }} (${{ matrix.sanitizer }})
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -24,18 +25,37 @@ jobs:
             compiler: "gcc13"
             opt: "opt"
             cxxflags: "-g -pg"
+            sanitizer: "none"
           - release: "LCG_107"
             arch: "x86_64"
             os: "el9"
             compiler: "clang16"
             opt: "opt"
             cxxflags: ""
+            sanitizer: "none"
           - release: "LCG_107"
             arch: "x86_64"
             os: "el9"
             compiler: "gcc14"
             opt: "opt"
             cxxflags: ""
+            sanitizer: "none"
+          # AddressSanitizer builds (using clang for better ASAN support)
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "clang16"
+            opt: "opt"
+            cxxflags: ""
+            sanitizer: "asan"
+          # UndefinedBehaviorSanitizer builds
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "clang16"
+            opt: "opt"
+            cxxflags: ""
+            sanitizer: "ubsan"
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -84,8 +104,18 @@ jobs:
             echo "::endgroup::"
 
             echo "::group::Compilation"
-            # Build the project with ccache
-            cmake -Bbuild -S. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS="${{ matrix.cxxflags }}"
+            # Build the project with ccache and optional sanitizers
+            CMAKE_OPTIONS="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS='${{ matrix.cxxflags }}'"
+            if [[ "${{ matrix.sanitizer }}" == "asan" ]]; then
+              CMAKE_OPTIONS="-DUSE_ASAN=ON"
+              echo "Building with AddressSanitizer enabled"
+            elif [[ "${{ matrix.sanitizer }}" == "ubsan" ]]; then
+              CMAKE_OPTIONS="-DUSE_UBSAN=ON"
+              echo "Building with UndefinedBehaviorSanitizer enabled"
+            else
+              echo "Building without sanitizers"
+            fi
+            cmake -Bbuild -S. ${CMAKE_OPTIONS}
             cmake --build build -j$(nproc)
             echo "::endgroup::"
             
@@ -96,6 +126,15 @@ jobs:
             echo "::group::Mock data generation"
             # Run the mock data generator and analysis as described in README
             source SetupFiles/SET_ME_UP.bash
+            
+            # Set up sanitizer environment if enabled
+            if [[ "${{ matrix.sanitizer }}" == "asan" ]]; then
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:suppressions=${{ github.workspace }}/.github/asan-suppressions.txt:log_path=./asan"
+              echo "AddressSanitizer configured with suppressions"
+            elif [[ "${{ matrix.sanitizer }}" == "ubsan" ]]; then
+              export UBSAN_OPTIONS="abort_on_error=1:suppressions=${{ github.workspace }}/.github/ubsan-suppressions.txt:log_path=./ubsan"
+              echo "UndefinedBehaviorSanitizer configured with suppressions"
+            fi
             
             # Generate mock data
             /usr/bin/time -v \
@@ -136,11 +175,21 @@ jobs:
       - name: Upload prompt summary
         uses: actions/upload-artifact@v4
         with:
-          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
           path: |
             summary_*.txt
           retention-days: 7
           if-no-files-found: error
+            
+      - name: Upload sanitizer logs
+        if: always() && (matrix.sanitizer == 'asan' || matrix.sanitizer == 'ubsan')
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanitizer-logs-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
+          path: |
+            ./asan*
+            ./ubsan*
+          if-no-files-found: ignore
 
       - name: Upload regression alias definitions
         uses: actions/upload-artifact@v4
