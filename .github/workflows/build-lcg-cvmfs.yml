@@ -78,6 +78,13 @@ jobs:
             cxxflags: "-march=x86-64-v3 -mtune=generic"
             submodules: true
             sanitizer: "ubsan"
+          # Combined AddressSanitizer + UndefinedBehaviorSanitizer builds
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "clang16"
+            opt: "opt"
+            sanitizer: "asan+ubsan"
     steps:
       - uses: actions/checkout@v5
         with:
@@ -157,6 +164,9 @@ jobs:
             elif [[ "${{ matrix.sanitizer }}" == "ubsan" ]]; then
               SANITIZER_OPTIONS="-DUSE_UBSAN=ON"
               echo "Building with UndefinedBehaviorSanitizer enabled"
+            elif [[ "${{ matrix.sanitizer }}" == "asan+ubsan" ]]; then
+              CMAKE_OPTIONS="-DUSE_ASAN=ON -DUSE_UBSAN=ON"
+              echo "Building with both AddressSanitizer and UndefinedBehaviorSanitizer enabled"
             else
               echo "Building without sanitizers"
             fi
@@ -185,11 +195,17 @@ jobs:
 
             # Set up sanitizer environment if enabled
             if [[ "${{ matrix.sanitizer }}" == "asan" ]]; then
-              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:suppressions=${{ github.workspace }}/.github/asan-suppressions.txt:log_path=./asan"
-              echo "AddressSanitizer configured with suppressions"
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:log_path=./asan"
+              export LSAN_OPTIONS="suppressions=${{ github.workspace }}/.github/asan-suppressions.txt"
+              echo "AddressSanitizer configured with leak detection and suppressions"
             elif [[ "${{ matrix.sanitizer }}" == "ubsan" ]]; then
               export UBSAN_OPTIONS="abort_on_error=1:suppressions=${{ github.workspace }}/.github/ubsan-suppressions.txt:log_path=./ubsan"
               echo "UndefinedBehaviorSanitizer configured with suppressions"
+            elif [[ "${{ matrix.sanitizer }}" == "asan+ubsan" ]]; then
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:log_path=./asan"
+              export LSAN_OPTIONS="suppressions=${{ github.workspace }}/.github/asan-suppressions.txt"
+              export UBSAN_OPTIONS="abort_on_error=1:suppressions=${{ github.workspace }}/.github/ubsan-suppressions.txt:log_path=./ubsan"
+              echo "Both AddressSanitizer and UndefinedBehaviorSanitizer configured with suppressions"
             fi
             
             # Generate mock data
@@ -301,14 +317,14 @@ jobs:
           if-no-files-found: error
 
       - name: Ensure sanitizer logs are readable
-        if: always() && (matrix.sanitizer == 'asan' || matrix.sanitizer == 'ubsan')
+        if: always() && (matrix.sanitizer == 'asan' || matrix.sanitizer == 'ubsan' || matrix.sanitizer == 'asan+ubsan')
         run: |
           shopt -s nullglob
-          ls -al ./asan* ./ubsan*
-          sudo chmod +r ./asan* ./ubsan*
+          ls -al ./asan* ./ubsan* 2>/dev/null || echo "No sanitizer logs found"
+          sudo chmod +r ./asan* ./ubsan* 2>/dev/null || echo "No logs to change permissions for"
             
       - name: Upload sanitizer logs
-        if: always() && (matrix.sanitizer == 'asan' || matrix.sanitizer == 'ubsan')
+        if: always() && (matrix.sanitizer == 'asan' || matrix.sanitizer == 'ubsan' || matrix.sanitizer == 'asan+ubsan')
         uses: actions/upload-artifact@v4
         with:
           name: sanitizer-logs-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
