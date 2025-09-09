@@ -195,16 +195,16 @@ jobs:
 
             # Set up sanitizer environment if enabled
             if [[ "${{ matrix.sanitizer }}" == "asan" ]]; then
-              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:log_path=./asan"
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=0:log_path=./asan"
               export LSAN_OPTIONS="suppressions=${{ github.workspace }}/.github/lsan.supp"
               echo "AddressSanitizer configured with leak detection and suppressions"
             elif [[ "${{ matrix.sanitizer }}" == "ubsan" ]]; then
-              export UBSAN_OPTIONS="abort_on_error=1:suppressions=${{ github.workspace }}/.github/ubsan.supp:log_path=./ubsan"
+              export UBSAN_OPTIONS="abort_on_error=0:suppressions=${{ github.workspace }}/.github/ubsan.supp:log_path=./ubsan"
               echo "UndefinedBehaviorSanitizer configured with suppressions"
             elif [[ "${{ matrix.sanitizer }}" == "asan+ubsan" ]]; then
-              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:log_path=./asan"
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=0:log_path=./asan"
               export LSAN_OPTIONS="suppressions=${{ github.workspace }}/.github/lsan.supp"
-              export UBSAN_OPTIONS="abort_on_error=1:suppressions=${{ github.workspace }}/.github/ubsan.supp:log_path=./ubsan"
+              export UBSAN_OPTIONS="abort_on_error=0:suppressions=${{ github.workspace }}/.github/ubsan.supp:log_path=./ubsan"
               echo "Both AddressSanitizer and UndefinedBehaviorSanitizer configured with suppressions"
             fi
             
@@ -322,6 +322,7 @@ jobs:
           shopt -s nullglob
           ls -al ./asan* ./ubsan* 2>/dev/null || echo "No sanitizer logs found"
           sudo chmod +r ./asan* ./ubsan* 2>/dev/null || echo "No logs to change permissions for"
+          cat ./asan* ./ubsan*
             
       - name: Upload sanitizer logs
         if: always() && (matrix.sanitizer == 'asan' || matrix.sanitizer == 'ubsan' || matrix.sanitizer == 'asan+ubsan')
