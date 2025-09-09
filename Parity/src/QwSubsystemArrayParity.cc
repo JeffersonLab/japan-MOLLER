@@ -465,7 +465,7 @@ Bool_t QwSubsystemArrayParity::ApplySingleEventCuts(){
   if( CheckBadEventRange() )
     fErrorFlag |=kBadEventRangeError;
   
-  VQwSubsystemParity *subsys_parity;
+  VQwSubsystemParity *subsys_parity = nullptr;
   CountFalse=0;
   if (!empty()){
     for (iterator subsys = begin(); subsys != end(); ++subsys){
@@ -500,7 +500,7 @@ Bool_t QwSubsystemArrayParity::ApplySingleEventCuts(){
 
 void QwSubsystemArrayParity::IncrementErrorCounters()
 {
-  VQwSubsystemParity *subsys_parity;
+  VQwSubsystemParity *subsys_parity = nullptr;
   if (!empty()){
     for (iterator subsys = begin(); subsys != end(); ++subsys){
       subsys_parity=dynamic_cast<VQwSubsystemParity*>((subsys)->get());
@@ -538,7 +538,7 @@ Bool_t QwSubsystemArrayParity::CheckForBurpFail(QwSubsystemArrayParity &event)
 
 
 void QwSubsystemArrayParity::PrintErrorCounters() const{// report number of events failed due to HW and event cut faliure
-  const VQwSubsystemParity *subsys_parity;
+  const VQwSubsystemParity *subsys_parity = nullptr;
   if (!empty()){
     for (const_iterator subsys = begin(); subsys != end(); ++subsys){
       subsys_parity=dynamic_cast<const VQwSubsystemParity*>((subsys)->get());
@@ -591,7 +591,7 @@ void QwSubsystemArrayParity::UpdateErrorFlag() {
   if( CheckBadEventRange() )
     fErrorFlag |=kBadEventRangeError;
 
-  VQwSubsystemParity *subsys_parity;
+  VQwSubsystemParity *subsys_parity = nullptr;
   if (!empty()){
     for (iterator subsys = begin(); subsys != end(); ++subsys){
       subsys_parity=dynamic_cast<VQwSubsystemParity*>((subsys)->get());
@@ -649,12 +649,12 @@ void QwSubsystemArrayParity::LoadMockDataParameters(std::string mapfile)
   // }
   QwParameterFile detectors(mapfile);
     // This is how this should work
-  QwParameterFile* preamble;
+  QwParameterFile* preamble = nullptr;
   preamble = detectors.ReadSectionPreamble();
   // Process preamble
   QwVerbose << "Preamble:" << QwLog::endl;
   QwVerbose << *preamble << QwLog::endl;
-  double window_period;
+  double window_period = 0.0;
   if (preamble->FileHasVariablePair("=","window_period",window_period)){
     fWindowPeriod = window_period * Qw::sec;
   }else{
@@ -666,7 +666,7 @@ void QwSubsystemArrayParity::LoadMockDataParameters(std::string mapfile)
     
   if (preamble) delete preamble;
 
-  QwParameterFile* section;
+  QwParameterFile* section = nullptr;
   std::string section_name;
   while ((section = detectors.ReadNextSection(section_name))) {
 
