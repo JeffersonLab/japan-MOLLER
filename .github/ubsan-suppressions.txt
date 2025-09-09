@@ -1,0 +1,72 @@
+# UndefinedBehaviorSanitizer suppressions for JAPAN-MOLLER Analysis Framework
+# This file contains suppressions for known false positives from external libraries
+# Usage: Set UBSAN_OPTIONS=suppressions=.github/ubsan-suppressions.txt
+
+# ROOT Framework suppressions
+# ROOT uses various undefined behavior patterns that are intentional
+signed-integer-overflow:libCore.so
+unsigned-integer-overflow:libCore.so
+float-divide-by-zero:libCore.so
+alignment:libCore.so
+vptr:libCore.so
+
+# ROOT's math libraries often have intentional overflow behavior
+signed-integer-overflow:libMathCore.so
+unsigned-integer-overflow:libMathCore.so
+float-divide-by-zero:libMathCore.so
+signed-integer-overflow:libMatrix.so
+
+# ROOT's histogram classes use bit manipulation
+shift-base:libHist.so
+shift-exponent:libHist.so
+
+# ROOT's I/O system uses type punning and alignment tricks
+alignment:libRIO.so
+object-size:libRIO.so
+
+# ROOT's TTree uses various optimization tricks
+alignment:libTree.so
+object-size:libTree.so
+
+# ROOT's interpreter (Cling) and JIT compilation
+vptr:cling::
+function:cling::
+return:cling::
+
+# Boost library suppressions
+# Boost uses template metaprogramming that can trigger false positives
+signed-integer-overflow:boost::
+shift-base:boost::
+
+# EVIO library suppressions
+# EVIO uses binary data manipulation that can trigger warnings
+alignment:evio::
+object-size:evio::
+
+# System library suppressions
+# Standard library implementations may use undefined behavior
+signed-integer-overflow:libc.so
+shift-base:libc.so
+alignment:libc.so
+
+# C++ standard library
+signed-integer-overflow:libstdc++.so
+alignment:libstdc++.so
+vptr:libstdc++.so
+
+# Suppress common template instantiation issues
+function:__static_initialization_and_destruction
+
+# X11/GUI related suppressions (for panguin)
+alignment:libX11.so
+object-size:libX11.so
+
+# MySQL++ library suppressions (if enabled)
+alignment:libmysqlpp.so
+object-size:libmysqlclient.so
+
+# Suppress known false positives in physics calculations
+# Some physics formulas intentionally use operations that UBSAN flags
+float-divide-by-zero:*Physics*
+float-divide-by-zero:*Asymmetry*
+float-divide-by-zero:*Parity*
