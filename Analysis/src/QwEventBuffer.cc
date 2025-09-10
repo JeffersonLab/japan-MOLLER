@@ -51,10 +51,10 @@ QwEventBuffer::QwEventBuffer()
        fDataFileExtension(fDefaultDataFileExtension),
        fDataDirectory(fDefaultDataDirectory),
        fEvStreamMode(fEvStreamNull),
-       fSingleFile(kFALSE),
        fEvStream(NULL),
        fCurrentRun(-1),
        fNumPhysicsEvents(0),
+       fSingleFile(kFALSE),
 			 decoder(NULL)
 {
   //  Set up the signal handler.
