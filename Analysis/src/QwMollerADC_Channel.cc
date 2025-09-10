@@ -370,7 +370,7 @@ void QwMollerADC_Channel::SetRawEventData(){
 //  std::cout <<  "*******In QwMollerADC_Channel::SetRawEventData for channel:\t" << this->GetElementName() << std::endl;
   for (Int_t i = 0; i < fBlocksPerEvent; i++) 
     {
-     Float_t block_raw = (fBlock[i] / fCalibrationFactor + fPedestal) * fNumberOfSamples / (fBlocksPerEvent * 1.0);
+     Double_t block_raw = (fBlock[i] / fCalibrationFactor + fPedestal) * fNumberOfSamples / (fBlocksPerEvent * 1.0);
      if (std::abs(block_raw) >= pow(2,29)) {
       block_raw = std::copysign(pow(2,29)-1, block_raw);
       QwWarning << "QwMollerADC_Channel::SetRawEventData: Overflow in conversion to raw data for channel "
