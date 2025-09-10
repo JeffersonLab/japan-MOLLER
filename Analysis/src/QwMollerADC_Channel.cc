@@ -362,6 +362,7 @@ void QwMollerADC_Channel::SetEventData(Double_t* block, UInt_t sequencenumber)
   return;
 }
 
+__attribute__((no_sanitize("signed-integer-overflow")))
 void QwMollerADC_Channel::SetRawEventData(){
   fNumberOfSamples = fNumberOfSamples_map;
   fHardwareBlockSum_raw = 0;
@@ -369,7 +370,20 @@ void QwMollerADC_Channel::SetRawEventData(){
 //  std::cout <<  "*******In QwMollerADC_Channel::SetRawEventData for channel:\t" << this->GetElementName() << std::endl;
   for (Int_t i = 0; i < fBlocksPerEvent; i++) 
     {
-     fBlock_raw[i] = Int_t((fBlock[i] / fCalibrationFactor + fPedestal) * fNumberOfSamples / (fBlocksPerEvent * 1.0));
+     Float_t block_raw = (fBlock[i] / fCalibrationFactor + fPedestal) * fNumberOfSamples / (fBlocksPerEvent * 1.0);
+     if (std::abs(block_raw) >= pow(2,29)) {
+      block_raw = std::copysign(pow(2,29)-1, block_raw);
+      QwWarning << "QwMollerADC_Channel::SetRawEventData: Overflow in conversion to raw data for channel "
+                << this->GetElementName() << ": ("
+                << "fBlock[i] = " << fBlock[i] << " / "
+                << "fCalibrationFactor = " << fCalibrationFactor << " + "
+                << "fPedestal = " << fPedestal << ") * "
+                << "fNumberOfSamples = " << fNumberOfSamples << " / "
+                << "fBlocksPerEvent = " << fBlocksPerEvent << ". "
+                << "Capping value to " << block_raw << "."
+                << QwLog::endl;
+     }
+     fBlock_raw[i] = Int_t(block_raw);
      fHardwareBlockSum_raw += fBlock_raw[i];
      
     double_t block = fBlock[i] / fCalibrationFactor;
