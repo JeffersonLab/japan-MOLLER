@@ -179,8 +179,8 @@ void  QwHistogramHelper::LoadTreeParamsFromFile(const std::string& filename)
   TString devicename;
   TString moduletype;
   TString subsystemname;
-  QwParameterFile *section;
-  QwParameterFile *module;
+  QwParameterFile *section = nullptr;
+  QwParameterFile *module = nullptr;
   std::vector<TString> TrimmedList;//stores the list of elements for each module
   std::vector<std::vector<TString> > ModulebyTrimmedList;//stores the list of elements for each module
   std::vector<TString> ModuleList;//stores the list of modules for each subsystem

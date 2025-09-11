@@ -368,7 +368,7 @@ Bool_t VQwDataHandler::PublishInternalValues() const
 {
   // Publish variables
   Bool_t status = kTRUE;
-  VQwHardwareChannel* tmp_channel;
+  VQwHardwareChannel* tmp_channel = nullptr;
   
   // Publish variables through map file
   for (size_t pp = 0; pp < fPublishList.size(); pp++) {
