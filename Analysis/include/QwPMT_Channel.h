@@ -38,7 +38,8 @@ class QwPMT_Channel: public VQwDataElement {
   { };
   /// Constructor with name
   QwPMT_Channel(TString name) {
-    InitializeChannel(name);
+    // InitializeChannel(name); // Moved to avoid virtual call during construction
+    // NOTE: Call InitializeChannel(name) explicitly after construction
   };
   /// Virtual destructor
   virtual ~QwPMT_Channel() { };

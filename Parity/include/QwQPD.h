@@ -40,13 +40,15 @@ class QwQPD : public VQwBPM {
   QwQPD() {
   };
   QwQPD(TString name):VQwBPM(name){
-    InitializeChannel(name);
+    // InitializeChannel(name); // Moved to avoid virtual call during construction
+    // NOTE: Call InitializeChannel(name) explicitly after construction
   };
   QwQPD(TString subsystemname, TString name):VQwBPM(name){
     SetSubsystemName(subsystemname);
-    InitializeChannel(subsystemname, name);
+    // InitializeChannel(subsystemname, name); // Moved to avoid virtual call during construction
     fQwQPDCalibration[0] = 1.0;
     fQwQPDCalibration[1] = 1.0;
+    // NOTE: Call InitializeChannel(subsystemname, name) explicitly after construction
   };
   QwQPD(const QwQPD& source)
   : VQwBPM(source),

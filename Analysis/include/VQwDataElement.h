@@ -4,6 +4,20 @@
  *
  * \author P. M. King
  * \date   2007-05-08 15:40
+ */QwDataElement.h
+ * \brief  Definition of the pure virtual base class of all data elements
+ *
+ *  /*! rief Process the CODA event buffer for this element */
+  virtual Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t subelement=0) = 0;
+  
+  /*! rief Check if this element is properly initialized */
+  void CheckInitialization(const char* method_name) const {
+    if (IsNameEmpty()) {
+      std::cerr << "ERROR: " << method_name << " called on uninitialized data element. "
+                << "Call InitializeChannel() or PostConstructionInit() after construction." << std::endl;
+    }
+  }author P. M. King
+ * \date   2007-05-08 15:40
  */
 
 #ifndef __VQWDATAELEMENT__
