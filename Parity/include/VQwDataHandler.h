@@ -111,7 +111,7 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
 
     void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values);
 #ifdef HAS_RNTUPLE_SUPPORT
-    void ConstructNTupleAndVector(std::unique_ptr<ROOT::Experimental::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+    void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
     void FillNTupleVector(std::vector<Double_t>& values) const;
 #endif // HAS_RNTUPLE_SUPPORT
 

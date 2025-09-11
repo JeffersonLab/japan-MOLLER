@@ -145,7 +145,7 @@ class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHeli
 
 #ifdef HAS_RNTUPLE_SUPPORT
   using VQwSubsystem::ConstructNTupleAndVector;
-  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::Experimental::RNTupleModel>& model, TString &prefix, std::vector<Double_t> &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, std::vector<Double_t> &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
   void  FillNTupleVector(std::vector<Double_t> &values) const;
 #endif // HAS_RNTUPLE_SUPPORT
 
