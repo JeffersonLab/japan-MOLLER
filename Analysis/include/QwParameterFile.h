@@ -187,8 +187,8 @@ class QwParameterFile {
     /// \brief Rewinds to the start and read until it finds next module header
     QwParameterFile* ReadModulePreamble();
     QwParameterFile* ReadUntilNextModule(const bool add_current_line = false);
-    QwParameterFile* ReadNextModule(std::string &secname, bool keep_header = false);
-    QwParameterFile* ReadNextModule(TString &secname, bool keep_header = false);
+    QwParameterFile* ReadNextModule(std::string &secname, const bool keep_header = false);
+    QwParameterFile* ReadNextModule(TString &secname, const bool keep_header = false);
     QwParameterFile* ReadNextModule(const bool keep_header = false) {
       std::string dummy;
       return ReadNextModule(dummy, keep_header);
