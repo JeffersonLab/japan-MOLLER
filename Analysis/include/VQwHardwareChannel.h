@@ -233,19 +233,12 @@ public:
   /*! \brief Set the flag indicating if raw or derived values are
    *         in this data element based on prefix */
   void SetDataToSaveByPrefix(const TString& prefix) {
-    // Check for stat first since it has priority
-    if (prefix.Contains("stat")) {
-      fDataToSave = kMoments; // stat has priority
-    }
-    else if (prefix.Contains("asym_")
+    if (prefix.Contains("asym_")
      || prefix.Contains("diff_")
-     || prefix.Contains("yield_")) {
+     || prefix.Contains("yield_"))
       fDataToSave = kDerived;
-    }
-    else if (prefix.IsNull() || prefix.Length() == 0) {
-      fDataToSave = kDerived; // Default for evt tree - store individual antenna values, not full raw breakdown
-    }
-    // Note: kRaw mode is only used when explicitly requested, not as default
+    if (prefix.Contains("stat"))
+      fDataToSave = kMoments; // stat has priority
   }
 
   /*! \brief Checks that the requested element is in range, to be
