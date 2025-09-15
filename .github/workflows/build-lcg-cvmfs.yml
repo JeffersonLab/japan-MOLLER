@@ -64,6 +64,9 @@ jobs:
             echo "::group::Compilation of dependencies"
             # Build the dependencies
             cmake -Bthirdparty/sqlpp11/build -Sthirdparty/sqlpp11/ \
+              -DBUILD_MARIADB_CONNECTOR=ON \
+              -DBUILD_MYSQL_CONNECTOR=ON \
+              -DBUILD_POSTGRESQL_CONNECTOR=OFF \ # fails in v0.65; rbock/sqlpp11#623
               -DBUILD_SQLITE3_CONNECTOR=ON \
               -DCMAKE_INSTALL_PREFIX=thirdparty/sqlpp11/install
             cmake --build thirdparty/sqlpp11/build -j$(nproc) --target install
