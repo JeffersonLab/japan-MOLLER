@@ -58,5 +58,5 @@ jobs:
             
             echo "::group::Mock data analysis"
             # Analyze the generated mock data
-            build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles .
+            build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary
             echo "::endgroup::"
