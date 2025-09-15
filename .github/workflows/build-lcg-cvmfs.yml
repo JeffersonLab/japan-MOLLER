@@ -56,7 +56,16 @@ jobs:
             SetupFiles/make_SET_ME_UP
             echo "::endgroup::"
 
-            echo "::group::Compilation"
+            echo "::group::Compilation of dependencies"
+            # Build the dependencies
+            cmake -Bthirdparty/sqlpp11/build -Sthirdparty/sqlpp11/ \
+              -DBUILD_SQLITE3_CONNECTOR=ON \
+              -DCMAKE_INSTALL_PREFIX=thirdparty/sqlpp11/install
+            cmake --build thirdparty/sqlpp11/build -j$(nproc) --target install
+            export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:$PWD/thirdparty/sqlpp11/install
+            echo "::endgroup::"
+
+            echo "::group::Compilation of main project"
             # Build the project
             cmake -Bbuild -S.
             cmake --build build -j$(nproc)
