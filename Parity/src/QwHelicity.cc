@@ -1121,8 +1121,12 @@ void QwHelicity::SetEventPatternPhase(Int_t event, Int_t pattern, Int_t phase)
 void QwHelicity::SetFirstBits(UInt_t nbits, UInt_t seed)
 {
   // This gives the predictor a quick start
-  UShort_t firstbits[nbits];
-  for (unsigned int i = 0; i < nbits; i++) firstbits[i] = (seed >> i) & 0x1;
+  // At present, this routine can only handle nbits=24 (see GetRandomSeed)
+  if (nbits != 24)
+	throw std::invalid_argument("SetFirstBits currently only supports 24 bits.");
+  // Allocate nbits+1 elements as GetRandomSeed expects Fortran indexing (1-nbits)
+  UShort_t firstbits[nbits+1];  // NB firstbits[0] is never used
+  for (unsigned int i = 0; i < nbits+1; i++) firstbits[i] = (seed >> i) & 0x1;
   // Set delayed seed
   iseed_Delayed = GetRandomSeed(firstbits);
   // Progress actual seed by the helicity delay
@@ -1617,7 +1621,7 @@ UInt_t QwHelicity::GetRandomSeed(UShort_t* first24randbits)
 
   if(ldebug)
     {
-     for(size_t i=0;i<25;i++)
+     for(size_t i=1;i<25;i++)
        std::cout << i << " : " << first24randbits[i] << "\n";
     }
 
