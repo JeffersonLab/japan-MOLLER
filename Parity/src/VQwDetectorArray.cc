@@ -1387,7 +1387,7 @@ VQwSubsystem&  VQwDetectorArray::operator=  (VQwSubsystem *value) {
 
     //  std::cout<<" here in VQwDetectorArray::operator= \n";
 
-    if (Compare(value)) {
+    if (this != value && Compare(value)) {
 
         //VQwSubsystem::operator=(value);
         VQwDetectorArray* input = dynamic_cast<VQwDetectorArray*> (value);

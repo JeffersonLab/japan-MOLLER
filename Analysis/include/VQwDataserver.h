@@ -10,6 +10,9 @@ class VQwDataserver : public VQwSystem {
 
   private:
     VQwDataserver& operator= (const VQwDataserver &value) {
+      if (this != &value) {
+        // Private assignment operator - no implementation needed
+      }
       return *this;
     };
 

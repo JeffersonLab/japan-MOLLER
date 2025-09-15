@@ -293,9 +293,10 @@ Int_t QwEnergyCalculator::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_i
 
 
 QwEnergyCalculator& QwEnergyCalculator::operator= (const QwEnergyCalculator &value){
-  if (GetElementName()!="")
-    this->fEnergyChange=value.fEnergyChange;
-
+  if (this != &value) {
+    if (GetElementName()!="")
+      this->fEnergyChange=value.fEnergyChange;
+  }
   return *this;
 }
 
