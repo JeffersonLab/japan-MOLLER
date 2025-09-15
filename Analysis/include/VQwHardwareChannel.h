@@ -174,7 +174,7 @@ public:
   Double_t GetCalibrationFactor() const          { return fCalibrationFactor; };
 
   void AddEntriesToList(std::vector<QwDBInterface> &row_list);
-  virtual void AddErrEntriesToList(std::vector<QwErrDBInterface> &row_list) {};
+  virtual void AddErrEntriesToList(std::vector<QwErrDBInterface> & /*row_list*/) {};
 
   
   virtual void AccumulateRunningSum(const VQwHardwareChannel *value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF){
@@ -198,7 +198,7 @@ public:
   void ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
   virtual void FillTreeVector(std::vector<Double_t>& values) const = 0;
 
-  virtual void CopyParameters(const VQwHardwareChannel* valueptr){};
+  virtual void CopyParameters(const VQwHardwareChannel* /*valueptr*/){};
 
  protected:
   /*! \brief Set the number of data words in this data element */

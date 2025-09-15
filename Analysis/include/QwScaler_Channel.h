@@ -101,7 +101,7 @@ public:
   /// \brief Initialize the fields in this object
   void  InitializeChannel(TString subsystem, TString instrumenttype, TString name, TString datatosave);
 
-  void SetDefaultSampleSize(size_t NumberOfSamples_map) {
+  void SetDefaultSampleSize(size_t /*NumberOfSamples_map*/) {
     //std::cerr << "QwScaler_Channel SetDefaultSampleSize does nothing!"
     //    << std::endl;
   }
@@ -133,10 +133,10 @@ public:
 
   void  ProcessEvent();
 
-  Int_t GetRawValue(size_t element) const      { return fValue_Raw; };
-  Double_t GetValue(size_t element) const      { return fValue; };
-  Double_t GetValueM2(size_t element) const    { return fValueM2; };
-  Double_t GetValueError(size_t element) const { return fValueError; };
+  Int_t GetRawValue(size_t /*element*/) const      { return fValue_Raw; };
+  Double_t GetValue(size_t /*element*/) const      { return fValue; };
+  Double_t GetValueM2(size_t /*element*/) const    { return fValueM2; };
+  Double_t GetValueError(size_t /*element*/) const { return fValueError; };
 
   VQwScaler_Channel& operator=  (const VQwScaler_Channel &value);
   void AssignScaledValue(const VQwScaler_Channel &value, Double_t scale);
@@ -169,7 +169,7 @@ public:
 
   Bool_t ApplySingleEventCuts();//check values read from modules are at desired level
 
-  Bool_t CheckForBurpFail(const VQwDataElement *ev_error){return kFALSE;};
+  Bool_t CheckForBurpFail(const VQwDataElement * /*ev_error*/){return kFALSE;};
 
   void IncrementErrorCounters();
 

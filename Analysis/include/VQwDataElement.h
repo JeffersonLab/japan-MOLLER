@@ -99,9 +99,9 @@ class VQwDataElement: public MQwHistograms {
   /*! \brief Get the name of this element */
   virtual const TString& GetElementName() const { return fElementName; }
 
-  virtual void LoadChannelParameters(QwParameterFile &paramfile){};
+  virtual void LoadChannelParameters(QwParameterFile & /*paramfile*/){};
 
-  virtual void LoadMockDataParameters(QwParameterFile &paramfile) {
+  virtual void LoadMockDataParameters(QwParameterFile & /*paramfile*/) {
   std::cerr << "LoadMockDataParameters is not defined!" << std::endl;
   };
 
@@ -118,15 +118,15 @@ class VQwDataElement: public MQwHistograms {
   UInt_t GetGoodEventCount() const { return fGoodEventCount; };
 
   
-  virtual void AssignValueFrom(const VQwDataElement* valueptr){
+  virtual void AssignValueFrom(const VQwDataElement* /*valueptr*/){
     std::cerr << "Operation AssignValueFrom not defined!" << std::endl;
   };
 
   /*! \brief Addition-assignment operator */
-  virtual VQwDataElement& operator+= (const VQwDataElement &value)
+  virtual VQwDataElement& operator+= (const VQwDataElement & /*value*/)
     { std::cerr << "Operation += not defined!" << std::endl; return *this; }
   /*! \brief Subtraction-assignment operator */
-  virtual VQwDataElement& operator-= (const VQwDataElement &value)
+  virtual VQwDataElement& operator-= (const VQwDataElement & /*value*/)
     { std::cerr << "Operation -= not defined!" << std::endl; return *this; }
 
   /*! \brief Sum operator */
@@ -144,7 +144,7 @@ class VQwDataElement: public MQwHistograms {
       *this -= value2;
     }
   /*! \brief Ratio operator */
-  virtual void Ratio(const VQwDataElement &numer, const VQwDataElement &denom)
+  virtual void Ratio(const VQwDataElement & /*numer*/, const VQwDataElement & /*denom*/)
   { std::cerr << "Ratio not defined for element"<< fElementName<< "!" << std::endl; }
 
   /*! \brief Construct the histograms for this data element */
@@ -159,11 +159,11 @@ class VQwDataElement: public MQwHistograms {
 
 
   /*! \brief set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
-  virtual void SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability){std::cerr << "SetSingleEventCuts not defined!" << std::endl; };
+  virtual void SetSingleEventCuts(UInt_t /*errorflag*/,Double_t /*min*/, Double_t /*max*/, Double_t /*stability*/){std::cerr << "SetSingleEventCuts not defined!" << std::endl; };
   /*! \brief report number of events failed due to HW and event cut failure */
   virtual void PrintErrorCounters() const {};
 
-  virtual Bool_t  CheckForBurpFail(const VQwDataElement *ev_error){
+  virtual Bool_t  CheckForBurpFail(const VQwDataElement * /*ev_error*/){
     return kFALSE;
   };
 
@@ -185,11 +185,11 @@ class VQwDataElement: public MQwHistograms {
 
   // These are related to those hardware channels that need to normalize
   // to an external clock
-  virtual void SetNeedsExternalClock(Bool_t needed) {};   // Default is No!
+  virtual void SetNeedsExternalClock(Bool_t /*needed*/) {};   // Default is No!
   virtual Bool_t NeedsExternalClock() { return kFALSE; }; // Default is No!
   virtual std::string GetExternalClockName() {  return ""; }; // Default is none
-  virtual void SetExternalClockPtr( const VQwHardwareChannel* clock) {};
-  virtual void SetExternalClockName( const std::string name) {};
+  virtual void SetExternalClockPtr( const VQwHardwareChannel* /*clock*/) {};
+  virtual void SetExternalClockName( const std::string /*name*/) {};
   virtual Double_t GetNormClockValue() { return 1.;}
 
   
