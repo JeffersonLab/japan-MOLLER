@@ -38,7 +38,7 @@ jobs:
             cxxflags: ""
     env:
       MYSQL_DB: qwparity
-      MYSQL_HOST: localhost
+      MYSQL_HOST: 127.0.0.1 # avoid localhost since it will use sockets
       MYSQL_PORT: 3306
       MYSQL_USER: qwparity
       MYSQL_PASSWORD: qwparity-${{ github.run_id }}-${{ github.run_attempt }}
@@ -158,7 +158,7 @@ jobs:
               --QwDatabase.dbname qwparity.db
             echo "::endgroup::"
 
-            echo "::group::Create database (sqlite3)"
+            echo "::group::Create database (mysql)"
             # Create and populate the database
             # (sqlite3 only supports AUTOINCREMENT on INTEGER keys)
             # (sqlite3 does not support ENUM, so convert to TEXT with CHECK)
