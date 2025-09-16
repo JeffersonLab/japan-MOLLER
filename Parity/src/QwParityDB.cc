@@ -7,10 +7,8 @@
  */
 
 #ifdef __USE_DATABASE__
-#define EXPAND_QWPARITYSSQLS_STATICS
-//#define MYSQLPP_SSQLS_NO_STATICS
-#include "QwParitySSQLS.h"
 #include "QwParityDB.h"
+#include "QwParitySchema.h"
 
 // System headers
 
