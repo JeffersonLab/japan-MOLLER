@@ -19,12 +19,6 @@
 #include "QwVQWK_Channel.h"
 #include "QwParameterFile.h"
 #include "QwHelicityPattern.h"
-
-#ifdef __USE_DATABASE__
-#include "QwParitySchema.h"
-#include "QwParityDB.h"
-#endif // __USE_DATABASE__
-
 #include "QwPromptSummary.h"
 
 // Register this handler with the factory
