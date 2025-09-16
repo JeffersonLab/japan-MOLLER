@@ -286,6 +286,20 @@ void QwDatabase::ProcessOptions(QwOptions &options)
     QwWarning << "QwDatabase::ProcessOptions : No access level specified; database access is OFF" << QwLog::endl;
     fAccessLevel = kQwDatabaseOff;
   }
+  if (options.HasValue("QwDatabase.dbtype")) {
+    string dbtype = options.GetValue<string>("QwDatabase.dbtype");
+    if (dbtype == "mysql") {
+      fDBType = kQwDatabaseMySQL;
+    } else if (dbtype == "sqlite3") {
+      fDBType = kQwDatabaseSQLite3;
+    } else {
+      QwWarning << "QwDatabase::ProcessOptions : Unrecognized database type \"" << dbtype << "\"; using SQLite3" << QwLog::endl;
+      fDBType = kQwDatabaseSQLite3;
+    }
+  } else {
+    QwMessage << "QwDatabase::ProcessOptions : No database type specified; using SQLite3" << QwLog::endl;
+    fDBType = kQwDatabaseSQLite3;
+  }
   if (options.HasValue("QwDatabase.dbport")) {
     fDBPortNumber = options.GetValue<int>("QwDatabase.dbport");
   }
@@ -305,9 +319,10 @@ void QwDatabase::ProcessOptions(QwOptions &options)
   return;
 }
 
-void QwDatabase::ProcessOptions(const TString& dbname, const TString& username, const TString& passwd, const TString& dbhost, const Int_t dbport, const TString& accesslevel)
+void QwDatabase::ProcessOptions(const EQwDBType& dbtype, const TString& dbname, const TString& username, const TString& passwd, const TString& dbhost, const Int_t dbport, const TString& accesslevel)
 {
   SetAccessLevel(static_cast<string>(accesslevel));
+  fDBType = dbtype;
   fDatabase = dbname;
   fDBUsername = username;
   fDBPassword = passwd;
