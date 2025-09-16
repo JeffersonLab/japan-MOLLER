@@ -18,9 +18,9 @@
 
 // Third Party Headers
 #ifdef __USE_DATABASE__
-#pragma GCC diagnostic ignored "-Wdeprecated"
-#include <mysql++.h>
-#pragma GCC diagnostic pop
+#include <sqlpp11/sqlpp11.h>
+#include <sqlpp11/mysql/mysql.h>
+#include <sqlpp11/sqlite3/sqlite3.h>
 #endif // __USE_DATABASE__
 
 // ROOT headers
@@ -33,8 +33,6 @@
 #include "QwOptions.h"
 #include "QwDatabase.h"
 #include "QwSubsystemArrayParity.h"
-
-//#include "QwParitySSQLS.h"
 #include "QwDBInterface.h"
 
 // Forward declarations
