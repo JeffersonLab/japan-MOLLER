@@ -36,6 +36,23 @@ jobs:
             compiler: "gcc14"
             opt: "opt"
             cxxflags: ""
+    env:
+      MYSQL_DB: qwparity
+      MYSQL_HOST: localhost
+      MYSQL_PORT: 3306
+      MYSQL_USER: qwparity
+      MYSQL_PASSWORD: qwparity-${{ github.run_id }}-${{ github.run_attempt }}
+      MYSQL_ROOT_PASSWORD: root-${{ github.run_id }}-${{ github.run_attempt }}
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_USER: ${{ env.MYSQL_USER }}
+          MYSQL_DATABASE: ${{ env.MYSQL_DB }}
+          MYSQL_PASSWORD: ${{ env.MYSQL_PASSWORD }}
+          MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_ROOT_PASSWORD }}
+        ports:
+          - ${{ env.MYSQL_PORT }}:${{ env.MYSQL_PORT }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -121,13 +138,13 @@ jobs:
               --data .
             echo "::endgroup::"
 
-            echo "::group::Create database"
+            echo "::group::Create database (sqlite3)"
             # Create and populate the database
             # (sqlite3 only supports AUTOINCREMENT on INTEGER keys)
             # (sqlite3 does not support ENUM, so convert to TEXT with CHECK)
             sed 's/AUTO_INCREMENT//g;s/\(\S*\)\sENUM(\([^)]*\))/\1 TEXT CHECK(\1 in (\2))/g' Parity/prminput/qwparity_schema.sql | sqlite3 qwparity.db
 
-            echo "::group::Mock data analysis"
+            echo "::group::Mock data analysis (sqlite3)"
             # Analyze the generated mock data
             /usr/bin/time -v \
             build/qwparity -r 4 \
@@ -136,7 +153,37 @@ jobs:
               --datahandlers mock_datahandlers.map \
               --data . \
               --rootfiles . \
-              --write-promptsummary
+              --write-promptsummary \
+              --QwDatabase.dbtype sqlite3 \
+              --QwDatabase.dbname qwparity.db
+            echo "::endgroup::"
+
+            echo "::group::Create database (sqlite3)"
+            # Create and populate the database
+            # (sqlite3 only supports AUTOINCREMENT on INTEGER keys)
+            # (sqlite3 does not support ENUM, so convert to TEXT with CHECK)
+            cat Parity/prminput/qwparity_schema.sql | mysql \
+              -h${{ env.MYSQL_HOST }} \
+              -P${{ env.MYSQL_PORT }} \
+              -u${{ env.MYSQL_USER }} \
+              -p${{ env.MYSQL_PASSWORD }} \
+              ${{ env.MYSQL_DB }}
+
+            echo "::group::Mock data analysis (mysql)"
+            # Analyze the generated mock data
+            build/qwparity -r 4 \
+              --config qwparity_simple.conf \
+              --detectors mock_newdets.map \
+              --datahandlers mock_datahandlers.map \
+              --data . \
+              --rootfiles . \
+              --write-promptsummary \
+              --QwDatabase.dbtype mysql \
+              --QwDatabase.host ${{ env.MYSQL_HOST }} \
+              --QwDatabase.port ${{ env.MYSQL_PORT }} \
+              --QwDatabase.user ${{ env.MYSQL_USER }} \
+              --QwDatabase.password ${{ env.MYSQL_PASSWORD }} \
+              --QwDatabase.dbname ${{ env.MYSQL_DB }}
             echo "::endgroup::"
 
             echo "::group:: Profile analysis"
