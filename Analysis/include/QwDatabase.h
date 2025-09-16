@@ -11,15 +11,16 @@
 
 // System headers
 #include <map>
+#include <memory>
 #include <vector>
 #include <string>
 #include <typeinfo>
+#include <variant>
 
 // Third Party Headers
-#pragma GCC diagnostic ignored "-Wdeprecated"
-#include <mysql++.h>
-#include <ssqls.h>
-#pragma GCC diagnostic pop
+#include <sqlpp11/sqlpp11.h>
+#include <sqlpp11/mysql/mysql.h>
+#include <sqlpp11/sqlite3/sqlite3.h>
 
 // ROOT headers
 #include "TString.h"
@@ -43,7 +44,16 @@
  *
  */
 
-class QwDatabase: private mysqlpp::Connection {
+class QwDatabase {
+  private:
+    enum EQwDBType {kQwDatabaseMySQL, kQwDatabaseSQLite3};
+    EQwDBType fDBType = kQwDatabaseSQLite3;  //!< Type of database backend to use
+
+    using SQLiteConnection = std::shared_ptr<sqlpp::sqlite3::connection>;
+    using MySQLConnection = std::shared_ptr<sqlpp::mysql::connection>;
+    using DatabaseConnection = std::variant<SQLiteConnection, MySQLConnection>;
+    DatabaseConnection fDBConnection;
+
   public:
 
     QwDatabase(const string &major = "00", const string &minor = "00", const string &point = "0000"); //!< Simple constructor
@@ -57,16 +67,67 @@ class QwDatabase: private mysqlpp::Connection {
     Bool_t       AllowsWriteAccess(){return (fAccessLevel==kQwDatabaseReadWrite);};
 
     Bool_t       Connect();                    //!< Open a connection to the database using the predefined parameters.
-    void         Disconnect() {disconnect();}; //<! Close an open database connection
-    Bool_t       Connected() { return connected(); }
-    const string GetServerVersion() {return server_version();}; //<! Get database server version
+    void         Disconnect() {
+      std::visit([](auto& conn) {
+        if (conn) {
+          conn.reset();
+        }
+      }, fDBConnection);
+    }; //<! Close an open database connection
+    Bool_t       Connected() {
+      return std::visit([](const auto& conn) -> bool {
+        return conn != nullptr;
+      }, fDBConnection);
+    }
+    const string GetServerVersion() {
+      // FIXME (wdconinc) implement server_version();
+      return "";
+    }; //<! Get database server version
     static void  DefineOptions(QwOptions& options); //!< Defines available class options for QwOptions
     void ProcessOptions(QwOptions &options); //!< Processes the options contained in the QwOptions object.
     void ProcessOptions(const TString& dbname, const TString& username, const TString& passwd, const TString& dbhost="localhost", const Int_t dbport = 0, const TString& accesslevel = "ro"); //!< Processes database options
 
-    mysqlpp::Query Query(const char *qstr=0     ) {return query(qstr);} //<! Generate a query to the database.
-    mysqlpp::Query Query(const std::string &qstr) {return query(qstr);} //<! Generate a query to the database.
-
+    // Separate methods for different query types to avoid std::visit return type issues
+    template<typename Statement>
+    size_t QueryCount(const Statement& statement) {
+      return std::visit([&statement](auto& connection) -> size_t {
+        if (!connection) {
+          throw std::runtime_error("Database not connected");
+        }
+        auto result = (*connection)(statement);
+        size_t count = 0;
+        for (const auto& row : result) {
+          (void)row; // Suppress unused variable warning
+          count++;
+        }
+        return count;
+      }, fDBConnection);
+    }
+    
+    template<typename Statement>
+    bool QueryExists(const Statement& statement) {
+      return QueryCount(statement) > 0;
+    } //<! Generate a query to check existence in the database.
+    
+    template<typename Statement>
+    auto QuerySelect(const Statement& statement) {
+      return std::visit([&statement](auto& connection) {
+        if (!connection) {
+          throw std::runtime_error("Database not connected");
+        }
+        return (*connection)(statement);
+      }, fDBConnection);
+    } //<! Execute a SELECT statement and return the result.
+    
+    template<typename Statement>
+    void QueryExecute(const Statement& statement) {
+      std::visit([&statement](auto& connection) {
+        if (!connection) {
+          throw std::runtime_error("Database not connected");
+        }
+        (*connection)(statement);
+      }, fDBConnection);
+    } //<! Execute a statement without returning a result.
     
     const string GetVersion();                             //! Return a full version string for the DB schema
     const string GetVersionMajor() {return fVersionMajor;} //<! fVersionMajor getter
