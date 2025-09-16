@@ -1,0 +1,39 @@
+! Prompt Summary Elements Configuration File
+! 
+! This file defines the elements that will be included in the prompt summary output
+! when using the --write-promptsummary option with qwparity.
+!
+! Format:
+! Each line defines an element name. Elements can be:
+! - Individual detector elements (e.g., bcm_an_us)
+! - Difference elements (e.g., bcm_an_us-bcm_an_ds)
+! - Element type can optionally be specified: element_name = type
+!
+! Supported types: single, difference
+! If no type is specified, "single" is assumed.
+!
+! Comments start with ! or # and are ignored.
+! Empty lines are ignored.
+
+[prompt_summary_elements]
+bcm1h02a
+bcm1h02b
+bcm1h04a
+bcm1h12a
+bcm1h12b
+bcm1h12c
+bcm1h13
+bcm1h15
+bcm_target
+bpm1h04
+bpm1h04x
+bcm1h02a-bcm1h15
+bcm_target-bcm1h15
+bpm1h04x-bpm1h14x
+bpm1h04x-bpm1h14y
+
+! Additional elements can be added here
+! Examples:
+! bpm_4ax = single
+! sam1 = single
+! md1neg_dd = difference

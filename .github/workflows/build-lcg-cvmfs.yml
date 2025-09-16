@@ -16,9 +16,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        LCG: ["LCG_106/x86_64-el9-gcc13-opt",
-              "LCG_107/x86_64-el9-clang16-opt",
-              "LCG_107/x86_64-el9-gcc14-opt"]
+        include:
+          # Standard builds without sanitizers
+          - release: "LCG_106"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc13"
+            opt: "opt"
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "clang16"
+            opt: "opt"
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc14"
+            opt: "opt"
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -28,12 +42,12 @@ jobs:
         run: ln -sf Parity/prminput/qwparity_simple.conf qwparity.conf
       - uses: aidasoft/run-lcg-view@v1
         with:
-          release-platform: ${{ matrix.LCG }}
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           run: |
             echo "::group::Configuration"
             # Set BOOST_INC_DIR and BOOST_LIB_DIR to point to
             # LCG-provided Boost installation
-            LCG_PATH="/cvmfs/sft.cern.ch/lcg/views/${{ matrix.LCG }}"
+            LCG_PATH="/cvmfs/sft.cern.ch/lcg/views/${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}"
             export BOOST_INC_DIR="${LCG_PATH}/include"
             export BOOST_LIB_DIR="${LCG_PATH}/lib"
 
@@ -58,5 +72,14 @@ jobs:
             
             echo "::group::Mock data analysis"
             # Analyze the generated mock data
-            build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles .
+            build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary
             echo "::endgroup::"
+
+      - name: Upload prompt summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: |
+            summary_*.txt
+          retention-days: 7
+          if-no-files-found: error

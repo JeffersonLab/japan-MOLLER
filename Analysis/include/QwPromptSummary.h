@@ -17,6 +17,7 @@
 
 #include "TROOT.h"
 #include "QwOptions.h"
+#include "QwParameterFile.h"
 /**
  *  \class QwPromptSummary
  *  \ingroup QwAnalysis
@@ -134,6 +135,7 @@ class QwPromptSummary  :  public TObject
  public:
   QwPromptSummary();
   QwPromptSummary(Int_t run_number, Int_t runlet_number);
+  QwPromptSummary(Int_t run_number, Int_t runlet_number, const std::string& parameter_file);
   virtual ~QwPromptSummary();
   //  friend std::ostream& operator<<(std::ostream& os, const QwF1TDC &f1tdc);
 
@@ -183,6 +185,8 @@ private:
   TString PrintCSVHeader(Int_t nEvents, TString start_time, TString end_time);
 
   void    SetupElementList();
+  void    LoadElementsFromParameterFile(const std::string& parameter_file);
+  void    LoadElementsFromParameterFile(QwParameterFile& parameterfile);
   
   Int_t   fRunNumber;
   Int_t   fRunletNumber;  
