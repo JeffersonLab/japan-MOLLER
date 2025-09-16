@@ -22,12 +22,6 @@
 #include "QwParameterFile.h"
 #include "QwRootFile.h"
 
-#ifdef __USE_DATABASE__
-#include "QwParitySchema.h"
-#include "QwParityDB.h"
-#endif // __USE_DATABASE__
-
-
 // Register this handler with the factory
 RegisterHandlerFactory(QwExtractor);
 
