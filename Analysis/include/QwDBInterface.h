@@ -23,8 +23,100 @@
 #include "QwLog.h"
 #include "QwParitySchema.h"
 
+// Third Party Headers
+#include <sqlpp11/sqlpp11.h>
+#include <sqlpp11/mysql/mysql.h>
+#include <sqlpp11/sqlite3/sqlite3.h>
+
 // Forward declarations
 class QwParityDB;
+
+#ifdef __USE_DATABASE__
+// Forward declaration for schema types
+namespace QwParitySchema {
+  struct beam;
+  struct beam_errors;
+  struct lumi_data;
+  struct md_data;
+  struct md_errors;
+
+  // Since sqlpp11 is a schema definition library, we need to define
+  // our own data holding structures for bulk insertions.
+  // These structures must match the database table structure.
+  // They are simple structs with public members only.
+  // We use sqlpp11::cpp_value_type_of to extract the C++ type
+  // from the sqlpp11 table definition.
+  // This ensures that the types always match the database schema.
+  // Note that these data holding structures are a subset of the full
+  // set of tables, limited to those tables where we use bulk inserts.
+  // Note that these data holding structures do not need to include
+  // all columns, only those we actually use.
+  struct beam_row {
+    using table_type = QwParitySchema::beam;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.analysis_id)::_traits::_value_type> analysis_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.monitor_id)::_traits::_value_type> monitor_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.measurement_type_id)::_traits::_value_type> measurement_type_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.subblock)::_traits::_value_type> subblock;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.n)::_traits::_value_type> n;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.value)::_traits::_value_type> value;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.error)::_traits::_value_type> error;
+  };
+
+  struct beam_errors_row {
+    using table_type = QwParitySchema::beam_errors;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.analysis_id)::_traits::_value_type> analysis_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.monitor_id)::_traits::_value_type> monitor_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.error_code_id)::_traits::_value_type> error_code_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.n)::_traits::_value_type> n;
+  };
+
+  struct lumi_data_row {
+    using table_type = QwParitySchema::lumi_data;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.analysis_id)::_traits::_value_type> analysis_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.lumi_detector_id)::_traits::_value_type> lumi_detector_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.measurement_type_id)::_traits::_value_type> measurement_type_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.subblock)::_traits::_value_type> subblock;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.n)::_traits::_value_type> n;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.value)::_traits::_value_type> value;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.error)::_traits::_value_type> error;
+  };
+
+  struct lumi_errors_row {
+    using table_type = QwParitySchema::lumi_errors;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.analysis_id)::_traits::_value_type> analysis_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.lumi_detector_id)::_traits::_value_type> lumi_detector_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.error_code_id)::_traits::_value_type> error_code_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.n)::_traits::_value_type> n;
+  };
+
+  struct md_data_row {
+    using table_type = QwParitySchema::md_data;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.analysis_id)::_traits::_value_type> analysis_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.main_detector_id)::_traits::_value_type> main_detector_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.measurement_type_id)::_traits::_value_type> measurement_type_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.subblock)::_traits::_value_type> subblock;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.n)::_traits::_value_type> n;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.value)::_traits::_value_type> value;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.error)::_traits::_value_type> error;
+  };
+
+  struct md_errors_row {
+    using table_type = QwParitySchema::md_errors;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.analysis_id)::_traits::_value_type> analysis_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.main_detector_id)::_traits::_value_type> main_detector_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.error_code_id)::_traits::_value_type> error_code_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.n)::_traits::_value_type> n;
+  };
+
+  struct general_errors_row {
+    using table_type = QwParitySchema::general_errors;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.analysis_id)::_traits::_value_type> analysis_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.error_code_id)::_traits::_value_type> error_code_id;
+    sqlpp::cpp_value_type_of<decltype(table_type{}.n)::_traits::_value_type> n;
+  };
+
+} // namespace QwParitySchema
+#endif
 
 // QwDBInterface  GetDBEntry(TString subname);
 
