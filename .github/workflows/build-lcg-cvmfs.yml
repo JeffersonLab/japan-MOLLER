@@ -48,6 +48,7 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_USER: ${{ env.MYSQL_USER }}
+          MYSQL_PORT: ${{ env.MYSQL_PORT }}
           MYSQL_DATABASE: ${{ env.MYSQL_DB }}
           MYSQL_PASSWORD: ${{ env.MYSQL_PASSWORD }}
           MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_ROOT_PASSWORD }}
