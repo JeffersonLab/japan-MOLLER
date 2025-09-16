@@ -121,6 +121,12 @@ jobs:
               --data .
             echo "::endgroup::"
 
+            echo "::group::Create database"
+            # Create and populate the database
+            # (sqlite3 only supports AUTOINCREMENT on INTEGER keys)
+            # (sqlite3 does not support ENUM, so convert to TEXT with CHECK)
+            sed 's/AUTO_INCREMENT//g;s/\(\S*\)\sENUM(\([^)]*\))/\1 TEXT CHECK(\1 in (\2))/g' Parity/prminput/qwparity_schema.sql | sqlite3 qwparity.db
+
             echo "::group::Mock data analysis"
             # Analyze the generated mock data
             /usr/bin/time -v \
