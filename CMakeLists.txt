@@ -79,7 +79,11 @@ IF(Sqlpp11_FOUND)
 
   # Generate C++ headers from SQL schema
   execute_process(
-    COMMAND ${Sqlpp11_ROOT}/bin/sqlpp11-ddl2cpp Parity/prminput/qwparity_schema.sql Parity/include/QwParitySchema QwParitySchema
+    COMMAND ${Sqlpp11_ROOT}/bin/sqlpp11-ddl2cpp 
+      -identity-naming -no-timestamp-warning
+      Parity/prminput/qwparity_schema.sql
+      Parity/include/QwParitySchema
+      QwParitySchema
   )
 ELSE()
   set(Sqlpp11_LIBRARIES "")
