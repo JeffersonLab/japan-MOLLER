@@ -85,7 +85,7 @@ class QwDatabase {
     }; //<! Get database server version
     static void  DefineOptions(QwOptions& options); //!< Defines available class options for QwOptions
     void ProcessOptions(QwOptions &options); //!< Processes the options contained in the QwOptions object.
-    void ProcessOptions(const TString& dbname, const TString& username, const TString& passwd, const TString& dbhost="localhost", const Int_t dbport = 0, const TString& accesslevel = "ro"); //!< Processes database options
+    void ProcessOptions(const EQwDBType& dbtype, const TString& dbname, const TString& username, const TString& passwd, const TString& dbhost="localhost", const Int_t dbport = 0, const TString& accesslevel = "ro"); //!< Processes database options
 
     // Separate methods for different query types to avoid std::visit return type issues
     template<typename Statement>
