@@ -25,9 +25,7 @@ using namespace std;
 #include "QwVQWK_Channel.h"
 #include "QwPromptSummary.h"
 
-#define MYSQLPP_SSQLS_NO_STATICS
 #ifdef __USE_DATABASE__
-#include "QwParitySSQLS.h"
 #include "QwParityDB.h"
 #endif // __USE_DATABASE__
 
