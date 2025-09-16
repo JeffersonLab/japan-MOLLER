@@ -269,6 +269,7 @@ void QwDatabase::DefineOptions(QwOptions& options)
   options.AddOptions("Database options")("QwDatabase.dbusername", po::value<string>(), "database username");
   options.AddOptions("Database options")("QwDatabase.dbpassword", po::value<string>(), "database password");
   options.AddOptions("Database options")("QwDatabase.dbport", po::value<int>()->default_value(0), "database server port number (defaults to standard mysql port)");
+  options.AddOptions("Database options")("QwDatabase.dbtype", po::value<string>()->default_value("sqlite3"), "database type (mysql, sqlite3)");
 }
 
 /*!
