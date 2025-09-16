@@ -38,6 +38,8 @@ jobs:
             cxxflags: ""
     steps:
       - uses: actions/checkout@v5
+        with:
+          submodules: true
       - uses: cvmfs-contrib/github-action-cvmfs@v5
         with:
           cvmfs_repositories: 'sft.cern.ch,geant4.cern.ch'
