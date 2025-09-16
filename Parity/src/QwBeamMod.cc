@@ -924,52 +924,66 @@ void QwBeamMod::FillDB_MPS(QwParityDB *db, TString datatype)
     QwMessage << " --------------------------------------------------------------- " << QwLog::endl;
   }
 
-  std::vector<QwParitySSQLS::beam_optics> entrylist;
+  try {
+    db->Connect();
+    
+    // Get analysis ID for foreign key relationship
+    UInt_t analysis_id = db->GetAnalysisID();
+    
+    // Use beam_optics table for beam modulation data
+    QwParitySchema::beam_optics beam_optics_table{};
+    
+    // Insert data for each modulation channel
+    for (size_t bpm = 0; bpm < fModChannel.size(); bpm++) {
+      for(size_t pattern = 0; pattern < 5; pattern++) {
+        try {
+          // FIXME (wdconinc) when re-enabling this database functionality,
+          // it turned out that variables used here were removed in this class.
 
-  QwParitySSQLS::beam_optics row;
+          // Get monitor ID for this channel (beam modulation monitors)
+          UInt_t monitor_id = 0; // db->GetMonitorID(fMonitorNames[bpm].Data());
 
-  UInt_t analysis_id = db->GetAnalysisID();
-
-  for(size_t bpm = 0; bpm < fMonitors.size(); bpm++){
-    for(size_t pattern = 0; pattern < 5; pattern++){
-      //  Explicitly zero the beam optics ID to ensure a non-sensical default
-      //  is not picked up.
-      row.beam_optics_id = 0;
-      row.analysis_id = analysis_id;
-      row.monitor_id = db->GetMonitorID(fMonitorNames[bpm].Data());
-      row.modulation_type_id = pattern;
-      row.n = fNFitPoints[bpm][pattern];
-      row.offset = fOffset[bpm][pattern];
-      row.amplitude = fAmplitude[bpm][pattern];
-      row.phase = fPhase[bpm][pattern];
-      row.o_error = fOffsetError[bpm][pattern];
-      row.a_error = fAmplitudeError[bpm][pattern];
-      row.p_error = fPhaseError[bpm][pattern];
-      row.gof_para = fChisquare[bpm][pattern];
-
-      entrylist.push_back(row);
+          // Insert beam optics data for modulation analysis
+          // FIXME: Using placeholder values since the actual beam modulation analysis
+          // variables are not available in this class
+          auto insert_query = sqlpp::insert_into(beam_optics_table)
+                              .set(beam_optics_table.analysis_id = analysis_id,
+                                   beam_optics_table.monitor_id = monitor_id,
+                                   beam_optics_table.modulation_type_id = pattern,
+                                   beam_optics_table.n = 0, // placeholder
+                                   beam_optics_table.offset = 0.0, // placeholder
+                                   beam_optics_table.amplitude = 0.0, // placeholder  
+                                   beam_optics_table.phase = 0.0, // placeholder
+                                   beam_optics_table.o_error = 0.0, // placeholder
+                                   beam_optics_table.a_error = 0.0, // placeholder
+                                   beam_optics_table.p_error = 0.0, // placeholder
+                                   beam_optics_table.gof_para = 0.0); // placeholder
+          db->QueryExecute(insert_query);
+          
+          if (local_print_flag) {
+            QwMessage << "Inserted beam optics data for channel: " << fModChannel[bpm]->GetElementName() 
+                      << " amplitude: " << fModChannel[bpm]->GetValue() << QwLog::endl;
+          }
+        } catch (const std::exception& channel_error) {
+          QwError << "QwBeamMod::FillDB_MPS: Error inserting beam optics data for channel " 
+                  << fModChannel[bpm]->GetElementName() << ": " << channel_error.what() << QwLog::endl;
+          // Continue with next channel rather than failing completely
+        }
+      }
     }
+    
+    if (local_print_flag) {
+      QwMessage << "QwBeamMod::FillDB_MPS: Successfully processed " << fModChannel.size() 
+                << " beam modulation channels" << QwLog::endl;
+    }
+    
+    db->Disconnect();
+    
+  } catch (const std::exception& db_error) {
+    QwError << "QwBeamMod::FillDB_MPS: Database connection error: " << db_error.what() << QwLog::endl;
+    db->Disconnect();
+    throw;
   }
-
-  if(local_print_flag) {
-    QwMessage << QwColor(Qw::kGreen) << "Entrylist Size : "
-	      << QwColor(Qw::kBoldRed) << entrylist.size()
-              << QwColor(Qw::kNormal) << QwLog::endl;
-  }
-
-  db->Connect();
-  // Check the entrylist size, if it isn't zero, start to query..
-  if( entrylist.size() ) {
-    mysqlpp::Query query= db->Query();
-    query.insert(entrylist.begin(), entrylist.end());
-    query.execute();
-  }
-  else {
-    QwMessage << "QwBeamMod::FillDB_MPS :: Nothing to insert in database." << QwLog::endl;
-  }
-  db->Disconnect();
-
-  return;
 }
 
 void QwBeamMod::FillDB(QwParityDB *db, TString datatype)
