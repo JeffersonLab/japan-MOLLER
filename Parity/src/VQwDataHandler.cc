@@ -24,8 +24,6 @@ using namespace std;
 #include <ROOT/RNTupleWriter.hxx>
 #endif
 
-//#include "QwCombiner.h"
-
 #include "QwParameterFile.h"
 #include "QwRootFile.h"
 #include "QwVQWK_Channel.h"
@@ -547,9 +545,9 @@ void VQwDataHandler::FillDB(QwParityDB *db, TString datatype)
 
   std::vector<QwDBInterface> interface;
 
-  std::vector<QwParitySSQLS::beam>      beamlist;
-  std::vector<QwParitySSQLS::md_data>   mdlist;
-  std::vector<QwParitySSQLS::lumi_data> lumilist;
+  std::vector<QwParitySchema::beam_row>      beamlist;
+  std::vector<QwParitySchema::md_data_row>   mdlist;
+  std::vector<QwParitySchema::lumi_data_row> lumilist;
 
   QwDBInterface::EQwDBIDataTableType tabletype;
 
@@ -584,25 +582,64 @@ void VQwDataHandler::FillDB(QwParityDB *db, TString datatype)
   db->Connect();
   // Check the entrylist size, if it isn't zero, start to query..
   if( beamlist.size() ) {
-    mysqlpp::Query query= db->Query();
-    query.insert(beamlist.begin(), beamlist.end());
-    query.execute();
+    // Convert to sqlpp11 bulk insert for beam data
+    const auto& beam_table = QwParitySchema::beam{};
+    try {
+      for (const auto& entry : beamlist) {
+        db->QueryExecute(sqlpp::insert_into(beam_table)
+                   .set(beam_table.analysis_id = entry.analysis_id,
+                        beam_table.monitor_id = entry.monitor_id,
+                        beam_table.measurement_type_id = entry.measurement_type_id,
+                        beam_table.subblock = entry.subblock,
+                        beam_table.n = entry.n,
+                        beam_table.value = entry.value,
+                        beam_table.error = entry.error));
+      }
+    } catch (const std::exception &er) {
+      QwError << "SQL exception in beam insert: " << er.what() << QwLog::endl;
+    }
   } else {
     QwMessage << "QwCombiner::FillDB :: This is the case when the beamlist contains nothing for type="<< measurement_type.Data() 
 	            << QwLog::endl;
   }
   if( mdlist.size() ) {
-    mysqlpp::Query query= db->Query();
-    query.insert(mdlist.begin(), mdlist.end());
-    query.execute();
+    // Convert to sqlpp11 bulk insert for MD data
+    const auto& md_data_table = QwParitySchema::md_data{};
+    try {
+      for (const auto& entry : mdlist) {
+        db->QueryExecute(sqlpp::insert_into(md_data_table)
+                   .set(md_data_table.analysis_id = entry.analysis_id,
+                        md_data_table.main_detector_id = entry.main_detector_id,
+                        md_data_table.measurement_type_id = entry.measurement_type_id,
+                        md_data_table.subblock = entry.subblock,
+                        md_data_table.n = entry.n,
+                        md_data_table.value = entry.value,
+                        md_data_table.error = entry.error));
+      }
+    } catch (const std::exception &er) {
+      QwError << "SQL exception in MD insert: " << er.what() << QwLog::endl;
+    }
   } else {
     QwMessage << "QwCombiner::FillDB :: This is the case when the mdlist contains nothing for type="<< measurement_type.Data() 
 	            << QwLog::endl;
   }
   if( lumilist.size() ) {
-    mysqlpp::Query query= db->Query();
-    query.insert(lumilist.begin(), lumilist.end());
-    query.execute();
+    // Convert to sqlpp11 bulk insert for luminosity data
+    const auto& lumi_data_table = QwParitySchema::lumi_data{};
+    try {
+      for (const auto& entry : lumilist) {
+        db->QueryExecute(sqlpp::insert_into(lumi_data_table)
+                   .set(lumi_data_table.analysis_id = entry.analysis_id,
+                        lumi_data_table.lumi_detector_id = entry.lumi_detector_id,
+                        lumi_data_table.measurement_type_id = entry.measurement_type_id,
+                        lumi_data_table.subblock = entry.subblock,
+                        lumi_data_table.n = entry.n,
+                        lumi_data_table.value = entry.value,
+                        lumi_data_table.error = entry.error));
+      }
+    } catch (const std::exception &er) {
+      QwError << "SQL exception in lumi insert: " << er.what() << QwLog::endl;
+    }
   } else {
     QwMessage << "QwCombiner::FillDB :: This is the case when the lumilist contains nothing for type="<< measurement_type.Data() 
 	      << QwLog::endl;
