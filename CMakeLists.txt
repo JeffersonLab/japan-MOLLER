@@ -75,16 +75,37 @@ IF(Sqlpp11_FOUND)
   include_directories(${Sqlpp11_INCLUDE_DIR})
   add_definitions(-D__USE_DATABASE__)
   message(STATUS ${Sqlpp11_LIBRARIES})
-  set(Sqlpp11_LIBRARIES "sqlpp11::sqlpp11 sqlpp11::mariadb sqlpp11::mysql sqlpp11::sqlite3")
 
-  # Generate C++ headers from SQL schema
-  execute_process(
-    COMMAND ${Sqlpp11_ROOT}/bin/sqlpp11-ddl2cpp 
-      -identity-naming -no-timestamp-warning
-      Parity/prminput/qwparity_schema.sql
-      Parity/include/QwParitySchema
-      QwParitySchema
+  # Generate C++ headers from SQL schema at build time
+  set(SCHEMA_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Parity/include)
+  set(SCHEMA_OUTPUT_FILE ${SCHEMA_OUTPUT_DIR}/QwParitySchema.h)
+  set(SCHEMA_INPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Parity/prminput/qwparity_schema.sql)
+  
+  # Find sqlpp11-ddl2cpp executable
+  find_program(SQLPP11_DDL2CPP
+    NAMES sqlpp11-ddl2cpp
+    PATHS ${Sqlpp11_ROOT}/bin
+    DOC "sqlpp11 DDL to C++ converter"
   )
+  
+  if(SQLPP11_DDL2CPP)
+    add_custom_command(
+      OUTPUT ${SCHEMA_OUTPUT_FILE}
+      COMMAND ${SQLPP11_DDL2CPP}
+        -identity-naming -no-timestamp-warning
+        ${SCHEMA_INPUT_FILE}
+        ${SCHEMA_OUTPUT_DIR}/QwParitySchema
+        QwParitySchema
+      DEPENDS ${SCHEMA_INPUT_FILE}
+      COMMENT "Generating C++ headers from SQL schema"
+      VERBATIM
+    )
+    
+    # Add a custom target to ensure the schema is generated
+    add_custom_target(generate_schema DEPENDS ${SCHEMA_OUTPUT_FILE})
+  else()
+    message(WARNING "sqlpp11-ddl2cpp not found, SQL schema headers may not be generated")
+  endif()
 ELSE()
   set(Sqlpp11_LIBRARIES "")
   list(REMOVE_ITEM my_project_sources
@@ -222,7 +243,7 @@ if(Sqlpp11_FOUND)
       sqlpp11::sqlpp11
       sqlpp11::mariadb
       sqlpp11::mysql
-      sqlpp11::sqlite3      
+      sqlpp11::sqlite3
   )
   target_include_directories(${PROJECT_NAME}
     PRIVATE
