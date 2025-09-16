@@ -61,22 +61,32 @@ file(GLOB my_project_headers
 		 Parity/include/*.h
 		 )
 
+
 #----------------------------------------------------------------------------
-# MYSQLPP
+# sqlpp11
 #
-find_package(MYSQLPP)
-IF(MYSQLPP_FOUND)
-  config_add_dependency(MYSQLPP)
-  include_directories(${MYSQLPP_INCLUDE_DIR})
-  ## KLUDGE:  For now, do not define the __USE_DATABASE__ flag, because we're still missing some of the database support files. --- P.King, 05jun2018
-  message(STATUS "  The \"__USE_DATABASE__\" flag is commented out in CMakeLists.txt; database support is DISABLED.")
-  #  add_definitions(-D__USE_DATABASE__)
-ELSE(MYSQLPP_FOUND)
-  set(MYSQLPP_LIBRARIES "")
+find_package(Sqlpp11 
+  # Optionally specify connectors needed to get corresponding targets.
+  # COMPONENTS SQLite3 SQLCipher MySQL MariaDB PostgreSQL
+  COMPONENTS SQLite3 MySQL MariaDB
+)
+IF(Sqlpp11_FOUND)
+  config_add_dependency(Sqlpp11)
+  include_directories(${Sqlpp11_INCLUDE_DIR})
+  add_definitions(-D__USE_DATABASE__)
+  message(STATUS ${Sqlpp11_LIBRARIES})
+  set(Sqlpp11_LIBRARIES "sqlpp11::sqlpp11 sqlpp11::mariadb sqlpp11::mysql sqlpp11::sqlite3")
+
+  # Generate C++ headers from SQL schema
+  execute_process(
+    COMMAND ${Sqlpp11_ROOT}/bin/sqlpp11-ddl2cpp Parity/prminput/qwparity_schema.sql Parity/include/QwParitySchema QwParitySchema
+  )
+ELSE()
+  set(Sqlpp11_LIBRARIES "")
   list(REMOVE_ITEM my_project_sources
     ${PROJECT_SOURCE_DIR}/Analysis/src/QwDatabase.cc
   )
-endif(MYSQLPP_FOUND)
+ENDIF(Sqlpp11_FOUND)
 
 #----------------------------------------------------------------------------
 # Boost
@@ -200,6 +210,21 @@ target_link_libraries(${PROJECT_NAME}
     ${MYSQLPP_LIBRARIES}
     ${Boost_LIBRARIES}
   )
+
+# Link sqlpp11 if enabled
+if(Sqlpp11_FOUND)
+  target_link_libraries(${PROJECT_NAME}
+    PUBLIC
+      sqlpp11::sqlpp11
+      sqlpp11::mariadb
+      sqlpp11::mysql
+      sqlpp11::sqlite3      
+  )
+  target_include_directories(${PROJECT_NAME}
+    PRIVATE
+      ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/sqlpp11/install/include
+  )
+endif()
 
 install(TARGETS ${PROJECT_NAME}
   EXPORT ${MAIN_PROJECT_NAME_LC}-exports
