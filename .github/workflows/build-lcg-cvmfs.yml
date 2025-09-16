@@ -158,16 +158,30 @@ jobs:
               --QwDatabase.dbname qwparity.db
             echo "::endgroup::"
 
+            echo "::group::Print database contents (sqlite3)"
+            # Print the database contents
+            sqlite3 qwparity.db .dump | tee qwparity-sqlite3.sql
+            echo "::endgroup::"
+
             echo "::group::Create database (mysql)"
             # Create and populate the database
-            # (sqlite3 only supports AUTOINCREMENT on INTEGER keys)
-            # (sqlite3 does not support ENUM, so convert to TEXT with CHECK)
             cat Parity/prminput/qwparity_schema.sql | mysql \
               -h${{ env.MYSQL_HOST }} \
               -P${{ env.MYSQL_PORT }} \
               -u${{ env.MYSQL_USER }} \
               -p${{ env.MYSQL_PASSWORD }} \
               ${{ env.MYSQL_DB }}
+            echo "::endgroup::"
+
+            echo "::group::Print database contents (mysql)"
+            # Print the database contents
+            mysql \
+              -h${{ env.MYSQL_HOST }} \
+              -P${{ env.MYSQL_PORT }} \
+              -u${{ env.MYSQL_USER }} \
+              -p${{ env.MYSQL_PASSWORD }} \
+              ${{ env.MYSQL_DB }} -e "SHOW TABLES;" | tee qwparity-mysql.sql
+            echo "::endgroup::"
 
             echo "::group::Mock data analysis (mysql)"
             # Analyze the generated mock data
@@ -217,6 +231,15 @@ jobs:
           name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
           path: |
             summary_*.txt
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Upload database dumps
+        uses: actions/upload-artifact@v4
+        with:
+          name: qwparity-sql-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: |
+            qwparity-*.sql
           retention-days: 7
           if-no-files-found: error
 
