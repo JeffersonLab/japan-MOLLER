@@ -11,10 +11,15 @@ using std::type_info;
 #include "TTree.h"
 #include "TPRegexp.h"
 #include "TSystem.h"
+#include <ROOT/RNTuple.hxx>
+#include <ROOT/RNTupleModel.hxx>
+#include <ROOT/RField.hxx>
+#include <map>
 
 // Qweak headers
 #include "QwOptions.h"
 #include "TMapFile.h"
+#include "VQwSubsystem.h" // Include the header defining VQwSubsystem
 
 
 // If one defines more than this number of words in the full ntuple,
@@ -483,6 +488,14 @@ class QwRootFile {
       return retval;
     }
 
+    // Adding these for RNTuple support
+    void SetUseRNTuple(bool use_rntuple) { fUseRNTuple = use_rntuple; }
+    bool GetUseRNTuple() const { return fUseRNTuple; }
+  
+    template<typename T>
+    void ConstructRNTupleBranches(const char* name, const char* title, T& subsys, const char* prefix = "");
+
+    void FillRNTuple(const char* name);
 
   private:
 
@@ -522,7 +535,12 @@ class QwRootFile {
     Int_t fAutoFlush;
     Int_t fAutoSave;
 
-  
+    // Added these members
+    bool fUseRNTuple;
+    std::map<std::string, std::shared_ptr<ROOT::Experimental::RNTupleWriter>> fRNTupleWriters;
+    std::map<std::string, std::shared_ptr<ROOT::Experimental::RNTupleModel>> fRNTupleModels;
+    std::map<std::string, std::vector<std::shared_ptr<Double_t>>> fRNTupleFields;
+    std::map<std::string, size_t> fRNTupleFieldCount;
 
   private:
 
