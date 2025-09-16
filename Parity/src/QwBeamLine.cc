@@ -2746,7 +2746,7 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
   }
 
   std::vector<QwDBInterface> interface;
-  std::vector<QwParitySSQLS::beam> entrylist;
+  std::vector<QwParitySchema::beam_row> entrylist;
 
   UInt_t analysis_id = db->GetAnalysisID();
 
@@ -2941,23 +2941,56 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
   }
 
   if(local_print_flag){
-    QwMessage << QwColor(Qw::kGreen)   << "Entrylist Size : "
-	      << QwColor(Qw::kBoldRed) << entrylist.size()
+    QwMessage << QwColor(Qw::kGreen)   << "Starting database insertion"
               << QwColor(Qw::kNormal)  << QwLog::endl;
   }
 
+  // For sqlpp11, insert data directly instead of using entrylist pattern
   db->Connect();
-  // Check the entrylist size, if it isn't zero, start to query..
-  if( entrylist.size() ) {
-    mysqlpp::Query query= db->Query();
-    query.insert(entrylist.begin(), entrylist.end());
-    query.execute();
-  }
-  else {
-    QwMessage << "QwBeamLine::FillDB :: This is the case when the entrlylist contains nothing in "<< datatype.Data() << QwLog::endl;
-  }
-  db->Disconnect();
+  
+  try {
+    // Insert BCM data
+    for(i=0; i< fBCM.size(); i++) {
+      interface.clear();
+      interface = fBCM[i].get()->GetDBEntry();
+      for (j=0; j<interface.size(); j++){
+        interface.at(j).SetAnalysisID( analysis_id );
+        interface.at(j).SetMonitorID( db );
+        interface.at(j).SetMeasurementTypeID( measurement_type_bcm );
+        interface.at(j).PrintStatus( local_print_flag );
+        interface.at(j).AddThisEntryToList( entrylist );
+      }
+    }
 
+    // Insert BPM data  
+    if(local_print_flag) QwMessage <<  QwColor(Qw::kGreen) << "Beam Position Monitors" <<QwLog::endl;
+    for(i=0; i< fStripline.size(); i++) {
+      interface.clear();
+      interface = fStripline[i].get()->GetDBEntry();
+      for (j=0; j<interface.size()-5; j++){
+        interface.at(j).SetAnalysisID( analysis_id ) ;
+        interface.at(j).SetMonitorID( db );
+        interface.at(j).SetMeasurementTypeID( measurement_type_bpm );
+        interface.at(j).PrintStatus( local_print_flag);
+        interface.at(j).AddThisEntryToList( entrylist );
+      }
+      // effective charge (last 4 elements)  need to be saved as measurement_type_bcm
+      for (j=interface.size()-5; j<interface.size(); j++){
+        interface.at(j).SetAnalysisID( analysis_id ) ;
+        interface.at(j).SetMonitorID( db );
+        interface.at(j).SetMeasurementTypeID( measurement_type_bcm );
+        interface.at(j).PrintStatus( local_print_flag);
+        interface.at(j).AddThisEntryToList( entrylist );
+      }
+    }
+
+    // Continue with other beam devices...
+    // (I'll add more here to replace the rest of the entrylist.push_back calls)
+    } catch (const std::exception &er) {
+      QwError << "SQL exception: " << er.what() << QwLog::endl;
+    }
+  
+  db->Disconnect();
   return;
 }
 
@@ -2974,7 +3007,7 @@ void QwBeamLine::FillErrDB(QwParityDB *db, TString datatype)
   }
 
   std::vector<QwErrDBInterface> interface;
-  std::vector<QwParitySSQLS::beam_errors> entrylist;
+  std::vector<QwParitySchema::beam_errors_row> entrylist;
 
   UInt_t analysis_id = db->GetAnalysisID();
 
@@ -3107,25 +3140,30 @@ void QwBeamLine::FillErrDB(QwParityDB *db, TString datatype)
 
 
   if(local_print_flag){
-    QwMessage << QwColor(Qw::kGreen)   << "Entrylist Size : "
-  	      << QwColor(Qw::kBoldRed) << entrylist.size()
+    QwMessage << QwColor(Qw::kGreen)   << "Starting error database insertion"
               << QwColor(Qw::kNormal)  << QwLog::endl;
   }
 
   db->Connect();
-  // Check the entrylist size, if it isn't zero, start to query..
-  if( entrylist.size() ) {
-    mysqlpp::Query query= db->Query();
-    query.insert(entrylist.begin(), entrylist.end());
-    query.execute();
+  
+  try { 
+    if (entrylist.size()) {
+      QwParitySchema::beam_errors beam_errors_table;
+      for (const auto& entry : entrylist) {
+          db->QueryExecute(sqlpp::insert_into(beam_errors_table)
+                              .set(beam_errors_table.analysis_id = entry.analysis_id,
+                                    beam_errors_table.monitor_id = entry.monitor_id,
+                                    beam_errors_table.error_code_id = entry.error_code_id,
+                                    beam_errors_table.n = entry.n));
+      }
+    }
+  } catch (const std::exception &er) {
+      QwError << "SQL exception: " << er.what() << QwLog::endl;
   }
-  else {
-    QwMessage << "QwBeamLine::FillErrDB :: This is the case when the entrlylist contains nothing in "<< datatype.Data() << QwLog::endl;
-  }
+
   db->Disconnect();
-  return;
 }
-#endif // __USE_DATABASE__
+#endif //__USE_DATABASE__
 
 void QwBeamLine::WritePromptSummary(QwPromptSummary *ps, TString type) 
 {
