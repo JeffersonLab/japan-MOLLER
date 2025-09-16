@@ -11,24 +11,19 @@
 
 // System headers
 
-// Qweak headers
+// Third-party headers
+#include <sqlpp11/select.h>
+#include <sqlpp11/functions.h>
 
-sql_create_6(db_schema, 1, 2 
-  , mysqlpp::sql_int_unsigned , db_schema_id
-  , mysqlpp::sql_char , major_release_number
-  , mysqlpp::sql_char , minor_release_number
-  , mysqlpp::sql_char , point_release_number
-  , mysqlpp::sql_timestamp , time
-  , mysqlpp::Null<mysqlpp::sql_text> , script_name
-) 
- 
+// Qweak headers
+#include "QwParitySchema.h"
+
 
 /*! The simple constructor initializes member fields.  This class is not
- * used to establish the database connection.  It sets up a
- * mysqlpp::Connection() object that has exception throwing disabled.
+ * used to establish the database connection.
  */
 //QwDatabase::QwDatabase() : Connection(false)
-QwDatabase::QwDatabase(const string &major, const string &minor, const string &point) : Connection(), kValidVersionMajor(major), kValidVersionMinor(minor), kValidVersionPoint(point)
+QwDatabase::QwDatabase(const string &major, const string &minor, const string &point) : kValidVersionMajor(major), kValidVersionMinor(minor), kValidVersionPoint(point)
 {
   QwDebug << "Greetings from QwDatabase simple constructor." << QwLog::endl;
 
@@ -50,7 +45,7 @@ QwDatabase::QwDatabase(const string &major, const string &minor, const string &p
  * @param minor Minor version number
  * @param point Point revision number
  */
-QwDatabase::QwDatabase(QwOptions &options, const string &major, const string &minor, const string &point) : Connection(), kValidVersionMajor(major), kValidVersionMinor(minor), kValidVersionPoint(point)
+QwDatabase::QwDatabase(QwOptions &options, const string &major, const string &minor, const string &point) : kValidVersionMajor(major), kValidVersionMinor(minor), kValidVersionPoint(point)
 {
   QwDebug << "Greetings from QwDatabase extended constructor." << QwLog::endl;
 
@@ -72,7 +67,7 @@ QwDatabase::QwDatabase(QwOptions &options, const string &major, const string &mi
 QwDatabase::~QwDatabase()
 {
   QwDebug << "QwDatabase::~QwDatabase() : Good-bye World from QwDatabase destructor!" << QwLog::endl;
-  if( connected() ) Disconnect();
+  if (Connected()) Disconnect();
 }
 
 /*! This function is used to load the connection information for the
@@ -116,9 +111,34 @@ Bool_t QwDatabase::ValidateConnection()
     // Try to connect with given information
     //
     try {
-      connect(fDatabase.c_str(), fDBServer.c_str(), fDBUsername.c_str(),
-	      fDBPassword.c_str(), (unsigned int) fDBPortNumber);
-      //    connect(dbname.Data(), server.Data(), username.Data(), password.Data(), (unsigned int) port);
+      // FIXME (wdconinc) duplication with Connect
+      switch(fDBType) 
+      {
+        case kQwDatabaseMySQL: {
+          QwDebug << "QwDatabase::ValidateConnection() : Using MySQL backend." << QwLog::endl;
+          sqlpp::mysql::connection_config config;
+          config.host = fDBServer;
+          config.user = fDBUsername;
+          config.password = fDBPassword;
+          config.database = fDatabase;
+          config.port = fDBPortNumber;
+          fDBConnection = std::make_shared<sqlpp::mysql::connection>(config);
+          break;
+        }
+        case kQwDatabaseSQLite3: {
+          QwDebug << "QwDatabase::ValidateConnection() : Using SQLite3 backend." << QwLog::endl;
+          sqlpp::sqlite3::connection_config config;
+          config.path_to_database = fDatabase;
+          config.password = fDBPassword;
+          fDBConnection = std::make_shared<sqlpp::sqlite3::connection>(config);
+          break;
+        }
+        default: {
+          QwError << "QwDatabase::ValidateConnection() : Unsupported database type." << QwLog::endl;
+          fAccessLevel = kQwDatabaseOff;
+          return false;
+        }
+      }
     } catch (std::exception const& e) {
       QwError << "QwDatabase::ValidateConnection() : " << QwLog::endl;
       QwError << e.what() << " while validating connection" << QwLog::endl;
@@ -149,7 +169,7 @@ Bool_t QwDatabase::ValidateConnection()
       fDBPassword.clear();
       fDBPortNumber=0;
     }
-    disconnect();
+    Disconnect();
   }
 
   // Check to make sure database and QwDatabase schema versions match up.
@@ -182,7 +202,7 @@ bool QwDatabase::Connect()
   if (fAccessLevel==kQwDatabaseOff) return false;
 
   // Make sure not already connected
-  if (connected()) return true;
+  if (Connected()) return true;
 
   // If never connected before, then make sure connection parameters form
   // valid connection
@@ -191,8 +211,41 @@ bool QwDatabase::Connect()
   }
 
   if (fValidConnection) {
-    return connect(fDatabase.c_str(), fDBServer.c_str(), fDBUsername.c_str(), fDBPassword.c_str(), (unsigned int) fDBPortNumber);
-    //   return connect(fDatabase.Data(), fDBServer.Data(), fDBUsername.Data(), fDBPassword.Data(), (unsigned int) fDBPortNumber);
+    // FIXME (wdconinc) duplication with ValidateConnection
+    try {
+      switch(fDBType) 
+      {
+        case kQwDatabaseMySQL: {
+          QwDebug << "QwDatabase::ValidateConnection() : Using MySQL backend." << QwLog::endl;
+          sqlpp::mysql::connection_config config;
+          config.host = fDBServer;
+          config.user = fDBUsername;
+          config.password = fDBPassword;
+          config.database = fDatabase;
+          config.port = fDBPortNumber;
+          fDBConnection = std::make_shared<sqlpp::mysql::connection>(config);
+          break;
+        }
+        case kQwDatabaseSQLite3: {
+          QwDebug << "QwDatabase::ValidateConnection() : Using SQLite3 backend." << QwLog::endl;
+          sqlpp::sqlite3::connection_config config;
+          config.path_to_database = fDatabase;
+          config.password = fDBPassword;
+          fDBConnection = std::make_shared<sqlpp::sqlite3::connection>(config);
+          break;
+        }
+        default: {
+          QwError << "QwDatabase::ValidateConnection() : Unsupported database type." << QwLog::endl;
+          return false;
+        }
+      }
+    } catch (const std::exception& e) {
+      QwError << "QwDatabase::Connect() : " << QwLog::endl;
+      QwError << e.what() << " while connecting to database" << QwLog::endl;
+      fValidConnection = false;
+      return false;
+    }
+    return true;
   } else {
     QwError << "QwDatabase::Connect() : Must establish valid connection to database." << QwLog::endl;
     return false;
@@ -209,6 +262,7 @@ bool QwDatabase::Connect()
 void QwDatabase::DefineOptions(QwOptions& options)
 {
   // Specify command line options for use by QwDatabase
+  // FIXME (wdconinc) add database type option
   options.AddOptions("Database options")("QwDatabase.accesslevel", po::value<string>(), "database access level (OFF,RO,RW)");
   options.AddOptions("Database options")("QwDatabase.dbname", po::value<string>(), "database name");
   options.AddOptions("Database options")("QwDatabase.dbserver", po::value<string>(), "database server name");
@@ -290,7 +344,8 @@ void QwDatabase::PrintServerInfo()
       printf(" name   : %s%12s%s",            BLUE, fDatabase.c_str(),   NORMAL);
       printf(" user   : %s%6s%s",             RED,  fDBUsername.c_str(), NORMAL);
       printf(" port   : %s%6d%s\n",           BLUE, fDBPortNumber,       NORMAL);
-      printf(" %s\n\n", server_status().c_str());
+      // FIXME (wdconinc) implement server_status();
+      //printf(" %s\n\n", server_status().c_str());
     }
   else
     {
@@ -319,41 +374,45 @@ bool QwDatabase::StoreDBVersion()
 {
   try
     {
-      mysqlpp::Query query = this->Query();
+      QwParitySchema::db_schema db_schema;
 
-      query << "SELECT * FROM db_schema";
-      std::vector<db_schema> res;
-      query.storein(res);
-      QwDebug << "QwDatabase::StoreDBVersion => Number of rows returned:  " << res.size() << QwLog::endl;
+      size_t record_count = QueryCount(
+          sqlpp::select(sqlpp::all_of(db_schema))
+          .from(db_schema)
+          .unconditionally()
+      );
+
+      QwDebug << "QwDatabase::StoreDBVersion => Number of rows returned:  " << record_count << QwLog::endl;
 
       // If there is more than one run in the DB with the same run number, then there will be trouble later on.  Catch and bomb out.
-      if (res.size()>1)
-	{
-	  QwError << "Unable to find unique schema version in database." << QwLog::endl;
-	  QwError << "Schema query returned " << res.size() << "rows." << QwLog::endl;
-	  QwError << "Please make sure that db_schema contains one unique." << QwLog::endl;
-	  this->Disconnect();
-	  return false;
-	}
+      if (record_count > 1)
+      {
+        QwError << "Unable to find unique schema version in database." << QwLog::endl;
+        QwError << "Schema query returned " << record_count << " rows." << QwLog::endl;
+        QwError << "Please make sure that db_schema contains one unique." << QwLog::endl;
+        Disconnect();
+        return false;
+      }
 
       // Run already exists in database.  Pull run_id and move along.
-      if (res.size()==1)
-	{
-	  QwDebug << "QwDatabase::StoreDBVersion => db_schema_id = " << res.at(0).db_schema_id << QwLog::endl;
+      if (record_count == 1)
+      {
+        // FIXME (wdconinc) print database version
+        // QwDebug << "QwDatabase::StoreDBVersion => db_schema_id = " << result_vec.at(0).db_schema_id << QwLog::endl;
 
-	  fVersionMajor=res.at(0).major_release_number;
-	  fVersionMinor=res.at(0).minor_release_number;
-	  fVersionPoint=res.at(0).point_release_number;
-	  this->Disconnect();
-	}
+        // fVersionMajor=result_vec.at(0).major_release_number;
+        // fVersionMinor=result_vec.at(0).minor_release_number;
+        // fVersionPoint=result_vec.at(0).point_release_number;
+        Disconnect();
+      }
     }
-  catch (const mysqlpp::Exception& er)
+  catch (const std::exception& er)
     {
       QwError << er.what() << QwLog::endl;
-      disconnect();
+      Disconnect();
       return false;
     }
 
-  return true;
+    return true;
 
 }
