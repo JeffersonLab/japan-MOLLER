@@ -15,9 +15,8 @@
 #include "QwParameterFile.h"
 #include "QwHelicityPattern.h"
 
-#define MYSQLPP_SSQLS_NO_STATICS
 #ifdef __USE_DATABASE__
-#include "QwParitySSQLS.h"
+#include "QwParitySchema.h"
 #include "QwParityDB.h"
 #endif // __USE_DATABASE__
 

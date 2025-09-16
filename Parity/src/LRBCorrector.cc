@@ -22,9 +22,8 @@ Last Modified: August 1, 2018 1:41 PM
 #include "VQwDataElement.h"
 #include "QwVQWK_Channel.h"
 #include "QwParameterFile.h"
-#define MYSQLPP_SSQLS_NO_STATICS
 #ifdef __USE_DATABASE__
-#include "QwParitySSQLS.h"
+#include "QwParitySchema.h"
 #include "QwParityDB.h"
 #endif // __USE_DATABASE__
 
