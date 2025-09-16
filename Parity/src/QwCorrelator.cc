@@ -28,10 +28,6 @@ Last Modified: August 1, 2018 1:43 PM
 #include "QwVQWK_Channel.h"
 #include "QwParameterFile.h"
 #include "QwRootFile.h"
-#ifdef __USE_DATABASE__
-#include "QwParitySchema.h"
-#include "QwParityDB.h"
-#endif // __USE_DATABASE__
 
 // Register this handler with the factory
 RegisterHandlerFactory(QwCorrelator);
