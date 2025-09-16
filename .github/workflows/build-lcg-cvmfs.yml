@@ -85,10 +85,11 @@ jobs:
 
             echo "::group::Compilation of dependencies with ccache"
             # Build the dependencies
+            # Note that postgresql fails in v0.65; see rbock/sqlpp11#623
             cmake -Bthirdparty/sqlpp11-build -Sthirdparty/sqlpp11/ \
               -DBUILD_MARIADB_CONNECTOR=ON \
               -DBUILD_MYSQL_CONNECTOR=ON \
-              -DBUILD_POSTGRESQL_CONNECTOR=OFF \ # fails in v0.65; rbock/sqlpp11#623
+              -DBUILD_POSTGRESQL_CONNECTOR=OFF \
               -DBUILD_SQLITE3_CONNECTOR=ON \
               -DCMAKE_INSTALL_PREFIX=thirdparty/sqlpp11-install \
               -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
