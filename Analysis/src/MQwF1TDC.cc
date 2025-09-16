@@ -190,34 +190,25 @@ std::ostream& operator<< (std::ostream& os, const MQwF1TDC &f1tdc)
 
 void MQwF1TDC::Print(Bool_t flag)
 {
-  if (! this) return; // do nothing if this is a null object
-
   if(flag) {
     std::cout << *this << std::endl;
   }
-  return;
 }
 
 
 void MQwF1TDC::PrintTDCHeader(Bool_t flag)
 {
-  if (! this) return; // do nothing if this is a null object
-
   if(flag) {
     std::cout << *this << std::endl;
   }
-  return;
 }
 
 
 void MQwF1TDC::PrintTDCData(Bool_t flag)
 {
-  if (! this) return; // do nothing if this is a null object
-  
   if(flag) {
     std::cout << *this << std::endl;
   }
-  return;
 }
 
 
