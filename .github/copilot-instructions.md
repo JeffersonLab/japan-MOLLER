@@ -59,14 +59,14 @@ export QWSCRATCH=/path/to/scratch/directory
 #### Build Process - NEVER CANCEL
 ```bash
 # Configure build - takes 1-3 minutes
-mkdir -p build && cd build
-cmake .. -DCMAKE_PREFIX_PATH=/path/to/root
+mkdir -p build
+cmake -B build -S . -DCMAKE_PREFIX_PATH=/path/to/root
 
 # Compile - takes 5-15 minutes. NEVER CANCEL. Set timeout to 30+ minutes.
-make -j$(nproc)
+make -C build -j$(nproc)
 
 # Install (optional)
-make install
+make -C build install
 ```
 
 ### Testing and Validation
@@ -102,8 +102,8 @@ After making changes, always test these complete workflows:
 2. **Panguin Plotting Tool**:
    ```bash
    # Build panguin separately
-   cd panguin && mkdir -p build && cd build
-   cmake .. && make
+   cd panguin && mkdir -p build
+   cmake -B build -S . && make -C build
    
    # Test basic plotting functionality
    ./build/panguin -f macros/default.cfg
