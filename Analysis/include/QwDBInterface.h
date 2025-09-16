@@ -21,7 +21,7 @@
 
 // Qweak headers
 #include "QwLog.h"
-//#include "QwParityDB.h"
+#include "QwParitySchema.h"
 
 // Forward declarations
 class QwParityDB;
