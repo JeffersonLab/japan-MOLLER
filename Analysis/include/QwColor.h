@@ -100,8 +100,8 @@ class QwColor
   public:
 
     /// Default constructor
-    QwColor(const Qw::EQwColor f = Qw::kDefaultForeground, const Qw::EQwColor b = Qw::kDefaultBackground)
-    : foreground(f), background(b) { };
+    QwColor(const Qw::EQwColor f = Qw::kDefaultForeground, [[maybe_unused]] const Qw::EQwColor b = Qw::kDefaultBackground)
+    : foreground(f) { };
     virtual ~QwColor() { };
 
   /// \brief Output stream operator
@@ -145,7 +145,6 @@ class QwColor
   private:
 
     Qw::EQwColor foreground; ///< Foreground color
-    Qw::EQwColor background; ///< Background color (not yet supported)
 
 }; // class QwColor
 
