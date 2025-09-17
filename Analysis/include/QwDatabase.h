@@ -98,6 +98,128 @@ class QwDatabase {
 
     DatabaseConnection fDBConnection;
 
+private:
+    // Enum to control connection checking behavior
+    enum class EConnectionCheck : bool {
+      kUnchecked = false,
+      kChecked = true
+    };
+
+    // Unified helper function to abstract the visitor pattern for database operations
+    template<EConnectionCheck CheckConnection = EConnectionCheck::kChecked, typename Lambda>
+    auto VisitConnection(Lambda&& lambda) -> decltype(lambda(std::declval<SQLiteConnection&>())) {
+      return std::visit([&lambda](auto& connection) -> decltype(lambda(connection)) {
+        using T = std::decay_t<decltype(connection)>;
+        if constexpr (std::is_same_v<T, std::monostate>) {
+          if constexpr (CheckConnection == EConnectionCheck::kChecked) {
+            throw std::runtime_error("Database not connected (no backend available)");
+          } else {
+            // For unchecked mode with monostate, return appropriate default
+            if constexpr (std::is_void_v<decltype(lambda(connection))>) {
+              return; // Return void for void lambdas
+            } else {
+              return decltype(lambda(connection)){}; // Return default-constructed value
+            }
+          }
+        } else {
+          if constexpr (CheckConnection == EConnectionCheck::kChecked) {
+            if (!connection) {
+              throw std::runtime_error("Database not connected");
+            }
+          }
+          return lambda(connection);
+        }
+      }, fDBConnection);
+    }
+
+  public:
+
+    // Helper function to iterate over QuerySelect results safely
+    template<typename Statement, typename Lambda>
+    void QuerySelectForEachResult(const Statement& statement, Lambda&& lambda) {
+      auto results = QuerySelect(statement);
+      ForEachResult(results, std::forward<Lambda>(lambda));
+    }
+
+    // Overload to work with already-executed query results
+    template<typename QueryResult, typename Lambda>
+    void ForEachResult(QueryResult& result, Lambda&& lambda) const {
+      std::visit([&lambda](auto& res) {
+        using T = std::decay_t<decltype(res)>;
+        if constexpr (!std::is_same_v<T, std::monostate>) {
+          for (const auto& row : res) {
+            lambda(row);
+          }
+        }
+        // If T is std::monostate, do nothing (no results to iterate over)
+      }, result);
+    }
+
+    // Helper function to count QuerySelect results safely
+    template<typename Statement>
+    size_t QuerySelectCountResults(const Statement& statement) {
+      size_t count = 0;
+      QuerySelectForEachResult(statement, [&count](const auto& row) {
+        (void)row; // Suppress unused variable warning
+        count++;
+      });
+      return count;
+    }
+
+    // Overload to work with already-executed query results
+    template<typename QueryResult>
+    size_t CountResults(QueryResult& result) const {
+      size_t count = 0;
+      ForEachResult(result, [&count](const auto& row) {
+        (void)row; // Suppress unused variable warning
+        count++;
+      });
+      return count;
+    }
+
+    // Helper function to get first result safely (returns optional-like behavior)
+    template<typename Statement, typename Lambda>
+    bool QuerySelectForFirstResult(const Statement& statement, Lambda&& lambda) {
+      bool found = false;
+      QuerySelectForEachResult(statement, [&lambda, &found](const auto& row) {
+        if (!found) {  // Only process first result
+          lambda(row);
+          found = true;
+        }
+      });
+      return found;
+    }
+
+    // Overload to work with already-executed query results
+    template<typename QueryResult, typename Lambda>
+    bool ForFirstResult(QueryResult& result, Lambda&& lambda) const {
+      bool found = false;
+      ForEachResult(result, [&lambda, &found](const auto& row) {
+        if (!found) {  // Only process first result
+          lambda(row);
+          found = true;
+        }
+      });
+      return found;
+    }
+
+    // Specialized helper for QuerySelect that returns a variant of all possible result types
+    template<typename Statement, typename Lambda>
+    auto VisitConnectionForSelect(Lambda&& lambda) -> QuerySelectReturnType<Statement> {
+      using ReturnVariant = QuerySelectReturnType<Statement>;
+      return std::visit([&lambda](auto& connection) -> ReturnVariant {
+        using T = std::decay_t<decltype(connection)>;
+        if constexpr (std::is_same_v<T, std::monostate>) {
+          throw std::runtime_error("Database not connected (no backend available)");
+        } else {
+          if (!connection) {
+            throw std::runtime_error("Database not connected");
+          }
+          return ReturnVariant{lambda(connection)};
+        }
+      }, fDBConnection);
+    }
+
   public:
 
     QwDatabase(const string &major = "00", const string &minor = "00", const string &point = "0000"); //!< Simple constructor
