@@ -62,3 +62,6 @@ SetupFiles/SET_ME_UP.*
 
 # Max burst indices
 Parity/prminput/max_burst_index.*
+
+# Generated database schema headers
+Parity/include/QwParitySchema.h
