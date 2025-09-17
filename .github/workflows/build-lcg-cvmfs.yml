@@ -70,9 +70,9 @@ jobs:
             build/qwmockdatagenerator -r 4 -e 1:20000 --config qwparity_simple.conf --detectors mock_newdets.map --data .
             echo "::endgroup::"
             
-            echo "::group::Mock data analysis"
-            # Analyze the generated mock data
-            build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary
+            echo "::group::Mock data analysis (MPS tree disabled)"
+            # Analyze the generated mock data with MPS tree disabled
+            build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary --disable-mps-tree
             echo "::endgroup::"
 
       - name: Upload prompt summary
@@ -83,3 +83,13 @@ jobs:
             summary_*.txt
           retention-days: 7
           if-no-files-found: error
+
+      - name: Upload mock data analysis artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mock-analysis-output-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: |
+            *.root
+          retention-days: 7
+          if-no-files-found: warn
