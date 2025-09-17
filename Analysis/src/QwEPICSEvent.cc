@@ -784,11 +784,11 @@ void QwEPICSEvent::FillDB(QwParityDB *db)
 
    try {
     db->Connect();
-    QwParitySchema::slow_controls_settings slowControlsSettings;
+    QwParitySchema::slow_controls_settings slow_controls_settings;
     bool recordsExist = db->QueryExists(
-        sqlpp::select(slowControlsSettings.slow_controls_settings_id)
-        .from(slowControlsSettings)
-        .where(slowControlsSettings.runlet_id == db->GetRunletID())
+        sqlpp::select(slow_controls_settings.slow_controls_settings_id)
+        .from(slow_controls_settings)
+        .where(slow_controls_settings.runlet_id == db->GetRunletID())
     );
 
     if (recordsExist) {
