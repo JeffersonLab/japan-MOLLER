@@ -323,7 +323,9 @@ class QwDatabase {
             } else {
               return result.insert_id();
             }
-          } else if constexpr (std::is_same_v<connection_type, sqlpp::normal_connection<sqlpp::mysql::connection_base>>) {
+          }
+#ifdef __USE_DATABASE_MYSQL__
+          if constexpr (std::is_same_v<connection_type, sqlpp::normal_connection<sqlpp::mysql::connection_base>>) {
             // MySQL might return the ID directly or have it in result
             if constexpr (std::is_integral_v<decltype(result)>) {
               return static_cast<uint64_t>(result);
@@ -331,6 +333,7 @@ class QwDatabase {
               return result.insert_id();
             }
           }
+#endif
         }
         // This should never be reached due to VisitConnection logic
         throw std::runtime_error("Unreachable: monostate in QueryInsertAndGetId lambda");
