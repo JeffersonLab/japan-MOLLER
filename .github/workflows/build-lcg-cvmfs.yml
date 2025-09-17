@@ -84,8 +84,6 @@ jobs:
           ccache --set-config=compression=true
           ccache --zero-stats
           echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
-      - name: Create qwparity.conf symlink
-        run: ln -sf Parity/prminput/qwparity_simple.conf qwparity.conf
       - uses: aidasoft/run-lcg-view@v1
         with:
           release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
