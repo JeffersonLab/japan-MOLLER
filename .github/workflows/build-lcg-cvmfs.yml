@@ -84,6 +84,34 @@ jobs:
           ccache --set-config=compression=true
           ccache --zero-stats
           echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
+      - name: Wait for MySQL to be ready
+        run: |
+          echo "Waiting for MySQL to be ready..."
+          echo "MySQL environment variables:"
+          echo "MYSQL_HOST: ${{ env.MYSQL_HOST }}"
+          echo "MYSQL_PORT: ${{ env.MYSQL_PORT }}"
+          echo "MYSQL_USER: ${{ env.MYSQL_USER }}"
+          echo "MYSQL_DB: ${{ env.MYSQL_DB }}"
+          
+          # Check if MySQL port is listening
+          echo "Checking if port 3306 is listening..."
+          netstat -ln | grep :3306 || echo "Port 3306 not found in netstat"
+          
+          # Try to connect with timeout
+          for i in {30..0}; do
+            if mysql -h${{ env.MYSQL_HOST }} -P${{ env.MYSQL_PORT }} -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} -e 'SELECT 1' ${{ env.MYSQL_DB }} &> /dev/null; then
+              echo "MySQL is ready!"
+              break
+            fi
+            echo "MySQL is unavailable - sleeping (attempt $((31-i))/30)"
+            sleep 2
+          done
+          if [ "$i" = 0 ]; then
+            echo "MySQL failed to become ready"
+            echo "Trying to connect with more verbose output:"
+            mysql -h${{ env.MYSQL_HOST }} -P${{ env.MYSQL_PORT }} -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} -e 'SELECT 1' ${{ env.MYSQL_DB }} || true
+            exit 1
+          fi
       - uses: aidasoft/run-lcg-view@v1
         with:
           release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
