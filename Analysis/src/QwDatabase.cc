@@ -114,6 +114,7 @@ Bool_t QwDatabase::ValidateConnection()
       // FIXME (wdconinc) duplication with Connect
       switch(fDBType) 
       {
+#ifdef __USE_DATABASE_MYSQL__
         case kQwDatabaseMySQL: {
           QwDebug << "QwDatabase::ValidateConnection() : Using MySQL backend." << QwLog::endl;
           sqlpp::mysql::connection_config config;
@@ -125,6 +126,8 @@ Bool_t QwDatabase::ValidateConnection()
           fDBConnection = std::make_shared<sqlpp::mysql::connection>(config);
           break;
         }
+#endif
+#ifdef __USE_DATABASE_SQLITE3__
         case kQwDatabaseSQLite3: {
           QwDebug << "QwDatabase::ValidateConnection() : Using SQLite3 backend." << QwLog::endl;
           sqlpp::sqlite3::connection_config config;
@@ -133,6 +136,8 @@ Bool_t QwDatabase::ValidateConnection()
           fDBConnection = std::make_shared<sqlpp::sqlite3::connection>(config);
           break;
         }
+#endif
+#ifdef __USE_DATABASE_POSTGRESQL__
         case kQwDatabasePostgreSQL: {
           QwDebug << "QwDatabase::ValidateConnection() : Using PostgreSQL backend." << QwLog::endl;
           sqlpp::postgresql::connection_config config;
@@ -144,6 +149,7 @@ Bool_t QwDatabase::ValidateConnection()
           fDBConnection = std::make_shared<sqlpp::postgresql::connection>(config);
           break;
         }
+#endif
         default: {
           QwError << "QwDatabase::ValidateConnection() : Unsupported database type." << QwLog::endl;
           fAccessLevel = kQwDatabaseOff;
@@ -226,6 +232,7 @@ bool QwDatabase::Connect()
     try {
       switch(fDBType) 
       {
+#ifdef __USE_DATABASE_MYSQL__
         case kQwDatabaseMySQL: {
           QwDebug << "QwDatabase::ValidateConnection() : Using MySQL backend." << QwLog::endl;
           sqlpp::mysql::connection_config config;
@@ -237,6 +244,8 @@ bool QwDatabase::Connect()
           fDBConnection = std::make_shared<sqlpp::mysql::connection>(config);
           break;
         }
+#endif
+#ifdef __USE_DATABASE_SQLITE3__
         case kQwDatabaseSQLite3: {
           QwDebug << "QwDatabase::ValidateConnection() : Using SQLite3 backend." << QwLog::endl;
           sqlpp::sqlite3::connection_config config;
@@ -245,6 +254,8 @@ bool QwDatabase::Connect()
           fDBConnection = std::make_shared<sqlpp::sqlite3::connection>(config);
           break;
         }
+#endif
+#ifdef __USE_DATABASE_POSTGRESQL__
         case kQwDatabasePostgreSQL: {
           QwDebug << "QwDatabase::ValidateConnection() : Using PostgreSQL backend." << QwLog::endl;
           sqlpp::postgresql::connection_config config;
@@ -256,6 +267,7 @@ bool QwDatabase::Connect()
           fDBConnection = std::make_shared<sqlpp::postgresql::connection>(config);
           break;
         }
+#endif
         default: {
           QwError << "QwDatabase::ValidateConnection() : Unsupported database type." << QwLog::endl;
           return false;
