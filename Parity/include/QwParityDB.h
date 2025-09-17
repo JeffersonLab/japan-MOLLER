@@ -25,6 +25,9 @@
 #ifdef __USE_DATABASE_SQLITE3__
 #include <sqlpp11/sqlite3/sqlite3.h>
 #endif
+#ifdef __USE_DATABASE_POSTGRESQL__
+#include <sqlpp11/postgresql/postgresql.h>
+#endif
 #endif // __USE_DATABASE__
 
 // ROOT headers
