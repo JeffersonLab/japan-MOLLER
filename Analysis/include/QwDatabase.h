@@ -50,12 +50,36 @@
 
 class QwDatabase {
   private:
-    enum EQwDBType {kQwDatabaseMySQL, kQwDatabaseSQLite3};
-    EQwDBType fDBType = kQwDatabaseSQLite3;  //!< Type of database backend to use
+    enum EQwDBType {kQwDatabaseNone, kQwDatabaseMySQL, kQwDatabaseSQLite3, kQwDatabasePostgreSQL};
+    EQwDBType fDBType = kQwDatabaseNone;  //!< Type of database backend to use
 
+    // Define connection types conditionally
+#ifdef __USE_DATABASE_SQLITE3__
     using SQLiteConnection = std::shared_ptr<sqlpp::sqlite3::connection>;
+#endif
+#ifdef __USE_DATABASE_MYSQL__
     using MySQLConnection = std::shared_ptr<sqlpp::mysql::connection>;
-    using DatabaseConnection = std::variant<SQLiteConnection, MySQLConnection>;
+#endif
+#ifdef __USE_DATABASE_POSTGRESQL__
+    using PostgreSQLConnection = std::shared_ptr<sqlpp::postgresql::connection>;
+#endif
+
+    // Build the variant type conditionally - much simpler approach!
+    using DatabaseConnection = std::variant<
+      std::monostate  // Always include monostate as fallback
+#ifdef __USE_DATABASE_SQLITE3__
+      , SQLiteConnection
+#endif
+#ifdef __USE_DATABASE_MYSQL__
+      , MySQLConnection
+#endif
+#ifdef __USE_DATABASE_POSTGRESQL__
+      , PostgreSQLConnection
+#endif
+    >;
+
+    >;
+
     DatabaseConnection fDBConnection;
 
   public:
