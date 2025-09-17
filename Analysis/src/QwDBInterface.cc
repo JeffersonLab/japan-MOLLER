@@ -9,7 +9,6 @@
 #include "QwDBInterface.h"
 
 // Qweak headers
-//#define MYSQLPP_SSQLS_NO_STATICS
 #ifdef __USE_DATABASE__
 #include "QwParitySchema.h"
 #include "QwParityDB.h"
