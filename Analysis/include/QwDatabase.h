@@ -81,6 +81,19 @@ class QwDatabase {
 #endif
     >;
 
+// Return type for QuerySelect that supports all possible result types
+    template<typename Statement>
+    using QuerySelectReturnType = std::variant<
+      std::monostate  // Always include monostate as fallback
+#ifdef __USE_DATABASE_SQLITE3__
+      , decltype((*std::declval<SQLiteConnection>())(std::declval<Statement>()))
+#endif
+#ifdef __USE_DATABASE_MYSQL__
+      , decltype((*std::declval<MySQLConnection>())(std::declval<Statement>()))
+#endif
+#ifdef __USE_DATABASE_POSTGRESQL__
+      , decltype((*std::declval<PostgreSQLConnection>())(std::declval<Statement>()))
+#endif
     >;
 
     DatabaseConnection fDBConnection;
