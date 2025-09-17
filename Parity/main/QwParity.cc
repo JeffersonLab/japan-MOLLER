@@ -739,8 +739,6 @@ Int_t main(Int_t argc, Char_t* argv[])
       patternsum.FillDB(&database);
       patternsum.FillErrDB(&database);
       epicsevent.FillDB(&database);
-      // FIXME (wdconinc) QwHelicityPattern::return_running_combiner is absent
-      //helicitypattern.return_running_combiner().FillDB(&database,"asymmetry");
       ringoutput.FillDB_MPS(&database, "optics");
     }
     #endif // __USE_DATABASE__    
