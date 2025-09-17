@@ -1611,10 +1611,11 @@ void  QwHelicity::FillDB(QwParityDB *db, TString type)
   if (type=="yield" || type=="asymmetry")
     return;
 
-  db->Connect();
+  //db->Connect();
+
   // No database operation
 
-  db->Disconnect();
+  //db->Disconnect();
 }
 
 
