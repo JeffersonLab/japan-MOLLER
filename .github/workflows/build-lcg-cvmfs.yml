@@ -47,12 +47,17 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_USER: ${{ env.MYSQL_USER }}
-          MYSQL_DATABASE: ${{ env.MYSQL_DB }}
-          MYSQL_PASSWORD: ${{ env.MYSQL_PASSWORD }}
-          MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_ROOT_PASSWORD }}
+          MYSQL_USER: qwparity
+          MYSQL_DATABASE: qwparity
+          MYSQL_PASSWORD: qwparity-${{ github.run_id }}-${{ github.run_attempt }}
+          MYSQL_ROOT_PASSWORD: root-${{ github.run_id }}-${{ github.run_attempt }}
         ports:
           - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
     steps:
       - uses: actions/checkout@v5
         with:
@@ -164,7 +169,12 @@ jobs:
             echo "::endgroup::"
 
             echo "::group::Create database (mysql)"
+            # Test MySQL connection first
+            echo "Testing MySQL connection..."
+            mysql -h${{ env.MYSQL_HOST }} -P${{ env.MYSQL_PORT }} -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} -e "SELECT VERSION();" ${{ env.MYSQL_DB }}
+            
             # Create and populate the database
+            echo "Creating database schema..."
             cat Parity/prminput/qwparity_schema.sql | mysql \
               -h${{ env.MYSQL_HOST }} \
               -P${{ env.MYSQL_PORT }} \
@@ -175,6 +185,7 @@ jobs:
 
             echo "::group::Print database contents (mysql)"
             # Print the database contents
+            echo "Showing MySQL tables..."
             mysql \
               -h${{ env.MYSQL_HOST }} \
               -P${{ env.MYSQL_PORT }} \
