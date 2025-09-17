@@ -62,8 +62,6 @@ jobs:
       - uses: cvmfs-contrib/github-action-cvmfs@v3
         with:
           cvmfs_repositories: 'sft.cern.ch,geant4.cern.ch'
-      - name: Create qwparity.conf symlink
-        run: ln -sf Parity/prminput/qwparity_simple.conf qwparity.conf
       - uses: aidasoft/run-lcg-view@v1
         with:
           release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
