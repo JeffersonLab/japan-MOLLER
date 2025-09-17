@@ -115,14 +115,9 @@ bool QwParityDB::SetRunNumber(const UInt_t runnum)
     auto query = sqlpp::select(sqlpp::all_of(run_table))
                  .from(run_table)
                  .where(run_table.run_number == runnum);
-    auto result = this->QuerySelect(query);
 
-    size_t result_count = 0;
-    std::visit([&](auto& res) {
-      for (const auto& row : res) {
-        result_count++;
-      }
-    }, result);
+    auto results = QuerySelect(query);
+    size_t result_count = CountResults(results);
     QwDebug << "Number of rows returned:  " << result_count << QwLog::endl;
 
     if (result_count != 1) {
@@ -134,12 +129,9 @@ bool QwParityDB::SetRunNumber(const UInt_t runnum)
 
     // Access first row from result
     UInt_t found_run_id = 0;
-    std::visit([&](auto& res) {
-      for (const auto& row : res) {
-        found_run_id = row.run_id;
-        break;
-      }
-    }, result);
+    ForFirstResult(results, [&](const auto& row) {
+      found_run_id = row.run_id;
+    });
     QwDebug << "Run ID = " << found_run_id << QwLog::endl;
 
     fRunNumber = runnum;
@@ -171,20 +163,15 @@ UInt_t QwParityDB::SetRunID(QwEventBuffer& qwevt)
       auto query = sqlpp::select(sqlpp::all_of(run_table))
                    .from(run_table)
                    .where(run_table.run_number == qwevt.GetRunNumber());
-      auto result = this->QuerySelect(query);
-      
-      size_t result_count = 0;
+      auto results = QuerySelect(query);
+
+      size_t result_count = CountResults(results);
       UInt_t first_run_id = 0;
       UInt_t first_run_number = 0;
-      std::visit([&](auto& res) {
-        for (const auto& row : res) {
-          if (result_count == 0) {
-            first_run_id = row.run_id;
-            first_run_number = row.run_number;
-          }
-          result_count++;
-        }
-      }, result);
+      ForFirstResult(results, [&](const auto& row) {
+        first_run_id = row.run_id;
+        first_run_number = row.run_number;
+      });
       
       QwDebug << "QwParityDB::SetRunID => Number of rows returned:  " << result_count << QwLog::endl;
 
@@ -241,7 +228,7 @@ UInt_t QwParityDB::SetRunID(QwEventBuffer& qwevt)
       );
         
       QwDebug << "QwParityDB::SetRunID() => Executing sqlpp11 run insert" << QwLog::endl;
-      auto insert_id = this->QueryInsertAndGetId(insert_query);
+      auto insert_id = QueryInsertAndGetId(insert_query);
       
       if (insert_id != 0)
       {
@@ -307,19 +294,14 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
                      .where(runlet_table.run_id == fRunID 
                             and runlet_table.full_run == "false" 
                             and runlet_table.segment_number == fSegmentNumber);
-        auto res = this->QuerySelect(query);
+        auto results = QuerySelect(query);
         
-        // Count results and process using visitor pattern  
-        size_t result_count = 0;
+        // Count results and process using helper functions
+        size_t result_count = CountResults(results);
         UInt_t found_runlet_id = 0;
-        std::visit([&](auto& result) {
-          for (const auto& row : result) {
-            result_count++;
-            if (result_count == 1) {
-              found_runlet_id = row.runlet_id;
-            }
-          }
-        }, res);
+        ForFirstResult(results, [&](const auto& row) {
+          found_runlet_id = row.runlet_id;
+        });
         
         QwDebug << "QwParityDB::SetRunletID => Number of rows returned:  " << result_count << QwLog::endl;
         
@@ -345,19 +327,14 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
                      .from(runlet_table)
                      .where(runlet_table.run_id == fRunID 
                             and runlet_table.full_run == "true");
-        auto res = this->QuerySelect(query);
+        auto results = QuerySelect(query);
         
-        // Count results and process using visitor pattern  
-        size_t result_count = 0;
+        // Count results and process using helper functions
+        size_t result_count = CountResults(results);
         UInt_t found_runlet_id = 0;
-        std::visit([&](auto& result) {
-          for (const auto& row : result) {
-            result_count++;
-            if (result_count == 1) {
-              found_runlet_id = row.runlet_id;
-            }
-          }
-        }, res);
+        ForFirstResult(results, [&](const auto& row) {
+          found_runlet_id = row.runlet_id;
+        });
         
         QwDebug << "QwParityDB::SetRunletID => Number of rows returned:  " << result_count << QwLog::endl;
         
@@ -411,7 +388,7 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
                                 runlet_table.full_run = "false");
         
         QwDebug << "QwParityDB::SetRunletID() => Executing sqlpp11 runlet insert (with segment)" << QwLog::endl;
-        insert_id = this->QueryInsertAndGetId(insert_query);
+        insert_id = QueryInsertAndGetId(insert_query);
       } else {
         auto insert_query = sqlpp::insert_into(runlet_table)
                            .set(runlet_table.run_id = fRunID,
@@ -424,7 +401,7 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
                                 runlet_table.full_run = "true");
         
         QwDebug << "QwParityDB::SetRunletID() => Executing sqlpp11 runlet insert (no segment)" << QwLog::endl;
-        insert_id = this->QueryInsertAndGetId(insert_query);
+        insert_id = QueryInsertAndGetId(insert_query);
       }
       
       
@@ -466,7 +443,6 @@ UInt_t QwParityDB::GetRunletID(QwEventBuffer& qwevt)
  */
 UInt_t QwParityDB::SetAnalysisID(QwEventBuffer& qwevt)
 {
-
   // If there is already an analysis_id for this run, then let's bomb out.
 
   try {
@@ -479,25 +455,23 @@ UInt_t QwParityDB::SetAnalysisID(QwEventBuffer& qwevt)
                         and analysis_table.slope_calculation == "off"
                         and analysis_table.slope_correction == "off"
                         and analysis_table.runlet_id == this->GetRunletID(qwevt));
-    auto result = this->QuerySelect(query);
+    auto results = QuerySelect(query);
+    size_t result_count = CountResults(results);
+    if (result_count > 0) {
+      QwError << "This runlet has already been analyzed by the engine!" << QwLog::endl;
+      QwError << "The following analysis_id values already exist in the database:  ";
+      ForEachResult(results, [&](const auto& row) {
+        QwError << row.analysis_id << " ";
+      });
+      QwError << QwLog::endl;
 
-    std::visit([&](auto& res) {
-      if (!res.empty()) {
-        QwError << "This runlet has already been analyzed by the engine!" << QwLog::endl;
-        QwError << "The following analysis_id values already exist in the database:  ";
-        for (const auto& row : res) {
-          QwError << row.analysis_id << " ";
-        }
-        QwError << QwLog::endl;
-
-        if (fDisableAnalysisCheck==false) {
-          QwError << "Analysis of this run will now be terminated."  << QwLog::endl;
-          // Note: return statement cannot be used in lambda to return from function
-        } else {
-          QwWarning << "Analysis will continue.  A duplicate entry with new analysis_id will be added to the analysis table." << QwLog::endl;
-        }
+      if (fDisableAnalysisCheck==false) {
+        QwError << "Analysis of this run will now be terminated."  << QwLog::endl;
+        // Note: return statement cannot be used in lambda to return from function
+      } else {
+        QwWarning << "Analysis will continue.  A duplicate entry with new analysis_id will be added to the analysis table." << QwLog::endl;
       }
-    }, result);
+    }
 
     Disconnect();
   }
@@ -617,7 +591,7 @@ UInt_t QwParityDB::SetAnalysisID(QwEventBuffer& qwevt)
                              analysis_table.analyzer_svn_url = analyzer_svn_url,
                              analysis_table.roc_flags = roc_flags);
     
-    auto insert_id = this->QueryInsertAndGetId(insert_query);
+    auto insert_id = QueryInsertAndGetId(insert_query);
     
     if (insert_id != 0)
     {
@@ -652,7 +626,7 @@ void QwParityDB::FillParameterFiles(QwSubsystemArrayParity& subsys){
       auto insert_query = sqlpp::insert_into(param_files_table)
                           .set(param_files_table.analysis_id = analysis_id,
                                param_files_table.filename = pfl_elem->GetName());
-      this->QueryExecute(insert_query);
+      QueryExecute(insert_query);
     }
 
     Disconnect();
@@ -716,24 +690,18 @@ UInt_t QwParityDB::GetMonitorID(const string& name, Bool_t zero_id_is_error)
 void QwParityDB::StoreMonitorIDs()
 {
   try {
-
     Connect();
+
     // Convert MySQL++ for_each to sqlpp11 select with range-based iteration
     QwParitySchema::monitor monitor_table{};
     auto query = sqlpp::select(sqlpp::all_of(monitor_table)).from(monitor_table).unconditionally();
-    auto res = this->QuerySelect(query);
-    
-    std::visit([&](auto& result) {
-      for (const auto& row : result) {
-        QwDebug << "StoreMonitorID:  monitor_id = " << row.monitor_id << " quantity = " << row.quantity << QwLog::endl;
-        QwParityDB::fMonitorIDs.insert(std::make_pair(row.quantity, row.monitor_id));
-      }
-    }, res);
+    QuerySelectForEachResult(query, [&](const auto& row) {
+      QwDebug << "StoreMonitorID:  monitor_id = " << row.monitor_id << " quantity = " << row.quantity << QwLog::endl;
+      QwParityDB::fMonitorIDs.insert(std::make_pair(row.quantity, row.monitor_id));
+    });
 
-//    QwDebug<< "QwParityDB::SetAnalysisID() => Analysis Insert Query = " << query.str() << QwLog::endl;
     Disconnect();
   }
-
   catch (const std::exception& er) {
     QwError << er.what() << QwLog::endl;
     Disconnect();
@@ -768,23 +736,16 @@ UInt_t QwParityDB::GetMainDetectorID(const string& name, Bool_t zero_id_is_error
  */
 void QwParityDB::StoreMainDetectorIDs()
 {
-
   try {
     Connect();
 
     // Convert MySQL++ for_each to sqlpp11 select with range-based iteration for main_detector table
     QwParitySchema::main_detector main_detector_table{};
     auto query = sqlpp::select(sqlpp::all_of(main_detector_table)).from(main_detector_table).unconditionally();
-    auto res = this->QuerySelect(query);
-    
-    std::visit([&](auto& result) {
-      for (const auto& row : result) {
-        QwDebug << "StoreMainDetectorID:  main_detector_id = " << row.main_detector_id << " quantity = " << row.quantity << QwLog::endl;
-        QwParityDB::fMainDetectorIDs.insert(std::make_pair(row.quantity, row.main_detector_id));
-      }
-    }, res);
-
-//    QwDebug<< "QwParityDB::SetAnalysisID() => Analysis Insert Query = " << query.str() << QwLog::endl;
+    QuerySelectForEachResult(query, [&](const auto& row) {
+      QwDebug << "StoreMainDetectorID:  main_detector_id = " << row.main_detector_id << " quantity = " << row.quantity << QwLog::endl;
+      QwParityDB::fMainDetectorIDs.insert(std::make_pair(row.quantity, row.main_detector_id));
+    });
 
     Disconnect();
   }
@@ -840,23 +801,16 @@ UInt_t QwParityDB::GetErrorCodeID(const string& name)
  */
 void QwParityDB::StoreSlowControlDetectorIDs()
 {
-
   try {
     Connect();
     
     // Convert MySQL++ for_each to sqlpp11 select for sc_detector table
     QwParitySchema::sc_detector sc_detector_table{};
     auto query = sqlpp::select(sqlpp::all_of(sc_detector_table)).from(sc_detector_table).unconditionally();
-    auto res = this->QuerySelect(query);
-    
-    std::visit([&](auto& result) {
-      for (const auto& row : result) {
-        QwDebug << "StoreSlowControlDetectorID: sc_detector_id = " << row.sc_detector_id << " name = " << row.name << QwLog::endl;
-        QwParityDB::fSlowControlDetectorIDs.insert(std::make_pair(row.name, row.sc_detector_id));
-      }
-    }, res);
-
-//    QwDebug<< "QwParityDB::SetAnalysisID() => Analysis Insert Query = " << query.str() << QwLog::endl;
+    QuerySelectForEachResult(query, [&](const auto& row) {
+      QwDebug << "StoreSlowControlDetectorID: sc_detector_id = " << row.sc_detector_id << " name = " << row.name << QwLog::endl;
+      QwParityDB::fSlowControlDetectorIDs.insert(std::make_pair(row.name, row.sc_detector_id));
+    });
 
     Disconnect();
   }
@@ -873,21 +827,16 @@ void QwParityDB::StoreSlowControlDetectorIDs()
  */
 void QwParityDB::StoreErrorCodeIDs()
 {
-
   try {
     Connect();
     
     // Convert MySQL++ for_each to sqlpp11 select for error_code table
     QwParitySchema::error_code error_code_table{};
     auto query = sqlpp::select(sqlpp::all_of(error_code_table)).from(error_code_table).unconditionally();
-    auto res = this->QuerySelect(query);
-    
-    std::visit([&](auto& result) {
-      for (const auto& row : result) {
-        QwDebug << "StoreErrorCodeID: error_code_id = " << row.error_code_id << " quantity = " << row.quantity << QwLog::endl;
-        QwParityDB::fErrorCodeIDs.insert(std::make_pair(row.quantity, row.error_code_id));
-      }
-    }, res);
+    QuerySelectForEachResult(query, [&](const auto& row) {
+      QwDebug << "StoreErrorCodeID: error_code_id = " << row.error_code_id << " quantity = " << row.quantity << QwLog::endl;
+      QwParityDB::fErrorCodeIDs.insert(std::make_pair(row.quantity, row.error_code_id));
+    });
 
     Disconnect();
   }
@@ -922,21 +871,16 @@ UInt_t QwParityDB::GetLumiDetectorID(const string& name, Bool_t zero_id_is_error
  */
 void QwParityDB::StoreLumiDetectorIDs()
 {
-
   try {
     Connect();
 
     // Convert MySQL++ for_each to sqlpp11 select for lumi_detector table
     QwParitySchema::lumi_detector lumi_detector_table{};
     auto query = sqlpp::select(sqlpp::all_of(lumi_detector_table)).from(lumi_detector_table).unconditionally();
-    auto res = this->QuerySelect(query);
-    
-    std::visit([&](auto& result) {
-      for (const auto& row : result) {
-        QwDebug << "StoreLumiDetectorID:  lumi_detector_id = " << row.lumi_detector_id << " quantity = " << row.quantity << QwLog::endl;
-        QwParityDB::fLumiDetectorIDs.insert(std::make_pair(row.quantity, row.lumi_detector_id));
-      }
-    }, res);
+    QuerySelectForEachResult(query, [&](const auto& row) {
+      QwDebug << "StoreLumiDetectorID:  lumi_detector_id = " << row.lumi_detector_id << " quantity = " << row.quantity << QwLog::endl;
+      QwParityDB::fLumiDetectorIDs.insert(std::make_pair(row.quantity, row.lumi_detector_id));
+    });
 
     Disconnect();
   }
@@ -968,21 +912,16 @@ const string QwParityDB::GetMeasurementID(const Int_t index)
 
 void QwParityDB::StoreMeasurementIDs()
 {
-
   try {
     Connect();
 
     // Convert MySQL++ for_each to sqlpp11 select for measurement_type table
     QwParitySchema::measurement_type measurement_type_table{};
     auto query = sqlpp::select(sqlpp::all_of(measurement_type_table)).from(measurement_type_table).unconditionally();
-    auto res = this->QuerySelect(query);
-    
-    std::visit([&](auto& result) {
-      for (const auto& row : result) {
-        QwDebug << "StoreMeasurementID:  measurement_type = " << row.measurement_type_id << QwLog::endl;
-        QwParityDB::fMeasurementIDs.push_back((std::string) row.measurement_type_id);
-      }
-    }, res);
+    QuerySelectForEachResult(query, [&](const auto& row) {
+      QwDebug << "StoreMeasurementID:  measurement_type = " << row.measurement_type_id << QwLog::endl;
+      QwParityDB::fMeasurementIDs.push_back((std::string) row.measurement_type_id);
+    });
 
     Disconnect();
   }
