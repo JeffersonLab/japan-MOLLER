@@ -25,8 +25,12 @@
 
 // Third Party Headers
 #include <sqlpp11/sqlpp11.h>
+#ifdef __USE_DATABASE_MYSQL__
 #include <sqlpp11/mysql/mysql.h>
+#endif
+#ifdef __USE_DATABASE_SQLITE3__
 #include <sqlpp11/sqlite3/sqlite3.h>
+#endif
 
 // Forward declarations
 class QwParityDB;
