@@ -67,7 +67,7 @@ class QwDatabase {
     using PostgreSQLConnection = std::shared_ptr<sqlpp::postgresql::connection>;
 #endif
 
-    // Build the variant type conditionally - much simpler approach!
+    // Build the variant type conditionally
     using DatabaseConnection = std::variant<
       std::monostate  // Always include monostate as fallback
 #ifdef __USE_DATABASE_SQLITE3__
