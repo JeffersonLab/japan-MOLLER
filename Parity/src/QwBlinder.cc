@@ -25,8 +25,8 @@
 
 ///  Run table aliases for seed query
 ///  (these types must be defined outside function scope)
-SQLPP_ALIAS_PROVIDER(run_first)
-SQLPP_ALIAS_PROVIDER(run_last)
+SQLPP_ALIAS_PROVIDER(run_first);
+SQLPP_ALIAS_PROVIDER(run_last);
 
 ///  Blinder event counter indices
 enum EQwBlinderErrorCounterIndices{
