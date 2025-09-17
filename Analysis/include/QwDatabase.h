@@ -81,7 +81,7 @@ class QwDatabase {
 #endif
     >;
 
-// Return type for QuerySelect that supports all possible result types
+    // Return type for QuerySelect that supports all possible result types
     template<typename Statement>
     using QuerySelectReturnType = std::variant<
       std::monostate  // Always include monostate as fallback
@@ -98,7 +98,7 @@ class QwDatabase {
 
     DatabaseConnection fDBConnection;
 
-private:
+  private:
     // Enum to control connection checking behavior
     enum class EConnectionCheck : bool {
       kUnchecked = false,
@@ -234,16 +234,24 @@ private:
 
     Bool_t       Connect();                    //!< Open a connection to the database using the predefined parameters.
     void         Disconnect() {
-      std::visit([](auto& conn) {
-        if (conn) {
-          conn.reset();
+      VisitConnection<EConnectionCheck::kUnchecked>([](auto& conn) {
+        using T = std::decay_t<decltype(conn)>;
+        if constexpr (!std::is_same_v<T, std::monostate>) {
+          if (conn) {
+            conn.reset();
+          }
         }
-      }, fDBConnection);
+      });
     }; //<! Close an open database connection
     Bool_t       Connected() {
-      return std::visit([](const auto& conn) -> bool {
-        return conn != nullptr;
-      }, fDBConnection);
+      return VisitConnection<EConnectionCheck::kUnchecked>([](const auto& conn) -> bool {
+        using T = std::decay_t<decltype(conn)>;
+        if constexpr (std::is_same_v<T, std::monostate>) {
+          return false;
+        } else {
+          return conn != nullptr;
+        }
+      });
     }
     const string GetServerVersion() {
       // FIXME (wdconinc) implement server_version();
@@ -256,18 +264,20 @@ private:
     // Separate methods for different query types to avoid std::visit return type issues
     template<typename Statement>
     size_t QueryCount(const Statement& statement) {
-      return std::visit([&statement](auto& connection) -> size_t {
-        if (!connection) {
-          throw std::runtime_error("Database not connected");
+      return VisitConnection<EConnectionCheck::kChecked>([&statement](auto& connection) -> size_t {
+        using T = std::decay_t<decltype(connection)>;
+        if constexpr (!std::is_same_v<T, std::monostate>) {
+          auto result = (*connection)(statement);
+          size_t count = 0;
+          for (const auto& row : result) {
+            (void)row; // Suppress unused variable warning
+            count++;
+          }
+          return count;
         }
-        auto result = (*connection)(statement);
-        size_t count = 0;
-        for (const auto& row : result) {
-          (void)row; // Suppress unused variable warning
-          count++;
-        }
-        return count;
-      }, fDBConnection);
+        // This should never be reached due to VisitConnection logic
+        throw std::runtime_error("Unreachable: monostate in QueryCount lambda");
+      });
     }
     
     template<typename Statement>
@@ -277,61 +287,54 @@ private:
     
     template<typename Statement>
     auto QuerySelect(const Statement& statement) {
-      // Use a lambda to handle the variant result in a type-safe way
-      return std::visit([&statement](auto& connection) -> 
-          std::variant<
-            decltype((*std::declval<SQLiteConnection>())(std::declval<Statement>())),
-            decltype((*std::declval<MySQLConnection>())(std::declval<Statement>()))
-          > {
-        if (!connection) {
-          throw std::runtime_error("Database not connected");
+      return VisitConnectionForSelect<Statement>([&statement](auto& connection) {
+        using T = std::decay_t<decltype(connection)>;
+        if constexpr (!std::is_same_v<T, std::monostate>) {
+          return (*connection)(statement);
         }
-        using ResultType = decltype((*connection)(statement));
-        using SQLiteResult = decltype((*std::declval<SQLiteConnection>())(std::declval<Statement>()));
-        using MySQLResult = decltype((*std::declval<MySQLConnection>())(std::declval<Statement>()));
-        using ReturnVariant = std::variant<SQLiteResult, MySQLResult>;
-        
-        return ReturnVariant{(*connection)(statement)};
-      }, fDBConnection);
+        // This should never be reached due to VisitConnectionForSelect logic
+        throw std::runtime_error("Unreachable: monostate in QuerySelect lambda");
+      });
     } //<! Execute a SELECT statement and return the result.
     
     template<typename Statement>
     void QueryExecute(const Statement& statement) {
-      std::visit([&statement](auto& connection) {
-        if (!connection) {
-          throw std::runtime_error("Database not connected");
+      VisitConnection<EConnectionCheck::kChecked>([&statement](auto& connection) {
+        using T = std::decay_t<decltype(connection)>;
+        if constexpr (!std::is_same_v<T, std::monostate>) {
+          (*connection)(statement);
         }
-        (*connection)(statement);
-      }, fDBConnection);
+      });
     } //<! Execute a statement without returning a result.
     
     template<typename InsertStatement>
     uint64_t QueryInsertAndGetId(const InsertStatement& statement) {
-      return std::visit([&statement](auto& connection) -> uint64_t {
-        if (!connection) {
-          throw std::runtime_error("Database not connected");
-        }
-        auto result = (*connection)(statement);
-        // For INSERT operations, some databases return the ID directly as uint64_t
-        // while others return it as a result object with insert_id() method
-        using connection_type = typename std::decay_t<decltype(*connection)>;
-        if constexpr (std::is_same_v<connection_type, sqlpp::normal_connection<sqlpp::sqlite3::connection_base>>) {
-          // SQLite might return the ID directly or have it in result
-          if constexpr (std::is_integral_v<decltype(result)>) {
-            return static_cast<uint64_t>(result);
-          } else {
-            return result.insert_id();
+      return VisitConnection<EConnectionCheck::kChecked>([&statement](auto& connection) -> uint64_t {
+        using T = std::decay_t<decltype(connection)>;
+        if constexpr (!std::is_same_v<T, std::monostate>) {
+          auto result = (*connection)(statement);
+          // For INSERT operations, some databases return the ID directly as uint64_t
+          // while others return it as a result object with insert_id() method
+          using connection_type = typename std::decay_t<decltype(*connection)>;
+          if constexpr (std::is_same_v<connection_type, sqlpp::normal_connection<sqlpp::sqlite3::connection_base>>) {
+            // SQLite might return the ID directly or have it in result
+            if constexpr (std::is_integral_v<decltype(result)>) {
+              return static_cast<uint64_t>(result);
+            } else {
+              return result.insert_id();
+            }
+          } else if constexpr (std::is_same_v<connection_type, sqlpp::normal_connection<sqlpp::mysql::connection_base>>) {
+            // MySQL might return the ID directly or have it in result
+            if constexpr (std::is_integral_v<decltype(result)>) {
+              return static_cast<uint64_t>(result);
+            } else {
+              return result.insert_id();
+            }
           }
-        } else if constexpr (std::is_same_v<connection_type, sqlpp::normal_connection<sqlpp::mysql::connection_base>>) {
-          // MySQL might return the ID directly or have it in result
-          if constexpr (std::is_integral_v<decltype(result)>) {
-            return static_cast<uint64_t>(result);
-          } else {
-            return result.insert_id();
-          }
         }
-        return 0;
-      }, fDBConnection);
+        // This should never be reached due to VisitConnection logic
+        throw std::runtime_error("Unreachable: monostate in QueryInsertAndGetId lambda");
+      });
     } //<! Execute an INSERT statement and return the auto-increment ID.
     
     const string GetVersion();                             //! Return a full version string for the DB schema
