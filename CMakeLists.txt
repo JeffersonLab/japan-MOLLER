@@ -65,16 +65,29 @@ file(GLOB my_project_headers
 #----------------------------------------------------------------------------
 # sqlpp11
 #
-find_package(Sqlpp11 
+list(APPEND SQLPP11_OPTIONAL_COMPONENTS SQLite3 MySQL MariaDB PostgreSQL)
+find_package(Sqlpp11
+  # Optional, so don't print failure warnings
+  QUIET
   # Optionally specify connectors needed to get corresponding targets.
-  # COMPONENTS SQLite3 SQLCipher MySQL MariaDB PostgreSQL
-  COMPONENTS SQLite3 MySQL MariaDB
+  OPTIONAL_COMPONENTS ${SQLPP11_OPTIONAL_COMPONENTS}
 )
 IF(Sqlpp11_FOUND)
   config_add_dependency(Sqlpp11)
   include_directories(${Sqlpp11_INCLUDE_DIR})
   add_definitions(-D__USE_DATABASE__)
-  message(STATUS ${Sqlpp11_LIBRARIES})
+  list(APPEND Sqlpp11_LIBRARIES sqlpp11::sqlpp11)
+
+  # Identify found backend components
+  foreach(component ${SQLPP11_OPTIONAL_COMPONENTS})
+    string(TOUPPER ${component} component_upper)
+    string(TOLOWER ${component} component_lower)
+    if(TARGET sqlpp11::${component_lower})
+      add_definitions(-D__USE_DATABASE_${component_upper}__)
+      list(APPEND Sqlpp11_LIBRARIES sqlpp11::${component_lower})
+    endif()
+  endforeach()
+  message(STATUS "Found ${Sqlpp11_LIBRARIES}")
 
   # Generate C++ headers from SQL schema at build time
   set(SCHEMA_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Parity/include)
@@ -107,6 +120,7 @@ IF(Sqlpp11_FOUND)
     message(WARNING "sqlpp11-ddl2cpp not found, SQL schema headers may not be generated")
   endif()
 ELSE()
+  message(STATUS "Sqlpp11 not found; database functionally disabled")
   set(Sqlpp11_LIBRARIES "")
   list(REMOVE_ITEM my_project_sources
     ${PROJECT_SOURCE_DIR}/Analysis/src/QwDatabase.cc
@@ -116,7 +130,10 @@ ENDIF(Sqlpp11_FOUND)
 #----------------------------------------------------------------------------
 # Boost
 #
-find_package(Boost COMPONENTS program_options REQUIRED)
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
+find_package(Boost 1.70 COMPONENTS program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIR})
 
@@ -240,10 +257,7 @@ target_link_libraries(${PROJECT_NAME}
 if(Sqlpp11_FOUND)
   target_link_libraries(${PROJECT_NAME}
     PUBLIC
-      sqlpp11::sqlpp11
-      sqlpp11::mariadb
-      sqlpp11::mysql
-      sqlpp11::sqlite3
+      ${Sqlpp11_LIBRARIES}
   )
   target_include_directories(${PROJECT_NAME}
     PRIVATE
