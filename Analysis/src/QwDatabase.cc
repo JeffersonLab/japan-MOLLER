@@ -133,6 +133,17 @@ Bool_t QwDatabase::ValidateConnection()
           fDBConnection = std::make_shared<sqlpp::sqlite3::connection>(config);
           break;
         }
+        case kQwDatabasePostgreSQL: {
+          QwDebug << "QwDatabase::ValidateConnection() : Using PostgreSQL backend." << QwLog::endl;
+          sqlpp::postgresql::connection_config config;
+          config.host = fDBServer;
+          config.user = fDBUsername;
+          config.password = fDBPassword;
+          config.database = fDatabase;
+          config.port = fDBPortNumber;
+          fDBConnection = std::make_shared<sqlpp::postgresql::connection>(config);
+          break;
+        }
         default: {
           QwError << "QwDatabase::ValidateConnection() : Unsupported database type." << QwLog::endl;
           fAccessLevel = kQwDatabaseOff;
@@ -234,6 +245,17 @@ bool QwDatabase::Connect()
           fDBConnection = std::make_shared<sqlpp::sqlite3::connection>(config);
           break;
         }
+        case kQwDatabasePostgreSQL: {
+          QwDebug << "QwDatabase::ValidateConnection() : Using PostgreSQL backend." << QwLog::endl;
+          sqlpp::postgresql::connection_config config;
+          config.host = fDBServer;
+          config.user = fDBUsername;
+          config.password = fDBPassword;
+          config.database = fDatabase;
+          config.port = fDBPortNumber;
+          fDBConnection = std::make_shared<sqlpp::postgresql::connection>(config);
+          break;
+        }
         default: {
           QwError << "QwDatabase::ValidateConnection() : Unsupported database type." << QwLog::endl;
           return false;
@@ -293,13 +315,15 @@ void QwDatabase::ProcessOptions(QwOptions &options)
       fDBType = kQwDatabaseMySQL;
     } else if (dbtype == "sqlite3") {
       fDBType = kQwDatabaseSQLite3;
+    } else if (dbtype == "postgresql") {
+      fDBType = kQwDatabasePostgreSQL;
     } else {
       QwWarning << "QwDatabase::ProcessOptions : Unrecognized database type \"" << dbtype << "\"; using SQLite3" << QwLog::endl;
       fDBType = kQwDatabaseSQLite3;
     }
   } else {
-    QwMessage << "QwDatabase::ProcessOptions : No database type specified; using SQLite3" << QwLog::endl;
-    fDBType = kQwDatabaseSQLite3;
+    QwMessage << "QwDatabase::ProcessOptions : No database type specified" << QwLog::endl;
+    fDBType = kQwDatabaseNone;
   }
   if (options.HasValue("QwDatabase.dbport")) {
     fDBPortNumber = options.GetValue<int>("QwDatabase.dbport");
