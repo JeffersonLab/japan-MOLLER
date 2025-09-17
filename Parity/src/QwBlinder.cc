@@ -464,31 +464,25 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db)
     QwError << "QwBlinder::ReadSeed executing sqlpp11 query for run number "
             << db->GetRunNumber() << QwLog::endl;
 
-    // Use QueryCount to avoid result type compatibility issues between MySQL/SQLite
-    size_t result_count = db->QueryCount(query);
-
+    auto results = db->QuerySelect(query);
+    size_t result_count = db->CountResults(results);
     if (result_count == 1) {
-      // Re-execute query to get the actual data
-      auto res = db->QuerySelect(query);
-      
-      std::visit([this](auto& result) {
-        for (const auto& row : result) {
-          // Process first (and only) row
-          fSeedID = row.seed_id;
-          if (!row.seed.is_null()) {
-            fSeed = row.seed.value();
-          } else {
-            QwError << "QwBlinder::ReadSeed(): Seed value came back NULL from the database." << QwLog::endl;
-            fSeedID = 0;
-            fSeed = kDefaultSeed;
-          }
-          break; // Only process first row
+      // Analyze the single result using database-agnostic interface
+      db->ForFirstResult(results, [this](const auto& row) {
+        // Process first (and only) row
+        fSeedID = row.seed_id;
+        if (!row.seed.is_null()) {
+          fSeed = row.seed.value();
+        } else {
+          QwError << "QwBlinder::ReadSeed(): Seed value came back NULL from the database." << QwLog::endl;
+          fSeedID = 0;
+          fSeed = kDefaultSeed;
         }
-      }, res);
+      });
 
       std::cout << "QwBlinder::ReadSeed():  Successfully read "
-      << Form("the fSeed with ID %d from the database.", fSeedID)
-      << std::endl;
+        << Form("the fSeed with ID %d from the database.", fSeedID)
+        << std::endl;
 
     } else {
       // Error Condition.
@@ -580,28 +574,23 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db, const UInt_t seed_id)
       auto query = sqlpp::select(sqlpp::all_of(seeds_table))
                    .from(seeds_table)
                    .where(seeds_table.seed_id == seed_id);
-      auto res = db->QuerySelect(query);
+      auto results = db->QuerySelect(query);
       
       // Process results using database-agnostic interface
       UInt_t found_seed_id = 0;
       TString found_seed = "";
-      size_t result_count = 0;
+      size_t result_count = db->CountResults(results);
       
-      std::visit([&](auto& result) {
-        for (const auto& row : result) {
-          result_count++;
-          if (result_count == 1) {
-            found_seed_id = row.seed_id;
-            if (!row.seed.is_null()) {
-              found_seed = row.seed.value();
-            } else {
-              QwError << "QwBlinder::ReadSeed(): Seed value came back NULL from the database." << QwLog::endl;
-              found_seed_id = 0;
-              found_seed = kDefaultSeed;
-            }
-          }
+      db->ForFirstResult(results, [&](const auto& row) {
+        found_seed_id = row.seed_id;
+        if (!row.seed.is_null()) {
+          found_seed = row.seed.value();
+        } else {
+          QwError << "QwBlinder::ReadSeed(): Seed value came back NULL from the database." << QwLog::endl;
+          found_seed_id = 0;
+          found_seed = kDefaultSeed;
         }
-      }, res);
+      });
       
       // Process result for specified seed
       if (result_count == 1) {
@@ -623,28 +612,24 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db, const UInt_t seed_id)
                    .order_by(seeds_table.seed_id.desc())
                    .limit(1u)
                    .unconditionally();
-      auto res = db->QuerySelect(query);
+      auto results = db->QuerySelect(query);
       
       // Process results using database-agnostic interface  
       UInt_t found_seed_id2 = 0;
       TString found_seed2 = "";
-      size_t result_count2 = 0;
 
-      std::visit([&](auto& result) {
-        for (const auto& row : result) {
-          result_count2++;
-          if (result_count2 == 1) {
-            found_seed_id2 = row.seed_id;
-            if (!row.seed.is_null()) {
-              found_seed2 = row.seed.value();
-            } else {
-              QwError << "QwBlinder::ReadSeed(): Seed value came back NULL from the database." << QwLog::endl;
-              found_seed_id2 = 0;
-              found_seed2 = kDefaultSeed;
-            }
-          }
+      size_t result_count2 = db->CountResults(results);
+
+      db->ForFirstResult(results, [&](const auto& row) {
+        found_seed_id2 = row.seed_id;
+        if (!row.seed.is_null()) {
+          found_seed2 = row.seed.value();
+        } else {
+          QwError << "QwBlinder::ReadSeed(): Seed value came back NULL from the database." << QwLog::endl;
+          found_seed_id2 = 0;
+          found_seed2 = kDefaultSeed;
         }
-      }, res);
+      });
 
       // Process result for most recent seed
       if (result_count2 == 1) {
