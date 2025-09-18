@@ -70,12 +70,10 @@ void  QwSubsystemArrayParity::FillDB(QwParityDB *db, TString type)
 
 void  QwSubsystemArrayParity::FillErrDB(QwParityDB *db, TString type)
 {
-  //  for (const_iterator subsys = dummy_source->begin(); subsys != dummy_source->end(); ++subsys) {
   for (iterator subsys = begin(); subsys != end(); ++subsys) {
     VQwSubsystemParity* subsys_parity = dynamic_cast<VQwSubsystemParity*>(subsys->get());
     subsys_parity->FillErrDB(db, type);
   }
-  return;
 }
 
 void QwSubsystemArrayParity::WritePromptSummary(QwPromptSummary *ps, TString type)
