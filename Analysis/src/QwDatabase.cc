@@ -95,17 +95,19 @@ Bool_t QwDatabase::ValidateConnection()
       QwError << "QwDatabase::ValidateConnection() : No database supplied.  Unable to connect." << QwLog::endl;
       fValidConnection=false;
     }
-    if (fDBUsername.empty()){
-      QwError << "QwDatabase::ValidateConnection() : No database username supplied.  Unable to connect." << QwLog::endl;
-      fValidConnection=false;
-    }
-    if (fDBPassword.empty()){
-      QwError << "QwDatabase::ValidateConnection() : No database password supplied.  Unable to connect." << QwLog::endl;
-      fValidConnection=false;
-    }
-    if (fDBServer.empty()){
-      QwMessage << "QwDatabase::ValidateConnection() : No database server supplied.  Attempting localhost." << QwLog::endl;
-      fDBServer = "localhost";
+    if (fDBType != kQwDatabaseSQLite3) {
+      if (fDBUsername.empty()){
+        QwError << "QwDatabase::ValidateConnection() : No database username supplied.  Unable to connect." << QwLog::endl;
+        fValidConnection=false;
+      }
+      if (fDBPassword.empty()){
+        QwError << "QwDatabase::ValidateConnection() : No database password supplied.  Unable to connect." << QwLog::endl;
+        fValidConnection=false;
+      }
+      if (fDBServer.empty()){
+        QwMessage << "QwDatabase::ValidateConnection() : No database server supplied.  Attempting localhost." << QwLog::endl;
+        fDBServer = "localhost";
+      }
     }
     //
     // Try to connect with given information
@@ -123,6 +125,7 @@ Bool_t QwDatabase::ValidateConnection()
           config.password = fDBPassword;
           config.database = fDatabase;
           config.port = fDBPortNumber;
+          config.debug = fDBDebug;
           fDBConnection = std::make_shared<sqlpp::mysql::connection>(config);
           break;
         }
@@ -133,6 +136,9 @@ Bool_t QwDatabase::ValidateConnection()
           sqlpp::sqlite3::connection_config config;
           config.path_to_database = fDatabase;
           config.password = fDBPassword;
+          // FIXME (wdconinc) use proper access flags
+          config.flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+          config.debug = fDBDebug;
           fDBConnection = std::make_shared<sqlpp::sqlite3::connection>(config);
           break;
         }
@@ -146,6 +152,7 @@ Bool_t QwDatabase::ValidateConnection()
           config.password = fDBPassword;
           config.database = fDatabase;
           config.port = fDBPortNumber;
+          config.debug = fDBDebug;
           fDBConnection = std::make_shared<sqlpp::postgresql::connection>(config);
           break;
         }
@@ -173,13 +180,13 @@ Bool_t QwDatabase::ValidateConnection()
 
     // Get database schema version information
     if (StoreDBVersion()) {
-      fValidConnection=true;
+      fValidConnection = true;
       // Success!
       QwMessage << "QwDatabase::ValidateConnection() : Successfully connected to requested database." << QwLog::endl;
     } else {
       QwError << "QwDatabase::ValidateConnection() : Unsuccessfully connected to requested database." << QwLog::endl;
       // Connection was bad so clear the member variables
-      fValidConnection=false;
+      fValidConnection = false;
       fDatabase.clear();
       fDBServer.clear();
       fDBUsername.clear();
@@ -190,10 +197,10 @@ Bool_t QwDatabase::ValidateConnection()
   }
 
   // Check to make sure database and QwDatabase schema versions match up.
-  if (fAccessLevel==kQwDatabaseReadWrite && 
+  if (fAccessLevel == kQwDatabaseReadWrite && 
       (fVersionMajor != kValidVersionMajor ||
-      fVersionMinor != kValidVersionMinor ||
-      fVersionPoint < kValidVersionPoint)) {
+       fVersionMinor != kValidVersionMinor ||
+       fVersionPoint <  kValidVersionPoint)) {
     fValidConnection = false;
     QwError << "QwDatabase::ValidConnection() : Connected database schema inconsistent with current version of analyzer." << QwLog::endl;
     QwError << "  Database version is " << this->GetVersion() << QwLog::endl;
@@ -251,6 +258,9 @@ bool QwDatabase::Connect()
           sqlpp::sqlite3::connection_config config;
           config.path_to_database = fDatabase;
           config.password = fDBPassword;
+          // FIXME (wdconinc) use proper access flags
+          config.flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+          config.debug = fDBDebug;
           fDBConnection = std::make_shared<sqlpp::sqlite3::connection>(config);
           break;
         }
@@ -303,6 +313,7 @@ void QwDatabase::DefineOptions(QwOptions& options)
   options.AddOptions("Database options")("QwDatabase.dbusername", po::value<string>(), "database username");
   options.AddOptions("Database options")("QwDatabase.dbpassword", po::value<string>(), "database password");
   options.AddOptions("Database options")("QwDatabase.dbport", po::value<int>()->default_value(0), "database server port number (defaults to standard mysql port)");
+  options.AddOptions("Database options")("QwDatabase.debug", po::value<bool>()->default_value(false), "enable database debug output (default false)");
 
   std::stringstream dbtypes;
   dbtypes << "none";
@@ -375,8 +386,9 @@ void QwDatabase::ProcessOptions(QwOptions &options)
   if (options.HasValue("QwDatabase.dbserver")) {
     fDBServer = options.GetValue<string>("QwDatabase.dbserver");
   }
-
-  return;
+  if (options.HasValue("QwDatabase.debug")) {
+    fDBDebug = options.GetValue<bool>("QwDatabase.debug");
+  }
 }
 
 void QwDatabase::ProcessOptions(const EQwDBType& dbtype, const TString& dbname, const TString& username, const TString& passwd, const TString& dbhost, const Int_t dbport, const TString& accesslevel)
@@ -450,13 +462,11 @@ bool QwDatabase::StoreDBVersion()
   try
     {
       QwParitySchema::db_schema db_schema;
-
       size_t record_count = QueryCount(
           sqlpp::select(sqlpp::all_of(db_schema))
           .from(db_schema)
           .unconditionally()
       );
-
       QwDebug << "QwDatabase::StoreDBVersion => Number of rows returned:  " << record_count << QwLog::endl;
 
       // If there is more than one run in the DB with the same run number, then there will be trouble later on.  Catch and bomb out.
@@ -472,12 +482,20 @@ bool QwDatabase::StoreDBVersion()
       // Run already exists in database.  Pull run_id and move along.
       if (record_count == 1)
       {
-        // FIXME (wdconinc) print database version
-        // QwDebug << "QwDatabase::StoreDBVersion => db_schema_id = " << result_vec.at(0).db_schema_id << QwLog::endl;
-
-        // fVersionMajor=result_vec.at(0).major_release_number;
-        // fVersionMinor=result_vec.at(0).minor_release_number;
-        // fVersionPoint=result_vec.at(0).point_release_number;
+        auto results = QuerySelect(
+            sqlpp::select(sqlpp::all_of(db_schema))
+            .from(db_schema)
+            .unconditionally()
+        );
+        ForFirstResult(
+          results,
+          [this](const auto& row) {
+            QwDebug << "QwDatabase::StoreDBVersion => db_schema_id = " << row.db_schema_id << QwLog::endl;
+            this->fVersionMajor = row.major_release_number;
+            this->fVersionMinor = row.minor_release_number;
+            this->fVersionPoint = row.point_release_number;
+          }
+        );
         Disconnect();
       }
     }

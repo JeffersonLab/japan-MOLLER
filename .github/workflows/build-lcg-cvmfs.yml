@@ -128,7 +128,12 @@ jobs:
             # Create and populate the database
             # (sqlite3 only supports AUTOINCREMENT on INTEGER keys)
             # (sqlite3 does not support ENUM, so convert to TEXT with CHECK)
-            sed 's/AUTO_INCREMENT//g;s/\(\S*\)\sENUM(\([^)]*\))/\1 TEXT CHECK(\1 in (\2))/g' Parity/prminput/qwparity_schema.sql | sqlite3 qwparity.db
+            sed -e 's/AUTO_INCREMENT//g' \
+                -e 's/\(\S*\)\sENUM(\([^)]*\))/\1 TEXT CHECK(\1 in (\2))/g' \
+                Parity/prminput/qwparity_schema.sql | sqlite3 qwparity.db
+            # Insert dummy schema version (compare with QwParityDB.h)
+            sqlite3 qwparity.db "INSERT INTO db_schema VALUES(0, '01','04','0000','now','build-lcg-cvmfs.yml');"
+            echo "::endgroup::"
 
             echo "::group::Mock data analysis (sqlite3)"
             # Analyze the generated mock data

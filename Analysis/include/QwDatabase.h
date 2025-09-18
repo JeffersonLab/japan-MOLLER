@@ -367,6 +367,7 @@ class QwDatabase {
     string fDBPassword;      //!< DB account password
     UInt_t fDBPortNumber;    //!< Port number to connect to on server (mysql default port is 3306)
     Bool_t fValidConnection; //!< True if a valid connection was established using defined connection information
+    Bool_t fDBDebug;         //!< True if database debug information should be printed to stdout
 
     string fVersionMajor;    //!< Major version number of current DB schema
     string fVersionMinor;    //!< Minor version number of current DB schema
