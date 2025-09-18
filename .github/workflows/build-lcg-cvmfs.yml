@@ -36,28 +36,6 @@ jobs:
             compiler: "gcc14"
             opt: "opt"
             cxxflags: ""
-    env:
-      MYSQL_DB: qwparity
-      MYSQL_HOST: 127.0.0.1 # avoid localhost since it will use sockets
-      MYSQL_PORT: 3306
-      MYSQL_USER: qwparity
-      MYSQL_PASSWORD: qwparity-${{ github.run_id }}-${{ github.run_attempt }}
-      MYSQL_ROOT_PASSWORD: root-${{ github.run_id }}-${{ github.run_attempt }}
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_USER: qwparity
-          MYSQL_DATABASE: qwparity
-          MYSQL_PASSWORD: qwparity-${{ github.run_id }}-${{ github.run_attempt }}
-          MYSQL_ROOT_PASSWORD: root-${{ github.run_id }}-${{ github.run_attempt }}
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
     steps:
       - uses: actions/checkout@v5
         with:
@@ -84,34 +62,6 @@ jobs:
           ccache --set-config=compression=true
           ccache --zero-stats
           echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
-      - name: Wait for MySQL to be ready
-        run: |
-          echo "Waiting for MySQL to be ready..."
-          echo "MySQL environment variables:"
-          echo "MYSQL_HOST: ${{ env.MYSQL_HOST }}"
-          echo "MYSQL_PORT: ${{ env.MYSQL_PORT }}"
-          echo "MYSQL_USER: ${{ env.MYSQL_USER }}"
-          echo "MYSQL_DB: ${{ env.MYSQL_DB }}"
-          
-          # Check if MySQL port is listening
-          echo "Checking if port 3306 is listening..."
-          netstat -ln | grep :3306 || echo "Port 3306 not found in netstat"
-          
-          # Try to connect with timeout
-          for i in {30..0}; do
-            if mysql -h${{ env.MYSQL_HOST }} -P${{ env.MYSQL_PORT }} -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} -e 'SELECT 1' ${{ env.MYSQL_DB }} &> /dev/null; then
-              echo "MySQL is ready!"
-              break
-            fi
-            echo "MySQL is unavailable - sleeping (attempt $((31-i))/30)"
-            sleep 2
-          done
-          if [ "$i" = 0 ]; then
-            echo "MySQL failed to become ready"
-            echo "Trying to connect with more verbose output:"
-            mysql -h${{ env.MYSQL_HOST }} -P${{ env.MYSQL_PORT }} -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} -e 'SELECT 1' ${{ env.MYSQL_DB }} || true
-            exit 1
-          fi
       - uses: aidasoft/run-lcg-view@v1
         with:
           release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
@@ -193,50 +143,6 @@ jobs:
             echo "::group::Print database contents (sqlite3)"
             # Print the database contents
             sqlite3 qwparity.db .dump | tee qwparity-sqlite3.sql
-            echo "::endgroup::"
-
-            echo "::group::Create database (mysql)"
-            # Test MySQL connection first
-            echo "Testing MySQL connection..."
-            mysql -h${{ env.MYSQL_HOST }} -P${{ env.MYSQL_PORT }} -u${{ env.MYSQL_USER }} -p${{ env.MYSQL_PASSWORD }} -e "SELECT VERSION();" ${{ env.MYSQL_DB }}
-            
-            # Create and populate the database
-            echo "Creating database schema..."
-            cat Parity/prminput/qwparity_schema.sql | mysql \
-              -h${{ env.MYSQL_HOST }} \
-              -P${{ env.MYSQL_PORT }} \
-              -u${{ env.MYSQL_USER }} \
-              -p${{ env.MYSQL_PASSWORD }} \
-              ${{ env.MYSQL_DB }}
-            echo "::endgroup::"
-
-            echo "::group::Print database contents (mysql)"
-            # Print the database contents
-            echo "Showing MySQL tables..."
-            mysql \
-              -h${{ env.MYSQL_HOST }} \
-              -P${{ env.MYSQL_PORT }} \
-              -u${{ env.MYSQL_USER }} \
-              -p${{ env.MYSQL_PASSWORD }} \
-              ${{ env.MYSQL_DB }} -e "SHOW TABLES;" | tee qwparity-mysql.sql
-            echo "::endgroup::"
-
-            echo "::group::Mock data analysis (mysql)"
-            # Analyze the generated mock data
-            build/qwparity -r 4 \
-              --config qwparity_simple.conf \
-              --detectors mock_newdets.map \
-              --datahandlers mock_datahandlers.map \
-              --data . \
-              --rootfiles . \
-              --write-promptsummary \
-              --QwDatabase.accesslevel RW \
-              --QwDatabase.dbtype mysql \
-              --QwDatabase.dbname ${{ env.MYSQL_DB }} \
-              --QwDatabase.host ${{ env.MYSQL_HOST }} \
-              --QwDatabase.port ${{ env.MYSQL_PORT }} \
-              --QwDatabase.user ${{ env.MYSQL_USER }} \
-              --QwDatabase.password ${{ env.MYSQL_PASSWORD }}
             echo "::endgroup::"
 
             echo "::group:: Profile analysis"
