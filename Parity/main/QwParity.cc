@@ -235,11 +235,13 @@ Int_t main(Int_t argc, Char_t* argv[])
     datahandlerarray_burst.ConstructTreeBranches(burstrootfile, "burst_", "|stat");
 
     // Construct RNTuple fields for data handlers if enabled
+#ifdef HAS_RNTUPLE_SUPPORT
     if (gQwOptions.GetValue<bool>("enable-rntuples")) {
       datahandlerarray_evt.ConstructNTupleFields(treerootfile, "evt_");
       datahandlerarray_mul.ConstructNTupleFields(treerootfile);
       datahandlerarray_burst.ConstructNTupleFields(burstrootfile, "burst_", "|stat");
     }
+#endif
 
     treerootfile->ConstructTreeBranches("evts", "Running sum tree", eventsum, "|stat");
     treerootfile->ConstructTreeBranches("muls", "Running sum tree", patternsum, "|stat");
@@ -655,23 +657,29 @@ Int_t main(Int_t argc, Char_t* argv[])
      *  here, in case we run over multiple runs at a time.           */
     if (treerootfile == historootfile) {
       // Use different write methods based on output format
+#ifdef HAS_RNTUPLE_SUPPORT
       if (gQwOptions.GetValue<bool>("enable-rntuples") && gQwOptions.GetValue<bool>("disable-trees")) {
         // RNTuple-only mode: use Close() for proper RNTuple finalization
         treerootfile->Close();
       } else {
+#endif
         // TTree mode or mixed mode: use Write() for explicit tree writing
         treerootfile->Write(0, TObject::kOverwrite);
         treerootfile->Close();
+#ifdef HAS_RNTUPLE_SUPPORT
       }
+#endif
       delete treerootfile; treerootfile = 0; burstrootfile = 0; historootfile = 0;
     } else {
       // Use different write methods based on output format
+#ifdef HAS_RNTUPLE_SUPPORT
       if (gQwOptions.GetValue<bool>("enable-rntuples") && gQwOptions.GetValue<bool>("disable-trees")) {
         // RNTuple-only mode: use Close() for proper RNTuple finalization
         treerootfile->Close();
         burstrootfile->Close();
         historootfile->Close();
       } else {
+#endif
         // TTree mode or mixed mode: use Write() for explicit tree writing
         treerootfile->Write(0, TObject::kOverwrite);
         burstrootfile->Write(0, TObject::kOverwrite);
@@ -679,7 +687,9 @@ Int_t main(Int_t argc, Char_t* argv[])
         treerootfile->Close();
         burstrootfile->Close();
         historootfile->Close();
+#ifdef HAS_RNTUPLE_SUPPORT
       }
+#endif
       delete treerootfile; treerootfile = 0;
       delete burstrootfile; burstrootfile = 0;
       delete historootfile; historootfile = 0;

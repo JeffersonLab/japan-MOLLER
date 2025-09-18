@@ -99,6 +99,7 @@ class QwRootTree {
 
     /// Construct the tree
     void ConstructNewTree() {
+      QwMessage << "New tree: " << fName << ", " << fDesc << QwLog::endl;
       
       fTree = new TTree(fName.c_str(), fDesc.c_str());
             
@@ -761,19 +762,8 @@ class QwRootFile {
       if (fRootFile) {
         TString rootfilename = fRootFile->GetName();
         
-        fRootFile->Close();
-        // Note: Don't delete fRootFile here - let destructor handle it
-        
-        // Handle file renaming for temporary files
-        if (fUseTemporaryFile && fMakePermanent) {
-          int err = rename( rootfilename.Data(), fPermanentName.Data() );
-          if (err) {
-            QwWarning << "Couldn't rename " << rootfilename << " to " << fPermanentName << QwLog::endl;
-          } else {
-            QwMessage << "Was able to rename " << rootfilename << " to " << fPermanentName << QwLog::endl;
-            QwMessage << "Root file is " << fPermanentName << QwLog::endl;
-          }
-        }
+        fRootFile->Close();        
+
       }
       
       if (fMapFile) fMapFile->Close();
