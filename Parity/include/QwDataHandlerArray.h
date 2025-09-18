@@ -126,7 +126,6 @@ class QwDataHandlerArray:
     /// \brief Fill the database
     void FillDB(QwParityDB *db, TString type);
     //    void FillErrDB(QwParityDB *db, TString type);
-    //    const QwDataHandlerArray *dummy_source;
 
     void  ClearEventData();
     void  ProcessEvent();

@@ -18,16 +18,18 @@
 #include <variant>
 
 // Third Party Headers
+#ifdef __USE_DATABASE__
 #include <sqlpp11/sqlpp11.h>
 #ifdef __USE_DATABASE_MYSQL__
 #include <sqlpp11/mysql/mysql.h>
-#endif
+#endif // __USE_DATABASE_MYSQL__
 #ifdef __USE_DATABASE_SQLITE3__
 #include <sqlpp11/sqlite3/sqlite3.h>
-#endif
+#endif // __USE_DATABASE_SQLITE3__
 #ifdef __USE_DATABASE_POSTGRESQL__
 #include <sqlpp11/postgresql/postgresql.h>
-#endif
+#endif // __USE_DATABASE_POSTGRESQL__
+#endif // __USE_DATABASE__
 
 // ROOT headers
 #include "TString.h"

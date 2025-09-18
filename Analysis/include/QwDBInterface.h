@@ -21,32 +21,27 @@
 
 // Qweak headers
 #include "QwLog.h"
-#include "QwParitySchema.h"
 
 // Third Party Headers
+#ifdef __USE_DATABASE__
 #include <sqlpp11/sqlpp11.h>
 #ifdef __USE_DATABASE_MYSQL__
 #include <sqlpp11/mysql/mysql.h>
-#endif
+#endif // __USE_DATABASE_MYSQL__
 #ifdef __USE_DATABASE_SQLITE3__
 #include <sqlpp11/sqlite3/sqlite3.h>
-#endif
+#endif // __USE_DATABASE_SQLITE3__
 #ifdef __USE_DATABASE_POSTGRESQL__
 #include <sqlpp11/postgresql/postgresql.h>
-#endif
+#endif // __USE_DATABASE_POSTGRESQL__
+#endif // __USE_DATABASE__
 
 // Forward declarations
 class QwParityDB;
 
 #ifdef __USE_DATABASE__
-// Forward declaration for schema types
+#include "QwParitySchema.h"
 namespace QwParitySchema {
-  struct beam;
-  struct beam_errors;
-  struct lumi_data;
-  struct md_data;
-  struct md_errors;
-
   // Since sqlpp11 is a schema definition library, we need to define
   // our own data holding structures for bulk insertions.
   // These structures must match the database table structure.

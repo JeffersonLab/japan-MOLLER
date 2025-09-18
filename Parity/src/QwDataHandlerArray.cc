@@ -445,12 +445,10 @@ void  QwDataHandlerArray::FillDB(QwParityDB *db, TString type)
 /*
 void  QwDataHandlerArray::FillErrDB(QwParityDB *db, TString type)
 {
-  //  for (const_iterator handler = dummy_source->begin(); handler != dummy_source->end(); ++handler) {
   for (iterator handler = begin(); handler != end(); ++handler) {
     VQwDataHandler* handler_parity = dynamic_cast<VQwDataHandler*>(handler->get());
     handler_parity->FillErrDB(db, type);
   }
-  return;
 }
 */
 
