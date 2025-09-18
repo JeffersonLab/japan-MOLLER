@@ -303,7 +303,21 @@ void QwDatabase::DefineOptions(QwOptions& options)
   options.AddOptions("Database options")("QwDatabase.dbusername", po::value<string>(), "database username");
   options.AddOptions("Database options")("QwDatabase.dbpassword", po::value<string>(), "database password");
   options.AddOptions("Database options")("QwDatabase.dbport", po::value<int>()->default_value(0), "database server port number (defaults to standard mysql port)");
-  options.AddOptions("Database options")("QwDatabase.dbtype", po::value<string>()->default_value("sqlite3"), "database type (mysql, sqlite3)");
+
+  std::stringstream dbtypes;
+  dbtypes << "none";
+#ifdef __USE_DATABASE_SQLITE3__
+      dbtypes << ",sqlite3";
+#endif // __USE_DATABASE_SQLITE3__
+#ifdef __USE_DATABASE_MYSQL__
+      dbtypes << ",mysql";
+#endif // __USE_DATABASE_MYSQL__
+#ifdef __USE_DATABASE_POSTGRESQL__
+      dbtypes << ",postgresql";
+#endif // __USE_DATABASE_POSTGRESQL__
+  std::stringstream desc;
+  desc << "database type (" << dbtypes.str() << ")";
+  options.AddOptions("Database options")("QwDatabase.dbtype", po::value<string>()->default_value("none"), desc.str().c_str());
 }
 
 /*!
@@ -323,15 +337,24 @@ void QwDatabase::ProcessOptions(QwOptions &options)
   }
   if (options.HasValue("QwDatabase.dbtype")) {
     string dbtype = options.GetValue<string>("QwDatabase.dbtype");
+    fDBType = kQwDatabaseNone;
+#ifdef __USE_DATABASE_MYSQL__
     if (dbtype == "mysql") {
       fDBType = kQwDatabaseMySQL;
-    } else if (dbtype == "sqlite3") {
+    }
+#endif
+#ifdef __USE_DATABASE_SQLITE3__
+    if (dbtype == "sqlite3") {
       fDBType = kQwDatabaseSQLite3;
-    } else if (dbtype == "postgresql") {
+    }
+#endif
+#ifdef __USE_DATABASE_POSTGRESQL__
+    if (dbtype == "postgresql") {
       fDBType = kQwDatabasePostgreSQL;
-    } else {
-      QwWarning << "QwDatabase::ProcessOptions : Unrecognized database type \"" << dbtype << "\"; using SQLite3" << QwLog::endl;
-      fDBType = kQwDatabaseSQLite3;
+    }
+#endif
+    if (fDBType == kQwDatabaseNone) {
+      QwWarning << "QwDatabase::ProcessOptions : Unrecognized database type \"" << dbtype << "\"; using none" << QwLog::endl;
     }
   } else {
     QwMessage << "QwDatabase::ProcessOptions : No database type specified" << QwLog::endl;
