@@ -223,6 +223,11 @@ endforeach()
 add_library(${PROJECT_NAME} SHARED ${my_project_sources} ${my_project_headers})
 add_dependencies(${PROJECT_NAME} check_git_repository)
 
+# Add schema generation dependency if sqlpp11 is available
+if(Sqlpp11_FOUND AND TARGET generate_schema)
+  add_dependencies(${PROJECT_NAME} generate_schema)
+endif()
+
 target_include_directories(${PROJECT_NAME}
   PUBLIC
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
