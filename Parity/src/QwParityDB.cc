@@ -216,6 +216,7 @@ UInt_t QwParityDB::SetRunID(QwEventBuffer& qwevt)
         run_table.run_number = qwevt.GetRunNumber(),
         run_table.run_type = "good", // qwevt.GetRunType(); RunType is the confused name because we have also a CODA run type.
         // Convert Unix timestamps to sqlpp11 datetime using chrono time_point
+        // FIXME (wdconinc) verify conversion
         run_table.start_time = std::chrono::system_clock::from_time_t(qwevt.GetStartUnixTime()),
         run_table.end_time = std::chrono::system_clock::from_time_t(qwevt.GetEndUnixTime()),
         run_table.n_mps = 0,
@@ -283,7 +284,7 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
   try
     {
       Connect();
-      // Convert MySQL++ SELECT query to sqlpp11
+
       QwParitySchema::runlet runlet_table{};
       
       // Query is slightly different if file segments are being chained together for replay or not.
@@ -371,7 +372,6 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
     {
       Connect();
 
-      // Convert MySQL++ insert to sqlpp11 for runlet table
       QwParitySchema::runlet runlet_table{};
       uint64_t insert_id = 0;
       
@@ -565,7 +565,7 @@ UInt_t QwParityDB::SetAnalysisID(QwEventBuffer& qwevt)
     }
     
     Connect();
-    // Convert MySQL++ insert to sqlpp11 for analysis table
+
     QwParitySchema::analysis analysis_table{};
     auto insert_query = sqlpp::insert_into(analysis_table)
                         .set(analysis_table.runlet_id = runlet_id,
@@ -615,7 +615,6 @@ void QwParityDB::FillParameterFiles(QwSubsystemArrayParity& subsys){
   try {
     Connect();
     
-    // Convert MySQL++ insert loop to sqlpp11
     QwParitySchema::parameter_files param_files_table{};
     UInt_t analysis_id = GetAnalysisID();
 
@@ -692,7 +691,6 @@ void QwParityDB::StoreMonitorIDs()
   try {
     Connect();
 
-    // Convert MySQL++ for_each to sqlpp11 select with range-based iteration
     QwParitySchema::monitor monitor_table{};
     auto query = sqlpp::select(sqlpp::all_of(monitor_table)).from(monitor_table).unconditionally();
     QuerySelectForEachResult(query, [&](const auto& row) {
@@ -739,7 +737,6 @@ void QwParityDB::StoreMainDetectorIDs()
   try {
     Connect();
 
-    // Convert MySQL++ for_each to sqlpp11 select with range-based iteration for main_detector table
     QwParitySchema::main_detector main_detector_table{};
     auto query = sqlpp::select(sqlpp::all_of(main_detector_table)).from(main_detector_table).unconditionally();
     QuerySelectForEachResult(query, [&](const auto& row) {
@@ -804,7 +801,6 @@ void QwParityDB::StoreSlowControlDetectorIDs()
   try {
     Connect();
     
-    // Convert MySQL++ for_each to sqlpp11 select for sc_detector table
     QwParitySchema::sc_detector sc_detector_table{};
     auto query = sqlpp::select(sqlpp::all_of(sc_detector_table)).from(sc_detector_table).unconditionally();
     QuerySelectForEachResult(query, [&](const auto& row) {
@@ -830,7 +826,6 @@ void QwParityDB::StoreErrorCodeIDs()
   try {
     Connect();
     
-    // Convert MySQL++ for_each to sqlpp11 select for error_code table
     QwParitySchema::error_code error_code_table{};
     auto query = sqlpp::select(sqlpp::all_of(error_code_table)).from(error_code_table).unconditionally();
     QuerySelectForEachResult(query, [&](const auto& row) {
@@ -874,7 +869,6 @@ void QwParityDB::StoreLumiDetectorIDs()
   try {
     Connect();
 
-    // Convert MySQL++ for_each to sqlpp11 select for lumi_detector table
     QwParitySchema::lumi_detector lumi_detector_table{};
     auto query = sqlpp::select(sqlpp::all_of(lumi_detector_table)).from(lumi_detector_table).unconditionally();
     QuerySelectForEachResult(query, [&](const auto& row) {
@@ -915,7 +909,6 @@ void QwParityDB::StoreMeasurementIDs()
   try {
     Connect();
 
-    // Convert MySQL++ for_each to sqlpp11 select for measurement_type table
     QwParitySchema::measurement_type measurement_type_table{};
     auto query = sqlpp::select(sqlpp::all_of(measurement_type_table)).from(measurement_type_table).unconditionally();
     QuerySelectForEachResult(query, [&](const auto& row) {
