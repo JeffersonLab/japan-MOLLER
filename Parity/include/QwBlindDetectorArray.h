@@ -65,6 +65,12 @@ class QwBlindDetectorArray:
   /// \brief Blind the difference using the yield
   void Blind(const QwBlinder *blinder, const VQwSubsystemParity* subsys);
 
+#ifdef HAS_RNTUPLE_SUPPORT
+  // Inherit RNTuple methods from VQwDetectorArray - no need to redeclare
+  using VQwDetectorArray::ConstructNTupleAndVector;
+  using VQwDetectorArray::FillNTupleVector;
+#endif // HAS_RNTUPLE_SUPPORT
+
 };
 
 

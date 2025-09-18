@@ -13,6 +13,11 @@
 // ROOT headers
 #include "TRegexp.h"
 #include "TMath.h"
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RNTupleWriter.hxx"
+#include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "QwHistogramHelper.h"
@@ -1490,6 +1495,116 @@ void  QwHelicity::FillTreeVector(std::vector<Double_t> &values) const
 
   return;
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwHelicity::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, std::vector<Double_t> &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  SetHistoTreeSave(prefix);
+
+  fTreeArrayIndex  = values.size();
+  TString basename;
+  if(fHistoType==kHelNoSave)
+    {
+      //do nothing
+    }
+  else if(fHistoType==kHelSaveMPS)
+    {
+      basename = "delayed_helicity";   //predicted delayed helicity
+      values.push_back(0.0);
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      //
+      basename = "reported_helicity";  //delayed helicity reported by the input register.
+      values.push_back(0.0);
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      //
+      basename = "pattern_phase";
+      values.push_back(0.0);
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      //
+      basename = "pattern_number";
+      values.push_back(0.0);
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      //
+      basename = "pattern_seed";
+      values.push_back(0.0);
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      //
+      basename = "event_number";
+      values.push_back(0.0);
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      //
+      for (size_t i=0; i<fWord.size(); i++)
+	{
+	  basename = fWord[i].fWordName;
+	  values.push_back(0.0);
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+	}
+    }
+  else if(fHistoType==kHelSavePattern)
+    {
+      basename = "actual_helicity";    //predicted actual helicity before being delayed.
+      values.push_back(0.0);
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      //
+      basename = "actual_pattern_polarity";
+      values.push_back(0.0);
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      //
+      basename = "actual_previous_pattern_polarity";
+      values.push_back(0.0);
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      //
+      basename = "delayed_pattern_polarity";
+      values.push_back(0.0);
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      //
+      basename = "pattern_number";
+      values.push_back(0.0);
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      //
+      basename = "pattern_seed";
+      values.push_back(0.0);
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      //
+      for (size_t i=0; i<fWord.size(); i++){
+	basename = fWord[i].fWordName;
+	values.push_back(0.0);
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      }
+    }
+
+  fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
+}
+
+void QwHelicity::FillNTupleVector(std::vector<Double_t> &values) const
+{
+  // Use the same logic as FillTreeVector
+  size_t index=fTreeArrayIndex;
+  if(fHistoType==kHelSaveMPS)
+    {
+      values[index++] = fHelicityDelayed;
+      values[index++] = fHelicityReported;
+      values[index++] = fPatternPhaseNumber;
+      values[index++] = fPatternNumber;
+      values[index++] = fPatternSeed;
+      values[index++] = fEventNumber;
+      for (size_t i=0; i<fWord.size(); i++)
+	values[index++] = fWord[i].fValue;
+    }
+  else if(fHistoType==kHelSavePattern)
+    {
+      values[index++] = fHelicityActual;
+      values[index++] = fActualPatternPolarity;
+      values[index++] = fPreviousPatternPolarity;
+      values[index++] = fDelayedPatternPolarity;
+      values[index++] = fPatternNumber;
+      values[index++] = fPatternSeed;
+      for (size_t i=0; i<fWord.size(); i++){
+	values[index++] = fWord[i].fValue;
+      }
+    }
+}
+#endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
 void  QwHelicity::FillDB(QwParityDB *db, TString type)

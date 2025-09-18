@@ -355,6 +355,98 @@ void QwScaler_Channel<data_mask,data_shift>::FillTreeVector(std::vector<Double_t
   
 }
 
+#ifdef HAS_RNTUPLE_SUPPORT
+template<unsigned int data_mask, unsigned int data_shift>
+void QwScaler_Channel<data_mask,data_shift>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  if (IsNameEmpty()){
+    //  This channel is not used, so skip setting up the RNTuple.
+  } else {
+    //  Decide what to store based on prefix
+    SetDataToSaveByPrefix(prefix);
+
+    TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
+    fTreeArrayIndex  = values.size();
+
+    // Calculate how many elements we need to avoid multiple push_back calls
+    size_t numElements = 2; // value + Device_Error_Code
+    if (fDataToSave == kMoments) numElements += 3; // _m2 + _err + num_samples
+    if (fDataToSave == kRaw) {
+      numElements += 1; // raw
+      if ((~data_mask) != 0) numElements += 1; // header
+    }
+    
+    // Resize vectors once to avoid reallocation
+    size_t oldSize = values.size();
+    values.resize(oldSize + numElements, 0.0);
+    fieldPtrs.reserve(fieldPtrs.size() + numElements);
+    
+    // Main value
+    fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+    
+    if (fDataToSave == kMoments) {
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_m2").Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_err").Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_num_samples").Data()));
+    }
+
+    // Device error code
+    fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_Device_Error_Code").Data()));
+
+    if(fDataToSave==kRaw){
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_raw").Data()));
+      
+      if ((~data_mask) != 0){
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_header").Data()));
+      }
+    }
+
+    fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
+  }
+}
+
+template<unsigned int data_mask, unsigned int data_shift>
+void QwScaler_Channel<data_mask,data_shift>::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (IsNameEmpty()) {
+    //  This channel is not used, so skip filling.
+  } else if (fTreeArrayNumEntries < 0) {
+    QwError << "QwScaler_Channel::FillNTupleVector:  fTreeArrayNumEntries=="
+	    << fTreeArrayNumEntries << QwLog::endl;
+  } else if (fTreeArrayNumEntries == 0) {
+    static bool warned = false;
+    if (!warned) {
+      QwError << "QwScaler_Channel::FillNTupleVector:  fTreeArrayNumEntries=="
+              << fTreeArrayNumEntries << " (no construction done?)" << QwLog::endl;
+      QwError << "Offending element is " << GetElementName() << QwLog::endl;
+      warned = true;
+    }
+  } else if (values.size() < fTreeArrayIndex+fTreeArrayNumEntries) {
+    QwError << "QwScaler_Channel::FillNTupleVector:  values.size()=="
+	    << values.size() << " name: " << fElementName
+	    << "; fTreeArrayIndex+fTreeArrayNumEntries=="
+            << fTreeArrayIndex << '+' << fTreeArrayNumEntries << '='
+	    << fTreeArrayIndex+fTreeArrayNumEntries
+	    << QwLog::endl;
+  } else {
+    size_t index = fTreeArrayIndex;
+    values[index++] = this->fValue;
+    if (fDataToSave == kMoments) {
+      values[index++] = fValueM2;
+      values[index++] = fValueError;
+      values[index++] = fGoodEventCount;
+    }
+    values[index++] = this->fErrorFlag;
+    if(fDataToSave==kRaw){
+      values[index++] = this->fValue_Raw;
+      if ((~data_mask) != 0){
+	values[index++] = this->fHeader;
+      }
+    }
+  }
+}
+#endif // HAS_RNTUPLE_SUPPORT
+
 
 void VQwScaler_Channel::AssignValueFrom(const VQwDataElement* valueptr){
   const VQwScaler_Channel* tmpptr;

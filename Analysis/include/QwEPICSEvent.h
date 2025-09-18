@@ -15,6 +15,10 @@ using std::string;
 #include "Rtypes.h"
 #include "TString.h"
 #include "TTree.h"
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "QwOptions.h"
@@ -101,6 +105,13 @@ class QwEPICSEvent
   void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values);
   /// \brief Fill the tree vector
   void FillTreeVector(std::vector<Double_t>& values) const;
+
+#ifdef HAS_RNTUPLE_SUPPORT
+  /// \brief Construct the RNTuple fields and vector
+  void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+  /// \brief Fill the RNTuple vector
+  void FillNTupleVector(std::vector<Double_t>& values) const;
+#endif // HAS_RNTUPLE_SUPPORT
 
 
  public:

@@ -11,6 +11,12 @@
 #include <iostream>
 #include <stdexcept>
 
+#ifdef HAS_RNTUPLE_SUPPORT
+// ROOT headers for RNTuple support
+#include <ROOT/RNTupleModel.hxx>
+#include <ROOT/RNTupleWriter.hxx>
+#endif
+
 // Qweak headers
 #include "QwLog.h"
 #ifdef __USE_DATABASE__
@@ -2597,6 +2603,61 @@ void QwBeamLine::FillTreeVector(std::vector<Double_t> &values) const
     fECalculator[i].FillTreeVector(values);}
   return;
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+//*****************************************************************//
+void QwBeamLine::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  for(size_t i = 0; i < fClock.size(); i++)
+    fClock[i].get()->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+  for(size_t i = 0; i < fStripline.size(); i++)
+    fStripline[i].get()->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+  for(size_t i = 0; i < fQPD.size(); i++)
+    fQPD[i].ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+  for(size_t i = 0; i < fLinearArray.size(); i++)
+    fLinearArray[i].ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+  for(size_t i = 0; i < fCavity.size(); i++)
+    fCavity[i].ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+  for(size_t i = 0; i < fBCM.size(); i++)
+    fBCM[i].get()->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+  for(size_t i = 0; i < fHaloMonitor.size(); i++)
+    fHaloMonitor[i].ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+  for(size_t i = 0; i <fBCMCombo.size();i++)
+    fBCMCombo[i].get()->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+  for(size_t i = 0; i <fBPMCombo.size();i++)
+    fBPMCombo[i].get()->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+  for(size_t i = 0; i <fECalculator.size();i++)
+    fECalculator[i].ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+
+  return;
+}
+
+//*****************************************************************//
+void QwBeamLine::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  for(size_t i = 0; i < fClock.size(); i++)
+    fClock[i].get()->FillNTupleVector(values);
+  for(size_t i = 0; i < fStripline.size(); i++)
+    fStripline[i].get()->FillNTupleVector(values);
+  for(size_t i = 0; i < fQPD.size(); i++)
+    fQPD[i].FillNTupleVector(values);
+  for(size_t i = 0; i < fLinearArray.size(); i++)
+    fLinearArray[i].FillNTupleVector(values);
+  for(size_t i = 0; i < fCavity.size(); i++)
+    fCavity[i].FillNTupleVector(values);
+  for(size_t i = 0; i < fBCM.size(); i++)
+    fBCM[i].get()->FillNTupleVector(values);
+  for(size_t i = 0; i < fHaloMonitor.size(); i++)
+    fHaloMonitor[i].FillNTupleVector(values);
+  for(size_t i = 0; i < fBCMCombo.size(); i++)
+    fBCMCombo[i].get()->FillNTupleVector(values);
+  for(size_t i = 0; i < fBPMCombo.size(); i++)
+    fBPMCombo[i].get()->FillNTupleVector(values);
+  for(size_t i = 0; i < fECalculator.size(); i++){
+    fECalculator[i].FillNTupleVector(values);}
+  return;
+}
+#endif
 
 
 //*****************************************************************//

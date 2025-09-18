@@ -656,6 +656,90 @@ void  QwADC18_Channel::FillTreeVector(std::vector<Double_t> &values) const
   }
 }
 
+#ifdef HAS_RNTUPLE_SUPPORT
+void  QwADC18_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  if (IsNameEmpty()){
+    //  This channel is not used, so skip setting up the RNTuple.
+  } else {
+    //  Decide what to store based on prefix
+    SetDataToSaveByPrefix(prefix);
+
+    TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
+    fTreeArrayIndex  = values.size();
+
+    // Calculate how many elements we need to avoid multiple push_back calls
+    size_t numElements = 2; // value + Device_Error_Code
+    if (fDataToSave == kMoments) numElements += 2; // _m2 + _err
+    if (fDataToSave == kRaw) numElements += 4; // _raw + _diff + _peak + _base
+    
+    // Resize vectors once to avoid reallocation
+    size_t oldSize = values.size();
+    values.resize(oldSize + numElements, 0.0);
+    fieldPtrs.reserve(fieldPtrs.size() + numElements);
+    
+    // Main value
+    fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+    
+    if (fDataToSave == kMoments) {
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_m2").Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_err").Data()));
+    }
+
+    // Device error code
+    fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_Device_Error_Code").Data()));
+
+    if (fDataToSave == kRaw){
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_raw").Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_diff").Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_peak").Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_base").Data()));
+    }
+
+    fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
+  }
+}
+
+void  QwADC18_Channel::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (IsNameEmpty()) {
+    //  This channel is not used, so skip filling.
+  } else if (fTreeArrayNumEntries < 0) {
+    QwError << "QwADC18_Channel::FillNTupleVector:  fTreeArrayNumEntries=="
+            << fTreeArrayNumEntries << QwLog::endl;
+  } else if (fTreeArrayNumEntries == 0) {
+    static bool warned = false;
+    if (!warned) {
+      QwError << "QwADC18_Channel::FillNTupleVector:  fTreeArrayNumEntries=="
+              << fTreeArrayNumEntries << " (no construction done?)" << QwLog::endl;
+      QwError << "Offending element is " << GetElementName() << QwLog::endl;
+      warned = true;
+    }
+  } else if (values.size() < fTreeArrayIndex+fTreeArrayNumEntries) {
+    QwError << "QwADC18_Channel::FillNTupleVector:  values.size()=="
+            << values.size() << " name: " << fElementName
+            << "; fTreeArrayIndex+fTreeArrayNumEntries=="
+            << fTreeArrayIndex << '+' << fTreeArrayNumEntries << '='
+            << fTreeArrayIndex+fTreeArrayNumEntries
+            << QwLog::endl;
+  } else {
+    size_t index = fTreeArrayIndex;
+    values[index++] = this->fValue;
+    if (fDataToSave == kMoments) {
+      values[index++] = fValueM2;
+      values[index++] = fValueError;
+    }
+    values[index++] = this->fErrorFlag;
+    if(fDataToSave==kRaw){
+      values[index++] = this->fValue_Raw;
+      values[index++] = this->fDiff_Raw;
+      values[index++] = this->fPeak_Raw;
+      values[index++] = this->fBase_Raw;
+    }
+  }
+}
+#endif // HAS_RNTUPLE_SUPPORT
+
 
 QwADC18_Channel& QwADC18_Channel::operator= (const QwADC18_Channel &value)
 {

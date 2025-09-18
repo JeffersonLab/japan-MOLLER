@@ -10,6 +10,12 @@
 // System headers
 #include <stdexcept>
 
+// ROOT headers for RNTuple support
+#ifdef HAS_RNTUPLE_SUPPORT
+#include <ROOT/RNTupleModel.hxx>
+#include <ROOT/RNTupleWriter.hxx>
+#endif // HAS_RNTUPLE_SUPPORT
+
 // Qweak headers
 #ifdef __USE_DATABASE__
 #include "QwDBInterface.h"
@@ -764,6 +770,48 @@ void  QwBPMCavity::FillTreeVector(std::vector<Double_t> &values) const
   }
   return;
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void  QwBPMCavity::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip constructing.
+  }
+  else {
+    TString thisprefix=prefix;
+    if(prefix.Contains("asym_"))
+      thisprefix.ReplaceAll("asym_","diff_");
+    SetRootSaveStatus(prefix);
+
+    fElement[kQElem].ConstructNTupleAndVector(model,prefix,values,fieldPtrs);
+    size_t i = 0;
+    for(i=kXAxis;i<kNumAxes;i++) {
+      if (bFullSave) fElement[i].ConstructNTupleAndVector(model,thisprefix,values,fieldPtrs);
+      //      fRelPos[i].ConstructNTupleAndVector(model,thisprefix,values,fieldPtrs);
+      fAbsPos[i].ConstructNTupleAndVector(model,thisprefix,values,fieldPtrs);
+    }
+
+  }
+  return;
+}
+
+void  QwBPMCavity::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (GetElementName()=="") {
+    //  This channel is not used, so skip filling.
+  }
+  else {
+    fElement[kQElem].FillNTupleVector(values);
+    size_t i = 0;
+    for(i=kXAxis;i<kNumAxes;i++){
+      if (bFullSave) fElement[i].FillNTupleVector(values);
+      //      fRelPos[i].FillNTupleVector(values);
+      fAbsPos[i].FillNTupleVector(values);
+    }
+  }
+  return;
+}
+#endif
 
 void QwBPMCavity::SetEventCutMode(Int_t bcuts)
 {

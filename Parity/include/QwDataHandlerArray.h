@@ -18,6 +18,13 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/mem_fn.hpp>
 
+// ROOT headers
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
+
+// Qweak headers
+
 #include "QwDataHandlerArray.h"
 #include "VQwDataHandler.h"
 #include "QwOptions.h"
@@ -97,6 +104,14 @@ class QwDataHandlerArray:
     void FillTreeBranches(QwRootFile *treerootfile);
     /// \brief Fill the vector for this handler
     void FillTreeVector(std::vector<Double_t>& values) const;
+
+    /// RNTuple methods
+    void ConstructNTupleFields(
+        QwRootFile *treerootfile,
+        const std::string& treeprefix = "",
+        const std::string& branchprefix = "");
+    
+    void FillNTupleFields(QwRootFile *treerootfile);
 
     /// Construct the histograms for this subsystem
     void  ConstructHistograms() {

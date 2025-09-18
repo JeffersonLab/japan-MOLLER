@@ -10,6 +10,11 @@
 // System headers
 #include <stdexcept>
 
+// ROOT headers
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #ifdef __USE_DATABASE__
@@ -473,6 +478,27 @@ void  QwIntegrationPMT::FillTreeVector(std::vector<Double_t> &values) const
     fTriumf_ADC.FillTreeVector(values);
   }
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwIntegrationPMT::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip RNTuple construction.
+  } else
+    {
+      fTriumf_ADC.ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+    }
+}
+
+void QwIntegrationPMT::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip filling the RNTuple.
+  } else {
+    fTriumf_ADC.FillNTupleVector(values);
+  }
+}
+#endif // HAS_RNTUPLE_SUPPORT
 
 void QwIntegrationPMT::CalculateRunningAverage()
 {

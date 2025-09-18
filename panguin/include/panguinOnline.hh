@@ -6,6 +6,14 @@
 
 #include <TTree.h>
 #include <TFile.h>
+// RNTuple support - only if available in ROOT version
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTuple.hxx"
+#include "ROOT/RNTupleReader.hxx"
+#include "ROOT/RNTupleModel.hxx"
+#endif
+// RDataFrame support
+#include "ROOT/RDataFrame.hxx"
 #include <TGButton.h>
 #include <TGFrame.h>
 #include <TRootEmbeddedCanvas.h>
@@ -52,8 +60,19 @@ private:
   Bool_t                            doGolden;
   std::vector <TTree*>                   fRootTree;
   std::vector <Int_t>                    fTreeEntries;
-  std::vector < std::pair <TString,TString> > fileObjects;
+#ifdef HAS_RNTUPLE_SUPPORT
+  // RNTuple support
+  std::vector <std::unique_ptr<ROOT::RNTupleReader>> fRootNTuple;
+  std::vector <TString>                  fRootNTupleNames;
+  std::vector <Int_t>                    fNTupleEntries;
+#endif // HAS_RNTUPLE_SUPPORT
+  // RDataFrame support for large datasets
+  std::unique_ptr<ROOT::RDataFrame>      fDataFrame;
+#ifdef HAS_RNTUPLE_SUPPORT
+  std::vector < std::vector <TString> >       ntupleVars;
+#endif // HAS_RNTUPLE_SUPPORT
   std::vector < std::vector <TString> >       treeVars;
+  std::vector < std::pair <TString,TString> > fileObjects;
   UInt_t                            runNumber;
   TTimer                           *timer;
   TTimer                           *timerNow; // used to update time
@@ -83,6 +102,16 @@ public:
   void GetFileObjects();
   void GetTreeVars();
   void GetRootTree();
+#ifdef HAS_RNTUPLE_SUPPORT
+  // RNTuple support methods
+  void GetRootNTuple();
+  void GetNTupleVars();
+  UInt_t GetNTupleIndex(TString);
+  void NTupleDraw(std::vector <TString>);
+#endif // HAS_RNTUPLE_SUPPORT
+  // RDataFrame support methods
+  void InitializeDataFrame();
+  void DataFrameDraw(std::vector <TString>);
   UInt_t GetTreeIndex(TString);
   UInt_t GetTreeIndexFromName(TString);
   void TreeDraw(std::vector <TString>); 

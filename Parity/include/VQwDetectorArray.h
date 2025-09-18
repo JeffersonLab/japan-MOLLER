@@ -14,6 +14,11 @@
 // System headers
 #include <vector>
 
+// ROOT headers
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
+
 // Qweak headers
 #include "VQwSubsystemParity.h"
 #include "QwIntegrationPMT.h"
@@ -150,6 +155,10 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
     void ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file );
 
     void  FillTreeVector(std::vector<Double_t> &values) const;
+#ifdef HAS_RNTUPLE_SUPPORT
+    void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+    void  FillNTupleVector(std::vector<Double_t>& values) const;
+#endif // HAS_RNTUPLE_SUPPORT
     //void  FillDB(QwParityDB *db, TString datatype);
     //void  FillErrDB(QwParityDB *db, TString datatype);
 

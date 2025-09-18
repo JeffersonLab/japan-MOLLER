@@ -855,6 +855,231 @@ void  QwMollerADC_Channel::FillTreeVector(std::vector<Double_t> &values) const
   }
 }
 
+#ifdef HAS_RNTUPLE_SUPPORT
+void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  //For rntuple 
+  if (IsNameEmpty()) {
+    //  This channel is not used, so skip setting up the RNTuple.
+  } else {
+    //  Decide what to store based on prefix
+    SetDataToSaveByPrefix(prefix);
+
+    // Set the boolean flags just like in ConstructBranchAndVector
+    bHw_sum =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum");
+    bHw_sum_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum_raw");
+    bBlock =      gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block");
+    bBlock_raw =  gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block_raw");
+    bNum_samples = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "num_samples");
+    bDevice_Error_Code = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "Device_Error_Code");
+    bSequence_number = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "sequence_number");
+
+    // For kMoments mode (running sum trees), enable all statistical fields regardless of histogram configuration
+    if (fDataToSave == kMoments) {
+      bHw_sum = true;
+      bBlock = true;
+      bNum_samples = true;
+      bDevice_Error_Code = true;
+    }
+
+    TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
+    fTreeArrayIndex  = values.size();
+
+    // For derived data (yield_, asym_, diff_), only store the main value to match TTree format
+    if (fDataToSave == kDerived) {
+      // Only store the main hardware sum value, just like the original tree
+      values.resize(values.size() + 1, 0.0);
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      fTreeArrayNumEntries = 1;
+      return;
+    }
+
+    // For moments data (stat prefix), use the same structure as TTree to get exact field count match
+    if (fDataToSave == kMoments) {
+      // Create the same structure as TTree kMoments mode
+      if (bHw_sum) {
+        values.push_back(0.0);
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum").Data()));
+        values.push_back(0.0);
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum_m2").Data()));
+        values.push_back(0.0);
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum_err").Data()));
+      }
+
+      if (bBlock) {
+        for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+          values.push_back(0.0);
+          fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_block%d", i)).Data()));
+        }
+      }
+
+      if (bNum_samples) {
+        values.push_back(0.0);
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_num_samples").Data()));
+      }
+
+      if (bDevice_Error_Code) {
+        values.push_back(0.0);
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_Device_Error_Code").Data()));
+      }
+
+      fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
+      return;
+    }
+
+    // For raw data, use the full detailed format
+    // Calculate how many elements we need to avoid multiple push_back calls
+    size_t numElements = 0;
+    
+    // Count elements based on what will be saved
+    if (bHw_sum) {
+      numElements += 1; // hw_sum
+    }
+    if (bBlock) numElements += fBlocksPerEvent; // blocks
+    if (bNum_samples) numElements += 1; // num_samples
+    if (bDevice_Error_Code) numElements += 1; // error code
+    
+    if (fDataToSave == kRaw) {
+      if (bHw_sum_raw) numElements += 1; // hw_sum_raw
+      if (bBlock_raw) numElements += fBlocksPerEvent; // block_raw
+      numElements += 16; // fBlockSumSq_raw (4*4)
+      if (bSequence_number) numElements += 1; // sequence_number
+    }
+    
+    // Resize vectors once to avoid reallocation
+    size_t oldSize = values.size();
+    values.resize(oldSize + numElements, 0.0);
+    fieldPtrs.reserve(fieldPtrs.size() + numElements);
+    
+    // Add fields in the same order as FillTreeVector
+    // hw_sum
+    if (bHw_sum) {
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+    }
+
+    if (bBlock) {
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_block%d", i)).Data()));
+      }
+    }
+
+    // num_samples
+    if (bNum_samples) {
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_num_samples").Data()));
+    }
+
+    // Device_Error_Code
+    if (bDevice_Error_Code) {
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_Device_Error_Code").Data()));
+    }
+
+    if (fDataToSave == kRaw) {
+      // hw_sum_raw
+      if (bHw_sum_raw) {
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_raw").Data()));
+      }
+
+      if (bBlock_raw) {
+        for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+          fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_block%d_raw", i)).Data()));
+        }
+      }
+
+      for(int i = 0; i < 4; i++){
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_sumsq%d_low", i)).Data()));
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_sumsq%d_high", i)).Data()));
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_min%d", i)).Data()));
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_max%d", i)).Data()));
+      }
+      
+      // sequence_number
+      if (bSequence_number) {
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_sequence_number").Data()));
+      }
+    }
+
+    fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
+  }
+}
+
+void  QwMollerADC_Channel::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (IsNameEmpty()) {
+    //  This channel is not used, so skip filling.
+  } else if (fTreeArrayNumEntries <= 0) {
+    if (bDEBUG) std::cerr << "QwMollerADC_Channel::FillNTupleVector:  fTreeArrayNumEntries=="
+              << fTreeArrayNumEntries << std::endl;
+  } else if (values.size() < fTreeArrayIndex+fTreeArrayNumEntries){
+    if (bDEBUG) std::cerr << "QwMollerADC_Channel::FillNTupleVector:  values.size()=="
+              << values.size()
+              << "; fTreeArrayIndex+fTreeArrayNumEntries=="
+              << fTreeArrayIndex+fTreeArrayNumEntries
+              << std::endl;
+  } else {
+
+    UInt_t index = fTreeArrayIndex;
+
+    // For derived data (yield_, asym_, diff_), only fill the main value to match TTree format
+    if (fDataToSave == kDerived) {
+      values[index] = this->GetHardwareSum();
+      return;
+    }
+
+    // For moments data (stat prefix), delegate to TTree behavior for exact match
+    if (fDataToSave == kMoments) {
+      // Use the existing TTree fill logic to ensure exact matching
+      FillTreeVector(values);
+      return;
+    }
+
+    // For raw data, use the full detailed format
+    // hw_sum
+    if (bHw_sum) {
+      values[index++] = this->GetHardwareSum();
+    }
+
+    if (bBlock) {
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        // blocki
+        values[index++] = this->GetBlockValue(i);
+      }
+    }
+
+    // num_samples
+    if (bNum_samples)
+      values[index++] = this->fNumberOfSamples;
+
+    // Device_Error_Code
+    if (bDevice_Error_Code)
+      values[index++] = this->fErrorFlag;
+
+    if (fDataToSave == kRaw)
+      {
+        // hw_sum_raw
+        if (bHw_sum_raw)
+          values[index++] = this->GetRawHardwareSum();
+
+        if (bBlock_raw) {
+          for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+            // blocki_raw
+            values[index++] = this->GetRawBlockValue(i);
+          }
+        }
+
+        for(int i = 0; i < 4; i++){
+        values[index++] = fBlockSumSq_raw[i] & 0xffffffff;
+        values[index++] = fBlockSumSq_raw[i] >> 32;
+        values[index++] = fBlock_min[i];
+        values[index++] = fBlock_max[i];
+        }
+        // sequence_number
+        if (bSequence_number)
+          values[index++] = this->fSequenceNumber;
+      }
+  }
+}
+#endif // HAS_RNTUPLE_SUPPORT
+
 QwMollerADC_Channel& QwMollerADC_Channel::operator= (const QwMollerADC_Channel &value)
 {
   if(this ==&value) return *this;

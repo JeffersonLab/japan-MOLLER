@@ -13,6 +13,10 @@
 
 // ROOT headers
 #include <TTree.h>
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "VQwBPM.h"
@@ -163,6 +167,12 @@ class QwBPMStripline : public VQwBPM {
   void    ConstructBranch(TTree *tree, TString &prefix);
   void    ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
   void    FillTreeVector(std::vector<Double_t> &values) const;
+
+#ifdef HAS_RNTUPLE_SUPPORT
+  // RNTuple methods
+  void    ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+  void    FillNTupleVector(std::vector<Double_t>& values) const;
+#endif
 
 
 #ifdef __USE_DATABASE__

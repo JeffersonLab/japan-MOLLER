@@ -10,6 +10,10 @@
 // System headers
 #include <stdexcept>
 
+// ROOT headers
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+
 // Qweak headers
 #ifdef __USE_DATABASE__
 #include "QwDBInterface.h"
@@ -969,6 +973,56 @@ void  QwBPMStripline<T>::FillTreeVector(std::vector<Double_t> &values) const
   }
   return;
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+template<typename T>
+void QwBPMStripline<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip constructing RNTuple.
+  }
+  else {
+    TString thisprefix=prefix;
+    if(prefix.Contains("asym_"))
+      thisprefix.ReplaceAll("asym_","diff_");
+
+    this->SetRootSaveStatus(prefix);
+
+    fEffectiveCharge.ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+    fEllipticity.ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+    Short_t i = 0;
+    if(bFullSave) {
+      for(i=0;i<4;i++) fWire[i].ConstructNTupleAndVector(model, thisprefix, values, fieldPtrs);
+    }
+    for(i=kXAxis;i<kNumAxes;i++) {
+      //  2018dec20, pking:  Do not output the relative positions to RNTuple
+      //      fRelPos[i].ConstructNTupleAndVector(model, thisprefix, values, fieldPtrs);
+      fAbsPos[i].ConstructNTupleAndVector(model, thisprefix, values, fieldPtrs);
+    }
+  }
+}
+
+template<typename T>
+void QwBPMStripline<T>::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (GetElementName()=="") {
+    //  This channel is not used, so skip filling the RNTuple.
+  }
+  else {
+    fEffectiveCharge.FillNTupleVector(values);
+    fEllipticity.FillNTupleVector(values);
+    Short_t i = 0;
+    if(bFullSave) {
+      for(i=0;i<4;i++) fWire[i].FillNTupleVector(values);
+    }
+    for(i=kXAxis;i<kNumAxes;i++){
+      //  2018dec20, pking:  Do not output the relative positions to RNTuple
+      //      fRelPos[i].FillNTupleVector(values);
+      fAbsPos[i].FillNTupleVector(values);
+    }
+  }
+}
+#endif
 
 template<typename T>
 void QwBPMStripline<T>::SetEventCutMode(Int_t bcuts)
