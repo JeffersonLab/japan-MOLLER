@@ -157,10 +157,10 @@ T QwErrDBInterface::TypedDBClone()
 template<> QwParitySchema::md_errors_row
 QwErrDBInterface::TypedDBClone<QwParitySchema::md_errors_row>() {
   QwParitySchema::md_errors_row row;
-  row.analysis_id   = fAnalysisId;
-  row.main_detector_id = fDeviceId;
-  row.error_code_id = fErrorCodeId;
-  row.n             = fN;
+  row.analysis_id         = fAnalysisId;
+  row.main_detector_id    = fDeviceId;
+  row.error_code_id       = fErrorCodeId;
+  row.n                   = fN;
   return row;
 }
 
@@ -187,9 +187,9 @@ QwErrDBInterface::TypedDBClone<QwParitySchema::beam_errors_row>() {
 template<> QwParitySchema::general_errors_row
 QwErrDBInterface::TypedDBClone<QwParitySchema::general_errors_row>() {
   QwParitySchema::general_errors_row row;
-  row.analysis_id   = fAnalysisId;
-  row.error_code_id = fErrorCodeId;
-  row.n             = fN;
+  row.analysis_id         = fAnalysisId;
+  row.error_code_id       = fErrorCodeId;
+  row.n                   = fN;
   return row;
 }
 #endif // __USE_DATABASE__
