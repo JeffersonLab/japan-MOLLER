@@ -55,7 +55,17 @@
 
 class QwDatabase {
   private:
-    enum EQwDBType {kQwDatabaseNone, kQwDatabaseMySQL, kQwDatabaseSQLite3, kQwDatabasePostgreSQL};
+    enum EQwDBType {kQwDatabaseNone
+#ifdef __USE_DATABASE_SQLITE3__
+      , kQwDatabaseSQLite3
+#endif // __USE_DATABASE_SQLITE3__
+#ifdef __USE_DATABASE_MYSQL__
+      , kQwDatabaseMySQL
+#endif // __USE_DATABASE_MYSQL__
+#ifdef __USE_DATABASE_POSTGRESQL__
+      , kQwDatabasePostgreSQL
+#endif // __USE_DATABASE_POSTGRESQL__
+    };
     EQwDBType fDBType = kQwDatabaseNone;  //!< Type of database backend to use
 
     // Define connection types conditionally
