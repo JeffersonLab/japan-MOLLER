@@ -1669,7 +1669,6 @@ void VQwDetectorArray::DoNormalization(Double_t factor) {
 }
 
 #ifdef __USE_DATABASE__
-
 void  VQwDetectorArray::FillDB(QwParityDB *db, TString datatype) {
 
     Bool_t local_print_flag = false;
@@ -1760,7 +1759,6 @@ void  VQwDetectorArray::FillDB(QwParityDB *db, TString datatype) {
     return;
 
 }
-
 #endif
 
 void  VQwDetectorArray::PrintValue() const {
@@ -1806,7 +1804,6 @@ void  VQwDetectorArray::PrintDetectorID() const {
 }
 
 #ifdef __USE_DATABASE__
-
 void VQwDetectorArray::FillErrDB(QwParityDB *db, TString datatype) {
 
     Bool_t local_print_flag = false;
@@ -1893,7 +1890,6 @@ void VQwDetectorArray::FillErrDB(QwParityDB *db, TString datatype) {
     return;
 
 }
-
 #endif
 
 
