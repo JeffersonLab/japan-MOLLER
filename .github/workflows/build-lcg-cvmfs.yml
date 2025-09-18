@@ -185,6 +185,7 @@ jobs:
               --data . \
               --rootfiles . \
               --write-promptsummary \
+              --QwDatabase.accesslevel RW \
               --QwDatabase.dbtype sqlite3 \
               --QwDatabase.dbname qwparity.db
             echo "::endgroup::"
@@ -229,12 +230,13 @@ jobs:
               --data . \
               --rootfiles . \
               --write-promptsummary \
+              --QwDatabase.accesslevel RW \
               --QwDatabase.dbtype mysql \
+              --QwDatabase.dbname ${{ env.MYSQL_DB }} \
               --QwDatabase.host ${{ env.MYSQL_HOST }} \
               --QwDatabase.port ${{ env.MYSQL_PORT }} \
               --QwDatabase.user ${{ env.MYSQL_USER }} \
-              --QwDatabase.password ${{ env.MYSQL_PASSWORD }} \
-              --QwDatabase.dbname ${{ env.MYSQL_DB }}
+              --QwDatabase.password ${{ env.MYSQL_PASSWORD }}
             echo "::endgroup::"
 
             echo "::group:: Profile analysis"
