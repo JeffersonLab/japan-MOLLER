@@ -307,13 +307,13 @@ void QwDatabase::DefineOptions(QwOptions& options)
   std::stringstream dbtypes;
   dbtypes << "none";
 #ifdef __USE_DATABASE_SQLITE3__
-      dbtypes << ",sqlite3";
+  dbtypes << ",sqlite3";
 #endif // __USE_DATABASE_SQLITE3__
 #ifdef __USE_DATABASE_MYSQL__
-      dbtypes << ",mysql";
+  dbtypes << ",mysql";
 #endif // __USE_DATABASE_MYSQL__
 #ifdef __USE_DATABASE_POSTGRESQL__
-      dbtypes << ",postgresql";
+  dbtypes << ",postgresql";
 #endif // __USE_DATABASE_POSTGRESQL__
   std::stringstream desc;
   desc << "database type (" << dbtypes.str() << ")";
