@@ -434,6 +434,7 @@ void  QwDataHandlerArray::FillHistograms()
 
 //*****************************************************************//
 
+#ifdef __USE_DATABASE__
 void  QwDataHandlerArray::FillDB(QwParityDB *db, TString type)
 {
   for (iterator handler = begin(); handler != end(); ++handler) {
@@ -451,6 +452,7 @@ void  QwDataHandlerArray::FillErrDB(QwParityDB *db, TString type)
   }
 }
 */
+#endif // __USE_DATABASE__
 
 void QwDataHandlerArray::WritePromptSummary(QwPromptSummary *ps, TString type)
 {
