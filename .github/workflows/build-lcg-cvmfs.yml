@@ -133,6 +133,8 @@ jobs:
                 Parity/prminput/qwparity_schema.sql | sqlite3 qwparity.db
             # Insert dummy schema version (compare with QwParityDB.h)
             sqlite3 qwparity.db "INSERT INTO db_schema VALUES(0, '01','04','0000','now','build-lcg-cvmfs.yml');"
+            # Insert dummy seed data
+            sqlite3 qwparity.db "INSERT INTO seeds VALUES(0, 0, 10, 'foo', 'bar');"
             echo "::endgroup::"
 
             echo "::group::Mock data analysis (sqlite3)"
