@@ -119,7 +119,7 @@ class QwDatabase {
 
     // Unified helper function to abstract the visitor pattern for database operations
     template<EConnectionCheck CheckConnection = EConnectionCheck::kChecked, typename Lambda>
-    auto VisitConnection(Lambda&& lambda) -> decltype(lambda(std::declval<SQLiteConnection&>())) {
+    auto VisitConnection(Lambda&& lambda) {
       return std::visit([&lambda](auto& connection) -> decltype(lambda(connection)) {
         using T = std::decay_t<decltype(connection)>;
         if constexpr (std::is_same_v<T, std::monostate>) {
@@ -327,25 +327,11 @@ class QwDatabase {
           auto result = (*connection)(statement);
           // For INSERT operations, some databases return the ID directly as uint64_t
           // while others return it as a result object with insert_id() method
-          using connection_type = typename std::decay_t<decltype(*connection)>;
-          if constexpr (std::is_same_v<connection_type, sqlpp::normal_connection<sqlpp::sqlite3::connection_base>>) {
-            // SQLite might return the ID directly or have it in result
-            if constexpr (std::is_integral_v<decltype(result)>) {
-              return static_cast<uint64_t>(result);
-            } else {
-              return result.insert_id();
-            }
+          if constexpr (std::is_integral_v<decltype(result)>) {
+            return static_cast<uint64_t>(result);
+          } else {
+            return result.insert_id();
           }
-#ifdef __USE_DATABASE_MYSQL__
-          if constexpr (std::is_same_v<connection_type, sqlpp::normal_connection<sqlpp::mysql::connection_base>>) {
-            // MySQL might return the ID directly or have it in result
-            if constexpr (std::is_integral_v<decltype(result)>) {
-              return static_cast<uint64_t>(result);
-            } else {
-              return result.insert_id();
-            }
-          }
-#endif
         }
         // This should never be reached due to VisitConnection logic
         throw std::runtime_error("Unreachable: monostate in QueryInsertAndGetId lambda");
