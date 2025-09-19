@@ -452,16 +452,15 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db)
     QwParitySchema::run last_run{};
     
     // Create aliases for the run table
-    auto rf_alias = first_run_table.as(run_first);
-    auto rl_alias = last_run_table.as(run_last);
-
-    auto query = sqlpp::select(seeds_table.seed_id, seeds_table.seed)
-                 .from(seeds_table
-                       .join(rf_alias).on(seeds_table.first_run_id == rf_alias.run_id)
-                       .join(rl_alias).on(seeds_table.last_run_id == rl_alias.run_id))
+    auto rf_alias = first_run.as(run_first);
+    auto rl_alias = last_run.as(run_last);
+    auto query = sqlpp::select(seeds.seed_id, seeds.seed)
+                 .from(seeds
+                       .join(rf_alias).on(seeds.first_run_id == rf_alias.run_id)
+                       .join(rl_alias).on(seeds.last_run_id == rl_alias.run_id))
                  .where(rf_alias.run_number <= db->GetRunNumber()
                         and rl_alias.run_number >= db->GetRunNumber()
-                        and seeds_table.seed_id > 2);
+                        and seeds.seed_id > 2);
 
     QwError << "QwBlinder::ReadSeed executing sqlpp11 query for run number "
             << db->GetRunNumber() << QwLog::endl;
@@ -568,14 +567,13 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db, const UInt_t seed_id)
   // Try to connect to the database
   if (db->Connect()) {
 
-    // Convert to sqlpp11 query  
-    QwParitySchema::seeds seeds_table{};
-    
+    // Convert to sqlpp11 query
+    QwParitySchema::seeds seeds{};
     if (fSeedID > 0) {
       // Use specified seed
-      auto query = sqlpp::select(sqlpp::all_of(seeds_table))
-                   .from(seeds_table)
-                   .where(seeds_table.seed_id == seed_id);
+      auto query = sqlpp::select(sqlpp::all_of(seeds))
+                   .from(seeds)
+                   .where(seeds.seed_id == seed_id);
       auto results = db->QuerySelect(query);
       
       // Process results using database-agnostic interface
@@ -609,9 +607,9 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db, const UInt_t seed_id)
       }
     } else {
       // Use most recent seed
-      auto query = sqlpp::select(sqlpp::all_of(seeds_table))
-                   .from(seeds_table)
-                   .order_by(seeds_table.seed_id.desc())
+      auto query = sqlpp::select(sqlpp::all_of(seeds))
+                   .from(seeds)
+                   .order_by(seeds.seed_id.desc())
                    .limit(1u)
                    .unconditionally();
       auto results = db->QuerySelect(query);
@@ -956,13 +954,11 @@ void QwBlinder::WriteChecksum(QwParityDB* db)
   //----------------------------------------------------------
   // Construct and execute sqlpp11 UPDATE query
   //----------------------------------------------------------
-  QwParitySchema::analysis analysis_table{};
-  
-  auto update_query = sqlpp::update(analysis_table)
-                      .set(analysis_table.seed_id = fSeedID,
-                           analysis_table.bf_checksum = fChecksum)
-                      .where(analysis_table.analysis_id == db->GetAnalysisID());
-
+  QwParitySchema::analysis analysis{};
+  auto update_query = sqlpp::update(analysis)
+                      .set(analysis.seed_id = fSeedID,
+                           analysis.bf_checksum = fChecksum)
+                      .where(analysis.analysis_id == db->GetAnalysisID());
   //----------------------------------------------------------
   // Execute SQL
   //----------------------------------------------------------
@@ -985,7 +981,7 @@ void QwBlinder::WriteTestValues(QwParityDB* db)
   //----------------------------------------------------------
   // Use sqlpp11 INSERT for bf_test table  
   //----------------------------------------------------------
-  QwParitySchema::bf_test bf_test_table{};
+  QwParitySchema::bf_test bf_test{};
 
   //----------------------------------------------------------
   // Insert test values using sqlpp11
@@ -993,10 +989,10 @@ void QwBlinder::WriteTestValues(QwParityDB* db)
   // Loop over all test values
   for (size_t i = 0; i < fTestValues.size(); i++)
     {
-      auto insert_query = sqlpp::insert_into(bf_test_table)
-                          .set(bf_test_table.analysis_id = db->GetAnalysisID(),
-                               bf_test_table.test_number = static_cast<int>(i),
-                               bf_test_table.test_value = fBlindTestValues[i]);
+      auto insert_query = sqlpp::insert_into(bf_test)
+                          .set(bf_test.analysis_id = db->GetAnalysisID(),
+                               bf_test.test_number = static_cast<int>(i),
+                               bf_test.test_value = fBlindTestValues[i]);
 
       // Execute SQL
       db->Connect();
@@ -1195,13 +1191,13 @@ void QwBlinder::FillDB(QwParityDB *db, TString datatype)
 
   // Modify the seed_id and bf_checksum in the analysis table
   try {
-    QwParitySchema::analysis analysis_table{};
-    
-    auto update_query = sqlpp::update(analysis_table)
-                        .set(analysis_table.seed_id = fSeedID,
-                             analysis_table.bf_checksum = fChecksum)
-                        .where(analysis_table.analysis_id == analysis_id);
-    
+    QwParitySchema::analysis analysis{};
+
+    auto update_query = sqlpp::update(analysis)
+                        .set(analysis.seed_id = fSeedID,
+                             analysis.bf_checksum = fChecksum)
+                        .where(analysis.analysis_id == analysis_id);
+
     QwDebug << "Updating analysis table with blinder information" << QwLog::endl;
     db->QueryExecute(update_query);
     
@@ -1212,13 +1208,12 @@ void QwBlinder::FillDB(QwParityDB *db, TString datatype)
   // Add the bf_test rows
   try {
     if (fTestValues.size() > 0) {
-      QwParitySchema::bf_test bf_test_table{};
-      
+      QwParitySchema::bf_test bf_test{};
       for (size_t i = 0; i < fTestValues.size(); i++) {
-        auto insert_query = sqlpp::insert_into(bf_test_table)
-                            .set(bf_test_table.analysis_id = analysis_id,
-                                 bf_test_table.test_number = static_cast<int>(i),
-                                 bf_test_table.test_value = fBlindTestValues[i]);
+        auto insert_query = sqlpp::insert_into(bf_test)
+                            .set(bf_test.analysis_id = analysis_id,
+                                 bf_test.test_number = static_cast<int>(i),
+                                 bf_test.test_value = fBlindTestValues[i]);
         
         db->QueryExecute(insert_query);
       }
@@ -1243,7 +1238,7 @@ void QwBlinder::FillErrDB(QwParityDB *db, TString datatype)
   QwDebug << " --------------------------------------------------------------- " << QwLog::endl;
 
   UInt_t analysis_id = db->GetAnalysisID();
-  QwParitySchema::general_errors general_errors_table{};
+  QwParitySchema::general_errors general_errors{};
 
   db->Connect();
   
@@ -1251,11 +1246,11 @@ void QwBlinder::FillErrDB(QwParityDB *db, TString datatype)
     // Insert error counter entries for each blinder counter type
     for (size_t index = 0; index < kBlinderCount_NumCounters; index++) {
       if (fPatternCounters.at(index) > 0) {  // Only insert non-zero counters
-        auto insert_query = sqlpp::insert_into(general_errors_table)
-                            .set(general_errors_table.analysis_id = analysis_id,
-                                 general_errors_table.error_code_id = index + 20,  // error codes 20+
-                                 general_errors_table.n = fPatternCounters.at(index));
-        
+        auto insert_query = sqlpp::insert_into(general_errors)
+                            .set(general_errors.analysis_id = analysis_id,
+                                 general_errors.error_code_id = index + 20,  // error codes 20+
+                                 general_errors.n = fPatternCounters.at(index));
+
         db->QueryExecute(insert_query);
       }
     }
