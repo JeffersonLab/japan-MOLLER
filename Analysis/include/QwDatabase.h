@@ -376,6 +376,9 @@ class QwDatabase {
     const string kValidVersionMinor;
     const string kValidVersionPoint;
 
+  protected:
+    Bool_t fDBInsertMissingKeys; //!< True if missing keys should be inserted into the database automatically
+
 };
 
 #endif
