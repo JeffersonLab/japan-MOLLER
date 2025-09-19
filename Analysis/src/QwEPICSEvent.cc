@@ -896,7 +896,7 @@ void QwEPICSEvent::FillSlowControlsData(QwParityDB *db)
     QwDebug << "QwEPICSEvent::FillSlowControlsData::Writing to database now" << QwLog::endl;
     
     // Convert to sqlpp11 bulk insert
-    QwParitySchema::slow_controls_data slowControlsData;
+    QwParitySchema::slow_controls_data slow_controls_data;
     try {
       for (const auto& entry : entrylist) {
         auto runlet_id = std::get<UInt_t>(entry.at("runlet_id"));
@@ -906,15 +906,15 @@ void QwEPICSEvent::FillSlowControlsData(QwParityDB *db)
         auto error = std::get<Double_t>(entry.at("error"));
         auto min_value = std::get<Double_t>(entry.at("min_value"));
         auto max_value = std::get<Double_t>(entry.at("max_value"));
-        
-        auto insert_query = sqlpp::insert_into(slowControlsData)
-                           .set(slowControlsData.runlet_id = runlet_id,
-                                slowControlsData.sc_detector_id = sc_detector_id,
-                                slowControlsData.n = n,
-                                slowControlsData.value = value,
-                                slowControlsData.error = error,
-                                slowControlsData.min_value = min_value,
-                                slowControlsData.max_value = max_value);
+
+        auto insert_query = sqlpp::insert_into(slow_controls_data)
+                           .set(slow_controls_data.runlet_id = runlet_id,
+                                slow_controls_data.sc_detector_id = sc_detector_id,
+                                slow_controls_data.n = n,
+                                slow_controls_data.value = value,
+                                slow_controls_data.error = error,
+                                slow_controls_data.min_value = min_value,
+                                slow_controls_data.max_value = max_value);
         db->QueryExecute(insert_query);
       }
       QwDebug << "Done executing sqlpp11 bulk insert" << QwLog::endl;
@@ -976,17 +976,17 @@ void QwEPICSEvent::FillSlowControlsStrigs(QwParityDB *db)
     QwDebug << "QwEPICSEvent::FillSlowControlsStrigs Writing to database now" << QwLog::endl;
     
     // Convert to sqlpp11 bulk insert
-    QwParitySchema::slow_controls_strings slowControlsStrings;
+    QwParitySchema::slow_controls_strings slow_controls_strings;
     try {
       for (const auto& entry : entrylist) {
         auto runlet_id = std::get<UInt_t>(entry.at("runlet_id"));
         auto sc_detector_id = std::get<UInt_t>(entry.at("sc_detector_id"));
         auto value = std::get<std::string>(entry.at("value"));
-        
-        auto insert_query = sqlpp::insert_into(slowControlsStrings)
-                           .set(slowControlsStrings.runlet_id = runlet_id,
-                                slowControlsStrings.sc_detector_id = sc_detector_id,
-                                slowControlsStrings.value = value);
+
+        auto insert_query = sqlpp::insert_into(slow_controls_strings)
+                           .set(slow_controls_strings.runlet_id = runlet_id,
+                                slow_controls_strings.sc_detector_id = sc_detector_id,
+                                slow_controls_strings.value = value);
         db->QueryExecute(insert_query);
       }
       QwDebug << "Done executing sqlpp11 bulk insert for FillSlowControlsStrings"
@@ -1005,7 +1005,7 @@ void QwEPICSEvent::FillSlowControlsStrigs(QwParityDB *db)
 void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
 {
   // Get database connection
-  QwParitySchema::slow_controls_settings slowControlsSettings{};
+  QwParitySchema::slow_controls_settings slow_controls_settings{};
   
   // Initialize values
   UInt_t runlet_id = db->GetRunletID();
@@ -1298,9 +1298,9 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
     QwDebug << "QwEPICSEvent::FillSlowControlsSettings Writing to database now" << QwLog::endl;
     
     // Create the insert statement with required fields first
-    auto insert_stmt = sqlpp::insert_into(slowControlsSettings).set(
-        slowControlsSettings.runlet_id = runlet_id,
-        slowControlsSettings.precession_reversal = precession_reversal
+    auto insert_stmt = sqlpp::insert_into(slow_controls_settings).set(
+        slow_controls_settings.runlet_id = runlet_id,
+        slow_controls_settings.precession_reversal = precession_reversal
     );
 
     db->QueryExecute(insert_stmt);
@@ -1310,58 +1310,58 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
     UInt_t last_inserted_id = runlet_id;  // We know the runlet_id we just inserted
     
     if (slow_helicity_plate) {
-      auto update_stmt = sqlpp::update(slowControlsSettings)
-                        .set(slowControlsSettings.slow_helicity_plate = slow_helicity_plate.value())
-                        .where(slowControlsSettings.runlet_id == last_inserted_id);
+      auto update_stmt = sqlpp::update(slow_controls_settings)
+                        .set(slow_controls_settings.slow_helicity_plate = slow_helicity_plate.value())
+                        .where(slow_controls_settings.runlet_id == last_inserted_id);
       db->QueryExecute(update_stmt);
     }
     
     if (passive_helicity_plate) {
-      auto update_stmt = sqlpp::update(slowControlsSettings)
-                        .set(slowControlsSettings.passive_helicity_plate = passive_helicity_plate.value())
-                        .where(slowControlsSettings.runlet_id == last_inserted_id);
+      auto update_stmt = sqlpp::update(slow_controls_settings)
+                        .set(slow_controls_settings.passive_helicity_plate = passive_helicity_plate.value())
+                        .where(slow_controls_settings.runlet_id == last_inserted_id);
       db->QueryExecute(update_stmt);
     }
     
     if (wien_reversal) {
-      auto update_stmt = sqlpp::update(slowControlsSettings)
-                        .set(slowControlsSettings.wien_reversal = wien_reversal.value())
-                        .where(slowControlsSettings.runlet_id == last_inserted_id);
+      auto update_stmt = sqlpp::update(slow_controls_settings)
+                        .set(slow_controls_settings.wien_reversal = wien_reversal.value())
+                        .where(slow_controls_settings.runlet_id == last_inserted_id);
       db->QueryExecute(update_stmt);
     }
     
     if (helicity_length) {
-      auto update_stmt = sqlpp::update(slowControlsSettings)
-                        .set(slowControlsSettings.helicity_length = helicity_length.value())
-                        .where(slowControlsSettings.runlet_id == last_inserted_id);
+      auto update_stmt = sqlpp::update(slow_controls_settings)
+                        .set(slow_controls_settings.helicity_length = helicity_length.value())
+                        .where(slow_controls_settings.runlet_id == last_inserted_id);
       db->QueryExecute(update_stmt);
     }
     
     if (charge_feedback) {
-      auto update_stmt = sqlpp::update(slowControlsSettings)
-                        .set(slowControlsSettings.charge_feedback = charge_feedback.value())
-                        .where(slowControlsSettings.runlet_id == last_inserted_id);
+      auto update_stmt = sqlpp::update(slow_controls_settings)
+                        .set(slow_controls_settings.charge_feedback = charge_feedback.value())
+                        .where(slow_controls_settings.runlet_id == last_inserted_id);
       db->QueryExecute(update_stmt);
     }
     
     if (position_feedback) {
-      auto update_stmt = sqlpp::update(slowControlsSettings)
-                        .set(slowControlsSettings.position_feedback = position_feedback.value())
-                        .where(slowControlsSettings.runlet_id == last_inserted_id);
+      auto update_stmt = sqlpp::update(slow_controls_settings)
+                        .set(slow_controls_settings.position_feedback = position_feedback.value())
+                        .where(slow_controls_settings.runlet_id == last_inserted_id);
       db->QueryExecute(update_stmt);
     }
     
     if (qtor_current) {
-      auto update_stmt = sqlpp::update(slowControlsSettings)
-                        .set(slowControlsSettings.qtor_current = qtor_current.value())
-                        .where(slowControlsSettings.runlet_id == last_inserted_id);
+      auto update_stmt = sqlpp::update(slow_controls_settings)
+                        .set(slow_controls_settings.qtor_current = qtor_current.value())
+                        .where(slow_controls_settings.runlet_id == last_inserted_id);
       db->QueryExecute(update_stmt);
     }
     
     if (target_position) {
-      auto update_stmt = sqlpp::update(slowControlsSettings)
-                        .set(slowControlsSettings.target_position = target_position.value())
-                        .where(slowControlsSettings.runlet_id == last_inserted_id);
+      auto update_stmt = sqlpp::update(slow_controls_settings)
+                        .set(slow_controls_settings.target_position = target_position.value())
+                        .where(slow_controls_settings.runlet_id == last_inserted_id);
       db->QueryExecute(update_stmt);
     }
     
