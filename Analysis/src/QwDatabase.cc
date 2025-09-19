@@ -314,6 +314,7 @@ void QwDatabase::DefineOptions(QwOptions& options)
   options.AddOptions("Database options")("QwDatabase.dbpassword", po::value<string>(), "database password");
   options.AddOptions("Database options")("QwDatabase.dbport", po::value<int>()->default_value(0), "database server port number (defaults to standard mysql port)");
   options.AddOptions("Database options")("QwDatabase.debug", po::value<bool>()->default_value(false), "enable database debug output (default false)");
+  options.AddOptions("Database options")("QwDatabase.insert-missing-keys", po::value<bool>()->default_value(false), "insert missing keys into the database (default false)");
 
   std::stringstream dbtypes;
   dbtypes << "none";
@@ -388,6 +389,9 @@ void QwDatabase::ProcessOptions(QwOptions &options)
   }
   if (options.HasValue("QwDatabase.debug")) {
     fDBDebug = options.GetValue<bool>("QwDatabase.debug");
+  }
+  if (options.HasValue("QwDatabase.insert-missing-keys")) {
+    fDBInsertMissingKeys = options.GetValue<bool>("QwDatabase.insert-missing-keys");
   }
 }
 
