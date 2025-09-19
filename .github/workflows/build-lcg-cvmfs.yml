@@ -126,13 +126,14 @@ jobs:
 
             echo "::group::Create database (sqlite3)"
             # Create and populate the database
-            # (sqlite3 only supports AUTOINCREMENT on INTEGER keys)
+            # (sqlite3 only supports INTEGER PRIMARY KEY, not INT UNSIGNED or TINYINT UNSIGNED)
             # (sqlite3 does not support ENUM, so convert to TEXT with CHECK)
-            sed -e 's/AUTO_INCREMENT//g' \
+            sed -e 's/INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY/INTEGER PRIMARY KEY/g' \
+                -e 's/TINYINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY/INTEGER PRIMARY KEY/g' \
                 -e 's/\(\S*\)\sENUM(\([^)]*\))/\1 TEXT CHECK(\1 in (\2))/g' \
                 Parity/prminput/qwparity_schema.sql | sqlite3 qwparity.db
             # Insert dummy schema version (compare with QwParityDB.h)
-            sqlite3 qwparity.db "INSERT INTO db_schema VALUES(0, '01','04','0000','now','build-lcg-cvmfs.yml');"
+            sqlite3 qwparity.db "INSERT INTO db_schema VALUES(0, '01','04','0000','1970-01-01 00:00:00.000','build-lcg-cvmfs.yml');"
             # Insert dummy seed data
             sqlite3 qwparity.db "INSERT INTO seeds VALUES(0, 0, 10, 'foo', 'bar');"
             echo "::endgroup::"
