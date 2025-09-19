@@ -768,6 +768,38 @@ UInt_t QwParityDB::GetSlowControlDetectorID(const string& name)
 
   if (sc_detector_id==0) {
     QwError << "QwParityDB::GetSlowControlDetectorID() => Unable to determine valid ID for the epics variable " << name << QwLog::endl;
+
+    if (fDBInsertMissingKeys) {
+      QwWarning << "Inserting missing variable " << name << " into sc_detector table." << QwLog::endl;
+      try {
+        Connect();
+
+        QwParitySchema::sc_detector sc_detector_table{};
+        auto insert_query = sqlpp::insert_into(sc_detector_table).set(
+          sc_detector_table.name = name,
+          sc_detector_table.units = "unknown",
+          sc_detector_table.comment = "unknown"
+        );
+
+        auto insert_id = QueryInsertAndGetId(insert_query);
+
+        if (insert_id != 0) {
+          fSlowControlDetectorIDs[name] = insert_id;
+          sc_detector_id = insert_id;
+          QwWarning << "Successfully inserted variable " << name << " into sc_detector table with ID " << insert_id << QwLog::endl;
+        } else {
+          QwError << "Failed to insert variable " << name << " into sc_detector table." << QwLog::endl;
+        }
+
+        Disconnect();
+      }
+      catch (const std::exception& er) {
+        QwError << er.what() << QwLog::endl;
+        Disconnect();
+      }
+    } else {
+      QwError << "To enable automatic insertion of missing variables, set the option '--QwDatabase.insert-missing-keys'" << QwLog::endl;
+    }
   }
 
   return sc_detector_id;
