@@ -111,10 +111,10 @@ bool QwParityDB::SetRunNumber(const UInt_t runnum)
 
     Connect();
 
-    const auto& run_table = QwParitySchema::run{};
-    auto query = sqlpp::select(sqlpp::all_of(run_table))
-                 .from(run_table)
-                 .where(run_table.run_number == runnum);
+    const auto& run = QwParitySchema::run{};
+    auto query = sqlpp::select(sqlpp::all_of(run))
+                 .from(run)
+                 .where(run.run_number == runnum);
 
     auto results = QuerySelect(query);
     size_t result_count = CountResults(results);
@@ -159,10 +159,10 @@ UInt_t QwParityDB::SetRunID(QwEventBuffer& qwevt)
     {
       Connect();
 
-      const auto& run_table = QwParitySchema::run{};
-      auto query = sqlpp::select(sqlpp::all_of(run_table))
-                   .from(run_table)
-                   .where(run_table.run_number == qwevt.GetRunNumber());
+      const auto& run = QwParitySchema::run{};
+      auto query = sqlpp::select(sqlpp::all_of(run))
+                   .from(run)
+                   .where(run.run_number == qwevt.GetRunNumber());
       auto results = QuerySelect(query);
 
       size_t result_count = CountResults(results);
@@ -211,21 +211,21 @@ UInt_t QwParityDB::SetRunID(QwEventBuffer& qwevt)
     {
 
       Connect();
-      const auto& run_table = QwParitySchema::run{};
-      auto insert_query = sqlpp::insert_into(run_table).set(
-        run_table.run_number = qwevt.GetRunNumber(),
-        run_table.run_type = "good", // qwevt.GetRunType(); RunType is the confused name because we have also a CODA run type.
+      const auto& run = QwParitySchema::run{};
+      auto insert_query = sqlpp::insert_into(run).set(
+        run.run_number = qwevt.GetRunNumber(),
+        run.run_type = "good", // qwevt.GetRunType(); RunType is the confused name because we have also a CODA run type.
         // Convert Unix timestamps to sqlpp11 datetime using chrono time_point
         // FIXME (wdconinc) verify conversion
-        run_table.start_time = std::chrono::system_clock::from_time_t(qwevt.GetStartUnixTime()),
-        run_table.end_time = std::chrono::system_clock::from_time_t(qwevt.GetEndUnixTime()),
-        run_table.n_mps = 0,
-        run_table.n_qrt = 0,
+        run.start_time = std::chrono::system_clock::from_time_t(qwevt.GetStartUnixTime()),
+        run.end_time = std::chrono::system_clock::from_time_t(qwevt.GetEndUnixTime()),
+        run.n_mps = 0,
+        run.n_qrt = 0,
         // Set following quantities to 9999 as "uninitialized value".  DTS 8/3/2012
-        run_table.slug = 9999,
-        run_table.wien_slug = 9999,
-        run_table.injector_slug = 9999,
-        run_table.comment = ""
+        run.slug = 9999,
+        run.wien_slug = 9999,
+        run.injector_slug = 9999,
+        run.comment = ""
       );
         
       QwDebug << "QwParityDB::SetRunID() => Executing sqlpp11 run insert" << QwLog::endl;
@@ -285,16 +285,16 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
     {
       Connect();
 
-      QwParitySchema::runlet runlet_table{};
+      QwParitySchema::runlet runlet{};
       
       // Query is slightly different if file segments are being chained together for replay or not.
       if (qwevt.AreRunletsSplit()) {
         fSegmentNumber = qwevt.GetSegmentNumber();
-        auto query = sqlpp::select(sqlpp::all_of(runlet_table))
-                     .from(runlet_table)
-                     .where(runlet_table.run_id == fRunID 
-                            and runlet_table.full_run == "false" 
-                            and runlet_table.segment_number == fSegmentNumber);
+        auto query = sqlpp::select(sqlpp::all_of(runlet))
+                     .from(runlet)
+                     .where(runlet.run_id == fRunID
+                            and runlet.full_run == "false"
+                            and runlet.segment_number == fSegmentNumber);
         auto results = QuerySelect(query);
         
         // Count results and process using helper functions
@@ -324,10 +324,10 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
         }
         
       } else {
-        auto query = sqlpp::select(sqlpp::all_of(runlet_table))
-                     .from(runlet_table)
-                     .where(runlet_table.run_id == fRunID 
-                            and runlet_table.full_run == "true");
+        auto query = sqlpp::select(sqlpp::all_of(runlet))
+                     .from(runlet)
+                     .where(runlet.run_id == fRunID
+                            and runlet.full_run == "true");
         auto results = QuerySelect(query);
         
         // Count results and process using helper functions
@@ -372,34 +372,34 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
     {
       Connect();
 
-      QwParitySchema::runlet runlet_table{};
+      QwParitySchema::runlet runlet{};
       uint64_t insert_id = 0;
       
       // Handle segment_number based on runlet split condition
       if (qwevt.AreRunletsSplit()) {
-        auto insert_query = sqlpp::insert_into(runlet_table)
-                           .set(runlet_table.run_id = fRunID,
-                                runlet_table.run_number = qwevt.GetRunNumber(),
-                                runlet_table.start_time = sqlpp::null,
-                                runlet_table.end_time = sqlpp::null,
-                                runlet_table.first_mps = 0,
-                                runlet_table.last_mps = 0,
-                                runlet_table.segment_number = fSegmentNumber,
-                                runlet_table.full_run = "false");
-        
+        auto insert_query = sqlpp::insert_into(runlet)
+                           .set(runlet.run_id = fRunID,
+                                runlet.run_number = qwevt.GetRunNumber(),
+                                runlet.start_time = sqlpp::null,
+                                runlet.end_time = sqlpp::null,
+                                runlet.first_mps = 0,
+                                runlet.last_mps = 0,
+                                runlet.segment_number = fSegmentNumber,
+                                runlet.full_run = "false");
+
         QwDebug << "QwParityDB::SetRunletID() => Executing sqlpp11 runlet insert (with segment)" << QwLog::endl;
         insert_id = QueryInsertAndGetId(insert_query);
       } else {
-        auto insert_query = sqlpp::insert_into(runlet_table)
-                           .set(runlet_table.run_id = fRunID,
-                                runlet_table.run_number = qwevt.GetRunNumber(),
-                                runlet_table.start_time = sqlpp::null,
-                                runlet_table.end_time = sqlpp::null,
-                                runlet_table.first_mps = 0,
-                                runlet_table.last_mps = 0,
-                                runlet_table.segment_number = sqlpp::null,
-                                runlet_table.full_run = "true");
-        
+        auto insert_query = sqlpp::insert_into(runlet)
+                           .set(runlet.run_id = fRunID,
+                                runlet.run_number = qwevt.GetRunNumber(),
+                                runlet.start_time = sqlpp::null,
+                                runlet.end_time = sqlpp::null,
+                                runlet.first_mps = 0,
+                                runlet.last_mps = 0,
+                                runlet.segment_number = sqlpp::null,
+                                runlet.full_run = "true");
+
         QwDebug << "QwParityDB::SetRunletID() => Executing sqlpp11 runlet insert (no segment)" << QwLog::endl;
         insert_id = QueryInsertAndGetId(insert_query);
       }
@@ -448,13 +448,13 @@ UInt_t QwParityDB::SetAnalysisID(QwEventBuffer& qwevt)
   try {
     Connect();
 
-    const auto& analysis_table = QwParitySchema::analysis{};
-    auto query = sqlpp::select(analysis_table.analysis_id)
-                 .from(analysis_table)
-                 .where(analysis_table.beam_mode == "nbm"
-                        and analysis_table.slope_calculation == "off"
-                        and analysis_table.slope_correction == "off"
-                        and analysis_table.runlet_id == this->GetRunletID(qwevt));
+    const auto& analysis = QwParitySchema::analysis{};
+    auto query = sqlpp::select(analysis.analysis_id)
+                 .from(analysis)
+                 .where(analysis.beam_mode == "nbm"
+                        and analysis.slope_calculation == "off"
+                        and analysis.slope_correction == "off"
+                        and analysis.runlet_id == this->GetRunletID(qwevt));
     auto results = QuerySelect(query);
     size_t result_count = CountResults(results);
     if (result_count > 0) {
@@ -566,31 +566,31 @@ UInt_t QwParityDB::SetAnalysisID(QwEventBuffer& qwevt)
     
     Connect();
 
-    QwParitySchema::analysis analysis_table{};
-    auto insert_query = sqlpp::insert_into(analysis_table)
-                        .set(analysis_table.runlet_id = runlet_id,
-                             analysis_table.seed_id = seed_id,
-                             analysis_table.time = analysis_time,
-                             analysis_table.bf_checksum = bf_checksum,
-                             analysis_table.beam_mode = beam_mode,
-                             analysis_table.n_mps = n_mps,
-                             analysis_table.n_qrt = n_qrt,
-                             analysis_table.first_event = first_event,
-                             analysis_table.last_event = last_event,
-                             analysis_table.segment = segment,
-                             analysis_table.slope_calculation = slope_calculation,
-                             analysis_table.slope_correction = slope_correction,
-                             analysis_table.root_version = root_version,
-                             analysis_table.root_file_time = root_file_time,
-                             analysis_table.root_file_host = root_file_host,
-                             analysis_table.root_file_user = root_file_user,
-                             analysis_table.analyzer_name = analyzer_name,
-                             analysis_table.analyzer_argv = analyzer_argv,
-                             analysis_table.analyzer_svn_rev = analyzer_svn_rev,
-                             analysis_table.analyzer_svn_lc_rev = analyzer_svn_lc_rev,
-                             analysis_table.analyzer_svn_url = analyzer_svn_url,
-                             analysis_table.roc_flags = roc_flags);
-    
+    QwParitySchema::analysis analysis{};
+    auto insert_query = sqlpp::insert_into(analysis)
+                        .set(analysis.runlet_id = runlet_id,
+                             analysis.seed_id = seed_id,
+                             analysis.time = analysis_time,
+                             analysis.bf_checksum = bf_checksum,
+                             analysis.beam_mode = beam_mode,
+                             analysis.n_mps = n_mps,
+                             analysis.n_qrt = n_qrt,
+                             analysis.first_event = first_event,
+                             analysis.last_event = last_event,
+                             analysis.segment = segment,
+                             analysis.slope_calculation = slope_calculation,
+                             analysis.slope_correction = slope_correction,
+                             analysis.root_version = root_version,
+                             analysis.root_file_time = root_file_time,
+                             analysis.root_file_host = root_file_host,
+                             analysis.root_file_user = root_file_user,
+                             analysis.analyzer_name = analyzer_name,
+                             analysis.analyzer_argv = analyzer_argv,
+                             analysis.analyzer_svn_rev = analyzer_svn_rev,
+                             analysis.analyzer_svn_lc_rev = analyzer_svn_lc_rev,
+                             analysis.analyzer_svn_url = analyzer_svn_url,
+                             analysis.roc_flags = roc_flags);
+
     auto insert_id = QueryInsertAndGetId(insert_query);
     
     if (insert_id != 0)
@@ -615,16 +615,16 @@ void QwParityDB::FillParameterFiles(QwSubsystemArrayParity& subsys){
   try {
     Connect();
     
-    QwParitySchema::parameter_files param_files_table{};
+    QwParitySchema::parameter_files param_files{};
     UInt_t analysis_id = GetAnalysisID();
 
     param_file_list->Print();
     TIter next(param_file_list);
     TList *pfl_elem;
     while ((pfl_elem = (TList *) next())) {
-      auto insert_query = sqlpp::insert_into(param_files_table)
-                          .set(param_files_table.analysis_id = analysis_id,
-                               param_files_table.filename = pfl_elem->GetName());
+      auto insert_query = sqlpp::insert_into(param_files)
+                          .set(param_files.analysis_id = analysis_id,
+                               param_files.filename = pfl_elem->GetName());
       QueryExecute(insert_query);
     }
 
@@ -691,8 +691,8 @@ void QwParityDB::StoreMonitorIDs()
   try {
     Connect();
 
-    QwParitySchema::monitor monitor_table{};
-    auto query = sqlpp::select(sqlpp::all_of(monitor_table)).from(monitor_table).unconditionally();
+    QwParitySchema::monitor monitor{};
+    auto query = sqlpp::select(sqlpp::all_of(monitor)).from(monitor).unconditionally();
     QuerySelectForEachResult(query, [&](const auto& row) {
       QwDebug << "StoreMonitorID:  monitor_id = " << row.monitor_id << " quantity = " << row.quantity << QwLog::endl;
       QwParityDB::fMonitorIDs.insert(std::make_pair(row.quantity, row.monitor_id));
@@ -737,8 +737,8 @@ void QwParityDB::StoreMainDetectorIDs()
   try {
     Connect();
 
-    QwParitySchema::main_detector main_detector_table{};
-    auto query = sqlpp::select(sqlpp::all_of(main_detector_table)).from(main_detector_table).unconditionally();
+    QwParitySchema::main_detector main_detector{};
+    auto query = sqlpp::select(sqlpp::all_of(main_detector)).from(main_detector).unconditionally();
     QuerySelectForEachResult(query, [&](const auto& row) {
       QwDebug << "StoreMainDetectorID:  main_detector_id = " << row.main_detector_id << " quantity = " << row.quantity << QwLog::endl;
       QwParityDB::fMainDetectorIDs.insert(std::make_pair(row.quantity, row.main_detector_id));
@@ -774,11 +774,11 @@ UInt_t QwParityDB::GetSlowControlDetectorID(const string& name)
       try {
         Connect();
 
-        QwParitySchema::sc_detector sc_detector_table{};
-        auto insert_query = sqlpp::insert_into(sc_detector_table).set(
-          sc_detector_table.name = name,
-          sc_detector_table.units = "unknown",
-          sc_detector_table.comment = "unknown"
+        QwParitySchema::sc_detector sc_detector{};
+        auto insert_query = sqlpp::insert_into(sc_detector).set(
+          sc_detector.name = name,
+          sc_detector.units = "unknown",
+          sc_detector.comment = "unknown"
         );
 
         auto insert_id = QueryInsertAndGetId(insert_query);
@@ -832,9 +832,9 @@ void QwParityDB::StoreSlowControlDetectorIDs()
 {
   try {
     Connect();
-    
-    QwParitySchema::sc_detector sc_detector_table{};
-    auto query = sqlpp::select(sqlpp::all_of(sc_detector_table)).from(sc_detector_table).unconditionally();
+
+    QwParitySchema::sc_detector sc_detector{};
+    auto query = sqlpp::select(sqlpp::all_of(sc_detector)).from(sc_detector).unconditionally();
     QuerySelectForEachResult(query, [&](const auto& row) {
       QwDebug << "StoreSlowControlDetectorID: sc_detector_id = " << row.sc_detector_id << " name = " << row.name << QwLog::endl;
       QwParityDB::fSlowControlDetectorIDs.insert(std::make_pair(row.name, row.sc_detector_id));
@@ -858,8 +858,8 @@ void QwParityDB::StoreErrorCodeIDs()
   try {
     Connect();
     
-    QwParitySchema::error_code error_code_table{};
-    auto query = sqlpp::select(sqlpp::all_of(error_code_table)).from(error_code_table).unconditionally();
+    QwParitySchema::error_code error_code{};
+    auto query = sqlpp::select(sqlpp::all_of(error_code)).from(error_code).unconditionally();
     QuerySelectForEachResult(query, [&](const auto& row) {
       QwDebug << "StoreErrorCodeID: error_code_id = " << row.error_code_id << " quantity = " << row.quantity << QwLog::endl;
       QwParityDB::fErrorCodeIDs.insert(std::make_pair(row.quantity, row.error_code_id));
@@ -901,8 +901,8 @@ void QwParityDB::StoreLumiDetectorIDs()
   try {
     Connect();
 
-    QwParitySchema::lumi_detector lumi_detector_table{};
-    auto query = sqlpp::select(sqlpp::all_of(lumi_detector_table)).from(lumi_detector_table).unconditionally();
+    QwParitySchema::lumi_detector lumi_detector{};
+    auto query = sqlpp::select(sqlpp::all_of(lumi_detector)).from(lumi_detector).unconditionally();
     QuerySelectForEachResult(query, [&](const auto& row) {
       QwDebug << "StoreLumiDetectorID:  lumi_detector_id = " << row.lumi_detector_id << " quantity = " << row.quantity << QwLog::endl;
       QwParityDB::fLumiDetectorIDs.insert(std::make_pair(row.quantity, row.lumi_detector_id));
@@ -941,8 +941,8 @@ void QwParityDB::StoreMeasurementIDs()
   try {
     Connect();
 
-    QwParitySchema::measurement_type measurement_type_table{};
-    auto query = sqlpp::select(sqlpp::all_of(measurement_type_table)).from(measurement_type_table).unconditionally();
+    QwParitySchema::measurement_type measurement_type{};
+    auto query = sqlpp::select(sqlpp::all_of(measurement_type)).from(measurement_type).unconditionally();
     QuerySelectForEachResult(query, [&](const auto& row) {
       QwDebug << "StoreMeasurementID:  measurement_type = " << row.measurement_type_id << QwLog::endl;
       QwParityDB::fMeasurementIDs.push_back((std::string) row.measurement_type_id);
