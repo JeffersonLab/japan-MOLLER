@@ -1740,16 +1740,16 @@ void  VQwDetectorArray::FillDB(QwParityDB *db, TString datatype) {
     // Check the entrylist size, if it isn't zero, start to query..
     
     if( entrylist.size() ) {
-        QwParitySchema::md_data md_data_table;
+        QwParitySchema::md_data md_data;
         for (const auto& entry : entrylist) {
-            db->QueryExecute(sqlpp::insert_into(md_data_table)
-                                .set(md_data_table.analysis_id = entry.analysis_id,
-                                     md_data_table.main_detector_id = entry.main_detector_id,
-                                     md_data_table.measurement_type_id = entry.measurement_type_id,
-                                     md_data_table.subblock = entry.subblock,
-                                     md_data_table.n = entry.n,
-                                     md_data_table.value = entry.value,
-                                     md_data_table.error = entry.error));
+            db->QueryExecute(sqlpp::insert_into(md_data)
+                                .set(md_data.analysis_id = entry[md_data.analysis_id],
+                                     md_data.main_detector_id = entry[md_data.main_detector_id],
+                                     md_data.measurement_type_id = entry[md_data.measurement_type_id],
+                                     md_data.subblock = entry[md_data.subblock],
+                                     md_data.n = entry[md_data.n],
+                                     md_data.value = entry[md_data.value],
+                                     md_data.error = entry[md_data.error]));
         }
     } else {
         QwMessage << "VQwDetectorArray::FillDB :: This is the case when the entrylist contains nothing in "<< datatype.Data() << QwLog::endl;
@@ -1872,13 +1872,13 @@ void VQwDetectorArray::FillErrDB(QwParityDB *db, TString datatype) {
     // Check the entrylist size, if it isn't zero, start to query..
 
     if( entrylist.size() ) {
-        QwParitySchema::md_errors md_errors_table;
+        QwParitySchema::md_errors md_errors;
         for (const auto& entry : entrylist) {
-            auto insert_query = sqlpp::insert_into(md_errors_table)
-                                .set(md_errors_table.analysis_id = entry.analysis_id,
-                                     md_errors_table.main_detector_id = entry.main_detector_id,
-                                     md_errors_table.error_code_id = entry.error_code_id,
-                                     md_errors_table.n = entry.n);
+            auto insert_query = sqlpp::insert_into(md_errors)
+                                .set(md_errors.analysis_id = entry[md_errors.analysis_id],
+                                     md_errors.main_detector_id = entry[md_errors.main_detector_id],
+                                     md_errors.error_code_id = entry[md_errors.error_code_id],
+                                     md_errors.n = entry[md_errors.n]);
             db->QueryExecute(insert_query);
         }
     } else {

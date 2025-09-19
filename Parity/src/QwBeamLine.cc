@@ -3148,13 +3148,13 @@ void QwBeamLine::FillErrDB(QwParityDB *db, TString datatype)
   
   try { 
     if (entrylist.size()) {
-      QwParitySchema::beam_errors beam_errors_table;
+      QwParitySchema::beam_errors beam_errors;
       for (const auto& entry : entrylist) {
-          db->QueryExecute(sqlpp::insert_into(beam_errors_table)
-                              .set(beam_errors_table.analysis_id = entry.analysis_id,
-                                    beam_errors_table.monitor_id = entry.monitor_id,
-                                    beam_errors_table.error_code_id = entry.error_code_id,
-                                    beam_errors_table.n = entry.n));
+          db->QueryExecute(sqlpp::insert_into(beam_errors)
+                              .set(beam_errors.analysis_id = entry[beam_errors.analysis_id],
+                                    beam_errors.monitor_id = entry[beam_errors.monitor_id],
+                                    beam_errors.error_code_id = entry[beam_errors.error_code_id],
+                                    beam_errors.n = entry[beam_errors.n]));
       }
     }
   } catch (const std::exception &er) {

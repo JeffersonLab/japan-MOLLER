@@ -447,9 +447,9 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db)
 	    <<  db->GetRunNumber() << QwLog::endl;
 
     // Convert to sqlpp11 query with JOINs
-    QwParitySchema::seeds seeds_table{};
-    QwParitySchema::run first_run_table{};
-    QwParitySchema::run last_run_table{};
+    QwParitySchema::seeds seeds{};
+    QwParitySchema::run first_run{};
+    QwParitySchema::run last_run{};
     
     // Create aliases for the run table
     auto rf_alias = first_run_table.as(run_first);
