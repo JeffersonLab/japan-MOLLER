@@ -74,7 +74,7 @@ CREATE TABLE runlet (
     run_id INT UNSIGNED NOT NULL,
     run_number INT UNSIGNED NOT NULL,
     segment_number INT UNSIGNED NULL,
-    full_run ENUM('0','1') NOT NULL,  -- ENUM conversion from sql_enum
+    full_run ENUM('false','true') NOT NULL,
     start_time DATETIME NULL,
     end_time DATETIME NULL,
     first_mps INT UNSIGNED NOT NULL,
@@ -104,8 +104,8 @@ CREATE TABLE analysis (
     first_event INT UNSIGNED NULL,
     last_event INT UNSIGNED NULL,
     segment INT NULL,
-    slope_calculation ENUM('0','1') NULL,  -- ENUM conversion
-    slope_correction ENUM('0','1') NULL,   -- ENUM conversion
+    slope_calculation ENUM('off','on') NULL,
+    slope_correction ENUM('off','on') NULL,
     root_version TEXT NOT NULL,
     root_file_time TEXT NOT NULL,
     root_file_host TEXT NOT NULL,
