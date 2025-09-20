@@ -241,7 +241,7 @@ add_library(${PROJECT_NAME} SHARED ${my_project_sources} ${my_project_headers})
 add_dependencies(${PROJECT_NAME} check_git_repository)
 
 # Add schema generation dependency if sqlpp11 is available
-if(TARGET sqlpp11:sqlpp11 AND TARGET generate_schema)
+if((Sqlpp11_FOUND OR TARGET sqlpp11::sqlpp11) AND TARGET generate_schema)
   add_dependencies(${PROJECT_NAME} generate_schema)
 endif()
 
@@ -275,7 +275,7 @@ target_link_libraries(${PROJECT_NAME}
   )
 
 # Link sqlpp11 if enabled
-if(TARGET sqlpp11::sqlpp11)
+if((Sqlpp11_FOUND OR TARGET sqlpp11::sqlpp11) AND TARGET generate_schema)
   target_link_libraries(${PROJECT_NAME}
     PRIVATE
       ${Sqlpp11_LIBRARIES}
