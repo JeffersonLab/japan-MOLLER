@@ -579,33 +579,36 @@ void VQwDataHandler::FillDB(QwParityDB *db, TString datatype)
     }
   }
 
-  db->Connect();
-  // Check the entrylist size, if it isn't zero, start to query..
-  if( beamlist.size() ) {
-    for (const auto& entry: beamlist) {
-      db->QueryExecute(entry.insert_into());
+  // Database operations with scoped connection
+  {
+    auto c = db->GetScopedConnection();
+    
+    // Check the entrylist size, if it isn't zero, start to query..
+    if( beamlist.size() ) {
+      for (const auto& entry: beamlist) {
+        c->QueryExecute(entry.insert_into());
+      }
+    } else {
+      QwMessage << "QwCombiner::FillDB :: This is the case when the beamlist contains nothing for type="<< measurement_type.Data() 
+                << QwLog::endl;
     }
-  } else {
-    QwMessage << "QwCombiner::FillDB :: This is the case when the beamlist contains nothing for type="<< measurement_type.Data() 
-	            << QwLog::endl;
-  }
-  if( mdlist.size() ) {
-    for (const auto& entry: mdlist) {
-      db->QueryExecute(entry.insert_into());
+    if( mdlist.size() ) {
+      for (const auto& entry: mdlist) {
+        c->QueryExecute(entry.insert_into());
+      }
+    } else {
+      QwMessage << "QwCombiner::FillDB :: This is the case when the mdlist contains nothing for type="<< measurement_type.Data() 
+                << QwLog::endl;
     }
-  } else {
-    QwMessage << "QwCombiner::FillDB :: This is the case when the mdlist contains nothing for type="<< measurement_type.Data() 
-	            << QwLog::endl;
-  }
-  if( lumilist.size() ) {
-    for (const auto& entry: lumilist) {
-      db->QueryExecute(entry.insert_into());
+    if( lumilist.size() ) {
+      for (const auto& entry: lumilist) {
+        c->QueryExecute(entry.insert_into());
+      }
+    } else {
+      QwMessage << "QwCombiner::FillDB :: This is the case when the lumilist contains nothing for type="<< measurement_type.Data() 
+          << QwLog::endl;
     }
-  } else {
-    QwMessage << "QwCombiner::FillDB :: This is the case when the lumilist contains nothing for type="<< measurement_type.Data() 
-	      << QwLog::endl;
   }
-  db->Disconnect();
   return;
 }
 #endif // __USE_DATABASE__
