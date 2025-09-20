@@ -18,6 +18,52 @@
 // Qweak headers
 #include "QwParitySchema.h"
 
+// QwScopedConnection implementation
+QwScopedConnection::QwScopedConnection(QwDatabase* db) 
+    : fDatabase(db), fConnected(false) {
+    if (fDatabase) {
+        fConnected = fDatabase->Connect();
+        if (!fConnected) {
+            QwError << "QwScopedConnection: Failed to establish database connection" << QwLog::endl;
+        }
+    }
+}
+
+QwScopedConnection::~QwScopedConnection() {
+    if (fDatabase && fConnected) {
+        fDatabase->Disconnect();
+        fConnected = false;
+    }
+}
+
+QwScopedConnection::QwScopedConnection(QwScopedConnection&& other) noexcept
+    : fDatabase(other.fDatabase), fConnected(other.fConnected) {
+    other.fDatabase = nullptr;
+    other.fConnected = false;
+}
+
+QwScopedConnection& QwScopedConnection::operator=(QwScopedConnection&& other) noexcept {
+    if (this != &other) {
+        // Clean up current connection
+        if (fDatabase && fConnected) {
+            fDatabase->Disconnect();
+        }
+        
+        // Move from other
+        fDatabase = other.fDatabase;
+        fConnected = other.fConnected;
+        
+        // Clear other
+        other.fDatabase = nullptr;
+        other.fConnected = false;
+    }
+    return *this;
+}
+
+bool QwScopedConnection::IsConnected() const {
+    return fConnected && fDatabase && fDatabase->Connected();
+}
+
 
 /*! The simple constructor initializes member fields.  This class is not
  * used to establish the database connection.
