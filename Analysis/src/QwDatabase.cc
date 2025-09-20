@@ -141,7 +141,12 @@ Bool_t QwDatabase::ValidateConnection()
       QwError << "QwDatabase::ValidateConnection() : No database supplied.  Unable to connect." << QwLog::endl;
       fValidConnection=false;
     }
+#ifdef __USE_DATABASE_SQLITE3__
     if (fDBType != kQwDatabaseSQLite3) {
+#else
+    // If SQLite3 is not available, all databases require username/password
+    if (true) {
+#endif
       if (fDBUsername.empty()){
         QwError << "QwDatabase::ValidateConnection() : No database username supplied.  Unable to connect." << QwLog::endl;
         fValidConnection=false;
