@@ -2947,49 +2947,15 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
 
   // For sqlpp11, insert data directly instead of using entrylist pattern
   db->Connect();
-  
-  try {
-    // Insert BCM data
-    for(i=0; i< fBCM.size(); i++) {
-      interface.clear();
-      interface = fBCM[i].get()->GetDBEntry();
-      for (j=0; j<interface.size(); j++){
-        interface.at(j).SetAnalysisID( analysis_id );
-        interface.at(j).SetMonitorID( db );
-        interface.at(j).SetMeasurementTypeID( measurement_type_bcm );
-        interface.at(j).PrintStatus( local_print_flag );
-        interface.at(j).AddThisEntryToList( entrylist );
-      }
+  // Check the entrylist size, if it isn't zero, start to query..
+  if( entrylist.size() ) {
+    for (const auto& entry: entrylist) {
+      db->QueryExecute(entry.insert_into());
     }
-
-    // Insert BPM data  
-    if(local_print_flag) QwMessage <<  QwColor(Qw::kGreen) << "Beam Position Monitors" <<QwLog::endl;
-    for(i=0; i< fStripline.size(); i++) {
-      interface.clear();
-      interface = fStripline[i].get()->GetDBEntry();
-      for (j=0; j<interface.size()-5; j++){
-        interface.at(j).SetAnalysisID( analysis_id ) ;
-        interface.at(j).SetMonitorID( db );
-        interface.at(j).SetMeasurementTypeID( measurement_type_bpm );
-        interface.at(j).PrintStatus( local_print_flag);
-        interface.at(j).AddThisEntryToList( entrylist );
-      }
-      // effective charge (last 4 elements)  need to be saved as measurement_type_bcm
-      for (j=interface.size()-5; j<interface.size(); j++){
-        interface.at(j).SetAnalysisID( analysis_id ) ;
-        interface.at(j).SetMonitorID( db );
-        interface.at(j).SetMeasurementTypeID( measurement_type_bcm );
-        interface.at(j).PrintStatus( local_print_flag);
-        interface.at(j).AddThisEntryToList( entrylist );
-      }
-    }
-
-    // Continue with other beam devices...
-    // (I'll add more here to replace the rest of the entrylist.push_back calls)
-    } catch (const std::exception &er) {
-      QwError << "SQL exception: " << er.what() << QwLog::endl;
-    }
-  
+  }
+  else {
+    QwMessage << "QwBeamLine::FillDB :: This is the case when the entrlylist contains nothing in "<< datatype.Data() << QwLog::endl;
+  }
   db->Disconnect();
   return;
 }
