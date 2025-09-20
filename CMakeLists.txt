@@ -319,6 +319,7 @@ foreach(file ${exefiles})
   target_link_libraries(${filelower}
     PRIVATE
       eviowrapper
+      ${Sqlpp11_LIBRARIES}
       ${PROJECT_NAME}
   )
   target_compile_options(${filelower}
