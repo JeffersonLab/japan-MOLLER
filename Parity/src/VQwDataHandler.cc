@@ -582,63 +582,24 @@ void VQwDataHandler::FillDB(QwParityDB *db, TString datatype)
   db->Connect();
   // Check the entrylist size, if it isn't zero, start to query..
   if( beamlist.size() ) {
-    // Convert to sqlpp11 bulk insert for beam data
-    const auto& beam = QwParitySchema::beam{};
-    try {
-      for (const auto& entry : beamlist) {
-        db->QueryExecute(sqlpp::insert_into(beam)
-                   .set(beam.analysis_id = entry[beam.analysis_id],
-                        beam.monitor_id = entry[beam.monitor_id],
-                        beam.measurement_type_id = entry[beam.measurement_type_id],
-                        beam.subblock = entry[beam.subblock],
-                        beam.n = entry[beam.n],
-                        beam.value = entry[beam.value],
-                        beam.error = entry[beam.error]));
-      }
-    } catch (const std::exception &er) {
-      QwError << "SQL exception in beam insert: " << er.what() << QwLog::endl;
+    for (const auto& entry: beamlist) {
+      db->QueryExecute(entry.insert_into());
     }
   } else {
     QwMessage << "QwCombiner::FillDB :: This is the case when the beamlist contains nothing for type="<< measurement_type.Data() 
 	            << QwLog::endl;
   }
   if( mdlist.size() ) {
-    // Convert to sqlpp11 bulk insert for MD data
-    const auto& md_data = QwParitySchema::md_data{};
-    try {
-      for (const auto& entry : mdlist) {
-        db->QueryExecute(sqlpp::insert_into(md_data)
-                   .set(md_data.analysis_id = entry[md_data.analysis_id],
-                        md_data.main_detector_id = entry[md_data.main_detector_id],
-                        md_data.measurement_type_id = entry[md_data.measurement_type_id],
-                        md_data.subblock = entry[md_data.subblock],
-                        md_data.n = entry[md_data.n],
-                        md_data.value = entry[md_data.value],
-                        md_data.error = entry[md_data.error]));
-      }
-    } catch (const std::exception &er) {
-      QwError << "SQL exception in MD insert: " << er.what() << QwLog::endl;
+    for (const auto& entry: mdlist) {
+      db->QueryExecute(entry.insert_into());
     }
   } else {
     QwMessage << "QwCombiner::FillDB :: This is the case when the mdlist contains nothing for type="<< measurement_type.Data() 
 	            << QwLog::endl;
   }
   if( lumilist.size() ) {
-    // Convert to sqlpp11 bulk insert for luminosity data
-    const auto& lumi_data = QwParitySchema::lumi_data{};
-    try {
-      for (const auto& entry : lumilist) {
-        db->QueryExecute(sqlpp::insert_into(lumi_data)
-                   .set(lumi_data.analysis_id = entry[lumi_data.analysis_id],
-                        lumi_data.lumi_detector_id = entry[lumi_data.lumi_detector_id],
-                        lumi_data.measurement_type_id = entry[lumi_data.measurement_type_id],
-                        lumi_data.subblock = entry[lumi_data.subblock],
-                        lumi_data.n = entry[lumi_data.n],
-                        lumi_data.value = entry[lumi_data.value],
-                        lumi_data.error = entry[lumi_data.error]));
-      }
-    } catch (const std::exception &er) {
-      QwError << "SQL exception in lumi insert: " << er.what() << QwLog::endl;
+    for (const auto& entry: lumilist) {
+      db->QueryExecute(entry.insert_into());
     }
   } else {
     QwMessage << "QwCombiner::FillDB :: This is the case when the lumilist contains nothing for type="<< measurement_type.Data() 
