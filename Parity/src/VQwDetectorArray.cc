@@ -1734,30 +1734,17 @@ void  VQwDetectorArray::FillDB(QwParityDB *db, TString datatype) {
          << QwColor(Qw::kNormal) << QwLog::endl;
 
     }
-
-    db->Connect();
     
     // Check the entrylist size, if it isn't zero, start to query..
-    
     if( entrylist.size() ) {
-        QwParitySchema::md_data md_data;
+        db->Connect();
         for (const auto& entry : entrylist) {
-            db->QueryExecute(sqlpp::insert_into(md_data)
-                                .set(md_data.analysis_id = entry[md_data.analysis_id],
-                                     md_data.main_detector_id = entry[md_data.main_detector_id],
-                                     md_data.measurement_type_id = entry[md_data.measurement_type_id],
-                                     md_data.subblock = entry[md_data.subblock],
-                                     md_data.n = entry[md_data.n],
-                                     md_data.value = entry[md_data.value],
-                                     md_data.error = entry[md_data.error]));
+            db->QueryExecute(entry.insert_into());
         }
+        db->Disconnect();
     } else {
         QwMessage << "VQwDetectorArray::FillDB :: This is the case when the entrylist contains nothing in "<< datatype.Data() << QwLog::endl;
     }
-    db->Disconnect();
-    
-    return;
-
 }
 #endif
 
@@ -1867,28 +1854,16 @@ void VQwDetectorArray::FillErrDB(QwParityDB *db, TString datatype) {
 
     }
 
-    db->Connect();
-
     // Check the entrylist size, if it isn't zero, start to query..
-
     if( entrylist.size() ) {
-        QwParitySchema::md_errors md_errors;
+        db->Connect();
         for (const auto& entry : entrylist) {
-            auto insert_query = sqlpp::insert_into(md_errors)
-                                .set(md_errors.analysis_id = entry[md_errors.analysis_id],
-                                     md_errors.main_detector_id = entry[md_errors.main_detector_id],
-                                     md_errors.error_code_id = entry[md_errors.error_code_id],
-                                     md_errors.n = entry[md_errors.n]);
-            db->QueryExecute(insert_query);
+            db->QueryExecute(entry.insert_into());
         }
+        db->Disconnect();
     } else {
         QwMessage << "VQwDetectorArray::FillErrDB :: This is the case when the entrylist contains nothing in "<< datatype.Data() << QwLog::endl;
     }
-
-    db->Disconnect();
-
-    return;
-
 }
 #endif
 
