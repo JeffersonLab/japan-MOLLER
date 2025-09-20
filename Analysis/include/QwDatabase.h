@@ -41,6 +41,43 @@
 #include "QwOptions.h"
 
 // Forward declarations
+class QwDatabase;
+
+/**
+ *  \class QwScopedConnection
+ *  \ingroup QwAnalysis
+ *  \brief A RAII-style scoped database connection
+ *
+ * This class provides automatic connection management using RAII principles.
+ * The connection is established when the object is created and automatically
+ * disconnected when the object goes out of scope.
+ */
+class QwScopedConnection {
+private:
+    QwDatabase* fDatabase;
+    bool fConnected;
+
+public:
+    explicit QwScopedConnection(QwDatabase* db);
+    ~QwScopedConnection();
+    
+    // Delete copy constructor and assignment operator to prevent copying
+    QwScopedConnection(const QwScopedConnection&) = delete;
+    QwScopedConnection& operator=(const QwScopedConnection&) = delete;
+    
+    // Allow move constructor and assignment
+    QwScopedConnection(QwScopedConnection&& other) noexcept;
+    QwScopedConnection& operator=(QwScopedConnection&& other) noexcept;
+    
+    // Provide access to the database interface
+    QwDatabase* operator->() { return fDatabase; }
+    const QwDatabase* operator->() const { return fDatabase; }
+    QwDatabase& operator*() { return *fDatabase; }
+    const QwDatabase& operator*() const { return *fDatabase; }
+    
+    // Check if connection is valid
+    bool IsConnected() const;
+};
 
 /**
  *  \class QwDatabase
@@ -264,6 +301,11 @@ class QwDatabase {
           return conn != nullptr;
         }
       });
+    }
+    
+    //!< Get a scoped connection that automatically disconnects when destroyed
+    QwScopedConnection GetScopedConnection() {
+      return QwScopedConnection(this);
     }
     const string GetServerVersion() {
       // FIXME (wdconinc) implement server_version();
