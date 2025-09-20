@@ -17,8 +17,7 @@
 // Qweak headers
 #include "QwHistogramHelper.h"
 #ifdef __USE_DATABASE__
-#define MYSQLPP_SSQLS_NO_STATICS
-#include "QwParitySSQLS.h"
+#include "QwParitySchema.h"
 #include "QwParityDB.h"
 #endif // __USE_DATABASE__
 #include "QwLog.h"
@@ -1497,10 +1496,11 @@ void  QwHelicity::FillDB(QwParityDB *db, TString type)
   if (type=="yield" || type=="asymmetry")
     return;
 
-  db->Connect();
-  mysqlpp::Query query = db->Query();
+  //db->Connect();
 
-  db->Disconnect();
+  // No database operation
+
+  //db->Disconnect();
 }
 
 

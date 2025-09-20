@@ -14,8 +14,7 @@
 // Qweak headers
 #include "QwLog.h"
 #ifdef __USE_DATABASE__
-#define MYSQLPP_SSQLS_NO_STATICS
-#include "QwParitySSQLS.h"
+#include "QwParitySchema.h"
 #include "QwParityDB.h"
 #endif // __USE_DATABASE__
 
@@ -2686,7 +2685,7 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
   }
 
   std::vector<QwDBInterface> interface;
-  std::vector<QwParitySSQLS::beam> entrylist;
+  std::vector<QwParitySchema::beam_row> entrylist;
 
   UInt_t analysis_id = db->GetAnalysisID();
 
@@ -2881,23 +2880,22 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
   }
 
   if(local_print_flag){
-    QwMessage << QwColor(Qw::kGreen)   << "Entrylist Size : "
-	      << QwColor(Qw::kBoldRed) << entrylist.size()
+    QwMessage << QwColor(Qw::kGreen)   << "Starting database insertion"
               << QwColor(Qw::kNormal)  << QwLog::endl;
   }
 
+  // For sqlpp11, insert data directly instead of using entrylist pattern
   db->Connect();
   // Check the entrylist size, if it isn't zero, start to query..
   if( entrylist.size() ) {
-    mysqlpp::Query query= db->Query();
-    query.insert(entrylist.begin(), entrylist.end());
-    query.execute();
+    for (const auto& entry: entrylist) {
+      db->QueryExecute(entry.insert_into());
+    }
   }
   else {
     QwMessage << "QwBeamLine::FillDB :: This is the case when the entrlylist contains nothing in "<< datatype.Data() << QwLog::endl;
   }
   db->Disconnect();
-
   return;
 }
 
@@ -2914,7 +2912,7 @@ void QwBeamLine::FillErrDB(QwParityDB *db, TString datatype)
   }
 
   std::vector<QwErrDBInterface> interface;
-  std::vector<QwParitySSQLS::beam_errors> entrylist;
+  std::vector<QwParitySchema::beam_errors_row> entrylist;
 
   UInt_t analysis_id = db->GetAnalysisID();
 
@@ -3047,25 +3045,30 @@ void QwBeamLine::FillErrDB(QwParityDB *db, TString datatype)
 
 
   if(local_print_flag){
-    QwMessage << QwColor(Qw::kGreen)   << "Entrylist Size : "
-  	      << QwColor(Qw::kBoldRed) << entrylist.size()
+    QwMessage << QwColor(Qw::kGreen)   << "Starting error database insertion"
               << QwColor(Qw::kNormal)  << QwLog::endl;
   }
 
   db->Connect();
-  // Check the entrylist size, if it isn't zero, start to query..
-  if( entrylist.size() ) {
-    mysqlpp::Query query= db->Query();
-    query.insert(entrylist.begin(), entrylist.end());
-    query.execute();
+  
+  try { 
+    if (entrylist.size()) {
+      QwParitySchema::beam_errors beam_errors;
+      for (const auto& entry : entrylist) {
+          db->QueryExecute(sqlpp::insert_into(beam_errors)
+                              .set(beam_errors.analysis_id = entry[beam_errors.analysis_id],
+                                    beam_errors.monitor_id = entry[beam_errors.monitor_id],
+                                    beam_errors.error_code_id = entry[beam_errors.error_code_id],
+                                    beam_errors.n = entry[beam_errors.n]));
+      }
+    }
+  } catch (const std::exception &er) {
+      QwError << "SQL exception: " << er.what() << QwLog::endl;
   }
-  else {
-    QwMessage << "QwBeamLine::FillErrDB :: This is the case when the entrlylist contains nothing in "<< datatype.Data() << QwLog::endl;
-  }
+
   db->Disconnect();
-  return;
 }
-#endif // __USE_DATABASE__
+#endif //__USE_DATABASE__
 
 void QwBeamLine::WritePromptSummary(QwPromptSummary *ps, TString type) 
 {

@@ -14,8 +14,7 @@
 #include "QwSubsystemArray.h"
 #include "QwLog.h"
 #ifdef __USE_DATABASE__
-#define MYSQLPP_SSQLS_NO_STATICS
-#include "QwParitySSQLS.h"
+#include "QwParitySchema.h"
 #include "QwParityDB.h"
 #endif
 #include "QwPromptSummary.h"
@@ -1638,7 +1637,6 @@ void VQwDetectorArray::DoNormalization(Double_t factor) {
 }
 
 #ifdef __USE_DATABASE__
-
 void  VQwDetectorArray::FillDB(QwParityDB *db, TString datatype) {
 
     Bool_t local_print_flag = false;
@@ -1652,7 +1650,7 @@ void  VQwDetectorArray::FillDB(QwParityDB *db, TString datatype) {
     }
 
     std::vector<QwDBInterface> interface;
-    std::vector<QwParitySSQLS::md_data> entrylist;
+    std::vector<QwParitySchema::md_data_row> entrylist;
 
     UInt_t analysis_id = db->GetAnalysisID();
 
@@ -1710,22 +1708,25 @@ void  VQwDetectorArray::FillDB(QwParityDB *db, TString datatype) {
     // Check the entrylist size, if it isn't zero, start to query..
     
     if( entrylist.size() ) {
-    
-        mysqlpp::Query query= db->Query();
-        query.insert(entrylist.begin(), entrylist.end());
-        query.execute();
+        QwParitySchema::md_data md_data;
+        for (const auto& entry : entrylist) {
+            db->QueryExecute(sqlpp::insert_into(md_data)
+                                .set(md_data.analysis_id = entry[md_data.analysis_id],
+                                     md_data.main_detector_id = entry[md_data.main_detector_id],
+                                     md_data.measurement_type_id = entry[md_data.measurement_type_id],
+                                     md_data.subblock = entry[md_data.subblock],
+                                     md_data.n = entry[md_data.n],
+                                     md_data.value = entry[md_data.value],
+                                     md_data.error = entry[md_data.error]));
+        }
     } else {
-        
-        QwMessage << "VQwDetectorArray::FillDB :: This is the case when the entrlylist contains nothing in "<< datatype.Data() << QwLog::endl;
-    
+        QwMessage << "VQwDetectorArray::FillDB :: This is the case when the entrylist contains nothing in "<< datatype.Data() << QwLog::endl;
     }
-    
     db->Disconnect();
     
     return;
 
 }
-
 #endif
 
 void  VQwDetectorArray::PrintValue() const {
@@ -1771,7 +1772,6 @@ void  VQwDetectorArray::PrintDetectorID() const {
 }
 
 #ifdef __USE_DATABASE__
-
 void VQwDetectorArray::FillErrDB(QwParityDB *db, TString datatype) {
 
     Bool_t local_print_flag = false;
@@ -1785,7 +1785,7 @@ void VQwDetectorArray::FillErrDB(QwParityDB *db, TString datatype) {
 
 
     std::vector<QwErrDBInterface> interface;
-    std::vector<QwParitySSQLS::md_errors> entrylist;
+    std::vector<QwParitySchema::md_errors_row> entrylist;
 
     UInt_t analysis_id = db->GetAnalysisID();
 
@@ -1840,14 +1840,17 @@ void VQwDetectorArray::FillErrDB(QwParityDB *db, TString datatype) {
     // Check the entrylist size, if it isn't zero, start to query..
 
     if( entrylist.size() ) {
-
-        mysqlpp::Query query= db->Query();
-        query.insert(entrylist.begin(), entrylist.end());
-        query.execute();
+        QwParitySchema::md_errors md_errors;
+        for (const auto& entry : entrylist) {
+            auto insert_query = sqlpp::insert_into(md_errors)
+                                .set(md_errors.analysis_id = entry[md_errors.analysis_id],
+                                     md_errors.main_detector_id = entry[md_errors.main_detector_id],
+                                     md_errors.error_code_id = entry[md_errors.error_code_id],
+                                     md_errors.n = entry[md_errors.n]);
+            db->QueryExecute(insert_query);
+        }
     } else {
-
-        QwMessage << "VQwDetectorArray::FillErrDB :: This is the case when the entrlylist contains nothing in "<< datatype.Data() << QwLog::endl;
-    
+        QwMessage << "VQwDetectorArray::FillErrDB :: This is the case when the entrylist contains nothing in "<< datatype.Data() << QwLog::endl;
     }
 
     db->Disconnect();
@@ -1855,7 +1858,6 @@ void VQwDetectorArray::FillErrDB(QwParityDB *db, TString datatype) {
     return;
 
 }
-
 #endif
 
 

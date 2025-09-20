@@ -16,13 +16,6 @@
 #include <string>
 #include <typeinfo>
 
-// Third Party Headers
-#ifdef __USE_DATABASE__
-#pragma GCC diagnostic ignored "-Wdeprecated"
-#include <mysql++.h>
-#pragma GCC diagnostic pop
-#endif // __USE_DATABASE__
-
 // ROOT headers
 #include "TString.h"
 
@@ -33,8 +26,6 @@
 #include "QwOptions.h"
 #include "QwDatabase.h"
 #include "QwSubsystemArrayParity.h"
-
-//#include "QwParitySSQLS.h"
 #include "QwDBInterface.h"
 
 // Forward declarations

@@ -17,17 +17,12 @@ using namespace std;
 
 //header file
 #include "VQwDataHandler.h"
-
-//#include "QwCombiner.h"
-
 #include "QwParameterFile.h"
 #include "QwRootFile.h"
 #include "QwVQWK_Channel.h"
 #include "QwPromptSummary.h"
 
-#define MYSQLPP_SSQLS_NO_STATICS
 #ifdef __USE_DATABASE__
-#include "QwParitySSQLS.h"
 #include "QwParityDB.h"
 #endif // __USE_DATABASE__
 
@@ -482,9 +477,9 @@ void VQwDataHandler::FillDB(QwParityDB *db, TString datatype)
 
   std::vector<QwDBInterface> interface;
 
-  std::vector<QwParitySSQLS::beam>      beamlist;
-  std::vector<QwParitySSQLS::md_data>   mdlist;
-  std::vector<QwParitySSQLS::lumi_data> lumilist;
+  std::vector<QwParitySchema::beam_row>      beamlist;
+  std::vector<QwParitySchema::md_data_row>   mdlist;
+  std::vector<QwParitySchema::lumi_data_row> lumilist;
 
   QwDBInterface::EQwDBIDataTableType tabletype;
 
@@ -519,25 +514,25 @@ void VQwDataHandler::FillDB(QwParityDB *db, TString datatype)
   db->Connect();
   // Check the entrylist size, if it isn't zero, start to query..
   if( beamlist.size() ) {
-    mysqlpp::Query query= db->Query();
-    query.insert(beamlist.begin(), beamlist.end());
-    query.execute();
+    for (const auto& entry: beamlist) {
+      db->QueryExecute(entry.insert_into());
+    }
   } else {
     QwMessage << "QwCombiner::FillDB :: This is the case when the beamlist contains nothing for type="<< measurement_type.Data() 
 	            << QwLog::endl;
   }
   if( mdlist.size() ) {
-    mysqlpp::Query query= db->Query();
-    query.insert(mdlist.begin(), mdlist.end());
-    query.execute();
+    for (const auto& entry: mdlist) {
+      db->QueryExecute(entry.insert_into());
+    }
   } else {
     QwMessage << "QwCombiner::FillDB :: This is the case when the mdlist contains nothing for type="<< measurement_type.Data() 
 	            << QwLog::endl;
   }
   if( lumilist.size() ) {
-    mysqlpp::Query query= db->Query();
-    query.insert(lumilist.begin(), lumilist.end());
-    query.execute();
+    for (const auto& entry: lumilist) {
+      db->QueryExecute(entry.insert_into());
+    }
   } else {
     QwMessage << "QwCombiner::FillDB :: This is the case when the lumilist contains nothing for type="<< measurement_type.Data() 
 	      << QwLog::endl;
