@@ -72,7 +72,19 @@ find_package(Sqlpp11
   # Optionally specify connectors needed to get corresponding targets.
   OPTIONAL_COMPONENTS ${SQLPP11_OPTIONAL_COMPONENTS}
 )
-IF(Sqlpp11_FOUND)
+if(NOT Sqlpp11_FOUND)
+  if(EXISTS thirdparty/sqlpp11/CMakeLists.txt)
+    message(STATUS "sqlpp11 included as subproject")
+    add_subdirectory(thirdparty/sqlpp11)
+    set(Sqlpp11_INCLUDE_DIR thirdparty/sqlpp11/include)
+    # Treat date dependency of sqlpp11 as system headers
+    # to hide compiler warnings
+    include_directories(SYSTEM ${date_SOURCE_DIR}/include)
+  else()
+    message(WARNING "sqlpp11 not available in thirdparty directory. Use 'git submodules init --recursive' to setup.")
+  endif()
+endif()
+if(TARGET sqlpp11::sqlpp11)
   config_add_dependency(Sqlpp11)
   include_directories(${Sqlpp11_INCLUDE_DIR})
   add_definitions(-D__USE_DATABASE__)
@@ -96,11 +108,14 @@ IF(Sqlpp11_FOUND)
   
   # Find sqlpp11-ddl2cpp executable
   find_program(SQLPP11_DDL2CPP
-    NAMES sqlpp11-ddl2cpp
-    PATHS ${Sqlpp11_ROOT}/bin
+    NAMES ddl2cpp
+    PATHS thirdparty/sqlpp11/scripts
     DOC "sqlpp11 DDL to C++ converter"
+    QUIET
   )
-  
+  if(TARGET sqlpp11::ddl2cpp)
+    set(SQLPP11_DDL2CPP sqlpp11::ddl2cpp)
+  endif()
   if(SQLPP11_DDL2CPP)
     add_custom_command(
       OUTPUT ${SCHEMA_OUTPUT_FILE}
@@ -125,7 +140,7 @@ ELSE()
   list(REMOVE_ITEM my_project_sources
     ${PROJECT_SOURCE_DIR}/Analysis/src/QwDatabase.cc
   )
-ENDIF(Sqlpp11_FOUND)
+ENDIF()
 
 #----------------------------------------------------------------------------
 # Boost
