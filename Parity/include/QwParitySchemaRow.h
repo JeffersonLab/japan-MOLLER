@@ -132,7 +132,7 @@ namespace detail {
         }
     };
     
-    // Helper to generate assignments only for insertable columns
+    // Helper to make assignment only for insertable columns
     template<std::size_t I, typename Columns, typename Values>
     auto make_assignment_if_insertable(const Columns& columns, const Values& values) {
         auto column = std::get<I>(columns);
@@ -152,6 +152,22 @@ namespace detail {
  * without manually duplicating field names. It uses template metaprogramming to
  * extract column types and provides clean access syntax using the schema column
  * definitions.
+ * 
+ * Usage Examples:
+ * 
+ * Basic Usage:
+ * @code
+ * QwParitySchema::beam_optics_row row;
+ * QwParitySchema::beam_optics table;
+ * 
+ * // Set values using the table column references
+ * row[table.run_number] = 12345;
+ * row[table.beam_energy] = 2.2;
+ * 
+ * // Generate insert query
+ * auto query = row.insert_into();
+ * connection(query);
+ * @endcode
  * 
  * @tparam Table The sqlpp11 table type (e.g., QwParitySchema::beam_optics)
  */
@@ -365,12 +381,12 @@ private:
     auto generate_insert_impl(Table& table, std::index_sequence<Is...>) const {
         auto columns = sqlpp::all_of(table);
         
-        // Create assignments only for insertable columns
+        // Create a tuple of all assignments (including empty tuples for non-insertable columns)
         auto assignments = std::tuple_cat(
             detail::make_assignment_if_insertable<Is>(columns, values)...
         );
         
-        // Apply the assignments to the insert query
+        // Apply the assignments to the insert query using tuple unpacking
         return std::apply([&table](auto&&... args) {
             return sqlpp::insert_into(table).set(args...);
         }, assignments);
