@@ -809,7 +809,7 @@ void QwEPICSEvent::FillDB(QwParityDB *db)
  
   if (! fDisableDatabase) {
     FillSlowControlsData(db);
-    FillSlowControlsStrigs(db);
+    FillSlowControlsStrings(db);
     FillSlowControlsSettings(db);
   }
   fDisableDatabase=hold_fDisableDatabase;
@@ -836,7 +836,8 @@ void QwEPICSEvent::FillSlowControlsData(QwParityDB *db)
 
   UInt_t runlet_id = db->GetRunletID();
 
-  std::vector<std::map<std::string, std::variant<UInt_t, Double_t, std::string>>> entrylist;
+  QwParitySchema::slow_controls_data slow_controls_data;
+  std::vector<QwParitySchema::row<QwParitySchema::slow_controls_data>> entrylist;
 
   UInt_t sc_detector_id;
 
@@ -848,13 +849,13 @@ void QwEPICSEvent::FillSlowControlsData(QwParityDB *db)
 
     // Look for variables to write into this table
     if (fEPICSTableList[tagindex] == table) {
-      std::map<std::string, std::variant<UInt_t, Double_t, std::string>> tmp_row;
+      QwParitySchema::row<QwParitySchema::slow_controls_data> tmp_row;
 
       //  Now get the current sc_detector_id for the above runlet_id.
       sc_detector_id = db->GetSlowControlDetectorID(fEPICSVariableList[tagindex]);
 
-      tmp_row["runlet_id"] = runlet_id;
-      tmp_row["sc_detector_id"] = sc_detector_id;
+      tmp_row[slow_controls_data.runlet_id] = runlet_id;
+      tmp_row[slow_controls_data.sc_detector_id] = sc_detector_id;
 
       if (!sc_detector_id) continue;
 
@@ -877,11 +878,11 @@ void QwEPICSEvent::FillSlowControlsData(QwParityDB *db)
           n_records = fEPICSCumulativeData[tagindex].NumberRecords;
 
 	  //  Build the row and submit it to the list
-	  tmp_row["n"] = static_cast<UInt_t>(n_records);
-	  tmp_row["value"] = mean;
-	  tmp_row["error"] = sigma;
-	  tmp_row["min_value"] = fEPICSCumulativeData[tagindex].Minimum;
-	  tmp_row["max_value"] = fEPICSCumulativeData[tagindex].Maximum;
+	  tmp_row[slow_controls_data.n] = static_cast<UInt_t>(n_records);
+	  tmp_row[slow_controls_data.value] = mean;
+	  tmp_row[slow_controls_data.error] = sigma;
+	  tmp_row[slow_controls_data.min_value] = fEPICSCumulativeData[tagindex].Minimum;
+	  tmp_row[slow_controls_data.max_value] = fEPICSCumulativeData[tagindex].Maximum;
 	  
 	  entrylist.push_back(tmp_row);
 	}
@@ -899,23 +900,7 @@ void QwEPICSEvent::FillSlowControlsData(QwParityDB *db)
     QwParitySchema::slow_controls_data slow_controls_data;
     try {
       for (const auto& entry : entrylist) {
-        auto runlet_id = std::get<UInt_t>(entry.at("runlet_id"));
-        auto sc_detector_id = std::get<UInt_t>(entry.at("sc_detector_id"));
-        auto n = std::get<UInt_t>(entry.at("n"));
-        auto value = std::get<Double_t>(entry.at("value"));
-        auto error = std::get<Double_t>(entry.at("error"));
-        auto min_value = std::get<Double_t>(entry.at("min_value"));
-        auto max_value = std::get<Double_t>(entry.at("max_value"));
-
-        auto insert_query = sqlpp::insert_into(slow_controls_data)
-                           .set(slow_controls_data.runlet_id = runlet_id,
-                                slow_controls_data.sc_detector_id = sc_detector_id,
-                                slow_controls_data.n = n,
-                                slow_controls_data.value = value,
-                                slow_controls_data.error = error,
-                                slow_controls_data.min_value = min_value,
-                                slow_controls_data.max_value = max_value);
-        db->QueryExecute(insert_query);
+        db->QueryExecute(entry.insert_into());
       }
       QwDebug << "Done executing sqlpp11 bulk insert" << QwLog::endl;
     } catch (const std::exception &er) {
@@ -929,9 +914,10 @@ void QwEPICSEvent::FillSlowControlsData(QwParityDB *db)
 }
 
 
-void QwEPICSEvent::FillSlowControlsStrigs(QwParityDB *db)
+void QwEPICSEvent::FillSlowControlsStrings(QwParityDB *db)
 {
-  std::vector<std::map<std::string, std::variant<UInt_t, std::string>>> entrylist;
+  QwParitySchema::slow_controls_strings slow_controls_strings{};
+  std::vector<QwParitySchema::row<QwParitySchema::slow_controls_strings>> entrylist;
   UInt_t sc_detector_id;
   UInt_t runlet_id = db->GetRunletID();
   string table = "polarized_source";
@@ -942,13 +928,13 @@ void QwEPICSEvent::FillSlowControlsStrigs(QwParityDB *db)
     // Look for variables to write into this table
 
     if (fEPICSTableList[tagindex] == table) {
-      std::map<std::string, std::variant<UInt_t, std::string>> tmp_row;
+      QwParitySchema::row<QwParitySchema::slow_controls_strings> tmp_row;
 
       //  Now get the current sc_detector_id for the above runlet_id.
       sc_detector_id = db->GetSlowControlDetectorID(fEPICSVariableList[tagindex]);
 
-      tmp_row["runlet_id"] = runlet_id;
-      tmp_row["sc_detector_id"] = sc_detector_id;
+      tmp_row[slow_controls_strings.runlet_id] = runlet_id;
+      tmp_row[slow_controls_strings.sc_detector_id] = sc_detector_id;
 
       if (!sc_detector_id) continue;
 
@@ -957,11 +943,11 @@ void QwEPICSEvent::FillSlowControlsStrigs(QwParityDB *db)
     	if (fEPICSDataEvent[tagindex].Filled) {
 	  if(fEPICSDataEvent[tagindex].StringValue.Contains("***") ){
 	    QwWarning<<"fEPICSDataEvent[tagindex].StringValue.Data() is not defined, tmp_row.value is set to an empty string."<<QwLog::endl;
-	    tmp_row["value"] = std::string("");
+	    tmp_row[slow_controls_strings.value] = std::string("");
 	  }
 	  else {
 	    //std::cout<<" Just a test value: "<<fEPICSDataEvent[tagindex].StringValue.Data()<<QwLog::endl;
-	    tmp_row["value"] = std::string(fEPICSDataEvent[tagindex].StringValue.Data());
+	    tmp_row[slow_controls_strings.value] = std::string(fEPICSDataEvent[tagindex].StringValue.Data());
 	  }
 	  //  Only add rows for filled variables
 	  entrylist.push_back(tmp_row);
@@ -979,15 +965,7 @@ void QwEPICSEvent::FillSlowControlsStrigs(QwParityDB *db)
     QwParitySchema::slow_controls_strings slow_controls_strings;
     try {
       for (const auto& entry : entrylist) {
-        auto runlet_id = std::get<UInt_t>(entry.at("runlet_id"));
-        auto sc_detector_id = std::get<UInt_t>(entry.at("sc_detector_id"));
-        auto value = std::get<std::string>(entry.at("value"));
-
-        auto insert_query = sqlpp::insert_into(slow_controls_strings)
-                           .set(slow_controls_strings.runlet_id = runlet_id,
-                                slow_controls_strings.sc_detector_id = sc_detector_id,
-                                slow_controls_strings.value = value);
-        db->QueryExecute(insert_query);
+        db->QueryExecute(entry.insert_into());
       }
       QwDebug << "Done executing sqlpp11 bulk insert for FillSlowControlsStrings"
 		  << QwLog::endl;
