@@ -66,16 +66,12 @@ file(GLOB my_project_headers
 # sqlpp11
 #
 list(APPEND SQLPP11_OPTIONAL_COMPONENTS SQLite3 MySQL MariaDB PostgreSQL)
-find_package(Sqlpp11
-  # Optional, so don't print failure warnings
-  QUIET
-  # Optionally specify connectors needed to get corresponding targets.
-  OPTIONAL_COMPONENTS ${SQLPP11_OPTIONAL_COMPONENTS}
-)
+find_package(Sqlpp11 QUIET OPTIONAL_COMPONENTS ${SQLPP11_OPTIONAL_COMPONENTS})
 if(NOT Sqlpp11_FOUND)
   if(EXISTS thirdparty/sqlpp11/CMakeLists.txt)
     message(STATUS "sqlpp11 included as subproject")
     add_subdirectory(thirdparty/sqlpp11)
+    list(APPEND CMAKE_MODULE_PATH thirdparty/sqlpp11/cmake/modules)
     set(Sqlpp11_INCLUDE_DIR thirdparty/sqlpp11/include)
     # Treat date dependency of sqlpp11 as system headers
     # to hide compiler warnings
@@ -100,6 +96,12 @@ if(TARGET sqlpp11::sqlpp11)
     endif()
   endforeach()
   message(STATUS "Found ${Sqlpp11_LIBRARIES}")
+
+  # When building sqlpp11::mysql connector, we need to ensure dependencies are found in parent scope
+  if(BUILD_MYSQL_CONNECTOR)
+    find_package(MySQL QUIET)
+    list(APPEND Sqlpp11_LIBRARIES MySQL::MySQL)
+  endif()
 
   # Generate C++ headers from SQL schema at build time
   set(SCHEMA_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Parity/include)
@@ -239,7 +241,7 @@ add_library(${PROJECT_NAME} SHARED ${my_project_sources} ${my_project_headers})
 add_dependencies(${PROJECT_NAME} check_git_repository)
 
 # Add schema generation dependency if sqlpp11 is available
-if(Sqlpp11_FOUND AND TARGET generate_schema)
+if(TARGET sqlpp11:sqlpp11 AND TARGET generate_schema)
   add_dependencies(${PROJECT_NAME} generate_schema)
 endif()
 
@@ -269,14 +271,13 @@ target_link_libraries(${PROJECT_NAME}
     eviowrapper
   PUBLIC
     ROOT::Libraries
-    ${MYSQLPP_LIBRARIES}
     ${Boost_LIBRARIES}
   )
 
 # Link sqlpp11 if enabled
-if(Sqlpp11_FOUND)
+if(TARGET sqlpp11::sqlpp11)
   target_link_libraries(${PROJECT_NAME}
-    PUBLIC
+    PRIVATE
       ${Sqlpp11_LIBRARIES}
   )
   target_include_directories(${PROJECT_NAME}
