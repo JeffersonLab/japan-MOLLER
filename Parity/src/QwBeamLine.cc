@@ -2945,19 +2945,16 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
               << QwColor(Qw::kNormal)  << QwLog::endl;
   }
 
-  // For sqlpp11, insert data directly instead of using entrylist pattern
-  db->Connect();
   // Check the entrylist size, if it isn't zero, start to query..
   if( entrylist.size() ) {
+    db->Connect();
     for (const auto& entry: entrylist) {
       db->QueryExecute(entry.insert_into());
     }
-  }
-  else {
+    db->Disconnect();
+  } else {
     QwMessage << "QwBeamLine::FillDB :: This is the case when the entrlylist contains nothing in "<< datatype.Data() << QwLog::endl;
   }
-  db->Disconnect();
-  return;
 }
 
 
@@ -3110,24 +3107,16 @@ void QwBeamLine::FillErrDB(QwParityDB *db, TString datatype)
               << QwColor(Qw::kNormal)  << QwLog::endl;
   }
 
-  db->Connect();
-  
-  try { 
-    if (entrylist.size()) {
-      QwParitySchema::beam_errors beam_errors;
-      for (const auto& entry : entrylist) {
-          db->QueryExecute(sqlpp::insert_into(beam_errors)
-                              .set(beam_errors.analysis_id = entry[beam_errors.analysis_id],
-                                    beam_errors.monitor_id = entry[beam_errors.monitor_id],
-                                    beam_errors.error_code_id = entry[beam_errors.error_code_id],
-                                    beam_errors.n = entry[beam_errors.n]));
-      }
+  // Check the entrylist size, if it isn't zero, start to query..
+  if (entrylist.size()) {
+    db->Connect();
+    for (const auto& entry: entrylist) {
+      db->QueryExecute(entry.insert_into());
     }
-  } catch (const std::exception &er) {
-      QwError << "SQL exception: " << er.what() << QwLog::endl;
+    db->Disconnect();
+  } else {
+    QwMessage << "QwBeamLine::FillErrDB :: This is the case when the entrlylist contains nothing in "<< datatype.Data() << QwLog::endl;
   }
-
-  db->Disconnect();
 }
 #endif //__USE_DATABASE__
 
