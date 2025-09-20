@@ -2947,11 +2947,10 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
 
   // Check the entrylist size, if it isn't zero, start to query..
   if( entrylist.size() ) {
-    db->Connect();
+    auto c = db->GetScopedConnection();
     for (const auto& entry: entrylist) {
-      db->QueryExecute(entry.insert_into());
+      c->QueryExecute(entry.insert_into());
     }
-    db->Disconnect();
   } else {
     QwMessage << "QwBeamLine::FillDB :: This is the case when the entrlylist contains nothing in "<< datatype.Data() << QwLog::endl;
   }
@@ -3109,11 +3108,10 @@ void QwBeamLine::FillErrDB(QwParityDB *db, TString datatype)
 
   // Check the entrylist size, if it isn't zero, start to query..
   if (entrylist.size()) {
-    db->Connect();
+    auto c = db->GetScopedConnection();
     for (const auto& entry: entrylist) {
-      db->QueryExecute(entry.insert_into());
+      c->QueryExecute(entry.insert_into());
     }
-    db->Disconnect();
   } else {
     QwMessage << "QwBeamLine::FillErrDB :: This is the case when the entrlylist contains nothing in "<< datatype.Data() << QwLog::endl;
   }

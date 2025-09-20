@@ -957,11 +957,10 @@ void QwBeamMod::FillDB_MPS(QwParityDB *db, TString datatype)
   }
 
   if( entrylist.size() ) {
-    db->Connect();
+    auto c = db->GetScopedConnection();
     for (const auto& entry : entrylist) {
-      db->QueryExecute(entry.insert_into());
+      c->QueryExecute(entry.insert_into());
     }
-    db->Disconnect();
   }
   else {
     QwMessage << "QwBeamMod::FillDB_MPS :: Nothing to insert in database." << QwLog::endl;

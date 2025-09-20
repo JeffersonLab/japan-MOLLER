@@ -441,7 +441,8 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db)
   }
 
   // Try to connect to the database
-  if (db->Connect()) {
+  try {
+    auto c = db->GetScopedConnection();
 
     QwError << "QwBlinder::ReadSeed  db->GetRunNumber() returns "
 	    <<  db->GetRunNumber() << QwLog::endl;
@@ -465,11 +466,11 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db)
     QwError << "QwBlinder::ReadSeed executing sqlpp11 query for run number "
             << db->GetRunNumber() << QwLog::endl;
 
-    auto results = db->QuerySelect(query);
-    size_t result_count = db->CountResults(results);
+    auto results = c->QuerySelect(query);
+    size_t result_count = c->CountResults(results);
     if (result_count == 1) {
       // Analyze the single result using database-agnostic interface
-      db->ForFirstResult(results, [this](const auto& row) {
+      c->ForFirstResult(results, [this](const auto& row) {
         // Process first (and only) row
         fSeedID = row.seed_id;
         if (!row.seed.is_null()) {
@@ -493,16 +494,11 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db)
                      result_count);
       std::cerr << "QwBlinder::ReadSeed(): "<<fSeed<<std::endl;
     }
-
-    // Disconnect from database
-    db->Disconnect();
-
-  } else {
-
+  } catch (const std::exception& er) {
     //  We were unable to open the connection.
     fSeedID = 0;
     fSeed   = "ERROR:  Unable to open the connection to the database.";
-    QwError << "QwBlinder::ReadSeed(): Unable to open connection to database." << QwLog::endl;
+    QwError << "QwBlinder::ReadSeed(): Unable to open connection to database: " << er.what() << QwLog::endl;
   }
 
   return fSeedID;
@@ -565,7 +561,8 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db, const UInt_t seed_id)
   }
 
   // Try to connect to the database
-  if (db->Connect()) {
+  try {
+    auto c = db->GetScopedConnection();
 
     // Convert to sqlpp11 query
     QwParitySchema::seeds seeds{};
@@ -645,16 +642,12 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db, const UInt_t seed_id)
         std::cerr << "QwBlinder::ReadSeed(): " << fSeed << std::endl;
       }
     }
-
-    // Disconnect from database
-    db->Disconnect();
-
-  } else {
+  } catch (const std::exception& er) {
 
     //  We were unable to open the connection.
     fSeedID = 0;
     fSeed   = "ERROR:  Unable to open the connection to the database.";
-    QwError << "QwBlinder::ReadSeed(): Unable to open connection to database." << QwLog::endl;
+    QwError << "QwBlinder::ReadSeed(): Unable to open connection to database: " << er.what() << QwLog::endl;
   }
 
   return fSeedID;
@@ -962,9 +955,8 @@ void QwBlinder::WriteChecksum(QwParityDB* db)
   //----------------------------------------------------------
   // Execute SQL
   //----------------------------------------------------------
-  db->Connect();
+  auto c = db->GetScopedConnection();
   db->QueryExecute(update_query);
-  db->Disconnect();
 } //End QwBlinder::WriteChecksum
 
 /*!------------------------------------------------------------
@@ -995,9 +987,8 @@ void QwBlinder::WriteTestValues(QwParityDB* db)
                                bf_test.test_value = fBlindTestValues[i]);
 
       // Execute SQL
-      db->Connect();
+      auto c = db->GetScopedConnection();
       db->QueryExecute(insert_query);
-      db->Disconnect();
     }
 }
 #endif // __USE_DATABASE__
@@ -1187,7 +1178,7 @@ void QwBlinder::FillDB(QwParityDB *db, TString datatype)
 
 
   // Connect to the database
-  db->Connect();
+  auto c = db->GetScopedConnection();
 
   // Modify the seed_id and bf_checksum in the analysis table
   try {
@@ -1225,10 +1216,6 @@ void QwBlinder::FillDB(QwParityDB *db, TString datatype)
   } catch (const std::exception& err) {
     QwError << "Failed to insert bf_test entries: " << err.what() << QwLog::endl;
   }
-
-  // Disconnect from database
-  db->Disconnect();
-
 }
 
 void QwBlinder::FillErrDB(QwParityDB *db, TString datatype)
@@ -1240,7 +1227,7 @@ void QwBlinder::FillErrDB(QwParityDB *db, TString datatype)
   UInt_t analysis_id = db->GetAnalysisID();
   QwParitySchema::general_errors general_errors{};
 
-  db->Connect();
+  auto c = db->GetScopedConnection();
   
   try {
     // Insert error counter entries for each blinder counter type
@@ -1259,10 +1246,6 @@ void QwBlinder::FillErrDB(QwParityDB *db, TString datatype)
   } catch (const std::exception& err) {
     QwError << "Failed to insert blinder error counters: " << err.what() << QwLog::endl;
   }
-  
-  db->Disconnect();
-
-  return;
 };
 #endif // __USE_DATABASE__
 
