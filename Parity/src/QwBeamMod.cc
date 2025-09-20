@@ -924,65 +924,47 @@ void QwBeamMod::FillDB_MPS(QwParityDB *db, TString datatype)
     QwMessage << " --------------------------------------------------------------- " << QwLog::endl;
   }
 
-  try {
+  std::vector<QwParitySchema::beam_optics_row> entrylist;
+
+  UInt_t analysis_id = db->GetAnalysisID();
+
+  for(size_t bpm = 0; bpm < fModChannel.size(); bpm++) {
+    for(size_t pattern = 0; pattern < 5; pattern++) {
+      //  Explicitly zero the beam optics ID to ensure a non-sensical default
+      //  is not picked up.
+      QwParitySchema::beam_optics table;
+      QwParitySchema::beam_optics_row row;
+      row[table.analysis_id] = analysis_id;
+      row[table.monitor_id] = 0; // placeholder
+      row[table.modulation_type_id] = pattern;
+      row[table.n] = 0; // placeholder
+      row[table.offset] = 0.0; // placeholder
+      row[table.amplitude] = 0.0; // placeholder
+      row[table.phase] = 0.0; // placeholder
+      row[table.o_error] = 0.0; // placeholder
+      row[table.a_error] = 0.0; // placeholder
+      row[table.p_error] = 0.0; // placeholder
+      row[table.gof_para] = 0.0; // placeholder
+
+      entrylist.push_back(row);
+    }
+  }
+
+  if(local_print_flag) {
+    QwMessage << QwColor(Qw::kGreen) << "Entrylist Size : "
+	      << QwColor(Qw::kBoldRed) << entrylist.size()
+              << QwColor(Qw::kNormal) << QwLog::endl;
+  }
+
+  if( entrylist.size() ) {
     db->Connect();
-    
-    // Get analysis ID for foreign key relationship
-    UInt_t analysis_id = db->GetAnalysisID();
-    
-    // Use beam_optics table for beam modulation data
-    QwParitySchema::beam_optics beam_optics{};
-    
-    // Insert data for each modulation channel
-    for (size_t bpm = 0; bpm < fModChannel.size(); bpm++) {
-      for(size_t pattern = 0; pattern < 5; pattern++) {
-        try {
-          // FIXME (wdconinc) when re-enabling this database functionality,
-          // it turned out that variables used here were removed in this class.
-
-          // Get monitor ID for this channel (beam modulation monitors)
-          UInt_t monitor_id = 0; // db->GetMonitorID(fMonitorNames[bpm].Data());
-
-          // Insert beam optics data for modulation analysis
-          // FIXME: Using placeholder values since the actual beam modulation analysis
-          // variables are not available in this class
-          auto insert_query = sqlpp::insert_into(beam_optics)
-                              .set(beam_optics.analysis_id = analysis_id,
-                                   beam_optics.monitor_id = monitor_id,
-                                   beam_optics.modulation_type_id = pattern,
-                                   beam_optics.n = 0, // placeholder
-                                   beam_optics.offset = 0.0, // placeholder
-                                   beam_optics.amplitude = 0.0, // placeholder  
-                                   beam_optics.phase = 0.0, // placeholder
-                                   beam_optics.o_error = 0.0, // placeholder
-                                   beam_optics.a_error = 0.0, // placeholder
-                                   beam_optics.p_error = 0.0, // placeholder
-                                   beam_optics.gof_para = 0.0); // placeholder
-          db->QueryExecute(insert_query);
-          
-          if (local_print_flag) {
-            QwMessage << "Inserted beam optics data for channel: " << fModChannel[bpm]->GetElementName() 
-                      << " amplitude: " << fModChannel[bpm]->GetValue() << QwLog::endl;
-          }
-        } catch (const std::exception& channel_error) {
-          QwError << "QwBeamMod::FillDB_MPS: Error inserting beam optics data for channel " 
-                  << fModChannel[bpm]->GetElementName() << ": " << channel_error.what() << QwLog::endl;
-          // Continue with next channel rather than failing completely
-        }
-      }
+    for (const auto& entry : entrylist) {
+      db->QueryExecute(entry.insert_into());
     }
-    
-    if (local_print_flag) {
-      QwMessage << "QwBeamMod::FillDB_MPS: Successfully processed " << fModChannel.size() 
-                << " beam modulation channels" << QwLog::endl;
-    }
-    
     db->Disconnect();
-    
-  } catch (const std::exception& db_error) {
-    QwError << "QwBeamMod::FillDB_MPS: Database connection error: " << db_error.what() << QwLog::endl;
-    db->Disconnect();
-    throw;
+  }
+  else {
+    QwMessage << "QwBeamMod::FillDB_MPS :: Nothing to insert in database." << QwLog::endl;
   }
 }
 
