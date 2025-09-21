@@ -259,7 +259,7 @@ CREATE TABLE slow_controls_settings (
     runlet_id INT UNSIGNED NOT NULL,
     slow_helicity_plate ENUM('0','1') NULL,     -- ENUM conversion, values may need adjustment
     passive_helicity_plate ENUM('0','1') NULL,  -- ENUM conversion, values may need adjustment
-    wien_reversal ENUM('0','1') NULL,           -- ENUM conversion, values may need adjustment
+    wien_reversal ENUM('indeterminate', 'normal', 'reverse', 'transverse_vertical', 'transverse_horizontal') NULL,
     precession_reversal ENUM('0','1') NULL,     -- ENUM conversion, values may need adjustment
     helicity_length INT UNSIGNED NULL,
     charge_feedback ENUM('0','1') NULL,         -- ENUM conversion, values may need adjustment
