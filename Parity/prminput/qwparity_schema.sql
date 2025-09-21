@@ -98,7 +98,7 @@ CREATE TABLE analysis (
     seed_id INT UNSIGNED NOT NULL,
     time DATETIME NULL,
     bf_checksum TEXT NULL,
-    beam_mode ENUM('0','1','2','3') NOT NULL,  -- ENUM conversion, values may need adjustment
+    beam_mode ENUM('nbm','1','2','3') NOT NULL,  -- ENUM conversion, values may need adjustment
     n_mps INT UNSIGNED NOT NULL,
     n_qrt INT UNSIGNED NOT NULL,
     first_event INT UNSIGNED NULL,
