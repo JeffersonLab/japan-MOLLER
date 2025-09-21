@@ -161,43 +161,43 @@ T QwErrDBInterface::TypedDBClone()
 template<> QwParitySchema::md_errors_row
 QwErrDBInterface::TypedDBClone<QwParitySchema::md_errors_row>() {
   QwParitySchema::md_errors_row row;
-  QwParitySchema::md_errors table;
-  row[table.analysis_id]         = fAnalysisId;
-  row[table.main_detector_id]    = fDeviceId;
-  row[table.error_code_id]       = fErrorCodeId;
-  row[table.n]                   = fN;
+  QwParitySchema::md_errors md_errors;
+  row[md_errors.analysis_id]         = fAnalysisId;
+  row[md_errors.main_detector_id]    = fDeviceId;
+  row[md_errors.error_code_id]       = fErrorCodeId;
+  row[md_errors.n]                   = fN;
   return row;
 }
 
 template<> QwParitySchema::lumi_errors_row
 QwErrDBInterface::TypedDBClone<QwParitySchema::lumi_errors_row>() {
   QwParitySchema::lumi_errors_row row;
-  QwParitySchema::lumi_errors table;
-  row[table.analysis_id]         = fAnalysisId;
-  row[table.lumi_detector_id]    = fDeviceId;
-  row[table.error_code_id]       = fErrorCodeId;
-  row[table.n]                   = fN;
+  QwParitySchema::lumi_errors lumi_errors;
+  row[lumi_errors.analysis_id]         = fAnalysisId;
+  row[lumi_errors.lumi_detector_id]    = fDeviceId;
+  row[lumi_errors.error_code_id]       = fErrorCodeId;
+  row[lumi_errors.n]                   = fN;
   return row;
 }
 
 template<> QwParitySchema::beam_errors_row
 QwErrDBInterface::TypedDBClone<QwParitySchema::beam_errors_row>() {
   QwParitySchema::beam_errors_row row;
-  QwParitySchema::beam_errors table;
-  row[table.analysis_id]         = fAnalysisId;
-  row[table.monitor_id]          = fDeviceId;
-  row[table.error_code_id]       = fErrorCodeId;
-  row[table.n]                   = fN;
+  QwParitySchema::beam_errors beam_errors;
+  row[beam_errors.analysis_id]         = fAnalysisId;
+  row[beam_errors.monitor_id]          = fDeviceId;
+  row[beam_errors.error_code_id]       = fErrorCodeId;
+  row[beam_errors.n]                   = fN;
   return row;
 }
 
 template<> QwParitySchema::general_errors_row
 QwErrDBInterface::TypedDBClone<QwParitySchema::general_errors_row>() {
   QwParitySchema::general_errors_row row;
-  QwParitySchema::general_errors table;
-  row[table.analysis_id]         = fAnalysisId;
-  row[table.error_code_id]       = fErrorCodeId;
-  row[table.n]                   = fN;
+  QwParitySchema::general_errors general_errors;
+  row[general_errors.analysis_id]         = fAnalysisId;
+  row[general_errors.error_code_id]       = fErrorCodeId;
+  row[general_errors.n]                   = fN;
   return row;
 }
 #endif // __USE_DATABASE__
