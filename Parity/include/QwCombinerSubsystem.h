@@ -9,9 +9,6 @@
 #ifndef __QWCOMBINERSUBSYSTEM__
 #define __QWCOMBINERSUBSYSTEM__
 
-// Boost headers
-#include <boost/shared_ptr.hpp>
-
 // headers
 #include "VQwSubsystemParity.h"
 #include "QwSubsystemArrayParity.h"
@@ -44,7 +41,7 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
       // Destructor 
       ~QwCombinerSubsystem();
 
-      boost::shared_ptr<VQwSubsystem> GetSharedPointerToStaticObject();
+      std::shared_ptr<VQwSubsystem> GetSharedPointerToStaticObject();
 
       /// \brief Update the running sums
       void AccumulateRunningSum(VQwSubsystem* input, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);

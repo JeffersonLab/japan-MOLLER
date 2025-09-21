@@ -22,8 +22,8 @@ struct null_deleter {
   void operator()(void const *) const { }
 };
 
-boost::shared_ptr<VQwSubsystem> QwCombinerSubsystem::GetSharedPointerToStaticObject(){
-  boost::shared_ptr<VQwSubsystem> px(this, null_deleter());
+std::shared_ptr<VQwSubsystem> QwCombinerSubsystem::GetSharedPointerToStaticObject(){
+  std::shared_ptr<VQwSubsystem> px(this, null_deleter());
   return px;
 }
 
