@@ -39,9 +39,11 @@ template<typename T> boost::random::uniform_real_distribution<double> QwCombined
 template<typename T> boost::variate_generator < boost::mt19937, boost::random::uniform_real_distribution<double> >
   QwCombinedBCM<T>::fRandomVariable(fRandomnessGenerator, fDistribution);
 
-
-
-
+template<typename T>
+void QwCombinedBCM<T>::SetTripSeed(uint seedval)
+{
+  fRandomVariable.engine().seed(seedval);
+}
 
 /********************************************************/
 
