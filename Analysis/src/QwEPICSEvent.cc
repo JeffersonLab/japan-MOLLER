@@ -974,14 +974,9 @@ void QwEPICSEvent::FillSlowControlsStrings(QwParityDB *db)
 
 void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
 {
-  using QwParitySchema::slow_controls_settings_row =
-      QwParitySchema::row<QwParitySchema::slow_controls_settings>;
-
   // Get database connection
   QwParitySchema::slow_controls_settings slow_controls_settings{};
-  std::vector<QwParitySchema::slow_controls_settings_row> entrylist;
-
-  QwParitySchema::slow_controls_settings_row tmp_row;
+  QwParitySchema::row<QwParitySchema::slow_controls_settings> tmp_row;
   
   // Initialize values
   UInt_t runlet_id = db->GetRunletID();
