@@ -974,11 +974,19 @@ void QwEPICSEvent::FillSlowControlsStrings(QwParityDB *db)
 
 void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
 {
+  using QwParitySchema::slow_controls_settings_row =
+      QwParitySchema::row<QwParitySchema::slow_controls_settings>;
+
   // Get database connection
   QwParitySchema::slow_controls_settings slow_controls_settings{};
+  std::vector<QwParitySchema::slow_controls_settings_row> entrylist;
+
+  QwParitySchema::slow_controls_settings_row tmp_row;
   
   // Initialize values
   UInt_t runlet_id = db->GetRunletID();
+  tmp_row[slow_controls_settings.runlet_id] = runlet_id;
+
   std::string precession_reversal;
   
   // Set precession_reversal
@@ -988,16 +996,6 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
     precession_reversal = "CW";
   }
   
-  // Initialize optional values
-  std::optional<std::string> slow_helicity_plate = std::nullopt;
-  std::optional<std::string> passive_helicity_plate = std::nullopt;  
-  std::optional<std::string> wien_reversal = std::nullopt;
-  std::optional<UInt_t> helicity_length = std::nullopt;
-  std::optional<std::string> charge_feedback = std::nullopt;
-  std::optional<std::string> position_feedback = std::nullopt;
-  std::optional<Double_t> qtor_current = std::nullopt;
-  std::optional<std::string> target_position = std::nullopt;
-
   Int_t tagindex;
 
   // Add as many blocks as needed in the following for all slow_controls_settings.
@@ -1010,7 +1008,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
     QwDebug << "tagindex for  = qw:qt_mps_i_dcct" << tagindex << QwLog::endl;
     if (! fEPICSCumulativeData[tagindex].Filled) {
       //  No data for this run.
-      qtor_current = std::nullopt;
+      tmp_row[slow_controls_settings.qtor_current] = sqlpp::null;
     } else if (fEPICSCumulativeData[tagindex].NumberRecords <= 0) {
       // No events in this variable
       QwWarning << "The value of "
@@ -1018,7 +1016,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
 		<< " had no events during this run.  "
 		<< "Send NULL word to the database."
 		<< QwLog::endl;
-      qtor_current = std::nullopt;
+      tmp_row[slow_controls_settings.qtor_current] = std::nullopt;
     } else {
       Double_t qtorcurrent = (fEPICSCumulativeData[tagindex].Sum)/
 	((Double_t) fEPICSCumulativeData[tagindex].NumberRecords);
@@ -1028,7 +1026,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
 	      << qtorcurrent
 	      << ", to the database."
 	      << QwLog::endl;
-      qtor_current = qtorcurrent;
+      tmp_row[slow_controls_settings.qtor_current] = qtorcurrent;
     }
   }
 
@@ -1040,7 +1038,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
     QwDebug << "tagindex for  = QWtgt_name" << tagindex << QwLog::endl;
     if (! fEPICSCumulativeData[tagindex].Filled) {
       //  No data for this run.
-      target_position = std::nullopt;
+      tmp_row[slow_controls_settings.target_position] = std::nullopt;
     } else if (fEPICSCumulativeData[tagindex].NumberRecords
         != fNumberEPICSEvents) {
       // Target position changed
@@ -1049,7 +1047,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
           << " changed during this run.  "
           << "Send NULL word to the database."
           << QwLog::endl;
-      target_position = std::nullopt;
+      tmp_row[slow_controls_settings.target_position] = std::nullopt;
     }
     if(fEPICSDataEvent[tagindex].StringValue.Contains("***") ){
       QwWarning << "The value of "
@@ -1057,7 +1055,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
           << " is not defined."
           << "Send NULL word to the database."
           << QwLog::endl;
-      target_position = std::nullopt;
+      tmp_row[slow_controls_settings.target_position] = std::nullopt;
     }  else {
       // Target position did not change.
       // Store the position as a text string.
@@ -1067,7 +1065,8 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
         << fEPICSDataEvent[tagindex].StringValue.Data()
         << ", to the database."
         << QwLog::endl;
-      target_position = std::string(fEPICSDataEvent[tagindex].StringValue.Data());
+      tmp_row[slow_controls_settings.target_position] =
+          std::string(fEPICSDataEvent[tagindex].StringValue.Data());
     }
   }
 
@@ -1080,7 +1079,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
 
     if (! fEPICSCumulativeData[tagindex].Filled) {
       //  No data for this run.
-      slow_helicity_plate = std::nullopt;
+      tmp_row[slow_controls_settings.slow_helicity_plate] = std::nullopt;
     } else if (fEPICSCumulativeData[tagindex].NumberRecords
         != fNumberEPICSEvents) {
       // Insertable Half Wave Plate Setting position changed
@@ -1089,7 +1088,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
           << " changed during the run."
           << "Send NULL word to the database."
           << QwLog::endl;
-      slow_helicity_plate = std::nullopt;
+      tmp_row[slow_controls_settings.slow_helicity_plate] = std::nullopt;
     }
     if(fEPICSDataEvent[tagindex].StringValue.Contains("***") ){
       QwWarning << "The value of "
@@ -1097,7 +1096,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
           << " is not defined."
           << "Send NULL word to the database."
           << QwLog::endl;
-      slow_helicity_plate = std::nullopt;
+      tmp_row[slow_controls_settings.slow_helicity_plate] = std::nullopt;
     } else {
       // Insertable Half Wave Plate Setting position did not change
       // Insertable Half Wave Plate Setting setting is stored as a string with possible values
@@ -1108,7 +1107,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
         << fEPICSDataEvent[tagindex].StringValue.Data()
         << ", to the database."
         << QwLog::endl;
-      slow_helicity_plate = std::string(fEPICSDataEvent[tagindex].StringValue.Data());
+      tmp_row[slow_controls_settings.slow_helicity_plate] = std::string(fEPICSDataEvent[tagindex].StringValue.Data());
     }
   }
 
@@ -1120,7 +1119,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
     
     if (! fEPICSCumulativeData[tagindex].Filled) {
       //  No data for this run.
-      passive_helicity_plate = std::nullopt;
+      tmp_row[slow_controls_settings.passive_helicity_plate] = std::nullopt;
     } else if (fEPICSCumulativeData[tagindex].NumberRecords
 	       != fNumberEPICSEvents) {
       // IHWP2 Setting position changed
@@ -1129,7 +1128,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
 		<< " changed during the run."
 		<< "Send NULL word to the database."
 		<< QwLog::endl;
-      passive_helicity_plate = std::nullopt;
+      tmp_row[slow_controls_settings.passive_helicity_plate] = std::nullopt;
     } else {
       Double_t ihwp2_readback = (fEPICSCumulativeData[tagindex].Sum)/
 	((Double_t) fEPICSCumulativeData[tagindex].NumberRecords);
@@ -1141,7 +1140,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
 		<< fEPICSDataEvent[tagindex].StringValue.Data()
 		<< ", to the database."
 		<< QwLog::endl;
-	passive_helicity_plate = std::string("in");
+	tmp_row[slow_controls_settings.passive_helicity_plate] = std::string("in");
       } else if (fabs(ihwp2_readback-8960)<1){
 	// IHWP2 is OUT
 	QwDebug << "Send the value of "
@@ -1150,14 +1149,14 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
 		<< fEPICSDataEvent[tagindex].StringValue.Data()
 		<< ", to the database."
 		<< QwLog::endl;
-	passive_helicity_plate = std::string("out");
+	tmp_row[slow_controls_settings.passive_helicity_plate] = std::string("out");
       } else {
 	QwWarning << "The value of "
 		  << fEPICSVariableList[tagindex]
 		  << " is not defined."
 		  << "Send NULL word to the database."
 		  << QwLog::endl;
-	passive_helicity_plate = std::nullopt;
+	tmp_row[slow_controls_settings.passive_helicity_plate] = std::nullopt;
       }
     }
   }
@@ -1169,7 +1168,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
 
     if (! fEPICSCumulativeData[tagindex].Filled) {
       //  No data for this run.
-      wien_reversal = std::nullopt;
+      tmp_row[slow_controls_settings.wien_reversal] = std::nullopt;
     } else if (fEPICSCumulativeData[tagindex].NumberRecords
 	       != fNumberEPICSEvents) {
       // WienMode changed
@@ -1178,7 +1177,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
 		<< " changed during the run."
 		<< "Send NULL word to the database."
 		<< QwLog::endl;
-      wien_reversal = std::nullopt;
+      tmp_row[slow_controls_settings.wien_reversal] = std::nullopt;
     }
     if(fEPICSDataEvent[tagindex].StringValue.Contains("***") ){
       QwWarning << "The value of "
@@ -1186,7 +1185,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
 		<< " is not defined."
 		<< "Send NULL word to the database."
 		<< QwLog::endl;
-      wien_reversal = std::nullopt;
+      tmp_row[slow_controls_settings.wien_reversal] = std::nullopt;
     } else {
       // WienMode is stored as an enum of the following labels:
       TString wien_enum[5] = {"indeterminate",
@@ -1199,7 +1198,8 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
 	      << fEPICSDataEvent[tagindex].StringValue.Data()
 	      << ", to the database."
 	      << QwLog::endl;
-      wien_reversal = std::string(wien_enum[WienModeIndex(fEPICSDataEvent[tagindex].StringValue)].Data());
+      tmp_row[slow_controls_settings.wien_reversal] =
+          std::string(wien_enum[WienModeIndex(fEPICSDataEvent[tagindex].StringValue)].Data());
     }
   }
   
@@ -1207,9 +1207,9 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
   //   This just uses the flag from the channel map to determine if the precession 
   //   is normal or reversed.
   if (fPrecessionReversal){
-    precession_reversal = std::string("reverse");
+    tmp_row[slow_controls_settings.precession_reversal] = std::string("reverse");
   } else {
-    precession_reversal = std::string("normal");
+    tmp_row[slow_controls_settings.precession_reversal] = std::string("normal");
   }
 
   // For charge feedback
@@ -1220,7 +1220,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
 
     if (! fEPICSCumulativeData[tagindex].Filled) {
       //  No data for this run.
-      charge_feedback = std::nullopt;
+      tmp_row[slow_controls_settings.charge_feedback] = std::nullopt;
 
     } else if (fEPICSCumulativeData[tagindex].NumberRecords
         != fNumberEPICSEvents) {
@@ -1230,7 +1230,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
           << " changed during the run."
           << "Send NULL word to the database."
           << QwLog::endl;
-      charge_feedback = std::nullopt;
+      tmp_row[slow_controls_settings.charge_feedback] = std::nullopt;
     }
 
     if(fEPICSDataEvent[tagindex].StringValue.Contains("***") ){
@@ -1239,7 +1239,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
           << " is not defined."
           << "Send NULL word to the database."
           << QwLog::endl;
-      charge_feedback = std::nullopt;
+      tmp_row[slow_controls_settings.charge_feedback] = std::nullopt;
     }
 
     else {
@@ -1254,7 +1254,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
         << QwLog::endl;
       TString tmpval = fEPICSDataEvent[tagindex].StringValue;
       tmpval.ToLower();
-      charge_feedback = std::string(tmpval.Data());
+      tmp_row[slow_controls_settings.charge_feedback] = std::string(tmpval.Data());
     }
   }
 
@@ -1263,6 +1263,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
   try {
     auto c = db->GetScopedConnection();
     QwDebug << "QwEPICSEvent::FillSlowControlsSettings Writing to database now" << QwLog::endl;
+    c->QueryExecute(tmp_row.insert_into);
 
     // Create the insert statement with required fields first
     auto insert_stmt = sqlpp::insert_into(slow_controls_settings).set(
@@ -1270,70 +1271,9 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
         slow_controls_settings.precession_reversal = precession_reversal
     );
     c->QueryExecute(insert_stmt);
-
-    // Now update the record with optional fields if they have values
-    // This is a workaround for sqlpp11's strict type checking with nullable fields
-    UInt_t last_inserted_id = runlet_id;  // We know the runlet_id we just inserted
-    
-    if (slow_helicity_plate) {
-      auto update_stmt = sqlpp::update(slow_controls_settings)
-                        .set(slow_controls_settings.slow_helicity_plate = slow_helicity_plate.value())
-                        .where(slow_controls_settings.runlet_id == last_inserted_id);
-      c->QueryExecute(update_stmt);
-    }
-    
-    if (passive_helicity_plate) {
-      auto update_stmt = sqlpp::update(slow_controls_settings)
-                        .set(slow_controls_settings.passive_helicity_plate = passive_helicity_plate.value())
-                        .where(slow_controls_settings.runlet_id == last_inserted_id);
-      c->QueryExecute(update_stmt);
-    }
-    
-    if (wien_reversal) {
-      auto update_stmt = sqlpp::update(slow_controls_settings)
-                        .set(slow_controls_settings.wien_reversal = wien_reversal.value())
-                        .where(slow_controls_settings.runlet_id == last_inserted_id);
-      c->QueryExecute(update_stmt);
-    }
-    
-    if (helicity_length) {
-      auto update_stmt = sqlpp::update(slow_controls_settings)
-                        .set(slow_controls_settings.helicity_length = helicity_length.value())
-                        .where(slow_controls_settings.runlet_id == last_inserted_id);
-      c->QueryExecute(update_stmt);
-    }
-    
-    if (charge_feedback) {
-      auto update_stmt = sqlpp::update(slow_controls_settings)
-                        .set(slow_controls_settings.charge_feedback = charge_feedback.value())
-                        .where(slow_controls_settings.runlet_id == last_inserted_id);
-      c->QueryExecute(update_stmt);
-    }
-    
-    if (position_feedback) {
-      auto update_stmt = sqlpp::update(slow_controls_settings)
-                        .set(slow_controls_settings.position_feedback = position_feedback.value())
-                        .where(slow_controls_settings.runlet_id == last_inserted_id);
-      c->QueryExecute(update_stmt);
-    }
-    
-    if (qtor_current) {
-      auto update_stmt = sqlpp::update(slow_controls_settings)
-                        .set(slow_controls_settings.qtor_current = qtor_current.value())
-                        .where(slow_controls_settings.runlet_id == last_inserted_id);
-      c->QueryExecute(update_stmt);
-    }
-    
-    if (target_position) {
-      auto update_stmt = sqlpp::update(slow_controls_settings)
-                        .set(slow_controls_settings.target_position = target_position.value())
-                        .where(slow_controls_settings.runlet_id == last_inserted_id);
-      c->QueryExecute(update_stmt);
-    }
-    
     QwDebug << "QwEPICSEvent::FillSlowControlsSettings Successfully wrote to database" << QwLog::endl;
   } catch (const std::exception& er) {
-      QwError << "Database exception: " << er.what() << QwLog::endl;
+    QwError << "Database exception: " << er.what() << QwLog::endl;
   }
   QwDebug << "Leaving QwEPICSEvent::FillSlowControlsSettings()" << QwLog::endl;
 }
