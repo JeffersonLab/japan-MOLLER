@@ -131,7 +131,7 @@ class QwCombinedBCM : public QwBCM<T> {
   static boost::variate_generator
     < boost::mt19937, boost::random::uniform_real_distribution<double> > fRandomVariable;
 public: 
-  static void SetTripSeed(uint seedval){fRandomVariable.engine().seed(seedval);}
+  static void SetTripSeed(uint seedval);
   // @}
 };
 
