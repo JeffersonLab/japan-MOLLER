@@ -87,18 +87,3 @@ To have your name properly tracked when committing (so that we know who is respo
   ```
   git commit --author=username
   ```
-
-## Continuous Integration
-
-This repository includes automated workflows for building, testing, and validating changes:
-
-### Build Workflows
-- **build-lcg-cvmfs.yml**: Builds the project using LCG software stack on CVMFS, runs mock data analysis, and generates prompt summary artifacts
-- **build.yml**: Builds and publishes Docker containers for releases and nightly builds
-
-### Artifact Comparison
-- **compare-artifacts.yml**: Automatically compares prompt summary outputs between pull requests and the main branch
-- Helps catch unintended changes in analysis results beyond expected timestamp differences
-- See [docs/artifact-comparison.md](docs/artifact-comparison.md) for detailed information
-
-All workflows run automatically on pull requests to ensure code quality and prevent unintended changes to analysis output.

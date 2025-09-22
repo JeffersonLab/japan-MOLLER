@@ -83,3 +83,98 @@ jobs:
             summary_*.txt
           retention-days: 7
           if-no-files-found: error
+
+  compare-artifacts:
+    runs-on: ubuntu-latest
+    needs: linux
+    if: github.event_name == 'pull_request'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - release: "LCG_106"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc13"
+            opt: "opt"
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "clang16"
+            opt: "opt"
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc14"
+            opt: "opt"
+    steps:
+      - name: Download current artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: ./current
+
+      - name: Download target branch artifacts
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: build-lcg-cvmfs.yml
+          branch: ${{ github.event.pull_request.base.ref }}
+          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: ./target
+          if_no_artifact_found: warn
+
+      - name: Compare artifacts
+        run: |
+          echo "Comparing artifacts for ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}"
+
+          # Check if target artifacts exist
+          if [ ! -d "./target" ] || [ -z "$(ls -A ./target)" ]; then
+            echo "⚠️  No target branch artifacts found. This may be the first run or target branch hasn't been built recently."
+            echo "Skipping comparison for this configuration."
+            exit 0
+          fi
+
+          # Find summary files in both directories
+          current_files=$(find ./current -name "summary_*.txt" | sort)
+          target_files=$(find ./target -name "summary_*.txt" | sort)
+
+          echo "Current files found:"
+          echo "$current_files"
+          echo "Target files found:"
+          echo "$target_files"
+
+          # Compare each file
+          comparison_failed=false
+          for current_file in $current_files; do
+            filename=$(basename "$current_file")
+            target_file="./target/$filename"
+
+            if [ ! -f "$target_file" ]; then
+              echo "❌ Target file $filename not found"
+              comparison_failed=true
+              continue
+            fi
+
+            echo "Comparing $filename..."
+
+            # Skip lines containing timestamps and metadata that can vary
+            if diff -q <(grep -v "Start Time:\|End Time:" "$current_file") <(grep -v "Start Time:\|End Time:" "$target_file") > /dev/null; then
+              echo "✅ $filename: No meaningful differences found"
+            else
+              echo "❌ $filename: Differences found beyond timestamps"
+              echo "--- Expected (target branch) ---"
+              grep -v "Start Time:\|End Time:" "$target_file" | head -20
+              echo "--- Actual (current PR) ---"
+              grep -v "Start Time:\|End Time:" "$current_file" | head -20
+              echo "--- Detailed diff ---"
+              diff -u <(grep -v "Start Time:\|End Time:" "$target_file") <(grep -v "Start Time:\|End Time:" "$current_file") | head -50
+              comparison_failed=true
+            fi
+          done
+
+          if [ "$comparison_failed" = "true" ]; then
+            echo "❌ Artifact comparison failed. Changes detected in prompt summary beyond timestamps."
+            exit 1
+          else
+            echo "✅ All artifacts match expected results (ignoring timestamps)."
+          fi
