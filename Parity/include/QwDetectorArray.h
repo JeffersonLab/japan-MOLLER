@@ -53,6 +53,10 @@ QwDetectorArray(const QwDetectorArray& source)
 /// Virtual destructor
 ~QwDetectorArray() {};
 
+// FIXME (wdconinc) explicit assignment operator needed
+using MQwHistograms::operator=;
+using VQwDetectorArray::operator=;
+
 };
 
 #endif

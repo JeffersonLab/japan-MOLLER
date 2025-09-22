@@ -72,6 +72,7 @@ class QwLinearDiodeArray : public VQwBPM {
   void    PrintValue() const;
   void    PrintInfo() const;
 
+  using VQwBPM::GetPosition;
   const VQwHardwareChannel* GetPosition(EBeamPositionMonitorAxis axis) const {
     if (axis<0 || axis>2){
       TString loc="QwLinearDiodeArray::GetPosition for "
@@ -88,6 +89,7 @@ class QwLinearDiodeArray : public VQwBPM {
 
   Bool_t  ApplyHWChecks();//Check for harware errors in the devices
   Bool_t  ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
+  using VQwDataElement::SetSingleEventCuts;
   //void    SetSingleEventCuts(TString ch_name, Double_t minX, Double_t maxX);
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   void    SetSingleEventCuts(TString ch_name, UInt_t errorflag,Double_t minX, Double_t maxX, Double_t stability, Double_t burplevel);
@@ -95,12 +97,14 @@ class QwLinearDiodeArray : public VQwBPM {
   void IncrementErrorCounters();
   void PrintErrorCounters() const;// report number of events failed due to HW and event cut faliure
   UInt_t GetEventcutErrorFlag();
+  using VQwDataElement::UpdateErrorFlag;
   UInt_t UpdateErrorFlag();
   void UpdateErrorFlag(const VQwBPM *ev_error);
 
   Bool_t  CheckForBurpFail(const VQwDataElement *ev_error);
 
   void    SetDefaultSampleSize(Int_t sample_size);
+  using VQwBPM::SetRandomEventParameters;
   void    SetRandomEventParameters(Double_t meanX, Double_t sigmaX, Double_t meanY, Double_t sigmaY);
   void    RandomizeEventData(int helicity = 0, double time = 0.0);
   void    SetEventData(Double_t* block, UInt_t sequencenumber);
@@ -108,9 +112,15 @@ class QwLinearDiodeArray : public VQwBPM {
   void    SetSubElementPedestal(Int_t j, Double_t value);
   void    SetSubElementCalibrationFactor(Int_t j, Double_t value);
 
+  using VQwDataElement::Ratio;
+  using VQwBPM::Ratio;
   void    Ratio(QwLinearDiodeArray &numer, QwLinearDiodeArray &denom);
   void    Scale(Double_t factor);
 
+  using MQwHistograms::operator=;
+  using VQwDataElement::operator=;
+  using VQwDataElement::operator+=;
+  using VQwDataElement::operator-=;
 
   VQwBPM& operator=  (const VQwBPM &value);
   VQwBPM& operator+= (const VQwBPM &value);

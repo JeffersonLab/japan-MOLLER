@@ -69,9 +69,17 @@ class  QwHaloMonitor : public VQwDataElement{
   Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left,UInt_t index=0);
   void  ProcessEvent();
 
+  using MQwHistograms::operator=;
+  using VQwDataElement::operator=;
+  using VQwDataElement::operator+=;
+  using VQwDataElement::operator-=;
   QwHaloMonitor& operator=  (const QwHaloMonitor &value);
   QwHaloMonitor& operator+= (const QwHaloMonitor &value);
   QwHaloMonitor& operator-= (const QwHaloMonitor &value);
+
+  using VQwDataElement::Sum;
+  using VQwDataElement::Difference;
+  using VQwDataElement::Ratio;
   void Sum(QwHaloMonitor &value1, QwHaloMonitor &value2);
   void Difference(QwHaloMonitor &value1, QwHaloMonitor &value2);
   void Ratio(QwHaloMonitor &numer, QwHaloMonitor &denom);
@@ -90,6 +98,7 @@ class  QwHaloMonitor : public VQwDataElement{
 
   Bool_t CheckForBurpFail(const VQwDataElement *ev_error);
 
+  using VQwDataElement::UpdateErrorFlag;
   UInt_t UpdateErrorFlag() {return GetEventcutErrorFlag();};
   void UpdateErrorFlag(const QwHaloMonitor *ev_error){
     fHalo_Counter.UpdateErrorFlag(ev_error->fHalo_Counter);
@@ -97,6 +106,7 @@ class  QwHaloMonitor : public VQwDataElement{
 
   void PrintErrorCounters() const;// report number of events failed due to HW and event cut faliure
   Bool_t ApplyHWChecks();
+  using VQwDataElement::SetSingleEventCuts;
   void SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel){
     QwError<<"***************************"<<QwLog::endl;
     fHalo_Counter.SetSingleEventCuts(errorflag,min,max,stability,burplevel);

@@ -81,6 +81,9 @@ class QwMollerDetector:
     /// Virtual destructor
     virtual ~QwMollerDetector() { };
 
+    // FIXME (wdconinc) explicit assignment operator needed
+    using MQwHistograms::operator=;
+  
     /* derived from VQwSubsystem */
     void ProcessOptions(QwOptions &options); //Handle command line options
     Int_t LoadChannelMap(TString mapfile);
@@ -119,6 +122,7 @@ class QwMollerDetector:
     };
 
     //update the error flag in the subsystem level from the top level routines related to stability checks. This will uniquely update the errorflag at each channel based on the error flag in the corresponding channel in the ev_error subsystem
+    using VQwSubsystemParity::UpdateErrorFlag;
     void UpdateErrorFlag(const VQwSubsystem *ev_error){
     };
 

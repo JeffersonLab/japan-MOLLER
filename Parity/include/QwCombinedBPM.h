@@ -85,6 +85,7 @@ class QwCombinedBPM : public VQwBPM {
   void    PrintValue() const;
   void    PrintInfo() const;
 
+  using VQwBPM::GetPosition;
   const VQwHardwareChannel* GetPosition(EBeamPositionMonitorAxis axis) const {
     if (axis<0 || axis>2){
       TString loc="QwLinearDiodeArray::GetPosition for "
@@ -116,15 +117,23 @@ class QwCombinedBPM : public VQwBPM {
   void IncrementErrorCounters();
   void PrintErrorCounters() const;// report number of events failed due to HW and event cut faliure
   UInt_t  GetEventcutErrorFlag();
+
+  using VQwDataElement::UpdateErrorFlag;
   UInt_t  UpdateErrorFlag();
   void UpdateErrorFlag(const VQwBPM *ev_error);
 
 
   void    SetBPMForCombo(const VQwBPM* bpm, Double_t charge_weight,  Double_t x_weight, Double_t y_weight,Double_t sumqw);
 
+  using VQwDataElement::Ratio;
   void    Ratio(QwCombinedBPM &numer, QwCombinedBPM &denom);
   void    Ratio(VQwBPM &numer, VQwBPM &denom);
   void    Scale(Double_t factor);
+
+  using MQwHistograms::operator=;
+  using VQwDataElement::operator=;
+  using VQwDataElement::operator+=;
+  using VQwDataElement::operator-=;
 
   VQwBPM& operator=  (const VQwBPM &value);
   VQwBPM& operator+= (const VQwBPM &value);
@@ -150,6 +159,7 @@ class QwCombinedBPM : public VQwBPM {
 
 //------------------------------------------------------------------------------------------------
   void    RandomizeEventData(int helicity = 0, double time = 0.0);
+  using VQwBPM::SetRandomEventParameters;
   void    SetRandomEventParameters(Double_t meanX, Double_t sigmaX, Double_t meanY, Double_t sigmaY,
                                    Double_t meanXslope, Double_t sigmaXslope, Double_t meanYslope, Double_t sigmaYslope);
   void    GetProjectedPosition(VQwBPM *device);

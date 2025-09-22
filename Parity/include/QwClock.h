@@ -68,6 +68,7 @@ class QwClock : public VQwClock {
   Bool_t ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
   void IncrementErrorCounters(){fClock.IncrementErrorCounters();}
 
+  using VQwDataElement::CheckForBurpFail;
   Bool_t CheckForBurpFail(const QwClock *ev_error){
     return fClock.CheckForBurpFail(&(ev_error->fClock));
   }
@@ -77,12 +78,14 @@ class QwClock : public VQwClock {
   UInt_t GetEventcutErrorFlag(){//return the error flag
     return fClock.GetEventcutErrorFlag();
   }
+  using VQwDataElement::UpdateErrorFlag;
   UInt_t UpdateErrorFlag() {return GetEventcutErrorFlag();};
   void UpdateErrorFlag(const QwClock *ev_error){
     fClock.UpdateErrorFlag(ev_error->fClock);
   }
 
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
+  using VQwDataElement::SetSingleEventCuts;
   void SetSingleEventCuts(UInt_t errorflag, Double_t min = 0, Double_t max = 0, Double_t stability = 0, Double_t burplevel = 0);
 
   void SetDefaultSampleSize(Int_t sample_size);
@@ -94,6 +97,11 @@ class QwClock : public VQwClock {
   void PrintValue() const;
   void PrintInfo() const;
 
+  using MQwHistograms::operator=;
+  using VQwDataElement::operator=;
+  using VQwDataElement::operator+=;
+  using VQwDataElement::operator-=;
+
   // Implementation of Parent class's virtual operators
   VQwClock& operator=  (const VQwClock &value);
   VQwClock& operator+= (const VQwClock &value);
@@ -103,6 +111,8 @@ class QwClock : public VQwClock {
   QwClock& operator=  (const QwClock &value);
   QwClock& operator+= (const QwClock &value);
   QwClock& operator-= (const QwClock &value);
+
+  using VQwDataElement::Ratio;
   void Ratio(const VQwClock &numer, const VQwClock &denom);
   void Ratio(const QwClock &numer, const QwClock &denom);
   void Scale(Double_t factor);

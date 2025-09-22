@@ -89,8 +89,10 @@ class VQwBPM : public VQwDataElement {
   void   SetRotation(Double_t);
   void   SetRotationOff();
 
+  using VQwDataElement::SetSingleEventCuts;
   void    SetSingleEventCuts(TString, Double_t, Double_t);
   void    SetSingleEventCuts(TString, UInt_t, Double_t, Double_t, Double_t, Double_t);
+  using VQwDataElement::UpdateErrorFlag;
   virtual UInt_t UpdateErrorFlag() = 0;
   virtual void UpdateErrorFlag(const VQwBPM *ev_error) = 0;
 
@@ -98,6 +100,11 @@ class VQwBPM : public VQwDataElement {
     std::cerr << "Scale for VQwBPM not implemented!\n";
   }
   void SetGains(TString pos, Double_t value);
+
+  using MQwHistograms::operator=;
+  using VQwDataElement::operator=;
+  using VQwDataElement::operator+=;
+  using VQwDataElement::operator-=;
 
   // Operators subclasses MUST support!
   virtual VQwBPM& operator=  (const VQwBPM &value) =0;
@@ -180,6 +187,7 @@ public:
   virtual std::vector<QwErrDBInterface> GetErrDBEntry() = 0;
 #endif // __USE_DATABASE__
 
+  using VQwDataElement::Ratio;
   virtual void Ratio(VQwBPM &numer, VQwBPM &denom) {
     std::cerr << "Ratio() is not defined for BPM named="<<GetElementName()<<"\n";
   }

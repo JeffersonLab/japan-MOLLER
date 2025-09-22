@@ -76,6 +76,7 @@ class QwEnergyCalculator : public VQwDataElement{
 
     Bool_t  ApplyHWChecks();//Check for harware errors in the devices
     Bool_t  ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
+    using VQwDataElement::SetSingleEventCuts;
     Int_t   SetSingleEventCuts(Double_t mean, Double_t sigma);//two limts and sample size
     /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
     void    SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel);
@@ -90,15 +91,21 @@ class QwEnergyCalculator : public VQwDataElement{
     UInt_t   GetEventcutErrorFlag(){//return the error flag
       return fEnergyChange.GetEventcutErrorFlag();
     }
+    using VQwDataElement::UpdateErrorFlag;
     UInt_t   UpdateErrorFlag();
-
     void    UpdateErrorFlag(const QwEnergyCalculator *ev_error);
   
 
     void    Set(const VQwBPM* device,TString type, TString property ,Double_t tmatrix_ratio);
+    using VQwDataElement::Ratio;
     void    Ratio(QwEnergyCalculator &numer,QwEnergyCalculator &denom);
     void    Scale(Double_t factor);
 
+    using MQwHistograms::operator=;
+    using VQwDataElement::operator=;
+    using VQwDataElement::operator+=;
+    using VQwDataElement::operator-=;
+  
     virtual QwEnergyCalculator& operator=  (const QwEnergyCalculator &value);
     virtual QwEnergyCalculator& operator+= (const QwEnergyCalculator &value);
     virtual QwEnergyCalculator& operator-= (const QwEnergyCalculator &value);

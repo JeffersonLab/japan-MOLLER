@@ -71,6 +71,7 @@ class QwCombinedPMT : public VQwDataElement {
   Bool_t ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
   void PrintErrorCounters() const;// report number of events failed due to HW and event cut faliure
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
+  using VQwDataElement::SetSingleEventCuts;
   void SetSingleEventCuts(UInt_t errorflag, Double_t LL, Double_t UL, Double_t stability, Double_t burplevel);
 
   void SetDefaultSampleSize(Int_t sample_size);
@@ -88,15 +89,21 @@ class QwCombinedPMT : public VQwDataElement {
 
   Bool_t CheckForBurpFail(const VQwDataElement *ev_error);
 
+  using VQwDataElement::UpdateErrorFlag;
   UInt_t UpdateErrorFlag();
   void   UpdateErrorFlag(const QwCombinedPMT *ev_error);
 
   void PrintInfo() const;
   void PrintValue() const;
 
+  using MQwHistograms::operator=;
+  using VQwDataElement::operator=;
+  using VQwDataElement::operator+=;
+  using VQwDataElement::operator-=;
   QwCombinedPMT& operator=  (const QwCombinedPMT &value);
   QwCombinedPMT& operator+= (const QwCombinedPMT &value);
   QwCombinedPMT& operator-= (const QwCombinedPMT &value);
+  using VQwDataElement::Ratio;
   void Ratio(QwCombinedPMT &numer, QwCombinedPMT &denom);
   void Scale(Double_t factor);
   void Normalize(VQwDataElement* denom);

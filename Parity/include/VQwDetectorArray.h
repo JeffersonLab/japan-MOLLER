@@ -112,10 +112,12 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
     UInt_t GetEventcutErrorFlag();//return the error flag
 
     //update the error flag in the subsystem level from the top level routines related to stability checks. This will uniquely update the errorflag at each channel based on the error flag in the corresponding channel in the ev_error subsystem
+    using VQwSubsystemParity::UpdateErrorFlag;
     void UpdateErrorFlag(const VQwSubsystem *ev_error);
 
 
     Int_t ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
+    using VQwSubsystem::ProcessEvBuffer;
     Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
 
     void  ClearEventData();
@@ -157,7 +159,7 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
 
     Bool_t Compare(VQwSubsystem* source);
 
-
+    using MQwHistograms::operator=;
     VQwSubsystem&  operator=  ( VQwSubsystem *value);
     VQwSubsystem&  operator+= ( VQwSubsystem *value);
     VQwSubsystem&  operator-= ( VQwSubsystem *value);

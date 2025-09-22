@@ -83,6 +83,8 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   };
   virtual ~QwVQWK_Channel() { };
 
+  using VQwDataElement::CopyFrom;
+  using VQwHardwareChannel::CopyFrom;
   void CopyFrom(const QwVQWK_Channel& value){
     VQwHardwareChannel::CopyFrom(value);
     fBlocksPerEvent = value.fBlocksPerEvent;
@@ -148,6 +150,12 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   void DivideBy(const VQwHardwareChannel* valueptr);
   void ArcTan(const QwVQWK_Channel &value);
 
+  using VQwHardwareChannel::operator=;
+  using VQwHardwareChannel::operator+=;
+  using VQwHardwareChannel::operator-=;
+  using VQwHardwareChannel::operator*=;
+  using VQwHardwareChannel::operator/=;
+
   QwVQWK_Channel& operator+= (const QwVQWK_Channel &value);
   QwVQWK_Channel& operator-= (const QwVQWK_Channel &value);
   QwVQWK_Channel& operator*= (const QwVQWK_Channel &value);
@@ -160,6 +168,13 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   const QwVQWK_Channel operator+ (const QwVQWK_Channel &value) const;
   const QwVQWK_Channel operator- (const QwVQWK_Channel &value) const;
   const QwVQWK_Channel operator* (const QwVQWK_Channel &value) const;
+
+  using VQwDataElement::Sum;
+  using VQwDataElement::Difference;
+  using VQwDataElement::Ratio;
+  using VQwHardwareChannel::Sum;
+  using VQwHardwareChannel::Difference;
+  using VQwHardwareChannel::Ratio;
   void Sum(const QwVQWK_Channel &value1, const QwVQWK_Channel &value2);
   void Difference(const QwVQWK_Channel &value1, const QwVQWK_Channel &value2);
   void Ratio(const QwVQWK_Channel &numer, const QwVQWK_Channel &denom);

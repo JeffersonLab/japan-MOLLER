@@ -42,6 +42,9 @@ class QwScaler: public VQwSubsystemParity, public MQwSubsystemCloneable<QwScaler
     /// Destructor
     virtual ~QwScaler();
 
+    // FIXME (wdconinc) explicit assignment operator needed
+    using MQwHistograms::operator=;
+  
     // Handle command line options
     static void DefineOptions(QwOptions &options);
     void ProcessOptions(QwOptions &options);
@@ -52,6 +55,7 @@ class QwScaler: public VQwSubsystemParity, public MQwSubsystemCloneable<QwScaler
     void  ClearEventData();
 
     Int_t ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
+    using VQwSubsystem::ProcessEvBuffer;
     Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t *buffer, UInt_t num_words);
     void  ProcessEvent();
 
@@ -92,6 +96,7 @@ class QwScaler: public VQwSubsystemParity, public MQwSubsystemCloneable<QwScaler
     void PrintErrorCounters() const;
     UInt_t GetEventcutErrorFlag();
     //update the error flag in the subsystem level from the top level routines related to stability checks. This will uniquely update the errorflag at each channel based on the error flag in the corresponding channel in the ev_error subsystem
+    using VQwSubsystemParity::UpdateErrorFlag;
     void UpdateErrorFlag(const VQwSubsystem *ev_error){
     };
     

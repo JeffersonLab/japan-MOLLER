@@ -133,6 +133,12 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   void DivideBy(const VQwHardwareChannel* valueptr);
   void ArcTan(const QwADC18_Channel &value);
 
+  using VQwHardwareChannel::operator=;
+  using VQwHardwareChannel::operator+=;
+  using VQwHardwareChannel::operator-=;
+  using VQwHardwareChannel::operator*=;
+  using VQwHardwareChannel::operator/=;
+
   QwADC18_Channel& operator+= (const QwADC18_Channel &value);
   QwADC18_Channel& operator-= (const QwADC18_Channel &value);
   QwADC18_Channel& operator*= (const QwADC18_Channel &value);
@@ -145,6 +151,13 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   const QwADC18_Channel operator+ (const QwADC18_Channel &value) const;
   const QwADC18_Channel operator- (const QwADC18_Channel &value) const;
   const QwADC18_Channel operator* (const QwADC18_Channel &value) const;
+
+  using VQwDataElement::Sum;
+  using VQwDataElement::Difference;
+  using VQwDataElement::Ratio;
+  using VQwHardwareChannel::Sum;
+  using VQwHardwareChannel::Difference;
+  using VQwHardwareChannel::Ratio;
   void Sum(const QwADC18_Channel &value1, const QwADC18_Channel &value2);
   void Difference(const QwADC18_Channel &value1, const QwADC18_Channel &value2);
   void Ratio(const QwADC18_Channel &numer, const QwADC18_Channel &denom);

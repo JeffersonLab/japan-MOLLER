@@ -26,6 +26,10 @@ class QwFakeHelicity: public QwHelicity {
 
     virtual ~QwFakeHelicity() { };
 
+    // FIXME (wdconinc) explicit assignment operator needed
+    using MQwHistograms::operator=;
+    using QwHelicity::operator=;
+  
     void    ClearEventData();
     Bool_t  IsGoodHelicity();
     void    ProcessEvent();

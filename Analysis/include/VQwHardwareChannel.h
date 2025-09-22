@@ -33,12 +33,17 @@ class VQwHardwareChannel: public VQwDataElement {
  *         from one physical channel (such as QwVQWK_Channel,
  *         QwScaler_Channel, etc.) should inherit from this class.
  ******************************************************************/
+
+public:
+  // Bring base class virtual functions into scope to avoid hiding warnings
+
 public:
   VQwHardwareChannel();
   VQwHardwareChannel(const VQwHardwareChannel& value);
   VQwHardwareChannel(const VQwHardwareChannel& value, VQwDataElement::EDataToSave datatosave);
   virtual ~VQwHardwareChannel() { };
 
+  using VQwDataElement::CopyFrom;
   virtual void CopyFrom(const VQwHardwareChannel& value);
 
   void ProcessOptions();
@@ -96,6 +101,7 @@ public:
 
   virtual Bool_t ApplySingleEventCuts() = 0;//check values read from modules are at desired level
 
+  using VQwDataElement::CheckForBurpFail;
   virtual Bool_t CheckForBurpFail(const VQwHardwareChannel *event){
     Bool_t foundburp = kFALSE;
     if (fBurpThreshold>0){
@@ -121,6 +127,7 @@ public:
   /*! \brief Inherited from VQwDataElement to set the upper and lower 
    *         limits (fULimit and fLLimit), stability % and the 
    *         error flag on this channel */
+  using VQwDataElement::SetSingleEventCuts;
   void SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability=-1.0, Double_t BurpLevel=-1.0);
 
   Double_t GetEventCutUpperLimit() const { return fULimit; };
@@ -140,6 +147,7 @@ public:
 //   virtual void AccumulateRunningSum(const VQwHardwareChannel *value) = 0;
 
   /// Arithmetic assignment operator:  Should only copy event-based data
+  using VQwDataElement::operator=;
   virtual VQwHardwareChannel& operator=(const VQwHardwareChannel& value) {
     VQwDataElement::operator=(value);
     return *this;
@@ -148,7 +156,9 @@ public:
      AssignValueFrom(&value);
      Scale(scale);
   };
-    virtual void Ratio(const VQwHardwareChannel* numer, const VQwHardwareChannel* denom){
+
+  using VQwDataElement::Ratio;
+  virtual void Ratio(const VQwHardwareChannel* numer, const VQwHardwareChannel* denom){
     if (!IsNameEmpty()){
       this->AssignValueFrom(numer); 
       this->operator/=(denom);
@@ -160,6 +170,9 @@ public:
   }
 
   void AssignValueFrom(const VQwDataElement* valueptr) = 0;
+
+  using VQwDataElement::operator+=;
+  using VQwDataElement::operator-=;
   virtual VQwHardwareChannel& operator+=(const VQwHardwareChannel* input) = 0;
   virtual VQwHardwareChannel& operator-=(const VQwHardwareChannel* input) = 0;
   virtual VQwHardwareChannel& operator*=(const VQwHardwareChannel* input) = 0;

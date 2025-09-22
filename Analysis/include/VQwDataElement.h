@@ -54,6 +54,8 @@ class VQwDataElement: public MQwHistograms {
   /// entered in the tree
   enum EDataToSave {kRaw = 0, kDerived, kMoments};
 
+  // Bring base class virtual functions into scope to avoid hiding warnings
+  using MQwHistograms::operator=;
 
  public:
 

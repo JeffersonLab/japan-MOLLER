@@ -51,8 +51,6 @@ class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHeli
   /// Virtual destructor
   virtual ~QwHelicity() { }
 
-
-
   /* derived from VQwSubsystem */
   /// \brief Define options function
 
@@ -71,6 +69,7 @@ class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHeli
   void PrintErrorCounters() const;// report number of events failed due to HW and event cut failure, derived from VQwSubsystemParity
   UInt_t  GetEventcutErrorFlag();//return the error flag
   //update the error flag in the subsystem level from the top level routines related to stability checks. This will uniquely update the errorflag at each channel based on the error flag in the corresponding channel in the ev_error subsystem
+  using VQwSubsystemParity::UpdateErrorFlag;
   void UpdateErrorFlag(const VQwSubsystem *ev_error){
   };
 
@@ -113,6 +112,7 @@ class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHeli
   void SetFirstBits(UInt_t nbits, UInt_t firstbits);
   void SetEventPatternPhase(Int_t event, Int_t pattern, Int_t phase);
 
+  using MQwHistograms::operator=;
   VQwSubsystem&  operator=  (VQwSubsystem *value);
   VQwSubsystem&  operator+=  (VQwSubsystem *value);
 

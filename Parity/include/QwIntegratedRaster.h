@@ -72,6 +72,8 @@ class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneab
   /// Virtual destructor
   virtual ~QwIntegratedRaster() { };
 
+  // FIXME (wdconinc) explicit assignment operator needed
+  using MQwHistograms::operator=;
 
   /* derived from VQwSubsystem */
 
@@ -93,6 +95,7 @@ class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneab
   };
 
   //update the error flag in the subsystem level from the top level routines related to stability checks. This will uniquely update the errorflag at each channel based on the error flag in the corresponding channel in the ev_error subsystem
+  using VQwSubsystemParity::UpdateErrorFlag;
   void UpdateErrorFlag(const VQwSubsystem *ev_error){
   };
 
@@ -103,6 +106,7 @@ class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneab
   void CalculateRunningAverage();
 
   Int_t ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
+  using VQwSubsystem::ProcessEvBuffer;
   Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
   void  PrintDetectorID() const;
 
@@ -130,6 +134,7 @@ class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneab
   void  ConstructHistograms(TDirectory *folder, TString &prefix);
   void  FillHistograms();
 
+  using VQwSubsystem::ConstructBranchAndVector;
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file);

@@ -100,11 +100,12 @@ template<typename T> class QwBCM : public VQwBCM {
     return fBeamCurrent.GetEventcutErrorFlag();
   }
 
+  using VQwBCM::UpdateErrorFlag;
   void UpdateErrorFlag(const VQwBCM *ev_error);
 
   UInt_t GetErrorCode() const {return (fBeamCurrent.GetErrorCode());}; 
 
-
+  using VQwDataElement::SetSingleEventCuts;
   Int_t SetSingleEventCuts(Double_t mean = 0, Double_t sigma = 0);//two limts and sample size
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   void SetSingleEventCuts(UInt_t errorflag, Double_t min = 0, Double_t max = 0, Double_t stability = 0, Double_t burplevel = 0);
@@ -118,6 +119,7 @@ template<typename T> class QwBCM : public VQwBCM {
   void PrintInfo() const;
 
 protected:
+  using VQwBCM::GetCharge;
   VQwHardwareChannel* GetCharge() {
     return &fBeamCurrent;
   };
@@ -129,6 +131,13 @@ public:
   void SetExternalClockPtr( const VQwHardwareChannel* clock) {fBeamCurrent.SetExternalClockPtr(clock);};
   void SetExternalClockName( const std::string name) { fBeamCurrent.SetExternalClockName(name);};
   Double_t GetNormClockValue() { return fBeamCurrent.GetNormClockValue();}
+
+  using MQwHistograms::operator=;
+  using VQwDataElement::operator=;
+  using VQwBCM::operator=;
+
+  using VQwDataElement::operator+=;
+  using VQwDataElement::operator-=;
 
   // Implementation of Parent class's virtual operators
   VQwBCM& operator=  (const VQwBCM &value);
@@ -146,6 +155,7 @@ public:
   QwBCM& operator=  (const QwBCM &value);
   QwBCM& operator+= (const QwBCM &value);
   QwBCM& operator-= (const QwBCM &value);
+  using VQwDataElement::Ratio;
   void Ratio(const VQwBCM &numer, const VQwBCM &denom);
   void Ratio(const QwBCM &numer, const QwBCM &denom);
   void Scale(Double_t factor);

@@ -54,7 +54,9 @@ public:
   virtual void  ConstructHistograms(TDirectory *folder, TString &prefix) = 0;
   virtual void  FillHistograms() = 0;
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
+  using VQwDataElement::SetSingleEventCuts;
   virtual void SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel) = 0;
+  using VQwDataElement::Ratio;
   virtual void Ratio( const VQwBCM &numer, const VQwBCM &denom)
     { std::cerr << "Ratio not defined! (VQwBCM)" << std::endl; }
   virtual void ClearEventData() = 0;
@@ -72,6 +74,7 @@ public:
 
   virtual void SetDefaultSampleSize(Int_t sample_size) = 0;
   virtual void SetEventCutMode(Int_t bcuts) = 0;
+  using VQwDataElement::UpdateErrorFlag;
   virtual UInt_t UpdateErrorFlag(){return this->GetEventcutErrorFlag();};
   virtual void UpdateErrorFlag(const VQwBCM *ev_error) = 0;
   virtual void SetPedestal(Double_t ped) = 0;
@@ -133,6 +136,10 @@ public:
   virtual void  AddRandomEventDriftParameters(Double_t amplitude, Double_t phase, Double_t frequency) =0;
 
   // Operators
+  using MQwHistograms::operator=;
+  using VQwDataElement::operator=;
+  using VQwDataElement::operator+=;
+  using VQwDataElement::operator-=;
   virtual VQwBCM& operator=  (const VQwBCM &value) =0;
   virtual VQwBCM& operator+= (const VQwBCM &value) =0;
   virtual VQwBCM& operator-= (const VQwBCM &value) =0;

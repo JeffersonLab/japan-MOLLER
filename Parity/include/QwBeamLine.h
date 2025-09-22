@@ -87,6 +87,7 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
   void UpdateErrorFlag(const VQwSubsystem *ev_error);
 
   Int_t  ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
+  using VQwSubsystem::ProcessEvBuffer;
   Int_t  ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
   void   PrintDetectorID() const;
 
@@ -103,6 +104,7 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
   void   SetRandomEventAsymmetry(Double_t asymmetry);
   void   EncodeEventData(std::vector<UInt_t> &buffer);
 
+  using MQwHistograms::operator=;
   VQwSubsystem&  operator=  (VQwSubsystem *value);
   VQwSubsystem&  operator+= (VQwSubsystem *value);
   VQwSubsystem&  operator-= (VQwSubsystem *value);

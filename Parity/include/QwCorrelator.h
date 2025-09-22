@@ -48,6 +48,7 @@ class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCor
   Int_t LoadChannelMap(const std::string& mapfile);
 
   /// \brief Connect to Channels (asymmetry/difference only)
+  using VQwDataHandler::ConnectChannels;
   Int_t ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff);
 
   void ProcessData();

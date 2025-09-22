@@ -273,8 +273,8 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   /// \brief Assignment
   /// Note: Must be called at the beginning of all subsystems routine
   /// call to operator=(VQwSubsystem *value) by VQwSubsystem::operator=(value)
+  using MQwHistograms::operator=;
   virtual VQwSubsystem& operator=(VQwSubsystem *value);
-
 
   virtual void PrintDetectorMaps(Bool_t status) const;
 

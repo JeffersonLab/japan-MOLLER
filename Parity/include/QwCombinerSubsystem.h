@@ -47,6 +47,7 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
       boost::shared_ptr<VQwSubsystem> GetSharedPointerToStaticObject();
 
       /// \brief Update the running sums
+      using VQwDataHandler::AccumulateRunningSum;
       void AccumulateRunningSum(VQwSubsystem* input, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
       void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF);
       /// \brief Calculate the average for all good events
@@ -59,6 +60,7 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
       }
 
       /// \brief Overloaded Operators
+      using MQwHistograms::operator=;
       VQwSubsystem& operator=  (VQwSubsystem *value);
       VQwSubsystem& operator+= (VQwSubsystem *value);
       VQwSubsystem& operator-= (VQwSubsystem *value);
@@ -67,6 +69,7 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
       void Ratio(VQwSubsystem* value1, VQwSubsystem* value2);
       void Scale(Double_t value);
 
+      using VQwSubsystem::ConstructBranchAndVector;
       void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector <Double_t> &values){
         QwCombiner::ConstructBranchAndVector(tree,prefix,values);
       }
@@ -74,6 +77,7 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
         QwCombiner::FillTreeVector(values);
       }
 
+      using VQwSubsystem::ConstructHistograms;
       void ConstructHistograms(TDirectory *folder, TString &prefix);
       void FillHistograms();
       void DeleteHistograms();
@@ -85,11 +89,13 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
 
       //update the error flag in the subsystem level from the top level routines related to stability checks
       // This will uniquely update the errorflag at each channel based on the error flag in the corresponding channel in the ev_error subsystem
+      using VQwSubsystemParity::UpdateErrorFlag;
       void UpdateErrorFlag(const VQwSubsystem *ev_error);
 
 
       /// \brief Derived functions
       // not sure if there should be empty definition, no definition or defined 
+      using QwCombiner::LoadChannelMap;
       Int_t LoadChannelMap(TString);
       Int_t LoadInputParameters(TString);
       Int_t LoadEventCuts(TString);
@@ -109,7 +115,8 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
         */
       };
       Int_t ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
-	Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
+      using VQwSubsystem::ProcessEvBuffer;
+    	Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
       void ProcessEvent(){};
 
       Bool_t ApplySingleEventCuts();

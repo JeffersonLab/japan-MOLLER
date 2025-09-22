@@ -97,6 +97,7 @@ void RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeam
     fTriumf_ADC.IncrementErrorCounters();
   }
   void PrintErrorCounters() const;// report number of events failed due to HW and event cut faliure
+  using VQwDataElement::SetSingleEventCuts;
   Int_t SetSingleEventCuts(Double_t, Double_t);//set two limts
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   void SetSingleEventCuts(UInt_t errorflag, Double_t LL, Double_t UL, Double_t stability, Double_t burplevel);
@@ -108,6 +109,7 @@ void RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeam
 
   Bool_t CheckForBurpFail(const VQwDataElement *ev_error);
   
+  using VQwDataElement::UpdateErrorFlag;
   UInt_t UpdateErrorFlag() {return GetEventcutErrorFlag();};
   void UpdateErrorFlag(const QwIntegrationPMT *ev_error);
 
@@ -130,11 +132,15 @@ void RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeam
 /*   Double_t GetRawBlockValue(size_t blocknum) */
 /*            {return fTriumf_ADC.GetRawBlockValue(blocknum);}; */
 
-
-
+  using MQwHistograms::operator=;
+  using VQwDataElement::operator=;
+  using VQwDataElement::operator+=;
+  using VQwDataElement::operator-=;
   QwIntegrationPMT& operator=  (const QwIntegrationPMT &value);
   QwIntegrationPMT& operator+= (const QwIntegrationPMT &value);
   QwIntegrationPMT& operator-= (const QwIntegrationPMT &value);
+
+  using VQwDataElement::Ratio;
   void Ratio(QwIntegrationPMT &numer, QwIntegrationPMT &denom);
   void Scale(Double_t factor);
   void Normalize(VQwDataElement* denom);

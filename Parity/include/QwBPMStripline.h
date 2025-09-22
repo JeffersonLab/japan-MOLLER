@@ -112,6 +112,7 @@ class QwBPMStripline : public VQwBPM {
 
   Bool_t  ApplyHWChecks();//Check for harware errors in the devices
   Bool_t  ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
+  using VQwDataElement::SetSingleEventCuts;
   //void    SetSingleEventCuts(TString ch_name, Double_t minX, Double_t maxX);
   /*   /\*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel *\/ */
   void    SetSingleEventCuts(TString ch_name, UInt_t errorflag,Double_t minX, Double_t maxX, Double_t stability, Double_t burplevel);
@@ -125,8 +126,11 @@ class QwBPMStripline : public VQwBPM {
   Bool_t  CheckForBurpFail(const VQwDataElement *ev_error);
   void    UpdateErrorFlag(const VQwBPM *ev_error);
 
+  // FIXME (wdconinc) doesn't avoid overloaded virtual warning
+  using VQwDataElement::UpdateErrorFlag;
 
   void    SetDefaultSampleSize(Int_t sample_size);
+  using VQwBPM::SetRandomEventParameters;
   void    SetRandomEventParameters(Double_t meanX, Double_t sigmaX, Double_t meanY, Double_t sigmaY);
   void    RandomizeEventData(int helicity = 0, double time = 0.0);
   void    LoadMockDataParameters(QwParameterFile &paramfile);
@@ -137,10 +141,15 @@ class QwBPMStripline : public VQwBPM {
   void    SetSubElementPedestal(Int_t j, Double_t value);
   void    SetSubElementCalibrationFactor(Int_t j, Double_t value);
 
+  using VQwDataElement::Ratio;
   void    Ratio(VQwBPM &numer, VQwBPM &denom);
   void    Ratio(QwBPMStripline &numer, QwBPMStripline &denom);
   void    Scale(Double_t factor);
 
+  using MQwHistograms::operator=;
+  using VQwDataElement::operator=;
+  using VQwDataElement::operator+=;
+  using VQwDataElement::operator-=;
   VQwBPM& operator=  (const VQwBPM &value);
   VQwBPM& operator+= (const VQwBPM &value);
   VQwBPM& operator-= (const VQwBPM &value);

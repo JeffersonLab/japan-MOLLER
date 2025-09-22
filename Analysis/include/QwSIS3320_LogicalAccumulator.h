@@ -32,6 +32,10 @@ public:
   { };
   virtual ~QwSIS3320_LogicalAccumulator() { };
 
+  // FIXME (wdconinc) explicit assignment operator needed
+  using MQwHistograms::operator=;
+  using VQwDataElement::operator=;
+
   void AddAccumulatorReference( QwSIS3320_Accumulator *accum, Double_t weight);
 
   void  ProcessEvent();

@@ -35,6 +35,7 @@ class QwAlarmHandler:public VQwDataHandler, public MQwDataHandlerCloneable<QwAla
     /// \brief Connect to Channels (event only)
     //Int_t ConnectChannels(QwSubsystemArrayParity& event);
     /// \brief Connect to Channels (asymmetry/difference only)
+    using VQwDataHandler::ConnectChannels;
     Int_t ConnectChannels(
         QwSubsystemArrayParity& yield,
         QwSubsystemArrayParity& asym,

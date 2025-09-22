@@ -81,6 +81,8 @@ public:
   { }
   virtual ~VQwScaler_Channel() { };
 
+  using VQwDataElement::CopyFrom;
+  using VQwHardwareChannel::CopyFrom;
   void CopyFrom(const VQwScaler_Channel& value){
     VQwHardwareChannel::CopyFrom(value);
     fValue_Raw_Old = value.fValue_Raw_Old;
@@ -138,13 +140,22 @@ public:
   Double_t GetValueM2(size_t element) const    { return fValueM2; };
   Double_t GetValueError(size_t element) const { return fValueError; };
 
-  VQwScaler_Channel& operator=  (const VQwScaler_Channel &value);
+  using MQwHistograms::operator=;
+  using VQwDataElement::operator=;
+  using VQwHardwareChannel::operator=;
+  VQwScaler_Channel& operator=(const VQwScaler_Channel &value);
+
   void AssignScaledValue(const VQwScaler_Channel &value, Double_t scale);
   void AssignValueFrom(const VQwDataElement* valueptr);
   void AddValueFrom(const VQwHardwareChannel* valueptr);
   void SubtractValueFrom(const VQwHardwareChannel* valueptr);
   void MultiplyBy(const VQwHardwareChannel* valueptr);
   void DivideBy(const VQwHardwareChannel* valueptr);
+
+  using VQwHardwareChannel::operator+=;
+  using VQwHardwareChannel::operator-=;
+  using VQwHardwareChannel::operator*=;
+  using VQwHardwareChannel::operator/=;
 
   //  VQwHardwareChannel& operator=  (const VQwHardwareChannel &data_value);
   VQwScaler_Channel& operator+= (const VQwScaler_Channel &value);
@@ -156,6 +167,12 @@ public:
   VQwHardwareChannel& operator*=(const VQwHardwareChannel* input);
   VQwHardwareChannel& operator/=(const VQwHardwareChannel* input);
 
+  using VQwDataElement::Sum;
+  using VQwDataElement::Difference;
+  using VQwDataElement::Ratio;
+  using VQwHardwareChannel::Sum;
+  using VQwHardwareChannel::Difference;
+  using VQwHardwareChannel::Ratio;
   void Sum(VQwScaler_Channel &value1, VQwScaler_Channel &value2);
   void Difference(VQwScaler_Channel &value1, VQwScaler_Channel &value2);
   void Ratio(const VQwScaler_Channel &numer, const VQwScaler_Channel &denom);
@@ -169,6 +186,7 @@ public:
 
   Bool_t ApplySingleEventCuts();//check values read from modules are at desired level
 
+  using VQwHardwareChannel::CheckForBurpFail;
   Bool_t CheckForBurpFail(const VQwDataElement *ev_error){return kFALSE;};
 
   void IncrementErrorCounters();
@@ -255,9 +273,13 @@ class QwScaler_Channel: public VQwScaler_Channel
   QwScaler_Channel(const QwScaler_Channel& source, VQwDataElement::EDataToSave datatosave)
     : VQwScaler_Channel(source,datatosave) { };
 
-  using VQwScaler_Channel::CopyFrom;
   using VQwHardwareChannel::Clone;
   VQwHardwareChannel* Clone(VQwDataElement::EDataToSave datatosave) const;
+
+  using MQwHistograms::operator=;
+  using VQwDataElement::operator=;
+  using VQwHardwareChannel::operator=;
+  using VQwScaler_Channel::operator=;
 
   public:
 

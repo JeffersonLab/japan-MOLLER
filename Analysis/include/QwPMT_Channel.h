@@ -62,6 +62,8 @@ class QwPMT_Channel: public VQwDataElement {
 
   void  ProcessEvent();
 
+  using MQwHistograms::operator=;
+  using VQwDataElement::operator=;
   QwPMT_Channel& operator=  (const QwPMT_Channel &value);
 
   void  ConstructHistograms(TDirectory *folder, TString &prefix);

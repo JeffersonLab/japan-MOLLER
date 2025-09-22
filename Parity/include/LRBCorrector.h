@@ -28,6 +28,7 @@ class LRBCorrector : public VQwDataHandler, public MQwDataHandlerCloneable<LRBCo
 
     Int_t LoadChannelMap(const std::string& mapfile);
 
+    using VQwDataHandler::ConnectChannels;
     Int_t ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff);
     
     void ProcessData();
