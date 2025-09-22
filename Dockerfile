@@ -16,7 +16,7 @@ RUN dnf update -y  && \
     openssl-devel libX11-devel libXt-devel libXpm-devel \
     boost-devel mariadb-server mariadb-connector-c-devel \
     python3 python3-pip tbb-devel libuv-devel giflib-devel root root-python3 root-mathcore root-montecarlo-eg \
-    root-mathmore root-gui root-hist root-physics root-genvector && \
+    root-mathmore root-gui root-hist root-physics root-genvector xrootd-client && \
     dnf clean all && rm -rf /var/cache/yum/*
 
 ENV JAPAN_MOLLER_HOME=/opt/japan-moller
