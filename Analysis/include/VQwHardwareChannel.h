@@ -140,8 +140,10 @@ public:
 //   virtual void AccumulateRunningSum(const VQwHardwareChannel *value) = 0;
 
   /// Arithmetic assignment operator:  Should only copy event-based data
-  virtual VQwHardwareChannel& operator=(const VQwHardwareChannel& value) {
-    VQwDataElement::operator=(value);
+  VQwHardwareChannel& operator=(const VQwHardwareChannel& value) {
+    if (this != &value) {
+      VQwDataElement::operator=(value);
+    }
     return *this;
   }
   void AssignScaledValue(const VQwHardwareChannel &value, Double_t scale){

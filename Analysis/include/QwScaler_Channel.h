@@ -146,7 +146,6 @@ public:
   void MultiplyBy(const VQwHardwareChannel* valueptr);
   void DivideBy(const VQwHardwareChannel* valueptr);
 
-  //  VQwHardwareChannel& operator=  (const VQwHardwareChannel &data_value);
   VQwScaler_Channel& operator+= (const VQwScaler_Channel &value);
   VQwScaler_Channel& operator-= (const VQwScaler_Channel &value);
   VQwScaler_Channel& operator*= (const VQwScaler_Channel &value);

@@ -140,7 +140,6 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
 
 
   QwMollerADC_Channel& operator=  (const QwMollerADC_Channel &value);
-  //  VQwHardwareChannel& operator=  (const VQwHardwareChannel &value);
   void AssignScaledValue(const QwMollerADC_Channel &value, Double_t scale);
   void AssignValueFrom(const VQwDataElement* valueptr);
   void AddValueFrom(const VQwHardwareChannel* valueptr);
