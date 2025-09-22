@@ -1,0 +1,194 @@
+---
+name: Compare Artifacts with Target Branch
+
+# This workflow implements automatic comparison of prompt summary artifacts
+# between the current PR and the target branch (main). It generates summary
+# files using the same process as build-lcg-cvmfs.yml, downloads corresponding
+# artifacts from the target branch, and compares them while ignoring timestamp
+# differences. The workflow fails if there are meaningful differences beyond
+# timestamps, helping catch unintended changes in analysis output.
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Analysis/**'
+      - 'Parity/**'
+      - 'CMakeLists.txt'
+      - 'cmake/**'
+      - 'SetupFiles/**'
+      - 'Dockerfile'
+      - '.github/workflows/compare-artifacts.yml'
+      - '.github/workflows/build-lcg-cvmfs.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  generate-current:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Use the same matrix as build-lcg-cvmfs.yml for consistency
+          - release: "LCG_106"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc13"
+            opt: "opt"
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "clang16"
+            opt: "opt"
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc14"
+            opt: "opt"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cvmfs-contrib/github-action-cvmfs@v3
+        with:
+          cvmfs_repositories: 'sft.cern.ch,geant4.cern.ch'
+      - name: Create qwparity.conf symlink
+        run: ln -sf Parity/prminput/qwparity_simple.conf qwparity.conf
+      - uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::Configuration"
+            # Set BOOST_INC_DIR and BOOST_LIB_DIR to point to
+            # LCG-provided Boost installation
+            LCG_PATH="/cvmfs/sft.cern.ch/lcg/views/${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}"
+            export BOOST_INC_DIR="${LCG_PATH}/include"
+            export BOOST_LIB_DIR="${LCG_PATH}/lib"
+
+            # Generate setup scripts
+            chmod +x SetupFiles/make_SET_ME_UP
+            SetupFiles/make_SET_ME_UP
+            echo "::endgroup::"
+
+            echo "::group::Compilation"
+            # Build the project
+            cmake -Bbuild -S.
+            cmake --build build -j$(nproc)
+            echo "::endgroup::"
+
+            echo "::group::Mock data generation"
+            # Run the mock data generator and analysis as described in README
+            source SetupFiles/SET_ME_UP.bash
+            
+            # Generate mock data
+            build/qwmockdatagenerator -r 4 -e 1:20000 --config qwparity_simple.conf --detectors mock_newdets.map --data .
+            echo "::endgroup::"
+            
+            echo "::group::Mock data analysis"
+            # Analyze the generated mock data
+            build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary
+            echo "::endgroup::"
+
+      - name: Upload current prompt summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: current-prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: |
+            summary_*.txt
+          retention-days: 1
+          if-no-files-found: error
+
+  compare-artifacts:
+    runs-on: ubuntu-latest
+    needs: generate-current
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - release: "LCG_106"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc13"
+            opt: "opt"
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "clang16"
+            opt: "opt"
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc14"
+            opt: "opt"
+    steps:
+      - name: Download current artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: current-prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: ./current
+
+      - name: Download target branch artifacts
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: build-lcg-cvmfs.yml
+          branch: ${{ github.event.pull_request.base.ref }}
+          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: ./target
+          if_no_artifact_found: warn
+
+      - name: Compare artifacts
+        run: |
+          echo "Comparing artifacts for ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}"
+          
+          # Check if target artifacts exist
+          if [ ! -d "./target" ] || [ -z "$(ls -A ./target)" ]; then
+            echo "⚠️  No target branch artifacts found. This may be the first run or target branch hasn't been built recently."
+            echo "Skipping comparison for this configuration."
+            exit 0
+          fi
+          
+          # Find summary files in both directories
+          current_files=$(find ./current -name "summary_*.txt" | sort)
+          target_files=$(find ./target -name "summary_*.txt" | sort)
+          
+          echo "Current files found:"
+          echo "$current_files"
+          echo "Target files found:"
+          echo "$target_files"
+          
+          # Compare each file
+          comparison_failed=false
+          for current_file in $current_files; do
+            filename=$(basename "$current_file")
+            target_file="./target/$filename"
+            
+            if [ ! -f "$target_file" ]; then
+              echo "❌ Target file $filename not found"
+              comparison_failed=true
+              continue
+            fi
+            
+            echo "Comparing $filename..."
+            
+            # Skip lines containing timestamps and metadata that can vary
+            if diff -q <(grep -v "Start Time:\|End Time:" "$current_file") <(grep -v "Start Time:\|End Time:" "$target_file") > /dev/null; then
+              echo "✅ $filename: No meaningful differences found"
+            else
+              echo "❌ $filename: Differences found beyond timestamps"
+              echo "--- Expected (target branch) ---"
+              grep -v "Start Time:\|End Time:" "$target_file" | head -20
+              echo "--- Actual (current PR) ---"
+              grep -v "Start Time:\|End Time:" "$current_file" | head -20
+              echo "--- Detailed diff ---"
+              diff -u <(grep -v "Start Time:\|End Time:" "$target_file") <(grep -v "Start Time:\|End Time:" "$current_file") | head -50
+              comparison_failed=true
+            fi
+          done
+          
+          if [ "$comparison_failed" = "true" ]; then
+            echo "❌ Artifact comparison failed. Changes detected in prompt summary beyond timestamps."
+            exit 1
+          else
+            echo "✅ All artifacts match expected results (ignoring timestamps)."
+          fi
