@@ -64,6 +64,7 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   /// Constructor with name
   VQwSubsystem(const TString& name)
   : MQwHistograms(),
+    MQwPublishable_child<QwSubsystemArray, VQwSubsystem>(),
     fSystemName(name), fEventTypeMask(0x0), fIsDataLoaded(kFALSE),
     fCurrentROC_ID(-1), fCurrentBank_ID(-1) {
     ClearAllBankRegistrations();
@@ -71,6 +72,7 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   /// Copy constructor by object
   VQwSubsystem(const VQwSubsystem& orig)
   : MQwHistograms(orig),
+    MQwPublishable_child<QwSubsystemArray, VQwSubsystem>(),
     fPublishList(orig.fPublishList),
     fROC_IDs(orig.fROC_IDs),
     fBank_IDs(orig.fBank_IDs),
