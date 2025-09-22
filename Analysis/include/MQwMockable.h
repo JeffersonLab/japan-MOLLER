@@ -8,6 +8,9 @@
 #ifndef __MQWMOCKABLE__
 #define __MQWMOCKABLE__
 
+// System headers
+#include <valarray>
+
 // Boost math library for random number generation
 #include "boost/random.hpp"
 
@@ -62,6 +65,9 @@ public:
   /// external Random Variable.
   Double_t GetRandomValue();
 
+  /// Return a valarray of random values of the specified length
+  std::valarray<Double_t> GetRandomValue(size_t length);
+
   /// Internally generate random event data
   virtual void  RandomizeEventData(int helicity = 0, double time = 0.0) = 0;
 
@@ -80,6 +86,11 @@ public:
   void  SetExternalRandomVariable(Double_t random_variable) {
     fUseExternalRandomVariable = true;
     fExternalRandomVariable = random_variable;
+  };
+  /// Set the externally provided random variable array
+  void  SetExternalRandomVariable(const std::valarray<Double_t>& random_variable_array) {
+    fUseExternalRandomVariable = true;
+    fExternalRandomVariableArray = random_variable_array;
   };
 
   // Default the mock data to be calculated with a zero-mean.
@@ -100,6 +111,8 @@ public:
   bool fUseExternalRandomVariable;
   /// Externally provided normal random variable
   double  fExternalRandomVariable;
+  /// Externally provided normal random variable array
+  std::valarray<Double_t> fExternalRandomVariableArray;
 
   bool fCalcMockDataAsDiff;
 
