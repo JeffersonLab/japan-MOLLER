@@ -10,6 +10,7 @@
 
 // System headers
 #include <fstream>
+#include <regex>
 
 // Qweak headers
 #include "QwColor.h"
