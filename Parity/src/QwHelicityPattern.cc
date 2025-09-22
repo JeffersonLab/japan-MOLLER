@@ -190,7 +190,8 @@ QwHelicityPattern::QwHelicityPattern(QwSubsystemArrayParity &event, const TStrin
 
 /*****************************************************************/
 QwHelicityPattern::QwHelicityPattern(const QwHelicityPattern &source)
-: fYield(source.fYield),
+: fPatternSize(source.fPatternSize),
+  fYield(source.fYield),
   fDifference(source.fDifference),
   fAsymmetry(source.fAsymmetry),
   fEnableAlternateAsym(source.fEnableAlternateAsym),
@@ -204,7 +205,6 @@ QwHelicityPattern::QwHelicityPattern(const QwHelicityPattern &source)
   fPrintIndexFile(source.fPrintIndexFile),
   fBurstMinGoodPatterns(source.fBurstMinGoodPatterns),
   fGoodPatterns(source.fGoodPatterns),
-  fPatternSize(source.fPatternSize),
   fBurstCounter(source.fBurstCounter),
   fEnableBurstSum(source.fEnableBurstSum),
   fPrintBurstSum(source.fPrintBurstSum),
