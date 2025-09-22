@@ -102,7 +102,7 @@ class VQwDataElement: public MQwHistograms {
   virtual void LoadChannelParameters(QwParameterFile &paramfile){};
 
   virtual void LoadMockDataParameters(QwParameterFile &paramfile) {
-  std::cerr << "LoadMockDataParameters is not defined!" << std::endl;
+    std::cerr << "LoadMockDataParameters is not defined!" << std::endl;
   };
 
   /*! \brief Clear the event data in this element */
@@ -132,14 +132,12 @@ class VQwDataElement: public MQwHistograms {
   /*! \brief Sum operator */
   virtual void Sum(const VQwDataElement &value1, const VQwDataElement &value2)
     { 
-      //std::cerr << "Sum not defined!" << std::endl; 
       *this =  value1;
       *this += value2;
     }
   /*! \brief Difference operator */
   virtual void Difference(const VQwDataElement &value1, const VQwDataElement &value2)
     { 
-      //std::cerr << "Difference not defined!" << std::endl; 
       *this =  value1;
       *this -= value2;
     }

@@ -626,17 +626,6 @@ VQwHardwareChannel& VQwScaler_Channel::operator/=(const VQwHardwareChannel *sour
   return *this;
 }
 
-void VQwScaler_Channel::Sum(VQwScaler_Channel &value1, VQwScaler_Channel &value2)
-{
-  *this =  value1;
-  *this += value2;
-}
-
-void VQwScaler_Channel::Difference(VQwScaler_Channel &value1, VQwScaler_Channel &value2){
-  *this =  value1;
-  *this -= value2;
-}
-
 void VQwScaler_Channel::Ratio(const VQwScaler_Channel &numer, const VQwScaler_Channel &denom)
 {
   if (!IsNameEmpty()){

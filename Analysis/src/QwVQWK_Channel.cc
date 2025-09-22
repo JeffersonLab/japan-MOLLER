@@ -1301,19 +1301,6 @@ VQwHardwareChannel& QwVQWK_Channel::operator/=(const VQwHardwareChannel *source)
   return *this;
 }
 
-
-void QwVQWK_Channel::Sum(const QwVQWK_Channel &value1, const QwVQWK_Channel &value2)
-{
-  *this  = value1;
-  *this += value2;
-}
-
-void QwVQWK_Channel::Difference(const QwVQWK_Channel &value1, const QwVQWK_Channel &value2)
-{
-  *this  = value1;
-  *this -= value2;
-}
-
 void QwVQWK_Channel::Ratio(const QwVQWK_Channel &numer, const QwVQWK_Channel &denom)
 {
   if (!IsNameEmpty()) {

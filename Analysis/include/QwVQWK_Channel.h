@@ -143,8 +143,7 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   void  ProcessEvent();
 
 
-  QwVQWK_Channel& operator=  (const QwVQWK_Channel &value);
-  //  VQwHardwareChannel& operator=  (const VQwHardwareChannel &value);
+  QwVQWK_Channel& operator=(const QwVQWK_Channel &value);
   void AssignScaledValue(const QwVQWK_Channel &value, Double_t scale);
   void AssignValueFrom(const VQwDataElement* valueptr);
   void AddValueFrom(const VQwHardwareChannel* valueptr);
@@ -165,8 +164,6 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   const QwVQWK_Channel operator+ (const QwVQWK_Channel &value) const;
   const QwVQWK_Channel operator- (const QwVQWK_Channel &value) const;
   const QwVQWK_Channel operator* (const QwVQWK_Channel &value) const;
-  void Sum(const QwVQWK_Channel &value1, const QwVQWK_Channel &value2);
-  void Difference(const QwVQWK_Channel &value1, const QwVQWK_Channel &value2);
   void Ratio(const QwVQWK_Channel &numer, const QwVQWK_Channel &denom);
   void Product(const QwVQWK_Channel &value1, const QwVQWK_Channel &value2);
   void DivideBy(const QwVQWK_Channel& denom);

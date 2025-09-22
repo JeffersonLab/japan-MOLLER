@@ -1365,20 +1365,6 @@ VQwHardwareChannel& QwMollerADC_Channel::operator/=(const VQwHardwareChannel *so
   }
   return *this;
 }
-
-
-void QwMollerADC_Channel::Sum(const QwMollerADC_Channel &value1, const QwMollerADC_Channel &value2)
-{
-  *this  = value1;
-  *this += value2;
-}
-
-void QwMollerADC_Channel::Difference(const QwMollerADC_Channel &value1, const QwMollerADC_Channel &value2)
-{
-  *this  = value1;
-  *this -= value2;
-}
-
 void QwMollerADC_Channel::Ratio(const QwMollerADC_Channel &numer, const QwMollerADC_Channel &denom)
 {
   if (!IsNameEmpty()) {

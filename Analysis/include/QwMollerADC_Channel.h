@@ -140,7 +140,6 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
 
 
   QwMollerADC_Channel& operator=  (const QwMollerADC_Channel &value);
-  //  VQwHardwareChannel& operator=  (const VQwHardwareChannel &value);
   void AssignScaledValue(const QwMollerADC_Channel &value, Double_t scale);
   void AssignValueFrom(const VQwDataElement* valueptr);
   void AddValueFrom(const VQwHardwareChannel* valueptr);
@@ -161,8 +160,6 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   const QwMollerADC_Channel operator+ (const QwMollerADC_Channel &value) const;
   const QwMollerADC_Channel operator- (const QwMollerADC_Channel &value) const;
   const QwMollerADC_Channel operator* (const QwMollerADC_Channel &value) const;
-  void Sum(const QwMollerADC_Channel &value1, const QwMollerADC_Channel &value2);
-  void Difference(const QwMollerADC_Channel &value1, const QwMollerADC_Channel &value2);
   void Ratio(const QwMollerADC_Channel &numer, const QwMollerADC_Channel &denom);
   void Product(const QwMollerADC_Channel &value1, const QwMollerADC_Channel &value2);
   void DivideBy(const QwMollerADC_Channel& denom);

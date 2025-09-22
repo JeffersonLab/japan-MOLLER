@@ -146,7 +146,6 @@ public:
   void MultiplyBy(const VQwHardwareChannel* valueptr);
   void DivideBy(const VQwHardwareChannel* valueptr);
 
-  //  VQwHardwareChannel& operator=  (const VQwHardwareChannel &data_value);
   VQwScaler_Channel& operator+= (const VQwScaler_Channel &value);
   VQwScaler_Channel& operator-= (const VQwScaler_Channel &value);
   VQwScaler_Channel& operator*= (const VQwScaler_Channel &value);
@@ -156,8 +155,6 @@ public:
   VQwHardwareChannel& operator*=(const VQwHardwareChannel* input);
   VQwHardwareChannel& operator/=(const VQwHardwareChannel* input);
 
-  void Sum(VQwScaler_Channel &value1, VQwScaler_Channel &value2);
-  void Difference(VQwScaler_Channel &value1, VQwScaler_Channel &value2);
   void Ratio(const VQwScaler_Channel &numer, const VQwScaler_Channel &denom);
   void Product(VQwScaler_Channel &numer, VQwScaler_Channel &denom);
   void AddChannelOffset(Double_t Offset);
