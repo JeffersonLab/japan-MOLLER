@@ -682,6 +682,82 @@ void QwSubsystemArray::FillTreeVector(std::vector<Double_t>& values) const
   }
 }
 
+#ifdef HAS_RNTUPLE_SUPPORT
+/**
+ * Construct the RNTuple fields and ve
+ * @param prefix Prefix
+ * @param values Vector of values  
+ * @param fieldPtrs Vector of shared field pointers
+ */
+void QwSubsystemArray::ConstructNTupleAndVector(
+    std::unique_ptr<ROOT::RNTupleModel>& model,
+    TString& prefix,
+    std::vector<Double_t>& values,
+    std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  fTreeArrayIndex = values.size();
+
+  // Debug output for eventsum
+  // Reserve space for event metadata
+  values.push_back(0.0);
+  values.push_back(0.0);
+  values.push_back(0.0);
+  values.push_back(0.0);
+  values.push_back(0.0);
+  
+  // Add corresponding field pointers and create fields
+  if (prefix == "" || prefix.Index("yield_") == 0) {
+    auto eventNumField = model->MakeField<Double_t>("CodaEventNumber");
+    auto eventTypeField = model->MakeField<Double_t>("CodaEventType");
+    auto cleanDataField = model->MakeField<Double_t>("Coda_CleanData");
+    auto scanData1Field = model->MakeField<Double_t>("Coda_ScanData1");
+    auto scanData2Field = model->MakeField<Double_t>("Coda_ScanData2");
+    
+    fieldPtrs.push_back(eventNumField);
+    fieldPtrs.push_back(eventTypeField);
+    fieldPtrs.push_back(cleanDataField);
+    fieldPtrs.push_back(scanData1Field);
+    fieldPtrs.push_back(scanData2Field);
+  } else {
+    // Still reserve space but don't create duplicate fields
+    fieldPtrs.push_back(nullptr);
+    fieldPtrs.push_back(nullptr);
+    fieldPtrs.push_back(nullptr);
+    fieldPtrs.push_back(nullptr);
+    fieldPtrs.push_back(nullptr);
+  }
+  
+  // Process subsystems
+  for (iterator subsys = begin(); subsys != end(); ++subsys) {
+    VQwSubsystem* subsys_ptr = dynamic_cast<VQwSubsystem*>(subsys->get());
+    subsys_ptr->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+  }
+}
+#endif // HAS_RNTUPLE_SUPPORT
+
+#ifdef HAS_RNTUPLE_SUPPORT
+/**
+ * Fill the RNTuple vector
+ * @param values Vector of values
+ */
+void QwSubsystemArray::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  // Fill the event number and event type (same as TTree)
+  size_t index = fTreeArrayIndex;
+  values[index++] = this->GetCodaEventNumber();
+  values[index++] = this->GetCodaEventType();
+  values[index++] = this->fCleanParameter[0];
+  values[index++] = this->fCleanParameter[1];
+  values[index++] = this->fCleanParameter[2];
+
+  // Fill the subsystem data
+  for (const_iterator subsys = begin(); subsys != end(); ++subsys) {
+    VQwSubsystem* subsys_ptr = dynamic_cast<VQwSubsystem*>(subsys->get());
+    subsys_ptr->FillNTupleVector(values);
+  }
+}
+#endif // HAS_RNTUPLE_SUPPORT
+
 
 
 

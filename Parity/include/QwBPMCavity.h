@@ -13,6 +13,9 @@
 
 // ROOT headres
 #include <TTree.h>
+#ifdef HAS_RNTUPLE_SUPPORT
+#include <ROOT/RNTupleModel.hxx>
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "QwVQWK_Channel.h"
@@ -133,6 +136,10 @@ class QwBPMCavity : public VQwBPM {
   void    FillTreeVector(std::vector<Double_t> &values) const;
   void    ConstructBranch(TTree *tree, TString &prefix);
   void    ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
+#ifdef HAS_RNTUPLE_SUPPORT
+  void    ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+  void    FillNTupleVector(std::vector<Double_t>& values) const;
+#endif
 
 
   std::vector<QwDBInterface> GetDBEntry();

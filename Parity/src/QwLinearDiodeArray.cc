@@ -10,6 +10,12 @@
 // System headers
 #include <stdexcept>
 
+// ROOT headers for RNTuple support
+#ifdef HAS_RNTUPLE_SUPPORT
+#include <ROOT/RNTupleModel.hxx>
+#include <ROOT/RNTupleWriter.hxx>
+#endif // HAS_RNTUPLE_SUPPORT
+
 // Qweak headers
 #include "QwParameterFile.h"
 #ifdef __USE_DATABASE__
@@ -724,6 +730,51 @@ void  QwLinearDiodeArray::FillTreeVector(std::vector<Double_t> &values) const
   }
   return;
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void  QwLinearDiodeArray::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip constructing.
+  }
+  else {
+    TString thisprefix=prefix;
+    if(prefix.Contains("asym_"))
+      thisprefix.ReplaceAll("asym_","diff_");
+
+    SetRootSaveStatus(prefix);
+
+    fEffectiveCharge.ConstructNTupleAndVector(model,prefix,values,fieldPtrs);
+    size_t i = 0;
+    if(bFullSave) {
+      for(i=0;i<8;i++) fPhotodiode[i].ConstructNTupleAndVector(model,thisprefix,values,fieldPtrs);
+    }
+    for(i=kXAxis;i<kNumAxes;i++) {
+      fRelPos[i].ConstructNTupleAndVector(model,thisprefix,values,fieldPtrs);
+    }
+
+  }
+  return;
+}
+
+void  QwLinearDiodeArray::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (GetElementName()=="") {
+    //  This channel is not used, so skip filling.
+  }
+  else {
+    fEffectiveCharge.FillNTupleVector(values);
+    size_t i = 0;
+    if(bFullSave) {
+      for(i=0;i<8;i++) fPhotodiode[i].FillNTupleVector(values);
+    }
+    for(i=kXAxis;i<kNumAxes;i++){
+      fRelPos[i].FillNTupleVector(values);
+    }
+  }
+  return;
+}
+#endif
 
 
 void QwLinearDiodeArray::SetEventCutMode(Int_t bcuts)

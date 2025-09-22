@@ -19,6 +19,11 @@
 #include "TDirectory.h"
 #include "TTree.h"
 
+// RNTuple headers
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
+
 // Qweak headers
 #include "MQwHistograms.h"
 #include "MQwPublishable.h"
@@ -235,6 +240,18 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   virtual void ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file) = 0;
   /// \brief Fill the tree vector
   virtual void FillTreeVector(std::vector<Double_t>& values) const = 0;
+  
+#ifdef HAS_RNTUPLE_SUPPORT
+  /// \brief Construct the RNTuple fields and vector
+  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
+  /// \brief Construct the RNTuple fields and vector  
+  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) {
+    TString tmpstr("");
+    ConstructNTupleAndVector(model, tmpstr, values, fieldPtrs);
+  };
+  /// \brief Fill the RNTuple vector
+  virtual void FillNTupleVector(std::vector<Double_t>& values) const = 0;
+#endif // HAS_RNTUPLE_SUPPORT
   // @}
 
 

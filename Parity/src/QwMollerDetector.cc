@@ -16,6 +16,12 @@
 #include <stdexcept>
 #include <iomanip>
 
+// ROOT headers  
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
+
 // Qweak headers
 #include "QwLog.h"
 #include "QwParameterFile.h"
@@ -230,6 +236,26 @@ void QwMollerDetector::FillTreeVector(std::vector<Double_t> &values) const {
     }
   }
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwMollerDetector::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
+    for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
+      fSTR7200_Channel[i][j].ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+    }
+  }
+}
+
+void QwMollerDetector::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
+    for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
+      fSTR7200_Channel[i][j].FillNTupleVector(values);
+    }
+  }
+}
+#endif // HAS_RNTUPLE_SUPPORT
 
 VQwSubsystem&  QwMollerDetector::operator=(VQwSubsystem *value){
   // std::cout << "QwMollerDetector assignment (operator=)" << std::endl;

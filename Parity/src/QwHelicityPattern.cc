@@ -10,6 +10,12 @@
 // System headers
 #include <stdexcept>
 
+// ROOT headers
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
+
 // Qweak headers
 #include "QwLog.h"
 #include "QwHistogramHelper.h"
@@ -846,6 +852,7 @@ void  QwHelicityPattern::FillHistograms()
       fAsymmetry1.FillHistograms();
       fAsymmetry2.FillHistograms();
     }
+  } else {
   }
 }
 
@@ -927,6 +934,46 @@ void QwHelicityPattern::FillTreeVector(std::vector<Double_t> &values) const
     }
   }
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwHelicityPattern::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length())+"BurstCounter";
+  // Note: fBurstCounter is a Short_t, but we're only creating Double_t fields for now
+  // This maintains compatibility with the existing TTree structure
+  
+  TString newprefix = "yield_" + prefix;
+  fYield.ConstructNTupleAndVector(model, newprefix, values, fieldPtrs);
+  newprefix = "asym_" + prefix;
+  fAsymmetry.ConstructNTupleAndVector(model, newprefix, values, fieldPtrs);
+
+  if (fEnableDifference) {
+    newprefix = "diff_" + prefix;
+    fDifference.ConstructNTupleAndVector(model, newprefix, values, fieldPtrs);
+  }
+  if (fEnableAlternateAsym) {
+    newprefix = "asym1_" + prefix;
+    fAsymmetry1.ConstructNTupleAndVector(model, newprefix, values, fieldPtrs);
+    newprefix = "asym2_" + prefix;
+    fAsymmetry2.ConstructNTupleAndVector(model, newprefix, values, fieldPtrs);
+  }
+}
+
+void QwHelicityPattern::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (fPatternIsGood) {
+    fYield.FillNTupleVector(values);
+    fAsymmetry.FillNTupleVector(values);
+    if (fEnableDifference) {
+      fDifference.FillNTupleVector(values);
+    }
+    if (fEnableAlternateAsym) {
+      fAsymmetry1.FillNTupleVector(values);
+      fAsymmetry2.FillNTupleVector(values);
+    }
+  }
+}
+#endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
 void QwHelicityPattern::FillDB(QwParityDB *db)

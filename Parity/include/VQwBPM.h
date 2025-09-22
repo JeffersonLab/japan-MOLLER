@@ -16,6 +16,11 @@
 #include <TTree.h>
 #include <TMath.h>
 
+// RNTuple headers
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
+
 // Qweak headers
 #include "VQwDataElement.h"
 #include "VQwHardwareChannel.h"
@@ -174,6 +179,11 @@ public:
   virtual void ConstructBranch(TTree *tree, TString &prefix,
       QwParameterFile& modulelist) = 0;
   virtual void FillTreeVector(std::vector<Double_t> &values) const = 0;
+
+#ifdef HAS_RNTUPLE_SUPPORT
+  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
+  virtual void FillNTupleVector(std::vector<Double_t>& values) const = 0;
+#endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
   virtual std::vector<QwDBInterface> GetDBEntry() = 0;
