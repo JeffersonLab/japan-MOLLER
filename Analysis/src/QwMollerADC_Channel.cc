@@ -7,6 +7,7 @@
 
 // System headers
 #include <stdexcept>
+#include <algorithm>
 
 // Qweak headers
 #include "QwLog.h"
@@ -172,6 +173,16 @@ void QwMollerADC_Channel::InitializeChannel(TString name, TString datatosave)
 
   fBlocksPerEvent      = 4;
 
+  // Initialize valarrays with proper sizes
+  fBlock_raw.resize(fBlocksPerEvent);
+  fBlock.resize(fBlocksPerEvent);
+  fBlockM2.resize(fBlocksPerEvent);
+  fBlockError.resize(fBlocksPerEvent);
+  fBlockSumSq_raw.resize(fBlocksPerEvent + 1);  // blocks + 1 sum
+  fBlock_min.resize(fBlocksPerEvent + 1);
+  fBlock_max.resize(fBlocksPerEvent + 1);
+  fBlock_numSamples.resize(fBlocksPerEvent + 1);
+
   fTreeArrayIndex      = 0;
   fTreeArrayNumEntries = 0;
 
@@ -246,15 +257,15 @@ void QwMollerADC_Channel::LoadChannelParameters(QwParameterFile &paramfile){
 
 void QwMollerADC_Channel::ClearEventData()
 {
-  for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-    fBlock_raw[i] = 0;
-    fBlockSumSq_raw[i] = 0;
-    fBlock_min[i] = 0;
-    fBlock_max[i] = 0;
-    fBlock[i] = 0.0;
-    fBlockM2[i] = 0.0;
-    fBlockError[i] = 0.0;
-  }
+  // Clear all valarrays in one operation
+  fBlock_raw = 0;
+  fBlock = 0.0;
+  fBlockM2 = 0.0;
+  fBlockError = 0.0;
+  fBlockSumSq_raw = 0;
+  fBlock_min = 0;
+  fBlock_max = 0;
+  
   fHardwareBlockSum_raw = 0;
   fSoftwareBlockSum_raw = 0;
   fHardwareBlockSum   = 0.0;
@@ -285,25 +296,29 @@ void QwMollerADC_Channel::RandomizeEventData(int helicity, double time)
   // Calculate signal
   fHardwareBlockSum = 0.0;
   fHardwareBlockSumM2 = 0.0; // second moment is zero for single events
-  fBlock_max[4] = kMinInt;
-  fBlock_min[4] = kMaxInt;
+  fBlock_max[fBlocksPerEvent] = kMinInt;
+  fBlock_min[fBlocksPerEvent] = kMaxInt;
 
-  for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-    double tmpvar = GetRandomValue();
-
-    fBlock[i] = fMockGaussianMean + drift;
-
-    if (fCalcMockDataAsDiff) {
-      fBlock[i] += helicity*fMockAsymmetry;
-    } else {
-      fBlock[i] *= 1.0 + helicity*fMockAsymmetry;
-    }
-    fBlock[i] += fMockGaussianSigma*tmpvar*sqrt(fBlocksPerEvent);
-    fBlockM2[i] = 0.0; // second moment is zero for single events
-    fHardwareBlockSum += fBlock[i];
-
+  // Generate all random values at once using valarray
+  std::valarray<Double_t> randomValues = GetRandomValue(fBlocksPerEvent);
+  
+  // Use valarray operations to set all blocks at once
+  fBlock = fMockGaussianMean + drift; // Set all elements to base value
+  
+  if (fCalcMockDataAsDiff) {
+    fBlock += helicity*fMockAsymmetry; // Add asymmetry to all elements
+  } else {
+    fBlock *= 1.0 + helicity*fMockAsymmetry; // Scale all elements by asymmetry
   }
-  fHardwareBlockSum /= fBlocksPerEvent;
+  
+  // Add random noise to all elements
+  fBlock += fMockGaussianSigma * randomValues * sqrt(fBlocksPerEvent);
+  
+  // Clear second moments for all elements (single events)
+  fBlockM2 = 0.0;
+  
+  // Calculate hardware sum using valarray sum() function
+  fHardwareBlockSum = fBlock.sum() / fBlocksPerEvent;
   fSequenceNumber = 0;
   fNumberOfSamples = fNumberOfSamples_map;
   //  SetEventData(block);
@@ -315,15 +330,18 @@ void QwMollerADC_Channel::SmearByResolution(double resolution){
 
   fHardwareBlockSum   = 0.0;
   fHardwareBlockSumM2 = 0.0; // second moment is zero for single events
-  for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-
-    fBlock[i] += resolution*sqrt(fBlocksPerEvent) * GetRandomValue();
- 
-    fBlockM2[i] = 0.0; // second moment is zero for single events
-    fHardwareBlockSum += fBlock[i];
-  }
-  // std::cout << std::endl;
-  fHardwareBlockSum /= fBlocksPerEvent;
+  
+  // Generate all random values at once using valarray
+  std::valarray<Double_t> randomValues = GetRandomValue(fBlocksPerEvent);
+  
+  // Use valarray operations to add resolution smearing to all elements
+  fBlock += resolution*sqrt(fBlocksPerEvent) * randomValues;
+  
+  // Clear second moments for all elements (single events)
+  fBlockM2 = 0.0;
+  
+  // Calculate hardware sum using valarray sum() function
+  fHardwareBlockSum = fBlock.sum() / fBlocksPerEvent;
 
   fNumberOfSamples = fNumberOfSamples_map;
   // SetRawEventData();
@@ -397,9 +415,9 @@ void QwMollerADC_Channel::SetRawEventData(){
     fBlock_min[i] = (block - 3.0 * sigma) * double_t(fNumberOfSamples_map) / (fBlocksPerEvent * 1.0);
     fBlock_max[i] = (block + 3.0 * sigma) * double_t(fNumberOfSamples_map) / (fBlocksPerEvent * 1.0);
     
-    fBlockSumSq_raw[4] += fBlockSumSq_raw[i];
-    fBlock_min[4] = TMath::Min(fBlock_min[i],fBlock_min[4]);
-    fBlock_max[4] = TMath::Max(fBlock_max[i],fBlock_max[4]);
+    fBlockSumSq_raw[fBlocksPerEvent] += fBlockSumSq_raw[i];
+    fBlock_min[fBlocksPerEvent] = TMath::Min(fBlock_min[i],fBlock_min[fBlocksPerEvent]);
+    fBlock_max[fBlocksPerEvent] = TMath::Max(fBlock_max[i],fBlock_max[fBlocksPerEvent]);
     }
 
 
@@ -418,7 +436,7 @@ void QwMollerADC_Channel::EncodeEventData(std::vector<UInt_t> &buffer)
     //  Skip over this data.
   } else {
     //    localbuf[4] = 0;
-    for (Int_t i = 0; i < 4; i++) {
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
       localbuf[i*5] = fBlock_raw[i];
       localbuf[i*5+1] = fBlockSumSq_raw[i] & 0xffffffff;
       localbuf[i*5+2] = fBlockSumSq_raw[i] >> 32;
@@ -430,10 +448,10 @@ void QwMollerADC_Channel::EncodeEventData(std::vector<UInt_t> &buffer)
     // The following causes many rounding errors and skips due to the check
     // that fHardwareBlockSum_raw == fSoftwareBlockSum_raw in IsGoodEvent().
     localbuf[20] = fHardwareBlockSum_raw;
-    localbuf[21] = fBlockSumSq_raw[4] & 0xffffffff;
-    localbuf[22] = fBlockSumSq_raw[4] >> 32;
-    localbuf[23] = fBlock_min[4];
-    localbuf[24] = fBlock_max[4];
+    localbuf[21] = fBlockSumSq_raw[fBlocksPerEvent] & 0xffffffff;
+    localbuf[22] = fBlockSumSq_raw[fBlocksPerEvent] >> 32;
+    localbuf[23] = fBlock_min[fBlocksPerEvent];
+    localbuf[24] = fBlock_max[fBlocksPerEvent];
     localbuf[25] = (fNumberOfSamples << 16 & 0xFFFF0000)
                 | (fSequenceNumber  << 8  & 0x0000FF00);
 
@@ -501,10 +519,8 @@ void QwMollerADC_Channel::ProcessEvent()
   if (fNumberOfSamples == 0 && fHardwareBlockSum_raw == 0) {
     //  There isn't valid data for this channel.  Just flag it and
     //  move on.
-    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-      fBlock[i] = 0.0;
-      fBlockM2[i] = 0.0;
-    }
+    fBlock = 0.0;   // Use valarray assignment
+    fBlockM2 = 0.0; // Use valarray assignment
     fHardwareBlockSum = 0.0;
     fHardwareBlockSumM2 = 0.0;
     fErrorFlag |= kErrorFlag_sample;
@@ -515,18 +531,19 @@ void QwMollerADC_Channel::ProcessEvent()
               << " has fNumberOfSamples==0 but has valid data in the hardware sum.  "
               << "Flag this as an error."
               << QwLog::endl;
-    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-      fBlock[i] = 0.0;
-      fBlockM2[i] = 0.0;
-    }
+    fBlock = 0.0;   // Use valarray assignment
+    fBlockM2 = 0.0; // Use valarray assignment
     fHardwareBlockSum = 0.0;
     fHardwareBlockSumM2 = 0.0;
     fErrorFlag|=kErrorFlag_sample;
   } else {
-    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-      fBlock[i] = fCalibrationFactor * ( (1.0 * fBlock_raw[i] * fBlocksPerEvent / fNumberOfSamples) - fPedestal );
-      fBlockM2[i] = 0.0; // second moment is zero for single events
-    }
+    // Calculate calibrated values using valarray operations with explicit casting
+    // Create a lambda for type conversion and use apply
+    std::valarray<Double_t> temp_raw(fBlock_raw.size());
+    std::transform(std::begin(fBlock_raw), std::end(fBlock_raw), std::begin(temp_raw),
+                   [](Int_t val) { return static_cast<Double_t>(val); });
+    fBlock = fCalibrationFactor * ((temp_raw * static_cast<Double_t>(fBlocksPerEvent) / static_cast<Double_t>(fNumberOfSamples)) - fPedestal);
+    fBlockM2 = 0.0; // Use valarray assignment for second moments
     fHardwareBlockSum = fCalibrationFactor * ( (1.0 * fHardwareBlockSum_raw / fNumberOfSamples) - fPedestal );
     fHardwareBlockSumM2 = 0.0; // second moment is zero for single events
   }
@@ -733,7 +750,7 @@ void  QwMollerADC_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix
       values.push_back("block3_raw", 'I');
     }
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < fBlocksPerEvent; i++) {
       if (bBlock_raw) {
         values.push_back(Form("SumSq_%d", i), 'L');
         values.push_back(Form("RawMin_%d", i), 'I');
@@ -842,7 +859,7 @@ void  QwMollerADC_Channel::FillTreeVector(QwRootTreeBranchVector& values) const
         }
 
         if (bBlock_raw) {
-          for (int i = 0; i < 4; i++) {
+          for (int i = 0; i < fBlocksPerEvent; i++) {
             values.SetValue(index++, fBlockSumSq_raw[i]);
             values.SetValue(index++, fBlock_min[i]);
             values.SetValue(index++, fBlock_max[i]);
@@ -1080,10 +1097,10 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator= (const QwMollerADC_Channel &
 
   if (!IsNameEmpty()) {
     VQwHardwareChannel::operator=(value);
-    for (Int_t i=0; i<fBlocksPerEvent; i++){
-      this->fBlock[i]     = value.fBlock[i];
-      this->fBlockM2[i]   = value.fBlockM2[i];
-    }
+    // Use valarray assignment for bulk operations
+    fBlock = value.fBlock;
+    fBlockM2 = value.fBlockM2;
+    
     this->fHardwareBlockSum = value.fHardwareBlockSum;
     this->fHardwareBlockSumM2 = value.fHardwareBlockSumM2;
     this->fHardwareBlockSumError = value.fHardwareBlockSumError;
@@ -1091,12 +1108,10 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator= (const QwMollerADC_Channel &
     this->fSequenceNumber  = value.fSequenceNumber;
    
     if (this->fDataToSave == kRaw){
-      for (Int_t i=0; i<fBlocksPerEvent; i++){
-       this->fBlock_raw[i] = value.fBlock_raw[i];
-       this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
-       this->fBlock_min[i]     = value.fBlock_min[i];
-       this->fBlock_max[i]     = value.fBlock_max[i];
-      }
+      fBlock_raw = value.fBlock_raw;
+      fBlockSumSq_raw = value.fBlockSumSq_raw;
+      fBlock_min = value.fBlock_min;
+      fBlock_max = value.fBlock_max;
       this->fHardwareBlockSum_raw = value.fHardwareBlockSum_raw;
       this->fSoftwareBlockSum_raw = value.fSoftwareBlockSum_raw;
     }
@@ -1110,11 +1125,9 @@ void QwMollerADC_Channel::AssignScaledValue(const QwMollerADC_Channel &value,
   if(this == &value) return;
 
   if (!IsNameEmpty()) {
-    for (Int_t i=0; i<fBlocksPerEvent; i++){
-      this->fBlock[i]   = value.fBlock[i]   * scale;
-      this->fBlockM2[i] = value.fBlockM2[i] * scale * scale;
-
-    }
+    // Use valarray operations for scaling
+    this->fBlock = value.fBlock * scale;
+    this->fBlockM2 = value.fBlockM2 * scale * scale;
     this->fHardwareBlockSum   = value.fHardwareBlockSum * scale;
     this->fHardwareBlockSumM2 = value.fHardwareBlockSumM2 * scale * scale;
     this->fHardwareBlockSumError = value.fHardwareBlockSumError;   // Keep this?
@@ -1198,16 +1211,14 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator+= (const QwMollerADC_Channel 
 {
 
   if (!IsNameEmpty()) {
-    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-      this->fBlock[i] += value.fBlock[i];
-      this->fBlockM2[i] = 0.0;
-    }
+    // Use valarray arithmetic operations
+    this->fBlock += value.fBlock;
+    this->fBlockM2 = 0.0;
     this->fHardwareBlockSum    += value.fHardwareBlockSum;
     this->fHardwareBlockSumM2   = 0.0;
     this->fNumberOfSamples     += value.fNumberOfSamples;
     this->fSequenceNumber       = 0;
     this->fErrorFlag            |= (value.fErrorFlag);
-
   }
 
   return *this;
@@ -1223,10 +1234,9 @@ const QwMollerADC_Channel QwMollerADC_Channel::operator- (const QwMollerADC_Chan
 QwMollerADC_Channel& QwMollerADC_Channel::operator-= (const QwMollerADC_Channel &value)
 {
   if (!IsNameEmpty()){
-    for (Int_t i=0; i<fBlocksPerEvent; i++){
-      this->fBlock[i] -= value.fBlock[i];
-      this->fBlockM2[i] = 0.0;
-    }
+    // Use valarray arithmetic operations
+    this->fBlock -= value.fBlock;
+    this->fBlockM2 = 0.0;
     this->fHardwareBlockSum    -= value.fHardwareBlockSum;
     this->fHardwareBlockSumM2   = 0.0;
     this->fNumberOfSamples     += value.fNumberOfSamples;
@@ -1247,10 +1257,9 @@ const QwMollerADC_Channel QwMollerADC_Channel::operator* (const QwMollerADC_Chan
 QwMollerADC_Channel& QwMollerADC_Channel::operator*= (const QwMollerADC_Channel &value)
 {
   if (!IsNameEmpty()){
-    for (Int_t i=0; i<fBlocksPerEvent; i++){
-      this->fBlock[i] *= value.fBlock[i];
-      this->fBlockM2[i] = 0.0;
-    }
+    // Use valarray arithmetic operations
+    this->fBlock *= value.fBlock;
+    this->fBlockM2 = 0.0;
     this->fHardwareBlockSum     *= value.fHardwareBlockSum;
     this->fHardwareBlockSumM2    = 0.0;
     this->fNumberOfSamples      *= value.fNumberOfSamples;
@@ -1445,8 +1454,7 @@ void QwMollerADC_Channel::AddChannelOffset(Double_t offset)
 {
   if (!IsNameEmpty()){
     fHardwareBlockSum += offset;
-    for (Int_t i=0; i<fBlocksPerEvent; i++) 
-      fBlock[i] += offset;
+    fBlock += offset; // Use valarray operation
   }
   return;
 }
@@ -1454,10 +1462,9 @@ void QwMollerADC_Channel::AddChannelOffset(Double_t offset)
 void QwMollerADC_Channel::Scale(Double_t scale)
 {
   if (!IsNameEmpty()){
-      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-        fBlock[i] *= scale;
-        fBlockM2[i] *= scale * scale;
-      }
+      // Use valarray operations for scaling
+      fBlock *= scale;
+      fBlockM2 *= scale * scale;
       fHardwareBlockSum *= scale;
       fHardwareBlockSumM2 *= scale * scale;
     }
@@ -1591,7 +1598,7 @@ void QwMollerADC_Channel::AccumulateRunningSum(const QwMollerADC_Channel& value,
       fHardwareBlockSumM2 -= (M12 - M11)
         * (M12 - fHardwareBlockSum); // note: using updated mean
       // and for individual blocks
-      for (Int_t i = 0; i < 4; i++) {
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
         M11 = fBlock[i];
         M12 = value.fBlock[i];
         M22 = value.fBlockM2[i];
@@ -1643,7 +1650,7 @@ void QwMollerADC_Channel::AccumulateRunningSum(const QwMollerADC_Channel& value,
     fHardwareBlockSumM2 += (M12 - M11)
          * (M12 - fHardwareBlockSum); // note: using updated mean
     // and for individual blocks
-    for (Int_t i = 0; i < 4; i++) {
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
       M11 = fBlock[i];
       M12 = value.fBlock[i];
       M22 = value.fBlockM2[i];
@@ -1656,7 +1663,7 @@ void QwMollerADC_Channel::AccumulateRunningSum(const QwMollerADC_Channel& value,
     fHardwareBlockSum += n2 * (M12 - M11) / n;
     fHardwareBlockSumM2 += M22 + n1 * n2 * (M12 - M11) * (M12 - M11) / n;
     // and for individual blocks
-    for (Int_t i = 0; i < 4; i++) {
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
       M11 = fBlock[i];
       M12 = value.fBlock[i];
       M22 = value.fBlockM2[i];
@@ -1675,9 +1682,8 @@ void QwMollerADC_Channel::CalculateRunningAverage()
 {
   if (fGoodEventCount <= 0)
     {
-      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-        fBlockError[i] = 0.0;
-      }
+      // Use valarray assignment for bulk operation
+      fBlockError = 0.0;
       fHardwareBlockSumError = 0.0;
     }
   else
@@ -1688,8 +1694,9 @@ void QwMollerADC_Channel::CalculateRunningAverage()
       // Note we want to calculate the error here, not sigma:
       //    sigma = sqrt(M2 / n);
       //    error = sigma / sqrt (n) = sqrt(M2) / n;
-      for (Int_t i = 0; i < fBlocksPerEvent; i++)
-        fBlockError[i] = sqrt(fBlockM2[i]) / fGoodEventCount;
+      
+      // Use valarray sqrt function for element-wise calculation
+      fBlockError = sqrt(fBlockM2) / fGoodEventCount;
       fHardwareBlockSumError = sqrt(fHardwareBlockSumM2) / fGoodEventCount;
 
       // Stability check 83951872

@@ -9,6 +9,7 @@
 #pragma once
 
 // System headers
+#include <valarray>
 #include <vector>
 
 // ROOT headers
@@ -337,19 +338,19 @@ private:
 
   /*! \name Event data members---Raw values */
   // @{
-  Int_t fBlock_raw[4];      ///< Array of the sub-block data as read from the module
+  std::valarray<Int_t> fBlock_raw;      ///< Array of the sub-block data as read from the module
   Int_t fHardwareBlockSum_raw; ///< Module-based sum of the four sub-blocks as read from the module
   Int_t fSoftwareBlockSum_raw; ///< Sum of the data in the four sub-blocks raw
-  Long64_t fBlockSumSq_raw[5]; 
-  Int_t fBlock_min[5];
-  Int_t fBlock_max[5];
-  Short_t fBlock_numSamples[5];
+  std::valarray<Long64_t> fBlockSumSq_raw;
+  std::valarray<Int_t> fBlock_min;
+  std::valarray<Int_t> fBlock_max;
+  std::valarray<Short_t> fBlock_numSamples;
   // @}
 
   /*! \name Event data members---Potentially calibrated values*/
   // @{
   // The following values potentially have pedestal removed  and calibration applied
-  Double_t fBlock[4];          ///< Array of the sub-block data
+  std::valarray<Double_t> fBlock;          ///< Array of the sub-block data
   Double_t fHardwareBlockSum;  ///< Module-based sum of the four sub-blocks
   // @}
 
@@ -357,8 +358,8 @@ private:
   /// \name Calculation of the statistical moments
   // @{
   // Moments of the separate blocks
-  Double_t fBlockM2[4];        ///< Second moment of the sub-block
-  Double_t fBlockError[4];     ///< Uncertainty on the sub-block
+  std::valarray<Double_t> fBlockM2;        ///< Second moment of the sub-block
+  std::valarray<Double_t> fBlockError;     ///< Uncertainty on the sub-block
   // Moments of the hardware sum
   Double_t fHardwareBlockSumM2;    ///< Second moment of the hardware sum
   Double_t fHardwareBlockSumError; ///< Uncertainty on the hardware sum
