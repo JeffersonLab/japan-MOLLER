@@ -1,7 +1,7 @@
 # Just Another Parity ANalyzer
    
 ## Doxygen
-Doxygen output can be found at: http://hallaweb.jlab.org/parity/prex/japan/Doxygen/html. This will get updated from time to time. 
+Doxygen output can be found at: https://jeffersonlab.github.io/japan-MOLLER/index.html. This gets updated on pushes to the main branch. 
 
 You can also generated your own locally (with your latest changes) by installing doxygen on your system (from the root directory of this code) and running:
 ```
