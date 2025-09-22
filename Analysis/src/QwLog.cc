@@ -11,9 +11,6 @@
 // System headers
 #include <fstream>
 
-// Boost headers
-#include <boost/regex.hpp>
-
 // Qweak headers
 #include "QwColor.h"
 #include "QwOptions.h"
@@ -142,8 +139,8 @@ bool QwLog::IsDebugFunction(const string func_sig)
     fIsDebugFunction[func_sig] = false;
     for (size_t i = 0; i < fDebugFunctionRegexString.size(); i++) {
       // When we find a match, cache it and break out
-      boost::regex regex(fDebugFunctionRegexString.at(i));
-      if (boost::regex_match(func_sig, regex)) {
+      std::regex regex(fDebugFunctionRegexString.at(i));
+      if (std::regex_match(func_sig, regex)) {
         fIsDebugFunction[func_sig] = true;
         break;
       }
