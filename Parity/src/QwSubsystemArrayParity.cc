@@ -120,8 +120,9 @@ QwSubsystemArrayParity& QwSubsystemArrayParity::operator+= (const QwSubsystemArr
 	} else {
 	  VQwSubsystemParity *ptr1 =
 	    dynamic_cast<VQwSubsystemParity*>(this->at(i).get());
-	  if (typeid(*ptr1)==typeid(*(value.at(i).get()))){
-	    *(ptr1) += value.at(i).get();
+          VQwSubsystem *ptr2 = value.at(i).get();
+	  if (typeid(*ptr1)==typeid(*ptr2)){
+	    *(ptr1) += ptr2;
 	    //std::cout<<"QwSubsystemArrayParity::operator+ here where types match \n";
 	  } else {
 	    QwError << "QwSubsystemArrayParity::operator+ here where types don't match" << QwLog::endl;
@@ -160,8 +161,9 @@ QwSubsystemArrayParity& QwSubsystemArrayParity::operator-= (const QwSubsystemArr
 	} else {
 	  VQwSubsystemParity *ptr1 =
 	    dynamic_cast<VQwSubsystemParity*>(this->at(i).get());
-	  if (typeid(*ptr1)==typeid(*(value.at(i).get()))){
-	    *(ptr1) -= value.at(i).get();
+          VQwSubsystem *ptr2 = value.at(i).get();
+	  if (typeid(*ptr1)==typeid(*ptr2)){
+	    *(ptr1) -= ptr2;
 	  } else {
 	    //  Subsystems don't match
 	  }
@@ -273,8 +275,9 @@ void QwSubsystemArrayParity::AccumulateRunningSum(const QwSubsystemArrayParity& 
 	  } else {
 	    VQwSubsystemParity *ptr1 =
 	      dynamic_cast<VQwSubsystemParity*>(this->at(i).get());
-	    if (typeid(*ptr1) == typeid(*(value.at(i).get()))) {
-	      ptr1->AccumulateRunningSum(value.at(i).get(), count, ErrorMask);
+            VQwSubsystem *ptr2 = value.at(i).get();
+	    if (typeid(*ptr1) == typeid(*ptr2)) {
+	      ptr1->AccumulateRunningSum(ptr2, count, ErrorMask);
 	    } else {
 	      QwError << "QwSubsystemArrayParity::AccumulateRunningSum here where types don't match" << QwLog::endl;
 	      QwError << " typeid(ptr1)=" << typeid(ptr1).name()
@@ -307,8 +310,9 @@ void QwSubsystemArrayParity::AccumulateAllRunningSum(const QwSubsystemArrayParit
 	  } else {
 	    VQwSubsystemParity *ptr1 =
 	      dynamic_cast<VQwSubsystemParity*>(this->at(i).get());
-	    if (typeid(*ptr1) == typeid(*(value.at(i).get()))) {
-	      ptr1->AccumulateRunningSum(value.at(i).get(), count, ErrorMask);
+            VQwSubsystem *ptr2 = value.at(i).get();
+	    if (typeid(*ptr1) == typeid(*ptr2)) {
+	      ptr1->AccumulateRunningSum(ptr2, count, ErrorMask);
 	    } else {
 	      QwError << "QwSubsystemArrayParity::AccumulateRunningSum here where types don't match" << QwLog::endl;
 	      QwError << " typeid(ptr1)=" << typeid(ptr1).name()
@@ -347,8 +351,9 @@ void QwSubsystemArrayParity::DeaccumulateRunningSum(const QwSubsystemArrayParity
 	  } else {
 	    VQwSubsystemParity *ptr1 =
 	      dynamic_cast<VQwSubsystemParity*>(this->at(i).get());
-	    if (typeid(*ptr1) == typeid(*(value.at(i).get()))) {
-	      ptr1->DeaccumulateRunningSum(value.at(i).get(), ErrorMask);
+            VQwSubsystem *ptr2 = value.at(i).get();
+	    if (typeid(*ptr1) == typeid(*ptr2)) {
+	      ptr1->DeaccumulateRunningSum(ptr2, ErrorMask);
 	    } else {
 	      QwError << "QwSubsystemArrayParity::AccumulateRunningSum here where types don't match" << QwLog::endl;
 	      QwError << " typeid(ptr1)=" << typeid(ptr1).name()
@@ -435,7 +440,8 @@ void QwSubsystemArrayParity::Ratio(
         } else {
 	  VQwSubsystemParity *ptr1 =
 	    dynamic_cast<VQwSubsystemParity*>(this->at(i).get());
-	  if (typeid(*ptr1)==typeid(*(denom.at(i).get())))
+          VQwSubsystem *ptr2 = denom.at(i).get();
+	  if (typeid(*ptr1)==typeid(*ptr2))
             {
               ptr1->Ratio(numer.at(i).get(),denom.at(i).get());
             } else {
@@ -516,16 +522,17 @@ Bool_t QwSubsystemArrayParity::CheckForBurpFail(QwSubsystemArrayParity &event)
     for(size_t i=0;i<event.size();i++){
       if (event.at(i)!=NULL && this->at(i)!=NULL){
 	      VQwSubsystemParity *ptr1 = dynamic_cast<VQwSubsystemParity*>(this->at(i).get());
-	      if (typeid(*ptr1)==typeid(*(event.at(i).get()))){
+              VQwSubsystem *ptr2 = event.at(i).get();
+	      if (typeid(*ptr1)==typeid(*ptr2)){
 	        //*(ptr1) = event.at(i).get();//when =operator is used
 	        //pass the correct subsystem to update the errorflags at subsystem to devices to channel levels
           //wError << "************* test " << typeid(*ptr1).name() << "*****************" << QwLog::endl;
-	        burpstatus |= ptr1->CheckForBurpFail(event.at(i).get());
+	        burpstatus |= ptr1->CheckForBurpFail(ptr2);
 	      } else {
 	        //  Subsystems don't match
 	        QwError << " QwSubsystemArrayParity::CheckForBurpFail types do not mach" << QwLog::endl;
 	        QwError << " typeid(ptr1)=" << typeid(*ptr1).name()
-		      << " but typeid(*(event.at(i).get()))=" << typeid(*(event.at(i).get())).name()
+		      << " but typeid(*(event.at(i).get()))=" << typeid(*ptr2).name()
 		      << QwLog::endl;
 	      }
       }
@@ -560,7 +567,8 @@ void QwSubsystemArrayParity::UpdateErrorFlag(const QwSubsystemArrayParity& ev_er
 	} else {
 	  VQwSubsystemParity *ptr1 =
 	    dynamic_cast<VQwSubsystemParity*>(this->at(i).get());
-	  if (typeid(*ptr1)==typeid(*(ev_error.at(i).get()))){
+          VQwSubsystem *ptr2 = ev_error.at(i).get();
+	  if (typeid(*ptr1)==typeid(*ptr2)){
 	    if(localdebug) std::cout<<" here in QwSubsystemArrayParity::UpdateErrorFlag types mach \n";
 	    //*(ptr1) = ev_error.at(i).get();//when =operator is used
 	    //pass the correct subsystem to update the errorflags at subsystem to devices to channel levels
@@ -569,7 +577,7 @@ void QwSubsystemArrayParity::UpdateErrorFlag(const QwSubsystemArrayParity& ev_er
 	    //  Subsystems don't match
 	      QwError << " QwSubsystemArrayParity::UpdateErrorFlag types do not mach" << QwLog::endl;
 	      QwError << " typeid(ptr1)=" << typeid(*ptr1).name()
-                      << " but typeid(*(ev_error.at(i).get()))=" << typeid(*(ev_error.at(i).get())).name()
+                      << " but typeid(*(ev_error.at(i).get()))=" << typeid(*ptr2).name()
                       << QwLog::endl;
 	  }
 	}

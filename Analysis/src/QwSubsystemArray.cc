@@ -80,13 +80,14 @@ QwSubsystemArray& QwSubsystemArray::operator=(const QwSubsystemArray& source)
         } else {
           VQwSubsystem *ptr1 =
             dynamic_cast<VQwSubsystem*>(this->at(i).get());
-          if (typeid(*ptr1)==typeid(*(source.at(i).get()))){
+          VQwSubsystem *ptr2 = source.at(i).get();
+          if (typeid(*ptr1)==typeid(*(ptr2))){
             *(ptr1) = source.at(i).get();
           } else {
             //  Subsystems don't match
             QwError << " QwSubsystemArray::operator= types do not mach" << QwLog::endl;
-            QwError << " typeid(ptr1)=" << typeid(*ptr1).name()
-                    << " but typeid(*(source.at(i).get()))=" << typeid(*(source.at(i).get())).name()
+            QwError << " typeid(*ptr1)=" << typeid(*ptr1).name()
+                    << " but typeid(*ptr2)=" << typeid(*ptr2).name()
                     << QwLog::endl;
           }
         }

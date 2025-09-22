@@ -464,14 +464,15 @@ QwDataHandlerArray& QwDataHandlerArray::operator= (const QwDataHandlerArray &sou
 	} else {
 	  VQwDataHandler *ptr1 =
 	    dynamic_cast<VQwDataHandler*>(this->at(i).get());
-	  if (typeid(*ptr1)==typeid(*(source.at(i).get()))){
+          VQwDataHandler *ptr2 = source.at(i).get();
+	  if (typeid(*ptr1)==typeid(*ptr2)){
 	    if(localdebug) std::cout<<" here in QwDataHandlerArray::operator= types mach \n";
 	    *(ptr1) = *(source.at(i).get());
 	  } else {
 	    //  DataHandlers don't match
 	      QwError << " QwDataHandlerArray::operator= types do not mach" << QwLog::endl;
-	      QwError << " typeid(ptr1)=" << typeid(*ptr1).name()
-                      << " but typeid(*(source.at(i).get()))=" << typeid(*(source.at(i).get())).name()
+	      QwError << " typeid(*ptr1)=" << typeid(*ptr1).name()
+                      << " but typeid(*ptr2)=" << typeid(*ptr2).name()
                       << QwLog::endl;
 	  }
 	}
@@ -535,8 +536,9 @@ void QwDataHandlerArray::AccumulateRunningSum(const QwDataHandlerArray& value, I
 	  } else {
 	    VQwDataHandler *ptr1 =
 	      dynamic_cast<VQwDataHandler*>(this->at(i).get());
-	    if (typeid(*ptr1) == typeid(*(value.at(i).get()))) {
-	      ptr1->AccumulateRunningSum(*(value.at(i).get()), count, ErrorMask);
+            VQwDataHandler *ptr2 = value.at(i).get();
+	    if (typeid(*ptr1) == typeid(*ptr2)) {
+	      ptr1->AccumulateRunningSum(*ptr2, count, ErrorMask);
 	    } else {
 	      QwError << "QwDataHandlerArray::AccumulateRunningSum here where types don't match" << QwLog::endl;
 	      QwError << " typeid(ptr1)=" << typeid(ptr1).name()
@@ -567,8 +569,9 @@ void QwDataHandlerArray::AccumulateAllRunningSum(const QwDataHandlerArray& value
 	  } else {
 	    VQwDataHandler *ptr1 =
 	      dynamic_cast<VQwDataHandler*>(this->at(i).get());
-	    if (typeid(*ptr1) == typeid(*(value.at(i).get()))) {
-	      ptr1->AccumulateRunningSum(*(value.at(i).get()), count, ErrorMask);
+            VQwDataHandler *ptr2 = value.at(i).get();
+	    if (typeid(*ptr1) == typeid(*ptr2)) {
+	      ptr1->AccumulateRunningSum(*ptr2, count, ErrorMask);
 	    } else {
 	      QwError << "QwDataHandlerArray::AccumulateRunningSum here where types don't match" << QwLog::endl;
 	      QwError << " typeid(ptr1)=" << typeid(ptr1).name()
