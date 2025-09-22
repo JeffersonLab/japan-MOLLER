@@ -160,10 +160,10 @@ public:
   }
 
   void AssignValueFrom(const VQwDataElement* valueptr) = 0;
-  virtual VQwHardwareChannel& operator+=(const VQwHardwareChannel* input) = 0;
-  virtual VQwHardwareChannel& operator-=(const VQwHardwareChannel* input) = 0;
-  virtual VQwHardwareChannel& operator*=(const VQwHardwareChannel* input) = 0;
-  virtual VQwHardwareChannel& operator/=(const VQwHardwareChannel* input) = 0;
+  virtual VQwHardwareChannel& operator+=(const VQwHardwareChannel& input) = 0;
+  virtual VQwHardwareChannel& operator-=(const VQwHardwareChannel& input) = 0;
+  virtual VQwHardwareChannel& operator*=(const VQwHardwareChannel& input) = 0;
+  virtual VQwHardwareChannel& operator/=(const VQwHardwareChannel& input) = 0;
 
 
   virtual void ScaledAdd(Double_t scale, const VQwHardwareChannel *value) = 0;

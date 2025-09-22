@@ -151,10 +151,10 @@ public:
   VQwScaler_Channel& operator-= (const VQwScaler_Channel &value);
   VQwScaler_Channel& operator*= (const VQwScaler_Channel &value);
 
-  VQwHardwareChannel& operator+=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator-=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator*=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator/=(const VQwHardwareChannel* input);
+  VQwHardwareChannel& operator+=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator-=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator*=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator/=(const VQwHardwareChannel& input) override;
 
   void Sum(VQwScaler_Channel &value1, VQwScaler_Channel &value2);
   void Difference(VQwScaler_Channel &value1, VQwScaler_Channel &value2);

@@ -1070,10 +1070,10 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator*= (const QwMollerADC_Channel 
   return *this;
 }
 
-VQwHardwareChannel& QwMollerADC_Channel::operator+=(const VQwHardwareChannel *source)
+VQwHardwareChannel& QwMollerADC_Channel::operator+=(const VQwHardwareChannel &source)
 {
   const QwMollerADC_Channel* tmpptr;
-  tmpptr = dynamic_cast<const QwMollerADC_Channel*>(source);
+  tmpptr = dynamic_cast<const QwMollerADC_Channel*>(&source);
   if (tmpptr!=NULL){
     *this += *tmpptr;
   } else {
@@ -1084,10 +1084,10 @@ VQwHardwareChannel& QwMollerADC_Channel::operator+=(const VQwHardwareChannel *so
   }
   return *this;
 }
-VQwHardwareChannel& QwMollerADC_Channel::operator-=(const VQwHardwareChannel *source)
+VQwHardwareChannel& QwMollerADC_Channel::operator-=(const VQwHardwareChannel &source)
 {
   const QwMollerADC_Channel* tmpptr;
-  tmpptr = dynamic_cast<const QwMollerADC_Channel*>(source);
+  tmpptr = dynamic_cast<const QwMollerADC_Channel*>(&source);
   if (tmpptr!=NULL){
     *this -= *tmpptr;
   } else {
@@ -1098,10 +1098,10 @@ VQwHardwareChannel& QwMollerADC_Channel::operator-=(const VQwHardwareChannel *so
   }
   return *this;
 }
-VQwHardwareChannel& QwMollerADC_Channel::operator*=(const VQwHardwareChannel *source)
+VQwHardwareChannel& QwMollerADC_Channel::operator*=(const VQwHardwareChannel &source)
 {
   const QwMollerADC_Channel* tmpptr;
-  tmpptr = dynamic_cast<const QwMollerADC_Channel*>(source);
+  tmpptr = dynamic_cast<const QwMollerADC_Channel*>(&source);
   if (tmpptr!=NULL){
     *this *= *tmpptr;
   } else {
@@ -1112,10 +1112,10 @@ VQwHardwareChannel& QwMollerADC_Channel::operator*=(const VQwHardwareChannel *so
   }
   return *this;
 }
-VQwHardwareChannel& QwMollerADC_Channel::operator/=(const VQwHardwareChannel *source)
+VQwHardwareChannel& QwMollerADC_Channel::operator/=(const VQwHardwareChannel &source)
 {
   const QwMollerADC_Channel* tmpptr;
-  tmpptr = dynamic_cast<const QwMollerADC_Channel*>(source);
+  tmpptr = dynamic_cast<const QwMollerADC_Channel*>(&source);
   if (tmpptr!=NULL){
     *this /= *tmpptr;
   } else {

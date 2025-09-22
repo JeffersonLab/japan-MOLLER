@@ -804,10 +804,10 @@ QwADC18_Channel& QwADC18_Channel::operator*= (const QwADC18_Channel &value)
   return *this;
 }
 
-VQwHardwareChannel& QwADC18_Channel::operator+=(const VQwHardwareChannel *source)
+VQwHardwareChannel& QwADC18_Channel::operator+=(const VQwHardwareChannel &source)
 {
   const QwADC18_Channel* tmpptr;
-  tmpptr = dynamic_cast<const QwADC18_Channel*>(source);
+  tmpptr = dynamic_cast<const QwADC18_Channel*>(&source);
   if (tmpptr!=NULL){
     *this += *tmpptr;
   } else {
@@ -819,10 +819,10 @@ VQwHardwareChannel& QwADC18_Channel::operator+=(const VQwHardwareChannel *source
   return *this;
 }
 
-VQwHardwareChannel& QwADC18_Channel::operator-=(const VQwHardwareChannel *source)
+VQwHardwareChannel& QwADC18_Channel::operator-=(const VQwHardwareChannel &source)
 {
   const QwADC18_Channel* tmpptr;
-  tmpptr = dynamic_cast<const QwADC18_Channel*>(source);
+  tmpptr = dynamic_cast<const QwADC18_Channel*>(&source);
   if (tmpptr!=NULL){
     *this -= *tmpptr;
   } else {
@@ -834,10 +834,10 @@ VQwHardwareChannel& QwADC18_Channel::operator-=(const VQwHardwareChannel *source
   return *this;
 }
 
-VQwHardwareChannel& QwADC18_Channel::operator*=(const VQwHardwareChannel *source)
+VQwHardwareChannel& QwADC18_Channel::operator*=(const VQwHardwareChannel &source)
 {
   const QwADC18_Channel* tmpptr;
-  tmpptr = dynamic_cast<const QwADC18_Channel*>(source);
+  tmpptr = dynamic_cast<const QwADC18_Channel*>(&source);
   if (tmpptr!=NULL){
     *this *= *tmpptr;
   } else {
@@ -849,10 +849,10 @@ VQwHardwareChannel& QwADC18_Channel::operator*=(const VQwHardwareChannel *source
   return *this;
 }
 
-VQwHardwareChannel& QwADC18_Channel::operator/=(const VQwHardwareChannel *source)
+VQwHardwareChannel& QwADC18_Channel::operator/=(const VQwHardwareChannel &source)
 {
   const QwADC18_Channel* tmpptr;
-  tmpptr = dynamic_cast<const QwADC18_Channel*>(source);
+  tmpptr = dynamic_cast<const QwADC18_Channel*>(&source);
   if (tmpptr!=NULL){
     *this /= *tmpptr;
   } else {
