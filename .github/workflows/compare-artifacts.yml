@@ -10,7 +10,7 @@ name: Compare Artifacts with Target Branch
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'Analysis/**'
       - 'Parity/**'
@@ -80,14 +80,19 @@ jobs:
             echo "::group::Mock data generation"
             # Run the mock data generator and analysis as described in README
             source SetupFiles/SET_ME_UP.bash
-            
+
             # Generate mock data
-            build/qwmockdatagenerator -r 4 -e 1:20000 --config qwparity_simple.conf --detectors mock_newdets.map --data .
+            build/qwmockdatagenerator -r 4 -e 1:20000 \
+              --config qwparity_simple.conf \
+              --detectors mock_newdets.map --data .
             echo "::endgroup::"
-            
+
             echo "::group::Mock data analysis"
             # Analyze the generated mock data
-            build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary
+            build/qwparity -r 4 --config qwparity_simple.conf \
+              --detectors mock_newdets.map \
+              --datahandlers mock_datahandlers.map \
+              --data . --rootfiles . --write-promptsummary
             echo "::endgroup::"
 
       - name: Upload current prompt summary
@@ -140,37 +145,37 @@ jobs:
       - name: Compare artifacts
         run: |
           echo "Comparing artifacts for ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}"
-          
+
           # Check if target artifacts exist
           if [ ! -d "./target" ] || [ -z "$(ls -A ./target)" ]; then
             echo "⚠️  No target branch artifacts found. This may be the first run or target branch hasn't been built recently."
             echo "Skipping comparison for this configuration."
             exit 0
           fi
-          
+
           # Find summary files in both directories
           current_files=$(find ./current -name "summary_*.txt" | sort)
           target_files=$(find ./target -name "summary_*.txt" | sort)
-          
+
           echo "Current files found:"
           echo "$current_files"
           echo "Target files found:"
           echo "$target_files"
-          
+
           # Compare each file
           comparison_failed=false
           for current_file in $current_files; do
             filename=$(basename "$current_file")
             target_file="./target/$filename"
-            
+
             if [ ! -f "$target_file" ]; then
               echo "❌ Target file $filename not found"
               comparison_failed=true
               continue
             fi
-            
+
             echo "Comparing $filename..."
-            
+
             # Skip lines containing timestamps and metadata that can vary
             if diff -q <(grep -v "Start Time:\|End Time:" "$current_file") <(grep -v "Start Time:\|End Time:" "$target_file") > /dev/null; then
               echo "✅ $filename: No meaningful differences found"
@@ -185,7 +190,7 @@ jobs:
               comparison_failed=true
             fi
           done
-          
+
           if [ "$comparison_failed" = "true" ]; then
             echo "❌ Artifact comparison failed. Changes detected in prompt summary beyond timestamps."
             exit 1
