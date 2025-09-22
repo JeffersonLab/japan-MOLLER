@@ -29,6 +29,7 @@ using namespace std;
 #ifdef __USE_DATABASE__
 #include "QwParitySSQLS.h"
 #include "QwParityDB.h"
+#include <ROOT/RNTupleModel.hxx>
 #endif // __USE_DATABASE__
 
 
