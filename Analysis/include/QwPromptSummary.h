@@ -140,7 +140,6 @@ class QwPromptSummary  :  public TObject
   //  friend std::ostream& operator<<(std::ostream& os, const QwF1TDC &f1tdc);
 
 
-  Int_t                    fNElements;
   std::vector<PromptSummaryElement*> fElementList; 
 
   void SetRunNumber(const Int_t in) {fRunNumber = in;};
@@ -167,9 +166,9 @@ class QwPromptSummary  :  public TObject
 
   void FillDoubleDifference(TString type, TString name1, TString name2);
 
-  Int_t  GetSize()         const {return fNElements;};
-  Int_t  Size()            const {return fNElements;};
-  Int_t  HowManyElements() const {return fNElements;};
+  Int_t  GetSize()         const {return fElementList.size();};
+  Int_t  Size()            const {return fElementList.size();};
+  Int_t  HowManyElements() const {return fElementList.size();};
 
 
   void PrintCSV(Int_t nEvents, TString start_time, TString end_time);
