@@ -1094,7 +1094,7 @@ VQwHardwareChannel& QwVQWK_Channel::operator+=(const VQwHardwareChannel &source)
     *this += *tmpptr;
   } else {
     TString loc="Standard exception from QwVQWK_Channel::operator+= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
@@ -1108,7 +1108,7 @@ VQwHardwareChannel& QwVQWK_Channel::operator-=(const VQwHardwareChannel &source)
     *this -= *tmpptr;
   } else {
     TString loc="Standard exception from QwVQWK_Channel::operator-= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
@@ -1122,7 +1122,7 @@ VQwHardwareChannel& QwVQWK_Channel::operator*=(const VQwHardwareChannel &source)
     *this *= *tmpptr;
   } else {
     TString loc="Standard exception from QwVQWK_Channel::operator*= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
@@ -1136,7 +1136,7 @@ VQwHardwareChannel& QwVQWK_Channel::operator/=(const VQwHardwareChannel &source)
     *this /= *tmpptr;
   } else {
     TString loc="Standard exception from QwVQWK_Channel::operator/= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }

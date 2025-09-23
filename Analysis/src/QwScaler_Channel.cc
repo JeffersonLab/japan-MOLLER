@@ -485,7 +485,7 @@ VQwHardwareChannel& VQwScaler_Channel::operator+=(const VQwHardwareChannel &sour
     *this += tmp;
   } catch(const std::exception& e) {
     TString loc="Standard exception from VQwScaler_Channel::operator+= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
@@ -499,7 +499,7 @@ VQwHardwareChannel& VQwScaler_Channel::operator-=(const VQwHardwareChannel &sour
     *this -= *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::operator-= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
@@ -513,7 +513,7 @@ VQwHardwareChannel& VQwScaler_Channel::operator*=(const VQwHardwareChannel &sour
     *this *= *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::operator*= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
@@ -527,7 +527,7 @@ VQwHardwareChannel& VQwScaler_Channel::operator/=(const VQwHardwareChannel &sour
     *this /= *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::operator/= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
