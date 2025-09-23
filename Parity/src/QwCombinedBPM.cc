@@ -749,7 +749,7 @@ void QwCombinedBPM<T>::GetProjectedPosition(VQwBPM *device)
       else continue;
       (device->GetPosition(axis))->ClearEventData();
       (device->GetPosition(axis))->AssignScaledValue(fSlope[axis],device->GetPositionInZ());
-      (device->GetPosition(axis))->operator+=(&fIntercept[axis]);
+      (device->GetPosition(axis))->operator+=(fIntercept[axis]);
    }
    // Maybe we should apply resolution smearing to the stripline BPMs?
    // device->PrintInfo();
