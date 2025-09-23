@@ -29,10 +29,10 @@ bpm_targetx
 bpm_targety
 bpm1h04x
 bpm1h04y
-bcm1h02a-bcm1h15
-bcm_target-bcm1h15
-bpm1h04x-bpm1h14x
-bpm1h04x-bpm1h14y
+diff_bcm1h02a_bcm1h15
+diff_bcm_target_bcm1h15
+diff_bpm1h04x_bpm1h14x
+diff_bpm1h04x_bpm1h14y
 
 ! Additional elements can be added here
 ! Examples:

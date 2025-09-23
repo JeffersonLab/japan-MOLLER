@@ -22,4 +22,8 @@
   alias-path = .
   disable-histos = true
   tree-name  = lrb_std
- tree-comment = Correlations
+  tree-comment = Correlations
+
+[QwCombiner]
+  name = beamline_combiner
+  map  = mock_beamline_combiner.map
