@@ -140,7 +140,8 @@ class QwPromptSummary  :  public TObject
   //  friend std::ostream& operator<<(std::ostream& os, const QwF1TDC &f1tdc);
 
 
-  std::vector<PromptSummaryElement*> fElementList; 
+  std::map<TString, PromptSummaryElement*> fElementList;
+  PromptSummaryElement* fReferenceElement{nullptr};
 
   void SetRunNumber(const Int_t in) {fRunNumber = in;};
   Int_t GetRunNumber() {return fRunNumber;};
