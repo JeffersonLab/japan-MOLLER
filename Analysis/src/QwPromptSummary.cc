@@ -113,7 +113,7 @@ if (type.Contains("asy")&& !(dd||da)){
       out = Form("%20s | Mean: %8.3f +/- %8.3f \t Width: %8.3f\n", fElementName.Data(), fAsymDiff, fAsymDiffError, fAsymDiffWidth);
 }
 if (type.Contains("double")&& (dd||da)) {
-     	out = Form ("%20s | Mean: %8.3f +/- %8.3f \t Width: %8.3f\n", fElementName.Data(), fAsymDiff, fAsymDiffError, fAsymDiffWidth);
+     	out = Form("%20s | Mean: %8.3f +/- %8.3f \t Width: %8.3f\n", fElementName.Data(), fAsymDiff, fAsymDiffError, fAsymDiffWidth);
 }     
 
 
@@ -184,9 +184,6 @@ QwPromptSummary::QwPromptSummary()
   fRunNumber    = 0;
   fRunletNumber = 0;
  
- 
-  fNElements = 0;
-
   fLocalDebug = kTRUE;
   
   this->SetupElementList();
@@ -199,9 +196,6 @@ QwPromptSummary::QwPromptSummary(Int_t run_number, Int_t runlet_number)
   fRunNumber    = run_number;
   fRunletNumber = runlet_number;
 
- 
-  fNElements = 0;
-
   fLocalDebug = kFALSE;
   
   this->SetupElementList();
@@ -213,9 +207,6 @@ QwPromptSummary::QwPromptSummary(Int_t run_number, Int_t runlet_number, const st
 {
   fRunNumber    = run_number;
   fRunletNumber = runlet_number;
-
- 
-  fNElements = 0;
 
   fLocalDebug = kFALSE;
   
@@ -245,8 +236,8 @@ QwPromptSummary::SetupElementList()
   try {
     QwParameterFile paramfile(default_param_file);
     LoadElementsFromParameterFile(paramfile);
-    if (fNElements > 0) {
-      QwMessage << "QwPromptSummary: Loaded " << fNElements << " elements from " << default_param_file << QwLog::endl;
+    if (fElementList.size() > 0) {
+      QwMessage << "QwPromptSummary: Loaded " << fElementList.size() << " elements from " << default_param_file << QwLog::endl;
       return; // Successfully loaded from file
     }
   } catch (const std::exception& e) {
@@ -255,38 +246,6 @@ QwPromptSummary::SetupElementList()
                 << ", using default elements: " << e.what() << QwLog::endl;
     }
   }
-  
-  // Fall back to default hard-coded elements if parameter file not found or empty
-  QwMessage << "QwPromptSummary: Using default hard-coded element list" << QwLog::endl;
-  
-  // Add the originally commented out elements
-  this->AddElement(new PromptSummaryElement("bcm_an_us"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds3"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds10"));
-  this->AddElement(new PromptSummaryElement("bcm_dg_us"));
-  this->AddElement(new PromptSummaryElement("bcm_dg_ds"));
-  
-  this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_an_ds"));
-  this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_an_ds3"));
-  this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_an_ds10"));
-  this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_dg_us"));
-  this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_dg_ds"));
-  
-  this->AddElement(new PromptSummaryElement("bcm_an_ds-bcm_an_ds3"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds-bcm_an_ds10"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds-bcm_dg_us"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds-bcm_dg_ds"));
-  
-  this->AddElement(new PromptSummaryElement("bcm_an_ds3-bcm_an_ds10"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds3-bcm_dg_us"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds3-bcm_dg_ds"));
-
-  this->AddElement(new PromptSummaryElement("bcm_an_ds10-bcm_dg_us"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds10-bcm_dg_ds"));
-
-  this->AddElement(new PromptSummaryElement("bcm_dg_us-bcm_dg_ds"));
-
 };
 
 
@@ -368,22 +327,17 @@ QwPromptSummary::LoadElementsFromParameterFile(QwParameterFile& parameterfile)
     delete section;
   }
   
-  QwMessage << "QwPromptSummary: Loaded " << fNElements << " elements from parameter file" << QwLog::endl;
+  QwMessage << "QwPromptSummary: Loaded " << fElementList.size() << " elements from parameter file" << QwLog::endl;
 };
 
 
 void 
 QwPromptSummary::AddElement(PromptSummaryElement *in)
 {
-  Int_t pos = 0;
-
   fElementList.push_back(in);
   if(fLocalDebug) {
-    printf("AddElement at pos %d\n", pos);
+    printf("AddElement at pos %d\n", fElementList.size()-1);
   }
-
-  fNElements++;
-  return;
 };
 
 
