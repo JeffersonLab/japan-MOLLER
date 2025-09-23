@@ -25,8 +25,10 @@ bcm1h12c
 bcm1h13
 bcm1h15
 bcm_target
-bpm1h04
+bpm_targetx
+bpm_targety
 bpm1h04x
+bpm1h04y
 bcm1h02a-bcm1h15
 bcm_target-bcm1h15
 bpm1h04x-bpm1h14x
