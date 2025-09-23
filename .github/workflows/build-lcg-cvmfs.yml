@@ -217,7 +217,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
           path: build.tar.zst
           retention-days: 7
           if-no-files-found: error
@@ -225,7 +225,7 @@ jobs:
       - name: Upload profiling analysis
         uses: actions/upload-artifact@v4
         with:
-          name: gprof-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: gprof-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
           path: |
             qwparity.txt
           retention-days: 7
@@ -270,7 +270,7 @@ jobs:
       - name: Upload regression alias definitions
         uses: actions/upload-artifact@v4
         with:
-          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
           path: |
             *regalias*.C
           retention-days: 7
@@ -282,7 +282,7 @@ jobs:
         with:
           workflow: build-lcg-cvmfs.yml
           branch: ${{ github.event.pull_request.base.ref }}
-          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
           path: ./target
           if_no_artifact_found: warn
 
@@ -292,14 +292,14 @@ jobs:
         with:
           workflow: build-lcg-cvmfs.yml
           branch: ${{ github.event.pull_request.base.ref }}
-          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
           path: ./target
           if_no_artifact_found: warn
 
       - name: Compare artifacts
         if: github.event_name == 'pull_request'
         run: |
-          echo "Comparing artifacts for ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}"
+          echo "Comparing artifacts for ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}"
 
           # Check if target artifacts exist
           if [ ! -d "./target" ] || [ -z "$(ls -A ./target)" ]; then
@@ -368,13 +368,14 @@ jobs:
             compiler: "gcc14"
             opt: "opt"
             cxxflags: ""
+            sanitizer: "none"
     steps:
       - uses: actions/checkout@v5
 
       - name: Download build artifact
         uses: actions/download-artifact@v5
         with:
-          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
           path: .
       - name: Uncompress build artifact
         run: tar -xaf build.tar.zst
