@@ -480,8 +480,8 @@ VQwScaler_Channel& VQwScaler_Channel::operator*= (const VQwScaler_Channel &value
 VQwHardwareChannel& VQwScaler_Channel::operator+=(const VQwHardwareChannel &source)
 {
   try {
-    const VQwScaler_Channel& tmp;
-    tmp = dynamic_cast<const VQwScaler_Channel&>(source);
+    const VQwScaler_Channel* tmpptr;
+    tmpptr = dynamic_cast<const VQwScaler_Channel*>(&source);
     *this += tmp;
   } catch(const std::exception& e) {
     TString loc="Standard exception from VQwScaler_Channel::operator+= "
