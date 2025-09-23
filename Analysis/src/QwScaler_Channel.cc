@@ -482,7 +482,7 @@ VQwHardwareChannel& VQwScaler_Channel::operator+=(const VQwHardwareChannel &sour
   try {
     const VQwScaler_Channel* tmpptr;
     tmpptr = dynamic_cast<const VQwScaler_Channel*>(&source);
-    *this += tmp;
+    *this += tmpptr;
   } catch(const std::exception& e) {
     TString loc="Standard exception from VQwScaler_Channel::operator+= "
         +source.GetElementName()+" "
