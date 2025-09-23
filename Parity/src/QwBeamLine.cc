@@ -3254,10 +3254,11 @@ void QwBeamLine::WritePromptSummary(QwPromptSummary *ps, TString type)
 
   
   char property[2][6]={"x","y"};
+
   local_ps_element=NULL;
   local_add_these_elements=false;
   
-  
+  // Add BPM striplines
   for(size_t i=0; i< fStripline.size(); i++) 
      {
      for (Int_t j=0;j<2;j++){
@@ -3278,21 +3279,53 @@ void QwBeamLine::WritePromptSummary(QwPromptSummary *ps, TString type)
           
      
       if(local_ps_element) {
-	element_value       = tmp_channel->GetValue();
-	element_value_err   = tmp_channel->GetValueError();
-	element_value_width = tmp_channel->GetValueWidth();
-	local_ps_element->Set(type, element_value, element_value_err, element_value_width);
+        element_value       = tmp_channel->GetValue();
+        element_value_err   = tmp_channel->GetValueError();
+        element_value_width = tmp_channel->GetValueWidth();
+        local_ps_element->Set(type, element_value, element_value_err, element_value_width);
       }
       
       if( local_print_flag && local_ps_element) {
-	printf("Type %12s, Element %32s, value %12.4e error %8.4e  width %12.4e\n", 
-	       type.Data(), element_name.Data(), element_value, element_value_err, element_value_width);
+        printf("Type %12s, Element %32s, value %12.4e error %8.4e  width %12.4e\n", 
+	      type.Data(), element_name.Data(), element_value, element_value_err, element_value_width);
       }
 
       }
     }
 
-  
-  
-    return;
+  // Add combined BPM striplines
+  for(size_t i=0; i< fBPMCombo.size(); i++) 
+     {
+     for (Int_t j=0;j<2;j++){
+      tmp_channel= GetChannel(kQwCombinedBPM, i, property[j]);   
+      element_name= tmp_channel->GetElementName();
+      element_value       = 0.0;
+      element_value_err   = 0.0;
+      element_value_width = 0.0;
+
+      local_add_these_elements=element_name.Contains("bpm4")||element_name.Contains("bpm18")||element_name.Contains("bpm14")||element_name.Contains("bpm12"); //Need to change this to add other stripline BPMs in summary
+
+      if( local_add_these_elements && local_add_element){
+      	ps->AddElement(new PromptSummaryElement(element_name)); 
+      }
+
+      local_ps_element=ps->GetElementByName(element_name);
+
+          
+     
+      if(local_ps_element) {
+        element_value       = tmp_channel->GetValue();
+        element_value_err   = tmp_channel->GetValueError();
+        element_value_width = tmp_channel->GetValueWidth();
+        local_ps_element->Set(type, element_value, element_value_err, element_value_width);
+      }
+      
+      if( local_print_flag && local_ps_element) {
+        printf("Type %12s, Element %32s, value %12.4e error %8.4e  width %12.4e\n", 
+	      type.Data(), element_name.Data(), element_value, element_value_err, element_value_width);
+      }
+
+      }
+    }
+
 };
