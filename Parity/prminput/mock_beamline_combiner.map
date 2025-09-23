@@ -1,0 +1,16 @@
+# Differences
+[diff:@diff_bcm1h02a_bcm1h15]
+diff:bcm1h02a, 1
+diff:bcm1h15, -1
+
+[diff:@diff_bcm_target_bcm1h15]
+diff:bcm_target, 1
+diff:bcm1h15, -1
+
+[diff:@diff_bpm1h04x_bpm1h14x]
+diff:bpm1h04x, 1
+diff:bpm1h14x, -1
+
+[diff:@diff_bpm1h04x_bpm1h14y]
+diff:bpm1h04x, 1
+diff:bpm1h14y, -1
