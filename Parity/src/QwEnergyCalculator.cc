@@ -157,7 +157,7 @@ void QwEnergyCalculator::GetProjectedPosition(VQwBPM *device)
       }
      tmp.Scale(fTMatrixRatio[i]);
      //  And subtract it from the device we are trying to get the position of.
-     (device->GetPosition(VQwBPM::kXAxis))->operator-=(&tmp);
+     (device->GetPosition(VQwBPM::kXAxis))->operator-=(tmp);
    }
   } // end of for(UInt_t i = 0; i<fProperty.size(); i++)
 
