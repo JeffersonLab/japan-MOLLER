@@ -219,7 +219,7 @@ QwPromptSummary::~QwPromptSummary()
 {
 
   for (auto i=fElementList.begin() ; i!=fElementList.end();i++){
-  	delete *i;
+    delete i->second;
   }
   fElementList.clear();
 
@@ -334,9 +334,14 @@ QwPromptSummary::LoadElementsFromParameterFile(QwParameterFile& parameterfile)
 void 
 QwPromptSummary::AddElement(PromptSummaryElement *in)
 {
-  fElementList.push_back(in);
+  TString name = in->GetName(); name.ToLower();
+  fElementList[name] = in;
   if(fLocalDebug) {
-    printf("AddElement at pos %d\n", fElementList.size()-1);
+    printf("AddElement %s at pos %lu\n", in->GetName().Data(), fElementList.size()-1);
+  }
+  if (fElementList.size() == 1) {
+    QwMessage << "First element: " << in->GetName() << " will be reference" << QwLog::endl;
+    fReferenceElement = in;
   }
 };
 
@@ -344,23 +349,18 @@ QwPromptSummary::AddElement(PromptSummaryElement *in)
 PromptSummaryElement *
 QwPromptSummary::GetElementByName(TString name)
 {
-
-  
-  TString get_name = "";
-
-  for (auto i=fElementList.begin(); i!=fElementList.end(); i++  )
-    {
-      PromptSummaryElement* an_element = *i;
-      get_name   = an_element->GetName();
-      if( get_name.EqualTo(name) ) {
-	if(fLocalDebug) {
-	  std::cout << "System " << an_element->GetName()
-		    << " QwPromptSummary::GetElementByName address at" << an_element << std::endl;
-	}
-	return an_element;
-      }
+  name.ToLower();
+  if (fElementList.find(name) != fElementList.end()) {
+    PromptSummaryElement* an_element = fElementList[name];
+    if(fLocalDebug) {
+      std::cout << "System " << an_element->GetName()
+                << " QwPromptSummary::GetElementByName address at " << an_element << std::endl;
     }
-
+    return an_element;
+  } else {
+      std::cout << "System " << name
+                << " QwPromptSummary::GetElementByName not found" << std::endl;
+  }
   return NULL;
 };
 
@@ -396,17 +396,14 @@ QwPromptSummary::PrintCSVHeader(Int_t nEvents, TString start_time, TString end_t
   TString out = "";
    
   Double_t goodEvents = 0.0;
-  TString referenceElement = "N/A";
+  TString referenceElementName = "N/A";
   
   // Use the first element in the list to determine good events
-  if (!fElementList.empty()) {
-    PromptSummaryElement* first_elem = fElementList.front();
-    if (first_elem) {
-      goodEvents = first_elem->GetNumGoodEvents() * fPatternSize;
-      referenceElement = first_elem->GetName();
-    }
+  if (fReferenceElement) {
+    goodEvents = fReferenceElement->GetNumGoodEvents() * fPatternSize;
+    referenceElementName = fReferenceElement->GetName();
   } else {
-    QwError << "Warning: No elements found in QwPromptSummary. Setting goodEvents=0." << QwLog::endl;
+    QwError << "Warning: No reference element found in QwPromptSummary. Setting goodEvents=0." << QwLog::endl;
   }
 
   out += Form("Run: %d \n",fRunNumber);
@@ -414,7 +411,7 @@ QwPromptSummary::PrintCSVHeader(Int_t nEvents, TString start_time, TString end_t
   out += Form("Number of events processed: %i\n",nEvents);
   out += Form("Number of events in good multiplicity patterns: %3.0f\n", goodEvents);
   out += Form("Percentage of good events: %3.1f %%\n", goodEvents/nEvents*100);
-  out += Form("Good events reference: %s (first element from parameter file)\n", referenceElement.Data());
+  out += Form("Good events reference: %s (first element from parameter file)\n", referenceElementName.Data());
   out += "=========================================================================\n";
   out += "Yield Units: bcm(uA), cavq(uA), bpm(mm), sam(mV/uA)\n";
   out += "Asymmetry/Difference Units: bcm(ppm), cavq(ppm), bpm(um), sam(ppm)\n";
@@ -616,7 +613,7 @@ QwPromptSummary::PrintCSV(Int_t nEvents, TString start_time, TString end_time)
  
   for (auto i=fElementList.begin(); i!=fElementList.end(); i++  )
     {
-      output << (*i)->GetCSVSummary("yield") ;
+      output << i->second->GetCSVSummary("yield") ;
     }
   
 
@@ -627,7 +624,7 @@ QwPromptSummary::PrintCSV(Int_t nEvents, TString start_time, TString end_time)
  
   for ( auto j=fElementList.begin(); j!=fElementList.end(); j++ )
     {
-      output << (*j)->GetCSVSummary("asymmetry");
+      output << j->second->GetCSVSummary("asymmetry");
     }
 
 
@@ -639,7 +636,7 @@ QwPromptSummary::PrintCSV(Int_t nEvents, TString start_time, TString end_time)
 
   for ( auto j=fElementList.begin(); j!=fElementList.end(); j++ )
     {
-      output << (*j)->GetCSVSummary("double");
+      output << j->second->GetCSVSummary("double");
     }
 
   output<< "=========================================================================\n";
