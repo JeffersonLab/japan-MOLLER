@@ -1268,13 +1268,13 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator-= (const QwMollerADC_Channel 
       this->fHardwareBlockSumM2   = 0.0;
     } else {
       for (Int_t i=0; i<fBlocksPerEvent; i++){  
-        this->fBlock_raw[i] -= value.fBlock_raw[i];
-        this->fBlockSumSq_raw[i] -= value.fBlockSumSq_raw[i];
+        this->fBlock_raw[i] = 0;
+        this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
         this->fBlock_min[i] = TMath::Min(fBlock_min[i],value.fBlock_min[i]);
         this->fBlock_max[i] = TMath::Max(fBlock_max[i],value.fBlock_max[i]);    
       }
-      this->fHardwareBlockSum_raw -= value.fHardwareBlockSum_raw;
-      this->fSoftwareBlockSum_raw -= value.fSoftwareBlockSum_raw;
+      this->fHardwareBlockSum_raw = 0;
+      this->fSoftwareBlockSum_raw = 0;
     }
     // Both for calibrated and uncalibrated data
     this->fNumberOfSamples     += value.fNumberOfSamples; // Note: + since statistical power increases
