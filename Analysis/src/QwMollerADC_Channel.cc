@@ -1303,15 +1303,17 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator*= (const QwMollerADC_Channel 
       this->fHardwareBlockSum    *= value.fHardwareBlockSum;
       this->fHardwareBlockSumM2   = 0.0;
     } else {
-      this->fBlock_raw[i] *= value.fBlock_raw[i];
-      if(fBlockSumSq_raw[i] != 0){
-        this->fBlockSumSq_raw[i] *= value.fBlockSumSq_raw[i];
-        this->fBlock_min[i] *= value.fBlock_min[i];
-        this->fBlock_max[i] *= value.fBlock_max[i];
-      } else {
-        this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
-        this->fBlock_min[i] = value.fBlock_min[i];
-        this->fBlock_max[i] = value.fBlock_max[i];
+      for (Int_t i=0; i<fBlocksPerEvent; i++){
+        this->fBlock_raw[i] *= value.fBlock_raw[i];
+        if(fBlockSumSq_raw[i] != 0){
+          this->fBlockSumSq_raw[i] *= value.fBlockSumSq_raw[i];
+          this->fBlock_min[i] *= value.fBlock_min[i];
+          this->fBlock_max[i] *= value.fBlock_max[i];
+        } else {
+          this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
+          this->fBlock_min[i] = value.fBlock_min[i];
+          this->fBlock_max[i] = value.fBlock_max[i];
+        }
       }
     }
     // Both for calibrated and uncalibrated data
