@@ -1115,9 +1115,9 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator= (const QwMollerADC_Channel &
     this->fHardwareBlockSumM2 = value.fHardwareBlockSumM2;
     this->fHardwareBlockSumError = value.fHardwareBlockSumError;
     this->fNumberOfSamples = value.fNumberOfSamples;
-    this->fSequenceNumber  = value.fSequenceNumber;
-   
-
+    this->fSequenceNumber = value.fSequenceNumber;
+    this->fCalibrated = value.fCalibrated;
+    // Note: fErrorFlag is not assigned
   }
   return *this;
 }
@@ -1145,6 +1145,7 @@ void QwMollerADC_Channel::AssignScaledValue(const QwMollerADC_Channel &value,
     this->fGoodEventCount  = value.fGoodEventCount;
     this->fNumberOfSamples = value.fNumberOfSamples;
     this->fSequenceNumber  = value.fSequenceNumber;
+    this->fCalibrated      = value.fCalibrated;
     this->fErrorFlag       = value.fErrorFlag;
   }
 }
@@ -1515,6 +1516,7 @@ void QwMollerADC_Channel::Product(const QwMollerADC_Channel &value1, const QwMol
     this->fHardwareBlockSum = value1.fHardwareBlockSum * value2.fHardwareBlockSum;
     this->fNumberOfSamples = value1.fNumberOfSamples;
     this->fSequenceNumber  = 0;
+    this->fCalibrated      = value1.fCalibrated;
     this->fErrorFlag       = (value1.fErrorFlag|value2.fErrorFlag);
   }
   return;
