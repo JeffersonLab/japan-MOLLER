@@ -170,6 +170,18 @@ public:
   virtual VQwHardwareChannel& operator*=(const VQwHardwareChannel* input) = 0;
   virtual VQwHardwareChannel& operator/=(const VQwHardwareChannel* input) = 0;
 
+  /*! \brief Sum operator */
+  void Sum(const VQwHardwareChannel &value1, const VQwHardwareChannel &value2)
+  { 
+    *this =   value1;
+    *this += &value2;
+  }
+  /*! \brief Difference operator */
+  void Difference(const VQwHardwareChannel &value1, const VQwHardwareChannel &value2)
+  { 
+    *this =   value1;
+    *this -= &value2;
+  }
 
   virtual void ScaledAdd(Double_t scale, const VQwHardwareChannel *value) = 0;
 

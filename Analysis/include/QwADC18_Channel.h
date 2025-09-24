@@ -145,8 +145,6 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   const QwADC18_Channel operator+ (const QwADC18_Channel &value) const;
   const QwADC18_Channel operator- (const QwADC18_Channel &value) const;
   const QwADC18_Channel operator* (const QwADC18_Channel &value) const;
-  void Sum(const QwADC18_Channel &value1, const QwADC18_Channel &value2);
-  void Difference(const QwADC18_Channel &value1, const QwADC18_Channel &value2);
   void Ratio(const QwADC18_Channel &numer, const QwADC18_Channel &denom);
   void Product(const QwADC18_Channel &value1, const QwADC18_Channel &value2);
   void DivideBy(const QwADC18_Channel& denom);

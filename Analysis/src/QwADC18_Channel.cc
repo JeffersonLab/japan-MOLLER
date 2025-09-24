@@ -947,20 +947,6 @@ VQwHardwareChannel& QwADC18_Channel::operator/=(const VQwHardwareChannel *source
   }
   return *this;
 }
-
-
-void QwADC18_Channel::Sum(const QwADC18_Channel &value1, const QwADC18_Channel &value2)
-{
-  *this  = value1;
-  *this += value2;
-}
-
-void QwADC18_Channel::Difference(const QwADC18_Channel &value1, const QwADC18_Channel &value2)
-{
-  *this  = value1;
-  *this -= value2;
-}
-
 void QwADC18_Channel::Ratio(const QwADC18_Channel &numer, const QwADC18_Channel &denom)
 {
   if (!IsNameEmpty()) {
