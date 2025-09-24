@@ -395,15 +395,13 @@ void QwMollerADC_Channel::SetRawEventData(){
     fBlockSumSq_raw[4] += fBlockSumSq_raw[i];
     fBlock_min[4] = TMath::Min(fBlock_min[i],fBlock_min[4]);
     fBlock_max[4] = TMath::Max(fBlock_max[i],fBlock_max[4]);
-
-    fCalibrated = kFALSE;
-  }
+    }
 
 
 
   fSoftwareBlockSum_raw = fHardwareBlockSum_raw;
 
-  return;
+  fCalibrated = kFALSE;
 }
 
 void QwMollerADC_Channel::EncodeEventData(std::vector<UInt_t> &buffer)
