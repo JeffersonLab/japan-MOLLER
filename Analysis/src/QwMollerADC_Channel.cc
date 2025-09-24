@@ -1313,7 +1313,9 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator*= (const QwMollerADC_Channel 
           this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
           this->fBlock_min[i] = value.fBlock_min[i];
           this->fBlock_max[i] = value.fBlock_max[i];
-        }
+          }
+        this->fHardwareBlockSum_raw *= value.fHardwareBlockSum_raw;
+        this->fSoftwareBlockSum_raw *= value.fSoftwareBlockSum_raw;
       }
     }
     // Both for calibrated and uncalibrated data
