@@ -46,7 +46,7 @@ jobs:
           run: |
             echo "::group::Dependencies"
             # Install dependencies
-            dnf install time
+            PYTHONHOME="" PYTHONPATH="" dnf install time
             echo "::endgroup::"
 
             echo "::group::Configuration"
