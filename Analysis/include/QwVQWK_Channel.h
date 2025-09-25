@@ -63,12 +63,13 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
 
  public:
   QwVQWK_Channel(): MQwMockable() {
-    InitializeChannel("","");
+    // InitializeChannel("",""); // Moved to separate Init method to avoid virtual call during construction
     SetVQWKSaturationLimt(8.5);//set the default saturation limit
   };
   QwVQWK_Channel(TString name, TString datatosave = "raw"): MQwMockable() {
-    InitializeChannel(name, datatosave);
+    // InitializeChannel(name, datatosave); // Moved to separate Init method to avoid virtual call during construction
     SetVQWKSaturationLimt(8.5);//set the default saturation limit
+    // NOTE: Call InitializeChannel() explicitly after construction
   };
   QwVQWK_Channel(const QwVQWK_Channel& value): 
     VQwHardwareChannel(value), MQwMockable(value),
@@ -107,6 +108,14 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
 
   /// \brief Initialize the fields in this object
   void  InitializeChannel(TString subsystem, TString instrumenttype, TString name, TString datatosave);
+  
+  /// \brief Post-construction initialization - call after constructor to avoid virtual calls during construction
+  void PostConstructionInit(TString name = "", TString datatosave = "raw") {
+    VQwHardwareChannel::PostConstructionInit();
+    if (!name.IsNull()) {
+      InitializeChannel(name, datatosave);
+    }
+  }
 
   void LoadChannelParameters(QwParameterFile &paramfile);
 
@@ -138,7 +147,9 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   /// Encode the event data into a CODA buffer
   void  EncodeEventData(std::vector<UInt_t> &buffer);
   /// Decode the event data from a CODA buffer
-  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t index = 0);
+    Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t index=0) {\n    CheckInitialization(\"QwVQWK_Channel::ProcessEvBuffer\");\n    return ProcessEvBufferImpl(buffer, num_words_left, index);\n  }\n  \nprivate:\n  Int_t ProcessEvBufferImpl(UInt_t* buffer, UInt_t num_words_left, UInt_t index=0);
+  
+public:
   /// Process the event data according to pedestal and calibration factor
   void  ProcessEvent();
 

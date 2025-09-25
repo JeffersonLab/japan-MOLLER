@@ -37,18 +37,21 @@ template<typename T> class QwBCM : public VQwBCM {
  public:
   QwBCM(): VQwBCM(fBeamCurrent) { };
   QwBCM(TString name): VQwBCM(fBeamCurrent,name) {
-    InitializeChannel(name,"raw");
+    // InitializeChannel(name,"raw"); // Moved to avoid virtual call during construction
+    // NOTE: Call InitializeChannel(name,"raw") explicitly after construction
   };
   QwBCM(TString subsystemname, TString name)
   : VQwBCM(fBeamCurrent,name) {
     SetSubsystemName(subsystemname);
-    InitializeChannel(subsystemname,name,"raw");
+    // InitializeChannel(subsystemname,name,"raw"); // Moved to avoid virtual call during construction
+    // NOTE: Call InitializeChannel(subsystemname,name,"raw") explicitly after construction
   };
   QwBCM(TString subsystemname, TString name, TString type, TString clock = "")
   : VQwBCM(fBeamCurrent,name) {
     fBeamCurrent.SetExternalClockName(clock.Data());
     SetSubsystemName(subsystemname);
-    InitializeChannel(subsystemname,name,type,"raw");
+    // InitializeChannel(subsystemname,name,type,"raw"); // Moved to avoid virtual call during construction
+    // NOTE: Call InitializeChannel(subsystemname,name,type,"raw") explicitly after construction
   };
   QwBCM(const QwBCM& source)
   : VQwBCM(source),

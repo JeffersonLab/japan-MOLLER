@@ -41,7 +41,8 @@ class QwLinearDiodeArray : public VQwBPM {
   };
   QwLinearDiodeArray(TString subsystemname, TString name):VQwBPM(name){
     SetSubsystemName(subsystemname);
-    InitializeChannel(subsystemname, name);
+    // InitializeChannel(subsystemname, name); // Moved to avoid virtual call during construction
+    // NOTE: Call InitializeChannel(subsystemname, name) explicitly after construction
   };    
   QwLinearDiodeArray(const QwLinearDiodeArray& source)
   : VQwBPM(source),

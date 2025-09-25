@@ -47,24 +47,27 @@ class QwBPMStripline : public VQwBPM {
  public:
   QwBPMStripline() { };
   QwBPMStripline(TString name) {
-    InitializeChannel(name);
+    // InitializeChannel(name); // Moved to avoid virtual call during construction
     fRotationAngle = 45.0;
     SetRotation(fRotationAngle);
     bRotated=kTRUE;
+    // NOTE: Call InitializeChannel(name) explicitly after construction
   };
   QwBPMStripline(TString subsystemname, TString name) {
     SetSubsystemName(subsystemname);
-    InitializeChannel(subsystemname, name);
+    // InitializeChannel(subsystemname, name); // Moved to avoid virtual call during construction
     fRotationAngle = 45.0;
     SetRotation(fRotationAngle);
     bRotated=kTRUE;
+    // NOTE: Call InitializeChannel(subsystemname, name) explicitly after construction
   };
   QwBPMStripline(TString subsystemname, TString name, TString type) {
     SetSubsystemName(subsystemname);
-    InitializeChannel(subsystemname, name, type);
+    // InitializeChannel(subsystemname, name, type); // Moved to avoid virtual call during construction
     fRotationAngle = 45.0;
     SetRotation(fRotationAngle);
     bRotated=kTRUE;
+    // NOTE: Call InitializeChannel(subsystemname, name, type) explicitly after construction
   };
   QwBPMStripline(const QwBPMStripline& source)
   : VQwBPM(source),
