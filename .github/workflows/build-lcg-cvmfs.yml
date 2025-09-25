@@ -67,11 +67,13 @@ jobs:
             source SetupFiles/SET_ME_UP.bash
             
             # Generate mock data
+            /usr/bin/time -v \
             build/qwmockdatagenerator -r 4 -e 1:20000 --config qwparity_simple.conf --detectors mock_newdets.map --data .
             echo "::endgroup::"
             
             echo "::group::Mock data analysis"
             # Analyze the generated mock data
+            /usr/bin/time -v \
             build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary
             echo "::endgroup::"
 
