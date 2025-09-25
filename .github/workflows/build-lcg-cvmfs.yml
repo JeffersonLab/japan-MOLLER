@@ -44,6 +44,11 @@ jobs:
         with:
           release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           run: |
+            echo "::group::Dependencies"
+            # Install dependencies
+            dnf install time
+            echo "::endgroup::"
+
             echo "::group::Configuration"
             # Set BOOST_INC_DIR and BOOST_LIB_DIR to point to
             # LCG-provided Boost installation
