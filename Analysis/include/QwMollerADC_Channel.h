@@ -323,7 +323,6 @@ private:
   /*! \name Event data members---Potentially calibrated values*/
   // @{
   // The following values potentially have pedestal removed  and calibration applied
-  Bool_t fCalibrated{kFALSE};  ///< Flag to indicate if the channel has been calibrated
   Double_t fBlock[4];          ///< Array of the sub-block data
   Double_t fHardwareBlockSum;  ///< Module-based sum of the four sub-blocks
   // @}
