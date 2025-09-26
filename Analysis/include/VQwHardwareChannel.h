@@ -179,7 +179,7 @@ public:
   Double_t GetCalibrationFactor() const          { return fCalibrationFactor; };
 
   void AddEntriesToList(std::vector<QwDBInterface> &row_list);
-  virtual void AddErrEntriesToList(std::vector<QwErrDBInterface> &row_list) {};
+  virtual void AddErrEntriesToList(std::vector<QwErrDBInterface> & /*row_list*/) {};
 
   
   virtual void AccumulateRunningSum(const VQwHardwareChannel *value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF){
@@ -207,7 +207,7 @@ public:
   virtual void FillNTupleVector(std::vector<Double_t>& values) const = 0;
 #endif // HAS_RNTUPLE_SUPPORT
 
-  virtual void CopyParameters(const VQwHardwareChannel* valueptr){};
+  virtual void CopyParameters(const VQwHardwareChannel* /*valueptr*/){};
 
  protected:
   /*! \brief Set the number of data words in this data element */

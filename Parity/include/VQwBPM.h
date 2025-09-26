@@ -63,7 +63,7 @@ class VQwBPM : public VQwDataElement {
  public:
   // Default constructor
   VQwBPM() {InitializeChannel_base();};
-  VQwBPM(TString& name) {InitializeChannel_base();};
+  VQwBPM(TString& /*name*/) {InitializeChannel_base();};
   VQwBPM(const VQwBPM& source)
   : VQwDataElement(source),
     bRotated(source.bRotated),
@@ -82,7 +82,7 @@ class VQwBPM : public VQwDataElement {
 
 //-------------------------------------------------------------------------------------
 
-  virtual  void    GetProjectedPosition(VQwBPM *device){}; // The base class function GetProjectedPosition is defined to have no effect.
+  virtual  void    GetProjectedPosition(VQwBPM * /*device*/){}; // The base class function GetProjectedPosition is defined to have no effect.
   virtual  size_t  GetNumberOfElements(){return size_t(1);}
   virtual  void    FillRawEventData() 
     {std::cerr << "FillRawEventData for VQwBPM not implemented for device " << GetElementName() << "!\n";};
@@ -99,7 +99,7 @@ class VQwBPM : public VQwDataElement {
   virtual UInt_t UpdateErrorFlag() = 0;
   virtual void UpdateErrorFlag(const VQwBPM *ev_error) = 0;
 
-  virtual void Scale(Double_t factor) {
+  virtual void Scale(Double_t /*factor*/) {
     std::cerr << "Scale for VQwBPM not implemented!\n";
   }
   void SetGains(TString pos, Double_t value);
@@ -164,7 +164,7 @@ public:
 /*   void PrintValue() const; */
 /*   void PrintInfo() const; */
   virtual void CalculateRunningAverage() = 0;
-  virtual void AccumulateRunningSum(const VQwBPM& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) {
+  virtual void AccumulateRunningSum(const VQwBPM& /*value*/, Int_t /*count*/=0, Int_t /*ErrorMask*/=0xFFFFFFF) {
     std::cerr << "AccumulateRunningSum not implemented for BPM named="
       <<GetElementName()<<"\n";
   };
@@ -190,7 +190,7 @@ public:
   virtual std::vector<QwErrDBInterface> GetErrDBEntry() = 0;
 #endif // __USE_DATABASE__
 
-  virtual void Ratio(VQwBPM &numer, VQwBPM &denom) {
+  virtual void Ratio(VQwBPM & /*numer*/, VQwBPM & /*denom*/) {
     std::cerr << "Ratio() is not defined for BPM named="<<GetElementName()<<"\n";
   }
 
@@ -200,7 +200,7 @@ public:
 /*       <<GetElementName()<< "!!\n"; */
 /*     return 0; */
 /*   } */
-  virtual TString GetSubElementName(Int_t subindex) {
+  virtual TString GetSubElementName(Int_t /*subindex*/) {
     std::cerr << "GetSubElementName()  is not implemented!! for device: " << GetElementName() << "\n";
     return TString("OBJECT_UNDEFINED"); // Return an erroneous TString
   }
@@ -226,13 +226,13 @@ public:
       "used in a CombinedBPM!\n";
     return 0;
   }
-  virtual void SetBPMForCombo(const VQwBPM* bpm, Double_t charge_weight,
-      Double_t x_weight, Double_t y_weight,Double_t sumqw) {
+  virtual void SetBPMForCombo(const VQwBPM* /*bpm*/, Double_t /*charge_weight*/,
+      Double_t /*x_weight*/, Double_t /*y_weight*/,Double_t /*sumqw*/) {
     std::cerr << "VQwBPM::SetBPMForCombo only defined for CombinedBPM's!!!\n";
   }
 
 
-  virtual void SetDefaultSampleSize(Int_t sample_size) {
+  virtual void SetDefaultSampleSize(Int_t /*sample_size*/) {
     std::cerr << "SetDefaultSampleSize() is undefined!!!\n";
   }
 
@@ -241,31 +241,31 @@ public:
     fResolution[kYAxis] = resolutionY;
   }
 
-  virtual void SetRandomEventParameters(Double_t meanX, Double_t sigmaX, Double_t meanY, Double_t sigmaY) {
+  virtual void SetRandomEventParameters(Double_t /*meanX*/, Double_t /*sigmaX*/, Double_t /*meanY*/, Double_t /*sigmaY*/) {
     std::cerr<< "SetRandomEventParameters undefined!!\n";
   }
-  virtual void SetRandomEventParameters(Double_t meanX, Double_t sigmaX, Double_t meanY, Double_t sigmaY,Double_t meanXslope, Double_t sigmaXslope, Double_t meanYslope, Double_t sigmaYslope) {
+  virtual void SetRandomEventParameters(Double_t /*meanX*/, Double_t /*sigmaX*/, Double_t /*meanY*/, Double_t /*sigmaY*/,Double_t /*meanXslope*/, Double_t /*sigmaXslope*/, Double_t /*meanYslope*/, Double_t /*sigmaYslope*/) {
     std::cerr<< "SetRandomEventParameters undefined!!\n";
   }
-  virtual void SetRandomEventAsymmetry(Double_t asymmetry) {
+  virtual void SetRandomEventAsymmetry(Double_t /*asymmetry*/) {
     std::cerr<< "SetRandomEventAsymmetry undefined!!\n";
   }
-  virtual void RandomizeEventData(int helicity = 0, double time = 0.0) {
+  virtual void RandomizeEventData(int /*helicity*/ = 0, double /*time*/ = 0.0) {
     std::cerr << "RandomizeEventData is undefined for device" << GetElementName() << "!!!\n";
   }
   virtual void ApplyResolutionSmearing(){
     std::cerr << "ApplyResolutionSmearing is undefined" << GetElementName() << "!!!\n";
   }
-  virtual void ApplyResolutionSmearing(EBeamPositionMonitorAxis iaxis){
+  virtual void ApplyResolutionSmearing(EBeamPositionMonitorAxis /*iaxis*/){
     std::cerr << "ApplyResolutionSmearing(EBeamPositionMonitorAxis iaxis) is undefined!!!\n";
   }
-  virtual void EncodeEventData(std::vector<UInt_t> &buffer) {
+  virtual void EncodeEventData(std::vector<UInt_t> & /*buffer*/) {
     std::cerr << "EncodeEventData is undefined!!!\n";
   }
-  virtual void SetSubElementPedestal(Int_t j, Double_t value) {
+  virtual void SetSubElementPedestal(Int_t /*j*/, Double_t /*value*/) {
     std::cerr << "SetSubElementPedestal is undefined!!!\n";
   }
-  virtual void SetSubElementCalibrationFactor(Int_t j, Double_t value) {
+  virtual void SetSubElementCalibrationFactor(Int_t /*j*/, Double_t /*value*/) {
     std::cerr << "SetSubElementCalibrationFactor is undefined!!!\n";
   }
   virtual void PrintInfo() const { 

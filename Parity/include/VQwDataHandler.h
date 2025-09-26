@@ -51,12 +51,12 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
       fErrorFlagPtr = ptr->GetEventcutErrorFlagPointer();
     };
 
-    virtual Int_t ConnectChannels(QwSubsystemArrayParity& yield, QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff){
+    virtual Int_t ConnectChannels(QwSubsystemArrayParity& /*yield*/, QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff){
       return this->ConnectChannels(asym, diff);
     }
 
     // Subsystems with support for subsystem arrays should override this
-    virtual Int_t ConnectChannels(QwSubsystemArrayParity& detectors) { return 0; }
+    virtual Int_t ConnectChannels(QwSubsystemArrayParity& /*detectors*/) { return 0; }
 
     Int_t ConnectChannels(QwHelicityPattern& helicitypattern) {
       return this->ConnectChannels(
@@ -84,7 +84,7 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
     virtual void AccumulateRunningSum(VQwDataHandler &value, Int_t count = 0, Int_t ErrorMask = 0xFFFFFFF);
     void CalculateRunningAverage();
     void PrintValue() const;
-    void FillDB(QwParityDB *db, TString datatype){};
+    void FillDB(QwParityDB * /*db*/, TString /*datatype*/){};
 
     void WritePromptSummary(QwPromptSummary *ps, TString type);
 
@@ -102,7 +102,7 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
     virtual void FillNTupleFields(QwRootFile *treerootfile);
 
     /// \brief Construct the histograms in a folder with a prefix
-    virtual void  ConstructHistograms(TDirectory *folder, TString &prefix) { };
+    virtual void  ConstructHistograms(TDirectory * /*folder*/, TString & /*prefix*/) { };
     /// \brief Fill the histograms
     virtual void  FillHistograms() { };
 
@@ -120,7 +120,7 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
     }
 
     Int_t LoadChannelMap(){return this->LoadChannelMap(fMapFile);}
-    virtual Int_t LoadChannelMap(const std::string& mapfile){return 0;};
+    virtual Int_t LoadChannelMap(const std::string& /*mapfile*/){return 0;};
 
     /// \brief Publish all variables of the subsystem
     virtual Bool_t PublishInternalValues() const;
