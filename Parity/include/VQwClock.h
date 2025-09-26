@@ -14,6 +14,9 @@
 
 // ROOT headers
 #include <TTree.h>
+#ifdef HAS_RNTUPLE_SUPPORT
+#include <ROOT/RNTupleModel.hxx>
+#endif // HAS_RNTUPLE_SUPPORT
 
 #include "QwParameterFile.h"
 #include "VQwDataElement.h"
@@ -50,7 +53,7 @@ public:
   virtual void  FillHistograms() = 0;
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   virtual void SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel) = 0;
-  virtual void Ratio( const VQwClock &numer, const VQwClock &denom)
+  virtual void Ratio( const VQwClock &/*numer*/, const VQwClock &/*denom*/)
     { std::cerr << "Ratio not defined! (VQwClock)" << std::endl; }
   virtual void ClearEventData() = 0;
 
@@ -73,6 +76,10 @@ public:
   virtual void ConstructBranch(TTree *tree, TString &prefix) = 0;
   virtual void ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist) = 0;
   virtual void FillTreeVector(std::vector<Double_t> &values) const = 0;
+#ifdef HAS_RNTUPLE_SUPPORT
+  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
+  virtual void FillNTupleVector(std::vector<Double_t>& values) const = 0;
+#endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
   virtual std::vector<QwDBInterface> GetDBEntry() = 0;

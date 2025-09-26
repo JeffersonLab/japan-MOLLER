@@ -3,6 +3,7 @@
 
 #include "QwColor.h"
 #include "QwLog.h"
+#include "QwParameterFile.h"
 
 #include "TROOT.h"
 #include "TMath.h"
@@ -208,6 +209,21 @@ QwPromptSummary::QwPromptSummary(Int_t run_number, Int_t runlet_number)
 };
 
 
+QwPromptSummary::QwPromptSummary(Int_t run_number, Int_t runlet_number, const std::string& parameter_file)
+{
+  fRunNumber    = run_number;
+  fRunletNumber = runlet_number;
+
+ 
+  fNElements = 0;
+
+  fLocalDebug = kFALSE;
+  
+  this->LoadElementsFromParameterFile(parameter_file);
+
+};
+
+
 QwPromptSummary::~QwPromptSummary()
 {
 
@@ -223,9 +239,34 @@ QwPromptSummary::~QwPromptSummary()
 void 
 QwPromptSummary::SetupElementList()
 {
-
+  // Try to load from default parameter file first
+  std::string default_param_file = "prompt_summary.map";
   
-/* 
+  try {
+    QwParameterFile paramfile(default_param_file);
+    LoadElementsFromParameterFile(paramfile);
+    if (fNElements > 0) {
+      QwMessage << "QwPromptSummary: Loaded " << fNElements << " elements from " << default_param_file << QwLog::endl;
+      return; // Successfully loaded from file
+    }
+  } catch (const std::exception& e) {
+    if (fLocalDebug) {
+      QwMessage << "QwPromptSummary: Could not load from " << default_param_file 
+                << ", using default elements: " << e.what() << QwLog::endl;
+    }
+  }
+  
+  // Fall back to default hard-coded elements if parameter file not found or empty
+  QwMessage << "QwPromptSummary: Using default hard-coded element list" << QwLog::endl;
+  
+  // Add the originally commented out elements
+  this->AddElement(new PromptSummaryElement("bcm_an_us"));
+  this->AddElement(new PromptSummaryElement("bcm_an_ds"));
+  this->AddElement(new PromptSummaryElement("bcm_an_ds3"));
+  this->AddElement(new PromptSummaryElement("bcm_an_ds10"));
+  this->AddElement(new PromptSummaryElement("bcm_dg_us"));
+  this->AddElement(new PromptSummaryElement("bcm_dg_ds"));
+  
   this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_an_ds"));
   this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_an_ds3"));
   this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_an_ds10"));
@@ -241,14 +282,93 @@ QwPromptSummary::SetupElementList()
   this->AddElement(new PromptSummaryElement("bcm_an_ds3-bcm_dg_us"));
   this->AddElement(new PromptSummaryElement("bcm_an_ds3-bcm_dg_ds"));
 
-  
   this->AddElement(new PromptSummaryElement("bcm_an_ds10-bcm_dg_us"));
   this->AddElement(new PromptSummaryElement("bcm_an_ds10-bcm_dg_ds"));
 
   this->AddElement(new PromptSummaryElement("bcm_dg_us-bcm_dg_ds"));
 
-*/   
+};
 
+
+void 
+QwPromptSummary::LoadElementsFromParameterFile(const std::string& parameter_file)
+{
+  try {
+    QwParameterFile paramfile(parameter_file);
+    LoadElementsFromParameterFile(paramfile);
+  } catch (const std::exception& e) {
+    QwError << "QwPromptSummary::LoadElementsFromParameterFile: Unable to open parameter file: " 
+            << parameter_file << " - " << e.what() << QwLog::endl;
+    QwMessage << "Falling back to default (empty) element list." << QwLog::endl;
+  }
+};
+
+
+void 
+QwPromptSummary::LoadElementsFromParameterFile(QwParameterFile& parameterfile)
+{
+  QwMessage << "QwPromptSummary::LoadElementsFromParameterFile: Loading prompt summary elements" << QwLog::endl;
+  
+  // Read preamble
+  QwParameterFile* preamble = parameterfile.ReadSectionPreamble();
+  if (preamble) {
+    QwVerbose << "PromptSummary preamble:" << QwLog::endl;
+    QwVerbose << *preamble << QwLog::endl;
+    delete preamble;
+  }
+  
+  // Read sections
+  QwParameterFile* section;
+  std::string section_name;
+  while ((section = parameterfile.ReadNextSection(section_name))) {
+    QwVerbose << "Processing section: " << section_name << QwLog::endl;
+    
+    // Check if this is a prompt summary elements section
+    if (section_name == "prompt_summary_elements" || section_name == "elements") {
+      // Process individual elements in this section
+      while (section->ReadNextLine()) {
+        section->TrimWhitespace();
+        section->TrimComment();
+        if (section->LineIsEmpty()) continue;
+        
+        std::string line = section->GetLine();
+        
+        // Parse element definitions
+        // Format 1: Simple element name
+        // Format 2: element_name = type (where type could be single, difference, etc.)
+        
+        std::string element_name, element_type;
+        if (section->HasVariablePair("=", element_name, element_type)) {
+          // Format: element_name = type
+          // Trim whitespace manually since TrimWhitespace is protected
+          element_name.erase(0, element_name.find_first_not_of(" \t\r\n"));
+          element_name.erase(element_name.find_last_not_of(" \t\r\n") + 1);
+          element_type.erase(0, element_type.find_first_not_of(" \t\r\n"));
+          element_type.erase(element_type.find_last_not_of(" \t\r\n") + 1);
+          
+          if (fLocalDebug) {
+            QwMessage << "Adding element: " << element_name << " (type: " << element_type << ")" << QwLog::endl;
+          }
+        } else {
+          // Format: simple element name
+          element_name = line;
+          element_type = "single"; // default type
+          
+          if (fLocalDebug) {
+            QwMessage << "Adding element: " << element_name << " (default type)" << QwLog::endl;
+          }
+        }
+        
+        // Create and add the element
+        if (!element_name.empty()) {
+          this->AddElement(new PromptSummaryElement(TString(element_name.c_str())));
+        }
+      }
+    }
+    delete section;
+  }
+  
+  QwMessage << "QwPromptSummary: Loaded " << fNElements << " elements from parameter file" << QwLog::endl;
 };
 
 
@@ -321,13 +441,26 @@ QwPromptSummary::PrintCSVHeader(Int_t nEvents, TString start_time, TString end_t
 {
   TString out = "";
    
-  Double_t goodEvents = ((this->GetElementByName("bcm_an_us"))->GetNumGoodEvents())*fPatternSize;
+  Double_t goodEvents = 0.0;
+  TString referenceElement = "N/A";
+  
+  // Use the first element in the list to determine good events
+  if (!fElementList.empty()) {
+    PromptSummaryElement* first_elem = fElementList.front();
+    if (first_elem) {
+      goodEvents = first_elem->GetNumGoodEvents() * fPatternSize;
+      referenceElement = first_elem->GetName();
+    }
+  } else {
+    QwError << "Warning: No elements found in QwPromptSummary. Setting goodEvents=0." << QwLog::endl;
+  }
 
   out += Form("Run: %d \n",fRunNumber);
   out += "Start Time: "+start_time+"\nEnd Time: "+end_time+"\n";
   out += Form("Number of events processed: %i\n",nEvents);
   out += Form("Number of events in good multiplicity patterns: %3.0f\n", goodEvents);
-  out += Form("Percentage of good events: %3.1f \%\n", goodEvents/nEvents*100);
+  out += Form("Percentage of good events: %3.1f %%\n", goodEvents/nEvents*100);
+  out += Form("Good events reference: %s (first element from parameter file)\n", referenceElement.Data());
   out += "=========================================================================\n";
   out += "Yield Units: bcm(uA), cavq(uA), bpm(mm), sam(mV/uA)\n";
   out += "Asymmetry/Difference Units: bcm(ppm), cavq(ppm), bpm(um), sam(ppm)\n";

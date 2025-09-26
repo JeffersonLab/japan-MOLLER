@@ -13,6 +13,10 @@
 
 // ROOT headers
 #include "TTree.h"
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "VQwSubsystemParity.h"
@@ -134,6 +138,12 @@ class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneab
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file);
   void  FillTreeVector(std::vector<Double_t> &values) const;
+
+#ifdef HAS_RNTUPLE_SUPPORT
+  // RNTuple methods  
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+  void  FillNTupleVector(std::vector<Double_t>& values) const;
+#endif
 #ifdef __USE_DATABASE__
   void  FillDB(QwParityDB *db, TString datatype);
   void  FillErrDB(QwParityDB *db, TString datatype);

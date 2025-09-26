@@ -137,10 +137,10 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   QwADC18_Channel& operator-= (const QwADC18_Channel &value);
   QwADC18_Channel& operator*= (const QwADC18_Channel &value);
 
-  VQwHardwareChannel& operator+=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator-=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator*=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator/=(const VQwHardwareChannel* input);
+  VQwHardwareChannel& operator+=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator-=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator*=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator/=(const VQwHardwareChannel& input) override;
 
   const QwADC18_Channel operator+ (const QwADC18_Channel &value) const;
   const QwADC18_Channel operator- (const QwADC18_Channel &value) const;
@@ -212,6 +212,10 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  FillTreeVector(std::vector<Double_t> &values) const;
+#ifdef HAS_RNTUPLE_SUPPORT
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+  void  FillNTupleVector(std::vector<Double_t>& values) const;
+#endif // HAS_RNTUPLE_SUPPORT
 
   Double_t GetAverageVolts() const;
 

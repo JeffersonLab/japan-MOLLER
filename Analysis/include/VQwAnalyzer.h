@@ -10,6 +10,9 @@ class VQwAnalyzer : public VQwSystem {
 
   private:
     VQwAnalyzer& operator= (const VQwAnalyzer &value) {
+      if (this != &value) {
+        // Private assignment operator - no implementation needed
+      }
       return *this;
     };
 

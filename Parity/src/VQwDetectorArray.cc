@@ -10,6 +10,12 @@
 // System headers
 #include <sstream>
 
+#ifdef HAS_RNTUPLE_SUPPORT
+// ROOT headers for RNTuple support
+#include <ROOT/RNTupleModel.hxx>
+#include <ROOT/RNTupleWriter.hxx>
+#endif
+
 // Qweak headers
 #include "QwSubsystemArray.h"
 #include "QwLog.h"
@@ -1344,6 +1350,32 @@ void VQwDetectorArray::FillTreeVector(std::vector<Double_t> &values) const {
 
 }
 
+#ifdef HAS_RNTUPLE_SUPPORT
+void VQwDetectorArray::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) {
+
+    for (size_t i=0;i<fIntegrationPMT.size();i++)
+     fIntegrationPMT[i].ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+
+    for (size_t i=0;i<fCombinedPMT.size();i++)
+     fCombinedPMT[i].ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+
+    return;
+
+}
+
+void VQwDetectorArray::FillNTupleVector(std::vector<Double_t>& values) const {
+
+    for (size_t i=0;i<fIntegrationPMT.size();i++)
+     fIntegrationPMT[i].FillNTupleVector(values);
+
+    for (size_t i=0;i<fCombinedPMT.size();i++)
+     fCombinedPMT[i].FillNTupleVector(values);
+
+    return;
+
+}
+#endif
+
 
 const QwIntegrationPMT* VQwDetectorArray::GetChannel(const TString name) const {
 
@@ -1387,7 +1419,7 @@ VQwSubsystem&  VQwDetectorArray::operator=  (VQwSubsystem *value) {
 
     //  std::cout<<" here in VQwDetectorArray::operator= \n";
 
-    if (Compare(value)) {
+    if (this != value && Compare(value)) {
 
         //VQwSubsystem::operator=(value);
         VQwDetectorArray* input = dynamic_cast<VQwDetectorArray*> (value);

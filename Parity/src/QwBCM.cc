@@ -10,6 +10,12 @@
 // System headers
 #include <stdexcept>
 
+// ROOT headers for RNTuple support
+#ifdef HAS_RNTUPLE_SUPPORT
+#include <ROOT/RNTupleModel.hxx>
+#include <ROOT/RNTupleWriter.hxx>
+#endif // HAS_RNTUPLE_SUPPORT
+
 // Qweak database headers
 #ifdef __USE_DATABASE__
 #include "QwDBInterface.h"
@@ -538,6 +544,30 @@ void QwBCM<T>::FillTreeVector(std::vector<Double_t> &values) const
       // this functions doesn't do anything yet
     }
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+template<typename T>
+void QwBCM<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  if (this->GetElementName()==""){
+    //  This channel is not used, so skip
+  } else
+    {
+      fBeamCurrent.ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+    }
+}
+
+template<typename T>
+void QwBCM<T>::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (this->GetElementName()==""){
+    //  This channel is not used, so skip filling.
+  } else
+    {
+      fBeamCurrent.FillNTupleVector(values);
+    }
+}
+#endif
 
 #ifdef __USE_DATABASE__
 template<typename T>

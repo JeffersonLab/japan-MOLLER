@@ -16,6 +16,11 @@
 // Qweak headers
 #include "VQwDataElement.h"
 
+// ROOT headers
+#ifdef HAS_RNTUPLE_SUPPORT
+#include <ROOT/RNTupleModel.hxx>
+#endif // HAS_RNTUPLE_SUPPORT
+
 // ROOT forward declarations
 class TTree;
 
@@ -140,8 +145,10 @@ public:
 //   virtual void AccumulateRunningSum(const VQwHardwareChannel *value) = 0;
 
   /// Arithmetic assignment operator:  Should only copy event-based data
-  virtual VQwHardwareChannel& operator=(const VQwHardwareChannel& value) {
-    VQwDataElement::operator=(value);
+  VQwHardwareChannel& operator=(const VQwHardwareChannel& value) {
+    if (this != &value) {
+      VQwDataElement::operator=(value);
+    }
     return *this;
   }
   void AssignScaledValue(const VQwHardwareChannel &value, Double_t scale){
@@ -151,7 +158,7 @@ public:
     virtual void Ratio(const VQwHardwareChannel* numer, const VQwHardwareChannel* denom){
     if (!IsNameEmpty()){
       this->AssignValueFrom(numer); 
-      this->operator/=(denom);
+      this->operator/=(*denom);
        
         // Remaining variables
     fGoodEventCount  = denom->fGoodEventCount;
@@ -160,10 +167,10 @@ public:
   }
 
   void AssignValueFrom(const VQwDataElement* valueptr) = 0;
-  virtual VQwHardwareChannel& operator+=(const VQwHardwareChannel* input) = 0;
-  virtual VQwHardwareChannel& operator-=(const VQwHardwareChannel* input) = 0;
-  virtual VQwHardwareChannel& operator*=(const VQwHardwareChannel* input) = 0;
-  virtual VQwHardwareChannel& operator/=(const VQwHardwareChannel* input) = 0;
+  virtual VQwHardwareChannel& operator+=(const VQwHardwareChannel& input) = 0;
+  virtual VQwHardwareChannel& operator-=(const VQwHardwareChannel& input) = 0;
+  virtual VQwHardwareChannel& operator*=(const VQwHardwareChannel& input) = 0;
+  virtual VQwHardwareChannel& operator/=(const VQwHardwareChannel& input) = 0;
 
 
   virtual void ScaledAdd(Double_t scale, const VQwHardwareChannel *value) = 0;
@@ -174,7 +181,7 @@ public:
   Double_t GetCalibrationFactor() const          { return fCalibrationFactor; };
 
   void AddEntriesToList(std::vector<QwDBInterface> &row_list);
-  virtual void AddErrEntriesToList(std::vector<QwErrDBInterface> &row_list) {};
+  virtual void AddErrEntriesToList(std::vector<QwErrDBInterface> & /*row_list*/) {};
 
   
   virtual void AccumulateRunningSum(const VQwHardwareChannel *value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF){
@@ -197,8 +204,12 @@ public:
   virtual void ConstructBranch(TTree *tree, TString &prefix) = 0;
   void ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
   virtual void FillTreeVector(std::vector<Double_t>& values) const = 0;
+#ifdef HAS_RNTUPLE_SUPPORT
+  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
+  virtual void FillNTupleVector(std::vector<Double_t>& values) const = 0;
+#endif // HAS_RNTUPLE_SUPPORT
 
-  virtual void CopyParameters(const VQwHardwareChannel* valueptr){};
+  virtual void CopyParameters(const VQwHardwareChannel* /*valueptr*/){};
 
  protected:
   /*! \brief Set the number of data words in this data element */
@@ -236,7 +247,7 @@ public:
    *         used in accesses to subelements similar to
    *         std::vector::at(). */
   void RangeCheck(size_t element) const {
-    if (element<0 || element >= fNumberOfSubElements){
+    if (element >= fNumberOfSubElements){
       TString loc="VQwDataElement::RangeCheck for "
 	+this->GetElementName()+" failed for subelement "+Form("%zu",element);
       throw std::out_of_range(loc.Data());

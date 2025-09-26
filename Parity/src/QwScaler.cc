@@ -5,6 +5,12 @@
 
 #include "QwScaler.h"
 
+// ROOT headers
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
+
 // Qweak headers
 #include "QwParameterFile.h"
 
@@ -17,7 +23,7 @@ void QwScaler::DefineOptions(QwOptions &options)
   // Define command line options
 }
 
-void QwScaler::ProcessOptions(QwOptions &options)
+void QwScaler::ProcessOptions(QwOptions &/*options*/)
 {
   // Handle command line options
 }
@@ -279,7 +285,7 @@ void QwScaler::ClearEventData()
  * @param num_words Number of words left in buffer
  * @return Number of words read
  */
-Int_t QwScaler::ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words)
+Int_t QwScaler::ProcessConfigurationBuffer(const ROCID_t /*roc_id*/, const BankID_t /*bank_id*/, UInt_t* /*buffer*/, UInt_t /*num_words*/)
 {
   return 0;
 }
@@ -368,6 +374,22 @@ void QwScaler::FillTreeVector(std::vector<Double_t> &values) const
     fScaler.at(i)->FillTreeVector(values);
   }
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwScaler::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  for (size_t i = 0; i < fScaler.size(); i++) {
+    fScaler.at(i)->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+  }
+}
+
+void QwScaler::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  for(size_t i = 0; i < fScaler.size(); i++) {
+    fScaler.at(i)->FillNTupleVector(values);
+  }
+}
+#endif // HAS_RNTUPLE_SUPPORT
 
 /**
  * Assignment operator
@@ -482,7 +504,7 @@ void QwScaler::CalculateRunningAverage()
   }
 }
 
-Int_t QwScaler::LoadEventCuts(TString filename)
+Int_t QwScaler::LoadEventCuts(TString /*filename*/)
 {
   return 0;
 }

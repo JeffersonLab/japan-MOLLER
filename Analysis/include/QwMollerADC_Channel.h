@@ -140,7 +140,6 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
 
 
   QwMollerADC_Channel& operator=  (const QwMollerADC_Channel &value);
-  //  VQwHardwareChannel& operator=  (const VQwHardwareChannel &value);
   void AssignScaledValue(const QwMollerADC_Channel &value, Double_t scale);
   void AssignValueFrom(const VQwDataElement* valueptr);
   void AddValueFrom(const VQwHardwareChannel* valueptr);
@@ -153,10 +152,10 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   QwMollerADC_Channel& operator-= (const QwMollerADC_Channel &value);
   QwMollerADC_Channel& operator*= (const QwMollerADC_Channel &value);
 
-  VQwHardwareChannel& operator+=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator-=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator*=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator/=(const VQwHardwareChannel* input);
+  VQwHardwareChannel& operator+=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator-=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator*=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator/=(const VQwHardwareChannel& input) override;
 
   const QwMollerADC_Channel operator+ (const QwMollerADC_Channel &value) const;
   const QwMollerADC_Channel operator- (const QwMollerADC_Channel &value) const;
@@ -217,6 +216,10 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  FillTreeVector(std::vector<Double_t> &values) const;
+#ifdef HAS_RNTUPLE_SUPPORT
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+  void  FillNTupleVector(std::vector<Double_t>& values) const;
+#endif // HAS_RNTUPLE_SUPPORT
 
   void CopyParameters(const VQwHardwareChannel* valueptr);
 

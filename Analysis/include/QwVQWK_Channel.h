@@ -14,6 +14,11 @@
 // ROOT headers
 #include "TTree.h"
 
+// RNTuple headers  
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
+
 // Qweak headers
 #include "VQwHardwareChannel.h"
 #include "MQwMockable.h"
@@ -138,8 +143,7 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   void  ProcessEvent();
 
 
-  QwVQWK_Channel& operator=  (const QwVQWK_Channel &value);
-  //  VQwHardwareChannel& operator=  (const VQwHardwareChannel &value);
+  QwVQWK_Channel& operator=(const QwVQWK_Channel &value);
   void AssignScaledValue(const QwVQWK_Channel &value, Double_t scale);
   void AssignValueFrom(const VQwDataElement* valueptr);
   void AddValueFrom(const VQwHardwareChannel* valueptr);
@@ -152,10 +156,10 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   QwVQWK_Channel& operator-= (const QwVQWK_Channel &value);
   QwVQWK_Channel& operator*= (const QwVQWK_Channel &value);
 
-  VQwHardwareChannel& operator+=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator-=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator*=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator/=(const VQwHardwareChannel* input);
+  VQwHardwareChannel& operator+=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator-=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator*=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator/=(const VQwHardwareChannel& input) override;
 
   const QwVQWK_Channel operator+ (const QwVQWK_Channel &value) const;
   const QwVQWK_Channel operator- (const QwVQWK_Channel &value) const;
@@ -216,6 +220,12 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  FillTreeVector(std::vector<Double_t> &values) const;
+
+#ifdef HAS_RNTUPLE_SUPPORT
+  // RNTuple support methods
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, std::vector<Double_t> &values, std::vector<std::shared_ptr<Double_t>> &fieldPtrs);
+  void  FillNTupleVector(std::vector<Double_t> &values) const;
+#endif // HAS_RNTUPLE_SUPPORT
 
   Int_t GetRawValue(size_t element) const {
     RangeCheck(element);

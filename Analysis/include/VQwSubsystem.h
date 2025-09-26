@@ -19,6 +19,11 @@
 #include "TDirectory.h"
 #include "TTree.h"
 
+// RNTuple headers
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
+
 // Qweak headers
 #include "MQwHistograms.h"
 #include "MQwPublishable.h"
@@ -64,6 +69,7 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   /// Constructor with name
   VQwSubsystem(const TString& name)
   : MQwHistograms(),
+    MQwPublishable_child<QwSubsystemArray, VQwSubsystem>(),
     fSystemName(name), fEventTypeMask(0x0), fIsDataLoaded(kFALSE),
     fCurrentROC_ID(-1), fCurrentBank_ID(-1) {
     ClearAllBankRegistrations();
@@ -71,6 +77,7 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   /// Copy constructor by object
   VQwSubsystem(const VQwSubsystem& orig)
   : MQwHistograms(orig),
+    MQwPublishable_child<QwSubsystemArray, VQwSubsystem>(),
     fPublishList(orig.fPublishList),
     fROC_IDs(orig.fROC_IDs),
     fBank_IDs(orig.fBank_IDs),
@@ -89,7 +96,7 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   /// \brief Define options function (note: no virtual static functions in C++)
   static void DefineOptions() { /* No default options defined */ };
   /// Process the command line options
-  virtual void ProcessOptions(QwOptions &options) { };
+  virtual void ProcessOptions(QwOptions & /*options*/) { };
 
 
   TString GetName() const {return fSystemName;};
@@ -105,7 +112,7 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   virtual std::map<TString, TString> GetDetectorMaps();
 
   /// \brief Try to publish an internal variable matching the submitted name
-  virtual Bool_t PublishByRequest(TString device_name){
+  virtual Bool_t PublishByRequest(TString /*device_name*/){
     return kFALSE; // when not implemented, this returns failure
   };
 
@@ -127,11 +134,11 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   /// Mandatory parameter file definition
   virtual Int_t LoadInputParameters(TString mapfile) = 0;
   /// Optional geometry definition
-  virtual Int_t LoadGeometryDefinition(TString mapfile) { return 0; };
+  virtual Int_t LoadGeometryDefinition(TString /*mapfile*/) { return 0; };
   /// Optional crosstalk definition
-  virtual Int_t LoadCrosstalkDefinition(TString mapfile) { return 0; };
+  virtual Int_t LoadCrosstalkDefinition(TString /*mapfile*/) { return 0; };
   /// Optional event cut file
-  virtual Int_t LoadEventCuts(TString mapfile) { return 0; };
+  virtual Int_t LoadEventCuts(TString /*mapfile*/) { return 0; };
 
   /// Set event type mask
   void SetEventTypeMask(const UInt_t mask) { fEventTypeMask = mask; };
@@ -170,8 +177,8 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
 
 
   // Not all derived classes will have the following functions
-  virtual void  RandomizeEventData(int helicity = 0, double time = 0.0) { };
-  virtual void  EncodeEventData(std::vector<UInt_t> &buffer) { };
+  virtual void  RandomizeEventData(int /*helicity*/ = 0, double /*time*/ = 0.0) { };
+  virtual void  EncodeEventData(std::vector<UInt_t> & /*buffer*/) { };
 
 
   /// \name Objects construction and maintenance
@@ -191,7 +198,7 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
     ConstructObjects((TDirectory*) NULL, prefix);
   };
   /// \brief Construct the objects for this subsystem in a folder with a prefix
-  virtual void  ConstructObjects(TDirectory *folder, TString &prefix) { };
+  virtual void  ConstructObjects(TDirectory * /*folder*/, TString & /*prefix*/) { };
   // @}
 
 
@@ -235,6 +242,18 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   virtual void ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file) = 0;
   /// \brief Fill the tree vector
   virtual void FillTreeVector(std::vector<Double_t>& values) const = 0;
+  
+#ifdef HAS_RNTUPLE_SUPPORT
+  /// \brief Construct the RNTuple fields and vector
+  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
+  /// \brief Construct the RNTuple fields and vector  
+  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) {
+    TString tmpstr("");
+    ConstructNTupleAndVector(model, tmpstr, values, fieldPtrs);
+  };
+  /// \brief Fill the RNTuple vector
+  virtual void FillNTupleVector(std::vector<Double_t>& values) const = 0;
+#endif // HAS_RNTUPLE_SUPPORT
   // @}
 
 
@@ -260,7 +279,7 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
     ConstructTree((TDirectory*) NULL, prefix);
   };
   /// \brief Construct the tree for this subsystem in a folder with a prefix
-  virtual void  ConstructTree(TDirectory *folder, TString &prefix) { return; };
+  virtual void  ConstructTree(TDirectory * /*folder*/, TString & /*prefix*/) { return; };
   /// \brief Fill the tree for this subsystem
   virtual void  FillTree() { return; };
   /// \brief Delete the tree for this subsystem

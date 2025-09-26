@@ -99,12 +99,12 @@ class QwSubsystemArrayParity: public QwSubsystemArray {
     /// \brief Blind the asymmetry of this subsystem
     void Blind(const QwBlinder* blinder);
     /// \brief Unblind the asymmetry of this subsystem
-    void UnBlind(const QwBlinder* blinder)
+    void UnBlind(const QwBlinder* /*blinder*/)
       { /* Not yet implemented */ };
     /// \brief Blind the difference of this subsystem
     void Blind(const QwBlinder* blinder, const QwSubsystemArrayParity& yield);
     /// \brief Unblind the difference of this subsystem
-    void UnBlind(const QwBlinder* blinder, const QwSubsystemArrayParity& yield)
+    void UnBlind(const QwBlinder* /*blinder*/, const QwSubsystemArrayParity& /*yield*/)
       { /* Not yet implemented */ };
 
 

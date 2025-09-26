@@ -133,8 +133,11 @@ void  QwPMT_Channel::FillTreeVector(std::vector<Double_t> &values) const
 
 
 QwPMT_Channel& QwPMT_Channel::operator= (const QwPMT_Channel &value){
-  if (GetElementName()!=""){
-    this->fValue  = value.fValue;
+  if (this != &value) {
+    if (GetElementName()!=""){
+      VQwDataElement::operator=(value);
+      this->fValue  = value.fValue;
+    }
   }
   return *this;
 }

@@ -4,6 +4,10 @@
 // System headers
 #include <stdexcept>
 
+// ROOT headers
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+
 // Qweak headers
 #ifdef __USE_DATABASE__
 #include "QwDBInterface.h"
@@ -450,6 +454,31 @@ void  QwCombinedPMT::FillTreeVector(std::vector<Double_t> &values) const
 //  fAvgADC.FillTreeVector(values);
   }
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwCombinedPMT::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  if (GetElementName()=="")
+    {
+      //  This channel is not used, so skip
+    }
+  else
+    {
+      TString sumprefix =  prefix+"";
+      fSumADC.ConstructNTupleAndVector(model, sumprefix, values, fieldPtrs);
+    }
+}
+
+void QwCombinedPMT::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (GetElementName()=="") {
+    //  This channel is not used, so skip filling the RNTuple.
+  } else {
+    fSumADC.FillNTupleVector(values);
+//  fAvgADC.FillNTupleVector(values);
+  }
+}
+#endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
 /********************************************************/

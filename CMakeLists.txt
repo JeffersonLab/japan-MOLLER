@@ -90,7 +90,7 @@ endif(MYSQLPP_FOUND)
 #----------------------------------------------------------------------------
 # Boost
 #
-find_package(Boost COMPONENTS program_options filesystem system regex REQUIRED)
+find_package(Boost COMPONENTS program_options filesystem system REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIR})
 
@@ -100,6 +100,15 @@ link_directories(${Boost_LIBRARY_DIR})
 set(minimum_root_version 6.0)
 find_package(ROOT ${minimum_root_version} REQUIRED New Gui)
 config_add_dependency(ROOT ${minimum_root_version})
+
+# Check ROOT version for RNTuple support (available in ROOT 6.36+)
+if(${ROOT_VERSION} VERSION_GREATER_EQUAL "6.36.0")
+    message(STATUS "ROOT version ${ROOT_VERSION} supports RNTuple - enabling RNTuple functionality")
+    add_definitions(-DHAS_RNTUPLE_SUPPORT)
+else()
+    message(STATUS "ROOT version ${ROOT_VERSION} does not support RNTuple - disabling RNTuple functionality")
+    message(STATUS "RNTuple support requires ROOT 6.36 or higher")
+endif()
 
 
 #----------------------------------------------------------------------------
@@ -187,7 +196,8 @@ target_compile_options(${PROJECT_NAME}
     ${${PROJECT_NAME_UC}_DIAG_FLAGS_LIST}
   )
 
-if(${CMAKE_CXX_STANDARD} LESS 17)
+# TMapFile is broken with C++17 or higher and ROOT < 6.32
+if(${CMAKE_CXX_STANDARD} LESS 17 OR ${ROOT_VERSION} VERSION_GREATER_EQUAL 6.32)
   target_compile_definitions(${PROJECT_NAME} PUBLIC QW_ENABLE_MAPFILE)
 endif()
 
@@ -223,6 +233,7 @@ foreach(file ${exefiles})
 
   target_link_libraries(${filelower}
     PRIVATE
+      eviowrapper
       ${PROJECT_NAME}
   )
   target_compile_options(${filelower}

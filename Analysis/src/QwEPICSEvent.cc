@@ -13,6 +13,10 @@
 #include "TFile.h"
 #include "TROOT.h"
 #include "TMath.h"
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "QwLog.h"
@@ -222,6 +226,67 @@ void QwEPICSEvent::FillTreeVector(std::vector<Double_t>& values) const
     }
   }
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwEPICSEvent::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  fTreeArrayIndex = values.size();
+  for (size_t tagindex = 0; tagindex < fEPICSVariableType.size(); tagindex++) {
+    if (fEPICSVariableType[tagindex] == kEPICSString ||
+        fEPICSVariableType[tagindex] == kEPICSFloat ||
+        fEPICSVariableType[tagindex] == kEPICSInt) {
+
+    	// Add element to vector
+    	values.push_back(0.0);
+
+    	// Determine field name
+    	TString name = fEPICSVariableList[tagindex];
+    	name.ReplaceAll(':','_'); // remove colons before creating field
+    	name.ReplaceAll('.','_'); // remove dots before creating field
+
+    	// Create RNTuple field (handle duplicate field names gracefully)
+    	// Note: Unlike TTrees which allow duplicate branch names, RNTuples require unique field names
+    	try {
+    	  auto field = model->MakeField<Double_t>(name.Data());
+    	  fieldPtrs.push_back(field);
+    	} catch (const std::exception& e) {
+    	  // Field already exists - this mimics TTree behavior where duplicate branches are allowed
+    	  // We still reserve space in the vector but use a nullptr for the field pointer
+    	  fieldPtrs.push_back(nullptr);
+    	  QwWarning << "EPICS field '" << name << "' already exists in RNTuple model, skipping duplicate creation" << QwLog::endl;
+    	}
+    }
+  }
+  fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
+}
+
+void QwEPICSEvent::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  Int_t treeindex = fTreeArrayIndex;
+  for (size_t tagindex = 0; tagindex < fEPICSVariableType.size(); tagindex++) {
+    switch (fEPICSVariableType[tagindex]) {
+      case kEPICSFloat:
+      case kEPICSInt: {
+        // Add value to vector
+        values[treeindex] = fEPICSDataEvent[tagindex].Value;
+        treeindex++;
+        break;
+      }
+      case kEPICSString: {
+        // Add value to vector
+        values[treeindex] = static_cast<Double_t>(fEPICSDataEvent[tagindex].StringValue.Hash());
+        treeindex++;
+        break;
+      }
+      default: {
+        TString name = fEPICSVariableList[tagindex];
+        QwError << "Unrecognized type for EPICS variable " << name << QwLog::endl;
+        break;
+      }
+    }
+  }
+}
+#endif // HAS_RNTUPLE_SUPPORT
 
 
 Int_t QwEPICSEvent::AddEPICSTag(

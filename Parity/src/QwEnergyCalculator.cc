@@ -10,6 +10,12 @@
 // System headers
 #include <stdexcept>
 
+// ROOT headers for RNTuple support
+#ifdef HAS_RNTUPLE_SUPPORT
+#include <ROOT/RNTupleModel.hxx>
+#include <ROOT/RNTupleWriter.hxx>
+#endif // HAS_RNTUPLE_SUPPORT
+
 // Qweak headers
 #ifdef __USE_DATABASE__
 #include "QwDBInterface.h"
@@ -157,7 +163,7 @@ void QwEnergyCalculator::GetProjectedPosition(VQwBPM *device)
       }
      tmp.Scale(fTMatrixRatio[i]);
      //  And subtract it from the device we are trying to get the position of.
-     (device->GetPosition(VQwBPM::kXAxis))->operator-=(&tmp);
+     (device->GetPosition(VQwBPM::kXAxis))->operator-=(tmp);
    }
   } // end of for(UInt_t i = 0; i<fProperty.size(); i++)
 
@@ -293,9 +299,10 @@ Int_t QwEnergyCalculator::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_i
 
 
 QwEnergyCalculator& QwEnergyCalculator::operator= (const QwEnergyCalculator &value){
-  if (GetElementName()!="")
-    this->fEnergyChange=value.fEnergyChange;
-
+  if (this != &value) {
+    if (GetElementName()!="")
+      this->fEnergyChange=value.fEnergyChange;
+  }
   return *this;
 }
 
@@ -472,6 +479,33 @@ void  QwEnergyCalculator::FillTreeVector(std::vector<Double_t> &values) const
     fEnergyChange.FillTreeVector(values);
   return;
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void  QwEnergyCalculator::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip construction.
+  }
+  else{
+    TString thisprefix=prefix;
+    if(prefix.Contains("asym_"))
+      thisprefix.ReplaceAll("asym_","diff_");
+    
+    fEnergyChange.ConstructNTupleAndVector(model, thisprefix, values, fieldPtrs);
+  }
+  return;
+}
+
+void  QwEnergyCalculator::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip filling.
+  }
+  else
+    fEnergyChange.FillNTupleVector(values);
+  return;
+}
+#endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
 std::vector<QwDBInterface> QwEnergyCalculator::GetDBEntry()

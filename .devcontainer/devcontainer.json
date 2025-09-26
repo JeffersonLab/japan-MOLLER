@@ -1,0 +1,46 @@
+{
+  "name": "JAPAN-MOLLER Development Environment",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  "runArgs": [
+    "--privileged",
+    "--cap-add=SYS_ADMIN",
+    "--device=/dev/fuse"
+  ],
+
+  "mounts": [
+    "source=/tmp,target=/tmp,type=bind,consistency=cached"
+  ],
+
+  "postCreateCommand": ".devcontainer/setup-cvmfs.sh",
+  "postStartCommand": ".devcontainer/mount-cvmfs.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cpptools-extension-pack", 
+        "ms-vscode.cmake-tools",
+        "llvm-vs-code-extensions.vscode-clangd",
+        "ms-python.python",
+        "GitHub.copilot",
+        "GitHub.copilot-chat"
+      ],
+      "settings": {
+        "C_Cpp.default.cppStandard": "c++17",
+        "C_Cpp.default.intelliSenseMode": "gcc-x64",
+        "cmake.configureOnOpen": false,
+        "files.associations": {
+          "*.h": "cpp",
+          "*.cc": "cpp",
+          "*.C": "cpp"
+        }
+      }
+    }
+  }
+}

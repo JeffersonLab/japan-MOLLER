@@ -15,6 +15,11 @@
 // ROOT headers
 #include <TTree.h>
 
+// RNTuple headers  
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
+
 #include "QwParameterFile.h"
 #include "VQwDataElement.h"
 #include "VQwHardwareChannel.h"
@@ -44,7 +49,7 @@ class VQwBCM : public VQwDataElement {
 
 protected:
   VQwBCM(VQwDataElement& beamcurrent): fBeamCurrent_ref(beamcurrent) { };
-  VQwBCM(VQwDataElement& beamcurrent, TString name): fBeamCurrent_ref(beamcurrent) { };
+  VQwBCM(VQwDataElement& beamcurrent, TString /*name*/): fBeamCurrent_ref(beamcurrent) { };
 
 public:
   virtual ~VQwBCM() { };
@@ -55,7 +60,7 @@ public:
   virtual void  FillHistograms() = 0;
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   virtual void SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel) = 0;
-  virtual void Ratio( const VQwBCM &numer, const VQwBCM &denom)
+  virtual void Ratio( const VQwBCM &/*numer*/, const VQwBCM &/*denom*/)
     { std::cerr << "Ratio not defined! (VQwBCM)" << std::endl; }
   virtual void ClearEventData() = 0;
 
@@ -90,14 +95,19 @@ public:
   virtual void ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist) = 0;
   virtual void FillTreeVector(std::vector<Double_t> &values) const = 0;
 
+#ifdef HAS_RNTUPLE_SUPPORT
+  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
+  virtual void FillNTupleVector(std::vector<Double_t>& values) const = 0;
+#endif // HAS_RNTUPLE_SUPPORT
+
 //----------------------------------------------------------------------------------------------------------------
   virtual void ApplyResolutionSmearing()
     {std::cerr << "ApplyResolutionSmearing is undefined!!!\n";}
   virtual void    FillRawEventData()
     {std::cerr << "FillRawEventData for VQwBPM not implemented!\n";};
-  virtual void GetProjectedCharge(VQwBCM *device){};
+  virtual void GetProjectedCharge(VQwBCM */*device*/){};
   virtual size_t GetNumberOfElements(){return size_t(1);}
-  virtual TString GetSubElementName(Int_t subindex) 
+  virtual TString GetSubElementName(Int_t /*subindex*/) 
   {
     std::cerr << "GetSubElementName()  is not implemented!! for device: " << GetElementName() << "\n";
     return TString("OBJECT_UNDEFINED"); // Return an erroneous TString

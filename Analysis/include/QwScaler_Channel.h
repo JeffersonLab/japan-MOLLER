@@ -101,7 +101,7 @@ public:
   /// \brief Initialize the fields in this object
   void  InitializeChannel(TString subsystem, TString instrumenttype, TString name, TString datatosave);
 
-  void SetDefaultSampleSize(size_t NumberOfSamples_map) {
+  void SetDefaultSampleSize(size_t /*NumberOfSamples_map*/) {
     //std::cerr << "QwScaler_Channel SetDefaultSampleSize does nothing!"
     //    << std::endl;
   }
@@ -133,10 +133,10 @@ public:
 
   void  ProcessEvent();
 
-  Int_t GetRawValue(size_t element) const      { return fValue_Raw; };
-  Double_t GetValue(size_t element) const      { return fValue; };
-  Double_t GetValueM2(size_t element) const    { return fValueM2; };
-  Double_t GetValueError(size_t element) const { return fValueError; };
+  Int_t GetRawValue(size_t /*element*/) const      { return fValue_Raw; };
+  Double_t GetValue(size_t /*element*/) const      { return fValue; };
+  Double_t GetValueM2(size_t /*element*/) const    { return fValueM2; };
+  Double_t GetValueError(size_t /*element*/) const { return fValueError; };
 
   VQwScaler_Channel& operator=  (const VQwScaler_Channel &value);
   void AssignScaledValue(const VQwScaler_Channel &value, Double_t scale);
@@ -146,15 +146,14 @@ public:
   void MultiplyBy(const VQwHardwareChannel* valueptr);
   void DivideBy(const VQwHardwareChannel* valueptr);
 
-  //  VQwHardwareChannel& operator=  (const VQwHardwareChannel &data_value);
   VQwScaler_Channel& operator+= (const VQwScaler_Channel &value);
   VQwScaler_Channel& operator-= (const VQwScaler_Channel &value);
   VQwScaler_Channel& operator*= (const VQwScaler_Channel &value);
 
-  VQwHardwareChannel& operator+=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator-=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator*=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator/=(const VQwHardwareChannel* input);
+  VQwHardwareChannel& operator+=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator-=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator*=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator/=(const VQwHardwareChannel& input) override;
 
   void Sum(VQwScaler_Channel &value1, VQwScaler_Channel &value2);
   void Difference(VQwScaler_Channel &value1, VQwScaler_Channel &value2);
@@ -169,7 +168,7 @@ public:
 
   Bool_t ApplySingleEventCuts();//check values read from modules are at desired level
 
-  Bool_t CheckForBurpFail(const VQwDataElement *ev_error){return kFALSE;};
+  Bool_t CheckForBurpFail(const VQwDataElement * /*ev_error*/){return kFALSE;};
 
   void IncrementErrorCounters();
 
@@ -186,6 +185,10 @@ public:
   virtual void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) = 0;
   virtual void  FillTreeVector(std::vector<Double_t> &values) const = 0;
   void  ConstructBranch(TTree *tree, TString &prefix);
+#ifdef HAS_RNTUPLE_SUPPORT
+  virtual void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
+  virtual void  FillNTupleVector(std::vector<Double_t>& values) const = 0;
+#endif // HAS_RNTUPLE_SUPPORT
 
 
   void AccumulateRunningSum(const VQwScaler_Channel &value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
@@ -267,6 +270,10 @@ class QwScaler_Channel: public VQwScaler_Channel
 
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
   void  FillTreeVector(std::vector<Double_t> &values) const;
+#ifdef HAS_RNTUPLE_SUPPORT
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+  void  FillNTupleVector(std::vector<Double_t>& values) const;
+#endif // HAS_RNTUPLE_SUPPORT
 
 
 };
