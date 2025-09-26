@@ -100,51 +100,30 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
-  compare-artifacts:
-    runs-on: ubuntu-latest
-    needs: linux
-    if: github.event_name == 'pull_request'
-    strategy:
-      fail-fast: false
-      matrix:
-        artifacts_to_check:
-        - "prompt-summary"
-        - "regalias"
-        include:
-          - release: "LCG_106"
-            arch: "x86_64"
-            os: "el9"
-            compiler: "gcc13"
-            opt: "opt"
-          - release: "LCG_107"
-            arch: "x86_64"
-            os: "el9"
-            compiler: "clang16"
-            opt: "opt"
-          - release: "LCG_107"
-            arch: "x86_64"
-            os: "el9"
-            compiler: "gcc14"
-            opt: "opt"
-    steps:
-      - name: Download current artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ matrix.artifacts_to_check }}-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
-          path: ./current
-
-      - name: Download target branch artifacts
+      - name: Download target branch artifacts (prompt summary)
+        if: github.event_name == 'pull_request'
         uses: dawidd6/action-download-artifact@v6
         with:
           workflow: build-lcg-cvmfs.yml
           branch: ${{ github.event.pull_request.base.ref }}
-          name: ${{ matrix.artifacts_to_check }}-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: ./target
+          if_no_artifact_found: warn
+
+      - name: Download target branch artifacts (regalias)
+        if: github.event_name == 'pull_request'
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: build-lcg-cvmfs.yml
+          branch: ${{ github.event.pull_request.base.ref }}
+          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
           path: ./target
           if_no_artifact_found: warn
 
       - name: Compare artifacts
+        if: github.event_name == 'pull_request'
         run: |
-          echo "Comparing ${{ matrix.artifacts_to_check }} artifacts for ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}"
+          echo "Comparing artifacts for ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}"
 
           # Check if target artifacts exist
           if [ ! -d "./target" ] || [ -z "$(ls -A ./target)" ]; then
@@ -192,7 +171,7 @@ jobs:
           done
 
           if [ "$comparison_failed" = "true" ]; then
-            echo "❌ Artifact comparison failed. Changes detected in ${{ matrix.artifacts_to_check }} beyond timestamps."
+            echo "❌ Artifact comparison failed. Changes detected in artifacts beyond timestamps."
             exit 1
           else
             echo "✅ All artifacts match expected results (ignoring timestamps)."
