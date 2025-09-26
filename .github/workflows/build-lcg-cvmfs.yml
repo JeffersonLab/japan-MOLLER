@@ -133,7 +133,7 @@ jobs:
           fi
 
           # Find summary files in both directories
-          current_files=$(find ./ -maxdepth 0 -name "summary_*.txt" -o -name "*regalias*.txt" | sort)
+          current_files=$(find ./ -maxdepth 1 -name "summary_*.txt" -o -name "*regalias*.txt" | sort)
           target_files=$(find ./target -name "summary_*.txt" -o -name "*regalias*.txt" | sort)
 
           echo "Current files found:"
