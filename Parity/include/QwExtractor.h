@@ -24,6 +24,7 @@ class QwExtractor:public VQwDataHandler, public MQwDataHandlerCloneable<QwExtrac
     virtual ~QwExtractor();
 
     Int_t LoadChannelMap(const std::string& mapfile);
+    using VQwDataHandler::ConnectChannels;
     Int_t ConnectChannels(QwSubsystemArrayParity& event);
     void ConstructTreeBranches(
         QwRootFile *treerootfile,

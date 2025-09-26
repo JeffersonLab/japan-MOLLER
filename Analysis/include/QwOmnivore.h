@@ -51,7 +51,11 @@ class QwOmnivore: public VQwSubsystem_t {
     /// Increment error counters
     void IncrementErrorCounters() { };
     /// Update error flag
+    using VQwSubsystem_t::UpdateErrorFlag;
     void UpdateErrorFlag(const VQwSubsystem*) { };
+    // FIXME (wdconinc)
+    // The using statements above should use concepts in C++20 (or SFINAE):
+    // it is not guaranteed that VQwSubsystem_t has an UpdateErrorFlag method
 
     /// Get the hit list
     //void  GetHitList(QwHitContainer& grandHitContainer) { };
@@ -91,6 +95,7 @@ class QwOmnivore: public VQwSubsystem_t {
     void  ProcessEvent() { };
 
     /// Assignment/addition/subtraction operators
+    using MQwHistograms::operator=;
     VQwSubsystem& operator=  (VQwSubsystem *value) { return *this; };
     VQwSubsystem& operator+= (VQwSubsystem *value) { return *this; };
     VQwSubsystem& operator-= (VQwSubsystem *value) { return *this; };
@@ -101,11 +106,13 @@ class QwOmnivore: public VQwSubsystem_t {
     void Scale(Double_t factor) { };
 
     /// Construct the histograms for this subsystem in a folder with a prefix
+    using VQwSubsystem::ConstructHistograms;
     void  ConstructHistograms(TDirectory *folder, TString &prefix) { };
     /// Fill the histograms for this subsystem
     void  FillHistograms() { };
 
     /// Construct the branch and tree vector
+    using VQwSubsystem::ConstructBranchAndVector;
     void ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values) { };
     /// Fill the tree vector
     void FillTreeVector(std::vector<Double_t> &values) const { };

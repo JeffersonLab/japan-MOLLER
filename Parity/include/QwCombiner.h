@@ -34,6 +34,7 @@ class QwCombiner:public VQwDataHandler, public MQwDataHandlerCloneable<QwCombine
     /// \brief Connect to Channels (event only)
     Int_t ConnectChannels(QwSubsystemArrayParity& event);
     /// \brief Connect to Channels (asymmetry/difference only)
+    using VQwDataHandler::ConnectChannels;
     Int_t ConnectChannels(QwSubsystemArrayParity& asym,
 			  QwSubsystemArrayParity& diff);
 

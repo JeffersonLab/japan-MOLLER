@@ -69,6 +69,7 @@ class QwIntegratedRasterChannel : public VQwDataElement{
   UInt_t GetEventcutErrorFlag(){//return the error flag
     return fTriumf_ADC.GetEventcutErrorFlag();
   }
+  using VQwDataElement::UpdateErrorFlag;
   UInt_t UpdateErrorFlag() {return GetEventcutErrorFlag();};
   void UpdateErrorFlag(const QwIntegratedRasterChannel *ev_error){
     return fTriumf_ADC.UpdateErrorFlag(ev_error->fTriumf_ADC);
@@ -87,10 +88,17 @@ class QwIntegratedRasterChannel : public VQwDataElement{
   void PrintValue() const;
   void PrintInfo() const;
 
-  
+  using MQwHistograms::operator=;
+  using VQwDataElement::operator=;
+  using VQwDataElement::operator+=;
+  using VQwDataElement::operator-=;  
   QwIntegratedRasterChannel& operator=  (const QwIntegratedRasterChannel &value);
   QwIntegratedRasterChannel& operator+= (const QwIntegratedRasterChannel &value);
   QwIntegratedRasterChannel& operator-= (const QwIntegratedRasterChannel &value);
+
+  using VQwDataElement::Sum;
+  using VQwDataElement::Difference;
+  using VQwDataElement::Ratio;
   void Sum(QwIntegratedRasterChannel &value1, QwIntegratedRasterChannel &value2);
   void Difference(QwIntegratedRasterChannel &value1, QwIntegratedRasterChannel &value2);
   void Ratio(QwIntegratedRasterChannel &numer, QwIntegratedRasterChannel &denom);

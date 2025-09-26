@@ -80,10 +80,14 @@ class QwCombinedBCM : public QwBCM<T> {
 
   Bool_t ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
 
+  using VQwDataElement::UpdateErrorFlag;
+  using VQwBCM::UpdateErrorFlag;
   UInt_t UpdateErrorFlag();
 
 
   // Implementation of Parent class's virtual operators
+  using MQwHistograms::operator=;
+  using VQwDataElement::operator=;
   VQwBCM& operator=  (const VQwBCM &value);
   QwCombinedBCM& operator=  (const QwCombinedBCM &value);
 

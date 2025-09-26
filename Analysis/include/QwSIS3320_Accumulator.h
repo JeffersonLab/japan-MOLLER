@@ -60,6 +60,10 @@ class QwSIS3320_Accumulator: public VQwDataElement {
     Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t subelement = 0);
     void  ProcessEvent() { };
 
+    using MQwHistograms::operator=;
+    using VQwDataElement::operator=;
+    using VQwDataElement::operator+=;
+    using VQwDataElement::operator-=;
     const QwSIS3320_Accumulator operator/ (const Double_t &value) const;
     const QwSIS3320_Accumulator operator* (const Double_t &value) const;
     const QwSIS3320_Accumulator operator+ (const Double_t &value) const;
@@ -73,6 +77,10 @@ class QwSIS3320_Accumulator: public VQwDataElement {
     QwSIS3320_Accumulator& operator=  (const QwSIS3320_Accumulator &value);
     QwSIS3320_Accumulator& operator+= (const QwSIS3320_Accumulator &value);
     QwSIS3320_Accumulator& operator-= (const QwSIS3320_Accumulator &value);
+
+    using VQwDataElement::Sum;
+    using VQwDataElement::Difference;
+    using VQwDataElement::Ratio;
     void Sum(const QwSIS3320_Accumulator &value1, const QwSIS3320_Accumulator &value2);
     void Difference(const QwSIS3320_Accumulator &value1, const QwSIS3320_Accumulator &value2);
     void Ratio(const QwSIS3320_Accumulator &numer, const QwSIS3320_Accumulator &denom);

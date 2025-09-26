@@ -57,6 +57,11 @@ class QwBlindDetectorArray:
   /// Virtual destructor
   ~QwBlindDetectorArray(){};
 
+  // FIXME (wdconinc) explicit assignment operator needed
+  using MQwHistograms::operator=;
+  using VQwSubsystem::operator=;
+  using VQwSubsystemParity::operator=;
+
   public:
 
   /// \brief Blind the asymmetry

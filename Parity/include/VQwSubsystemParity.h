@@ -58,8 +58,9 @@ class VQwSubsystemParity: virtual public VQwSubsystem {
     /// \brief Fill the database
     virtual void FillDB(QwParityDB *db, TString type) { };
     virtual void FillErrDB(QwParityDB *db, TString type) { };
-
+  
     // VQwSubsystem routine is overridden. Call it at the beginning by VQwSubsystem::operator=(value)
+    using MQwHistograms::operator=;
     virtual VQwSubsystem& operator=  (VQwSubsystem *value) = 0;
     virtual VQwSubsystem& operator+= (VQwSubsystem *value) = 0;
     virtual VQwSubsystem& operator-= (VQwSubsystem *value) = 0;
