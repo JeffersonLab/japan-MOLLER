@@ -569,57 +569,57 @@ VQwScaler_Channel& VQwScaler_Channel::operator*= (const VQwScaler_Channel &value
   return *this;
 }
 
-VQwHardwareChannel& VQwScaler_Channel::operator+=(const VQwHardwareChannel *source)
+VQwHardwareChannel& VQwScaler_Channel::operator+=(const VQwHardwareChannel &source)
 {
-  const VQwScaler_Channel* tmpptr;
-  tmpptr = dynamic_cast<const VQwScaler_Channel*>(source);
-  if (tmpptr!=NULL){
+  try {
+    const VQwScaler_Channel* tmpptr;
+    tmpptr = dynamic_cast<const VQwScaler_Channel*>(&source);
     *this += *tmpptr;
-  } else {
+  } catch(const std::exception& e) {
     TString loc="Standard exception from VQwScaler_Channel::operator+= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
   return *this;
 }
-VQwHardwareChannel& VQwScaler_Channel::operator-=(const VQwHardwareChannel *source)
+VQwHardwareChannel& VQwScaler_Channel::operator-=(const VQwHardwareChannel &source)
 {
   const VQwScaler_Channel* tmpptr;
-  tmpptr = dynamic_cast<const VQwScaler_Channel*>(source);
+  tmpptr = dynamic_cast<const VQwScaler_Channel*>(&source);
   if (tmpptr!=NULL){
     *this -= *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::operator-= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
   return *this;
 }
-VQwHardwareChannel& VQwScaler_Channel::operator*=(const VQwHardwareChannel *source)
+VQwHardwareChannel& VQwScaler_Channel::operator*=(const VQwHardwareChannel &source)
 {
   const VQwScaler_Channel* tmpptr;
-  tmpptr = dynamic_cast<const VQwScaler_Channel*>(source);
+  tmpptr = dynamic_cast<const VQwScaler_Channel*>(&source);
   if (tmpptr!=NULL){
     *this *= *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::operator*= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
   return *this;
 }
-VQwHardwareChannel& VQwScaler_Channel::operator/=(const VQwHardwareChannel *source)
+VQwHardwareChannel& VQwScaler_Channel::operator/=(const VQwHardwareChannel &source)
 {
   const VQwScaler_Channel* tmpptr;
-  tmpptr = dynamic_cast<const VQwScaler_Channel*>(source);
+  tmpptr = dynamic_cast<const VQwScaler_Channel*>(&source);
   if (tmpptr!=NULL){
     *this /= *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::operator/= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }

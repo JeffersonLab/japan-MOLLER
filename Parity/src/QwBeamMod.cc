@@ -656,7 +656,7 @@ VQwSubsystem&  QwBeamMod::operator+=  (VQwSubsystem *value)
       QwBeamMod* input = dynamic_cast<QwBeamMod*>(value);
 
       for(size_t i=0;i<input->fModChannel.size();i++)
-	*(this->fModChannel[i]) += input->fModChannel[i];
+	*(this->fModChannel[i]) += *(input->fModChannel[i]);
 //         for(size_t i=0;i<input->fWord.size();i++)
 //    	this->fWord[i]+=input->fWord[i];
       this->fFFB_ErrorFlag |= input->fFFB_ErrorFlag;
@@ -673,7 +673,7 @@ VQwSubsystem&  QwBeamMod::operator-=  (VQwSubsystem *value){
       QwBeamMod* input = dynamic_cast<QwBeamMod*>(value);
 
       for(size_t i=0;i<input->fModChannel.size();i++)
-	*(this->fModChannel[i]) -= input->fModChannel[i];
+	*(this->fModChannel[i]) -= *(input->fModChannel[i]);
 //       for(size_t i=0;i<input->fWord.size();i++)
 //         this->fWord[i]-=input->fWord[i];
       this->fFFB_ErrorFlag |= input->fFFB_ErrorFlag;

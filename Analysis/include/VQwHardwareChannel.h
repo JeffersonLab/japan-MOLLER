@@ -158,7 +158,7 @@ public:
     virtual void Ratio(const VQwHardwareChannel* numer, const VQwHardwareChannel* denom){
     if (!IsNameEmpty()){
       this->AssignValueFrom(numer); 
-      this->operator/=(denom);
+      this->operator/=(*denom);
        
         // Remaining variables
     fGoodEventCount  = denom->fGoodEventCount;
@@ -167,10 +167,10 @@ public:
   }
 
   void AssignValueFrom(const VQwDataElement* valueptr) = 0;
-  virtual VQwHardwareChannel& operator+=(const VQwHardwareChannel* input) = 0;
-  virtual VQwHardwareChannel& operator-=(const VQwHardwareChannel* input) = 0;
-  virtual VQwHardwareChannel& operator*=(const VQwHardwareChannel* input) = 0;
-  virtual VQwHardwareChannel& operator/=(const VQwHardwareChannel* input) = 0;
+  virtual VQwHardwareChannel& operator+=(const VQwHardwareChannel& input) = 0;
+  virtual VQwHardwareChannel& operator-=(const VQwHardwareChannel& input) = 0;
+  virtual VQwHardwareChannel& operator*=(const VQwHardwareChannel& input) = 0;
+  virtual VQwHardwareChannel& operator/=(const VQwHardwareChannel& input) = 0;
 
 
   virtual void ScaledAdd(Double_t scale, const VQwHardwareChannel *value) = 0;

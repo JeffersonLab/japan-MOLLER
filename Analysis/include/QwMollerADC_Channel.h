@@ -152,10 +152,10 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   QwMollerADC_Channel& operator-= (const QwMollerADC_Channel &value);
   QwMollerADC_Channel& operator*= (const QwMollerADC_Channel &value);
 
-  VQwHardwareChannel& operator+=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator-=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator*=(const VQwHardwareChannel* input);
-  VQwHardwareChannel& operator/=(const VQwHardwareChannel* input);
+  VQwHardwareChannel& operator+=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator-=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator*=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator/=(const VQwHardwareChannel& input) override;
 
   const QwMollerADC_Channel operator+ (const QwMollerADC_Channel &value) const;
   const QwMollerADC_Channel operator- (const QwMollerADC_Channel &value) const;
