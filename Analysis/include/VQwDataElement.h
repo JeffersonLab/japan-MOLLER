@@ -219,7 +219,7 @@ class VQwDataElement: public MQwHistograms {
   void SetNumberOfDataWords(const UInt_t &numwords) {fNumberOfDataWords = numwords;}
 
   /// Arithmetic assignment operator:  Should only copy event-based data
-  virtual VQwDataElement& operator=(const VQwDataElement& value) {
+  VQwDataElement& operator=(const VQwDataElement& value) {
     if(this != &value){
       MQwHistograms::operator=(value);
       fGoodEventCount    = value.fGoodEventCount;

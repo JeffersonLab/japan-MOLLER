@@ -143,8 +143,7 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   void  ProcessEvent();
 
 
-  QwVQWK_Channel& operator=  (const QwVQWK_Channel &value);
-  //  VQwHardwareChannel& operator=  (const VQwHardwareChannel &value);
+  QwVQWK_Channel& operator=(const QwVQWK_Channel &value);
   void AssignScaledValue(const QwVQWK_Channel &value, Double_t scale);
   void AssignValueFrom(const VQwDataElement* valueptr);
   void AddValueFrom(const VQwHardwareChannel* valueptr);

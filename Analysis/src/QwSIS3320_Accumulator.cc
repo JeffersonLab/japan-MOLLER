@@ -182,9 +182,12 @@ const QwSIS3320_Accumulator QwSIS3320_Accumulator::operator- (const QwSIS3320_Ac
  */
 QwSIS3320_Accumulator& QwSIS3320_Accumulator::operator= (const QwSIS3320_Accumulator &value)
 {
-  if (!IsNameEmpty()) {
-    this->fAccumulatorSum = value.fAccumulatorSum;
-    this->fNumberOfSamples = value.fNumberOfSamples;
+  if (this != &value) {
+    if (!IsNameEmpty()) {
+      VQwDataElement::operator=(value);
+      this->fAccumulatorSum = value.fAccumulatorSum;
+      this->fNumberOfSamples = value.fNumberOfSamples;
+    }
   }
   return *this;
 }
