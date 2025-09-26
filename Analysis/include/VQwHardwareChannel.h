@@ -180,6 +180,9 @@ public:
   void     SetCalibrationFactor(Double_t factor) { fCalibrationFactor = factor; kFoundGain = 1; };
   Double_t GetCalibrationFactor() const          { return fCalibrationFactor; };
 
+  Bool_t IsCalibrated() const {return fCalibrated;};
+  void SetCalibrated(Bool_t state=kTRUE){fCalibrated=state;};  
+
   void AddEntriesToList(std::vector<QwDBInterface> &row_list);
   virtual void AddErrEntriesToList(std::vector<QwErrDBInterface> & /*row_list*/) {};
 
@@ -269,6 +272,7 @@ protected:
 
   /*! \name Channel calibration                    */
   // @{
+  Bool_t fCalibrated{false}; /*!<Flag to indicate if the channel has been calibrated*/
   Double_t fPedestal; /*!< Pedestal of the hardware sum signal,
 			   we assume the pedestal level is constant over time
 			   and can be divided by four for use with each block,
