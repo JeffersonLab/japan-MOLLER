@@ -31,13 +31,16 @@ class MQwHistograms {
 
     /// Arithmetic assignment operator:  Should only copy event-based data.
     /// In this particular class, there is no event-based data.
-    virtual MQwHistograms& operator=(const MQwHistograms& /*value*/) {
+    MQwHistograms& operator=(const MQwHistograms& value) {
+      if (this != &value) {
+        // No event-based data to copy in this class
+      }
       return *this;
     }
 
     inline void Fill_Pointer(TH1_ptr hist_ptr, Double_t value){
-      if (hist_ptr != NULL){
-	hist_ptr->Fill(value);
+      if (hist_ptr != nullptr){
+        hist_ptr->Fill(value);
       }
     }
 
@@ -56,7 +59,6 @@ class MQwHistograms {
     void ShareHistograms(const MQwHistograms* source) {
       if (source) fHistograms = source->fHistograms;
     }
-
 
 }; // class MQwHistograms
 
