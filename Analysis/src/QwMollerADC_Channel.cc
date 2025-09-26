@@ -549,6 +549,7 @@ void QwMollerADC_Channel::PrintInfo() const
   std::cout<<"fBlocksPerEvent= "<<fBlocksPerEvent<<"\n"<<"\n";
   std::cout<<"fSequenceNumber= "<<fSequenceNumber<<"\n";
   std::cout<<"fNumberOfSamples= "<<fNumberOfSamples<<"\n";
+  std::cout<<"fCalibrated= "<<fCalibrated<<"\n";
   std::cout<<"fBlock_raw ";
 
   for (Int_t i = 0; i < fBlocksPerEvent; i++)
@@ -1222,6 +1223,13 @@ const QwMollerADC_Channel QwMollerADC_Channel::operator+ (const QwMollerADC_Chan
 QwMollerADC_Channel& QwMollerADC_Channel::operator+= (const QwMollerADC_Channel &value)
 {
   if (!IsNameEmpty()) {
+    if (fCalibrated ^ value.fCalibrated)  {
+      TString loc="Standard exception from QwMollerADC_Channel::operator+= "
+        +value.GetElementName()+" and "+this->GetElementName()
+        +" are not both calibrated or uncalibrated";
+      fCalibrated = value.fCalibrated;
+      QwWarning << loc << QwLog::endl;
+    }
     if (fCalibrated) {
       for (Int_t i = 0; i < fBlocksPerEvent; i++) {
         this->fBlock[i] += value.fBlock[i];
@@ -1258,6 +1266,13 @@ const QwMollerADC_Channel QwMollerADC_Channel::operator- (const QwMollerADC_Chan
 QwMollerADC_Channel& QwMollerADC_Channel::operator-= (const QwMollerADC_Channel &value)
 {
   if (!IsNameEmpty()){
+    if (fCalibrated ^ value.fCalibrated)  {
+      TString loc="Standard exception from QwMollerADC_Channel::operator-= "
+        +value.GetElementName()+" and "+this->GetElementName()
+        +" are not both calibrated or uncalibrated";
+      fCalibrated = value.fCalibrated;
+      QwWarning << loc << QwLog::endl;
+    }
     if (fCalibrated) {
       for (Int_t i=0; i<fBlocksPerEvent; i++){
         this->fBlock[i] -= value.fBlock[i];
@@ -1294,6 +1309,13 @@ const QwMollerADC_Channel QwMollerADC_Channel::operator* (const QwMollerADC_Chan
 QwMollerADC_Channel& QwMollerADC_Channel::operator*= (const QwMollerADC_Channel &value)
 {
   if (!IsNameEmpty()){
+    if (fCalibrated ^ value.fCalibrated)  {
+      TString loc="Standard exception from QwMollerADC_Channel::operator*= "
+        +value.GetElementName()+" and "+this->GetElementName()
+        +" are not both calibrated or uncalibrated";
+      fCalibrated = value.fCalibrated;
+      QwWarning << loc << QwLog::endl;
+    }
     if (fCalibrated) {
       for (Int_t i=0; i<fBlocksPerEvent; i++){
         this->fBlock[i] *= value.fBlock[i];
