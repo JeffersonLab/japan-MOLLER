@@ -107,6 +107,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        artifacts_to_check:
+        - "prompt-summary"
+        - "regalias"
         include:
           - release: "LCG_106"
             arch: "x86_64"
@@ -127,7 +130,7 @@ jobs:
       - name: Download current artifacts
         uses: actions/download-artifact@v4
         with:
-          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: ${{ matrix.artifacts_to_check }}-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
           path: ./current
 
       - name: Download target branch artifacts
@@ -135,13 +138,13 @@ jobs:
         with:
           workflow: build-lcg-cvmfs.yml
           branch: ${{ github.event.pull_request.base.ref }}
-          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: ${{ matrix.artifacts_to_check }}-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
           path: ./target
           if_no_artifact_found: warn
 
       - name: Compare artifacts
         run: |
-          echo "Comparing artifacts for ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}"
+          echo "Comparing ${{ matrix.artifacts_to_check }} artifacts for ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}"
 
           # Check if target artifacts exist
           if [ ! -d "./target" ] || [ -z "$(ls -A ./target)" ]; then
@@ -151,8 +154,8 @@ jobs:
           fi
 
           # Find summary files in both directories
-          current_files=$(find ./current -name "summary_*.txt" | sort)
-          target_files=$(find ./target -name "summary_*.txt" | sort)
+          current_files=$(find ./current -name "summary_*.txt" -o -name "*regalias*.txt" | sort)
+          target_files=$(find ./target -name "summary_*.txt" -o -name "*regalias*.txt" | sort)
 
           echo "Current files found:"
           echo "$current_files"
@@ -189,7 +192,7 @@ jobs:
           done
 
           if [ "$comparison_failed" = "true" ]; then
-            echo "❌ Artifact comparison failed. Changes detected in prompt summary beyond timestamps."
+            echo "❌ Artifact comparison failed. Changes detected in ${{ matrix.artifacts_to_check }} beyond timestamps."
             exit 1
           else
             echo "✅ All artifacts match expected results (ignoring timestamps)."
