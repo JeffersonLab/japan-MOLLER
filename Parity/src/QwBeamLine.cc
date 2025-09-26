@@ -3150,6 +3150,7 @@ void QwBeamLine::WritePromptSummary(QwPromptSummary *ps, TString type)
   PromptSummaryElement *local_ps_element = NULL;
   Bool_t local_add_these_elements= false;
 
+  // Add BCMs
   for (size_t i = 0; i < fBCM.size();  i++) 
     {
       tmp_channel=GetChannel(kQwBCM, i,"");	
@@ -3169,20 +3170,54 @@ void QwBeamLine::WritePromptSummary(QwPromptSummary *ps, TString type)
 
       
       if(local_ps_element) {
-	element_value       = tmp_channel->GetValue();
-	element_value_err   = tmp_channel->GetValueError();
-	element_value_width = tmp_channel->GetValueWidth();
-	
-	local_ps_element->Set(type, element_value, element_value_err, element_value_width);
+        element_value       = tmp_channel->GetValue();
+        element_value_err   = tmp_channel->GetValueError();
+        element_value_width = tmp_channel->GetValueWidth();
+
+        local_ps_element->Set(type, element_value, element_value_err, element_value_width);
       }
       
       if( local_print_flag && local_ps_element) {
-	printf("Type %12s, Element %32s, value %12.4e error %8.4e  width %12.4e\n", 
-	       type.Data(), element_name.Data(), element_value, element_value_err, element_value_width);
+        printf("Type %12s, Element %32s, value %12.4e error %8.4e  width %12.4e\n", 
+          type.Data(), element_name.Data(), element_value, element_value_err, element_value_width);
       }
     }
 
-//Add BPM Cavity
+    // Add combined BCMs
+    for (size_t i = 0; i < fBCMCombo.size();  i++) {
+      tmp_channel = GetChannel(kQwCombinedBCM, i,"");	
+      // Need to change this to add other BCMs in summary
+      static const TString kTargetBCMName = "bcm_target";
+      local_add_these_elements =  element_name.EqualTo(kTargetBCMName);
+      element_value_err   = 0.0;
+      element_value_width = 0.0;
+
+      // Need to change this to add other BCMs in summary
+      local_add_these_elements =  element_name.EqualTo("bcm_target");
+
+      if(local_add_these_elements && local_add_element){
+      	ps->AddElement(new PromptSummaryElement(element_name)); 
+      }
+
+
+      local_ps_element=ps->GetElementByName(element_name);
+
+      
+      if(local_ps_element) {
+        element_value       = tmp_channel->GetValue();
+        element_value_err   = tmp_channel->GetValueError();
+        element_value_width = tmp_channel->GetValueWidth();
+
+        local_ps_element->Set(type, element_value, element_value_err, element_value_width);
+      }
+      
+      if( local_print_flag && local_ps_element) {
+        printf("Type %12s, Element %32s, value %12.4e error %8.4e  width %12.4e\n", 
+          type.Data(), element_name.Data(), element_value, element_value_err, element_value_width);
+      }
+    }
+
+  // Add BPM Cavity
   for (size_t i = 0; i < fCavity.size();  i++) 
     {
       tmp_channel=GetChannel(kQwBPMCavity, i,"ef");	
@@ -3202,15 +3237,15 @@ void QwBeamLine::WritePromptSummary(QwPromptSummary *ps, TString type)
 
       
       if(local_ps_element) {
-	element_value       = tmp_channel->GetValue();
-	element_value_err   = tmp_channel->GetValueError();
-	element_value_width = tmp_channel->GetValueWidth();
+        element_value       = tmp_channel->GetValue();
+        element_value_err   = tmp_channel->GetValueError();
+        element_value_width = tmp_channel->GetValueWidth();
 	
-	local_ps_element->Set(type, element_value, element_value_err, element_value_width);
+        local_ps_element->Set(type, element_value, element_value_err, element_value_width);
       }
       
       if( local_print_flag && local_ps_element) {
-	printf("Type %12s, Element %32s, value %12.4e error %8.4e  width %12.4e\n", 
+        printf("Type %12s, Element %32s, value %12.4e error %8.4e  width %12.4e\n", 
 	       type.Data(), element_name.Data(), element_value, element_value_err, element_value_width);
       }
     }
@@ -3220,14 +3255,60 @@ void QwBeamLine::WritePromptSummary(QwPromptSummary *ps, TString type)
 
   
   char property[2][6]={"x","y"};
+
   local_ps_element=NULL;
   local_add_these_elements=false;
   
-  
+  // Add BPM striplines
   for(size_t i=0; i< fStripline.size(); i++) 
      {
      for (Int_t j=0;j<2;j++){
       tmp_channel= GetChannel(kQwBPMStripline, i,property[j]);   
+      element_name= tmp_channel->GetElementName();
+      element_value       = 0.0;
+      element_value_err   = 0.0;
+      element_value_width = 0.0;
+
+      // List of BPM names to include in the summary (move to config if needed)
+      static const std::vector<TString> kSummaryBPMNames = {
+        "bpm4", "bpm18", "bpm14", "bpm12"
+      };
+      local_add_these_elements = false;
+      for (const auto& bpm_name : kSummaryBPMNames) {
+        if (element_name.Contains(bpm_name)) {
+          local_add_these_elements = true;
+          break;
+        }
+      }
+
+      if( local_add_these_elements && local_add_element){
+      	ps->AddElement(new PromptSummaryElement(element_name)); 
+      }
+
+      local_ps_element=ps->GetElementByName(element_name);
+
+          
+     
+      if(local_ps_element) {
+        element_value       = tmp_channel->GetValue();
+        element_value_err   = tmp_channel->GetValueError();
+        element_value_width = tmp_channel->GetValueWidth();
+        local_ps_element->Set(type, element_value, element_value_err, element_value_width);
+      }
+      
+      if( local_print_flag && local_ps_element) {
+        printf("Type %12s, Element %32s, value %12.4e error %8.4e  width %12.4e\n", 
+	      type.Data(), element_name.Data(), element_value, element_value_err, element_value_width);
+      }
+
+      }
+    }
+
+  // Add combined BPM striplines
+  for(size_t i=0; i< fBPMCombo.size(); i++) 
+     {
+     for (Int_t j=0;j<2;j++){
+      tmp_channel= GetChannel(kQwCombinedBPM, i, property[j]);   
       element_name= tmp_channel->GetElementName();
       element_value       = 0.0;
       element_value_err   = 0.0;
@@ -3244,21 +3325,18 @@ void QwBeamLine::WritePromptSummary(QwPromptSummary *ps, TString type)
           
      
       if(local_ps_element) {
-	element_value       = tmp_channel->GetValue();
-	element_value_err   = tmp_channel->GetValueError();
-	element_value_width = tmp_channel->GetValueWidth();
-	local_ps_element->Set(type, element_value, element_value_err, element_value_width);
+        element_value       = tmp_channel->GetValue();
+        element_value_err   = tmp_channel->GetValueError();
+        element_value_width = tmp_channel->GetValueWidth();
+        local_ps_element->Set(type, element_value, element_value_err, element_value_width);
       }
       
       if( local_print_flag && local_ps_element) {
-	printf("Type %12s, Element %32s, value %12.4e error %8.4e  width %12.4e\n", 
-	       type.Data(), element_name.Data(), element_value, element_value_err, element_value_width);
+        printf("Type %12s, Element %32s, value %12.4e error %8.4e  width %12.4e\n", 
+	      type.Data(), element_name.Data(), element_value, element_value_err, element_value_width);
       }
 
       }
     }
 
-  
-  
-    return;
 };
