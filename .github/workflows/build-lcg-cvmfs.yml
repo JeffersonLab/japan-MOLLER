@@ -106,7 +106,7 @@ jobs:
             echo "::endgroup::"
 
             echo "::group:: Profile analysis"
-            gprof gmon.out
+            gprof build/qwparity | tee qwparity.txt
             echo "::endgroup::"
 
       - name: Upload prompt summary
