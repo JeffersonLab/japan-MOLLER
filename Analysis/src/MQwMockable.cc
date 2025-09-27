@@ -1,5 +1,7 @@
 #include "MQwMockable.h"
+
 #include "QwParameterFile.h"
+#include <math.h>
 
 // Randomness generator: Mersenne twister with period 2^19937 - 1
 //
@@ -18,8 +20,12 @@ boost::variate_generator < boost::mt19937, boost::normal_distribution<double> >
 
 void MQwMockable::LoadMockDataParameters(QwParameterFile &paramfile){
   Bool_t   ldebug=kFALSE;
-  Double_t asym=0.0, mean=0.0, sigma=0.0;
-  Double_t amplitude=0.0, phase=0.0, frequency=0.0;
+  Double_t asym=0.0;
+  Double_t mean=0.0;
+  Double_t sigma=0.0;
+  Double_t amplitude=0.0;
+  Double_t phase=0.0;
+  Double_t frequency=0.0;
 
   //Check to see if this line contains "drift"
   if (paramfile.GetLine().find("drift")!=std::string::npos){
@@ -36,7 +42,7 @@ void MQwMockable::LoadMockDataParameters(QwParameterFile &paramfile){
     asym  = paramfile.GetTypedNextToken<Double_t>();
     mean  = paramfile.GetTypedNextToken<Double_t>(); 
     sigma = paramfile.GetTypedNextToken<Double_t>();      
-    if (ldebug==1) {
+    if (static_cast<int>(ldebug)==1) {
       std::cout << "#################### \n";
       std::cout << "asym, mean, sigma \n" << std::endl;
       std::cout << asym                   << " / "
@@ -60,7 +66,6 @@ void MQwMockable::SetRandomEventDriftParameters(Double_t amplitude, Double_t pha
   fMockDriftAmplitude.push_back(amplitude);
   fMockDriftFrequency.push_back(frequency);
   fMockDriftPhase.push_back(phase);
-  return;
 }
 
 void MQwMockable::AddRandomEventDriftParameters(Double_t amplitude, Double_t phase, Double_t frequency)
@@ -69,30 +74,28 @@ void MQwMockable::AddRandomEventDriftParameters(Double_t amplitude, Double_t pha
   fMockDriftAmplitude.push_back(amplitude);
   fMockDriftFrequency.push_back(frequency);
   fMockDriftPhase.push_back(phase);
-  return;
 }
 
 void MQwMockable::SetRandomEventParameters(Double_t mean, Double_t sigma)
 {
   fMockGaussianMean = mean;
   fMockGaussianSigma = sigma;
-  return;
 }
 
 void MQwMockable::SetRandomEventAsymmetry(Double_t asymmetry)
 {
   fMockAsymmetry = asymmetry;
-  return;
 }
 
-Double_t MQwMockable::GetRandomValue(){
-  Double_t random_variable;
-  if (fUseExternalRandomVariable)
+Double_t MQwMockable::GetRandomValue() const{
+  Double_t random_variable = NAN;
+  if (fUseExternalRandomVariable) {
     // external normal random variable
     random_variable = fExternalRandomVariable;
-  else
+  } else {
     // internal normal random variable
     random_variable = fNormalRandomVariable();
+}
   return random_variable;
 }
 

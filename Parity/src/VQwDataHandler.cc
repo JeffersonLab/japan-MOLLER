@@ -12,6 +12,7 @@ Last Modified: August 1, 2018 1:39 PM
 *****************************************************************************/
 
 #include <iostream>
+#include <utility>
 
 using namespace std;
 
@@ -38,19 +39,16 @@ using namespace std;
 #endif // __USE_DATABASE__
 
 
-VQwDataHandler::VQwDataHandler(const TString& name)
+VQwDataHandler::VQwDataHandler(TString  name)
 : fPriority(0),
   fBurstCounter(0),
-  fName(name),
-  fMapFile(""),
-  fTreeName(""),
-  fTreeComment(""),
-  fPrefix(""),
-  fErrorFlagPtr(0),
-  fSubsystemArray(0),
-  fHelicityPattern(0),
-  fKeepRunningSum(kFALSE)
-{ fRunningsum=NULL;}
+  fName(std::move(name)),
+  
+  fErrorFlagPtr(nullptr),
+  fSubsystemArray(nullptr),
+  fHelicityPattern(nullptr),
+  fKeepRunningSum(kFALSE), fRunningsum(NULL)
+{ }
 
 VQwDataHandler::VQwDataHandler(const VQwDataHandler &source)
 : fPriority(source.fPriority),
@@ -60,15 +58,15 @@ VQwDataHandler::VQwDataHandler(const VQwDataHandler &source)
   fTreeName(source.fTreeName),
   fTreeComment(source.fTreeComment),
   fPrefix(source.fPrefix),
-  fSubsystemArray(source.fSubsystemArray),
+  fErrorFlagPtr(source.fErrorFlagPtr), fSubsystemArray(source.fSubsystemArray),
   fHelicityPattern(source.fHelicityPattern),
-  ParseSeparator(source.ParseSeparator),
+  fDependentName(source.fDependentName), fDependentType(source.fDependentType), fDependentVar(source.fDependentVar), ParseSeparator(source.ParseSeparator),
   fKeepRunningSum(source.fKeepRunningSum)
 {
-  fErrorFlagPtr  = source.fErrorFlagPtr;
-  fDependentVar  = source.fDependentVar;
-  fDependentType = source.fDependentType;
-  fDependentName = source.fDependentName;
+  
+  
+  
+  
   //  Create new objects for the the outputs.
   fOutputVar.resize(source.fOutputVar.size());
   for (size_t i = 0; i < this->fDependentVar.size(); i++) {
@@ -76,19 +74,19 @@ VQwDataHandler::VQwDataHandler(const VQwDataHandler &source)
     this->fOutputVar[i] = source.fOutputVar[i]->Clone(VQwDataElement::kDerived);
     //this->fOutputVar[i] = new QwVQWK_Channel(*vqwk, VQwDataElement::kDerived);
   }
-  if (source.fRunningsum!=NULL){
+  if (source.fRunningsum!=nullptr){
     fRunningsum = source.fRunningsum->Clone();
   } else {
-    fRunningsum = NULL;
+    fRunningsum = nullptr;
   }
 }
 
 
 VQwDataHandler::~VQwDataHandler() {
   
-  for (size_t i = 0; i < fOutputVar.size(); ++i) {
-    if (fOutputVar.at(i) != NULL){
-       delete fOutputVar.at(i);
+  for (auto & i : fOutputVar) {
+    if (i != nullptr){
+       delete i;
     }
   }
   fOutputVar.clear();
@@ -115,7 +113,7 @@ void VQwDataHandler::CalcOneOutput(const VQwHardwareChannel* dv, VQwHardwareChan
                                   vector< Double_t > &sens) {
   
   // if second is NULL, can't do corrector
-  if (output == NULL){
+  if (output == nullptr){
     QwError<<"Second is value is NULL, unable to calculate corrector."<<QwLog::endl;
     return;
   }
@@ -123,7 +121,7 @@ void VQwDataHandler::CalcOneOutput(const VQwHardwareChannel* dv, VQwHardwareChan
   // if (fDependentType.at(dv) != type) continue;
 
   // Clear data in second, if first is NULL
-  if (dv == NULL){
+  if (dv == nullptr){
     output->ClearEventData();
   }else{
     // Update second value
@@ -155,15 +153,15 @@ Int_t VQwDataHandler::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemA
   /// Fill vector of pointers to the relevant data elements
   for (size_t dv = 0; dv < fDependentName.size(); dv++) {
     // Get the dependent variables
-    const VQwHardwareChannel* dv_ptr = 0;
-    VQwHardwareChannel* new_ptr = NULL;
-    string name = "";
+    const VQwHardwareChannel* dv_ptr = nullptr;
+    VQwHardwareChannel* new_ptr = nullptr;
+    string name;
     string cor = "cor_";
     
     if (fDependentType.at(dv)==kHandleTypeMps) {
       //  Quietly ignore the MPS type when we're connecting the asym & diff
       continue;
-    } else if(fDependentName.at(dv).at(0) == '@' ) {
+    } if(fDependentName.at(dv).at(0) == '@' ) {
       name = fDependentName.at(dv).substr(1,fDependentName.at(dv).length());
     }else{
       dv_ptr = this->RequestExternalPointer(fDependentFull.at(dv));
@@ -205,7 +203,7 @@ Int_t VQwDataHandler::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemA
       new_ptr->SetSubsystemName(fName);
     }
     // defined type
-    else if(dv_ptr!=NULL) {
+    else if(dv_ptr!=nullptr) {
       //QwMessage << "dv: " << fDependentName.at(dv) << QwLog::endl;
     }else {
       QwWarning << "Dependent variable " << fDependentName.at(dv) << " could not be found, "
@@ -214,7 +212,7 @@ Int_t VQwDataHandler::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemA
     }
 
     // pair creation
-    if(new_ptr != NULL) {
+    if(new_ptr != nullptr) {
       fDependentVar.push_back(dv_ptr);
       fOutputVar.push_back(new_ptr);
     }
@@ -256,15 +254,15 @@ void VQwDataHandler::ConstructTreeBranches(
     const std::string& treeprefix,
     const std::string& branchprefix)
 {
-  if (fTreeName.size() > 0) {
-    if (fOutputVar.size() == 0) {
+  if (!fTreeName.empty()) {
+    if (fOutputVar.empty()) {
       QwWarning << "No data handler output; not creating tree "
                 << treeprefix + fTreeName
                 << QwLog::endl;
     } else {
       TString tmp_branchprefix(branchprefix.c_str());
       if (tmp_branchprefix.Contains("stat") && fKeepRunningSum 
-	  && fRunningsum!=NULL){
+	  && fRunningsum!=nullptr){
 	fRunningsumFillsTree = kTRUE;
       } else {
 	fRunningsumFillsTree = kFALSE;
@@ -284,14 +282,14 @@ void VQwDataHandler::ConstructBranchAndVector(
     TString& prefix,
     std::vector<Double_t>& values)
 {
-  for (size_t i = 0; i < fOutputVar.size(); ++i) {
-    fOutputVar.at(i)->ConstructBranchAndVector(tree, prefix, values);
+  for (auto & i : fOutputVar) {
+    i->ConstructBranchAndVector(tree, prefix, values);
   }
 }
 
 void VQwDataHandler::FillTreeBranches(QwRootFile *treerootfile)
 {
-  if (fTreeName.size()>0){
+  if (!fTreeName.empty()){
     if (fRunningsumFillsTree) {
       treerootfile->FillTreeBranches(*fRunningsum);
     } else {
@@ -306,15 +304,15 @@ void VQwDataHandler::ConstructNTupleFields(
     const std::string& treeprefix,
     const std::string& branchprefix)
 {
-  if (fTreeName.size() > 0) {
-    if (fOutputVar.size() == 0) {
+  if (!fTreeName.empty()) {
+    if (fOutputVar.empty()) {
       QwWarning << "No data handler output; not creating RNTuple "
                 << treeprefix + fTreeName
                 << QwLog::endl;
     } else {
       TString tmp_branchprefix(branchprefix.c_str());
       if (tmp_branchprefix.Contains("stat") && fKeepRunningSum 
-	  && fRunningsum!=NULL){
+	  && fRunningsum!=nullptr){
 	fRunningsumFillsTree = kTRUE;
       } else {
 	fRunningsumFillsTree = kFALSE;
@@ -333,7 +331,7 @@ void VQwDataHandler::ConstructNTupleFields(
 
 void VQwDataHandler::FillNTupleFields(QwRootFile *treerootfile)
 {
-  if (fTreeName.size()>0){
+  if (!fTreeName.empty()){
 #ifdef HAS_RNTUPLE_SUPPORT
     if (fRunningsumFillsTree) {
       treerootfile->FillNTupleFields(*fRunningsum);
@@ -352,9 +350,9 @@ void VQwDataHandler::FillNTupleFields(QwRootFile *treerootfile)
 void VQwDataHandler::FillTreeVector(std::vector<Double_t>& values) const
 {
   // Fill the data element
-  for (size_t i = 0; i < fOutputVar.size(); ++i) {
-    if (fOutputVar.at(i) == NULL) {continue;}
-    fOutputVar.at(i)->FillTreeVector(values);
+  for (auto i : fOutputVar) {
+    if (i == nullptr) {continue;}
+    i->FillTreeVector(values);
   }
 }
 
@@ -378,7 +376,7 @@ void VQwDataHandler::FillNTupleVector(std::vector<Double_t>& values) const
 
 void VQwDataHandler::InitRunningSum()
 {
-  if (fKeepRunningSum && fRunningsum == NULL){
+  if (fKeepRunningSum && fRunningsum == nullptr){
     fRunningsum = this->Clone();
     fRunningsum->fKeepRunningSum = kFALSE;
     fRunningsum->ClearEventData();
@@ -387,7 +385,7 @@ void VQwDataHandler::InitRunningSum()
 
 void VQwDataHandler::AccumulateRunningSum()
 {
-  if (fKeepRunningSum && fErrorFlagPtr!=NULL && (*fErrorFlagPtr)==0){
+  if (fKeepRunningSum && fErrorFlagPtr!=nullptr && (*fErrorFlagPtr)==0){
     fRunningsum->AccumulateRunningSum(*this);
   }
 }
@@ -402,10 +400,10 @@ void VQwDataHandler::AccumulateRunningSum(VQwDataHandler &value, Int_t count, In
 
 void VQwDataHandler::CalculateRunningAverage()
 {
-  if (fKeepRunningSum && (fRunningsum != NULL)){
-    for(size_t i = 0; i < fRunningsum->fOutputVar.size(); i++) {
+  if (fKeepRunningSum && (fRunningsum != nullptr)){
+    for(auto & i : fRunningsum->fOutputVar) {
       // calling CalculateRunningAverage in scope of VQwHardwareChannel
-      fRunningsum->fOutputVar[i]->CalculateRunningAverage();
+      i->CalculateRunningAverage();
     }
   }
 }
@@ -413,18 +411,18 @@ void VQwDataHandler::CalculateRunningAverage()
 void VQwDataHandler::PrintValue() const
 {
   QwMessage<<"=== "<< fName << " ==="<<QwLog::endl<<QwLog::endl;
-  for(size_t i = 0; i < fOutputVar.size(); i++) {
-    fOutputVar[i]->PrintValue();
+  for(auto i : fOutputVar) {
+    i->PrintValue();
   }
 }
 
 
 void VQwDataHandler::ClearEventData()
 {
-  for(size_t i = 0; i < fOutputVar.size(); i++) {
-    fOutputVar[i]->ClearEventData();
+  for(auto & i : fOutputVar) {
+    i->ClearEventData();
   }
-  if (fKeepRunningSum && fRunningsum!=NULL){
+  if (fKeepRunningSum && fRunningsum!=nullptr){
     fRunningsum->ClearEventData();
   }
 }
@@ -438,23 +436,23 @@ Bool_t VQwDataHandler::PublishInternalValues() const
   VQwHardwareChannel* tmp_channel = nullptr;
   
   // Publish variables through map file
-  for (size_t pp = 0; pp < fPublishList.size(); pp++) {
-    TString publish_name = fPublishList.at(pp).at(0);
-    TString device_type = fPublishList.at(pp).at(1);
-    TString device_name = fPublishList.at(pp).at(2);
-    TString device_prop = fPublishList.at(pp).at(3);
+  for (const auto & pp : fPublishList) {
+    TString publish_name = pp.at(0);
+    TString device_type = pp.at(1);
+    TString device_name = pp.at(2);
+    TString device_prop = pp.at(3);
     device_type.ToLower();
     device_prop.ToLower();
 
-    tmp_channel = NULL;
+    tmp_channel = nullptr;
 
-    for(size_t i=0;i<fOutputVar.size(); ++i) {
-      if(device_name.CompareTo(fOutputVar.at(i)->GetElementName())==0){
-	tmp_channel = fOutputVar.at(i);
+    for(auto i : fOutputVar) {
+      if(device_name.CompareTo(i->GetElementName())==0){
+	tmp_channel = i;
 	break;
       }
     }
-    if (tmp_channel == NULL) {
+    if (tmp_channel == nullptr) {
       QwError << "VQwDataHandler::PublishInternalValues(): " << publish_name 
 	      << " not found" << QwLog::endl;
       status &= kFALSE;
@@ -470,15 +468,16 @@ Bool_t VQwDataHandler::PublishInternalValues() const
 Bool_t VQwDataHandler::PublishByRequest(TString device_name)
 {
   Bool_t status = kFALSE;
-  for(size_t i=0;i<fOutputVar.size(); ++i) {
-    if(device_name.CompareTo(fOutputVar.at(i)->GetElementName())==0){
+  for(auto & i : fOutputVar) {
+    if(device_name.CompareTo(i->GetElementName())==0){
       status = PublishInternalValue(device_name, "published-by-request",
-				    fOutputVar.at(i));
+				    i);
       break;
     }
   }
-  if (!status && fOutputVar.size()>0)
+  if (!status && !fOutputVar.empty()) {
     QwDebug << "VQwDataHandler::PublishByRequest:  Failed to publish channel name:  " << device_name << QwLog::endl;
+}
   return status;
 }
 
@@ -494,19 +493,19 @@ void VQwDataHandler::WritePromptSummary(QwPromptSummary *ps, TString type)
           QwMessage << " --------------------------------------------------------------- " << QwLog::endl;
      }
 
-     const VQwHardwareChannel* tmp_channel = 0;
+     const VQwHardwareChannel* tmp_channel = nullptr;
      TString  element_name        = "";
      Double_t element_value       = 0.0;
      Double_t element_value_err   = 0.0;
      Double_t element_value_width = 0.0;
 
-     PromptSummaryElement *local_ps_element = NULL;
+     PromptSummaryElement *local_ps_element = nullptr;
      Bool_t local_add_these_elements= false;
 
-  for (size_t i = 0; i < fOutputVar.size();  i++) 
+  for (auto & i : fOutputVar) 
     {
-      element_name        = fOutputVar[i]->GetElementName(); 
-      tmp_channel         = fOutputVar[i];
+      element_name        = i->GetElementName(); 
+      tmp_channel         = i;
       element_value       = 0.0;
       element_value_err   = 0.0;
       element_value_width = 0.0;
@@ -520,7 +519,7 @@ void VQwDataHandler::WritePromptSummary(QwPromptSummary *ps, TString type)
 
       local_ps_element=ps->GetElementByName(element_name);
        
-      if(local_ps_element) {
+      if(local_ps_element != nullptr) {
         element_value       = tmp_channel->GetValue();
         element_value_err   = tmp_channel->GetValueError();
         element_value_width = tmp_channel->GetValueWidth();
@@ -528,7 +527,7 @@ void VQwDataHandler::WritePromptSummary(QwPromptSummary *ps, TString type)
         local_ps_element->Set(type, element_value, element_value_err, element_value_width);
       }
       
-      if( local_print_flag && local_ps_element) {
+      if( local_print_flag && (local_ps_element != nullptr)) {
         printf("Type %12s, Element %32s, value %12.4e error %8.4e  width %12.4e\n", type.Data(), element_name.Data(), element_value, element_value_err, element_value_width);
       }
     }

@@ -70,7 +70,8 @@ Int_t LRBCorrector::LoadChannelMap(const std::string& mapfile)
     // Throw away comments, whitespace, empty lines
     map.TrimComment();
     map.TrimWhitespace();
-    if (map.LineIsEmpty()) continue;
+    if (map.LineIsEmpty()) { continue;
+}
     // Get first token: label (dv or iv), second token is the name like "asym_blah"
     string primary_token = map.GetNextToken(" ");
     string current_token = map.GetNextToken(" ");
@@ -102,15 +103,15 @@ Int_t LRBCorrector::LoadChannelMap(const std::string& mapfile)
   TString corFileName(SlopeFile);
 
   QwMessage << "Trying to open " << corFileName << QwLog::endl;
-  TFile* corFile = new TFile(corFileName);
+  auto* corFile = new TFile(corFileName);
   if (! corFile->IsOpen()) {
     QwWarning << "Failed to open " << corFileName << ", slopes NOT found" << QwLog::endl;
     return 0;
   }
 
   // DV names
-  TH1 *dvnames = (TH1 *) corFile->Get("DVname");
-  if (dvnames == 0) {
+  TH1 *dvnames = dynamic_cast<TH1 *>( corFile->Get("DVname"));
+  if (dvnames == nullptr) {
     QwWarning << "DV names matrix is null" << QwLog::endl;
     corFile->Close();
     return 0;
@@ -128,8 +129,8 @@ Int_t LRBCorrector::LoadChannelMap(const std::string& mapfile)
   }
 
   // IV names
-  TH1 *ivnames = (TH1 *) corFile->Get("IVname");
-  if (ivnames == 0) {
+  TH1 *ivnames = dynamic_cast<TH1 *>( corFile->Get("IVname"));
+  if (ivnames == nullptr) {
     QwWarning << "IV names matrix is null" << QwLog::endl;
     corFile->Close();
     return 0;
@@ -148,7 +149,7 @@ Int_t LRBCorrector::LoadChannelMap(const std::string& mapfile)
 
   // Slope matrix
   TKey* key = corFile->GetKey("slopes");
-  if (key == 0) {
+  if (key == nullptr) {
     QwWarning << "No slope matrix found" << QwLog::endl;
     corFile->Close();
     return 0;
@@ -157,8 +158,8 @@ Int_t LRBCorrector::LoadChannelMap(const std::string& mapfile)
   fLastCycle = key->GetCycle(); // last cycle
   for (Short_t cycle=1; cycle<=fLastCycle; cycle++){
     TKey* key_cycle = corFile->GetKey("slopes", cycle);
-    TMatrixD *alphasM = (TMatrixD *) key_cycle->ReadObj();
-    if (alphasM == 0) {
+    auto *alphasM = dynamic_cast<TMatrixD *>( key_cycle->ReadObj());
+    if (alphasM == nullptr) {
       QwWarning << "Slope matrix is null" << QwLog::endl;
       corFile->Close();
       return 0;
@@ -202,9 +203,9 @@ Int_t LRBCorrector::ConnectChannels(
   // Add independent variables
   for (size_t iv = 0; iv < fIndependentName.size(); iv++) {
     // Get the independent variables
-    const VQwHardwareChannel* iv_ptr = 0;
+    const VQwHardwareChannel* iv_ptr = nullptr;
     iv_ptr = this->RequestExternalPointer(fIndependentFull.at(iv));
-    if (iv_ptr==NULL){
+    if (iv_ptr==nullptr){
       switch (fIndependentType.at(iv)) {
       case kHandleTypeAsym:
         iv_ptr = asym.RequestExternalPointer(fIndependentName.at(iv));
@@ -218,7 +219,7 @@ Int_t LRBCorrector::ConnectChannels(
         break;
       }
     }
-    if (iv_ptr) {
+    if (iv_ptr != nullptr) {
       //QwMessage << " iv: " << fIndependentName.at(iv) /*<< " (sens = " << fSensitivity.at(dv).at(iv) << ")"*/ << QwLog::endl;
       fIndependentVar.push_back(iv_ptr);
     } else {
@@ -235,7 +236,8 @@ Int_t LRBCorrector::ConnectChannels(
 
 void LRBCorrector::ProcessData() {
   Short_t cycle = fBurstCounter+1;
-  if (fSensitivity.count(cycle) == 0) return;
+  if (fSensitivity.count(cycle) == 0) { return;
+}
   for (size_t i = 0; i < fDependentVar.size(); ++i) {
     CalcOneOutput(fDependentVar[i], fOutputVar[i], fIndependentVar, fSensitivity[cycle][i]);
   }

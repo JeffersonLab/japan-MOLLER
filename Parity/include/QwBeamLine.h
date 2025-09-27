@@ -71,7 +71,7 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
   void LoadEventCuts_Fin(Int_t &eventcut_flag);
   Int_t  LoadGeometryDefinition(TString mapfile);
   void  LoadMockDataParameters(TString mapfile);
-  void   AssignGeometry(QwParameterFile* mapstr, VQwBPM * bpm);
+  static void   AssignGeometry(QwParameterFile* mapstr, VQwBPM * bpm);
 
   Bool_t ApplySingleEventCuts();//derived from VQwSubsystemParity
   void   IncrementErrorCounters();
@@ -138,7 +138,7 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
   void   FillErrDB(QwParityDB *db, TString datatype);
 #endif // __USE_DATABASE__
 
-  Bool_t Compare(VQwSubsystem *source);
+  Bool_t Compare(VQwSubsystem *value);
 
   void   PrintValue() const;
   void   PrintInfo() const;
@@ -177,7 +177,7 @@ protected:
   template <typename TT>
   Int_t AddToElementList(std::vector<TT> &elementlist, QwBeamDetectorID &detector_id);
   
-  Int_t GetDetectorIndex(EQwBeamInstrumentType TypeID, TString name) const;
+  Int_t GetDetectorIndex(EQwBeamInstrumentType type_id, TString name) const;
   //when the type and the name is passed the detector index from appropriate vector will be returned
   //for example if TypeID is bcm  then the index of the detector from fBCM vector for given name will be returnd.
 

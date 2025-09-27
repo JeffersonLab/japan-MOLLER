@@ -264,29 +264,29 @@ protected:
   EDataToSave fDataToSave;
 
   /*  Ntuple array indices */
-  size_t fTreeArrayIndex;
-  size_t fTreeArrayNumEntries;
+  size_t fTreeArrayIndex{};
+  size_t fTreeArrayNumEntries{};
 
   /*! \name Channel calibration                    */
   // @{
-  Double_t fPedestal; /*!< Pedestal of the hardware sum signal,
+  Double_t fPedestal{}; /*!< Pedestal of the hardware sum signal,
 			   we assume the pedestal level is constant over time
 			   and can be divided by four for use with each block,
 			   units: [counts / number of samples] */
-  Double_t fCalibrationFactor;
-  Bool_t kFoundPedestal;
-  Bool_t kFoundGain;
+  Double_t fCalibrationFactor{};
+  Bool_t kFoundPedestal{};
+  Bool_t kFoundGain{};
   //@}
 
   /*! \name Single event cuts and errors                    */
   // @{
-  Int_t bEVENTCUTMODE;/*!<If this set to kFALSE then Event cuts are OFF*/
-  Double_t fULimit, fLLimit;/*!<this sets the upper and lower limits*/
-  Double_t fStability;/*!<how much deviaton from the stable reading is allowed*/
+  Int_t bEVENTCUTMODE{};/*!<If this set to kFALSE then Event cuts are OFF*/
+  Double_t fULimit{-1}, fLLimit{1};/*!<this sets the upper and lower limits*/
+  Double_t fStability{};/*!<how much deviaton from the stable reading is allowed*/
 
-  Double_t fBurpThreshold;
-  Int_t fBurpCountdown;
-  Int_t fBurpHoldoff;
+  Double_t fBurpThreshold{-1.0};
+  Int_t fBurpCountdown{};
+  Int_t fBurpHoldoff{10};
 
   //@}
 

@@ -46,7 +46,7 @@ void  QwPMT_Channel::EncodeEventData(std::vector<UInt_t> &TrigBuffer)
 {
 //  std::cout<<"QwPMT_Channel::EncodeEventData() not fully implemented yet."<<std::endl;
 
-  Long_t localbuf;
+  Long_t localbuf = 0;
 
   if (IsNameEmpty()) {
     //  This channel is not used, but is present in the data stream.
@@ -67,16 +67,18 @@ void  QwPMT_Channel::ProcessEvent()
 void  QwPMT_Channel::ConstructHistograms(TDirectory *folder, TString &prefix)
 {
   //  If we have defined a subdirectory in the ROOT file, then change into it.
-  if (folder != NULL) folder->cd();
+  if (folder != nullptr) { folder->cd();
+}
 
   if (GetElementName() == "") {
     //  This channel is not used, so skip filling the histograms.
   } else {
     //  Now create the histograms.
-    TString basename, fullname;
+    TString basename;
+    TString fullname;
     basename = prefix + GetElementName();
 
-    fHistograms.resize(1, NULL);
+    fHistograms.resize(1, nullptr);
     size_t index = 0;
     fHistograms[index] = gQwHists.Construct1DHist(basename);
     index++;
@@ -89,8 +91,9 @@ void  QwPMT_Channel::FillHistograms()
   if (GetElementName() == "") {
     //  This channel is not used, so skip creating the histograms.
   } else {
-    if (fHistograms[index] != NULL)
+    if (fHistograms[index] != nullptr) {
       fHistograms[index]->Fill(fValue);
+}
     index++;
   }
 }

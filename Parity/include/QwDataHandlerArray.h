@@ -145,7 +145,7 @@ class QwDataHandlerArray:
     }
 
     /// \brief Assignment operator
-    QwDataHandlerArray& operator=  (const QwDataHandlerArray &value);
+    QwDataHandlerArray& operator=  (const QwDataHandlerArray &source);
     /*
     /// \brief Addition-assignment operator
     QwDataHandlerArray& operator+= (const QwDataHandlerArray &value);
@@ -213,7 +213,7 @@ class QwDataHandlerArray:
     std::vector<std::string> fDataHandlersDisabledByName; ///< List of disabled types
     std::vector<std::string> fDataHandlersDisabledByType; ///< List of disabled names
 
-    Bool_t fPrintRunningSum;
+    Bool_t fPrintRunningSum{};
 
     /// Test whether this handler array can contain a particular handler
     static Bool_t CanContain(VQwDataHandler* handler) {

@@ -26,14 +26,12 @@ void QwIntegrationPMT::SetPedestal(Double_t pedestal)
 {
 	fPedestal=pedestal;
 	fTriumf_ADC.SetPedestal(fPedestal);
-	return;
 }
 
 void QwIntegrationPMT::SetCalibrationFactor(Double_t calib)
 {
 	fCalibration=calib;
 	fTriumf_ADC.SetCalibrationFactor(fCalibration);
-	return;
 }
 /********************************************************/
 void  QwIntegrationPMT::InitializeChannel(TString name, TString datatosave)
@@ -44,7 +42,6 @@ void  QwIntegrationPMT::InitializeChannel(TString name, TString datatosave)
   SetElementName(name);
   SetBlindability(kTRUE);
   SetNormalizability(kTRUE);
-  return;
 }
 /********************************************************/
 void  QwIntegrationPMT::InitializeChannel(TString subsystem, TString name, TString datatosave)
@@ -55,7 +52,6 @@ void  QwIntegrationPMT::InitializeChannel(TString subsystem, TString name, TStri
   SetElementName(name);
   SetBlindability(kTRUE);
   SetNormalizability(kTRUE);
-  return;
 }
 /********************************************************/
 void  QwIntegrationPMT::InitializeChannel(TString subsystem, TString module, TString name, TString datatosave)
@@ -66,13 +62,11 @@ void  QwIntegrationPMT::InitializeChannel(TString subsystem, TString module, TSt
   SetElementName(name);
   SetBlindability(kTRUE);
   SetNormalizability(kTRUE);
-  return;
 }
 /********************************************************/
 void QwIntegrationPMT::ClearEventData()
 {
   fTriumf_ADC.ClearEventData();
-  return;
 }
 /********************************************************/
 void QwIntegrationPMT::PrintErrorCounters(){
@@ -82,43 +76,36 @@ void QwIntegrationPMT::PrintErrorCounters(){
 void QwIntegrationPMT::UseExternalRandomVariable()
 {
   fTriumf_ADC.UseExternalRandomVariable();
-  return;
 }
 /********************************************************/
 void QwIntegrationPMT::SetExternalRandomVariable(double random_variable)
 {
   fTriumf_ADC.SetExternalRandomVariable(random_variable);
-  return;
 }
 /********************************************************/
 void QwIntegrationPMT::SetRandomEventDriftParameters(Double_t amplitude, Double_t phase, Double_t frequency)
 {
   fTriumf_ADC.SetRandomEventDriftParameters(amplitude, phase, frequency);
-  return;
 }
 /********************************************************/
 void QwIntegrationPMT::AddRandomEventDriftParameters(Double_t amplitude, Double_t phase, Double_t frequency)
 {
   fTriumf_ADC.AddRandomEventDriftParameters(amplitude, phase, frequency);
-  return;
 }
 /********************************************************/
 void QwIntegrationPMT::SetRandomEventParameters(Double_t mean, Double_t sigma)
 {
   fTriumf_ADC.SetRandomEventParameters(mean, sigma);
-  return;
 }
 /********************************************************/
 void QwIntegrationPMT::SetRandomEventAsymmetry(Double_t asymmetry)
 {
   fTriumf_ADC.SetRandomEventAsymmetry(asymmetry);
-  return;
 }
 /********************************************************/
 void QwIntegrationPMT::RandomizeEventData(int helicity, double time)
 {
   fTriumf_ADC.RandomizeEventData(helicity, time);
-  return;
 }
 
 /********************************************************/
@@ -154,8 +141,6 @@ void QwIntegrationPMT::RandomizeMollerEvent(int helicity, const QwBeamCharge& ch
   fTriumf_ADC.SmearByResolution(voltage_width);
   fTriumf_ADC.SetRawEventData();
 
-  return;
-
 }
 
 
@@ -163,7 +148,6 @@ void QwIntegrationPMT::RandomizeMollerEvent(int helicity, const QwBeamCharge& ch
 void QwIntegrationPMT::SetHardwareSum(Double_t hwsum, UInt_t sequencenumber)
 {
   fTriumf_ADC.SetHardwareSum(hwsum, sequencenumber);
-  return;
 }
 
 Double_t QwIntegrationPMT::GetValue()
@@ -180,7 +164,6 @@ Double_t QwIntegrationPMT::GetValue(Int_t blocknum)
 void QwIntegrationPMT::SetEventData(Double_t* block, UInt_t sequencenumber)
 {
   fTriumf_ADC.SetEventData(block, sequencenumber);
-  return;
 }
 /********************************************************/
 void QwIntegrationPMT::EncodeEventData(std::vector<UInt_t> &buffer)
@@ -192,8 +175,6 @@ void  QwIntegrationPMT::ProcessEvent()
 {
   ApplyHWChecks();//first apply HW checks and update HW  error flags.
   fTriumf_ADC.ProcessEvent();
-
-  return;
 }
 /********************************************************/
 Bool_t QwIntegrationPMT::ApplyHWChecks()
@@ -201,7 +182,7 @@ Bool_t QwIntegrationPMT::ApplyHWChecks()
   Bool_t eventokay=kTRUE;
 
   UInt_t deviceerror=fTriumf_ADC.ApplyHWChecks();//will check for consistancy between HWSUM and SWSUM also check for sample size
-  eventokay=(deviceerror & 0x0);//if no HW error return true
+  eventokay=((deviceerror & 0x0) != 0u);//if no HW error return true
 
 
   return eventokay;
@@ -267,7 +248,7 @@ Bool_t QwIntegrationPMT::CheckForBurpFail(const VQwDataElement *ev_error){
     if(typeid(*ev_error)==typeid(*this)) {
       //std::cout<<" Here in QwIntegrationPMT::CheckForBurpFail \n";
       if (this->GetElementName()!="") {
-        const QwIntegrationPMT* value_pmt = dynamic_cast<const QwIntegrationPMT* >(ev_error);
+        const auto* value_pmt = dynamic_cast<const QwIntegrationPMT* >(ev_error);
         burpstatus |= fTriumf_ADC.CheckForBurpFail(&(value_pmt->fTriumf_ADC)); 
       }
     } else {
@@ -361,19 +342,17 @@ void QwIntegrationPMT::Ratio(QwIntegrationPMT &numer, QwIntegrationPMT &denom)
       this->fPedestal=0;
       this->fCalibration=0;
     }
-  return;
-}
+  }
 
 void QwIntegrationPMT::Scale(Double_t factor)
 {
   fTriumf_ADC.Scale(factor);
-  return;
 }
 
 void QwIntegrationPMT::Normalize(VQwDataElement* denom)
 {
   if (fIsNormalizable) {
-    QwMollerADC_Channel* denom_ptr = dynamic_cast<QwMollerADC_Channel*>(denom);
+    auto* denom_ptr = dynamic_cast<QwMollerADC_Channel*>(denom);
     QwMollerADC_Channel vqwk_denom(*denom_ptr);
     fTriumf_ADC.DivideBy(vqwk_denom);
   }
@@ -398,7 +377,6 @@ void QwIntegrationPMT::PrintInfo() const
             << " Asym=" << fAsym << " C_x=" << fCoeff_x << " C_y=" << fCoeff_y 
             << " C_xp=" << fCoeff_xp << " C_yp=" << fCoeff_yp 
             << " C_e=" << fCoeff_e << std::endl;
-  return;
 }
 
 /********************************************************/
@@ -412,8 +390,7 @@ void  QwIntegrationPMT::ConstructHistograms(TDirectory *folder, TString &prefix)
     {
       fTriumf_ADC.ConstructHistograms(folder, prefix);
     }
-  return;
-}
+  }
 
 void  QwIntegrationPMT::FillHistograms()
 {
@@ -427,8 +404,7 @@ void  QwIntegrationPMT::FillHistograms()
     }
 
 
-  return;
-}
+  }
 
 void  QwIntegrationPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
@@ -438,8 +414,7 @@ void  QwIntegrationPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, s
     {
       fTriumf_ADC.ConstructBranchAndVector(tree, prefix,values);
     }
-  return;
-}
+  }
 
 void  QwIntegrationPMT::ConstructBranch(TTree *tree, TString &prefix)
 {
@@ -449,8 +424,7 @@ void  QwIntegrationPMT::ConstructBranch(TTree *tree, TString &prefix)
     {
       fTriumf_ADC.ConstructBranch(tree, prefix);
     }
-  return;
-}
+  }
 
 void  QwIntegrationPMT::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist)
 {
@@ -466,8 +440,7 @@ void  QwIntegrationPMT::ConstructBranch(TTree *tree, TString &prefix, QwParamete
        }
 
    }
-  return;
-}
+  }
 
 
 void  QwIntegrationPMT::FillTreeVector(std::vector<Double_t> &values) const
@@ -518,12 +491,14 @@ void QwIntegrationPMT::DeaccumulateRunningSum(QwIntegrationPMT& value, Int_t Err
 
 void QwIntegrationPMT::Blind(const QwBlinder *blinder)
 {
-  if (fIsBlindable)  fTriumf_ADC.Blind(blinder);
+  if (fIsBlindable) {  fTriumf_ADC.Blind(blinder);
+}
 }
 
 void QwIntegrationPMT::Blind(const QwBlinder *blinder, const QwIntegrationPMT& yield)
 {
-  if (fIsBlindable)  fTriumf_ADC.Blind(blinder, yield.fTriumf_ADC);
+  if (fIsBlindable) {  fTriumf_ADC.Blind(blinder, yield.fTriumf_ADC);
+}
 }
 
 #ifdef __USE_DATABASE__

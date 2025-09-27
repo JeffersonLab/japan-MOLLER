@@ -291,8 +291,9 @@ void QwCombinedBCM<T>::DeaccumulateRunningSum(VQwBCM &value){
 template<typename T>
 QwCombinedBCM<T>& QwCombinedBCM<T>::operator= (const QwCombinedBCM<T> &value)
 {
-  if (this->GetElementName()!="")
+  if (this->GetElementName()!="") {
     this->fBeamCurrent=value.fBeamCurrent;
+}
 
   return *this;
 }
@@ -300,9 +301,10 @@ QwCombinedBCM<T>& QwCombinedBCM<T>::operator= (const QwCombinedBCM<T> &value)
 template<typename T>
 VQwBCM& QwCombinedBCM<T>::operator= (const VQwBCM &value)
 {
-  if (this->GetElementName()!="")
+  if (this->GetElementName()!="") {
     dynamic_cast<QwCombinedBCM<T>* >(this)->fBeamCurrent=
       dynamic_cast<const QwCombinedBCM<T>* >(&value)->fBeamCurrent;
+}
 
   return *this;
 }

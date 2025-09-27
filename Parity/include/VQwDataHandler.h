@@ -37,7 +37,7 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
     typedef std::vector< VQwHardwareChannel* >::iterator Iterator_HdwChan;
     typedef std::vector< VQwHardwareChannel* >::const_iterator ConstIterator_HdwChan;
 
-    VQwDataHandler(const TString& name);
+    VQwDataHandler(TString  name);
     VQwDataHandler(const VQwDataHandler &source);
 
     virtual void ParseConfigFile(QwParameterFile& file);
@@ -145,7 +145,7 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
 
     std::pair<EQwHandleType,std::string> ParseHandledVariable(const std::string& variable);
 
-   void CalcOneOutput(const VQwHardwareChannel* dv, VQwHardwareChannel* output,
+   static void CalcOneOutput(const VQwHardwareChannel* dv, VQwHardwareChannel* output,
                        std::vector< const VQwHardwareChannel* > &ivs,
                        std::vector< Double_t > &sens);
 

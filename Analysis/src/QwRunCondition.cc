@@ -13,12 +13,12 @@ extern const char* const gGitInfo;
 
 const Int_t QwRunCondition::fCharLength = 127;
 
-QwRunCondition::QwRunCondition(Int_t argc, Char_t* argv[], TString name)
+QwRunCondition::QwRunCondition(Int_t argc, Char_t* argv[], TString name) : fROCFlagFileName("qwvmets.flags"), fRunConditionList(new TList)
 {
 
-  fROCFlagFileName = "qwvmets.flags";
+  
 
-  fRunConditionList = new TList;
+  
   fRunConditionList -> SetOwner(true);
   this->SetArgs(argc, argv);
   this->SetName(name);
@@ -28,7 +28,7 @@ QwRunCondition::QwRunCondition(Int_t argc, Char_t* argv[], TString name)
 
 QwRunCondition::~QwRunCondition()
 {
-  if(fRunConditionList) delete fRunConditionList;
+  delete fRunConditionList;
 }
 
 
@@ -67,7 +67,8 @@ QwRunCondition::SetArgs(Int_t argc, Char_t* argv[])
 	TString QwVersion = Form("%d.%d.%d",QWANALYSIS_VERSION_MAJOR, QWANALYSIS_VERSION_MINOR, QWANALYSIS_VERSION_PATCH);
   TString program_name = argv[0];
   TString argv_list;
-  for (Int_t i=1; i<argc; i++) argv_list += argv[i];
+  for (Int_t i=1; i<argc; i++) { argv_list += argv[i];
+}
 
   // get current time when a ROOT file is created
   TTimeStamp time_stamp;
@@ -76,7 +77,7 @@ QwRunCondition::SetArgs(Int_t argc, Char_t* argv[])
   // get current ROC flags 
   TString roc_flags;
   // if one of the cdaq cluster AND the user must be a "cdaq", 
-  if( (host_name.Contains("cdaql")) and (not user_name.CompareTo("cdaq", TString::kExact)) )  {
+  if( (host_name.Contains("cdaql")) and (user_name.CompareTo("cdaq", TString::kExact) == 0) )  {
     roc_flags = this->GetROCFlags();
   }
   else {
@@ -106,8 +107,6 @@ QwRunCondition::SetArgs(Int_t argc, Char_t* argv[])
   this -> Add(current_time);
   this -> Add(gGitInfo);
   this -> Add(roc_flags);
-
-  return;
 }
 
 
@@ -115,7 +114,6 @@ void
 QwRunCondition::Add(TString in)
 {
   fRunConditionList -> AddLast(new TObjString(in));
-  return;
 }
 
 
@@ -139,7 +137,6 @@ void
 QwRunCondition::SetName(TString name)
 {
   fRunConditionList->SetName(name);
-  return;
 }
 
 

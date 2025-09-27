@@ -34,7 +34,7 @@ class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCor
  public:
   /// \brief Constructor with name
   QwCorrelator(const TString& name);
-  QwCorrelator(const QwCorrelator& name);
+  QwCorrelator(const QwCorrelator& source);
   virtual ~QwCorrelator();
 
  private:
@@ -105,14 +105,14 @@ class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCor
   void WriteAliasFile();
   void CloseAliasFile();
 
-  int fTotalCount;
-  int fGoodCount;
+  int fTotalCount{};
+  int fGoodCount{};
 
-  int fErrCounts_EF;
+  int fErrCounts_EF{};
   std::vector<int> fErrCounts_IV;
   std::vector<int> fErrCounts_DV;
 
-  unsigned int fGoodEvent;
+  unsigned int fGoodEvent{};
 
  private:
 		

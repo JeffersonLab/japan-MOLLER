@@ -64,7 +64,7 @@ class QwSubsystemArray:
   virtual ~QwSubsystemArray() { };
 
   /// \brief Assignment operator
-  QwSubsystemArray& operator=(const QwSubsystemArray& value);
+  QwSubsystemArray& operator=(const QwSubsystemArray& source);
 
   /// \brief Set the internal record of the CODA run number
   void SetCodaRunNumber(UInt_t runnum) { fCodaRunNumber = runnum; };
@@ -264,17 +264,17 @@ class QwSubsystemArray:
   void GetMarkerWordList(const ROCID_t roc_id, const BankID_t bank_id, std::vector<UInt_t>& marker) const;
 
  protected:
-  size_t fTreeArrayIndex;  //! Index of this data element in root tree
+  size_t fTreeArrayIndex{};  //! Index of this data element in root tree
 
  protected:
-  UInt_t fCodaRunNumber;     ///< CODA run number as provided by QwEventBuffer
-  UInt_t fCodaSegmentNumber; ///< CODA segment number as provided by QwEventBuffer
-  UInt_t fCodaEventNumber;   ///< CODA event number as provided by QwEventBuffer
-  UInt_t fCodaEventType;     ///< CODA event type as provided by QwEventBuffer
+  UInt_t fCodaRunNumber{};     ///< CODA run number as provided by QwEventBuffer
+  UInt_t fCodaSegmentNumber{}; ///< CODA segment number as provided by QwEventBuffer
+  UInt_t fCodaEventNumber{};   ///< CODA event number as provided by QwEventBuffer
+  UInt_t fCodaEventType{};     ///< CODA event type as provided by QwEventBuffer
 
-  Double_t fCleanParameter[3];
+  Double_t fCleanParameter[3]{};
   UInt_t fEventTypeMask;   ///< Mask of event types
-  Bool_t fHasDataLoaded;   ///< Has this array gotten data to be processed?
+  Bool_t fHasDataLoaded{};   ///< Has this array gotten data to be processed?
 
  protected:
   /// Function to determine which subsystems we can accept
@@ -308,7 +308,7 @@ public:
   double GetWindowPeriod(){return fWindowPeriod;};
 
 protected:
-  double fWindowPeriod;
+  double fWindowPeriod{};
   
 
 }; // class QwSubsystemArray

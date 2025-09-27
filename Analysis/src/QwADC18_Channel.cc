@@ -5,6 +5,7 @@
 
 // ROOT headers
 #include <TTree.h>
+#include <math.h>
 
 // Qweak headers
 #include "QwLog.h"
@@ -87,11 +88,12 @@ Int_t QwADC18_Channel::GetBufferOffset(Int_t moduleindex, Int_t channelindex)
 Int_t QwADC18_Channel::ApplyHWChecks()
 {
   Bool_t fEventIsGood=kTRUE;
-  Bool_t bStatus;
+  Bool_t bStatus = false;
   if (bEVENTCUTMODE>0){//Global switch to ON/OFF event cuts set at the event cut file
 
-    if (bDEBUG)
+    if (bDEBUG) {
       QwWarning<<" QwQWVK_Channel "<<GetElementName()<<"  "<<GetNumberOfSamples()<<QwLog::endl;
+}
 
     // Sample size check
     bStatus = MatchNumberOfSamples(fNumberOfSamples_map);//compare the default sample size with no.of samples read by the module
@@ -108,7 +110,8 @@ Int_t QwADC18_Channel::ApplyHWChecks()
     if (!MatchSequenceNumber(fSequenceNo_Prev)){//we have a sequence number error
       fEventIsGood=kFALSE;
       fErrorFlag|=kErrorFlag_Sequence;
-      if (bDEBUG)       QwWarning<<" QwQWVK_Channel "<<GetElementName()<<" Sequence number previous value = "<<fSequenceNo_Prev<<" Current value= "<< GetSequenceNumber()<<QwLog::endl;
+      if (bDEBUG) {       QwWarning<<" QwQWVK_Channel "<<GetElementName()<<" Sequence number previous value = "<<fSequenceNo_Prev<<" Current value= "<< GetSequenceNumber()<<QwLog::endl;
+}
     }
   }
   else {
@@ -122,16 +125,21 @@ Int_t QwADC18_Channel::ApplyHWChecks()
 
 /********************************************************/
 void QwADC18_Channel::IncrementErrorCounters(){
-  if ( (kErrorFlag_sample &  fErrorFlag)==kErrorFlag_sample)
+  if ( (kErrorFlag_sample &  fErrorFlag)==kErrorFlag_sample) {
     fErrorCount_sample++; //increment the hw error counter
-  if ( (kErrorFlag_SW_HW &  fErrorFlag)==kErrorFlag_SW_HW)
+}
+  if ( (kErrorFlag_SW_HW &  fErrorFlag)==kErrorFlag_SW_HW) {
     fErrorCount_SW_HW++; //increment the hw error counter
-  if ( (kErrorFlag_Sequence &  fErrorFlag)==kErrorFlag_Sequence)
+}
+  if ( (kErrorFlag_Sequence &  fErrorFlag)==kErrorFlag_Sequence) {
     fErrorCount_Sequence++; //increment the hw error counter
-  if ( (kErrorFlag_SameHW &  fErrorFlag)==kErrorFlag_SameHW)
+}
+  if ( (kErrorFlag_SameHW &  fErrorFlag)==kErrorFlag_SameHW) {
     fErrorCount_SameHW++; //increment the hw error counter
-  if ( (kErrorFlag_ZeroHW &  fErrorFlag)==kErrorFlag_ZeroHW)
+}
+  if ( (kErrorFlag_ZeroHW &  fErrorFlag)==kErrorFlag_ZeroHW) {
     fErrorCount_ZeroHW++; //increment the hw error counter
+}
   if ( ((kErrorFlag_EventCut_L &  fErrorFlag)==kErrorFlag_EventCut_L) 
        || ((kErrorFlag_EventCut_U &  fErrorFlag)==kErrorFlag_EventCut_U)){
     fNumEvtsWithEventCutsRejected++; //increment the event cut error counter
@@ -191,7 +199,7 @@ void QwADC18_Channel::InitializeChannel(TString name, TString datatosave)
   fErrorCount_ZeroHW     = 0;
   fErrorCount_HWSat      = 0;
 
-  fRunningSum            = 0;
+  fRunningSum            = nullptr;
 
   fADC_Same_NumEvt       = 0;
   fSequenceNo_Prev       = 0;
@@ -200,9 +208,6 @@ void QwADC18_Channel::InitializeChannel(TString name, TString datatosave)
   fGoodEventCount        = 0;
 
   bEVENTCUTMODE          = 0;
-
-  //std::cout<< "name = "<<name<<" error count same _HW = "<<fErrorCount_SameHW <<std::endl;
-  return;
 }
 
 /********************************************************/
@@ -316,12 +321,12 @@ void QwADC18_Channel::EncodeEventData(std::vector<UInt_t> &buffer)
     }
   }
 
-  for (Int_t i = 0; i < kDataWordsPerChannel; i++) {
-    buffer.push_back(localbuf[i]);
+  for (unsigned int i : localbuf) {
+    buffer.push_back(i);
   }
 }
 
-Bool_t QwADC18_Channel::IsHeaderWord(UInt_t rawd) const
+Bool_t QwADC18_Channel::IsHeaderWord(UInt_t rawd) 
 {
   return ((rawd & mask31x) != 0);
 }
@@ -346,7 +351,8 @@ Int_t QwADC18_Channel::ProcessDataWord(UInt_t rawd)
         return 0;
       }
       value_raw = rawd & mask200x;
-      if (rawd & mask21x) value_raw = -((~value_raw & 0x1fffffff) + 1);
+      if ((rawd & mask21x) != 0u) { value_raw = -((~value_raw & 0x1fffffff) + 1);
+}
       fNumberOfSamples = (1 << act_dvalue);
       return value_raw;
       break;
@@ -386,7 +392,8 @@ Int_t QwADC18_Channel::ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UI
     Int_t n = 25;
     for (size_t i = 0; i < num_words_left; i++) {
       QwOut << "0x" << std::setfill('0') << std::setw(8) << buffer[i] << " ";
-      if (i % n == n - 1) QwOut << QwLog::endl;
+      if (i % n == n - 1) { QwOut << QwLog::endl;
+}
     }
     QwOut << std::dec << std::setfill(' ') << std::setw(0) << QwLog::endl;
   }
@@ -506,7 +513,8 @@ void QwADC18_Channel::PrintInfo() const
 void  QwADC18_Channel::ConstructHistograms(TDirectory *folder, TString &prefix)
 {
   //  If we have defined a subdirectory in the ROOT file, then change into it.
-  if (folder != NULL) folder->cd();
+  if (folder != nullptr) { folder->cd();
+}
 
   if (IsNameEmpty()){
     //  This channel is not used, so skip filling the histograms.
@@ -514,22 +522,24 @@ void  QwADC18_Channel::ConstructHistograms(TDirectory *folder, TString &prefix)
     //  Now create the histograms.
     if (prefix == TString("asym_")
        || prefix == TString("diff_")
-       || prefix == TString("yield_"))
+       || prefix == TString("yield_")) {
       fDataToSave=kDerived;
+}
 
-    TString basename, fullname;
+    TString basename;
+    TString fullname;
     basename = prefix + GetElementName();
 
     if(fDataToSave==kRaw)
       {
-	fHistograms.resize(2, NULL);
+	fHistograms.resize(2, nullptr);
 	size_t index=0;
 	fHistograms[index++] = gQwHists.Construct1DHist(basename);
 	fHistograms[index++] = gQwHists.Construct1DHist(basename+Form("_raw"));
       }
     else if(fDataToSave==kDerived)
       {
-	fHistograms.resize(1, NULL);
+	fHistograms.resize(1, nullptr);
 	Int_t index=0;
 	fHistograms[index++] = gQwHists.Construct1DHist(basename);
       }
@@ -551,15 +561,18 @@ void  QwADC18_Channel::FillHistograms()
       {
 	if(fDataToSave==kRaw)
 	  {
-	    if (fHistograms[index] != NULL && (fErrorFlag)==0)
+	    if (fHistograms[index] != nullptr && (fErrorFlag)==0) {
 	      fHistograms[index++]->Fill(GetValue());
-	    if (fHistograms[index] != NULL && (fErrorFlag)==0)
+}
+	    if (fHistograms[index] != nullptr && (fErrorFlag)==0) {
 	      fHistograms[index++]->Fill(GetRawValue());
+}
 	  }
 	else if(fDataToSave==kDerived)
 	  {
-	    if (fHistograms[index] != NULL && (fErrorFlag)==0)
+	    if (fHistograms[index] != nullptr && (fErrorFlag)==0) {
 	      fHistograms[index++]->Fill(GetValue());
+}
 	  }
     }
 }
@@ -601,8 +614,9 @@ void  QwADC18_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, st
     }
 
     fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
-    if (gQwHists.MatchDeviceParamsFromList(basename.Data()))
+    if (gQwHists.MatchDeviceParamsFromList(basename.Data())) {
       tree->Branch(basename, &(values[fTreeArrayIndex]), list);
+}
   }
 }
 
@@ -743,7 +757,8 @@ void  QwADC18_Channel::FillNTupleVector(std::vector<Double_t>& values) const
 
 QwADC18_Channel& QwADC18_Channel::operator= (const QwADC18_Channel &value)
 {
-  if (this == &value) return *this;
+  if (this == &value) { return *this;
+}
 
   if (!IsNameEmpty()) {
     VQwHardwareChannel::operator=(value);
@@ -761,7 +776,8 @@ QwADC18_Channel& QwADC18_Channel::operator= (const QwADC18_Channel &value)
 void QwADC18_Channel::AssignScaledValue(const QwADC18_Channel &value,
 				 Double_t scale)
 {
-  if(this == &value) return;
+  if(this == &value) { return;
+}
 
   if (!IsNameEmpty()) {
     this->fValue      = value.fValue * scale;
@@ -774,9 +790,9 @@ void QwADC18_Channel::AssignScaledValue(const QwADC18_Channel &value,
 
 void QwADC18_Channel::AssignValueFrom(const  VQwDataElement* valueptr)
 {
-  const QwADC18_Channel* tmpptr;
+  const QwADC18_Channel* tmpptr = nullptr;
   tmpptr = dynamic_cast<const QwADC18_Channel*>(valueptr);
-  if (tmpptr!=NULL){
+  if (tmpptr!=nullptr){
     *this = *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::AssignValueFrom = "
@@ -786,9 +802,9 @@ void QwADC18_Channel::AssignValueFrom(const  VQwDataElement* valueptr)
 }
 void QwADC18_Channel::AddValueFrom(const  VQwHardwareChannel* valueptr)
 {
-  const QwADC18_Channel* tmpptr;
+  const QwADC18_Channel* tmpptr = nullptr;
   tmpptr = dynamic_cast<const QwADC18_Channel*>(valueptr);
-  if (tmpptr!=NULL){
+  if (tmpptr!=nullptr){
     *this += *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::AddValueFrom = "
@@ -798,9 +814,9 @@ void QwADC18_Channel::AddValueFrom(const  VQwHardwareChannel* valueptr)
 }
 void QwADC18_Channel::SubtractValueFrom(const  VQwHardwareChannel* valueptr)
 {
-  const QwADC18_Channel* tmpptr;
+  const QwADC18_Channel* tmpptr = nullptr;
   tmpptr = dynamic_cast<const QwADC18_Channel*>(valueptr);
-  if (tmpptr!=NULL){
+  if (tmpptr!=nullptr){
     *this -= *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::SubtractValueFrom = "
@@ -810,9 +826,9 @@ void QwADC18_Channel::SubtractValueFrom(const  VQwHardwareChannel* valueptr)
 }
 void QwADC18_Channel::MultiplyBy(const VQwHardwareChannel* valueptr)
 {
-  const QwADC18_Channel* tmpptr;
+  const QwADC18_Channel* tmpptr = nullptr;
   tmpptr = dynamic_cast<const QwADC18_Channel*>(valueptr);
-  if (tmpptr!=NULL){
+  if (tmpptr!=nullptr){
     *this *= *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::MultiplyBy = "
@@ -822,9 +838,9 @@ void QwADC18_Channel::MultiplyBy(const VQwHardwareChannel* valueptr)
 }
 void QwADC18_Channel::DivideBy(const VQwHardwareChannel* valueptr)
 {
-  const QwADC18_Channel* tmpptr;
+  const QwADC18_Channel* tmpptr = nullptr;
   tmpptr = dynamic_cast<const QwADC18_Channel*>(valueptr);
-  if (tmpptr!=NULL){
+  if (tmpptr!=nullptr){
     *this /= *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::DivideBy = "
@@ -834,7 +850,7 @@ void QwADC18_Channel::DivideBy(const VQwHardwareChannel* valueptr)
 }
 
 
-const QwADC18_Channel QwADC18_Channel::operator+ (const QwADC18_Channel &value) const
+QwADC18_Channel QwADC18_Channel::operator+ (const QwADC18_Channel &value) const
 {
   QwADC18_Channel result = *this;
   result += value;
@@ -851,7 +867,7 @@ QwADC18_Channel& QwADC18_Channel::operator+= (const QwADC18_Channel &value)
   return *this;
 }
 
-const QwADC18_Channel QwADC18_Channel::operator- (const QwADC18_Channel &value) const
+QwADC18_Channel QwADC18_Channel::operator- (const QwADC18_Channel &value) const
 {
   QwADC18_Channel result = *this;
   result -= value;
@@ -868,7 +884,7 @@ QwADC18_Channel& QwADC18_Channel::operator-= (const QwADC18_Channel &value)
   return *this;
 }
 
-const QwADC18_Channel QwADC18_Channel::operator* (const QwADC18_Channel &value) const
+QwADC18_Channel QwADC18_Channel::operator* (const QwADC18_Channel &value) const
 {
   QwADC18_Channel result = *this;
   result *= value;
@@ -890,9 +906,9 @@ QwADC18_Channel& QwADC18_Channel::operator*= (const QwADC18_Channel &value)
 
 VQwHardwareChannel& QwADC18_Channel::operator+=(const VQwHardwareChannel &source)
 {
-  const QwADC18_Channel* tmpptr;
+  const QwADC18_Channel* tmpptr = nullptr;
   tmpptr = dynamic_cast<const QwADC18_Channel*>(&source);
-  if (tmpptr!=NULL){
+  if (tmpptr!=nullptr){
     *this += *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::operator+= "
@@ -905,9 +921,9 @@ VQwHardwareChannel& QwADC18_Channel::operator+=(const VQwHardwareChannel &source
 
 VQwHardwareChannel& QwADC18_Channel::operator-=(const VQwHardwareChannel &source)
 {
-  const QwADC18_Channel* tmpptr;
+  const QwADC18_Channel* tmpptr = nullptr;
   tmpptr = dynamic_cast<const QwADC18_Channel*>(&source);
-  if (tmpptr!=NULL){
+  if (tmpptr!=nullptr){
     *this -= *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::operator-= "
@@ -920,9 +936,9 @@ VQwHardwareChannel& QwADC18_Channel::operator-=(const VQwHardwareChannel &source
 
 VQwHardwareChannel& QwADC18_Channel::operator*=(const VQwHardwareChannel &source)
 {
-  const QwADC18_Channel* tmpptr;
+  const QwADC18_Channel* tmpptr = nullptr;
   tmpptr = dynamic_cast<const QwADC18_Channel*>(&source);
-  if (tmpptr!=NULL){
+  if (tmpptr!=nullptr){
     *this *= *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::operator*= "
@@ -935,9 +951,9 @@ VQwHardwareChannel& QwADC18_Channel::operator*=(const VQwHardwareChannel &source
 
 VQwHardwareChannel& QwADC18_Channel::operator/=(const VQwHardwareChannel &source)
 {
-  const QwADC18_Channel* tmpptr;
+  const QwADC18_Channel* tmpptr = nullptr;
   tmpptr = dynamic_cast<const QwADC18_Channel*>(&source);
-  if (tmpptr!=NULL){
+  if (tmpptr!=nullptr){
     *this /= *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::operator/= "
@@ -981,8 +997,8 @@ void QwADC18_Channel::Ratio(const QwADC18_Channel &numer, const QwADC18_Channel 
 QwADC18_Channel& QwADC18_Channel::operator/= (const QwADC18_Channel &denom)
 {
   //  In this function, leave the "raw" variables untouched.
-  Double_t ratio;
-  Double_t variance;
+  Double_t ratio = NAN;
+  Double_t variance = NAN;
   if (!IsNameEmpty()) {
     // The variances are calculated using the following formula:
     //   Var[ratio] = ratio^2 (Var[numer] / numer^2 + Var[denom] / denom^2)
@@ -1013,8 +1029,9 @@ QwADC18_Channel& QwADC18_Channel::operator/= (const QwADC18_Channel &denom)
   }
 
   // Nanny
-  if (fValue != fValue)
+  if (fValue != fValue) {
     QwWarning << "Angry Nanny: NaN detected in " << GetElementName() << QwLog::endl;
+}
   return *this;
 }
 
@@ -1153,7 +1170,7 @@ void QwADC18_Channel::AccumulateRunningSum(const QwADC18_Channel& value, Int_t c
   if (n2 == 0) {
     // no good events for addition
     return;
-  } else if (n2 == 1) {
+  } if (n2 == 1) {
     // simple version for addition of single event
     fGoodEventCount++;
     fValue += (M12 - M11) / n;
@@ -1166,8 +1183,9 @@ void QwADC18_Channel::AccumulateRunningSum(const QwADC18_Channel& value, Int_t c
   }
 
   // Nanny
-  if (fValue != fValue)
+  if (fValue != fValue) {
     QwWarning << "Angry Nanny: NaN detected in " << GetElementName() << QwLog::endl;
+}
 }
 
 
@@ -1253,12 +1271,13 @@ Bool_t QwADC18_Channel::MatchNumberOfSamples(size_t numsamp)
   if (!IsNameEmpty()){
     status = (fNumberOfSamples==numsamp);
     if (! status){
-      if (bDEBUG)
+      if (bDEBUG) {
 	QwError << "QwADC18_Channel::MatchNumberOfSamples:  Channel "
 		<< GetElementName()
 		<< " had fNumberOfSamples==" << fNumberOfSamples
 		<< " and was supposed to have " << numsamp
 		<< std::endl;
+}
     }
   }
   return status;
@@ -1272,10 +1291,11 @@ Bool_t QwADC18_Channel::ApplySingleEventCuts(Double_t LL,Double_t UL)
   if (UL < LL){
     status=kTRUE;
   } else  if (GetValue()<=UL && GetValue()>=LL){
-    if ((fErrorFlag & kPreserveError)!=0)
+    if ((fErrorFlag & kPreserveError)!=0) {
       status=kTRUE;
-    else
+    } else {
       status=kFALSE;//If the device HW is failed
+}
   }
   std::cout<<(this->fErrorFlag & kPreserveError)<<std::endl;
   return status;
@@ -1283,23 +1303,25 @@ Bool_t QwADC18_Channel::ApplySingleEventCuts(Double_t LL,Double_t UL)
 
 Bool_t QwADC18_Channel::ApplySingleEventCuts()//This will check the limits and update event_flags and error counters
 {
-  Bool_t status;
+  Bool_t status = false;
 
   if (bEVENTCUTMODE>=2){//Global switch to ON/OFF event cuts set at the event cut file
 
     if (fULimit < fLLimit){
       status=kTRUE;
     } else  if (GetValue()<=fULimit && GetValue()>=fLLimit){
-      if ((fErrorFlag)==0)
+      if ((fErrorFlag)==0) {
 	status=kTRUE;
-      else
+      } else {
 	status=kFALSE;//If the device HW is failed
+}
     }
     else{
-      if (GetValue()> fULimit)
+      if (GetValue()> fULimit) {
 	fErrorFlag|=kErrorFlag_EventCut_U;
-      else
+      } else {
 	fErrorFlag|=kErrorFlag_EventCut_L;
+}
       status=kFALSE;
     }
 
@@ -1341,7 +1363,7 @@ void  QwADC18_Channel::PrintErrorCounterTail()
 void  QwADC18_Channel::PrintErrorCounters() const
 {
   TString message;
-  if (fErrorCount_sample || fErrorCount_SW_HW || fErrorCount_Sequence || fErrorCount_SameHW || fErrorCount_ZeroHW || fErrorCount_HWSat || fNumEvtsWithEventCutsRejected) {
+  if ((fErrorCount_sample != 0) || (fErrorCount_SW_HW != 0) || (fErrorCount_Sequence != 0) || (fErrorCount_SameHW != 0) || (fErrorCount_ZeroHW != 0) || (fErrorCount_HWSat != 0) || (fNumEvtsWithEventCutsRejected != 0)) {
     message  = Form("%30s", GetElementName().Data());
     message += Form("%9d", fErrorCount_HWSat);
     message += Form("%9d", fErrorCount_sample);
@@ -1361,10 +1383,10 @@ void  QwADC18_Channel::PrintErrorCounters() const
 
 void QwADC18_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *value)
 {
-  const QwADC18_Channel* input = dynamic_cast<const QwADC18_Channel*>(value);
+  const auto* input = dynamic_cast<const QwADC18_Channel*>(value);
 
   // follows same steps as += but w/ scaling factor
-  if(input!=NULL && !IsNameEmpty()){
+  if(input!=nullptr && !IsNameEmpty()){
     //     QwWarning << "Adding " << input->GetElementName()
     // 	      << " to " << GetElementName()
     // 	      << " with scale factor " << scale

@@ -12,36 +12,20 @@ VQwHardwareChannel::VQwHardwareChannel():
   fNumberOfDataWords(0),
   fNumberOfSubElements(0), fDataToSave(kRaw)
 {
-  fULimit = -1;
-  fLLimit = 1;
+  
+  
   fErrorFlag = 0;
   fErrorConfigFlag = 0;
-  fBurpHoldoff = 10;
-  fBurpThreshold = -1.0;
+  
+  
   
   ProcessOptions();
 }
 
 VQwHardwareChannel::VQwHardwareChannel(const VQwHardwareChannel& value)
-  :VQwDataElement(value),
-   fNumberOfDataWords(value.fNumberOfDataWords),
-   fNumberOfSubElements(value.fNumberOfSubElements),
-   fDataToSave(value.fDataToSave),
-   fTreeArrayIndex(value.fTreeArrayIndex),
-   fTreeArrayNumEntries(value.fTreeArrayNumEntries),
-   fPedestal(value.fPedestal),
-   fCalibrationFactor(value.fCalibrationFactor),
-   kFoundPedestal(value.kFoundPedestal),
-   kFoundGain(value.kFoundGain),
-   bEVENTCUTMODE(value.bEVENTCUTMODE),
-   fULimit(value.fULimit),
-   fLLimit(value.fLLimit),
-   fStability(value.fStability),
-   fBurpThreshold(value.fBurpThreshold),
-   fBurpCountdown(value.fBurpCountdown),
-   fBurpHoldoff(value.fBurpHoldoff)
-{
-}
+  
+   
+= default;
 
 VQwHardwareChannel::VQwHardwareChannel(const VQwHardwareChannel& value, VQwDataElement::EDataToSave datatosave)
   :VQwDataElement(value),
@@ -88,8 +72,9 @@ void VQwHardwareChannel::CopyFrom(const VQwHardwareChannel& value)
 
 
 void VQwHardwareChannel::ProcessOptions(){
-  if (gQwOptions.HasValue("burp.holdoff"))
+  if (gQwOptions.HasValue("burp.holdoff")) {
     fBurpHoldoff=gQwOptions.GetValue<int>("burp.holdoff");
+}
 }
 
 void VQwHardwareChannel::SetSingleEventCuts(Double_t min, Double_t max)

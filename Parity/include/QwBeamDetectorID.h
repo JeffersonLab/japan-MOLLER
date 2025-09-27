@@ -46,7 +46,7 @@ public:
 
   EQwBeamInstrumentType   fTypeID; // type of detector eg: bcm or stripline, etc..
   Int_t   fIndex;            // index of this detector in the vector containing all the detector of same type
-  UInt_t  fSubelement;       // some detectors have many subelements (eg stripline have 4 antenas) some have only one sub element(eg lumis have one channel)
+  UInt_t  fSubelement{};       // some detectors have many subelements (eg stripline have 4 antenas) some have only one sub element(eg lumis have one channel)
   TString fChannelName;
   TString fSubelementName;
 

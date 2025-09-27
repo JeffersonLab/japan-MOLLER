@@ -79,11 +79,11 @@ class QwEnergyCalculator : public VQwDataElement{
     void    PrintInfo() const;
     void    SetRootSaveStatus(TString &prefix);
 
-    Bool_t  ApplyHWChecks();//Check for harware errors in the devices
+    static Bool_t  ApplyHWChecks();//Check for harware errors in the devices
     Bool_t  ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
-    Int_t   SetSingleEventCuts(Double_t mean, Double_t sigma);//two limts and sample size
+    Int_t   SetSingleEventCuts(Double_t minX, Double_t maxX);//two limts and sample size
     /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
-    void    SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel);
+    void    SetSingleEventCuts(UInt_t errorflag,Double_t LL, Double_t UL, Double_t stability, Double_t burplevel);
     void    SetEventCutMode(Int_t bcuts){
       bEVENTCUTMODE=bcuts;
       fEnergyChange.SetEventCutMode(bcuts);
@@ -117,7 +117,7 @@ class QwEnergyCalculator : public VQwDataElement{
 
     void    ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
     void    ConstructBranch(TTree *tree, TString &prefix);
-    void    ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file);
+    void    ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
     void    FillTreeVector(std::vector<Double_t> &values) const;
 
 #ifdef HAS_RNTUPLE_SUPPORT

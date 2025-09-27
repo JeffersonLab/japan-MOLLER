@@ -8,10 +8,10 @@
 #include <TROOT.h>
 
 // Global pointers
-QwRint* gQwRint = NULL;
+QwRint* gQwRint = nullptr;
 
 // Pointer to self
-QwRint* QwRint::fExists = NULL;
+QwRint* QwRint::fExists = nullptr;
 
 
 //--------------------------------------------------------------------------
@@ -32,6 +32,7 @@ QwRint::QwRint (const char* appClassName, int* argc, char** argv,
 QwRint::~QwRint()
 {
   // Reset point to self
-  if (fExists == this)
-    fExists = NULL;
+  if (fExists == this) {
+    fExists = nullptr;
+}
 }

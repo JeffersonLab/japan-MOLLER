@@ -132,7 +132,7 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   ///  TODO:  SetHardwareSum should be removed, and SetEventData
   ///         should be made protected.
   void  SetHardwareSum(Double_t hwsum, UInt_t sequencenumber = 0);
-  void  SetEventData(Double_t* block, UInt_t sequencenumber = 0);
+  void  SetEventData(const Double_t* block, UInt_t sequencenumber = 0);
   void  SetRawEventData();
 
   /// Encode the event data into a CODA buffer
@@ -156,21 +156,21 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   QwVQWK_Channel& operator-= (const QwVQWK_Channel &value);
   QwVQWK_Channel& operator*= (const QwVQWK_Channel &value);
 
-  VQwHardwareChannel& operator+=(const VQwHardwareChannel& input) override;
-  VQwHardwareChannel& operator-=(const VQwHardwareChannel& input) override;
-  VQwHardwareChannel& operator*=(const VQwHardwareChannel& input) override;
-  VQwHardwareChannel& operator/=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator+=(const VQwHardwareChannel& source) override;
+  VQwHardwareChannel& operator-=(const VQwHardwareChannel& source) override;
+  VQwHardwareChannel& operator*=(const VQwHardwareChannel& source) override;
+  VQwHardwareChannel& operator/=(const VQwHardwareChannel& source) override;
 
-  const QwVQWK_Channel operator+ (const QwVQWK_Channel &value) const;
-  const QwVQWK_Channel operator- (const QwVQWK_Channel &value) const;
-  const QwVQWK_Channel operator* (const QwVQWK_Channel &value) const;
+  QwVQWK_Channel operator+ (const QwVQWK_Channel &value) const;
+  QwVQWK_Channel operator- (const QwVQWK_Channel &value) const;
+  QwVQWK_Channel operator* (const QwVQWK_Channel &value) const;
   void Sum(const QwVQWK_Channel &value1, const QwVQWK_Channel &value2);
   void Difference(const QwVQWK_Channel &value1, const QwVQWK_Channel &value2);
   void Ratio(const QwVQWK_Channel &numer, const QwVQWK_Channel &denom);
   void Product(const QwVQWK_Channel &value1, const QwVQWK_Channel &value2);
   void DivideBy(const QwVQWK_Channel& denom);
   void AddChannelOffset(Double_t Offset);
-  void Scale(Double_t Offset);
+  void Scale(Double_t scale);
 
 
   void AccumulateRunningSum(const QwVQWK_Channel& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
@@ -274,7 +274,7 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
 #endif
 
  protected:
-  QwVQWK_Channel& operator/= (const QwVQWK_Channel &value);
+  QwVQWK_Channel& operator/= (const QwVQWK_Channel &denom);
 
 private:
   //  The following specific access methods should only be used internally,

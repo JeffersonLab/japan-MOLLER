@@ -99,7 +99,7 @@ class PromptSummaryElement :  public TObject
 
 
   TString GetCSVSummary(TString type);
-  TString GetTextSummary();
+  static TString GetTextSummary();
   //
 
   // This is not sigma, but error defined in QwVQWK_Channel::CalculateRunningAverage() in QwVQWK_Channel.cc as follows
@@ -107,18 +107,18 @@ class PromptSummaryElement :  public TObject
   //
  private:
 
-  TString fElementName;
+  TString fElementName{""};
   
-  Double_t fNumGoodEvents;
-  Double_t fYield;
-  Double_t fYieldError;
-  Double_t fYieldWidth;
-  TString  fYieldUnit;
+  Double_t fNumGoodEvents{};
+  Double_t fYield{0.0};
+  Double_t fYieldError{0.0};
+  Double_t fYieldWidth{0.0};
+  TString  fYieldUnit{""};
 
-  Double_t fAsymDiff;
-  Double_t fAsymDiffError;
-  Double_t fAsymDiffWidth;
-  TString  fAsymDiffUnit;
+  Double_t fAsymDiff{0.0};
+  Double_t fAsymDiffError{0.0};
+  Double_t fAsymDiffWidth{0.0};
+  TString  fAsymDiffUnit{""};
 
   /* Double_t fAsymmetryWidth; */
   /* Double_t fAsymmetryWidthError; */
@@ -140,7 +140,7 @@ class QwPromptSummary  :  public TObject
   //  friend std::ostream& operator<<(std::ostream& os, const QwF1TDC &f1tdc);
 
 
-  Int_t                    fNElements;
+  Int_t                    fNElements{0};
   std::vector<PromptSummaryElement*> fElementList; 
 
   void SetRunNumber(const Int_t in) {fRunNumber = in;};
@@ -173,23 +173,23 @@ class QwPromptSummary  :  public TObject
 
 
   void PrintCSV(Int_t nEvents, TString start_time, TString end_time);
-  void PrintTextSummary();
+  static void PrintTextSummary();
 
 private:
 
 
-  Int_t fPatternSize;
+  Int_t fPatternSize{};
 
-  TString PrintTextSummaryHeader();
-  TString PrintTextSummaryTailer();
+  TString PrintTextSummaryHeader() const;
+  static TString PrintTextSummaryTailer();
   TString PrintCSVHeader(Int_t nEvents, TString start_time, TString end_time);
 
   void    SetupElementList();
   void    LoadElementsFromParameterFile(const std::string& parameter_file);
   void    LoadElementsFromParameterFile(QwParameterFile& parameterfile);
   
-  Int_t   fRunNumber;
-  Int_t   fRunletNumber;  
+  Int_t   fRunNumber{0};
+  Int_t   fRunletNumber{0};  
 
   Bool_t  fLocalDebug;
 

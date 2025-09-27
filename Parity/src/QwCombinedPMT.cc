@@ -26,13 +26,13 @@ void  QwCombinedPMT::InitializeChannel(TString name, TString datatosave)
   SetElementName(name);
   //SetPedestal(0.);
   //SetCalibrationFactor(1.);
-  if (datatosave=="raw") fDataToSave=kRaw;
-  else
-    if (datatosave=="derived") fDataToSave=kDerived;
+  if (datatosave=="raw") { fDataToSave=kRaw;
+  } else
+    if (datatosave=="derived") { fDataToSave=kDerived;
+}
 
   fSumADC.InitializeChannel(name, datatosave);
   SetBlindability(kTRUE);
-  return;
 }
 
 void  QwCombinedPMT::InitializeChannel(TString subsystemname, TString name, TString datatosave)
@@ -40,14 +40,13 @@ void  QwCombinedPMT::InitializeChannel(TString subsystemname, TString name, TStr
   SetElementName(name);
   //SetPedestal(0.);
   //SetCalibrationFactor(1.);
-  if (datatosave=="raw") fDataToSave=kRaw;
-  else
-    if (datatosave=="derived") fDataToSave=kDerived;
+  if (datatosave=="raw") { fDataToSave=kRaw;
+  } else
+    if (datatosave=="derived") { fDataToSave=kDerived;
+}
 
   fSumADC.InitializeChannel(subsystemname, "QwCombinedPMT", name, datatosave);
   SetBlindability(kTRUE);
-
-  return;
 }
 
 void  QwCombinedPMT::LinkChannel(TString name)
@@ -59,7 +58,8 @@ void  QwCombinedPMT::LinkChannel(TString name)
   fSumADC.SetElementName(sumstr);
 //   TString avgstr = name+TString("_avg");
 //   fAvgADC.SetElementName(avgstr);
-  if(local_debug) std::cout<<"linked combined PMT channel "<< GetElementName()<<std::endl;
+  if(local_debug) { std::cout<<"linked combined PMT channel "<< GetElementName()<<std::endl;
+}
 }
 
 void QwCombinedPMT::ClearEventData()
@@ -105,8 +105,9 @@ void QwCombinedPMT::CalculateSumAndAverage()
 //   if (total_weights!=0.0)
 //     fAvgADC.Scale(1/total_weights);
 
-   if (total_weights!=0.0)
+   if (total_weights!=0.0) {
      fSumADC.Scale(1/total_weights);
+}
 
 
   if (ldebug)
@@ -151,9 +152,6 @@ void  QwCombinedPMT::ProcessEvent()
 {
 //Calculate the weigted averages of the hardware sum and each of the four blocks.
   CalculateSumAndAverage();
-  //fSumADC.ProcessEvent(); //This is not necessary for combined devices-Rakitha 11-15-2010
-
-  return;
 }
 
 
@@ -174,7 +172,7 @@ Bool_t QwCombinedPMT::CheckForBurpFail(const VQwDataElement *ev_error){
     if(typeid(*ev_error)==typeid(*this)) {
       //std::cout<<" Here in QwCombinedPMT::CheckForBurpFail \n";
       if (this->GetElementName()!="") {
-        const QwCombinedPMT* value_pmt = dynamic_cast<const QwCombinedPMT* >(ev_error);
+        const auto* value_pmt = dynamic_cast<const QwCombinedPMT* >(ev_error);
         burpstatus |= fSumADC.CheckForBurpFail(&(value_pmt->fSumADC)); 
       }
     } else {
@@ -193,8 +191,8 @@ Bool_t QwCombinedPMT::CheckForBurpFail(const VQwDataElement *ev_error){
 /********************************************************/
 UInt_t QwCombinedPMT::UpdateErrorFlag()
 {
-  for (size_t i=0;i<fElement.size();i++) {
-    fSumADC.UpdateErrorFlag(fElement[i]);
+  for (auto & i : fElement) {
+    fSumADC.UpdateErrorFlag(i);
   }
   return GetEventcutErrorFlag();
 }
@@ -313,21 +311,15 @@ void QwCombinedPMT::Ratio(QwCombinedPMT &numer, QwCombinedPMT &denom)
 {
   //std::cout<<"Calling QwCombinedPMT::Ratio"<<std::endl;
   fSumADC.Ratio(numer.fSumADC,denom.fSumADC);
-//  fAvgADC.Ratio(numer.fAvgADC,denom.fAvgADC);
-  return;
 }
 
 void QwCombinedPMT::Scale(Double_t factor)
 {
   fSumADC.Scale(factor);
-//  fAvgADC.Scale(factor);
-  return;
 }
 void QwCombinedPMT::Normalize(VQwDataElement* denom)
 {
   fSumADC.Normalize(denom);
-
-  return;
 }
 
 
@@ -375,8 +367,7 @@ void  QwCombinedPMT::ConstructHistograms(TDirectory *folder, TString &prefix)
 //      TString avgprefix = prefix+TString("");
 //      fAvgADC.ConstructHistograms(folder, avgprefix);
     }
-  return;
-
+  
 }
 
 void  QwCombinedPMT::FillHistograms()
@@ -392,8 +383,7 @@ void  QwCombinedPMT::FillHistograms()
     }
 
 
-  return;
-}
+  }
 
 void  QwCombinedPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
@@ -407,8 +397,7 @@ void  QwCombinedPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, std:
       fSumADC.ConstructBranchAndVector(tree, sumprefix,values);
 
     }
-  return;
-}
+  }
 
 void  QwCombinedPMT::ConstructBranch(TTree *tree, TString &prefix)
 {
@@ -421,8 +410,7 @@ void  QwCombinedPMT::ConstructBranch(TTree *tree, TString &prefix)
       TString sumprefix =  prefix+"";
       fSumADC.ConstructBranch(tree, sumprefix);
     }
-  return;
-}
+  }
 
 void  QwCombinedPMT::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile &modulelist)
 {
@@ -441,8 +429,7 @@ void  QwCombinedPMT::ConstructBranch(TTree *tree, TString &prefix, QwParameterFi
 	QwMessage <<" Tree leave added to "<<devicename<<QwLog::endl;
       }
     }
-  return;
-}
+  }
 
 
 void  QwCombinedPMT::FillTreeVector(std::vector<Double_t> &values) const

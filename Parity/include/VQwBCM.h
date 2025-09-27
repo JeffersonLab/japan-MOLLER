@@ -152,9 +152,9 @@ public:
 
 
   // Factory function to produce appropriate BCM
-  static VQwBCM* Create(TString subsystemname, TString type, TString name, TString clock = "");
+  static VQwBCM* Create(TString subsystemname, TString name, TString type, TString clock = "");
   static VQwBCM* Create(const VQwBCM& source); // Create a generic BCM (define properties later)
-  static VQwBCM* CreateCombo(TString subsystemname, TString type, TString name);
+  static VQwBCM* CreateCombo(TString subsystemname, TString name, TString type);
   static VQwBCM* CreateCombo(const VQwBCM& source); // Create a generic BCM (define properties later)
 
 

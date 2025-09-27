@@ -30,16 +30,12 @@ void QwEnergyCalculator::InitializeChannel(TString name,TString datatosave )
 {
   SetElementName(name);
   fEnergyChange.InitializeChannel(name,datatosave);
-  //  beamx.InitializeChannel("beamx","derived");
-  return;
 }
 
 void QwEnergyCalculator::InitializeChannel(TString subsystem, TString name,TString datatosave )
 {
   SetElementName(name);
   fEnergyChange.InitializeChannel(subsystem, "QwEnergyCalculator", name,datatosave);
-  //  beamx.InitializeChannel("beamx","derived");
-  return;
 }
 
 void QwEnergyCalculator::Set(const VQwBPM* device, TString type, TString property,Double_t tmatrix_ratio)
@@ -51,23 +47,20 @@ void QwEnergyCalculator::Set(const VQwBPM* device, TString type, TString propert
   fType.push_back(type);
   fTMatrixRatio.push_back(tmatrix_ratio);
 
-  if(ldebug)
+  if(ldebug) {
     std::cout<<"QwEnergyCalculator:: Using "<<device->GetElementName()<<" with ratio "<< tmatrix_ratio <<" for "<<property<<std::endl;
- 
-  return;
+}
 }
 
 void QwEnergyCalculator::SetRootSaveStatus(TString &prefix)
 {
-  if(prefix.Contains("diff_")||prefix.Contains("yield_")|| prefix.Contains("asym_"))
+  if(prefix.Contains("diff_")||prefix.Contains("yield_")|| prefix.Contains("asym_")) {
     bFullSave=kFALSE;
-  
-  return;
+}
 }
 
 void QwEnergyCalculator::ClearEventData(){
   fEnergyChange.ClearEventData();
-  return;
 }
 
 
@@ -84,7 +77,7 @@ void QwEnergyCalculator::ProcessEvent()
 
   for(UInt_t i = 0; i<fProperty.size(); i++){
     if(fProperty[i].Contains("targetbeamangle")){
-      tmp.ArcTan((((QwCombinedBPM<QwMollerADC_Channel>*)fDevice[i])->fSlope[VQwBPM::kXAxis]));
+      tmp.ArcTan(((dynamic_cast<QwCombinedBPM<QwMollerADC_Channel>*>(fDevice[i]))->fSlope[VQwBPM::kXAxis]));
      } else {
       tmp.AssignValueFrom(fDevice[i]->GetPosition(VQwBPM::kXAxis));
      }
@@ -110,22 +103,19 @@ void QwEnergyCalculator::ProcessEvent()
     }
 */
   //if(ldebug) std::cout<<"QwEnegyCalculator::ProcessEvent() :: dp/p = "<<fEnergyChange.GetValue()<<std::endl;
-  return;
-}
+  }
 
 //------------------------------------------------------------------------------------------------------------------------------------
 
 void QwEnergyCalculator::RandomizeEventData(int helicity, double time)
 {
   fEnergyChange.RandomizeEventData(helicity, time);
-  return;
 }
 
 
 void QwEnergyCalculator::SetRandomEventParameters(Double_t mean, Double_t sigma)
 {
   fEnergyChange.SetRandomEventParameters(mean, sigma);
-  return;
 }
 
 
@@ -140,7 +130,8 @@ void QwEnergyCalculator::GetProjectedPosition(VQwBPM *device)
     }
   } /** idevice=0, fProperty.size()=3 **/
 
-  if (idevice>fProperty.size()) return;  // Return without trying to find a new position if "device" doesn't contribute to the energy calculator
+  if (idevice>fProperty.size()) { return;  // Return without trying to find a new position if "device" doesn't contribute to the energy calculator
+}
 
   static QwMollerADC_Channel tmp;
   tmp.InitializeChannel("tmp","derived");
@@ -154,8 +145,7 @@ void QwEnergyCalculator::GetProjectedPosition(VQwBPM *device)
    if (i==idevice) {
      // Do nothing for this device!
      continue;
-   } else {
-      //  Calculate contribution to fEnergyChange from the other devices
+   }       //  Calculate contribution to fEnergyChange from the other devices
       if(fProperty[i].Contains("targetbeamangle")) {
        tmp.ArcTan((((QwCombinedBPM<QwMollerADC_Channel>*)fDevice[i])->fSlope[VQwBPM::kXAxis]));
       } else {
@@ -164,7 +154,7 @@ void QwEnergyCalculator::GetProjectedPosition(VQwBPM *device)
      tmp.Scale(fTMatrixRatio[i]);
      //  And subtract it from the device we are trying to get the position of.
      (device->GetPosition(VQwBPM::kXAxis))->operator-=(tmp);
-   }
+  
   } // end of for(UInt_t i = 0; i<fProperty.size(); i++)
 
   //  At this point, device position is (Energy - ( M_x*x + M_xp*arctan(xp) ) )
@@ -173,26 +163,6 @@ void QwEnergyCalculator::GetProjectedPosition(VQwBPM *device)
   (device->GetPosition(VQwBPM::kXAxis))->Scale(1.0/fTMatrixRatio[idevice]);
   device->ApplyResolutionSmearing(VQwBPM::kXAxis);
   device->FillRawEventData();
-
-/*
-///  Reclaculate energy and see what we get
-  static QwVQWK_Channel tmp_e;
-  tmp_e.InitializeChannel("tmp_e","derived");
-  tmp_e.ClearEventData();
-
-  for(UInt_t i = 0; i<fProperty.size(); i++){
-    if(fProperty[i].Contains("targetbeamangle")){
-      tmp.ArcTan((((QwCombinedBPM<QwVQWK_Channel>*)fDevice[i])->fSlope[VQwBPM::kXAxis]));
-    } else {
-      tmp.AssignValueFrom(fDevice[i]->GetPosition(VQwBPM::kXAxis));
-    }
-    tmp.Scale(fTMatrixRatio[i]);
-    tmp_e += tmp;
-   }
-  //  std::cout << "GetProjectedPosition()::fEnergyChange = " << fEnergyChange.GetValue(0) << "\t ProcessEvent()::fEnergyChange = " << tmp_e.GetValue(0) << std::endl;
-*/
-
-  return;
 }
 
 
@@ -226,7 +196,7 @@ Bool_t QwEnergyCalculator::ApplySingleEventCuts(){
   UInt_t error_code = 0;
   for(UInt_t i = 0; i<fProperty.size(); i++){
     if(fProperty[i].Contains("targetbeamangle")){
-      error_code |= ((QwCombinedBPM<QwMollerADC_Channel>*)fDevice[i])->fSlope[0].GetErrorCode();
+      error_code |= (dynamic_cast<QwCombinedBPM<QwMollerADC_Channel>*>(fDevice[i]))->fSlope[0].GetErrorCode();
     } else {
       error_code |= fDevice[i]->GetPosition(VQwBPM::kXAxis)->GetErrorCode();
     }
@@ -262,7 +232,7 @@ UInt_t QwEnergyCalculator::UpdateErrorFlag()
   UInt_t error_code = 0;
   for(UInt_t i = 0; i<fProperty.size(); i++){
     if(fProperty[i].Contains("targetbeamangle")){
-      error_code |= ((QwCombinedBPM<QwMollerADC_Channel>*)fDevice[i])->fSlope[0].GetErrorCode();
+      error_code |= (dynamic_cast<QwCombinedBPM<QwMollerADC_Channel>*>(fDevice[i]))->fSlope[0].GetErrorCode();
     } else {
       error_code |= fDevice[i]->GetPosition(VQwBPM::kXAxis)->GetErrorCode();
     }
@@ -300,23 +270,26 @@ Int_t QwEnergyCalculator::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_i
 
 QwEnergyCalculator& QwEnergyCalculator::operator= (const QwEnergyCalculator &value){
   if (this != &value) {
-    if (GetElementName()!="")
+    if (GetElementName()!="") {
       this->fEnergyChange=value.fEnergyChange;
+}
   }
   return *this;
 }
 
 QwEnergyCalculator& QwEnergyCalculator::operator+= (const QwEnergyCalculator &value){
 
-  if (GetElementName()!="")
+  if (GetElementName()!="") {
     this->fEnergyChange+=value.fEnergyChange;
+}
 
   return *this;
 }
 
 QwEnergyCalculator& QwEnergyCalculator::operator-= (const QwEnergyCalculator &value){
-  if (GetElementName()!="")
+  if (GetElementName()!="") {
     this->fEnergyChange-=value.fEnergyChange;
+}
 
   return *this;
 }
@@ -327,25 +300,21 @@ void QwEnergyCalculator::Ratio(QwEnergyCalculator &numer, QwEnergyCalculator &de
   // qwk_energy/(dp/p) is the difference only not the asymmetries
 
   *this=numer;
-  return;
 }
 
 
 void QwEnergyCalculator::Scale(Double_t factor){
   fEnergyChange.Scale(factor);
-  return;
 }
 
 
 void QwEnergyCalculator::PrintInfo() const{
   fEnergyChange.PrintInfo();
-  return;
 }
 
 
 void QwEnergyCalculator::PrintValue() const{
   fEnergyChange.PrintValue();
-  return;
 }
 
 Bool_t QwEnergyCalculator::ApplyHWChecks(){
@@ -377,7 +346,7 @@ Bool_t QwEnergyCalculator::CheckForBurpFail(const VQwDataElement *ev_error){
     if(typeid(*ev_error)==typeid(*this)) {
       //std::cout<<" Here in QwEnergyCalculator::CheckForBurpFail \n";
       if (this->GetElementName()!="") {
-        const QwEnergyCalculator* value_halo = dynamic_cast<const QwEnergyCalculator* >(ev_error);
+        const auto* value_halo = dynamic_cast<const QwEnergyCalculator* >(ev_error);
         burpstatus |= fEnergyChange.CheckForBurpFail(&(value_halo->fEnergyChange)); 
       }
     } else {
@@ -398,22 +367,21 @@ void  QwEnergyCalculator::ConstructHistograms(TDirectory *folder, TString &prefi
   }
   else{
     TString thisprefix=prefix;
-    if(prefix.Contains("asym_"))
+    if(prefix.Contains("asym_")) {
       thisprefix.ReplaceAll("asym_","diff_");
+}
     SetRootSaveStatus(thisprefix);
     fEnergyChange.ConstructHistograms(folder, thisprefix);
   }
-  return;
-}
+  }
 
 void  QwEnergyCalculator::FillHistograms(){
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
   }
-  else
+  else {
     fEnergyChange.FillHistograms();
-  
-  return;
+}
 }
 
 void  QwEnergyCalculator::ConstructBranchAndVector(TTree *tree, TString &prefix,
@@ -423,15 +391,15 @@ void  QwEnergyCalculator::ConstructBranchAndVector(TTree *tree, TString &prefix,
   }
   else{
     TString thisprefix=prefix;
-    if(prefix.Contains("asym_"))
+    if(prefix.Contains("asym_")) {
       thisprefix.ReplaceAll("asym_","diff_");
+}
     
     SetRootSaveStatus(thisprefix);
     
     fEnergyChange.ConstructBranchAndVector(tree,thisprefix,values);
   }
-    return;
-}
+    }
 
 
 
@@ -441,14 +409,14 @@ void  QwEnergyCalculator::ConstructBranch(TTree *tree, TString &prefix){
   }
   else{
     TString thisprefix=prefix;
-    if(prefix.Contains("asym_"))
+    if(prefix.Contains("asym_")) {
       thisprefix.ReplaceAll("asym_","diff_");
+}
 
     SetRootSaveStatus(thisprefix);
     fEnergyChange.ConstructBranch(tree,thisprefix);
   }
-  return;
-}
+  }
 
 void  QwEnergyCalculator::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist){
 
@@ -461,23 +429,23 @@ void  QwEnergyCalculator::ConstructBranch(TTree *tree, TString &prefix, QwParame
   else
     if (modulelist.HasValue(devicename)){
       TString thisprefix=prefix;
-      if(prefix.Contains("asym_"))
+      if(prefix.Contains("asym_")) {
 	thisprefix.ReplaceAll("asym_","diff_");
+}
       SetRootSaveStatus(thisprefix);   
       fEnergyChange.ConstructBranch(tree,thisprefix);
       QwMessage <<" Tree leave added to "<<devicename<<QwLog::endl;
       }
-  return;
-}
+  }
 
 void  QwEnergyCalculator::FillTreeVector(std::vector<Double_t> &values) const
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
   }
-  else
+  else {
     fEnergyChange.FillTreeVector(values);
-  return;
+}
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT

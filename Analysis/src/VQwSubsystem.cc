@@ -47,9 +47,10 @@ Int_t VQwSubsystem::LoadDetectorMaps(QwParameterFile& file)
     file.TrimWhitespace();
 
     // Find key-value pairs
-    std::string key, value;
+    std::string key;
+    std::string value;
     if (file.HasVariablePair("=", key, value)) {
-      if ( value.size() > 0) {
+      if ( !value.empty()) {
 
 	// If-Ordering Optimization for parity
 	// Beamline     1423
@@ -88,7 +89,7 @@ Int_t VQwSubsystem::LoadDetectorMaps(QwParameterFile& file)
         }
  	//Event type mask
 	else if (key == "mask") {
-	  SetEventTypeMask(file.GetUInt(value));
+	  SetEventTypeMask(QwParameterFile::GetUInt(value));
 	}
       }
       
@@ -132,11 +133,10 @@ VQwSubsystem* VQwSubsystem::GetSibling(const std::string& name) const
 {
   // Get the parent and check for existence
   QwSubsystemArray* parent = GetParent();
-  if (parent != 0)
+  if (parent != nullptr) {
     // Return the subsystem with name in the parent
     return parent->GetSubsystemByName(name);
-  else
-    return 0; // GetParent() prints error already
+  }     return 0; // GetParent() prints error already
 }
 
 
@@ -278,8 +278,9 @@ void VQwSubsystem::PrintInfo() const
   std::cout << "Name of this subsystem: " << fSystemName << std::endl;
   for (size_t roc_index = 0; roc_index < fROC_IDs.size(); roc_index++) {
     std::cout << "ROC" << std::dec << fROC_IDs[roc_index] << ": ";
-    for (size_t bank_index = 0; bank_index < fBank_IDs[roc_index].size(); bank_index++)
-      std::cout << std::hex << "0x" << fBank_IDs[roc_index][bank_index] << " ";
+    for (unsigned long long bank_index : fBank_IDs[roc_index]) {
+      std::cout << std::hex << "0x" << bank_index << " ";
+}
     std::cout << std::dec << std::endl;
   }
   std::cout << "in array " << std::hex << GetParent() << std::dec << std::endl;
@@ -320,15 +321,15 @@ void VQwSubsystem::PrintDetectorMaps(Bool_t status) const
 
     if (total != 0) {
 
-      for (std::map<TString,TString>::const_iterator ii = fDetectorMaps.begin();
-           ii != fDetectorMaps.end(); ++ii) {
+      for (const auto & fDetectorMap : fDetectorMaps) {
 
         index++;
-        TString name = (*ii).first;
-        TString all  = (*ii).second;
+        TString name = fDetectorMap.first;
+        TString all  = fDetectorMap.second;
         QwMessage << "   ---> " << index << "/" << total << ": " << name << QwLog::endl;
-        if (local_debug)
+        if (local_debug) {
           QwMessage << "   " << all << QwLog::endl;
+}
 
       }
 

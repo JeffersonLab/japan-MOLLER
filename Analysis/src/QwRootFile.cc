@@ -18,8 +18,8 @@ Double_t QwRootTree::kUnitsValue[] = { 1e-6, 1e-9, 1e-3, 1 , 1e-3, 1};
  * Constructor with relative filename
  */
 QwRootFile::QwRootFile(const TString& run_label)
-  : fRootFile(0), fMakePermanent(0),
-    fMapFile(0), fEnableMapFile(kFALSE),
+  : fRootFile(nullptr), fMakePermanent(0),
+    fMapFile(nullptr), fEnableMapFile(kFALSE),
     fUpdateInterval(-1)
 #ifdef HAS_RNTUPLE_SUPPORT
     , fEnableRNTuples(kFALSE)
@@ -38,7 +38,7 @@ QwRootFile::QwRootFile(const TString& run_label)
 
     fMapFile = TMapFile::Create(mapfilename,"UPDATE", kMaxMapFileSize, "RealTime Producer File");
 
-    if (not fMapFile) {
+    if (fMapFile == nullptr) {
       QwError << "Memory-mapped file " << mapfilename
               << " could not be opened!" << QwLog::endl;
       return;
@@ -67,18 +67,17 @@ QwRootFile::QwRootFile(const TString& run_label)
       rootfilename = fPermanentName;
     }
     fRootFile = new TFile(rootfilename.Data(), "RECREATE", "myfile1");
-    if (! fRootFile) {
+    if (fRootFile == nullptr) {
       QwError << "ROOT file " << rootfilename
               << " could not be opened!" << QwLog::endl;
       return;
-    } else {
-      QwMessage << "Opened "<< (fUseTemporaryFile?"temporary ":"")
+    }       QwMessage << "Opened "<< (fUseTemporaryFile?"temporary ":"")
 		<<"rootfile " << rootfilename << QwLog::endl;
-    }
+   
 
     TString run_condition_name = Form("condition_%s", run_label.Data());
-    TList *run_cond_list = (TList*) fRootFile -> FindObjectAny(run_condition_name);
-    if (not run_cond_list) {
+    auto *run_cond_list = dynamic_cast<TList*>( fRootFile -> FindObjectAny(run_condition_name));
+    if (run_cond_list == nullptr) {
       QwRunCondition run_condition(
           gQwOptions.GetArgc(),
           gQwOptions.GetArgv(),
@@ -103,26 +102,27 @@ QwRootFile::~QwRootFile()
 {
   // Keep the file on disk if any trees or histograms have been filled.
   // Also respect any other requests to keep the file around.
-  if (!fMakePermanent) fMakePermanent = HasAnyFilled();
+  if (!fMakePermanent) { fMakePermanent = HasAnyFilled();
+}
 
   // Close the map file
-  if (fMapFile) {
+  if (fMapFile != nullptr) {
     fMapFile->Close();
     // TMapFiles may not be deleted
-    fMapFile = 0;
+    fMapFile = nullptr;
   }
 
   // Close the ROOT file.
   // Rename if permanence is requested, remove otherwise
-  if (fRootFile) {
+  if (fRootFile != nullptr) {
     TString rootfilename = fRootFile->GetName();
 
     fRootFile->Close();
     delete fRootFile;
-    fRootFile = 0;
+    fRootFile = nullptr;
 
-    int err;
-    const char* action;
+    int err = 0;
+    const char* action = nullptr;
     if (fUseTemporaryFile){
       if (fMakePermanent) {
 	action = " rename ";
@@ -133,7 +133,7 @@ QwRootFile::~QwRootFile()
       }
       // It'd be proper to "extern int errno" and strerror() here,
       // but that doesn't seem very C++-ish.
-      if (err) {
+      if (err != 0) {
 	QwWarning << "Couldn't" << action << rootfilename << QwLog::endl;
       } else {
 	QwMessage << "Was able to" << action << rootfilename << QwLog::endl;
@@ -282,16 +282,23 @@ void QwRootFile::ProcessOptions(QwOptions &options)
   // tree and histogram output
   auto v = options.GetValueVector<std::string>("disable-tree");
   std::for_each(v.begin(), v.end(), [&](const std::string& s){ this->DisableTree(s); });
-  if (options.GetValue<bool>("disable-trees"))  DisableTree(".*");
-  if (options.GetValue<bool>("disable-histos")) DisableHisto(".*");
+  if (options.GetValue<bool>("disable-trees")) {  DisableTree(".*");
+}
+  if (options.GetValue<bool>("disable-histos")) { DisableHisto(".*");
+}
 
   // Options 'disable-mps' and 'disable-hel' for disabling
   // helicity window and helicity pattern output
-  if (options.GetValue<bool>("disable-mps-tree"))  DisableTree("^evt$");
-  if (options.GetValue<bool>("disable-pair-tree"))  DisableTree("^pr$");
-  if (options.GetValue<bool>("disable-hel-tree"))  DisableTree("^mul$");
-  if (options.GetValue<bool>("disable-burst-tree"))  DisableTree("^burst$");
-  if (options.GetValue<bool>("disable-slow-tree")) DisableTree("^slow$");
+  if (options.GetValue<bool>("disable-mps-tree")) {  DisableTree("^evt$");
+}
+  if (options.GetValue<bool>("disable-pair-tree")) {  DisableTree("^pr$");
+}
+  if (options.GetValue<bool>("disable-hel-tree")) {  DisableTree("^mul$");
+}
+  if (options.GetValue<bool>("disable-burst-tree")) {  DisableTree("^burst$");
+}
+  if (options.GetValue<bool>("disable-slow-tree")) { DisableTree("^slow$");
+}
 
   // Options 'num-accepted-events' and 'num-discarded-events' for
   // prescaling of the tree output
@@ -316,18 +323,17 @@ void QwRootFile::ProcessOptions(QwOptions &options)
               << QwLog::endl;
   }
   fAutoSave  = options.GetValue<int>("autosave");
-  return;
 }
 
 /**
  * Determine whether the rootfile object has any non-empty trees or
  * histograms.
  */
-Bool_t QwRootFile::HasAnyFilled(void) {
+Bool_t QwRootFile::HasAnyFilled() {
   return this->HasAnyFilled(fRootFile);
 }
 Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
-  if (!d) {
+  if (d == nullptr) {
 
     return false;
   }
@@ -335,7 +341,7 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
   // First check if any in-memory trees have been filled
   for (auto& pair : fTreeByName) {
     for (auto& tree : pair.second) {
-      if (tree && tree->GetTree()) {
+      if ((tree != nullptr) && (tree->GetTree() != nullptr)) {
         Long64_t entries = tree->GetTree()->GetEntries();
         if (entries > 0) {
 
@@ -367,7 +373,7 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
 
 
     // Objects which can't be found don't count.
-    if (!obj) {
+    if (obj == nullptr) {
 
       continue;
     }
@@ -390,17 +396,20 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
 
     // Recursively check subdirectories.
     if (obj->IsA()->InheritsFrom( "TDirectory" )) {
-      if (this->HasAnyFilled( (TDirectory*)obj )) return true;
+      if (this->HasAnyFilled( dynamic_cast<TDirectory*>(obj) )) { return true;
+}
     }
 
     if (obj->IsA()->InheritsFrom( "TTree" )) {
-      Long64_t entries = ((TTree*) obj)->GetEntries();
-      if ( entries ) return true;
+      Long64_t entries = (dynamic_cast<TTree*>( obj))->GetEntries();
+      if ( entries != 0 ) { return true;
+}
     }
 
     if (obj->IsA()->InheritsFrom( "TH1" )) {
-      Double_t entries = ((TH1*) obj)->GetEntries();
-      if ( entries ) return true;
+      Double_t entries = (dynamic_cast<TH1*>( obj))->GetEntries();
+      if ( entries != 0.0 ) { return true;
+}
     }
   }
   return false;

@@ -7,6 +7,8 @@
 
 #include "VQwDetectorArray.h"
 
+#include <math.h>
+
 // System headers
 #include <sstream>
 
@@ -126,32 +128,28 @@ Bool_t VQwDetectorArray::PublishInternalValues() const {
   // Publish variables through map file
   // This should work with bcm, bpmstripline, bpmcavity, combo bpm and combo bcm
 
-    for (size_t pp = 0; pp < fPublishList.size(); pp++) {
+    for (const auto & pp : fPublishList) {
 
-        TString publish_name = fPublishList.at(pp).at(0);
-        TString device_type = fPublishList.at(pp).at(1);
-        TString device_name = fPublishList.at(pp).at(2);
-        TString device_prop = fPublishList.at(pp).at(3);
+        TString publish_name = pp.at(0);
+        TString device_type = pp.at(1);
+        TString device_name = pp.at(2);
+        TString device_prop = pp.at(3);
         device_type.ToLower();
         device_prop.ToLower();
 
-        const VQwHardwareChannel* tmp_channel;
+        const VQwHardwareChannel* tmp_channel = nullptr;
 
         if (device_type == "integrationpmt") {
 
             tmp_channel = GetIntegrationPMT(device_name)->GetChannel(device_name);
 
-        } else if (device_type == "combinedpmt") {
+        } else {
 
             tmp_channel = GetCombinedPMT(device_name)->GetChannel(device_name);
 
-        } else {
-
-            QwError << "QwBeamLine::PublishInternalValues() error "<< QwLog::endl;
-
         }
 
-        if (tmp_channel == NULL) {
+        if (tmp_channel == nullptr) {
 
             QwError << "QwBeamLine::PublishInternalValues(): " << publish_name << " not found" << QwLog::endl;
              status |= kFALSE;
@@ -176,21 +174,22 @@ Bool_t VQwDetectorArray::PublishByRequest(TString device_name) {
     Bool_t status = kFALSE;
     //std::cerr << "#####   device_name==\"" << device_name << "\"" << std::endl;
   
-    for(size_t i=0;i<fMainDetID.size();i++) {
+    for(auto & i : fMainDetID) {
 
         //std::cerr << "fMainDetID[i].fdetectorname==\"" << fMainDetID[i].fdetectorname << "\"" << std::endl;
 
-        if(device_name.CompareTo(fMainDetID[i].fdetectorname)!=0) continue;
+        if(device_name.CompareTo(i.fdetectorname)!=0) { continue;
+}
     
-        if (fMainDetID[i].fTypeID == kQwCombinedPMT){
+        if (i.fTypeID == kQwCombinedPMT){
 
             status = PublishInternalValue(device_name, "published-by-request",
-			 fCombinedPMT[fMainDetID[i].fIndex].GetChannel(device_name));
+			 fCombinedPMT[i.fIndex].GetChannel(device_name));
 
-        } else if (fMainDetID[i].fTypeID == kQwIntegrationPMT) {
+        } else if (i.fTypeID == kQwIntegrationPMT) {
 
             status = PublishInternalValue(device_name, "published-by-request",
-			 fIntegrationPMT[fMainDetID[i].fIndex].GetChannel(device_name));
+			 fIntegrationPMT[i.fIndex].GetChannel(device_name));
 
         } else {
 
@@ -202,8 +201,9 @@ Bool_t VQwDetectorArray::PublishByRequest(TString device_name) {
 
     }
 
-    if (!status)  
+    if (!status) {  
      QwDebug << "VQwDetectorArray::PublishByRequest:  Failed to publish channel name:  " << device_name << QwLog::endl;
+}
 
     return status;
 
@@ -225,13 +225,14 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
 
     // Open the file
     QwParameterFile mapstr(mapfile.Data());
-    TString varname, varvalue;
+    TString varname;
+    TString varvalue;
 
     fDetectorMaps.insert(mapstr.GetParamFileNameContents());
     mapstr.EnableGreediness();
     mapstr.SetCommentChars("!");
 
-    UInt_t value;
+    UInt_t value = 0;
     size_t vqwk_buffer_offset = 0;
 
     while (mapstr.ReadNextLine()) {
@@ -253,7 +254,8 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
         mapstr.TrimComment('!');   // Remove everything after a '!' character.
         mapstr.TrimWhitespace();   // Get rid of leading and trailing spaces.
     
-        if (mapstr.LineIsEmpty())  continue;
+        if (mapstr.LineIsEmpty()) {  continue;
+}
 
         Bool_t  lineok   = kTRUE;
 	    TString keyword  = "";
@@ -271,7 +273,7 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
         if (modtype == "VPMT") {
 
             channum       = mapstr.GetTypedNextToken<Int_t>();	//channel number
-            Int_t combinedchans = mapstr.GetTypedNextToken<Int_t>();	//number of combined channels
+            auto combinedchans = mapstr.GetTypedNextToken<Int_t>();	//number of combined channels
             dettype     = mapstr.GetTypedNextToken<TString>();	//type-purpose of the detector
             dettype.ToLower();
             namech      = mapstr.GetTypedNextToken<TString>();  //name of the detector
@@ -280,7 +282,7 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
         
             for (int i=0; i<combinedchans; i++){
         
-                TString nameofcombinedchan = mapstr.GetTypedNextToken<TString>();
+                auto nameofcombinedchan = mapstr.GetTypedNextToken<TString>();
                 nameofcombinedchan.ToLower();
                 combinedchannelnames.push_back(nameofcombinedchan);        
             }
@@ -371,23 +373,26 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
 
                 QwIntegrationPMT localIntegrationPMT(GetName(),localMainDetID.fdetectorname);
 
-		        if (keyword=="not_blindable" || keyword2=="not_blindable")
+		        if (keyword=="not_blindable" || keyword2=="not_blindable") {
 		         localIntegrationPMT.SetBlindability(kFALSE);
 
-		        else 
+		        } else { 
 		         localIntegrationPMT.SetBlindability(kTRUE);
+}
 
-		        if (keyword=="not_normalizable" || keyword2=="not_normalizable")
+		        if (keyword=="not_normalizable" || keyword2=="not_normalizable") {
 		  	     localIntegrationPMT.SetNormalizability(kFALSE);
 
-		        else
+		        } else {
 		  	     localIntegrationPMT.SetNormalizability(kTRUE);
+}
 
 		        fIntegrationPMT.push_back(localIntegrationPMT);
                 fIntegrationPMT[fIntegrationPMT.size()-1].SetDefaultSampleSize(sample_size);
 
-		        if(bAssignedLimit)
+		        if(bAssignedLimit) {
 		         fIntegrationPMT[fIntegrationPMT.size()-1].SetSaturationLimit(abs_saturation_limit);
+}
 
 		        localMainDetID.fIndex=fIntegrationPMT.size()-1;
 
@@ -395,17 +400,19 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
 
 		        QwCombinedPMT localcombinedPMT(GetName(),localMainDetID.fdetectorname);
 
-		        if (keyword=="not_normalizable" || keyword2=="not_normalizable")
+		        if (keyword=="not_normalizable" || keyword2=="not_normalizable") {
 		         localcombinedPMT.SetNormalizability(kFALSE);
 
-		        else
+		        } else {
 		         localcombinedPMT.SetNormalizability(kTRUE);
+}
 
-		        if (keyword=="not_blindable" || keyword2 =="not_blindable") 
+		        if (keyword=="not_blindable" || keyword2 =="not_blindable") { 
 		         localcombinedPMT.SetBlindability(kFALSE);
 
-		        else 
+		        } else { 
 		         localcombinedPMT.SetBlindability(kTRUE);
+}
 
                 fCombinedPMT.push_back(localcombinedPMT);
                 fCombinedPMT[fCombinedPMT.size()-1].SetDefaultSampleSize(sample_size);
@@ -418,46 +425,50 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
             localMainDetID.Print();
             std::cout<<"line ok=";
 
-            if (lineok) 
+            if (lineok) { 
              std::cout<<"TRUE"<<std::endl;
 
-            else
+            } else {
              std::cout<<"FALSE"<<std::endl;
+}
         }
 
-        if (lineok)
+        if (lineok) {
          fMainDetID.push_back(localMainDetID);
+}
 
     } // End of "while (mapstr.ReadNextLine())"
 
-    for (size_t i=0; i<fMainDetID.size(); i++) {
+    for (auto & i : fMainDetID) {
 
-        if (fMainDetID[i].fTypeID==kQwCombinedPMT) {
+        if (i.fTypeID==kQwCombinedPMT) {
 
-            Int_t ind = fMainDetID[i].fIndex;
+            Int_t ind = i.fIndex;
 
             //check to see if all required channels are available
             if (ldebug) {
 
                 std::cout<<"fMainDetID[i].fCombinedChannelNames.size()="
-                 <<fMainDetID[i].fCombinedChannelNames.size()<<std::endl<<"name list: ";
+                 <<i.fCombinedChannelNames.size()<<std::endl<<"name list: ";
 
-                for (size_t n=0; n<fMainDetID[i].fCombinedChannelNames.size(); n++)
-                 std::cout<<"  "<<fMainDetID[i].fCombinedChannelNames[n];
+                for (size_t n=0; n<i.fCombinedChannelNames.size(); n++) {
+                 std::cout<<"  "<<i.fCombinedChannelNames[n];
+}
 
                 std::cout<<std::endl;
             }
 
             Int_t chanmatched=0;
 
-            for (size_t j=0; j<fMainDetID[i].fCombinedChannelNames.size(); j++) {
+            for (size_t j=0; j<i.fCombinedChannelNames.size(); j++) {
 
-                for (size_t k=0; k<fMainDetID.size(); k++) {
+                for (auto & k : fMainDetID) {
 
-                    if (fMainDetID[i].fCombinedChannelNames[j]==fMainDetID[k].fdetectorname) {
+                    if (i.fCombinedChannelNames[j]==k.fdetectorname) {
 
-                        if (ldebug)
+                        if (ldebug) {
                          std::cout<<"found a to-be-combined channel candidate"<<std::endl;
+}
 
                         chanmatched ++;
                         break;
@@ -465,24 +476,25 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
                 }
             }
 
-            if ((Int_t) fMainDetID[i].fCombinedChannelNames.size()==chanmatched) {
+            if ((Int_t) i.fCombinedChannelNames.size()==chanmatched) {
 
-                for (size_t l=0; l<fMainDetID[i].fCombinedChannelNames.size(); l++) {
+                for (size_t l=0; l<i.fCombinedChannelNames.size(); l++) {
 
                     Int_t ind_pmt = GetDetectorIndex(GetDetectorTypeID("integrationpmt"),
-                    fMainDetID[i].fCombinedChannelNames[l]);
+                    i.fCombinedChannelNames[l]);
 
-                    fCombinedPMT[ind].Add(&fIntegrationPMT[ind_pmt],fMainDetID[i].fWeight[l]);
+                    fCombinedPMT[ind].Add(&fIntegrationPMT[ind_pmt],i.fWeight[l]);
                 }
 
-                fCombinedPMT[ind].LinkChannel(fMainDetID[i].fdetectorname);
+                fCombinedPMT[ind].LinkChannel(i.fdetectorname);
 
-                if (ldebug)
+                if (ldebug) {
                  std::cout<<"linked a combined channel"<<std::endl;
+}
             } else {
 
-                std::cerr<<"cannot combine void channels for "<<fMainDetID[i].fdetectorname<<std::endl;
-                fMainDetID[i].fIndex = -1;
+                std::cerr<<"cannot combine void channels for "<<i.fdetectorname<<std::endl;
+                i.fIndex = -1;
                 continue;
             }
         }
@@ -491,9 +503,9 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
 
      // Now load the variables to publish
     mapstr.RewindToFileStart();
-    QwParameterFile *section;
+    QwParameterFile *section = nullptr;
     std::vector<TString> publishinfo;
-    while ((section = mapstr.ReadNextSection(varvalue))) {
+    while ((section = mapstr.ReadNextSection(varvalue)) != nullptr) {
 
         if (varvalue == "PUBLISH") {
 
@@ -508,14 +520,15 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
 
                     varvalue = section->GetNextToken().c_str();
 
-                    if (varvalue.Length()) {
+                    if (varvalue.Length() != 0) {
                     
                         publishinfo.push_back(varvalue);                    
                     }
                 }
 
-                if (publishinfo.size() == 4)
+                if (publishinfo.size() == 4) {
                  fPublishList.push_back(publishinfo);
+}
 
                 publishinfo.clear();
             }
@@ -523,22 +536,25 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
     }
 
     // Print list of variables to publish
-    if (fPublishList.size()>0){
+    if (!fPublishList.empty()){
 
         QwMessage << "Variables to publish:" << QwLog::endl;
 
-        for (size_t jj = 0; jj < fPublishList.size(); jj++)
-         QwMessage << fPublishList.at(jj).at(0) << " " << fPublishList.at(jj).at(1) << " "
-		  << fPublishList.at(jj).at(2) << " " << fPublishList.at(jj).at(3) << QwLog::endl;
+        for (auto & jj : fPublishList) {
+         QwMessage << jj.at(0) << " " << jj.at(1) << " "
+		  << jj.at(2) << " " << jj.at(3) << QwLog::endl;
+}
     }
 
     if (ldebug) {
 
         std::cout<<"Done with Load channel map\n";
 
-        for (size_t i=0;i<fMainDetID.size();i++)
-         if (fMainDetID[i].fIndex>=0)
-          fMainDetID[i].Print();
+        for (auto & i : fMainDetID) {
+         if (i.fIndex>=0) {
+          i.Print();
+}
+}
     }
 
     ldebug=kFALSE;
@@ -547,9 +563,9 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
 }
 
 void VQwDetectorArray::LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, Int_t &eventcut_flag) {
-    TString device_type = mapstr.GetTypedNextToken<TString>();
+    auto device_type = mapstr.GetTypedNextToken<TString>();
     device_type.ToLower();
-    TString device_name = mapstr.GetTypedNextToken<TString>();
+    auto device_name = mapstr.GetTypedNextToken<TString>();
      device_name.ToLower();
 
     Int_t det_index = GetDetectorIndex(GetDetectorTypeID(device_type),device_name);
@@ -558,13 +574,13 @@ void VQwDetectorArray::LoadEventCuts_Line(QwParameterFile &mapstr, TString &varv
         //continue;
 	}
 
-    Double_t LLX = mapstr.GetTypedNextToken<Double_t>();	//lower limit for IntegrationPMT value
-	Double_t ULX = mapstr.GetTypedNextToken<Double_t>();	//upper limit for IntegrationPMT value
+    auto LLX = mapstr.GetTypedNextToken<Double_t>();	//lower limit for IntegrationPMT value
+	auto ULX = mapstr.GetTypedNextToken<Double_t>();	//upper limit for IntegrationPMT value
 	varvalue = mapstr.GetTypedNextToken<TString>();//global/local
     varvalue.ToLower();
 
-    Double_t burplevel = mapstr.GetTypedNextToken<Double_t>();
-	Double_t stabilitycut = mapstr.GetTypedNextToken<Double_t>();
+    auto burplevel = mapstr.GetTypedNextToken<Double_t>();
+	auto stabilitycut = mapstr.GetTypedNextToken<Double_t>();
 
     if (device_type == GetQwPMTInstrumentTypeName(kQwIntegrationPMT)){
 	    QwMessage << "VQwDetectorArray Error Code passing to QwIntegrationPMT " << GetGlobalErrorFlag(varvalue,eventcut_flag,stabilitycut) << QwLog::endl;
@@ -576,10 +592,12 @@ void VQwDetectorArray::LoadEventCuts_Line(QwParameterFile &mapstr, TString &varv
 }
 
 void VQwDetectorArray::LoadEventCuts_Fin(Int_t &eventcut_flag) {
-    for (size_t i = 0; i < fIntegrationPMT.size(); i++)
-     fIntegrationPMT[i].SetEventCutMode(eventcut_flag);
-    for (size_t i = 0; i < fCombinedPMT.size(); i++)
-     fCombinedPMT[i].SetEventCutMode(eventcut_flag); 
+    for (auto & i : fIntegrationPMT) {
+     i.SetEventCutMode(eventcut_flag);
+}
+    for (auto & i : fCombinedPMT) {
+     i.SetEventCutMode(eventcut_flag); 
+}
 
     fMainDetErrorCount = 0;//set the error counter to zero
 }
@@ -590,18 +608,18 @@ Int_t VQwDetectorArray::LoadInputParameters(TString pedestalfile) {
 
     Bool_t ldebug=kFALSE;
     TString varname;
-    Double_t varped;
-    Double_t varcal;
+    Double_t varped = NAN;
+    Double_t varcal = NAN;
 
     //  Double_t varbaserate;
-    Double_t varnormrate;
-    Double_t varvoltperhz;
-    Double_t varasym;
-    Double_t varcx;
-    Double_t varcy;
-    Double_t varcxp;
-    Double_t varcyp;
-    Double_t varce;
+    Double_t varnormrate = 0.0 = NAN;
+    Double_t varvoltperhz = 0.0 = NAN;
+    Double_t varasym = 0.0 = NAN;
+    Double_t varcx = 0.0 = NAN;
+    Double_t varcy = 0.0 = NAN;
+    Double_t varcxp = 0.0 = NAN;
+    Double_t varcyp = 0.0 = NAN;
+    Double_t varce = 0.0 = NAN;
 
     TString localname;
 
@@ -613,15 +631,15 @@ Int_t VQwDetectorArray::LoadInputParameters(TString pedestalfile) {
     while (mapstr.ReadNextLine()) {
 
         lineread+=1;
-        if (ldebug)std::cout<<" line read so far ="<<lineread<<"\n";
+        if (ldebug) {std::cout<<" line read so far ="<<lineread<<"\n";
+}
          mapstr.TrimComment('!');   // Remove everything after a '!' character.
       
         mapstr.TrimWhitespace();   // Get rid of leading and trailing spaces.
       
-        if (mapstr.LineIsEmpty())  continue;
+        if (mapstr.LineIsEmpty()) {  continue;
 
-        else {
-            varname = mapstr.GetTypedNextToken<TString>();	//name of the channel
+        }             varname = mapstr.GetTypedNextToken<TString>();	//name of the channel
             varname.ToLower();
             varname.Remove(TString::kBoth,' ');
             varped  = mapstr.GetTypedNextToken<Double_t>(); // value of the pedestal
@@ -659,12 +677,13 @@ Int_t VQwDetectorArray::LoadInputParameters(TString pedestalfile) {
               }
 	    }
 
-        }
+       
 
     }
 
-    if (ldebug) 
+    if (ldebug) { 
      std::cout<<" line read in the pedestal + cal file ="<<lineread<<" \n";
+}
 
     ldebug=kFALSE;
     mapstr.Close(); // Close the file (ifstream)
@@ -684,18 +703,18 @@ void VQwDetectorArray::LoadMockDataParameters(TString pedestalfile) {
 
     Bool_t ldebug=kFALSE;
     TString varname;
-    Double_t varped;
-    Double_t varcal;
+    Double_t varped = 0.0 = NAN;
+    Double_t varcal = 0.0 = NAN;
 
     //  Double_t varbaserate;
-    Double_t varnormrate;
-    Double_t varvoltperhz;
-    Double_t varasym;
-    Double_t varcx;
-    Double_t varcy;
-    Double_t varcxp;
-    Double_t varcyp;
-    Double_t varce;
+    Double_t varnormrate = NAN;
+    Double_t varvoltperhz = NAN;
+    Double_t varasym = NAN;
+    Double_t varcx = NAN;
+    Double_t varcy = NAN;
+    Double_t varcxp = NAN;
+    Double_t varcyp = NAN;
+    Double_t varce = NAN;
 
     TString localname;
 
@@ -707,15 +726,15 @@ void VQwDetectorArray::LoadMockDataParameters(TString pedestalfile) {
     while (mapstr.ReadNextLine()) {
 
         lineread+=1;
-        if (ldebug)std::cout<<" line read so far ="<<lineread<<"\n";
+        if (ldebug) {std::cout<<" line read so far ="<<lineread<<"\n";
+}
          mapstr.TrimComment('!');   // Remove everything after a '!' character.
       
         mapstr.TrimWhitespace();   // Get rid of leading and trailing spaces.
       
-        if (mapstr.LineIsEmpty())  continue;
+        if (mapstr.LineIsEmpty()) {  continue;
 
-        else {
-            varname = mapstr.GetTypedNextToken<TString>();	//name of the channel
+        }             varname = mapstr.GetTypedNextToken<TString>();	//name of the channel
             varname.ToLower();
             varname.Remove(TString::kBoth,' ');
 	   
@@ -764,12 +783,13 @@ void VQwDetectorArray::LoadMockDataParameters(TString pedestalfile) {
               }
 	    }
 
-        }
+       
 
     }
 
-    if (ldebug) 
+    if (ldebug) { 
      std::cout<<" line read in the pedestal + cal file ="<<lineread<<" \n";
+}
 
     ldebug=kFALSE;
     mapstr.Close(); // Close the file (ifstream)
@@ -796,16 +816,15 @@ Bool_t VQwDetectorArray::IsGoodEvent() {
 
 void VQwDetectorArray::ClearEventData() {
 
-    for (size_t i=0;i<fIntegrationPMT.size();i++){
+    for (auto & i : fIntegrationPMT){
     
-        fIntegrationPMT[i].ClearEventData();
+        i.ClearEventData();
     
     }
 
-    for (size_t i=0;i<fCombinedPMT.size();i++)
-     fCombinedPMT[i].ClearEventData();
-
-    return;
+    for (auto & i : fCombinedPMT) {
+     i.ClearEventData();
+}
 
 }
 
@@ -814,11 +833,12 @@ void VQwDetectorArray::ClearEventData() {
 
 void VQwDetectorArray::SetRandomEventParameters(Double_t mean, Double_t sigma) {
 
-    for (size_t i = 0; i < fMainDetID.size(); i++) {
+    for (auto & i : fMainDetID) {
 
         // This is a QwIntegrationPMT
-        if (fMainDetID.at(i).fTypeID == kQwIntegrationPMT)
-         fIntegrationPMT[fMainDetID.at(i).fIndex].SetRandomEventParameters(mean, sigma);
+        if (i.fTypeID == kQwIntegrationPMT) {
+         fIntegrationPMT[i.fIndex].SetRandomEventParameters(mean, sigma);
+}
     
     }
 
@@ -826,11 +846,12 @@ void VQwDetectorArray::SetRandomEventParameters(Double_t mean, Double_t sigma) {
 
 void VQwDetectorArray::SetRandomEventAsymmetry(Double_t asymmetry) {
 
-    for (size_t i = 0; i < fMainDetID.size(); i++) {
+    for (auto & i : fMainDetID) {
 
         // This is a QwIntegrationPMT
-        if (fMainDetID.at(i).fTypeID == kQwIntegrationPMT)
-         fIntegrationPMT[fMainDetID.at(i).fIndex].SetRandomEventAsymmetry(asymmetry);
+        if (i.fTypeID == kQwIntegrationPMT) {
+         fIntegrationPMT[i.fIndex].SetRandomEventAsymmetry(asymmetry);
+}
     
     }
 
@@ -838,11 +859,12 @@ void VQwDetectorArray::SetRandomEventAsymmetry(Double_t asymmetry) {
 
 void VQwDetectorArray::RandomizeEventData(int helicity, double time) {
 
-    for (size_t i = 0; i < fMainDetID.size(); i++) {
+    for (auto & i : fMainDetID) {
 
         // This is a QwIntegrationPMT
-        if (fMainDetID.at(i).fTypeID == kQwIntegrationPMT)
-         fIntegrationPMT[fMainDetID.at(i).fIndex].RandomizeEventData(helicity, time);
+        if (i.fTypeID == kQwIntegrationPMT) {
+         fIntegrationPMT[i.fIndex].RandomizeEventData(helicity, time);
+}
     
     }
 
@@ -854,11 +876,12 @@ void VQwDetectorArray::EncodeEventData(std::vector<UInt_t> &buffer) {
     elements.clear();
 
     // Get all buffers in the order they are defined in the map file
-    for (size_t i = 0; i < fMainDetID.size(); i++) {
+    for (auto & i : fMainDetID) {
 
         // This is a QwIntegrationPMT
-        if (fMainDetID.at(i).fTypeID == kQwIntegrationPMT)
-         fIntegrationPMT[fMainDetID.at(i).fIndex].EncodeEventData(elements);
+        if (i.fTypeID == kQwIntegrationPMT) {
+         fIntegrationPMT[i.fIndex].EncodeEventData(elements);
+}
 
     }
 
@@ -867,7 +890,7 @@ void VQwDetectorArray::EncodeEventData(std::vector<UInt_t> &buffer) {
     std::vector<UInt_t> subbankheader;
     std::vector<UInt_t> rocheader;
 
-    if (elements.size() > 0) {
+    if (!elements.empty()) {
 
         // Form CODA subbank header
         subbankheader.clear();
@@ -1013,27 +1036,28 @@ Int_t VQwDetectorArray::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t ban
     if (index>=0 && num_words>0) {
 
         //  We want to process this ROC.  Begin looping through the data.
-        if (lkDEBUG)
+        if (lkDEBUG) {
             std::cout << "VQwDetectorArray::ProcessEvBuffer:  "
              << "Begin processing ROC" << roc_id
              << " and subbank "<<bank_id
              << " number of words="<<num_words<<std::endl;
+}
 
-        for (size_t i=0;i<fMainDetID.size();i++) {
+        for (auto & i : fMainDetID) {
 
-            if (fMainDetID[i].fSubbankIndex==index) {
+            if (i.fSubbankIndex==index) {
 
-                if (fMainDetID[i].fTypeID == kQwIntegrationPMT) {
+                if (i.fTypeID == kQwIntegrationPMT) {
 
                     if (lkDEBUG) {
 
-                        std::cout<<"found IntegrationPMT data for "<<fMainDetID[i].fdetectorname<<std::endl;
-                        std::cout<<"word left to read in this buffer:"<<num_words-fMainDetID[i].fWordInSubbank<<std::endl;
+                        std::cout<<"found IntegrationPMT data for "<<i.fdetectorname<<std::endl;
+                        std::cout<<"word left to read in this buffer:"<<num_words-i.fWordInSubbank<<std::endl;
                     
                     }
 
-                    fIntegrationPMT[fMainDetID[i].fIndex].ProcessEvBuffer(&(buffer[fMainDetID[i].fWordInSubbank]),
-                     num_words-fMainDetID[i].fWordInSubbank);
+                    fIntegrationPMT[i.fIndex].ProcessEvBuffer(&(buffer[i.fWordInSubbank]),
+                     num_words-i.fWordInSubbank);
 
                 }
 
@@ -1055,19 +1079,22 @@ Bool_t VQwDetectorArray::ApplySingleEventCuts() {
     for(size_t i=0;i<fIntegrationPMT.size();i++){
         
         status &= fIntegrationPMT[i].ApplySingleEventCuts();
-        if(!status && bDEBUG) 
+        if(!status && bDEBUG) { 
          std::cout<<"******* VQwDetectorArray::SingleEventCuts()->IntegrationPMT[ "<<i<<" , "<<fIntegrationPMT[i].GetElementName()<<" ] ******\n"; 
+}
     }
     
     for(size_t i=0;i<fCombinedPMT.size();i++){
 
         status &= fCombinedPMT[i].ApplySingleEventCuts();
-        if(!status && bDEBUG) 
+        if(!status && bDEBUG) { 
          std::cout<<"******* VQwDetectorArray::SingleEventCuts()->CombinedPMT[ "<<i<<" , "<<fCombinedPMT[i].GetElementName()<<" ] ******\n"; 
+}
     }
 
-    if (!status) 
+    if (!status) { 
      fMainDetErrorCount++; //failed  event counter for VQwDetectorArray
+}
 
     return status;
 }
@@ -1075,19 +1102,19 @@ Bool_t VQwDetectorArray::ApplySingleEventCuts() {
 
 UInt_t VQwDetectorArray::GetEventcutErrorFlag() { //return the error flag 
 
-    UInt_t ErrorFlag;
+    UInt_t ErrorFlag = 0;
 
     ErrorFlag=0;
 
-    for(size_t i=0;i<fIntegrationPMT.size();i++){
+    for(auto & i : fIntegrationPMT){
 
-        ErrorFlag |= fIntegrationPMT[i].GetEventcutErrorFlag();
+        ErrorFlag |= i.GetEventcutErrorFlag();
 
     }
 
-    for(size_t i=0;i<fCombinedPMT.size();i++){
+    for(auto & i : fCombinedPMT){
 
-        ErrorFlag |= fCombinedPMT[i].GetEventcutErrorFlag();
+        ErrorFlag |= i.GetEventcutErrorFlag();
     
     }
 
@@ -1097,15 +1124,15 @@ UInt_t VQwDetectorArray::GetEventcutErrorFlag() { //return the error flag
 
 void VQwDetectorArray::IncrementErrorCounters() {
 
-    for(size_t i=0;i<fIntegrationPMT.size();i++){
+    for(auto & i : fIntegrationPMT){
 
-        fIntegrationPMT[i].IncrementErrorCounters();
+        i.IncrementErrorCounters();
 
     }
 
-    for(size_t i=0;i<fCombinedPMT.size();i++){
+    for(auto & i : fCombinedPMT){
 
-        fCombinedPMT[i].IncrementErrorCounters();
+        i.IncrementErrorCounters();
 
     }
 
@@ -1117,17 +1144,17 @@ void VQwDetectorArray::PrintErrorCounters() const {
     QwMessage<<"*********VQwDetectorArray Error Summary****************"<<QwLog::endl;
     QwMollerADC_Channel::PrintErrorCounterHead();
     
-    for(size_t i=0;i<fIntegrationPMT.size();i++){
+    for(const auto & i : fIntegrationPMT){
 
         //std::cout<<"  IntegrationPMT ["<<i<<"] "<<std::endl;
-        fIntegrationPMT[i].PrintErrorCounters();
+        i.PrintErrorCounters();
 
     }
 
-    for(size_t i=0;i<fCombinedPMT.size();i++){
+    for(const auto & i : fCombinedPMT){
 
         //std::cout<<"  CombinedPMT ["<<i<<"] "<<std::endl;
-        fCombinedPMT[i].PrintErrorCounters();
+        i.PrintErrorCounters();
 
     }
     
@@ -1138,17 +1165,19 @@ void VQwDetectorArray::PrintErrorCounters() const {
 Bool_t VQwDetectorArray::CheckForBurpFail(const VQwSubsystem *subsys) {
 
     Bool_t burpstatus = kFALSE;
-    VQwSubsystem* tmp = const_cast<VQwSubsystem *>(subsys);
+    auto* tmp = const_cast<VQwSubsystem *>(subsys);
 
     if(Compare(tmp)) {
 
-        const VQwDetectorArray* input = dynamic_cast<const VQwDetectorArray*>(subsys);
+        const auto* input = dynamic_cast<const VQwDetectorArray*>(subsys);
 
-        for(size_t i=0;i<input->fIntegrationPMT.size();i++)
+        for(size_t i=0;i<input->fIntegrationPMT.size();i++) {
          burpstatus |= (this->fIntegrationPMT[i]).CheckForBurpFail(&(input->fIntegrationPMT[i]));
+}
 
-        for(size_t i=0;i<input->fCombinedPMT.size();i++)
+        for(size_t i=0;i<input->fCombinedPMT.size();i++) {
          burpstatus |= (this->fCombinedPMT[i]).CheckForBurpFail(&(input->fCombinedPMT[i]));
+}
 
     }
 
@@ -1159,17 +1188,19 @@ Bool_t VQwDetectorArray::CheckForBurpFail(const VQwSubsystem *subsys) {
 
 void VQwDetectorArray::UpdateErrorFlag(const VQwSubsystem *ev_error){
 
-    VQwSubsystem* tmp = const_cast<VQwSubsystem*>(ev_error);
+    auto* tmp = const_cast<VQwSubsystem*>(ev_error);
 
     if(Compare(tmp)){
 
-        const VQwDetectorArray* input = dynamic_cast<const VQwDetectorArray*> (ev_error);
+        const auto* input = dynamic_cast<const VQwDetectorArray*> (ev_error);
 
-        for (size_t i=0;i<input->fIntegrationPMT.size();i++)
+        for (size_t i=0;i<input->fIntegrationPMT.size();i++) {
          this->fIntegrationPMT[i].UpdateErrorFlag(&(input->fIntegrationPMT[i]));
+}
     
-        for (size_t i=0;i<input->fCombinedPMT.size();i++)
+        for (size_t i=0;i<input->fCombinedPMT.size();i++) {
          this->fCombinedPMT[i].UpdateErrorFlag(&(input->fCombinedPMT[i]));
+}
 
     }
 
@@ -1178,18 +1209,18 @@ void VQwDetectorArray::UpdateErrorFlag(const VQwSubsystem *ev_error){
 
 void  VQwDetectorArray::ProcessEvent() {
 
-    for (size_t i=0;i<fIntegrationPMT.size();i++)
-     fIntegrationPMT[i].ProcessEvent();
+    for (auto & i : fIntegrationPMT) {
+     i.ProcessEvent();
+}
 
-    for (size_t i=0;i<fCombinedPMT.size();i++) {
+    for (auto & i : fCombinedPMT) {
 
         //std::cout<<"Process combination "<<i<<std::endl;
-        fCombinedPMT[i].ProcessEvent();
+        i.ProcessEvent();
 
     }
 
-    return;
-
+    
 }
 
 /**
@@ -1243,8 +1274,9 @@ void  VQwDetectorArray::ProcessEvent_2() {
         
         }
       
-        if (bNormalization && fTargetCharge.GetValue()>fNormThreshold)
+        if (bNormalization && fTargetCharge.GetValue()>fNormThreshold) {
 	     this->DoNormalization();
+}
 
     } else {
       
@@ -1259,58 +1291,58 @@ void  VQwDetectorArray::ProcessEvent_2() {
 
 void  VQwDetectorArray::ConstructHistograms(TDirectory *folder, TString &prefix) {
 
-    for (size_t i=0;i<fIntegrationPMT.size();i++)
-     fIntegrationPMT[i].ConstructHistograms(folder,prefix);
+    for (auto & i : fIntegrationPMT) {
+     i.ConstructHistograms(folder,prefix);
+}
 
-    for (size_t i=0;i<fCombinedPMT.size();i++)
-     fCombinedPMT[i].ConstructHistograms(folder,prefix);
-    
-    return;
+    for (auto & i : fCombinedPMT) {
+     i.ConstructHistograms(folder,prefix);
+}
 
 }
 
 
 void  VQwDetectorArray::FillHistograms() {
 
-    for (size_t i=0;i<fIntegrationPMT.size();i++)
-     fIntegrationPMT[i].FillHistograms();
+    for (auto & i : fIntegrationPMT) {
+     i.FillHistograms();
+}
 
-    for (size_t i=0;i<fCombinedPMT.size();i++)
-     fCombinedPMT[i].FillHistograms();
-
-    return;
+    for (auto & i : fCombinedPMT) {
+     i.FillHistograms();
+}
 
 }
 
 
 void VQwDetectorArray::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values) {
 
-    for (size_t i=0;i<fIntegrationPMT.size();i++)
-     fIntegrationPMT[i].ConstructBranchAndVector(tree, prefix, values);
+    for (auto & i : fIntegrationPMT) {
+     i.ConstructBranchAndVector(tree, prefix, values);
+}
 
-    for (size_t i=0;i<fCombinedPMT.size();i++)
-     fCombinedPMT[i].ConstructBranchAndVector(tree, prefix, values);
-
-    return;
+    for (auto & i : fCombinedPMT) {
+     i.ConstructBranchAndVector(tree, prefix, values);
+}
 
 }
 
 void VQwDetectorArray::ConstructBranch(TTree *tree, TString & prefix) {
 
-    for (size_t i=0;i<fIntegrationPMT.size();i++)
-     fIntegrationPMT[i].ConstructBranch(tree, prefix);
+    for (auto & i : fIntegrationPMT) {
+     i.ConstructBranch(tree, prefix);
+}
 
-    for (size_t i=0;i<fCombinedPMT.size();i++)
-     fCombinedPMT[i].ConstructBranch(tree, prefix);
-
-    return;
+    for (auto & i : fCombinedPMT) {
+     i.ConstructBranch(tree, prefix);
+}
 
 }
 
 void VQwDetectorArray::ConstructBranch(TTree *tree, TString & prefix, QwParameterFile& trim_file) {
 
     TString tmp;
-    QwParameterFile* nextmodule;
+    QwParameterFile* nextmodule = nullptr;
     trim_file.RewindToFileStart();
     tmp="QwIntegrationPMT";
     trim_file.RewindToFileStart();
@@ -1319,8 +1351,9 @@ void VQwDetectorArray::ConstructBranch(TTree *tree, TString & prefix, QwParamete
 
         nextmodule=trim_file.ReadUntilNextModule();//This section contains sub modules and or channels to be included in the tree
         
-        for (size_t i=0;i<fIntegrationPMT.size();i++)
-         fIntegrationPMT[i].ConstructBranch(tree, prefix, *nextmodule);
+        for (auto & i : fIntegrationPMT) {
+         i.ConstructBranch(tree, prefix, *nextmodule);
+}
     
     }
 
@@ -1331,22 +1364,22 @@ void VQwDetectorArray::ConstructBranch(TTree *tree, TString & prefix, QwParamete
         
         nextmodule=trim_file.ReadUntilNextModule();//This section contains sub modules and or channels to be included in the tree
         
-        for (size_t i=0;i<fCombinedPMT.size();i++)
-         fCombinedPMT[i].ConstructBranch(tree, prefix, *nextmodule );
+        for (auto & i : fCombinedPMT) {
+         i.ConstructBranch(tree, prefix, *nextmodule );
+}
     }
 
-    return;
-}
+    }
 
 void VQwDetectorArray::FillTreeVector(std::vector<Double_t> &values) const {
 
-    for (size_t i=0;i<fIntegrationPMT.size();i++)
-     fIntegrationPMT[i].FillTreeVector(values);
+    for (const auto & i : fIntegrationPMT) {
+     i.FillTreeVector(values);
+}
 
-    for (size_t i=0;i<fCombinedPMT.size();i++)
-     fCombinedPMT[i].FillTreeVector(values);
-
-    return;
+    for (const auto & i : fCombinedPMT) {
+     i.FillTreeVector(values);
+}
 
 }
 
@@ -1398,7 +1431,7 @@ Bool_t VQwDetectorArray::Compare(VQwSubsystem *value) {
     
     } else {
       
-        VQwDetectorArray* input = dynamic_cast<VQwDetectorArray*>(value);
+        auto* input = dynamic_cast<VQwDetectorArray*>(value);
 
         if (input->fIntegrationPMT.size()!=fIntegrationPMT.size()
          || input->fCombinedPMT.size()!=fCombinedPMT.size() ) {
@@ -1422,13 +1455,15 @@ VQwSubsystem&  VQwDetectorArray::operator=  (VQwSubsystem *value) {
     if (this != value && Compare(value)) {
 
         //VQwSubsystem::operator=(value);
-        VQwDetectorArray* input = dynamic_cast<VQwDetectorArray*> (value);
+        auto* input = dynamic_cast<VQwDetectorArray*> (value);
 
-        for (size_t i=0;i<input->fIntegrationPMT.size();i++)
+        for (size_t i=0;i<input->fIntegrationPMT.size();i++) {
          this->fIntegrationPMT[i]=input->fIntegrationPMT[i];
+}
 
-        for (size_t i=0;i<input->fCombinedPMT.size();i++)
+        for (size_t i=0;i<input->fCombinedPMT.size();i++) {
          (this->fCombinedPMT[i])=(input->fCombinedPMT[i]);
+}
 
     }
 
@@ -1441,13 +1476,15 @@ VQwSubsystem&  VQwDetectorArray::operator+=  (VQwSubsystem *value) {
 
     if (Compare(value)) {
 
-        VQwDetectorArray* input= dynamic_cast<VQwDetectorArray*>(value) ;
+        auto* input= dynamic_cast<VQwDetectorArray*>(value) ;
 
-        for (size_t i=0;i<input->fIntegrationPMT.size();i++)
+        for (size_t i=0;i<input->fIntegrationPMT.size();i++) {
          this->fIntegrationPMT[i]+=input->fIntegrationPMT[i];
+}
 
-        for (size_t i=0;i<input->fCombinedPMT.size();i++)
+        for (size_t i=0;i<input->fCombinedPMT.size();i++) {
          this->fCombinedPMT[i]+=input->fCombinedPMT[i];
+}
 
     }
 
@@ -1460,13 +1497,15 @@ VQwSubsystem&  VQwDetectorArray::operator-=  (VQwSubsystem *value) {
 
     if (Compare(value)) {
 
-        VQwDetectorArray* input= dynamic_cast<VQwDetectorArray*>(value);
+        auto* input= dynamic_cast<VQwDetectorArray*>(value);
 
-        for (size_t i=0;i<input->fIntegrationPMT.size();i++)
+        for (size_t i=0;i<input->fIntegrationPMT.size();i++) {
          this->fIntegrationPMT[i]-=input->fIntegrationPMT[i];
+}
 
-        for (size_t i=0;i<input->fCombinedPMT.size();i++)
+        for (size_t i=0;i<input->fCombinedPMT.size();i++) {
          this->fCombinedPMT[i]-=input->fCombinedPMT[i];
+}
 
     }
 
@@ -1479,31 +1518,32 @@ void VQwDetectorArray::Ratio(VQwSubsystem  *numer, VQwSubsystem  *denom) {
 
     if (Compare(numer)&&Compare(denom)) {
 
-        VQwDetectorArray* innumer= dynamic_cast<VQwDetectorArray*>(numer) ;
-        VQwDetectorArray* indenom= dynamic_cast<VQwDetectorArray*>(denom) ;
+        auto* innumer= dynamic_cast<VQwDetectorArray*>(numer) ;
+        auto* indenom= dynamic_cast<VQwDetectorArray*>(denom) ;
 
-        for (size_t i=0;i<innumer->fIntegrationPMT.size();i++)
+        for (size_t i=0;i<innumer->fIntegrationPMT.size();i++) {
          this->fIntegrationPMT[i].Ratio(innumer->fIntegrationPMT[i],indenom->fIntegrationPMT[i]);
+}
 
-        for (size_t i=0;i<innumer->fCombinedPMT.size();i++)
+        for (size_t i=0;i<innumer->fCombinedPMT.size();i++) {
          this->fCombinedPMT[i].Ratio(innumer->fCombinedPMT[i],indenom->fCombinedPMT[i]);
+}
 
     }
 
-    return;
-
+    
 }
 
 
 void VQwDetectorArray::Scale(Double_t factor) {
 
-    for (size_t i=0;i<fIntegrationPMT.size();i++)
-     fIntegrationPMT[i].Scale(factor);
+    for (auto & i : fIntegrationPMT) {
+     i.Scale(factor);
+}
 
-    for (size_t i=0;i<fCombinedPMT.size();i++)
-     fCombinedPMT[i].Scale(factor);
-
-    return;
+    for (auto & i : fCombinedPMT) {
+     i.Scale(factor);
+}
 
 }
 
@@ -1511,11 +1551,13 @@ void VQwDetectorArray::Scale(Double_t factor) {
 
 void VQwDetectorArray::Normalize(VQwDataElement* denom) {
 
-    for (size_t i = 0; i < fIntegrationPMT.size(); i++)
-     fIntegrationPMT[i].Normalize(denom);
+    for (auto & i : fIntegrationPMT) {
+     i.Normalize(denom);
+}
     
-    for (size_t i = 0; i < fCombinedPMT.size(); i++)
-     fCombinedPMT[i].Normalize(denom);
+    for (auto & i : fCombinedPMT) {
+     i.Normalize(denom);
+}
 
 }
 
@@ -1523,13 +1565,13 @@ void VQwDetectorArray::Normalize(VQwDataElement* denom) {
 
 void VQwDetectorArray::CalculateRunningAverage() {
 
-    for (size_t i=0;i<fIntegrationPMT.size();i++)
-     fIntegrationPMT[i].CalculateRunningAverage();
+    for (auto & i : fIntegrationPMT) {
+     i.CalculateRunningAverage();
+}
 
-    for (size_t i=0;i<fCombinedPMT.size();i++)
-     fCombinedPMT[i].CalculateRunningAverage();
-
-    return;
+    for (auto & i : fCombinedPMT) {
+     i.CalculateRunningAverage();
+}
 
 }
 
@@ -1538,13 +1580,15 @@ void VQwDetectorArray::AccumulateRunningSum(VQwSubsystem* value1, Int_t count, I
 
     if (Compare(value1)) {
         
-        VQwDetectorArray* value = dynamic_cast<VQwDetectorArray*>(value1);
+        auto* value = dynamic_cast<VQwDetectorArray*>(value1);
 
-        for (size_t i = 0; i < fIntegrationPMT.size(); i++)
+        for (size_t i = 0; i < fIntegrationPMT.size(); i++) {
          fIntegrationPMT[i].AccumulateRunningSum(value->fIntegrationPMT[i], count, ErrorMask);
+}
     
-        for (size_t i = 0; i < fCombinedPMT.size(); i++)
+        for (size_t i = 0; i < fCombinedPMT.size(); i++) {
          fCombinedPMT[i].AccumulateRunningSum(value->fCombinedPMT[i], count, ErrorMask);
+}
     
     }
 
@@ -1554,13 +1598,15 @@ void VQwDetectorArray::DeaccumulateRunningSum(VQwSubsystem* value1, Int_t ErrorM
     
     if (Compare(value1)) {
         
-        VQwDetectorArray* value = dynamic_cast<VQwDetectorArray*>(value1);
+        auto* value = dynamic_cast<VQwDetectorArray*>(value1);
 
-        for (size_t i = 0; i < fIntegrationPMT.size(); i++)
+        for (size_t i = 0; i < fIntegrationPMT.size(); i++) {
          fIntegrationPMT[i].DeaccumulateRunningSum(value->fIntegrationPMT[i], ErrorMask);
+}
         
-        for (size_t i = 0; i < fCombinedPMT.size(); i++)
+        for (size_t i = 0; i < fCombinedPMT.size(); i++) {
          fCombinedPMT[i].DeaccumulateRunningSum(value->fCombinedPMT[i], ErrorMask);
+}
 
     }  
 
@@ -1587,18 +1633,20 @@ Int_t VQwDetectorArray::GetDetectorIndex(EQwPMTInstrumentType type_id, TString n
     }
 
     Int_t result=-1;
-    for (size_t i=0;i<fMainDetID.size();i++) {
+    for (auto & i : fMainDetID) {
 
-        if (fMainDetID[i].fTypeID==type_id)
-         if (fMainDetID[i].fdetectorname==name) {
+        if (i.fTypeID==type_id) {
+         if (i.fdetectorname==name) {
             
-            result=fMainDetID[i].fIndex;
+            result=i.fIndex;
 
-            if (ldebug)
-             std::cout<<"testing against ("<<fMainDetID[i].fTypeID
-             <<","<<fMainDetID[i].fdetectorname<<")=>"<<result<<"\n";
+            if (ldebug) {
+             std::cout<<"testing against ("<<i.fTypeID
+             <<","<<i.fdetectorname<<")=>"<<result<<"\n";
+}
 
          }
+}
     }
 
     return result;
@@ -1611,12 +1659,12 @@ const QwIntegrationPMT* VQwDetectorArray::GetIntegrationPMT(const TString name) 
     tmpname.ToLower();
     if (! fIntegrationPMT.empty()) {
 
-        for (size_t i=0;i<fIntegrationPMT.size();i++) {
+        for (const auto & i : fIntegrationPMT) {
 
-            if (fIntegrationPMT.at(i).GetElementName() == tmpname) {
+            if (i.GetElementName() == tmpname) {
 
                 //std::cout<<"Get IntegrationPMT "<<tmpname<<std::endl;
-                return &(fIntegrationPMT.at(i));
+                return &i;
             
             }
         
@@ -1626,7 +1674,7 @@ const QwIntegrationPMT* VQwDetectorArray::GetIntegrationPMT(const TString name) 
     
     QwMessage << "VQwDetectorArray::GetIntegrationPMT: cannot find channel " << tmpname << QwLog::endl;
     
-    return NULL;
+    return nullptr;
 
 }
 
@@ -1636,17 +1684,17 @@ const QwCombinedPMT* VQwDetectorArray::GetCombinedPMT(const TString name) const 
   tmpname.ToLower();
   if (! fCombinedPMT.empty())
     {
-      for (size_t i=0;i<fCombinedPMT.size();i++)
+      for (const auto & i : fCombinedPMT)
         {
-          if (fCombinedPMT.at(i).GetElementName() == tmpname)
+          if (i.GetElementName() == tmpname)
             {
               //std::cout<<"Get CombinedPMT "<<tmpname<<std::endl;
-              return &(fCombinedPMT.at(i));
+              return &i;
             }
         }
     }
   QwMessage << "VQwDetectorArray::GetCombinedPMT: cannot find channel " << tmpname << QwLog::endl;
-  return NULL;
+  return nullptr;
 }
 
 void VQwDetectorArray::DoNormalization(Double_t factor) {
@@ -1764,11 +1812,13 @@ void  VQwDetectorArray::PrintValue() const {
 
     QwMessage << "=== VQwDetectorArray: " << GetName() << " ===" << QwLog::endl;
     
-    for (size_t i = 0; i < fIntegrationPMT.size(); i++)
-     fIntegrationPMT[i].PrintValue();
+    for (const auto & i : fIntegrationPMT) {
+     i.PrintValue();
+}
     
-    for (size_t i = 0; i < fCombinedPMT.size(); i++)
-     fCombinedPMT[i].PrintValue();
+    for (const auto & i : fCombinedPMT) {
+     i.PrintValue();
+}
 
 }
 
@@ -1781,10 +1831,12 @@ void  VQwDetectorArray::PrintInfo() const {
 
     std::cout<<" Printing Running AVG and other channel info"<<std::endl;
 
-    for (size_t i = 0; i < fIntegrationPMT.size(); i++)
-     fIntegrationPMT[i].PrintInfo();
-    for (size_t i = 0; i < fCombinedPMT.size(); i++)
-     fCombinedPMT[i].PrintInfo();
+    for (const auto & i : fIntegrationPMT) {
+     i.PrintInfo();
+}
+    for (const auto & i : fCombinedPMT) {
+     i.PrintInfo();
+}
 
 }
 
@@ -1798,8 +1850,7 @@ void  VQwDetectorArray::PrintDetectorID() const {
     
     }
 
-    return;
-
+    
 }
 
 #ifdef __USE_DATABASE__
@@ -1903,18 +1954,18 @@ void VQwDetectorArray::WritePromptSummary(QwPromptSummary *ps, TString type) {
         QwMessage << " --------------------------------------------------------------- " << QwLog::endl;
     }
 
-    const VQwHardwareChannel* tmp_channel = 0;
+    const VQwHardwareChannel* tmp_channel = nullptr;
     TString  element_name        = "";
     Double_t element_value       = 0.0;
     Double_t element_value_err   = 0.0;
     Double_t element_value_width = 0.0;
 
-    PromptSummaryElement *local_ps_element = NULL;
+    PromptSummaryElement *local_ps_element = nullptr;
     Bool_t local_add_these_elements= false;
 
-    for (size_t i = 0; i < fMainDetID.size();  i++) {
+    for (auto & i : fMainDetID) {
 
-        element_name        = fMainDetID[i].fdetectorname;
+        element_name        = i.fdetectorname;
         tmp_channel=GetIntegrationPMT(element_name)->GetChannel(element_name);	
         element_value       = 0.0;
         element_value_err   = 0.0;
@@ -1933,7 +1984,7 @@ void VQwDetectorArray::WritePromptSummary(QwPromptSummary *ps, TString type) {
         local_ps_element=ps->GetElementByName(element_name);
 
       
-        if(local_ps_element) {
+        if(local_ps_element != nullptr) {
 
 	        element_value       = tmp_channel->GetValue();
 	        element_value_err   = tmp_channel->GetValueError();
@@ -1943,7 +1994,7 @@ void VQwDetectorArray::WritePromptSummary(QwPromptSummary *ps, TString type) {
         
         }
       
-        if( local_print_flag && local_ps_element) {
+        if( local_print_flag && (local_ps_element != nullptr)) {
 
 	        printf("Type %12s, Element %32s, value %12.4e error %8.4e  width %12.4e\n", 
 	         type.Data(), element_name.Data(), element_value, element_value_err, element_value_width);
@@ -1952,8 +2003,7 @@ void VQwDetectorArray::WritePromptSummary(QwPromptSummary *ps, TString type) {
     
     }
 
-  return;
-
+  
 }
 
 
@@ -1968,9 +2018,7 @@ void  QwDetectorArrayID::Print() const {
     std::cout<<"Index of this detector in the vector of similar detector= "<<fIndex<<std::endl;
     std::cout<<"Subelement index= "<<fSubelement<<std::endl;
     std::cout<<"==========================================\n";
-
-    return;
-    
+   
 }
 
 

@@ -171,9 +171,9 @@ Int_t main(Int_t argc, Char_t* argv[])
     #endif // __USE_DATABASE__
 
     //  Open the ROOT file (close when scope ends)
-    QwRootFile *treerootfile  = NULL;
-    QwRootFile *burstrootfile = NULL;
-    QwRootFile *historootfile = NULL;
+    QwRootFile *treerootfile  = nullptr;
+    QwRootFile *burstrootfile = nullptr;
+    QwRootFile *historootfile = nullptr;
 
 
     if (gQwOptions.GetValue<bool>("single-output-file")) {
@@ -335,7 +335,8 @@ Int_t main(Int_t argc, Char_t* argv[])
 
 
       //  Now, if this is not a physics event, go back and get a new event.
-      if (! eventbuffer.IsPhysicsEvent()) continue;
+      if (! eventbuffer.IsPhysicsEvent()) { continue;
+}
 
 
       //  Fill the subsystem objects with their respective data for this event.
@@ -664,12 +665,12 @@ Int_t main(Int_t argc, Char_t* argv[])
       } else {
 #endif
         // TTree mode or mixed mode: use Write() for explicit tree writing
-        treerootfile->Write(0, TObject::kOverwrite);
+        treerootfile->Write(nullptr, TObject::kOverwrite);
         treerootfile->Close();
 #ifdef HAS_RNTUPLE_SUPPORT
       }
 #endif
-      delete treerootfile; treerootfile = 0; burstrootfile = 0; historootfile = 0;
+      delete treerootfile; treerootfile = nullptr; burstrootfile = nullptr; historootfile = nullptr;
     } else {
       // Use different write methods based on output format
 #ifdef HAS_RNTUPLE_SUPPORT
@@ -681,18 +682,18 @@ Int_t main(Int_t argc, Char_t* argv[])
       } else {
 #endif
         // TTree mode or mixed mode: use Write() for explicit tree writing
-        treerootfile->Write(0, TObject::kOverwrite);
-        burstrootfile->Write(0, TObject::kOverwrite);
-        historootfile->Write(0, TObject::kOverwrite);
+        treerootfile->Write(nullptr, TObject::kOverwrite);
+        burstrootfile->Write(nullptr, TObject::kOverwrite);
+        historootfile->Write(nullptr, TObject::kOverwrite);
         treerootfile->Close();
         burstrootfile->Close();
         historootfile->Close();
 #ifdef HAS_RNTUPLE_SUPPORT
       }
 #endif
-      delete treerootfile; treerootfile = 0;
-      delete burstrootfile; burstrootfile = 0;
-      delete historootfile; historootfile = 0;
+      delete treerootfile; treerootfile = nullptr;
+      delete burstrootfile; burstrootfile = nullptr;
+      delete historootfile; historootfile = nullptr;
     }
 
     //  Print the event cut error summary for each subsystem

@@ -46,7 +46,7 @@ class MQwV775TDC{
   UInt_t GetTDCMaxChannels()  {return fV775MaxChannelsPerModule;};
 
   UInt_t GetTDCEventNumber()  {return fV775EventNumber;};
-  UInt_t GetTDCTriggerTime();
+  static UInt_t GetTDCTriggerTime();
 
   void SetReferenceParameters(Double_t mindiff, Double_t maxdiff,
 			      Double_t offset, Double_t shift){
@@ -54,10 +54,10 @@ class MQwV775TDC{
     //  the MQwF1TDC class.
   };
 
-  Double_t SubtractReference(Double_t rawtime, Double_t reftime);
-  Bool_t CheckDataIntegrity(const ROCID_t roc_id, UInt_t *buffer, UInt_t num_words);
-  void   PrintTDCHeader(Bool_t flag) ; 
-  void   PrintTDCData(Bool_t flag) ; 
+  static Double_t SubtractReference(Double_t rawtime, Double_t reftime);
+  static Bool_t CheckDataIntegrity(const ROCID_t roc_id, UInt_t *buffer, UInt_t num_words);
+  static void   PrintTDCHeader(Bool_t flag) ; 
+  void   PrintTDCData(Bool_t flag) const ; 
 
  private:
   static const UInt_t kV775Mask_SlotNumber;
@@ -82,11 +82,11 @@ class MQwV775TDC{
   Bool_t fV775ValidFlag;
   Bool_t fV775HeaderFlag;
 
-  UInt_t fV775SlotNumber;
-  UInt_t fV775ChannelNumber;
-  UInt_t fV775Dataword;
-  UInt_t fV775MaxChannelsPerModule;
-  UInt_t fV775EventNumber;
+  UInt_t fV775SlotNumber{0};
+  UInt_t fV775ChannelNumber{0};
+  UInt_t fV775Dataword{0};
+  UInt_t fV775MaxChannelsPerModule{32};
+  UInt_t fV775EventNumber{0};
 
 };
 

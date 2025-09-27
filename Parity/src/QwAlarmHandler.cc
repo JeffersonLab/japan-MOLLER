@@ -90,7 +90,8 @@ Int_t QwAlarmHandler::LoadChannelMap(const std::string& mapfile)
     // Throw away comments, whitespace, empty lines
     map.TrimComment();
     map.TrimWhitespace();
-    if (map.LineIsEmpty()) continue;
+    if (map.LineIsEmpty()) { continue;
+}
     // Get first token: label (dv or iv), second token is the name like "asym_blah"
 //  Type, Channel, Ana, tree, channel, highhigh, high, low, lowlow, ringLength, pat-tolerance
 //  Kind=Main-Det Chan=usr Tree=mul Channel=asym_usr HighHigh=1000 High=100 Low=-100 LowLow=-1000 Ring-Length=200 Tolerance=2
@@ -98,7 +99,7 @@ Int_t QwAlarmHandler::LoadChannelMap(const std::string& mapfile)
     // Do while tmpVal = map.GetNextToken parse
     // Do map[tmpVal.type] = tmpVal.value
     std::string tmpToken = map.GetNextToken(" ");
-    while ( tmpToken != "" ) {
+    while ( !tmpToken.empty() ) {
       tmpPair = ParseAlarmMapVariable(tmpToken,'='); // This refers to the object under scrutiny, finds type of object - asym, yield, diff, etc. Check on yields FIXME
       if (tmpPair.first=="Channel") {
         type_name = ParseHandledVariable(tmpPair.second);
@@ -121,10 +122,10 @@ Int_t QwAlarmHandler::LoadChannelMap(const std::string& mapfile)
       }
       tmpToken = map.GetNextToken(" ");
     }
-    if (!tmpAlarmObject.alarmParameterMap.count("Ring-Length")) {
+    if (tmpAlarmObject.alarmParameterMap.count("Ring-Length") == 0u) {
       tmpAlarmObject.alarmParameterMap["Ring-Length"] = 1e9;
     }
-    if (!tmpAlarmObject.alarmParameterMap.count("Tolerance")) {
+    if (tmpAlarmObject.alarmParameterMap.count("Tolerance") == 0u) {
       tmpAlarmObject.alarmParameterMap["Tolerance"] = 0;
     }
 
@@ -148,8 +149,8 @@ Int_t QwAlarmHandler::LoadChannelMap(const std::string& mapfile)
     tmpAlarmObject.alarmStatus  = "OK";
     tmpAlarmObject.Nviolated    = 0;
     tmpAlarmObject.NsinceLastViolation = 1e9;
-    tmpAlarmObject.value = NULL;
-    tmpAlarmObject.eventcutErrorFlag = NULL;
+    tmpAlarmObject.value = nullptr;
+    tmpAlarmObject.eventcutErrorFlag = nullptr;
     fAlarmObjectList.push_back(tmpAlarmObject);
 
     /*else if (primary_token == "treetype") {
@@ -174,28 +175,28 @@ Int_t QwAlarmHandler::ConnectChannels(
     QwSubsystemArrayParity& diff)
 {
   /// Fill vector of pointers to the relevant data elements
-  for (size_t anaInd = 0; anaInd < fAlarmObjectList.size(); anaInd++) {
+  for (auto & anaInd : fAlarmObjectList) {
     // Get the dependent variables
-    if (fAlarmObjectList.at(anaInd).analysisType==kHandleTypeMps || fAlarmObjectList.at(anaInd).alarmParameterMapStr.count("Channel-Name") == 0){
+    if (anaInd.analysisType==kHandleTypeMps || anaInd.alarmParameterMapStr.count("Channel-Name") == 0){
       //  Quietly ignore the MPS type when we're connecting the asym & diff
       continue;
     }
-    const VQwHardwareChannel* ana_ptr = NULL;
-    const UInt_t* eventcut = NULL;
-    switch (fAlarmObjectList.at(anaInd).analysisType) {
+    const VQwHardwareChannel* ana_ptr = nullptr;
+    const UInt_t* eventcut = nullptr;
+    switch (anaInd.analysisType) {
       case kHandleTypeYield:
         SetEventcutErrorFlagPointer(yield.GetEventcutErrorFlagPointer());
-        ana_ptr = yield.ReturnInternalValue(fAlarmObjectList.at(anaInd).alarmParameterMapStr.at("Channel-Name"));
+        ana_ptr = yield.ReturnInternalValue(anaInd.alarmParameterMapStr.at("Channel-Name"));
         eventcut = yield.GetEventcutErrorFlagPointer();
         break;
       case kHandleTypeAsym:
         SetEventcutErrorFlagPointer(asym.GetEventcutErrorFlagPointer());
-        ana_ptr = asym.ReturnInternalValue(fAlarmObjectList.at(anaInd).alarmParameterMapStr.at("Channel-Name"));
+        ana_ptr = asym.ReturnInternalValue(anaInd.alarmParameterMapStr.at("Channel-Name"));
         eventcut = asym.GetEventcutErrorFlagPointer();
         break;
       case kHandleTypeDiff:
         SetEventcutErrorFlagPointer(diff.GetEventcutErrorFlagPointer());
-        ana_ptr = diff.ReturnInternalValue(fAlarmObjectList.at(anaInd).alarmParameterMapStr.at("Channel-Name"));
+        ana_ptr = diff.ReturnInternalValue(anaInd.alarmParameterMapStr.at("Channel-Name"));
         eventcut = diff.GetEventcutErrorFlagPointer();
         break;
       default:
@@ -203,13 +204,13 @@ Int_t QwAlarmHandler::ConnectChannels(
           << QwLog::endl;
         break;
     }
-    if (ana_ptr != NULL) {
-      fAlarmObjectList.at(anaInd).value = ana_ptr;
+    if (ana_ptr != nullptr) {
+      anaInd.value = ana_ptr;
       //QwError << "ana_ptr = " << ana_ptr <<QwLog::endl;
       //QwError << "fAlarmObjectList.at(" << anaInd << ").value = " <<  fAlarmObjectList.at(anaInd).value <<QwLog::endl;
-      fAlarmObjectList.at(anaInd).eventcutErrorFlag = eventcut;
+      anaInd.eventcutErrorFlag = eventcut;
     } else {
-      fAlarmObjectList.at(anaInd).value = NULL;
+      anaInd.value = nullptr;
       //QwWarning << "Independent variable " << fAlarmObjectList.at(anaInd).alarmParameterMapStr.at("Channel-Name") << " missing in alarm map "
       //  << QwLog::endl;
     }
@@ -285,7 +286,7 @@ void QwAlarmHandler::ProcessData() {
  //   fValue.at(i) = fDependentValues[i];
  // }
   fCounter++;
-  if (fAlarmActive) {
+  if (fAlarmActive != 0) {
     CheckAlarms();
     if (fCounter % fAlarmNupdate == 0) {
       UpdateAlarmFile();
@@ -342,7 +343,7 @@ void QwAlarmHandler::CheckAlarms() {
   // If user-name-of-variable exists then grab it, grab its value from memory, and then compare to the upper and lower limits defined by user (if they were defined) 
   std::string tmpAlarmStat = "OK";
   for ( size_t numAna = 0; numAna < fAlarmObjectList.size() ; numAna++ ) {
-    if (fAlarmObjectList.at(numAna).value != NULL){
+    if (fAlarmObjectList.at(numAna).value != nullptr){
       //QwWarning << "fAlarmObjectList.at("<<numAna<<").value == " << fAlarmObjectList.at(numAna).value  <<QwLog::endl;
       //QwWarning << "fAlarmObjectList.at("<<numAna<<").value->GetValue() == " << fAlarmObjectList.at(numAna).value->GetValue()  <<QwLog::endl;
       if ( fAlarmObjectList.at(numAna).alarmParameterMapStr.count("Error-Code") != 0 
@@ -413,20 +414,23 @@ void QwAlarmHandler::UpdateAlarmFile(){
 
   file_out.open(fAlarmOutputFile,std::ofstream::trunc);
   for (size_t ite = 0 ; ite<fAlarmObjectList.size(); ite++){
-    if (fAlarmObjectList.at(ite).value != NULL && fAlarmObjectList.at(ite).alarmParameterMapStr.count("Kind") && fAlarmObjectList.at(ite).alarmParameterMapStr.count("Chan") && fAlarmObjectList.at(ite).alarmParameterMapStr.count("Analysis")) {
-      if (fAlarmObjectList.at(ite).value != 0) { // Check if non-trivial value object...
+    if (fAlarmObjectList.at(ite).value != nullptr && (fAlarmObjectList.at(ite).alarmParameterMapStr.count("Kind") != 0u) && (fAlarmObjectList.at(ite).alarmParameterMapStr.count("Chan") != 0u) && (fAlarmObjectList.at(ite).alarmParameterMapStr.count("Analysis") != 0u)) {
+      if (fAlarmObjectList.at(ite).value != nullptr) { // Check if non-trivial value object...
         file_out<<fAlarmObjectList.at(ite).alarmParameterMapStr.at("Kind")<<","<<fAlarmObjectList.at(ite).alarmParameterMapStr.at("Chan")<<","<<fAlarmObjectList.at(ite).alarmParameterMapStr.at("Analysis")<<","<<"Value"<<","<<fAlarmObjectList.at(ite).value->GetValue()<<std::endl;
       }
-      else continue;
-      if (fAlarmObjectList.at(ite).alarmStatus != "") { // Check if non-trivial value object...
+      else { continue;
+}
+      if (!fAlarmObjectList.at(ite).alarmStatus.empty()) { // Check if non-trivial value object...
         file_out<<fAlarmObjectList.at(ite).alarmParameterMapStr.at("Kind")<<","<<fAlarmObjectList.at(ite).alarmParameterMapStr.at("Chan")<<","<<fAlarmObjectList.at(ite).alarmParameterMapStr.at("Analysis")<<","<<"Alarm Status"<<","<<fAlarmObjectList.at(ite).alarmStatus<<std::endl;
       }
-      else continue;
-      if (fAlarmObjectList.at(ite).alarmParameterMapStr.count("Error-Code")) { // Check if non-trivial value object...
+      else { continue;
+}
+      if (fAlarmObjectList.at(ite).alarmParameterMapStr.count("Error-Code") != 0u) { // Check if non-trivial value object...
         file_out<<fAlarmObjectList.at(ite).alarmParameterMapStr.at("Kind")<<","<<fAlarmObjectList.at(ite).alarmParameterMapStr.at("Chan")<<","<<fAlarmObjectList.at(ite).alarmParameterMapStr.at("Analysis")<<","<<"Error-Code"<<","<<fAlarmObjectList.at(ite).alarmParameterMapStr.at("Error-Code")<<std::endl;
       }
     }
-    else continue;
+    else { continue;
+}
     for (auto jte : fAlarmObjectList.at(ite).alarmParameterMap){ // Loop through parameter list
       file_out<<fAlarmObjectList.at(ite).alarmParameterMapStr.at("Kind")<<","<<fAlarmObjectList.at(ite).alarmParameterMapStr.at("Chan")<<","<<fAlarmObjectList.at(ite).alarmParameterMapStr.at("Analysis")<<","<<jte.first<<","<<jte.second<<std::endl;
     }

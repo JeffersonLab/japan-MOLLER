@@ -20,7 +20,7 @@
 int main(int argc, char** argv)
 {
   // Start Qw-Root command prompt
-  QwRint* qwrint = new QwRint("Qweak-Root Analyzer", &argc, argv);
+  auto* qwrint = new QwRint("Qweak-Root Analyzer", &argc, argv);
   // Set some paths
   TString path = getenv_safe_TString("QWANALYSIS");
   gROOT->ProcessLine(".include " + path + "/Analysis/include");

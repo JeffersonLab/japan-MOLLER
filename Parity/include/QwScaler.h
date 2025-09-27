@@ -53,7 +53,7 @@ class QwScaler: public VQwSubsystemParity, public MQwSubsystemCloneable<QwScaler
     void ProcessOptions(QwOptions &options);
 
     Int_t LoadChannelMap(TString mapfile);
-    Int_t LoadInputParameters(TString pedestalfile);
+    Int_t LoadInputParameters(TString mapfile);
 
     void  ClearEventData();
 
@@ -77,12 +77,12 @@ class QwScaler: public VQwSubsystemParity, public MQwSubsystemCloneable<QwScaler
     void FillNTupleVector(std::vector<Double_t>& values) const;
 #endif // HAS_RNTUPLE_SUPPORT
 
-    Bool_t Compare(VQwSubsystem *source);
+    Bool_t Compare(VQwSubsystem *value);
 
     VQwSubsystem& operator=(VQwSubsystem *value);
     VQwSubsystem& operator+=(VQwSubsystem *value);
     VQwSubsystem& operator-=(VQwSubsystem *value);
-    void Ratio(VQwSubsystem *value1, VQwSubsystem  *value2);
+    void Ratio(VQwSubsystem *numer, VQwSubsystem  *denom);
     void Scale(Double_t factor);
 
     void AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
@@ -117,7 +117,7 @@ class QwScaler: public VQwSubsystemParity, public MQwSubsystemCloneable<QwScaler
       return fScaler.at(index)->GetValue();
     }
 
-    Int_t GetChannelIndex(TString channelName, UInt_t module_number);
+    static Int_t GetChannelIndex(TString channelName, UInt_t module_number);
 
   private:
 

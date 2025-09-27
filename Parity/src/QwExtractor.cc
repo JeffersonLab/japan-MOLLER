@@ -35,22 +35,22 @@ RegisterHandlerFactory(QwExtractor);
 
 /// \brief Constructor with name
 QwExtractor::QwExtractor(const TString& name)
-: VQwDataHandler(name)
+: VQwDataHandler(name), fErrorFlagMask(0x9000), fErrorFlagPointer(0)
 {
   ParseSeparator = ":";
   fKeepRunningSum = kTRUE;
   fTreeName = "bmw";
   fTreeComment = "BMOD Extractor";
-  fErrorFlagMask = 0x9000;
-  fErrorFlagPointer = 0;
+  
+  
 
 }
 
 QwExtractor::QwExtractor(const QwExtractor &source)
-: VQwDataHandler(source)
+: VQwDataHandler(source), fErrorFlagMask(0x9000), fErrorFlagPointer(0)
 {
-  fErrorFlagMask = 0x9000;
-  fErrorFlagPointer = 0;
+  
+  
 }
 
 /// Destructor
@@ -83,21 +83,21 @@ void QwExtractor::ConstructTreeBranches(
     const std::string& branchprefix)
 {
   // Check if tree name is specified
-  if (fTreeName == "") {
+  if (fTreeName.empty()) {
     QwWarning << "QwCorrelator: no tree name specified, use 'tree-name = value'" << QwLog::endl;
     return;
   }
 
   // Construct tree name and create new tree
   fTreeName = treeprefix + fTreeName;
-  treerootfile->ConstructTreeBranches(fTreeName, fTreeComment.c_str(), *fSourceCopy);
+  treerootfile->ConstructTreeBranches(fTreeName, fTreeComment, *fSourceCopy);
   //fTree = treerootfile->GetTree(fTreeName);
 }
 
 void QwExtractor::ProcessData()
 {
   fLocalFlag = 0;
-  if (fErrorFlagMask!=0 && fErrorFlagPointer!=NULL) {
+  if (fErrorFlagMask!=0 && fErrorFlagPointer!=nullptr) {
     if ((*fErrorFlagPointer & fErrorFlagMask)!=0) {
       //QwMessage << "0x" << std::hex << *fErrorFlagPointer << " passed mask " << "0x" << std::hex << fErrorFlagMask << std::dec << QwLog::endl;
       fLocalFlag = 1;
@@ -114,7 +114,7 @@ void QwExtractor::ProcessData()
 
 void QwExtractor::FillTreeBranches(QwRootFile *treerootfile)
 {
-  if (fTreeName.size()>0 && fLocalFlag == 1 ){
+  if (!fTreeName.empty() && fLocalFlag == 1 ){
     //QwMessage << fLocalFlag << " passed mask " << "0x" << std::hex<< fErrorFlagMask << std::dec << QwLog::endl;
     treerootfile->FillTreeBranches(*fSourceCopy);
     treerootfile->FillTree(fTreeName);

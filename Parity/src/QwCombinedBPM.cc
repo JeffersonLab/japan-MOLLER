@@ -59,8 +59,7 @@ void  QwCombinedBPM<T>::InitializeChannel(TString name)
     m[axis]          = 0.0;
   }
 
-  return;
-}
+  }
 
 template<typename T>
 void  QwCombinedBPM<T>::InitializeChannel(TString subsystem, TString name)
@@ -96,8 +95,7 @@ void  QwCombinedBPM<T>::InitializeChannel(TString subsystem, TString name)
     m[axis]          = 0.0;
   }
 
-  return;
-}
+  }
 
 
 template<typename T>
@@ -111,8 +109,7 @@ void QwCombinedBPM<T>::ClearEventData()
     fIntercept[axis].ClearEventData();
   }
 
-  return;
-}
+  }
 
 
 template<typename T>
@@ -139,8 +136,7 @@ void QwCombinedBPM<T>::SetBPMForCombo(const VQwBPM* bpm, Double_t charge_weight,
     //     fElement.at(i)->GetEffectiveCharge()->PrintInfo();
     //     fElement.at(i)->PrintInfo();
   }
-  return;
-
+  
 }
 
 
@@ -201,22 +197,22 @@ Bool_t QwCombinedBPM<T>::ApplySingleEventCuts()
 {
   Bool_t status=kTRUE;
   Int_t axis=0;
-  UInt_t charge_error;
+  UInt_t charge_error = 0;
   UInt_t pos_error[2];
   charge_error = 0;
   pos_error[kXAxis]=0;
   pos_error[kYAxis]=0;
 
-  for(size_t i=0;i<fElement.size();i++){
+  for(auto & i : fElement){
     ///  TODO:  The returned base class should be changed so
     ///         these casts aren't needed, but "GetErrorCode"
     ///         is not meaningful for every VQwDataElement.
     ///         Maybe the return should be a VQwHardwareChannel?
 
     //To update the event cut faliures in individual BPM devices
-    charge_error      |= fElement[i]->GetEffectiveCharge()->GetErrorCode();
-    pos_error[kXAxis] |= fElement[i]->GetPosition(kXAxis)->GetErrorCode();
-    pos_error[kYAxis] |= fElement[i]->GetPosition(kYAxis)->GetErrorCode();
+    charge_error      |= i->GetEffectiveCharge()->GetErrorCode();
+    pos_error[kXAxis] |= i->GetPosition(kXAxis)->GetErrorCode();
+    pos_error[kYAxis] |= i->GetPosition(kYAxis)->GetErrorCode();
   }
 
   //Event cuts for  X & Y slopes
@@ -227,7 +223,8 @@ Bool_t QwCombinedBPM<T>::ApplySingleEventCuts()
     }
     else{
       status&=kFALSE;
-      if (bDEBUG) std::cout<<" X Slope event cut failed ";
+      if (bDEBUG) { std::cout<<" X Slope event cut failed ";
+}
     }
   }
 
@@ -239,7 +236,8 @@ Bool_t QwCombinedBPM<T>::ApplySingleEventCuts()
     }
     else{
       status&=kFALSE;
-      if (bDEBUG) std::cout<<" X Intercept event cut failed ";
+      if (bDEBUG) { std::cout<<" X Intercept event cut failed ";
+}
     }
   }
 
@@ -252,7 +250,8 @@ Bool_t QwCombinedBPM<T>::ApplySingleEventCuts()
     }
     else{
       status&=kFALSE;
-      if (bDEBUG) std::cout<<" X Intercept event cut failed ";
+      if (bDEBUG) { std::cout<<" X Intercept event cut failed ";
+}
     }
   }
 
@@ -265,7 +264,8 @@ Bool_t QwCombinedBPM<T>::ApplySingleEventCuts()
     }
     else{
       status&=kFALSE;
-      if (bDEBUG) std::cout<<" Abs X event cut failed ";
+      if (bDEBUG) { std::cout<<" Abs X event cut failed ";
+}
     }
   }
 
@@ -276,7 +276,8 @@ Bool_t QwCombinedBPM<T>::ApplySingleEventCuts()
   }
   else{
     status&=kFALSE;
-    if (bDEBUG) std::cout<<"EffectiveCharge event cut failed ";
+    if (bDEBUG) { std::cout<<"EffectiveCharge event cut failed ";
+}
   }
 
   return status;
@@ -286,7 +287,7 @@ template<typename T>
 UInt_t QwCombinedBPM<T>::UpdateErrorFlag()
 {
   Int_t axis=0;
-  UInt_t charge_error;
+  UInt_t charge_error = 0;
   UInt_t pos_error[2];
   charge_error = 0;
   pos_error[kXAxis]=0;
@@ -294,11 +295,11 @@ UInt_t QwCombinedBPM<T>::UpdateErrorFlag()
 
   UInt_t error = 0;
   
-  for(size_t i=0;i<fElement.size();i++){
+  for(auto & i : fElement){
     //To update the event cut faliures in individual BPM devices
-    charge_error      |= fElement[i]->GetEffectiveCharge()->GetErrorCode();
-    pos_error[kXAxis] |= fElement[i]->GetPosition(kXAxis)->GetErrorCode();
-    pos_error[kYAxis] |= fElement[i]->GetPosition(kYAxis)->GetErrorCode();
+    charge_error      |= i->GetEffectiveCharge()->GetErrorCode();
+    pos_error[kXAxis] |= i->GetPosition(kXAxis)->GetErrorCode();
+    pos_error[kYAxis] |= i->GetPosition(kYAxis)->GetErrorCode();
   }
 
   //Event cuts for  X & Y slopes
@@ -328,7 +329,7 @@ UInt_t QwCombinedBPM<T>::UpdateErrorFlag()
 template<typename T>
 VQwHardwareChannel* QwCombinedBPM<T>::GetSubelementByName(TString ch_name)
 {
-  VQwHardwareChannel* tmpptr = NULL;
+  VQwHardwareChannel* tmpptr = nullptr;
   ch_name.ToLower();
   if (ch_name=="xslope"){
     tmpptr = &fSlope[kXAxis];
@@ -438,7 +439,7 @@ void QwCombinedBPM<T>::UpdateErrorFlag(const VQwBPM *ev_error){
     if(typeid(*ev_error)==typeid(*this)) {
       // std::cout<<" Here in QwBPMStripline::UpdateErrorFlag \n";
       if (this->GetElementName()!="") {
-        const QwCombinedBPM<T>* value_bpm = dynamic_cast<const QwCombinedBPM<T>* >(ev_error);
+        const auto* value_bpm = dynamic_cast<const QwCombinedBPM<T>* >(ev_error);
 	for(i=kXAxis;i<kNumAxes;i++) {
 	  fAbsPos[i].UpdateErrorFlag(value_bpm->fAbsPos[i]);
 	  fSlope[i].UpdateErrorFlag(value_bpm->fSlope[i]);
@@ -465,12 +466,14 @@ void  QwCombinedBPM<T>::ProcessEvent()
 {
   Bool_t ldebug = kFALSE;
 
-  static T  tmpQADC("tmpQADC"), tmpADC("tmpADC");
+  static T  tmpQADC("tmpQADC");
+  static T  tmpADC("tmpADC");
 
   this->ClearEventData();
   //check to see if the fixed parameters are calculated
   if(!fixedParamCalculated){
-    if(ldebug) std::cout<<"QwCombinedBPM:Calculating fixed parameters..\n";
+    if(ldebug) { std::cout<<"QwCombinedBPM:Calculating fixed parameters..\n";
+}
     CalculateFixedParameter(fXWeights,kXAxis); //for X
     CalculateFixedParameter(fYWeights,kYAxis); //for Y
     fixedParamCalculated = kTRUE;
@@ -501,14 +504,15 @@ void  QwCombinedBPM<T>::ProcessEvent()
 	       << fElement[i]->GetPosition(kYAxis)
 	       << std::endl << std::flush;
 
-      if (fElement[i]->GetEffectiveCharge()==NULL){
+      if (fElement[i]->GetEffectiveCharge()==nullptr){
 	std::cout<<"fElement[" << i << "]->GetEffectiveCharge returns NULL"
 		 << std::endl;
-      } else
+      } else {
 	std::cout<<"got 4-wire.hw_sum = "<<fEffectiveCharge.GetValue()
 		 <<" vs     actual "
 		 << fElement[i]->GetEffectiveCharge()->GetValue() 
 		 << std::endl << std::flush;
+}
 
       
       std::cout<<"copied absolute X position hw_sum from device "
@@ -551,8 +555,7 @@ void  QwCombinedBPM<T>::ProcessEvent()
     }
   }
 
-  return;
-
+  
  }
 
 
@@ -577,8 +580,9 @@ template<typename T>
    covab[pos] = -A[pos]/m[pos];
 
   // Divvy
-  if (m[pos] == 0)
+  if (m[pos] == 0) {
     QwWarning << "Angry Divvy: Division by zero in " << this->GetElementName() << QwLog::endl;
+}
 
    if(ldebug){
      std::cout<<" A = "<<A[pos]<<", B = "<<B[pos]<<", D = "<<D[pos]<<", m = "<<m[pos]<<std::endl;
@@ -586,8 +590,7 @@ template<typename T>
 	      <<"\ncovariance  = "<<covab[pos]<<"\n\n";
    }
 
-   return;
- }
+   }
 
 
 template<typename T>
@@ -650,11 +653,12 @@ template<typename T>
      E[axis] += tmp1;
    }
 
-   if(ldebug) std::cout<<"\n A ="<<A[axis]
+   if(ldebug) { std::cout<<"\n A ="<<A[axis]
 		       <<" -- B ="<<B[axis]
 		       <<" --C ="<<C[axis].GetValue()
 		       <<" --D ="<<D[axis]
 		       <<" --E ="<<E[axis].GetValue()<<"\n";
+}
 
    // calculate the slope  a = E*erra + C*covab
    fSlope[axis].AssignScaledValue(E[axis], erra[axis]);
@@ -666,9 +670,10 @@ template<typename T>
    tmp2.AssignScaledValue(E[axis], covab[axis]);
    fIntercept[axis] += tmp2;
 
-   if(ldebug)    std::cout<<" Least Squares Fit Parameters for "<< axis
+   if(ldebug) {    std::cout<<" Least Squares Fit Parameters for "<< axis
 			  <<" are: \n slope = "<< fSlope[axis].GetValue()
 			  <<" \n intercept = " << fIntercept[axis].GetValue()<<"\n\n";
+}
 
 
    // absolute positions at target  using X = Za + b
@@ -720,8 +725,7 @@ template<typename T>
 
    //std::cout << "1.0/fElement.size() = " << 1.0/fElement.size() << std::endl;
    
-   return;
- }
+   }
 
 template<typename T>
  Int_t QwCombinedBPM<T>::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer,UInt_t index)
@@ -752,7 +756,8 @@ void QwCombinedBPM<T>::GetProjectedPosition(VQwBPM *device)
       //std::cout << "kYAxis= " << kYAxis << std::endl;
       //std::cout << "axis= " << axis << std::endl;
 	}
-      else continue;
+      else { continue;
+}
       (device->GetPosition(axis))->ClearEventData();
       (device->GetPosition(axis))->AssignScaledValue(fSlope[axis],device->GetPositionInZ());
       (device->GetPosition(axis))->operator+=(fIntercept[axis]);
@@ -772,7 +777,7 @@ void QwCombinedBPM<T>::GetProjectedPosition(VQwBPM *device)
 template<typename T>
 void QwCombinedBPM<T>::PrintValue() const
 {
-   Short_t axis;
+   Short_t axis = 0;
 
    for(axis = kXAxis; axis < kNumAxes; axis++){
      fAbsPos[axis].PrintValue();
@@ -784,16 +789,14 @@ void QwCombinedBPM<T>::PrintValue() const
      fMinimumChiSquare[axis].PrintValue();
    }
    fEffectiveCharge.PrintValue();
-
-   return;
- }
+}
 
 
 template<typename T>
 void QwCombinedBPM<T>::PrintInfo() const
 {
 
-  Short_t axis;
+  Short_t axis = 0;
 
   for(axis = kXAxis; axis < kNumAxes; axis++){
     fAbsPos[axis].PrintInfo();
@@ -805,8 +808,6 @@ void QwCombinedBPM<T>::PrintInfo() const
     fMinimumChiSquare[axis].PrintInfo();
   }
   fEffectiveCharge.PrintInfo();
-
-  return;
 }
 
 
@@ -911,8 +912,7 @@ void QwCombinedBPM<T>::Ratio(QwCombinedBPM<T> &numer,
     }
   }
 
-  return;
-}
+  }
 
 
 template<typename T>
@@ -925,8 +925,7 @@ void QwCombinedBPM<T>::Scale(Double_t factor)
     fAbsPos[axis].Scale(factor);
     fMinimumChiSquare[axis].Scale(factor);
   }
-  return;
-}
+  }
 
 template<typename T>
 void QwCombinedBPM<T>::CalculateRunningAverage()
@@ -995,8 +994,9 @@ void  QwCombinedBPM<T>::ConstructHistograms(TDirectory *folder, TString &prefix)
     //we calculate the asym_ for the fEffectiveCharge becasue its an asymmetry and not a difference.
     fEffectiveCharge.ConstructHistograms(folder, prefix);
     TString thisprefix=prefix;
-    if(prefix.Contains("asym_"))
+    if(prefix.Contains("asym_")) {
       thisprefix.ReplaceAll("asym_","diff_");
+}
     this->SetRootSaveStatus(prefix);
 
     for(Short_t axis=kXAxis;axis<kNumAxes;axis++) {
@@ -1007,8 +1007,7 @@ void  QwCombinedBPM<T>::ConstructHistograms(TDirectory *folder, TString &prefix)
     }
 
   }
-  return;
-}
+  }
 
 template<typename T>
 void  QwCombinedBPM<T>::FillHistograms()
@@ -1025,8 +1024,7 @@ void  QwCombinedBPM<T>::FillHistograms()
       fMinimumChiSquare[axis].FillHistograms();
     }
   }
-  return;
-}
+  }
 
 template<typename T>
 void  QwCombinedBPM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
@@ -1037,8 +1035,9 @@ void  QwCombinedBPM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, s
     {
 
       TString thisprefix=prefix;
-      if(prefix.Contains("asym_"))
+      if(prefix.Contains("asym_")) {
 	thisprefix.ReplaceAll("asym_","diff_");
+}
 
       this->SetRootSaveStatus(prefix);
 
@@ -1052,8 +1051,7 @@ void  QwCombinedBPM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, s
 
     }
 
-  return;
-}
+  }
 
 template<typename T>
 void  QwCombinedBPM<T>::ConstructBranch(TTree *tree, TString &prefix)
@@ -1063,8 +1061,9 @@ void  QwCombinedBPM<T>::ConstructBranch(TTree *tree, TString &prefix)
   } else
     {
       TString thisprefix=prefix;
-      if(prefix.Contains("asym_"))
+      if(prefix.Contains("asym_")) {
 	thisprefix.ReplaceAll("asym_","diff_");
+}
 
 
       fEffectiveCharge.ConstructBranch(tree,prefix);
@@ -1077,8 +1076,7 @@ void  QwCombinedBPM<T>::ConstructBranch(TTree *tree, TString &prefix)
       }
 
     }
-  return;
-}
+  }
 
 template<typename T>
 void  QwCombinedBPM<T>::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist)
@@ -1093,8 +1091,9 @@ void  QwCombinedBPM<T>::ConstructBranch(TTree *tree, TString &prefix, QwParamete
     {
       if (modulelist.HasValue(devicename)){
 	TString thisprefix=prefix;
-	if(prefix.Contains("asym_"))
+	if(prefix.Contains("asym_")) {
 	  thisprefix.ReplaceAll("asym_","diff_");
+}
 
 
 	fEffectiveCharge.ConstructBranch(tree,prefix);
@@ -1109,8 +1108,7 @@ void  QwCombinedBPM<T>::ConstructBranch(TTree *tree, TString &prefix, QwParamete
     }
 
     }
-  return;
-}
+  }
 
 
 template<typename T>
@@ -1129,8 +1127,7 @@ void  QwCombinedBPM<T>::FillTreeVector(std::vector<Double_t> &values) const
       fMinimumChiSquare[axis].FillTreeVector(values);
     }
   }
-  return;
-}
+  }
 
 #ifdef HAS_RNTUPLE_SUPPORT
 template<typename T>
@@ -1187,8 +1184,6 @@ void QwCombinedBPM<T>::SetEventCutMode(Int_t bcuts)
     fMinimumChiSquare[axis].SetEventCutMode(bcuts);
   }
   fEffectiveCharge.SetEventCutMode(bcuts);
-
-  return;
 }
 
 
@@ -1247,8 +1242,7 @@ void QwCombinedBPM<T>::RandomizeEventData(int helicity, double time)
     fIntercept[axis] -= tmp1;  //b = X - az
     //    std::cout << axis << " " << fAbsPos[axis].GetValue() << "-" << fSlope[axis].GetValue() <<"*"<<zpos <<"=?" << fIntercept[axis].GetValue() << std::endl;
    }
- return;
-}
+ }
 
 
 template<typename T>
@@ -1264,7 +1258,8 @@ void QwCombinedBPM<T>::LoadMockDataParameters(QwParameterFile &paramfile){
   Double_t meanX=0.0, sigmaX=0.0, meanY=0.0, sigmaY=0.0;
   Double_t meanXslope=0.0, sigmaXslope=0.0, meanYslope=0.0, sigmaYslope=0.0;
 */
-  Double_t xres=0.0, yres=0.0; //  Temporary variables for the resoluton.
+  Double_t xres=0.0;
+  Double_t yres=0.0; //  Temporary variables for the resoluton.
 
   if (paramfile.GetLine().find("resolution")!=std::string::npos){
     paramfile.GetNextToken();
@@ -1347,8 +1342,6 @@ void QwCombinedBPM<T>::SetRandomEventParameters(Double_t meanX, Double_t sigmaX,
   fAbsPos[kYAxis].SetRandomEventParameters(meanY, sigmaY);
   fSlope[kXAxis].SetRandomEventParameters(meanXslope, sigmaXslope);
   fSlope[kYAxis].SetRandomEventParameters(meanYslope, sigmaYslope);
-
- return;
 }
 
 //-----------------------------------------------------------------------

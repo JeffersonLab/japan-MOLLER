@@ -7,6 +7,8 @@
 
 #include "QwBeamDetectorID.h"
 
+#include <utility>
+
 // Qweak headers
 #include "QwVQWK_Channel.h"
 #include "QwADC18_Channel.h"
@@ -22,7 +24,7 @@ QwBeamDetectorID::QwBeamDetectorID(Int_t subbankid, Int_t offset,
 				   TString name, TString dettype,
 				   TString modtype):
   fSubbankIndex(subbankid),fWordInSubbank(offset),
-  fmoduletype(modtype),fdetectorname(name),fdetectortype(dettype),
+  fmoduletype(std::move(modtype)),fdetectorname(std::move(name)),fdetectortype(dettype),
   fIndex(-1)
 {
   fTypeID = GetQwBeamInstrumentType(dettype);
@@ -32,7 +34,8 @@ QwBeamDetectorID::QwBeamDetectorID(Int_t subbankid,
 				   QwParameterFile &paramfile):
   fSubbankIndex(subbankid), fIndex(-1)
 {
-  Int_t modnum, channum;
+  Int_t modnum;
+  Int_t channum;
   fmoduletype   = paramfile.GetTypedNextToken<TString>();
   modnum        = paramfile.GetTypedNextToken<Int_t>();    //slot number
   channum       = paramfile.GetTypedNextToken<Int_t>();    //channel number
@@ -42,7 +45,7 @@ QwBeamDetectorID::QwBeamDetectorID(Int_t subbankid,
   fdetectortype.ToLower();
   fChannelName.ToLower();
 
-  Int_t offset;
+  Int_t offset = 0;
   if (fmoduletype == "VQWK") {
     fWordInSubbank = QwVQWK_Channel::GetBufferOffset(modnum, channum);
     if (paramfile.ReturnValue("vqwk_buffer_offset",offset)) {
@@ -97,24 +100,24 @@ QwBeamDetectorID::QwBeamDetectorID(Int_t subbankid,
   }
 }
 
-QwBeamDetectorID::QwBeamDetectorID(const QwBeamDetectorID& input)
+QwBeamDetectorID::QwBeamDetectorID(const QwBeamDetectorID& input) : fSubbankIndex(input.fSubbankIndex), fChannelName(input.fChannelName), fIndex(input.fIndex), fSubelement(input.fSubelement), fSubelementName(input.fSubelementName), fTypeID(input.fTypeID), fWordInSubbank(input.fWordInSubbank), fdetectorname(input.fdetectorname), fdetectortype(input.fdetectortype), fmoduletype(input.fmoduletype)
 {
-  fSubbankIndex   = input.fSubbankIndex;
-  fWordInSubbank  = input.fWordInSubbank;
-  fmoduletype     = input.fmoduletype;
-  fdetectorname   = input.fdetectorname;
-  fdetectortype   = input.fdetectortype;
-  fTypeID         = input.fTypeID;
-  fIndex          = input.fIndex;
-  fSubelement     = input.fSubelement;
-  fChannelName    = input.fChannelName;
-  fSubelementName = input.fSubelementName;
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 }
 
 
 Bool_t QwBeamDetectorID::ReportInitErrors() const
 {
-  Bool_t lineok;
+  Bool_t lineok = false;
   lineok = kTRUE;
   if(fWordInSubbank<0){
     QwError<< "QwBeamLine::LoadChannelMap:  Unknown module type, "
@@ -155,7 +158,4 @@ void  QwBeamDetectorID::Print() const
     fSubelement<<std::endl;
   std::cout<<"---------------------------------------------------"<<std::endl;
   std::cout<<std::endl;
-
-
-  return;
 }

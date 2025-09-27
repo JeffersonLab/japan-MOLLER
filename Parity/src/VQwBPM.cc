@@ -27,21 +27,20 @@ void  VQwBPM::InitializeChannel(TString name)
 { 
   Short_t i = 0; 
 
-  for(i=0;i<3;i++) fPositionCenter[i] = 0.0;
+  for(i=0;i<3;i++) { fPositionCenter[i] = 0.0;
+}
 
   SetElementName(name);
-  
-  return;
 }
 
 void VQwBPM::GetSurveyOffsets(Double_t Xoffset, Double_t Yoffset, Double_t Zoffset)
 {
   // Read in the position offsets from the geometry map file
-  for(Short_t i=0;i<3;i++) fPositionCenter[i]=0.0;
+  for(double & i : fPositionCenter) { i=0.0;
+}
   fPositionCenter[0]=Xoffset;
   fPositionCenter[1]=Yoffset;
   fPositionCenter[2]=Zoffset;
-  return;
 }
 
 
@@ -65,8 +64,7 @@ void VQwBPM::GetElectronicFactors(Double_t BSENfactor, Double_t AlphaX, Double_t
     std::cout<<"AlphaY = "<<fRelativeGains[1]<<std::endl;
     
   }
-  return;
-}
+  }
 
 void VQwBPM::SetRotation(Double_t rotation_angle){
   // Read the rotation angle in degrees (to beam right)
@@ -93,8 +91,10 @@ void VQwBPM::SetRotationOff(){
 }
 
 void VQwBPM::SetGains(TString pos, Double_t value){
-  if(pos.Contains("X")) fGains[0] = value;
-  if(pos.Contains("Y")) fGains[1] = value;
+  if(pos.Contains("X")) { fGains[0] = value;
+}
+  if(pos.Contains("Y")) { fGains[1] = value;
+}
 }
 
 void VQwBPM::SetSingleEventCuts(TString ch_name, Double_t minX, Double_t maxX)
@@ -180,10 +180,9 @@ VQwBPM& VQwBPM::operator= (const VQwBPM &value)
 
 void VQwBPM::SetRootSaveStatus(TString &prefix)
 {
-  if(prefix.Contains("diff_")||prefix.Contains("yield_")|| prefix.Contains("asym_"))
+  if(prefix.Contains("diff_")||prefix.Contains("yield_")|| prefix.Contains("asym_")) {
     bFullSave=kFALSE;
-  
-  return;
+}
 }
 
 // void VQwBPM::PrintValue() const
@@ -229,13 +228,14 @@ VQwBPM* VQwBPM::CreateStripline(TString subsystemname, TString name, TString typ
 {
   Bool_t localDebug = kFALSE;
   type.ToUpper();
-  if( localDebug ) QwMessage<<"Creating BPM of type: "<<type<<" with name: "<<
+  if( localDebug ) { QwMessage<<"Creating BPM of type: "<<type<<" with name: "<<
     name<<". Subsystem Name: " <<subsystemname<<"\n";
+}
   // (jc2) As a first try, let's do this the ugly way (but rather very
   // simple), just list out the types of BPM's supported by this code!!!
   if( type == "VQWK") {
     return new QwBPMStripline<QwVQWK_Channel>(subsystemname,name,type);
-  } else if ( type == "SIS3801" ) {
+  } if ( type == "SIS3801" ) {
     return new QwBPMStripline<QwSIS3801_Channel>(subsystemname,name,type);
   } else if ( type == "SCALER" || type == "SIS3801D24" ) {
     return new QwBPMStripline<QwSIS3801D24_Channel>(subsystemname,name,type);
@@ -252,12 +252,13 @@ VQwBPM* VQwBPM::CreateStripline(const VQwBPM& source)
   Bool_t localDebug = kFALSE;
   TString type = source.GetModuleType();
   type.ToUpper();
-  if( localDebug ) QwMessage<<"Creating BPM of type: "<<type << QwLog::endl;
+  if( localDebug ) { QwMessage<<"Creating BPM of type: "<<type << QwLog::endl;
+}
   // (jc2) As a first try, let's do this the ugly way (but rather very
   // simple), just list out the types of BPM's supported by this code!!!
   if( type == "VQWK") {
     return new QwBPMStripline<QwVQWK_Channel>(dynamic_cast<const QwBPMStripline<QwVQWK_Channel>&>(source));
-  } else if ( type == "SIS3801" ) {
+  } if ( type == "SIS3801" ) {
     return new QwBPMStripline<QwSIS3801_Channel>(dynamic_cast<const QwBPMStripline<QwSIS3801_Channel>&>(source));
   } else if ( type == "SCALER" || type == "SIS3801D24" ) {
     return new QwBPMStripline<QwSIS3801D24_Channel>(dynamic_cast<const QwBPMStripline<QwSIS3801D24_Channel>&>(source));
@@ -277,13 +278,14 @@ VQwBPM* VQwBPM::CreateCombo(TString subsystemname, TString name,
 {
   Bool_t localDebug = kFALSE;
   type.ToUpper();
-  if( localDebug ) QwMessage<<"Creating CombinedBPM of type: "<<type<<" with name: "<<
+  if( localDebug ) { QwMessage<<"Creating CombinedBPM of type: "<<type<<" with name: "<<
     name<<". Subsystem Name: " <<subsystemname<<"\n";
+}
   // (jc2) As a first try, let's do this the ugly way (but rather very
   // simple), just list out the types of BPM's supported by this code!!!
   if( type == "VQWK") {
     return new QwCombinedBPM<QwVQWK_Channel>(subsystemname,name,type);
-  } else if (type == "SIS3801" ) { // Default SCALER channel
+  } if (type == "SIS3801" ) { // Default SCALER channel
     return new QwCombinedBPM<QwSIS3801_Channel>(subsystemname,name,type);
   } else if ( type == "SCALER" || type == "SIS3801D24" ) {
     return new QwCombinedBPM<QwSIS3801D24_Channel>(subsystemname,name,type);
@@ -300,12 +302,13 @@ VQwBPM* VQwBPM::CreateCombo(const VQwBPM& source)
   Bool_t localDebug = kFALSE;
   TString type = source.GetModuleType();
   type.ToUpper();
-  if( localDebug ) QwMessage<<"Creating CombinedBCM of type: "<<type<< QwLog::endl;
+  if( localDebug ) { QwMessage<<"Creating CombinedBCM of type: "<<type<< QwLog::endl;
+}
   // (jc2) As a first try, let's do this the ugly way (but rather very
   // simple), just list out the types of BCM's supported by this code!!!
   if( type == "VQWK") {
     return new QwCombinedBPM<QwVQWK_Channel>(dynamic_cast<const QwCombinedBPM<QwVQWK_Channel>&>(source));
-  } else if ( type == "SIS3801" ) { // Default SCALER channel
+  } if ( type == "SIS3801" ) { // Default SCALER channel
     return new QwCombinedBPM<QwSIS3801_Channel>(dynamic_cast<const QwCombinedBPM<QwSIS3801_Channel>&>(source));
   } else if ( type == "SCALER" || type == "SIS3801D24" ) {
     return new QwCombinedBPM<QwSIS3801D24_Channel>(dynamic_cast<const QwCombinedBPM<QwSIS3801D24_Channel>&>(source));

@@ -34,19 +34,19 @@ RegisterHandlerFactory(QwCombiner);
 
 /// \brief Constructor with name
 QwCombiner::QwCombiner(const TString& name)
-: VQwDataHandler(name)
+: VQwDataHandler(name), fErrorFlagMask(0), fErrorFlagPointer(0)
 {
   ParseSeparator = ":";
   fKeepRunningSum = kTRUE;
-  fErrorFlagMask = 0;
-  fErrorFlagPointer = 0;
+  
+  
 }
 
 QwCombiner::QwCombiner(const QwCombiner &source)
-: VQwDataHandler(source)
+: VQwDataHandler(source), fErrorFlagMask(0), fErrorFlagPointer(0)
 {
-  fErrorFlagMask = 0;
-  fErrorFlagPointer = 0;
+  
+  
 }
 
 /// Destructor
@@ -92,10 +92,11 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
   // Read the sections of dependent variables
   bool keep_header = true;
   std::string section_name;
-  QwParameterFile* section = 0;
+  QwParameterFile* section = nullptr;
   std::pair<EQwHandleType,std::string> type_name;
-  while ((section = map.ReadNextSection(section_name,keep_header))) {
-    if(section_name=="PUBLISH") continue;
+  while ((section = map.ReadNextSection(section_name,keep_header)) != nullptr) {
+    if(section_name=="PUBLISH") { continue;
+}
 
     // Store index to the current position in the dv vector
     size_t current_dv_start = fDependentName.size();
@@ -111,7 +112,8 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
       do {
         previous_token = current_token;
         current_token = section->GetNextToken(",");
-        if (current_token.size() == 0) continue;
+        if (current_token.empty()) { continue;
+}
         // Parse current token into dependent variable type and name
         type_name = ParseHandledVariable(current_token);
         fDependentType.push_back(type_name.first);
@@ -120,15 +122,17 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
         fSensitivity.resize(fDependentName.size());
         fIndependentType.resize(fDependentName.size());
         fIndependentName.resize(fDependentName.size());
-      } while (current_token.size() != 0);
-    } else QwError << "Section does not start with header." << QwLog::endl;
+      } while (!current_token.empty());
+    } else { QwError << "Section does not start with header." << QwLog::endl;
+}
 
     // Add independent variables and sensitivities
     while (section->ReadNextLine()) {
       // Throw away comments, whitespace, empty lines
       section->TrimComment();
       section->TrimWhitespace();
-      if (section->LineIsEmpty()) continue;
+      if (section->LineIsEmpty()) { continue;
+}
       // Get first token: independent variable
       std::string current_token = section->GetNextToken(",");
       // Parse current token into independent variable type and name
@@ -147,9 +151,9 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
   // Now load the variables to publish
   std::vector<std::vector<TString> > fPublishList;
   map.RewindToFileStart();
-  QwParameterFile *section2;
+  QwParameterFile *section2 = nullptr;
   std::vector<TString> publishinfo;
-  while ((section2=map.ReadNextSection(varvalue))) {
+  while ((section2=map.ReadNextSection(varvalue)) != nullptr) {
     if (varvalue == "PUBLISH") {
       fPublishList.clear();
       while (section2->ReadNextLine()) {
@@ -157,22 +161,23 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
         section2->TrimWhitespace(); // Get rid of leading and trailing spaces
         for (int ii = 0; ii < 4; ii++) {
           varvalue = section2->GetTypedNextToken<TString>();
-          if (varvalue.Length()) {
+          if (varvalue.Length() != 0) {
             publishinfo.push_back(varvalue);
           }
         }
-        if (publishinfo.size() == 4)
+        if (publishinfo.size() == 4) {
           fPublishList.push_back(publishinfo);
+}
         publishinfo.clear();
       }
     }
     delete section2;
   }
   // Print list of variables to publish
-  if (fPublishList.size()>0){
+  if (!fPublishList.empty()){
     QwMessage << "Variables to publish:" << QwLog::endl;
-    for (size_t jj = 0; jj < fPublishList.size(); jj++){
-      QwMessage << fPublishList.at(jj).at(0) << " " << fPublishList.at(jj).at(1) << " " << fPublishList.at(jj).at(2) << " " << fPublishList.at(jj).at(3) << QwLog::endl;
+    for (auto & jj : fPublishList){
+      QwMessage << jj.at(0) << " " << jj.at(1) << " " << jj.at(2) << " " << jj.at(3) << QwLog::endl;
     }
   }
   return 0;
@@ -194,16 +199,16 @@ Int_t QwCombiner::ConnectChannels(
   for (size_t dv = 0; dv < fDependentName.size(); dv++) {
     // Get the dependent variables
 
-    const VQwHardwareChannel* dv_ptr = 0;
-    QwVQWK_Channel* new_vqwk = NULL;
-    const QwVQWK_Channel* vqwk = NULL;
-    string name = "";
+    const VQwHardwareChannel* dv_ptr = nullptr;
+    QwVQWK_Channel* new_vqwk = nullptr;
+    const QwVQWK_Channel* vqwk = nullptr;
+    string name;
     string calc = "calc_";
     
     if (fDependentType.at(dv)==kHandleTypeMps){
       //  Quietly ignore the MPS type when we're connecting the asym & diff
       continue;
-    } else if(fDependentName.at(dv).at(0) == '@' ){
+    } if(fDependentName.at(dv).at(0) == '@' ){
         name = fDependentName.at(dv).substr(1,fDependentName.at(dv).length());
     }else{
       dv_ptr = this->RequestExternalPointer(fDependentFull.at(dv));
@@ -239,7 +244,7 @@ Int_t QwCombiner::ConnectChannels(
       new_vqwk->SetSubsystemName(fName);
     }
     // defined type
-    else if(dv_ptr!=NULL){
+    else if(dv_ptr!=nullptr){
       //QwMessage << "dv: " << fDependentName.at(dv) << QwLog::endl;
     }else {
       QwWarning << "Dependent variable " << fDependentName.at(dv) << " could not be found, "
@@ -248,7 +253,7 @@ Int_t QwCombiner::ConnectChannels(
     }
 
     // pair creation
-    if(new_vqwk != NULL){
+    if(new_vqwk != nullptr){
       fDependentType.push_back(fDependentType.at(dv));
       fDependentVar.push_back(vqwk);
       fOutputVar.push_back(new_vqwk);
@@ -259,9 +264,9 @@ Int_t QwCombiner::ConnectChannels(
     fIndependentVar.resize(fDependentVar.size());
     for (size_t iv = 0; iv < fIndependentName.at(dv).size(); iv++) {
       // Get the independent variables
-      const VQwHardwareChannel* iv_ptr = 0;
+      const VQwHardwareChannel* iv_ptr = nullptr;
       iv_ptr = RequestExternalPointer(fIndependentName.at(dv).at(iv));
-      if (iv_ptr == NULL){
+      if (iv_ptr == nullptr){
 	switch (fIndependentType.at(dv).at(iv)) {
         case kHandleTypeAsym:
           iv_ptr = asym.RequestExternalPointer(fIndependentName.at(dv).at(iv));
@@ -275,7 +280,7 @@ Int_t QwCombiner::ConnectChannels(
           break;
 	}
       }
-      if (iv_ptr) {
+      if (iv_ptr != nullptr) {
         //QwMessage << " iv: " << fIndependentName.at(dv).at(iv) << " (sens = " << fSensitivity.at(dv).at(iv) << ")" << QwLog::endl;
         fIndependentVar.back().push_back(iv_ptr);
       } else {
@@ -306,16 +311,16 @@ Int_t QwCombiner::ConnectChannels(QwSubsystemArrayParity& event)
   for (size_t dv = 0; dv < fDependentName.size(); dv++) {
     // Get the dependent variables
 
-    const VQwHardwareChannel* dv_ptr = 0;
-    QwVQWK_Channel* new_vqwk = NULL;
-    const QwVQWK_Channel* vqwk = NULL;
+    const VQwHardwareChannel* dv_ptr = nullptr;
+    QwVQWK_Channel* new_vqwk = nullptr;
+    const QwVQWK_Channel* vqwk = nullptr;
     string name = " s";
     string calc = "calc_";
 
     if (fDependentType.at(dv)==kHandleTypeAsym || fDependentType.at(dv)==kHandleTypeDiff){
       //  Quietly skip the asymmetry or difference types.
       continue;
-    } else if(fDependentType.at(dv) != kHandleTypeMps){
+    } if(fDependentType.at(dv) != kHandleTypeMps){
       QwWarning << "QwCombiner::ConnectChannels(QwSubsystemArrayParity& event):  Dependent variable, "
                 << fDependentName.at(dv)
 	              << ", for MPS combiner does not have MPS type, type=="
@@ -338,31 +343,30 @@ Int_t QwCombiner::ConnectChannels(QwSubsystemArrayParity& event)
     }
 
     // alias
-    if(new_vqwk==NULL){
+    if(new_vqwk==nullptr){
       QwWarning << "Dependent variable " << fDependentName.at(dv) << " could not be found, "
                 << "or is not a VQWK channel." << QwLog::endl;
       continue; 
-    } else {
-      //QwMessage << "dv: " << new_vqwk->GetElementName() << QwLog::endl;
+    }       //QwMessage << "dv: " << new_vqwk->GetElementName() << QwLog::endl;
       // pair creation
       fDependentType.push_back(fDependentType.at(dv));
       fDependentVar.push_back(vqwk);
       fOutputVar.push_back(new_vqwk);
       //fDependentVar.push_back(std::make_pair(vqwk, new_vqwk));
-    }
+   
 
     // Add independent variables
     fIndependentVar.resize(fDependentVar.size());
     for (size_t iv = 0; iv < fIndependentName.at(dv).size(); iv++) {
       // Get the independent variables
-      const VQwHardwareChannel* iv_ptr = 0;
+      const VQwHardwareChannel* iv_ptr = nullptr;
       if(fIndependentType.at(dv).at(iv) == kHandleTypeMps){
         iv_ptr = event.RequestExternalPointer(fIndependentName.at(dv).at(iv));
     	} else {
         QwWarning << "Independent variable for MPS combiner has unknown type."
                   << QwLog::endl;
       }
-      if (iv_ptr) {
+      if (iv_ptr != nullptr) {
         //QwMessage << " iv: " << fIndependentName.at(dv).at(iv) << " (sens = " << fSensitivity.at(dv).at(iv) << ")" << QwLog::endl;
         fIndependentVar.back().push_back(iv_ptr);
       } else {
@@ -382,7 +386,7 @@ Int_t QwCombiner::ConnectChannels(QwSubsystemArrayParity& event)
 
 void QwCombiner::ProcessData()
 {
-  if (fErrorFlagMask!=0 && fErrorFlagPointer!=NULL) {
+  if (fErrorFlagMask!=0 && fErrorFlagPointer!=nullptr) {
     if ((*fErrorFlagPointer & fErrorFlagMask)!=0) {
       //QwMessage << "0x" << std::hex << *fErrorFlagPointer << " passed mask " << "0x" << fErrorFlagMask << std::dec << QwLog::endl;
       for (size_t i = 0; i < fDependentVar.size(); ++i) {

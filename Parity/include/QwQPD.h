@@ -105,7 +105,7 @@ class QwQPD : public VQwBPM {
   void    SetDefaultSampleSize(Int_t sample_size);
   void    SetRandomEventParameters(Double_t meanX, Double_t sigmaX, Double_t meanY, Double_t sigmaY);
   void    RandomizeEventData(int helicity = 0, double time = 0.0);
-  void    SetEventData(Double_t* block, UInt_t sequencenumber);
+  void    SetEventData(Double_t* relpos, UInt_t sequencenumber);
   void    EncodeEventData(std::vector<UInt_t> &buffer);
   void    SetSubElementPedestal(Int_t j, Double_t value);
   void    SetSubElementCalibrationFactor(Int_t j, Double_t value);

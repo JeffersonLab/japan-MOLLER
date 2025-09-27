@@ -116,7 +116,7 @@ class QwParameterFile {
     void TrimSectionHeader();
     void TrimModuleHeader();
 
-    TString LastString(TString in, char* delim);
+    static TString LastString(TString in, const char* delim);
     TString GetParameterFileContents();
 
     Bool_t LineIsEmpty(){return fLine.empty();};
@@ -241,7 +241,7 @@ class QwParameterFile {
     
 
   protected:
-    void Trim(const std::string& chars, std::string& token, TString::EStripType head_tail = TString::kBoth);
+    static void Trim(const std::string& chars, std::string& token, TString::EStripType head_tail = TString::kBoth);
     void TrimWhitespace(std::string &token, TString::EStripType head_tail);
 
   public:
@@ -262,13 +262,13 @@ class QwParameterFile {
   private:
 
     /// Find the first file in a directory that conforms to the run label
-    int FindFile(const bfs::path& dir_path,    // in this directory,
+    static int FindFile(const bfs::path& directory,    // in this directory,
                  const std::string& file_stem, // search for this stem,
                  const std::string& file_ext,  // search for this extension,
-                 bfs::path& path_found);       // placing path here if found
+                 bfs::path& best_path);       // placing path here if found
 
     /// Open a file
-    bool OpenFile(const bfs::path& path_found);
+    bool OpenFile(const bfs::path& file);
   //  TString fCurrentSecName;     // Stores the name of the current section  read
   //  TString fCurrentModuleName;  // Stores the name of the current module  read
     TString fBestParamFileName;
@@ -312,7 +312,7 @@ class QwParameterFile {
 
     // Current line and position
     std::string fLine;      /// Internal line storage
-    size_t fCurrentPos;     /// Current position in the line
+    size_t fCurrentPos{};     /// Current position in the line
 
  protected:
 
@@ -335,7 +335,7 @@ class QwParameterFile {
     Bool_t fBeGreedy;
     std::set<std::string> fBreakpointWords;
     std::map<std::string, std::string> fKeyValuePair;
-    Bool_t fHasNewPairs;
+    Bool_t fHasNewPairs{};
 
   private:
 

@@ -41,8 +41,8 @@ class QwExtractor:public VQwDataHandler, public MQwDataHandlerCloneable<QwExtrac
     const UInt_t* fErrorFlagPointer;
     Int_t fLocalFlag = 0;
 
-    const QwSubsystemArrayParity* fSourcePointer;
-    QwSubsystemArrayParity* fSourceCopy;
+    const QwSubsystemArrayParity* fSourcePointer{};
+    QwSubsystemArrayParity* fSourceCopy{};
     //TTree* fTree;
 
   private:

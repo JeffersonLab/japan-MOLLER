@@ -60,7 +60,7 @@ public:
 
   /// Return a random value generated either from the internal or
   /// external Random Variable.
-  Double_t GetRandomValue();
+  Double_t GetRandomValue() const;
 
   /// Internally generate random event data
   virtual void  RandomizeEventData(int helicity = 0, double time = 0.0) = 0;

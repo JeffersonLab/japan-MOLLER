@@ -818,7 +818,7 @@ class QwRootFile {
     /// change to a permanent name when closing the file.
     TString fPermanentName;
     Bool_t fMakePermanent;
-    Bool_t fUseTemporaryFile;
+    Bool_t fUseTemporaryFile{};
 
     /// Search for non-empty trees or histograms in the file
     Bool_t HasAnyFilled(void);
@@ -828,10 +828,10 @@ class QwRootFile {
     TMapFile* fMapFile;
     Bool_t fEnableMapFile;
     Int_t fUpdateInterval;
-    Int_t fCompressionLevel;
-    Int_t fBasketSize;
-    Int_t fAutoFlush;
-    Int_t fAutoSave;
+    Int_t fCompressionLevel{};
+    Int_t fBasketSize{};
+    Int_t fAutoFlush{};
+    Int_t fAutoSave{};
 
   
 
@@ -944,12 +944,12 @@ class QwRootFile {
   private:
 
     /// Prescaling of events written to tree
-    UInt_t fNumMpsEventsToSkip;
-    UInt_t fNumMpsEventsToSave;
-    UInt_t fNumHelEventsToSkip;
-    UInt_t fNumHelEventsToSave;
-    UInt_t fCircularBufferSize;
-    UInt_t fCurrentEvent;
+    UInt_t fNumMpsEventsToSkip{};
+    UInt_t fNumMpsEventsToSave{};
+    UInt_t fNumHelEventsToSkip{};
+    UInt_t fNumHelEventsToSave{};
+    UInt_t fCircularBufferSize{};
+    UInt_t fCurrentEvent{};
 
     /// Maximum tree size
     static const Long64_t kMaxTreeSize;

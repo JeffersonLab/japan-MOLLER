@@ -40,8 +40,9 @@ void  QwLinearDiodeArray::InitializeChannel(TString name)
   for(i=0;i<8;i++) {
     fPhotodiode[i].InitializeChannel(name+subelement[i],"raw");
     
-    if(localdebug)
+    if(localdebug) {
       std::cout<<" photodiode ["<<i<<"]="<<fPhotodiode[i].GetElementName()<<"\n";
+}
   }
   
 
@@ -52,8 +53,6 @@ void  QwLinearDiodeArray::InitializeChannel(TString name)
   fRelPos[1].InitializeChannel(name+"RelVariance","derived");
 
   bFullSave=kTRUE;
-
-  return;
 }
 
 void  QwLinearDiodeArray::InitializeChannel(TString subsystem, TString name)
@@ -66,8 +65,9 @@ void  QwLinearDiodeArray::InitializeChannel(TString subsystem, TString name)
 
   for(i=0;i<8;i++) {
     fPhotodiode[i].InitializeChannel(subsystem, "QwLinearDiodeArray", name+subelement[i],"raw");
-    if(localdebug)
+    if(localdebug) {
       std::cout<<" photodiode ["<<i<<"]="<<fPhotodiode[i].GetElementName()<<"\n";
+}
   }
 
   fEffectiveCharge.InitializeChannel(subsystem, "QwLinearDiodeArray", name+"WS","derived");
@@ -78,22 +78,19 @@ void  QwLinearDiodeArray::InitializeChannel(TString subsystem, TString name)
   fRelPos[1].InitializeChannel(subsystem, "QwLinearDiodeArray", name+"RelVariance","derived");
 
   bFullSave=kTRUE;
-
-  return;
 }
 
 void QwLinearDiodeArray::ClearEventData()
 {
   size_t i=0;
 
-  for(i=0;i<8;i++) fPhotodiode[i].ClearEventData();
+  for(i=0;i<8;i++) { fPhotodiode[i].ClearEventData();
+}
 
   for(i=kXAxis;i<kNumAxes;i++){
     fRelPos[i].ClearEventData();
   }
   fEffectiveCharge.ClearEventData();
-
- return;
 }
 
 
@@ -107,8 +104,10 @@ Bool_t QwLinearDiodeArray::ApplyHWChecks()
       deviceerror|= fPhotodiode[i].ApplyHWChecks();  //OR the error code from each wire
       eventokay &= (deviceerror & 0x0);//AND with 0 since zero means HW is good.
 
-      if (bDEBUG) std::cout<<" Inconsistent within LinearArray terminals photodiode[ "<<i<<" ] "<<std::endl;
-      if (bDEBUG) std::cout<<" photodiode[ "<<i<<" ] sequence num "<<fPhotodiode[i].GetSequenceNumber()<<" sample size "<<fPhotodiode[i].GetNumberOfSamples()<<std::endl;
+      if (bDEBUG) { std::cout<<" Inconsistent within LinearArray terminals photodiode[ "<<i<<" ] "<<std::endl;
+}
+      if (bDEBUG) { std::cout<<" photodiode[ "<<i<<" ] sequence num "<<fPhotodiode[i].GetSequenceNumber()<<" sample size "<<fPhotodiode[i].GetNumberOfSamples()<<std::endl;
+}
     }
 
   return eventokay;
@@ -117,7 +116,8 @@ Bool_t QwLinearDiodeArray::ApplyHWChecks()
 void QwLinearDiodeArray::IncrementErrorCounters()
 {
   size_t i=0;
-  for(i=0;i<8;i++) fPhotodiode[i].IncrementErrorCounters();
+  for(i=0;i<8;i++) { fPhotodiode[i].IncrementErrorCounters();
+}
   for(i=kXAxis;i<kNumAxes;i++) {
     fRelPos[i].IncrementErrorCounters();
   }
@@ -127,7 +127,8 @@ void QwLinearDiodeArray::IncrementErrorCounters()
 void QwLinearDiodeArray::PrintErrorCounters() const
 {
   size_t i=0;
-  for(i=0;i<8;i++) fPhotodiode[i].PrintErrorCounters();
+  for(i=0;i<8;i++) { fPhotodiode[i].PrintErrorCounters();
+}
   for(i=kXAxis;i<kNumAxes;i++) {
     fRelPos[i].PrintErrorCounters();
   }
@@ -138,7 +139,8 @@ UInt_t QwLinearDiodeArray::GetEventcutErrorFlag()
 {
   size_t i=0;
   UInt_t error=0;
-  for(i=0;i<8;i++) error|=fPhotodiode[i].GetEventcutErrorFlag();
+  for(i=0;i<8;i++) { error|=fPhotodiode[i].GetEventcutErrorFlag();
+}
   for(i=kXAxis;i<kNumAxes;i++) {
     error|=fRelPos[i].GetEventcutErrorFlag();
   }
@@ -177,7 +179,8 @@ Bool_t QwLinearDiodeArray::ApplySingleEventCuts()
     }
     else{
       status&=kFALSE;
-      if (bDEBUG) std::cout<<" array ["<<i<<"] event cut failed ";
+      if (bDEBUG) { std::cout<<" array ["<<i<<"] event cut failed ";
+}
     }
     //Get the Event cut error flag for wires
     error_code|=fPhotodiode[i].GetErrorCode();
@@ -191,7 +194,8 @@ Bool_t QwLinearDiodeArray::ApplySingleEventCuts()
     }
     else{
       status&=kFALSE;
-      if (bDEBUG) std::cout<<" Rel X event cut failed ";
+      if (bDEBUG) { std::cout<<" Rel X event cut failed ";
+}
     }
   }
 
@@ -202,7 +206,8 @@ Bool_t QwLinearDiodeArray::ApplySingleEventCuts()
   }
   else{
     status&=kFALSE;
-    if (bDEBUG) std::cout<<"EffectiveCharge event cut failed ";
+    if (bDEBUG) { std::cout<<"EffectiveCharge event cut failed ";
+}
   }
   return status;
 }
@@ -210,7 +215,7 @@ Bool_t QwLinearDiodeArray::ApplySingleEventCuts()
 
 VQwHardwareChannel* QwLinearDiodeArray::GetSubelementByName(TString ch_name)
 {
-  VQwHardwareChannel* tmpptr = NULL;
+  VQwHardwareChannel* tmpptr = nullptr;
   ch_name.ToLower();
   if (ch_name=="relx"){
     tmpptr = &fRelPos[0];
@@ -266,7 +271,7 @@ Bool_t QwLinearDiodeArray::CheckForBurpFail(const VQwDataElement *ev_error){
     if(typeid(*ev_error)==typeid(*this)) {
       //std::cout<<" Here in QwLinearDiodeArray::CheckForBurpFail \n";
       if (this->GetElementName()!="") {
-        const QwLinearDiodeArray* value_lin = dynamic_cast<const QwLinearDiodeArray* >(ev_error);
+        const auto* value_lin = dynamic_cast<const QwLinearDiodeArray* >(ev_error);
         for(i=kXAxis;i<kNumAxes;i++) {
           burpstatus |= fRelPos[i].CheckForBurpFail(&(value_lin->fRelPos[i]));
         }
@@ -293,7 +298,7 @@ void QwLinearDiodeArray::UpdateErrorFlag(const VQwBPM *ev_error){
     if(typeid(*ev_error)==typeid(*this)) {
       // std::cout<<" Here in QwQPD::UpdateErrorFlag \n";
       if (this->GetElementName()!="") {
-        const QwLinearDiodeArray* value_bpm = dynamic_cast<const QwLinearDiodeArray* >(ev_error);
+        const auto* value_bpm = dynamic_cast<const QwLinearDiodeArray* >(ev_error);
 	for(i=0;i<4;i++){
 	  fPhotodiode[i].UpdateErrorFlag(value_bpm->fPhotodiode[i]);
 	}
@@ -316,7 +321,8 @@ void QwLinearDiodeArray::UpdateErrorFlag(const VQwBPM *ev_error){
 void  QwLinearDiodeArray::ProcessEvent()
 {
   Bool_t localdebug = kFALSE;
-  static QwVQWK_Channel mean, meansqr;
+  static QwVQWK_Channel mean;
+  static QwVQWK_Channel meansqr;
   static QwVQWK_Channel tmp("tmp");
   static QwVQWK_Channel tmp2("tmp2");
 
@@ -364,16 +370,16 @@ void  QwLinearDiodeArray::ProcessEvent()
     std::cout<<" LinearArray name="<<fElementName<<std::endl;
     std::cout<<" Size of the linear array = "<<8<<std::endl;
     std::cout<<" event number= "<<fPhotodiode[0].GetSequenceNumber()<<std::endl;
-    for(Int_t i = 0; i<8; i++)
+    for(Int_t i = 0; i<8; i++) {
       std::cout<<" pad"<<i<<" ="<<fPhotodiode[i].GetValue()<<std::endl;
+}
     std::cout<<" mean ="<<fRelPos[0].GetValue()<<std::endl;
     std::cout<<" varaiance ="<<fRelPos[1].GetValue()<<std::endl;
     std::cout<<" total charge ="<<fEffectiveCharge.GetValue()<<std::endl;
 
   }
   
-  return;
-}
+  }
 
 
 Int_t QwLinearDiodeArray::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer,UInt_t index)
@@ -394,16 +400,16 @@ Int_t QwLinearDiodeArray::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_i
 
 void QwLinearDiodeArray::PrintValue() const
 {
-  for (size_t i = 0; i < 2; i++) {
-    fRelPos[i].PrintValue();
+  for (const auto & fRelPo : fRelPos) {
+    fRelPo.PrintValue();
   }
-  return;
-}
+  }
 
 void QwLinearDiodeArray::PrintInfo() const
 {
   size_t i = 0;
-  for (i = 0; i < 8; i++) fPhotodiode[i].PrintInfo();
+  for (i = 0; i < 8; i++) { fPhotodiode[i].PrintInfo();
+}
   for (i = 0; i < 2; i++) {
     fAbsPos[i].PrintInfo();
   }
@@ -415,14 +421,16 @@ TString QwLinearDiodeArray::GetSubElementName(Int_t subindex)
 {
   TString thisname;
   size_t localindex=kInvalidSubelementIndex;
-  if (subindex>-1) localindex = subindex;
+  if (subindex>-1) { localindex = subindex;
+}
 
-  if(localindex<8)
+  if(localindex<8) {
     thisname=fPhotodiode[subindex].GetElementName();
-  else
+  } else {
     std::cerr<< "QwLinearDiodeArray::GetSubElementName for "
 	     << GetElementName()<<" this subindex, "
 	     << subindex << ", doesn't exist \n";
+}
 
   return thisname;
 }
@@ -436,7 +444,8 @@ UInt_t QwLinearDiodeArray::GetSubElementIndex(TString subname)
   //  Interpret the subname as the pad index.
   if (padindex.IsDigit()){
     Int_t tmpval = padindex.Atoi();
-    if (tmpval>-1) localindex = tmpval-1;
+    if (tmpval>-1) { localindex = tmpval-1;
+}
   }
 
   // localindex is unsigned int and always positive
@@ -471,7 +480,8 @@ QwLinearDiodeArray& QwLinearDiodeArray::operator= (const QwLinearDiodeArray &val
   if (GetElementName()!=""){
     size_t i = 0;
     this->fEffectiveCharge=value.fEffectiveCharge;
-    for(i=0;i<8;i++) this->fPhotodiode[i]=value.fPhotodiode[i];
+    for(i=0;i<8;i++) { this->fPhotodiode[i]=value.fPhotodiode[i];
+}
     for(i=kXAxis;i<kNumAxes;i++) {
       this->fRelPos[i]=value.fRelPos[i];
     }
@@ -492,7 +502,8 @@ QwLinearDiodeArray& QwLinearDiodeArray::operator+= (const QwLinearDiodeArray &va
   if (GetElementName()!=""){
     size_t i = 0;
     this->fEffectiveCharge+=value.fEffectiveCharge;
-    for(i=0;i<8;i++) this->fPhotodiode[i]+=value.fPhotodiode[i];
+    for(i=0;i<8;i++) { this->fPhotodiode[i]+=value.fPhotodiode[i];
+}
     for(i=kXAxis;i<kNumAxes;i++) {
       this->fRelPos[i]+=value.fRelPos[i];
     }
@@ -513,7 +524,8 @@ QwLinearDiodeArray& QwLinearDiodeArray::operator-= (const QwLinearDiodeArray &va
   if (GetElementName()!=""){
     size_t i = 0;
     this->fEffectiveCharge-=value.fEffectiveCharge;
-    for(i=0;i<8;i++) this->fPhotodiode[i]-=value.fPhotodiode[i];
+    for(i=0;i<8;i++) { this->fPhotodiode[i]-=value.fPhotodiode[i];
+}
     for(i=kXAxis;i<kNumAxes;i++) {
       this->fRelPos[i]-=value.fRelPos[i];
     }
@@ -529,7 +541,6 @@ void QwLinearDiodeArray::Ratio(QwLinearDiodeArray &numer, QwLinearDiodeArray &de
 
   *this=numer;
   this->fEffectiveCharge.Ratio(numer.fEffectiveCharge,denom.fEffectiveCharge);
-  return;
 }
 
 
@@ -539,21 +550,22 @@ void QwLinearDiodeArray::Scale(Double_t factor)
   size_t i = 0;
   fEffectiveCharge.Scale(factor);
 
-  for(i=0;i<8;i++) fPhotodiode[i].Scale(factor);
+  for(i=0;i<8;i++) { fPhotodiode[i].Scale(factor);
+}
   for(i=kXAxis;i<kNumAxes;i++){
     fRelPos[i].Scale(factor);
   }
-  return;
-}
+  }
 
 
 void QwLinearDiodeArray::CalculateRunningAverage()
 {
   size_t i = 0;
-  for(i=0;i<8;i++) fPhotodiode[i].CalculateRunningAverage();
-  for (i = 0; i < 2; i++) fRelPos[i].CalculateRunningAverage();
+  for(i=0;i<8;i++) { fPhotodiode[i].CalculateRunningAverage();
+}
+  for (i = 0; i < 2; i++) { fRelPos[i].CalculateRunningAverage();
+}
   fEffectiveCharge.CalculateRunningAverage();
-  return;
 }
 
 void QwLinearDiodeArray::AccumulateRunningSum(const VQwBPM& value, Int_t count, Int_t ErrorMask){
@@ -563,10 +575,11 @@ void QwLinearDiodeArray::AccumulateRunningSum(const VQwBPM& value, Int_t count, 
 void QwLinearDiodeArray::AccumulateRunningSum(const QwLinearDiodeArray& value, Int_t count, Int_t ErrorMask)
 {
   size_t i = 0;
-  for(i=0;i<8;i++) fPhotodiode[i].AccumulateRunningSum(value.fPhotodiode[i], count, ErrorMask);
-  for (i = 0; i < 2; i++) fRelPos[i].AccumulateRunningSum(value.fRelPos[i], count, ErrorMask);
+  for(i=0;i<8;i++) { fPhotodiode[i].AccumulateRunningSum(value.fPhotodiode[i], count, ErrorMask);
+}
+  for (i = 0; i < 2; i++) { fRelPos[i].AccumulateRunningSum(value.fRelPos[i], count, ErrorMask);
+}
   fEffectiveCharge.AccumulateRunningSum(value.fEffectiveCharge, count, ErrorMask);
-  return;
 }
 
 void QwLinearDiodeArray::DeaccumulateRunningSum(VQwBPM& value, Int_t ErrorMask){
@@ -576,10 +589,11 @@ void QwLinearDiodeArray::DeaccumulateRunningSum(VQwBPM& value, Int_t ErrorMask){
 void QwLinearDiodeArray::DeaccumulateRunningSum(QwLinearDiodeArray& value, Int_t ErrorMask)
 {
   size_t i = 0;
-  for(i=0;i<8;i++) fPhotodiode[i].DeaccumulateRunningSum(value.fPhotodiode[i], ErrorMask);
-  for (i = 0; i < 2; i++) fRelPos[i].DeaccumulateRunningSum(value.fRelPos[i], ErrorMask);
+  for(i=0;i<8;i++) { fPhotodiode[i].DeaccumulateRunningSum(value.fPhotodiode[i], ErrorMask);
+}
+  for (i = 0; i < 2; i++) { fRelPos[i].DeaccumulateRunningSum(value.fRelPos[i], ErrorMask);
+}
   fEffectiveCharge.DeaccumulateRunningSum(value.fEffectiveCharge, ErrorMask);
-  return;
 }
 
 
@@ -593,19 +607,20 @@ void  QwLinearDiodeArray::ConstructHistograms(TDirectory *folder, TString &prefi
     fEffectiveCharge.ConstructHistograms(folder, prefix);
     TString thisprefix=prefix;
 
-    if(prefix.Contains("asym_"))
+    if(prefix.Contains("asym_")) {
       thisprefix.ReplaceAll("asym_","diff_");
+}
     SetRootSaveStatus(prefix);
     size_t i = 0;
     if(bFullSave) {
-      for(i=0;i<8;i++) fPhotodiode[i].ConstructHistograms(folder, thisprefix);
+      for(i=0;i<8;i++) { fPhotodiode[i].ConstructHistograms(folder, thisprefix);
+}
     }
     for(i=kXAxis;i<kNumAxes;i++) {
       fRelPos[i].ConstructHistograms(folder, thisprefix);
     }
   }
-  return;
-}
+  }
 
 void  QwLinearDiodeArray::FillHistograms()
 {
@@ -616,14 +631,14 @@ void  QwLinearDiodeArray::FillHistograms()
     fEffectiveCharge.FillHistograms();
     size_t i = 0;
     if(bFullSave) {
-      for(i=0;i<8;i++) fPhotodiode[i].FillHistograms();
+      for(i=0;i<8;i++) { fPhotodiode[i].FillHistograms();
+}
     }
     for(i=kXAxis;i<kNumAxes;i++){
       fRelPos[i].FillHistograms();
     }
   }
-  return;
-}
+  }
 
 void  QwLinearDiodeArray::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
@@ -632,23 +647,24 @@ void  QwLinearDiodeArray::ConstructBranchAndVector(TTree *tree, TString &prefix,
   }
   else {
     TString thisprefix=prefix;
-    if(prefix.Contains("asym_"))
+    if(prefix.Contains("asym_")) {
       thisprefix.ReplaceAll("asym_","diff_");
+}
 
     SetRootSaveStatus(prefix);
 
     fEffectiveCharge.ConstructBranchAndVector(tree,prefix,values);
     size_t i = 0;
     if(bFullSave) {
-      for(i=0;i<8;i++) fPhotodiode[i].ConstructBranchAndVector(tree,thisprefix,values);
+      for(i=0;i<8;i++) { fPhotodiode[i].ConstructBranchAndVector(tree,thisprefix,values);
+}
     }
     for(i=kXAxis;i<kNumAxes;i++) {
       fRelPos[i].ConstructBranchAndVector(tree,thisprefix,values);
     }
 
   }
-  return;
-}
+  }
 
 void  QwLinearDiodeArray::ConstructBranch(TTree *tree, TString &prefix)
 {
@@ -657,23 +673,24 @@ void  QwLinearDiodeArray::ConstructBranch(TTree *tree, TString &prefix)
   }
   else {
     TString thisprefix=prefix;
-    if(prefix.Contains("asym_"))
+    if(prefix.Contains("asym_")) {
       thisprefix.ReplaceAll("asym_","diff_");
+}
 
     SetRootSaveStatus(prefix);
 
     fEffectiveCharge.ConstructBranch(tree,prefix);
     size_t i = 0;
     if(bFullSave) {
-      for(i=0;i<8;i++) fPhotodiode[i].ConstructBranch(tree,thisprefix);
+      for(i=0;i<8;i++) { fPhotodiode[i].ConstructBranch(tree,thisprefix);
+}
     }
     for(i=kXAxis;i<kNumAxes;i++) {
       fRelPos[i].ConstructBranch(tree,thisprefix);
     }
 
   }
-  return;
-}
+  }
 
 void  QwLinearDiodeArray::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist)
 {
@@ -687,15 +704,17 @@ void  QwLinearDiodeArray::ConstructBranch(TTree *tree, TString &prefix, QwParame
     {
       if (modulelist.HasValue(devicename)){
 	TString thisprefix=prefix;
-	if(prefix.Contains("asym_"))
+	if(prefix.Contains("asym_")) {
 	  thisprefix.ReplaceAll("asym_","diff_");
+}
 
 	SetRootSaveStatus(prefix);
 
 	fEffectiveCharge.ConstructBranch(tree,prefix);
 	size_t i = 0;
 	if(bFullSave) {
-	  for(i=0;i<8;i++) fPhotodiode[i].ConstructBranch(tree,thisprefix);
+	  for(i=0;i<8;i++) { fPhotodiode[i].ConstructBranch(tree,thisprefix);
+}
 	}
 	for(i=kXAxis;i<kNumAxes;i++) {
 	  fRelPos[i].ConstructBranch(tree,thisprefix);
@@ -710,8 +729,7 @@ void  QwLinearDiodeArray::ConstructBranch(TTree *tree, TString &prefix, QwParame
 
 
 
-  return;
-}
+  }
 
 void  QwLinearDiodeArray::FillTreeVector(std::vector<Double_t> &values) const
 {
@@ -722,14 +740,14 @@ void  QwLinearDiodeArray::FillTreeVector(std::vector<Double_t> &values) const
     fEffectiveCharge.FillTreeVector(values);
     size_t i = 0;
     if(bFullSave) {
-      for(i=0;i<8;i++) fPhotodiode[i].FillTreeVector(values);
+      for(i=0;i<8;i++) { fPhotodiode[i].FillTreeVector(values);
+}
     }
     for(i=kXAxis;i<kNumAxes;i++){
       fRelPos[i].FillTreeVector(values);
     }
   }
-  return;
-}
+  }
 
 #ifdef HAS_RNTUPLE_SUPPORT
 void  QwLinearDiodeArray::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
@@ -781,7 +799,8 @@ void QwLinearDiodeArray::SetEventCutMode(Int_t bcuts)
 {
   size_t i = 0;
   //  bEVENTCUTMODE=bcuts;
-  for (i=0;i<8;i++) fPhotodiode[i].SetEventCutMode(bcuts);
+  for (i=0;i<8;i++) { fPhotodiode[i].SetEventCutMode(bcuts);
+}
   for (i=kXAxis;i<kNumAxes;i++) {
     fRelPos[i].SetEventCutMode(bcuts);
     fAbsPos[i].SetEventCutMode(bcuts);
@@ -862,9 +881,8 @@ void  QwLinearDiodeArray::SetRandomEventParameters(Double_t meanX, Double_t sigm
 
 void QwLinearDiodeArray::RandomizeEventData(int helicity, double time)
 {
-  for (size_t i=0; i<8; i++) fPhotodiode[i].RandomizeEventData(helicity, time);
-
-  return;
+  for (auto & i : fPhotodiode) { i.RandomizeEventData(helicity, time);
+}
 }
 
 
@@ -875,32 +893,30 @@ void QwLinearDiodeArray::SetEventData(Double_t* relpos, UInt_t sequencenumber)
       fRelPos[i].SetHardwareSum(relpos[i], sequencenumber);
     }
 
-  return;
-}
+  }
 
 
 void QwLinearDiodeArray::EncodeEventData(std::vector<UInt_t> &buffer)
 {
-  for (size_t i=0; i<8; i++) fPhotodiode[i].EncodeEventData(buffer);
+  for (auto & i : fPhotodiode) { i.EncodeEventData(buffer);
+}
 }
 
 
 void QwLinearDiodeArray::SetDefaultSampleSize(Int_t sample_size)
 {
-  for(size_t i=0;i<8;i++) fPhotodiode[i].SetDefaultSampleSize((size_t)sample_size);
-  return;
+  for(auto & i : fPhotodiode) { i.SetDefaultSampleSize((size_t)sample_size);
+}
 }
 
 
 void QwLinearDiodeArray::SetSubElementPedestal(Int_t j, Double_t value)
 {
   fPhotodiode[j].SetPedestal(value);
-  return;
 }
 
 void QwLinearDiodeArray::SetSubElementCalibrationFactor(Int_t j, Double_t value)
 {
   fPhotodiode[j].SetCalibrationFactor(value);
-  return;
 }
 

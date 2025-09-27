@@ -46,8 +46,8 @@ QwScaler::QwScaler(const TString& name)
 QwScaler::~QwScaler()
 {
   // Delete scalers
-  for (size_t i = 0; i < fScaler.size(); i++) {
-    delete fScaler.at(i);
+  for (auto & i : fScaler) {
+    delete i;
   }
   fScaler.clear();
 }
@@ -63,7 +63,7 @@ Int_t QwScaler::LoadChannelMap(TString mapfile)
   // Normalization channel (register default token "1")
   const TString default_norm_channel = "1";
   fName_Map[default_norm_channel] = -1;
-  Name_to_Scaler_Map_t::iterator current_norm_channel = fName_Map.find(default_norm_channel);
+  auto current_norm_channel = fName_Map.find(default_norm_channel);
   double current_norm_factor = 1;
   // Map with normalizations
   std::vector<Name_to_Scaler_Map_t::iterator> norm_channel;
@@ -91,9 +91,11 @@ Int_t QwScaler::LoadChannelMap(TString mapfile)
 
     mapstr.TrimComment();       // Remove everything after a comment character.
     mapstr.TrimWhitespace();    // Get rid of leading and trailing whitespace
-    if (mapstr.LineIsEmpty())  continue;
+    if (mapstr.LineIsEmpty()) {  continue;
+}
 
-    TString varname, varvalue;
+    TString varname;
+    TString varvalue;
     if (mapstr.HasVariablePair("=", varname, varvalue)) {
       // This is a declaration line.  Decode it.
       varname.ToLower();
@@ -122,8 +124,9 @@ Int_t QwScaler::LoadChannelMap(TString mapfile)
         // Header for this block of channels
         header = value;
         QwMessage << "Number of scaler header words: " << header << QwLog::endl;
-        if (header > 32)
+        if (header > 32) {
           QwError << "Is that really what you want?" << QwLog::endl;
+}
       } else if (varname == "differential") {
         // Differential scaler
         try {
@@ -131,20 +134,21 @@ Int_t QwScaler::LoadChannelMap(TString mapfile)
         } catch (boost::bad_lexical_cast&) {
           differential = false;
         }
-        if (differential)
+        if (differential) {
           QwMessage << "Subsequent scalers will be differential." << QwLog::endl;
-        else
+        } else {
           QwMessage << "Subsequent scalers will not be differential." << QwLog::endl;
+}
       }
 
     } else {
 
       //  Break this line into tokens to process it.
-      TString modtype = mapstr.GetTypedNextToken<TString>();
-      UInt_t  modnum  = mapstr.GetTypedNextToken<UInt_t>();
-      UInt_t  channum = mapstr.GetTypedNextToken<UInt_t>();
-      TString dettype = mapstr.GetTypedNextToken<TString>();
-      TString keyword = mapstr.GetTypedNextToken<TString>();
+      auto modtype = mapstr.GetTypedNextToken<TString>();
+      auto  modnum  = mapstr.GetTypedNextToken<UInt_t>();
+      auto  channum = mapstr.GetTypedNextToken<UInt_t>();
+      auto dettype = mapstr.GetTypedNextToken<TString>();
+      auto keyword = mapstr.GetTypedNextToken<TString>();
       modtype.ToUpper();
       dettype.ToUpper();
 
@@ -160,10 +164,12 @@ Int_t QwScaler::LoadChannelMap(TString mapfile)
 
       // Register data channel type
       Int_t subbank = GetSubbankIndex(fCurrentROC_ID,fCurrentBank_ID);
-      if (modnum >= fSubbank_Map[subbank].size())
+      if (modnum >= fSubbank_Map[subbank].size()) {
         fSubbank_Map[subbank].resize(modnum+1);
-      if (channum >= fSubbank_Map[subbank].at(modnum).size())
+}
+      if (channum >= fSubbank_Map[subbank].at(modnum).size()) {
         fSubbank_Map[subbank].at(modnum).resize(channum+1,-1);
+}
       // Add scaler channel
       if (fSubbank_Map[subbank].at(modnum).at(channum) < 0) {
         QwVerbose << "Registering " << modtype << " " << keyword
@@ -173,14 +179,14 @@ Int_t QwScaler::LoadChannelMap(TString mapfile)
                   << " at mod " << modnum << ", chan " << channum
                   << QwLog::endl;
         size_t index = fScaler.size();
-        VQwScaler_Channel* scaler = 0;
-        if (modtype == "SIS3801" || modtype == "SIS3801D24")
+        VQwScaler_Channel* scaler = nullptr;
+        if (modtype == "SIS3801" || modtype == "SIS3801D24") {
           scaler = new QwSIS3801D24_Channel(keyword);
-        else if (modtype == "SIS3801D32")
+        } else if (modtype == "SIS3801D32") {
           scaler = new QwSIS3801D32_Channel(keyword);
-        else if (modtype == "STR7200")
+        } else if (modtype == "STR7200") {
           scaler = new QwSTR7200_Channel(keyword);
-        else {
+        } else {
           QwError << "Unrecognized module type " << modtype << QwLog::endl;
           continue;
         }
@@ -194,7 +200,7 @@ Int_t QwScaler::LoadChannelMap(TString mapfile)
         fModuleChannel_Map[std::pair<Int_t,Int_t>(modnum,channum)] = index;
         // Store scaler
         fScaler.push_back(scaler);
-        fNorm.push_back(std::pair<VQwScaler_Channel*,double>(0,1));
+        fNorm.emplace_back(0,1);
         fBufferOffset.push_back(offset);
         // Store current normalization
         norm_channel.push_back(current_norm_channel);
@@ -204,9 +210,9 @@ Int_t QwScaler::LoadChannelMap(TString mapfile)
   }
 
   // Check for normalization names without actual channels
-  for (Name_to_Scaler_Map_t::iterator iter = fName_Map.begin(); iter != fName_Map.end(); iter++) {
-    if (iter->second == -1 && iter->first != default_norm_channel) {
-      QwError << "Normalization channel " << iter->first << " not found!" << QwLog::endl;
+  for (auto & iter : fName_Map) {
+    if (iter.second == -1 && iter.first != default_norm_channel) {
+      QwError << "Normalization channel " << iter.first << " not found!" << QwLog::endl;
     }
   }
 
@@ -240,13 +246,14 @@ Int_t QwScaler::LoadInputParameters(TString mapfile)
   while (mapstr.ReadNextLine()) {
     mapstr.TrimComment();    // Remove everything after a comment character
     mapstr.TrimWhitespace(); // Get rid of leading and trailing spaces
-    if (mapstr.LineIsEmpty())  continue;
+    if (mapstr.LineIsEmpty()) {  continue;
+}
 
-    TString varname = mapstr.GetTypedNextToken<TString>();  // name of the channel
+    auto varname = mapstr.GetTypedNextToken<TString>();  // name of the channel
     varname.ToLower();
     varname.Remove(TString::kBoth,' ');
-    Double_t varped = mapstr.GetTypedNextToken<Double_t>(); // value of the pedestal
-    Double_t varcal = mapstr.GetTypedNextToken<Double_t>(); // value of the calibration factor
+    auto varped = mapstr.GetTypedNextToken<Double_t>(); // value of the pedestal
+    auto varcal = mapstr.GetTypedNextToken<Double_t>(); // value of the calibration factor
     QwVerbose << varname << ": " << QwLog::endl;
 
     if (fName_Map.count(varname) != 0) {
@@ -270,8 +277,8 @@ Int_t QwScaler::LoadInputParameters(TString mapfile)
 void QwScaler::ClearEventData()
 {
   // Clear all scaler channels
-  for (size_t i = 0; i < fScaler.size(); i++) {
-    fScaler.at(i)->ClearEventData();
+  for (auto & i : fScaler) {
+    i->ClearEventData();
   }
   // Reset good event count
   fGoodEventCount = 0;
@@ -315,9 +322,9 @@ Int_t QwScaler::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UI
     // TODO Multiscaler functionality
 
     // Read scalers
-    for (size_t modnum = 0; modnum < fSubbank_Map[subbank].size(); modnum++) {
-      for (size_t channum = 0; channum < fSubbank_Map[subbank].at(modnum).size(); channum++) {
-        Int_t index = fSubbank_Map[subbank].at(modnum).at(channum);
+    for (auto & modnum : fSubbank_Map[subbank]) {
+      for (size_t channum = 0; channum < modnum.size(); channum++) {
+        Int_t index = modnum.at(channum);
         if (index >= 0) {
           UInt_t offset = fBufferOffset.at(index);
           words_read += fScaler[index]->ProcessEvBuffer(&(buffer[offset]), num_words - offset);
@@ -334,13 +341,13 @@ Int_t QwScaler::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UI
 void QwScaler::ProcessEvent()
 {
   // Process the event
-  for (size_t i = 0; i < fScaler.size(); i++) {
-    fScaler.at(i)->ProcessEvent();
+  for (auto & i : fScaler) {
+    i->ProcessEvent();
   }
 
   // Normalization
   for (size_t i = 0; i < fScaler.size(); i++) {
-    if (fNorm.at(i).first) {
+    if (fNorm.at(i).first != nullptr) {
       fScaler.at(i)->Scale(fNorm.at(i).second);
       fScaler.at(i)->DivideBy(*(fNorm.at(i).first));
     }
@@ -349,29 +356,29 @@ void QwScaler::ProcessEvent()
 
 void QwScaler::ConstructHistograms(TDirectory* folder, TString& prefix)
 {
-  for(size_t i = 0; i < fScaler.size(); i++) {
-    fScaler.at(i)->ConstructHistograms(folder, prefix);
+  for(auto & i : fScaler) {
+    i->ConstructHistograms(folder, prefix);
   }
 }
 
 void QwScaler::FillHistograms()
 {
-  for(size_t i = 0; i < fScaler.size(); i++) {
-    fScaler.at(i)->FillHistograms();
+  for(auto & i : fScaler) {
+    i->FillHistograms();
   }
 }
 
 void QwScaler::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values)
 {
-  for (size_t i = 0; i < fScaler.size(); i++) {
-    fScaler.at(i)->ConstructBranchAndVector(tree, prefix, values);
+  for (auto & i : fScaler) {
+    i->ConstructBranchAndVector(tree, prefix, values);
   }
 }
 
 void QwScaler::FillTreeVector(std::vector<Double_t> &values) const
 {
-  for(size_t i = 0; i < fScaler.size(); i++) {
-    fScaler.at(i)->FillTreeVector(values);
+  for(auto i : fScaler) {
+    i->FillTreeVector(values);
   }
 }
 
@@ -399,8 +406,8 @@ void QwScaler::FillNTupleVector(std::vector<Double_t>& values) const
 VQwSubsystem& QwScaler::operator=(VQwSubsystem *value)
 {
   if (Compare(value)) {
-    VQwSubsystem::operator=(value);
-    QwScaler* input = dynamic_cast<QwScaler*>(value);
+    VQwSubsystemParity::operator=(value);
+    auto* input = dynamic_cast<QwScaler*>(value);
     for (size_t i = 0; i < fScaler.size(); i++) {
       *(fScaler.at(i)) = *(input->fScaler.at(i));
     }
@@ -416,7 +423,7 @@ VQwSubsystem& QwScaler::operator=(VQwSubsystem *value)
 VQwSubsystem& QwScaler::operator+=(VQwSubsystem *value)
 {
   if (Compare(value)) {
-    QwScaler* input = dynamic_cast<QwScaler*>(value);
+    auto* input = dynamic_cast<QwScaler*>(value);
     for (size_t i = 0; i < fScaler.size(); i++) {
       *(fScaler.at(i)) += *(input->fScaler.at(i));
     }
@@ -432,7 +439,7 @@ VQwSubsystem& QwScaler::operator+=(VQwSubsystem *value)
 VQwSubsystem& QwScaler::operator-=(VQwSubsystem *value)
 {
   if (Compare(value)) {
-    QwScaler* input = dynamic_cast<QwScaler *> (value);
+    auto* input = dynamic_cast<QwScaler *> (value);
     for (size_t i = 0; i < fScaler.size(); i++) {
       *(fScaler.at(i)) -= *(input->fScaler.at(i));
     }
@@ -449,8 +456,8 @@ VQwSubsystem& QwScaler::operator-=(VQwSubsystem *value)
 void QwScaler::Ratio(VQwSubsystem *numer, VQwSubsystem *denom)
 {
   if (Compare(numer) && Compare(denom)) {
-    QwScaler* innumer = dynamic_cast<QwScaler*>(numer);
-    QwScaler* indenom = dynamic_cast<QwScaler*>(denom);
+    auto* innumer = dynamic_cast<QwScaler*>(numer);
+    auto* indenom = dynamic_cast<QwScaler*>(denom);
     for (size_t i = 0; i < fScaler.size(); i++) {
       fScaler.at(i)->Ratio(*(innumer->fScaler.at(i)), *(indenom->fScaler.at(i)));
     }
@@ -463,8 +470,8 @@ void QwScaler::Ratio(VQwSubsystem *numer, VQwSubsystem *denom)
  */
 void QwScaler::Scale(Double_t factor)
 {
-  for (size_t i = 0; i < fScaler.size(); i++) {
-    fScaler.at(i)->Scale(factor);
+  for (auto & i : fScaler) {
+    i->Scale(factor);
   }
 }
 
@@ -474,7 +481,7 @@ void QwScaler::Scale(Double_t factor)
 void QwScaler::AccumulateRunningSum(VQwSubsystem* value, Int_t count, Int_t ErrorMask)
 {
   if (Compare(value)) {
-    QwScaler* scaler = dynamic_cast<QwScaler*>(value);
+    auto* scaler = dynamic_cast<QwScaler*>(value);
     for (size_t i = 0; i < fScaler.size(); i++) {
       fScaler.at(i)->AccumulateRunningSum(scaler->fScaler.at(i), count, ErrorMask);
     }
@@ -487,7 +494,7 @@ void QwScaler::AccumulateRunningSum(VQwSubsystem* value, Int_t count, Int_t Erro
 void QwScaler::DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask)
 {
   if (Compare(value)) {
-    QwScaler* scaler = dynamic_cast<QwScaler*>(value);
+    auto* scaler = dynamic_cast<QwScaler*>(value);
     for (size_t i = 0; i < fScaler.size(); i++) {
       fScaler.at(i)->DeaccumulateRunningSum(scaler->fScaler.at(i), ErrorMask);
     }
@@ -499,8 +506,8 @@ void QwScaler::DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask)
  */
 void QwScaler::CalculateRunningAverage()
 {
-  for (size_t i = 0; i < fScaler.size(); i++) {
-    fScaler.at(i)->CalculateRunningAverage();
+  for (auto & i : fScaler) {
+    i->CalculateRunningAverage();
   }
 }
 
@@ -554,7 +561,8 @@ Int_t QwScaler::GetChannelIndex(TString channelName, UInt_t module_number)
 Bool_t QwScaler::Compare(VQwSubsystem *value)
 {
   // Immediately fail on null objects
-  if (value == 0) return kFALSE;
+  if (value == nullptr) { return kFALSE;
+}
 
   // Continue testing on actual object
   Bool_t result = kTRUE;
@@ -562,7 +570,7 @@ Bool_t QwScaler::Compare(VQwSubsystem *value)
     result = kFALSE;
 
   } else {
-    QwScaler* input = dynamic_cast<QwScaler*> (value);
+    auto* input = dynamic_cast<QwScaler*> (value);
     if (input->fScaler.size() != fScaler.size()) {
       result = kFALSE;
     }
@@ -591,7 +599,7 @@ void QwScaler::PrintInfo() const
 void QwScaler::PrintValue() const
 {
   QwMessage << "=== QwScaler: " << GetName() << " ===" << QwLog::endl;
-  for(size_t i = 0; i < fScaler.size(); i++) {
-    fScaler.at(i)->PrintValue();
+  for(auto i : fScaler) {
+    i->PrintValue();
   }
 }
