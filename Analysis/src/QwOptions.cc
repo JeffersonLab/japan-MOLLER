@@ -200,7 +200,6 @@ po::options_description* QwOptions::CombineOptions()
  */
 void QwOptions::ParseCommandLine()
 {
-#if BOOST_VERSION >= 103300
   //  Boost versions starting with 1.33.00 allow unrecognized options to be
   //  passed through the parser.
   try {
@@ -211,22 +210,6 @@ void QwOptions::ParseCommandLine()
     QwWarning << e.what() << " while parsing command line arguments" << QwLog::endl;
     exit(10);
   }
-#endif
-
-#if BOOST_VERSION < 103300
-  //  Boost versions before 1.33.00 do not allow unrecognized options to be
-  //  passed through the parser.
-  try {
-    //  Boost versions before 1.33.00 do not recognize "allow_unregistered".
-    po::options_description* command_line_options = CombineOptions();
-    po::store(po::command_line_parser(fArgc, fArgv).options(*command_line_options).run(), fVariablesMap);
-    delete command_line_options;
-  } catch (std::exception const& e) {
-    QwWarning << e.what() << " while parsing command line arguments" << QwLog::endl;
-    QwWarning << "All command line arguments may have been ignored!" << QwLog::endl;
-    exit(10);
-  }
-#endif
 
   // Notify of new options
   po::notify(fVariablesMap);
@@ -300,27 +283,15 @@ void QwOptions::ParseConfigFile()
     configstream << configfile.rdbuf();
 
     try {
-#if BOOST_VERSION >= 103500
       // Boost version after 1.35 have bool allow_unregistered = false in
       // their signature.  This allows for unknown options in the config file.
       po::options_description* config_file_options = CombineOptions();
       po::store(po::parse_config_file(configstream, *config_file_options, true),
 		fVariablesMap);
       delete config_file_options;
-#else
-      // Boost versions before 1.35 cannot handle files with unregistered
-      // options.
-      po::options_description* config_file_options = CombineOptions();
-      po::store(po::parse_config_file(configstream, *config_file_options),
-		fVariablesMap);
-      delete config_file_options;
-#endif
     } catch (std::exception const& e) {
       QwWarning << e.what() << " while parsing configuration file "
                 << fConfigFiles.at(i) << QwLog::endl;
-#if BOOST_VERSION < 103500
-      QwWarning << "The entire configuration file was ignored!" << QwLog::endl;
-#endif
       exit(10);
     }
     // Notify of new options

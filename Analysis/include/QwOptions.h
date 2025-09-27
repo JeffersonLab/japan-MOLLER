@@ -47,11 +47,7 @@ inline const TString getenv_safe_TString (const char* name) {
 // Starting with boost::program_options 1.35.0 there is support for the semantic
 // implicit_value.  An explicit option value is optional, but if given, must be
 // strictly adjacent to the option.
-#if BOOST_VERSION >= 103500
 #define default_bool_value(b) default_value(b)->implicit_value(true)
-#else
-#define default_bool_value(b) default_value(b)
-#endif
 
 
 /**
