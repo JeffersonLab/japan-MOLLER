@@ -1945,7 +1945,7 @@ VQwBPM* QwBeamLine::GetBPMStripline(const TString name)
 {
   if (! fStripline.empty()) {
     for (std::vector<VQwBPM_ptr >::iterator stripline = fStripline.begin(); stripline != fStripline.end(); ++stripline) {
-      if (*stripline->GetElementName() == name) {
+      if (stripline->get()->GetElementName() == name) {
 	return (*stripline).get();
       }
     }
