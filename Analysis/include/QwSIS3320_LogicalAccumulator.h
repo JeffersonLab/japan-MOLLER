@@ -30,12 +30,12 @@ public:
   QwSIS3320_LogicalAccumulator(TString name = "")
   : QwSIS3320_Accumulator(name)
   { };
-  virtual ~QwSIS3320_LogicalAccumulator() { };
+  ~QwSIS3320_LogicalAccumulator() override { };
 
   void AddAccumulatorReference( QwSIS3320_Accumulator *accum, Double_t weight);
 
   void  ProcessEvent();
-  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t subelement = 0) { return 0; };
+  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t subelement = 0) override { return 0; };
 
 private:
 
