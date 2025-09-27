@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include "VQwSystem.h"
-//#include "QwHitContainer.h"
 
 class VQwAnalyzer : public VQwSystem {
 

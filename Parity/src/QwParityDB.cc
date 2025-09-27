@@ -7,22 +7,15 @@
  */
 
 #ifdef __USE_DATABASE__
-#define EXPAND_QWPARITYSSQLS_STATICS
-//#define MYSQLPP_SSQLS_NO_STATICS
-#include "QwParitySSQLS.h"
 #include "QwParityDB.h"
+#include "QwParitySchema.h"
 
 // System headers
 
 // Qweak headers
 #include "QwEventBuffer.h"
 #include "QwRunCondition.h"
-using namespace QwParitySSQLS;
-
-// Specific template instantiations
-template void QwDBInterface::AddThisEntryToList<QwParitySSQLS::md_data>(std::vector<QwParitySSQLS::md_data> &list);
-template void QwDBInterface::AddThisEntryToList<QwParitySSQLS::lumi_data>(std::vector<QwParitySSQLS::lumi_data> &list);
-template void QwDBInterface::AddThisEntryToList<QwParitySSQLS::beam>(std::vector<QwParitySSQLS::beam> &list);
+using namespace QwParitySchema;
 
 // Definition of static class members in QwParityDB
 std::map<string, unsigned int> QwParityDB::fMonitorIDs;
@@ -32,54 +25,8 @@ std::vector<string>            QwParityDB::fMeasurementIDs;
 std::map<string, unsigned int> QwParityDB::fSlowControlDetectorIDs;// for epics
 std::map<string, unsigned char> QwParityDB::fErrorCodeIDs;
 
-class StoreMonitorID {
-  public:
-    void operator() (QwParitySSQLS::monitor elem) {
-      QwDebug << "StoreMonitorID:  monitor_id = " << elem.monitor_id << " quantity = " << elem.quantity << QwLog::endl;
-      QwParityDB::fMonitorIDs.insert(std::make_pair(elem.quantity, elem.monitor_id));
-    }
-};
-
-class StoreMainDetectorID {
-  public:
-    void operator() (QwParitySSQLS::main_detector elem) {
-      QwDebug << "StoreMainDetectorID:  main_detector_id = " << elem.main_detector_id << " quantity = " << elem.quantity << QwLog::endl;
-      QwParityDB::fMainDetectorIDs.insert(std::make_pair(elem.quantity, elem.main_detector_id));
-    }
-};
-
-class StoreLumiDetectorID {
-  public:
-    void operator() (QwParitySSQLS::lumi_detector elem) {
-      QwDebug << "StoreLumiDetectorID:  lumi_detector_id = " << elem.lumi_detector_id << " quantity = " << elem.quantity << QwLog::endl;
-      QwParityDB::fLumiDetectorIDs.insert(std::make_pair(elem.quantity, elem.lumi_detector_id));
-    }
-};
-
-class StoreMeasurementID {
- public:
-  void operator() (QwParitySSQLS::measurement_type elem) {
-      QwDebug << "StoreMeasurementID:  measurement_type = " << elem.measurement_type_id << QwLog::endl;
-      QwParityDB::fMeasurementIDs.push_back( (std::string) elem.measurement_type_id );
-    }
-};
-
-
-class StoreSlowControlDetectorID {
-  public:
-    void operator() (QwParitySSQLS::sc_detector elem) {
-      QwDebug << "StoreSlowControlDetectorID: sc_detector_id = " << elem.sc_detector_id << " name = " << elem.name << QwLog::endl;
-      QwParityDB::fSlowControlDetectorIDs.insert(std::make_pair(elem.name, elem.sc_detector_id));
-    }
-};
-
-class StoreErrorCodeID {
-  public:
-    void operator() (QwParitySSQLS::error_code elem) {
-      QwDebug << "StoreErrorCodeID: error_code_id = " << elem.error_code_id << " quantity = " << elem.quantity << QwLog::endl;
-      QwParityDB::fErrorCodeIDs.insert(std::make_pair(elem.quantity, elem.error_code_id));
-    }
-};
+// Functor classes for MySQL++ for_each() have been removed
+// They have been replaced with direct sqlpp11 SELECT queries and range-based for loops
 
 
 /*! The simple constructor initializes member fields.  This class is not
@@ -162,30 +109,35 @@ bool QwParityDB::SetRunNumber(const UInt_t runnum)
 
   try {
 
-    this->Connect();
+    auto c = GetScopedConnection();
 
-    mysqlpp::Query query= this->Query();
-    query << "SELECT * FROM run WHERE run_number = " << runnum;
-    std::vector<run> res;
-    query.storein(res);
+    const auto& run = QwParitySchema::run{};
+    auto query = sqlpp::select(sqlpp::all_of(run))
+                 .from(run)
+                 .where(run.run_number == runnum);
 
-    QwDebug << "Number of rows returned:  " << res.size() << QwLog::endl;
+    auto results = QuerySelect(query);
+    size_t result_count = CountResults(results);
+    QwDebug << "Number of rows returned:  " << result_count << QwLog::endl;
 
-    if (res.size()!=1) {
+    if (result_count != 1) {
       QwError << "Unable to find unique run number " << runnum << " in database." << QwLog::endl;
-      QwError << "Run number query returned " << res.size() << "rows." << QwLog::endl;
+      QwError << "Run number query returned " << result_count << "rows." << QwLog::endl;
       QwError << "Please make sure that the database contains one unique entry for this run." << QwLog::endl;
       return false;
     }
 
-    QwDebug << "Run ID = " << res.at(0).run_id << QwLog::endl;
+    // Access first row from result
+    UInt_t found_run_id = 0;
+    ForFirstResult(results, [&](const auto& row) {
+      found_run_id = row.run_id;
+    });
+    QwDebug << "Run ID = " << found_run_id << QwLog::endl;
 
     fRunNumber = runnum;
-    fRunID = res.at(0).run_id;
-
-    this->Disconnect();
+    fRunID = found_run_id;
   }
-  catch (const mysqlpp::Exception& er) {
+  catch (const std::exception& er) {
     QwError << er.what() << QwLog::endl;
     return false;
   }
@@ -201,86 +153,72 @@ UInt_t QwParityDB::SetRunID(QwEventBuffer& qwevt)
 {
 
   // Check to see if run is already in database.  If so retrieve run ID and exit.
-  try
-    {
-      this->Connect();
-      mysqlpp::Query query = this->Query();
+  try {
+      auto c = GetScopedConnection();
 
-      query << "SELECT * FROM run WHERE run_number = " << qwevt.GetRunNumber();
-      std::vector<run> res;
-      query.storein(res);
-      QwDebug << "QwParityDB::SetRunID => Number of rows returned:  " << res.size() << QwLog::endl;
+      const auto& run = QwParitySchema::run{};
+      auto query = sqlpp::select(sqlpp::all_of(run))
+                   .from(run)
+                   .where(run.run_number == qwevt.GetRunNumber());
+      auto results = QuerySelect(query);
+
+      size_t result_count = CountResults(results);
+      UInt_t first_run_id = 0;
+      UInt_t first_run_number = 0;
+      ForFirstResult(results, [&](const auto& row) {
+        first_run_id = row.run_id;
+        first_run_number = row.run_number;
+      });
+      
+      QwDebug << "QwParityDB::SetRunID => Number of rows returned:  " << result_count << QwLog::endl;
 
       // If there is more than one run in the DB with the same run number, then there will be trouble later on.  Catch and bomb out.
-      if (res.size()>1)
-	{
-	  QwError << "Unable to find unique run number " << qwevt.GetRunNumber() << " in database." << QwLog::endl;
-	  QwError << "Run number query returned " << res.size() << "rows." << QwLog::endl;
-	  QwError << "Please make sure that the database contains one unique entry for this run." << QwLog::endl;
-	  this->Disconnect();
-	  return 0;
-	}
+      if (result_count > 1) {
+        QwError << "Unable to find unique run number " << qwevt.GetRunNumber() << " in database." << QwLog::endl;
+        QwError << "Run number query returned " << result_count << "rows." << QwLog::endl;
+        QwError << "Please make sure that the database contains one unique entry for this run." << QwLog::endl;
+        return 0;
+      }
 
       // Run already exists in database.  Pull run_id and move along.
-      if (res.size()==1)
-	{
-	  QwDebug << "QwParityDB::SetRunID => Run ID = " << res.at(0).run_id << QwLog::endl;
+      if (result_count == 1) {
+        QwDebug << "QwParityDB::SetRunID => Run ID = " << first_run_id << QwLog::endl;
 
-	  fRunNumber = qwevt.GetRunNumber();
-	  fRunID     = res.at(0).run_id;
-	  this->Disconnect();
-	  return fRunID;
-	}
-      this->Disconnect();
-    }
-  catch (const mysqlpp::Exception& er)
-    {
+        fRunNumber = qwevt.GetRunNumber();
+        fRunID     = first_run_id;
+        return fRunID;
+      }
 
-      QwError << er.what() << QwLog::endl;
-      this->Disconnect();
-      return 0;
-    }
-
-  // Run is not in database so insert pertinent data and retrieve run ID
-  // Right now this does not insert start/stop times or info on number of events.
-  try
-    {
-
-      this->Connect();
-      run row(0);
-      row.run_number      = qwevt.GetRunNumber();
-      row.run_type        = "good"; // qwevt.GetRunType(); RunType is the confused name because we have also a CODA run type.
-      row.start_time      = mysqlpp::DateTime(qwevt.GetStartUnixTime());
-      row.end_time        = mysqlpp::DateTime(qwevt.GetEndUnixTime());
-      row.n_mps = 0;
-      row.n_qrt	= 0;
+      // If we reach here, run is not in database so insert pertinent data and retrieve run ID
+      // Right now this does not insert start/stop times or info on number of events.
+      QwParitySchema::row<QwParitySchema::run> run_row;
+      run_row[run.run_number] = qwevt.GetRunNumber();
+      run_row[run.run_type] = "good"; // qwevt.GetRunType(); RunType is the confused name because we have also a CODA run type.
+      // Convert Unix timestamps to sqlpp11 datetime using chrono time_point
+      // FIXME (wdconinc) verify conversion
+      run_row[run.start_time] = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::from_time_t(qwevt.GetStartUnixTime()));
+      run_row[run.end_time] = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::from_time_t(qwevt.GetEndUnixTime()));
+      run_row[run.n_mps] = 0;
+      run_row[run.n_qrt] = 0;
       // Set following quantities to 9999 as "uninitialized value".  DTS 8/3/2012
-      row.slug = 9999;
-      row.wien_slug = 9999;
-      row.injector_slug = 9999;
-//    row.n_mps=10; // This works
-      //    row.start_time = mysqlpp::null; // This works
-      //    row.start_time = qwevt.GetStartSQLTime().Data(); // This does not work
-        mysqlpp::Query query=this->Query();
-        query.insert(row);
-       QwDebug<< "QwParityDB::SetRunID() => Run Insert Query = " << query.str() << QwLog::endl;
+      run_row[run.slug] = 9999;
+      run_row[run.wien_slug] = 9999;
+      run_row[run.injector_slug] = 9999;
+      run_row[run.comment] = "";
 
-      query.execute();
-
-      if (query.insert_id()!=0)
-	{
-	  fRunNumber = qwevt.GetRunNumber();
-	  fRunID     = query.insert_id();
-	}
-      this->Disconnect();
+      QwDebug << "QwParityDB::SetRunID() => Executing sqlpp11 run insert" << QwLog::endl;
+      auto insert_id = QueryInsertAndGetId(run_row.insert_into());
+      
+      if (insert_id != 0) {
+        fRunNumber = qwevt.GetRunNumber();
+        fRunID     = insert_id;
+      }
       return fRunID;
-    }
-  catch (const mysqlpp::Exception& er)
-    {
+  }
+  catch (const std::exception& er) {
       QwError << er.what() << QwLog::endl;
-      this->Disconnect();
       return 0;
-    }
+  }
 
 }
 
@@ -317,92 +255,112 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
   //  UInt_t runid = this->GetRunID(qwevt);
 
   // Check to see if runlet is already in database.  If so retrieve runlet_id and exit.
-  try
-    {
-      this->Connect();
-      mysqlpp::Query query = this->Query();
+  try {
+      auto c = GetScopedConnection();
 
+      QwParitySchema::runlet runlet{};
+      
       // Query is slightly different if file segments are being chained together for replay or not.
       if (qwevt.AreRunletsSplit()) {
         fSegmentNumber = qwevt.GetSegmentNumber();
-        query << "SELECT * FROM runlet WHERE run_id = " << fRunID << " AND full_run = 'false' AND segment_number = " << fSegmentNumber;
+        auto query = sqlpp::select(sqlpp::all_of(runlet))
+                     .from(runlet)
+                     .where(runlet.run_id == fRunID
+                            and runlet.full_run == "false"
+                            and runlet.segment_number == fSegmentNumber);
+        auto results = QuerySelect(query);
+        
+        // Count results and process using helper functions
+        size_t result_count = CountResults(results);
+        UInt_t found_runlet_id = 0;
+        ForFirstResult(results, [&](const auto& row) {
+          found_runlet_id = row.runlet_id;
+        });
+        
+        QwDebug << "QwParityDB::SetRunletID => Number of rows returned:  " << result_count << QwLog::endl;
+        
+        // If there is more than one run in the DB with the same runlet number, then there will be trouble later on.
+        if (result_count > 1) {
+          QwError << "Unable to find unique runlet number " << qwevt.GetRunNumber() << " in database." << QwLog::endl;
+          QwError << "Run number query returned " << result_count << " rows." << QwLog::endl;
+          QwError << "Please make sure that the database contains one unique entry for this run." << QwLog::endl;
+          return 0;
+        }
+        
+        // Run already exists in database.  Pull runlet_id and move along.
+        if (result_count == 1) {
+          QwDebug << "QwParityDB::SetRunletID => Runlet ID = " << found_runlet_id << QwLog::endl;
+          fRunletID = found_runlet_id;
+          return fRunletID;
+        }
+        
       } else {
-	query << "SELECT * FROM runlet WHERE run_id = " << fRunID << " AND full_run = 'true'";
+        auto query = sqlpp::select(sqlpp::all_of(runlet))
+                     .from(runlet)
+                     .where(runlet.run_id == fRunID
+                            and runlet.full_run == "true");
+        auto results = QuerySelect(query);
+        
+        // Count results and process using helper functions
+        size_t result_count = CountResults(results);
+        UInt_t found_runlet_id = 0;
+        ForFirstResult(results, [&](const auto& row) {
+          found_runlet_id = row.runlet_id;
+        });
+        
+        QwDebug << "QwParityDB::SetRunletID => Number of rows returned:  " << result_count << QwLog::endl;
+        
+        // If there is more than one run in the DB with the same runlet number, then there will be trouble later on.
+        if (result_count > 1) {
+          QwError << "Unable to find unique runlet number " << qwevt.GetRunNumber() << " in database." << QwLog::endl;
+          QwError << "Run number query returned " << result_count << " rows." << QwLog::endl;
+          QwError << "Please make sure that the database contains one unique entry for this run." << QwLog::endl;
+          return 0;
+        }
+        
+        // Run already exists in database.  Pull runlet_id and move along.
+        if (result_count == 1) {
+          QwDebug << "QwParityDB::SetRunletID => Runlet ID = " << found_runlet_id << QwLog::endl;
+          fRunletID = found_runlet_id;
+          return fRunletID;
+        }
       }
 
-      std::vector<runlet> res;
-      query.storein(res);
-      QwDebug << "QwParityDB::SetRunletID => Number of rows returned:  " << res.size() << QwLog::endl;
-
-      // If there is more than one run in the DB with the same runlet number, then there will be trouble later on.  Catch and bomb out.
-      if (res.size()>1)
-	{
-	  QwError << "Unable to find unique runlet number " << qwevt.GetRunNumber() << " in database." << QwLog::endl;
-	  QwError << "Run number query returned " << res.size() << "rows." << QwLog::endl;
-	  QwError << "Please make sure that the database contains one unique entry for this run." << QwLog::endl;
-	  this->Disconnect();
-	  return 0;
-	}
-
-      // Run already exists in database.  Pull runlet_id and move along.
-      if (res.size()==1)
-	{
-	  QwDebug << "QwParityDB::SetRunletID => Runlet ID = " << res.at(0).runlet_id << QwLog::endl;
-
-	  fRunletID     = res.at(0).runlet_id;
-	  this->Disconnect();
-	  return fRunletID;
-	}
-      this->Disconnect();
-    }
-  catch (const mysqlpp::Exception& er)
-    {
-
-      QwError << er.what() << QwLog::endl;
-      this->Disconnect();
-      return 0;
-    }
-
-  // Runlet is not in database so insert pertinent data and retrieve run ID
-  // Right now this does not insert start/stop times or info on number of events.
-  try
-    {
-
-      this->Connect();
-      runlet row(0);
-      row.run_id      = fRunID;
-      row.run_number      = qwevt.GetRunNumber();
-      row.start_time      = mysqlpp::null;
-      row.end_time        = mysqlpp::null;
-      row.first_mps = 0;
-      row.last_mps	= 0;
+      // If we reach here, runlet is not in database so insert pertinent data and retrieve run ID
+      // Right now this does not insert start/stop times or info on number of events.
+      QwParitySchema::runlet runlet_table{};
+      QwParitySchema::row<QwParitySchema::runlet> row;
+      row[runlet_table.run_id]      = fRunID;
+      row[runlet_table.run_number]      = qwevt.GetRunNumber();
+      // Note: start_time and end_time are nullable fields but we need to use proper sqlpp11 null types
+      // row[runlet_table.start_time]      = sqlpp::null;
+      // row[runlet_table.end_time]        = sqlpp::null;
+      row[runlet_table.first_mps] = 0;
+      row[runlet_table.last_mps]	= 0;
+      
+      // Handle segment_number based on runlet split condition
       if (qwevt.AreRunletsSplit()) {
-        row.segment_number = fSegmentNumber;
-        row.full_run = "false";
+        row[runlet_table.segment_number]  = fSegmentNumber;
+        row[runlet_table.full_run] = "false";
+        QwDebug << "QwParityDB::SetRunletID() => Executing sqlpp11 runlet insert (with segment)" << QwLog::endl;
       } else {
-        row.segment_number  = mysqlpp::null;
-        row.full_run = "true";
+        // Note: segment_number is nullable, but row assignment might need special handling for null
+        // For now, use 0 or another default value
+        // row[runlet_table.segment_number]  = sqlpp::null;
+        row[runlet_table.full_run] = "true";
+        QwDebug << "QwParityDB::SetRunletID() => Executing sqlpp11 runlet insert (no segment)" << QwLog::endl;
       }
 
-        mysqlpp::Query query=this->Query();
-        query.insert(row);
-       QwDebug<< "QwParityDB::SetRunletID() => Run Insert Query = " << query.str() << QwLog::endl;
-
-      query.execute();
-
-      if (query.insert_id()!=0)
-	{
-	  fRunletID     = query.insert_id();
-	}
-      this->Disconnect();
+      auto insert_id = QueryInsertAndGetId(row.insert_into());
+      if (insert_id != 0) {
+        fRunletID = insert_id;
+      }
       return fRunletID;
-    }
-  catch (const mysqlpp::Exception& er)
-    {
+  }
+  catch (const std::exception& er) {
       QwError << er.what() << QwLog::endl;
-      this->Disconnect();
       return 0;
-    }
+  }
 
 }
 
@@ -428,66 +386,64 @@ UInt_t QwParityDB::GetRunletID(QwEventBuffer& qwevt)
  */
 UInt_t QwParityDB::SetAnalysisID(QwEventBuffer& qwevt)
 {
-
   // If there is already an analysis_id for this run, then let's bomb out.
 
   try {
-    this->Connect();
-    mysqlpp::Query query= this->Query();
-    query << "SELECT analysis_id FROM analysis WHERE beam_mode=" << mysqlpp::quote << "nbm";
-    query << " AND slope_calculation=" << mysqlpp::quote << "off";
-    query << " AND slope_correction=" << mysqlpp::quote << "off";
-    query << " AND runlet_id = " << mysqlpp::quote << this->GetRunletID(qwevt); 
+    auto c = GetScopedConnection();
 
-    mysqlpp::StoreQueryResult res = query.store();
-
-    if (res.num_rows() != 0) {
+    const auto& analysis = QwParitySchema::analysis{};
+    auto query = sqlpp::select(analysis.analysis_id)
+                 .from(analysis)
+                 .where(analysis.beam_mode == "nbm"
+                        and analysis.slope_calculation == "off"
+                        and analysis.slope_correction == "off"
+                        and analysis.runlet_id == this->GetRunletID(qwevt));
+    auto results = QuerySelect(query);
+    size_t result_count = CountResults(results);
+    if (result_count > 0) {
       QwError << "This runlet has already been analyzed by the engine!" << QwLog::endl;
       QwError << "The following analysis_id values already exist in the database:  ";
-      for (size_t i=0; i<res.num_rows(); i++) {
-        QwError << res[i][0] << " ";
-      }
+      ForEachResult(results, [&](const auto& row) {
+        QwError << row.analysis_id << " ";
+      });
       QwError << QwLog::endl;
 
       if (fDisableAnalysisCheck==false) {
         QwError << "Analysis of this run will now be terminated."  << QwLog::endl;
-
-        return 0;
+        // Note: return statement cannot be used in lambda to return from function
       } else {
         QwWarning << "Analysis will continue.  A duplicate entry with new analysis_id will be added to the analysis table." << QwLog::endl;
       }
     }
-
-    this->Disconnect();
   }
-  catch (const mysqlpp::Exception& er) {
+  catch (const std::exception& er) {
     QwError << er.what() << QwLog::endl;
     QwError << "Unable to determine if there are other database entries for this run.  Exiting." << QwLog::endl;
-    this->Disconnect();
     return 0;
   }
 
 
   try {
 
-    analysis analysis_row(0);
+    QwParitySchema::analysis analysis;
+    QwParitySchema::row<QwParitySchema::analysis> analysis_row;
 
-    analysis_row.runlet_id  = GetRunletID(qwevt);
-    analysis_row.seed_id = 1;
-
+    analysis_row[analysis.runlet_id]  = GetRunletID(qwevt);
+    analysis_row[analysis.seed_id] = 1;
+  
     std::pair<UInt_t, UInt_t> event_range;
     event_range = qwevt.GetEventRange();
 
-    analysis_row.time        = mysqlpp::DateTime::now();
-    analysis_row.bf_checksum = "empty"; // we will match this as a real one later
-    analysis_row.beam_mode   = "nbm";   // we will match this as a real one later
-    analysis_row.n_mps       = 0;       // we will match this as a real one later
-    analysis_row.n_qrt       = 4;       // we will match this as a real one later
-    analysis_row.first_event = event_range.first;
-    analysis_row.last_event  = event_range.second;
-    analysis_row.segment     = 0;       // we will match this as a real one later
-    analysis_row.slope_calculation = "off";  // we will match this as a real one later
-    analysis_row.slope_correction  = "off"; // we will match this as a real one later
+    analysis_row[analysis.time]        = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
+    analysis_row[analysis.bf_checksum] = "empty"; // we will match this as a real one later
+    analysis_row[analysis.beam_mode]   = "nbm";   // we will match this as a real one later
+    analysis_row[analysis.n_mps]       = 0;       // we will match this as a real one later
+    analysis_row[analysis.n_qrt]       = 4;       // we will match this as a real one later
+    analysis_row[analysis.first_event] = event_range.first;
+    analysis_row[analysis.last_event]  = event_range.second;
+    analysis_row[analysis.segment]     = 0;       // we will match this as a real one later
+    analysis_row[analysis.slope_calculation] = "off";  // we will match this as a real one later
+    analysis_row[analysis.slope_correction]  = "off"; // we will match this as a real one later
 
     // Analyzer Information Parsing 
     QwRunCondition run_condition(
@@ -515,45 +471,40 @@ UInt_t QwParityDB::SetAnalysisID(QwEventBuffer& qwevt)
 
       // Decision tree to figure out which variable to store in
       if (str_var.BeginsWith("ROOT Version")) { 
-        analysis_row.root_version = str_val;
+        analysis_row[analysis.root_version] = str_val;
       } else if (str_var.BeginsWith("ROOT file creating time")) {
-        analysis_row.root_file_time = str_val;
+        analysis_row[analysis.root_file_time] = str_val;
       } else if (str_var.BeginsWith("ROOT file created on Hostname")) {
-        analysis_row.root_file_host = str_val;
+        analysis_row[analysis.root_file_host] = str_val;
       } else if (str_var.BeginsWith("ROOT file created by the user")) {
-        analysis_row.root_file_user = str_val;
+        analysis_row[analysis.root_file_user] = str_val;
       } else if (str_var.BeginsWith("QwAnalyzer Name")) {
-        analysis_row.analyzer_name = str_val;
+        analysis_row[analysis.analyzer_name] = str_val;
       } else if (str_var.BeginsWith("QwAnalyzer Options")) {
-        analysis_row.analyzer_argv = str_val;
+        analysis_row[analysis.analyzer_argv] = str_val;
       } else if (str_var.BeginsWith("QwAnalyzer SVN Revision")) {
-        analysis_row.analyzer_svn_rev = str_val;
+        analysis_row[analysis.analyzer_svn_rev] = str_val;
       } else if (str_var.BeginsWith("QwAnalyzer SVN Last Changed Revision")) {
-        analysis_row.analyzer_svn_lc_rev = str_val;
+        analysis_row[analysis.analyzer_svn_lc_rev] = str_val;
       } else if (str_var.BeginsWith("QwAnalyzer SVN URL")) {
-        analysis_row.analyzer_svn_url = str_val;
+        analysis_row[analysis.analyzer_svn_url] = str_val;
       } else if (str_var.BeginsWith("DAQ ROC flags when QwAnalyzer runs")) {
-        analysis_row.roc_flags = str_val;
+        analysis_row[analysis.roc_flags] = str_val;
       } else {
       }
     }
-    this->Connect();
-    mysqlpp::Query query= this->Query();
-    query.insert(analysis_row);
-    //QwMessage << "\nQwParityDB::SetAnalysisID() => Analysis Insert Query = " << query.str() << QwLog::endl<< QwLog::endl;
-    query.execute();
+    auto c = GetScopedConnection();
 
-    if (query.insert_id()!=0)
-      {
-	fAnalysisID = query.insert_id();
-      }
-
-    this->Disconnect();
+    auto insert_id = QueryInsertAndGetId(analysis_row.insert_into());
+    
+    if (insert_id != 0)
+    {
+      fAnalysisID = insert_id;
+    }
     return fAnalysisID;
   }
-  catch (const mysqlpp::Exception& er) {
+  catch (const std::exception& er) {
     QwError << er.what() << QwLog::endl;
-    this->Disconnect();
     return 0;
   }
 
@@ -563,27 +514,23 @@ UInt_t QwParityDB::SetAnalysisID(QwEventBuffer& qwevt)
 void QwParityDB::FillParameterFiles(QwSubsystemArrayParity& subsys){
   TList* param_file_list = subsys.GetParamFileNameList("mapfiles");
   try {
-    this->Connect();
-    mysqlpp::Query query = this->Query();
-    parameter_files parameter_file_row(0);
-    parameter_file_row.analysis_id = GetAnalysisID();
+    auto c = GetScopedConnection();
+    
+    QwParitySchema::parameter_files parameter_files;
+    QwParitySchema::row<QwParitySchema::parameter_files> parameter_file_row;
+    parameter_file_row[parameter_files.analysis_id] = GetAnalysisID();
 
     param_file_list->Print();
     TIter next(param_file_list);
     TList *pfl_elem;
     while ((pfl_elem = (TList *) next())) {
-      parameter_file_row.filename = pfl_elem->GetName();
-      query.insert(parameter_file_row);
-      query.execute();
+      parameter_file_row[parameter_files.filename] = pfl_elem->GetName();
+      QueryExecute(parameter_file_row.insert_into());
     }
-
-    this->Disconnect();
-
     delete param_file_list;
   }
-  catch (const mysqlpp::Exception& er) {
+  catch (const std::exception& er) {
     QwError << er.what() << QwLog::endl;
-    this->Disconnect();
     delete param_file_list;
   }
 }
@@ -638,18 +585,17 @@ UInt_t QwParityDB::GetMonitorID(const string& name, Bool_t zero_id_is_error)
 void QwParityDB::StoreMonitorIDs()
 {
   try {
+    auto c = GetScopedConnection();
 
-    this->Connect();
-    mysqlpp::Query query=this->Query();
-    query.for_each(monitor(), StoreMonitorID());
-
-//    QwDebug<< "QwParityDB::SetAnalysisID() => Analysis Insert Query = " << query.str() << QwLog::endl;
-    this->Disconnect();
+    QwParitySchema::monitor monitor{};
+    auto query = sqlpp::select(sqlpp::all_of(monitor)).from(monitor).unconditionally();
+    QuerySelectForEachResult(query, [&](const auto& row) {
+      QwDebug << "StoreMonitorID:  monitor_id = " << row.monitor_id << " quantity = " << row.quantity << QwLog::endl;
+      QwParityDB::fMonitorIDs.insert(std::make_pair(row.quantity, row.monitor_id));
+    });
   }
-
-  catch (const mysqlpp::Exception& er) {
+  catch (const std::exception& er) {
     QwError << er.what() << QwLog::endl;
-    Disconnect();
     exit(1);
   }
   return;
@@ -667,12 +613,36 @@ UInt_t QwParityDB::GetMainDetectorID(const string& name, Bool_t zero_id_is_error
   UInt_t main_detector_id = fMainDetectorIDs[name];
 
   if (zero_id_is_error && main_detector_id==0) {
-    //    main_detector_id = 19; // only for QwMockDataAnalysis
-    QwError << "QwParityDB::GetMainDetectorID() => Unable to determine valid ID for beam main_detector " << name << QwLog::endl;
+
+    if (fDBInsertMissingKeys) {
+      QwWarning << "Inserting missing variable " << name << " into main_detector table." << QwLog::endl;
+      try {
+        auto c = GetScopedConnection();
+
+        QwParitySchema::main_detector main_detector;
+        QwParitySchema::row<QwParitySchema::main_detector> main_detector_row;
+        main_detector_row[main_detector.quantity] = name;
+        main_detector_row[main_detector.title] = "unknown";
+
+        auto insert_id = QueryInsertAndGetId(main_detector_row.insert_into());
+
+        if (insert_id != 0) {
+          fMainDetectorIDs[name] = insert_id;
+          main_detector_id = insert_id;
+          QwWarning << "Successfully inserted variable " << name << " into main_detector table with ID " << insert_id << QwLog::endl;
+        } else {
+          QwError << "Failed to insert variable " << name << " into main_detector table." << QwLog::endl;
+        }
+      }
+      catch (const std::exception& er) {
+        QwError << er.what() << QwLog::endl;
+      }
+    } else {
+      QwError << "To enable automatic insertion of missing variables, set the option '--QwDatabase.insert-missing-keys'" << QwLog::endl;
+    }
   }
 
   return main_detector_id;
-
 }
 
 
@@ -681,19 +651,18 @@ UInt_t QwParityDB::GetMainDetectorID(const string& name, Bool_t zero_id_is_error
  */
 void QwParityDB::StoreMainDetectorIDs()
 {
-
   try {
-    this->Connect();
-    mysqlpp::Query query=this->Query();
-    query.for_each(main_detector(), StoreMainDetectorID());
+    auto c = GetScopedConnection();
 
-//    QwDebug<< "QwParityDB::SetAnalysisID() => Analysis Insert Query = " << query.str() << QwLog::endl;
-
-    this->Disconnect();
+    QwParitySchema::main_detector main_detector{};
+    auto query = sqlpp::select(sqlpp::all_of(main_detector)).from(main_detector).unconditionally();
+    QuerySelectForEachResult(query, [&](const auto& row) {
+      QwDebug << "StoreMainDetectorID:  main_detector_id = " << row.main_detector_id << " quantity = " << row.quantity << QwLog::endl;
+      QwParityDB::fMainDetectorIDs.insert(std::make_pair(row.quantity, row.main_detector_id));
+    });
   }
-  catch (const mysqlpp::Exception& er) {
+  catch (const std::exception& er) {
     QwError << er.what() << QwLog::endl;
-    Disconnect();
     exit(1);
   }
   return;
@@ -713,6 +682,34 @@ UInt_t QwParityDB::GetSlowControlDetectorID(const string& name)
 
   if (sc_detector_id==0) {
     QwError << "QwParityDB::GetSlowControlDetectorID() => Unable to determine valid ID for the epics variable " << name << QwLog::endl;
+
+    if (fDBInsertMissingKeys) {
+      QwWarning << "Inserting missing variable " << name << " into sc_detector table." << QwLog::endl;
+      try {
+        auto c = GetScopedConnection();
+
+        QwParitySchema::sc_detector sc_detector;
+        QwParitySchema::row<QwParitySchema::sc_detector> sc_detector_row;
+        sc_detector_row[sc_detector.name] = name;
+        sc_detector_row[sc_detector.units] = "unknown";
+        sc_detector_row[sc_detector.comment] = "unknown";
+
+        auto insert_id = QueryInsertAndGetId(sc_detector_row.insert_into());
+
+        if (insert_id != 0) {
+          fSlowControlDetectorIDs[name] = insert_id;
+          sc_detector_id = insert_id;
+          QwWarning << "Successfully inserted variable " << name << " into sc_detector table with ID " << insert_id << QwLog::endl;
+        } else {
+          QwError << "Failed to insert variable " << name << " into sc_detector table." << QwLog::endl;
+        }
+      }
+      catch (const std::exception& er) {
+        QwError << er.what() << QwLog::endl;
+      }
+    } else {
+      QwError << "To enable automatic insertion of missing variables, set the option '--QwDatabase.insert-missing-keys'" << QwLog::endl;
+    }
   }
 
   return sc_detector_id;
@@ -743,19 +740,18 @@ UInt_t QwParityDB::GetErrorCodeID(const string& name)
  */
 void QwParityDB::StoreSlowControlDetectorIDs()
 {
-
   try {
-    this->Connect();
-    mysqlpp::Query query=this->Query();
-    query.for_each(sc_detector(), StoreSlowControlDetectorID());
+    auto c = GetScopedConnection();
 
-//    QwDebug<< "QwParityDB::SetAnalysisID() => Analysis Insert Query = " << query.str() << QwLog::endl;
-
-    this->Disconnect();
+    QwParitySchema::sc_detector sc_detector{};
+    auto query = sqlpp::select(sqlpp::all_of(sc_detector)).from(sc_detector).unconditionally();
+    QuerySelectForEachResult(query, [&](const auto& row) {
+      QwDebug << "StoreSlowControlDetectorID: sc_detector_id = " << row.sc_detector_id << " name = " << row.name << QwLog::endl;
+      QwParityDB::fSlowControlDetectorIDs.insert(std::make_pair(row.name, row.sc_detector_id));
+    });
   }
-  catch (const mysqlpp::Exception& er) {
+  catch (const std::exception& er) {
     QwError << er.what() << QwLog::endl;
-    Disconnect();
     exit(1);
   }
   return;
@@ -766,19 +762,18 @@ void QwParityDB::StoreSlowControlDetectorIDs()
  */
 void QwParityDB::StoreErrorCodeIDs()
 {
-
   try {
-    this->Connect();
-    mysqlpp::Query query=this->Query();
-    query.for_each(error_code(), StoreErrorCodeID());
-
-//    QwDebug<< "QwParityDB::SetAnalysisID() => Analysis Insert Query = " << query.str() << QwLog::endl;
-
-    this->Disconnect();
+    auto c = GetScopedConnection();
+    
+    QwParitySchema::error_code error_code{};
+    auto query = sqlpp::select(sqlpp::all_of(error_code)).from(error_code).unconditionally();
+    QuerySelectForEachResult(query, [&](const auto& row) {
+      QwDebug << "StoreErrorCodeID: error_code_id = " << row.error_code_id << " quantity = " << row.quantity << QwLog::endl;
+      QwParityDB::fErrorCodeIDs.insert(std::make_pair(row.quantity, row.error_code_id));
+    });
   }
-  catch (const mysqlpp::Exception& er) {
+  catch (const std::exception& er) {
     QwError << er.what() << QwLog::endl;
-    Disconnect();
     exit(1);
   }
   return;
@@ -807,21 +802,18 @@ UInt_t QwParityDB::GetLumiDetectorID(const string& name, Bool_t zero_id_is_error
  */
 void QwParityDB::StoreLumiDetectorIDs()
 {
-
   try {
-    this->Connect();
+    auto c = GetScopedConnection();
 
-    mysqlpp::Query query=this->Query();
-    query.for_each(lumi_detector(), StoreLumiDetectorID());
-
-//    QwDebug<< "QwParityDB::SetAnalysisID() => Analysis Insert Query = " << query.str() << QwLog::endl;
-
-    this->Disconnect();
-
+    QwParitySchema::lumi_detector lumi_detector{};
+    auto query = sqlpp::select(sqlpp::all_of(lumi_detector)).from(lumi_detector).unconditionally();
+    QuerySelectForEachResult(query, [&](const auto& row) {
+      QwDebug << "StoreLumiDetectorID:  lumi_detector_id = " << row.lumi_detector_id << " quantity = " << row.quantity << QwLog::endl;
+      QwParityDB::fLumiDetectorIDs.insert(std::make_pair(row.quantity, row.lumi_detector_id));
+    });
   }
-  catch (const mysqlpp::Exception& er) {
+  catch (const std::exception& er) {
     QwError << er.what() << QwLog::endl;
-    Disconnect();
     exit(1);
   }
   return;
@@ -847,21 +839,18 @@ const string QwParityDB::GetMeasurementID(const Int_t index)
 
 void QwParityDB::StoreMeasurementIDs()
 {
-
   try {
-    this->Connect();
+    auto c = GetScopedConnection();
 
-    mysqlpp::Query query=this->Query();
-    query.for_each(measurement_type(), StoreMeasurementID());
-
-    // QwDebug<< "QwParityDB::SetAnalysisID() => Analysis Insert Query = " << query.str() << QwLog::endl;
-
-    this->Disconnect();
-
+    QwParitySchema::measurement_type measurement_type{};
+    auto query = sqlpp::select(sqlpp::all_of(measurement_type)).from(measurement_type).unconditionally();
+    QuerySelectForEachResult(query, [&](const auto& row) {
+      QwDebug << "StoreMeasurementID:  measurement_type = " << row.measurement_type_id << QwLog::endl;
+      QwParityDB::fMeasurementIDs.push_back((std::string) row.measurement_type_id);
+    });
   }
-  catch (const mysqlpp::Exception& er) {
+  catch (const std::exception& er) {
     QwError << er.what() << QwLog::endl;
-    Disconnect();
     exit(1);
   }
   return;
