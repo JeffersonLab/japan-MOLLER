@@ -31,7 +31,7 @@ class PromptSummaryElement :  public TObject
  public:
   PromptSummaryElement();
   PromptSummaryElement(TString name);
-  virtual ~PromptSummaryElement();
+  ~PromptSummaryElement() override;
   //  friend std::ostream& operator<<(std::ostream& os, const PromptSummaryElement &ps_element);
 
   void FillData(Double_t yield, Double_t yield_err, Double_t yield_width, TString yield_unit, 
@@ -136,7 +136,7 @@ class QwPromptSummary  :  public TObject
   QwPromptSummary();
   QwPromptSummary(Int_t run_number, Int_t runlet_number);
   QwPromptSummary(Int_t run_number, Int_t runlet_number, const std::string& parameter_file);
-  virtual ~QwPromptSummary();
+  ~QwPromptSummary() override;
   //  friend std::ostream& operator<<(std::ostream& os, const QwF1TDC &f1tdc);
 
 

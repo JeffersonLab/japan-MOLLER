@@ -26,18 +26,18 @@ class QwCombiner:public VQwDataHandler, public MQwDataHandlerCloneable<QwCombine
     /// \brief Copy constructor
     QwCombiner(const QwCombiner &source);
     /// Virtual destructor
-    virtual ~QwCombiner();
+    ~QwCombiner() override;
 
     /// \brief Load the channels and sensitivities
-    Int_t LoadChannelMap(const std::string& mapfile);
+    Int_t LoadChannelMap(const std::string& mapfile) override;
 
     /// \brief Connect to Channels (event only)
-    Int_t ConnectChannels(QwSubsystemArrayParity& event);
+    Int_t ConnectChannels(QwSubsystemArrayParity& event) override;
     /// \brief Connect to Channels (asymmetry/difference only)
     Int_t ConnectChannels(QwSubsystemArrayParity& asym,
-			  QwSubsystemArrayParity& diff);
+			  QwSubsystemArrayParity& diff) override;
 
-    void ProcessData();
+    void ProcessData() override;
   
   protected:
   

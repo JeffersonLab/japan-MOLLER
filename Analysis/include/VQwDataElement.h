@@ -80,7 +80,7 @@ class VQwDataElement: public MQwHistograms {
     fErrorConfigFlag(value.fErrorConfigFlag)
     { };
   /// Virtual destructor
-  virtual ~VQwDataElement() { };
+  ~VQwDataElement() override { };
 
   virtual void CopyFrom(const VQwDataElement& value){
     fElementName       = value.fElementName;
