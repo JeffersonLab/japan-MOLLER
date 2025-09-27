@@ -27,12 +27,12 @@ class THaCodaFile : public THaCodaData {
 public:
 
   THaCodaFile();
-  explicit THaCodaFile(const char* filename, const char* rw="r");
+  explicit THaCodaFile(const char* fname, const char* readwrite="r");
   THaCodaFile(const THaCodaFile &fn) = delete;
   THaCodaFile& operator=(const THaCodaFile &fn) = delete;
   virtual ~THaCodaFile();
-  virtual Int_t codaOpen(const char* filename, Int_t mode=1);
-  virtual Int_t codaOpen(const char* filename, const char* rw, Int_t mode=1);
+  virtual Int_t codaOpen(const char* fname, Int_t mode=1);
+  virtual Int_t codaOpen(const char* fname, const char* readwrite, Int_t mode=1);
   virtual Int_t codaClose();
   virtual Int_t codaRead();
   Int_t codaWrite(const UInt_t* evbuffer);

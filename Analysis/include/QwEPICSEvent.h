@@ -53,7 +53,7 @@ class QwEPICSEvent
 
   Int_t LoadChannelMap(TString mapfile);
 
-  std::vector<Double_t> ReportAutogains(std::vector<std::string> tag_list = fDefaultAutogainList);
+  std::vector<Double_t> ReportAutogains(std::vector<std::string> tag_list = fDefaultAutogainList) const;
 
   void ExtractEPICSValues(const string& data, int event);
 
@@ -92,11 +92,11 @@ class QwEPICSEvent
  private:
 
   // Tree array indices
-  size_t fTreeArrayIndex;
-  size_t fTreeArrayNumEntries;
+  size_t fTreeArrayIndex{};
+  size_t fTreeArrayNumEntries{};
 
   // Flag to indicate that the event contains data
-  Bool_t fIsDataLoaded;
+  Bool_t fIsDataLoaded{};
   void SetDataLoaded(Bool_t flag) { fIsDataLoaded = flag; };
 
  public:
@@ -138,7 +138,7 @@ class QwEPICSEvent
   // Int_t maxsize = 300;
 
   // Flag to disable database accesses for EPICS events
-  bool fDisableDatabase;
+  bool fDisableDatabase{};
 
   // Test whether the string is a number string or not
   Bool_t IsNumber(const string& word) {
@@ -171,7 +171,7 @@ class QwEPICSEvent
   std::vector<EPICSCumulativeRecord> fEPICSCumulativeData;
 
 
-  Int_t fNumberEPICSEvents;     // Number of EPICS events in the run
+  Int_t fNumberEPICSEvents{};     // Number of EPICS events in the run
   Int_t fNumberEPICSVariables;  // Number of defined EPICS variables
   std::vector<std::string> fEPICSVariableList;  // List of defined EPICS variables
   std::vector<std::string> fEPICSTableList;     // List of DB tables to write
@@ -185,7 +185,7 @@ class QwEPICSEvent
   Bool_t fPrecessionReversal;
 
   Double_t fNominalWienAngle;
-  Int_t    fExtraHelicityReversal;
+  Int_t    fExtraHelicityReversal{};
 
   
 }; // class QwEPICSEvent

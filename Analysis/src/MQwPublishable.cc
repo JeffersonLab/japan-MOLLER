@@ -38,7 +38,7 @@ template<class U, class T>
 const VQwHardwareChannel* MQwPublishable<U,T>::ReturnInternalValue(const TString& name) const
 {
   //  First try to find the value in the list of published values.
-  std::map<TString, const VQwHardwareChannel*>::const_iterator iter1 =
+  auto iter1 =
       fPublishedValuesDataElement.find(name);
   if (iter1 != fPublishedValuesDataElement.end()) {
     return iter1->second;
@@ -64,7 +64,7 @@ const VQwHardwareChannel* MQwPublishable<U,T>::ReturnInternalValue(const TString
     QwDebug << "PublishByRequest failed for " << name << QwLog::endl;
   }
   //  Not found
-  return 0;
+  return nullptr;
 }
 
 /**
@@ -79,19 +79,21 @@ Bool_t MQwPublishable<U,T>::ReturnInternalValue(const TString& name, VQwHardware
   Bool_t foundit = kFALSE;
 
   // Check for null pointer
-  if (! value)
+  if (value == nullptr) {
     QwWarning << "MQwPublishable::ReturnInternalValue requires that "
               << "'value' be a non-null pointer to a VQwHardwareChannel."
               << QwLog::endl;
+}
 
   //  Get a const pointer to the internal value
   const VQwHardwareChannel* internal_value = ReturnInternalValue(name);
-  if (value && internal_value) {
+  if ((value != nullptr) && (internal_value != nullptr)) {
     value->AssignValueFrom(internal_value);
     foundit = kTRUE;
-  } else
+  } else {
     QwWarning << "MQwPublishable::ReturnInternalValue: name \""
               << name << "\" not found in array." << QwLog::endl;
+}
 
   return foundit;
 }
@@ -143,7 +145,8 @@ Bool_t MQwPublishable<U,T>::PublishByRequest(TString device_name)
       for (auto subsys = u->begin(); subsys != u->end(); ++subsys)
       {
         status = (*subsys)->PublishByRequest(device_name);
-        if (status) break;
+        if (status) { break;
+}
       }
       // Report failure to publish
       if (! status) {
@@ -181,7 +184,7 @@ void MQwPublishable<U,T>::ListPublishedValues() const
  */
 template<class U, class T>
 Bool_t MQwPublishable_child<U,T>::RequestExternalValue(const TString& name, VQwHardwareChannel* value) const  {
-  if (fParent != 0) {
+  if (fParent != nullptr) {
     return fParent->RequestExternalValue(name,value);
   }
   return kFALSE;
@@ -189,10 +192,10 @@ Bool_t MQwPublishable_child<U,T>::RequestExternalValue(const TString& name, VQwH
 /// \brief Retrieve the variable name from other subsystem arrays
 template<class U, class T>
 const VQwHardwareChannel* MQwPublishable_child<U,T>::RequestExternalPointer(const TString& name) const  {
-  if (fParent != 0) {
+  if (fParent != nullptr) {
     return fParent->RequestExternalPointer(name);
   }
-  return NULL;
+  return nullptr;
 }
 
 /**
@@ -208,7 +211,7 @@ Bool_t MQwPublishable_child<U,T>::PublishInternalValue(
 						       const TString desc,
 						       const VQwHardwareChannel* element) const{
   // Get the parent and check for existence
-  if (fParent != 0) {
+  if (fParent != nullptr) {
     // Publish the variable with name in the parent
     if (fParent->PublishInternalValue(name, desc, fSelf, element) == kFALSE) {
       QwError << "Could not publish variable " << name

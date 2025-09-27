@@ -273,9 +273,9 @@ public:
   };
 
   // Factory function to produce appropriate BCM
-  static VQwBPM* CreateStripline(TString subsystemname, TString type, TString name);
+  static VQwBPM* CreateStripline(TString subsystemname, TString name, TString type);
   static VQwBPM* CreateStripline(const VQwBPM& source);
-  static VQwBPM* CreateCombo(TString subsystemname, TString type, TString name);
+  static VQwBPM* CreateCombo(TString subsystemname, TString name, TString type);
   static VQwBPM* CreateCombo(const VQwBPM& source);
 
   private:

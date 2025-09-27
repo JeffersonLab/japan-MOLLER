@@ -17,10 +17,12 @@ RegisterSubsystemFactory(QwBlindDetectorArray);
  */
 void QwBlindDetectorArray::Blind(const QwBlinder *blinder)
 {
-  for (size_t i = 0; i < fIntegrationPMT.size(); i++)
-    fIntegrationPMT[i].Blind(blinder);
-  for (size_t i = 0; i < fCombinedPMT.size(); i++)
-    fCombinedPMT[i].Blind(blinder);
+  for (auto & i : fIntegrationPMT) {
+    i.Blind(blinder);
+}
+  for (auto & i : fCombinedPMT) {
+    i.Blind(blinder);
+}
 }
 
 /**
@@ -36,12 +38,15 @@ void QwBlindDetectorArray::Blind(const QwBlinder *blinder, const VQwSubsystemPar
   /// is just an ugly stop-gap measure.
   if (Compare(const_cast<VQwSubsystemParity*>(subsys))) {
 
-    const QwBlindDetectorArray* yield = dynamic_cast<const QwBlindDetectorArray*>(subsys);
-    if (yield == 0) return;
+    const auto* yield = dynamic_cast<const QwBlindDetectorArray*>(subsys);
+    if (yield == nullptr) { return;
+}
 
-    for (size_t i = 0; i < fIntegrationPMT.size(); i++)
+    for (size_t i = 0; i < fIntegrationPMT.size(); i++) {
       fIntegrationPMT[i].Blind(blinder, yield->fIntegrationPMT[i]);
-    for (size_t i = 0; i < fCombinedPMT.size(); i++)
+}
+    for (size_t i = 0; i < fCombinedPMT.size(); i++) {
       fCombinedPMT[i].Blind(blinder, yield->fCombinedPMT[i]);
+}
   }
 }

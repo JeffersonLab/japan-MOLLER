@@ -42,8 +42,9 @@ template<typename T>
 void  QwClock<T>::InitializeChannel(TString subsystem, TString name, TString datatosave, TString type){
   SetPedestal(0.);
   SetCalibrationFactor(1.);
-  if (type.Length() > 0)
+  if (type.Length() > 0) {
     SetModuleType(type);
+}
   fClock.InitializeChannel(subsystem, "QwClock", name, datatosave);
   fClock.SetNeedsExternalClock(kFALSE);
   SetElementName(name);
@@ -56,7 +57,6 @@ template<typename T>
 void QwClock<T>::ClearEventData()
 {
   fClock.ClearEventData();
-  return;
 }
 /********************************************************/
 //template<typename T>
@@ -82,8 +82,7 @@ void QwClock<T>::EncodeEventData(std::vector<UInt_t> &buffer)
 template<typename T>
 void QwClock<T>::ProcessEvent()
 {
-  return;
-}
+  }
 /********************************************************/
 template<typename T>
 Bool_t QwClock<T>::ApplyHWChecks()
@@ -91,7 +90,7 @@ Bool_t QwClock<T>::ApplyHWChecks()
   Bool_t eventokay=kTRUE;
 
   UInt_t deviceerror=fClock.ApplyHWChecks();//will check for HW consistancy and return the error code (=0 is HW good)
-  eventokay=(deviceerror & 0x0);//if no HW error return true
+  eventokay=((deviceerror & 0x0) != 0u);//if no HW error return true
 
   return eventokay;
 }
@@ -123,7 +122,8 @@ Bool_t QwClock<T>::ApplySingleEventCuts(){
   }
   else{
 
-    if (bDEBUG) std::cout<<" evnt cut failed:-> set limit "<<fULimit<<" harware sum  "<<fClock.GetValue();
+    if (bDEBUG) { std::cout<<" evnt cut failed:-> set limit "<<fULimit<<" harware sum  "<<fClock.GetValue();
+}
     status&=kFALSE;
   }
   return status;
@@ -171,8 +171,8 @@ VQwClock& QwClock<T>::operator= (const VQwClock &value)
     if(typeid(value)==typeid(*this)) {
       // std::cout<<" Here in QwClock::operator= \n";
       if (this->GetElementName()!="") {
-        const QwClock<T>* value_bcm = dynamic_cast<const QwClock<T>* >(&value);
-        QwClock<T>* this_cast = dynamic_cast<QwClock<T>* >(this);
+        const auto* value_bcm = dynamic_cast<const QwClock<T>* >(&value);
+        auto* this_cast = dynamic_cast<QwClock<T>* >(this);
         this_cast->fClock= value_bcm->fClock;
         this_cast->fPedestal=value_bcm->fPedestal;
         this_cast->fCalibration=value_bcm->fCalibration;
@@ -214,8 +214,8 @@ VQwClock& QwClock<T>::operator+= (const VQwClock &value)
     if(typeid(value)==typeid(*this)) {
       // std::cout<<" Here in QwClock::operator+= \n";
       if (this->GetElementName()!="") {
-        const QwClock<T>* value_bcm = dynamic_cast<const QwClock<T>* >(&value);
-        QwClock<T>* this_cast = dynamic_cast<QwClock<T>* >(this);
+        const auto* value_bcm = dynamic_cast<const QwClock<T>* >(&value);
+        auto* this_cast = dynamic_cast<QwClock<T>* >(this);
         this_cast->fClock+=value_bcm->fClock;
         this_cast->fPedestal+=value_bcm->fPedestal;
         this_cast->fCalibration=0;
@@ -238,8 +238,8 @@ VQwClock& QwClock<T>::operator-= (const VQwClock &value)
 {
   if (this->GetElementName()!="")
     {
-      const QwClock<T>* value_bcm = dynamic_cast<const QwClock<T>* >(&value);
-      QwClock<T>* this_cast = dynamic_cast<QwClock<T>* >(this);
+      const auto* value_bcm = dynamic_cast<const QwClock<T>* >(&value);
+      auto* this_cast = dynamic_cast<QwClock<T>* >(this);
       this_cast->fClock-=value_bcm->fClock;
       this_cast->fPedestal-=value_bcm->fPedestal;
       this_cast->fCalibration=0;
@@ -254,8 +254,8 @@ QwClock<T>& QwClock<T>::operator-= (const QwClock<T> &value)
     if(typeid(value)==typeid(*this)) {
       // std::cout<<" Here in QwClock::operator-= \n";
       if (this->GetElementName()!="") {
-        const QwClock<T>* value_bcm = dynamic_cast<const QwClock<T>* >(&value);
-        QwClock<T>* this_cast = dynamic_cast<QwClock<T>* >(this);
+        const auto* value_bcm = dynamic_cast<const QwClock<T>* >(&value);
+        auto* this_cast = dynamic_cast<QwClock<T>* >(this);
         this_cast->fClock-=value_bcm->fClock;
         this_cast->fPedestal-=value_bcm->fPedestal;
         this_cast->fCalibration=0;
@@ -290,14 +290,12 @@ void QwClock<T>::Ratio(const QwClock<T> &numer, const QwClock<T> &denom)
       this->fPedestal=0;
       this->fCalibration=0;
     }
-  return;
-}
+  }
 
 template<typename T>
 void QwClock<T>::Scale(Double_t factor)
 {
   fClock.Scale(factor);
-  return;
 }
 
 template<typename T>
@@ -342,8 +340,7 @@ void QwClock<T>::ConstructHistograms(TDirectory *folder, TString &prefix)
     {
       fClock.ConstructHistograms(folder, prefix);
     }
-  return;
-}
+  }
 
 template<typename T>
 void QwClock<T>::FillHistograms()
@@ -358,8 +355,7 @@ void QwClock<T>::FillHistograms()
     }
 
 
-  return;
-}
+  }
 
 template<typename T>
 void QwClock<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
@@ -370,8 +366,7 @@ void QwClock<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vec
     {
       fClock.ConstructBranchAndVector(tree, prefix,values);
     }
-  return;
-}
+  }
 
 template<typename T>
 void  QwClock<T>::ConstructBranch(TTree *tree, TString &prefix)
@@ -383,8 +378,7 @@ void  QwClock<T>::ConstructBranch(TTree *tree, TString &prefix)
       fClock.ConstructBranch(tree, prefix);
       // this functions doesn't do anything yet
     }
-  return;
-}
+  }
 
 template<typename T>
 void  QwClock<T>::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist)
@@ -405,8 +399,7 @@ void  QwClock<T>::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile&
       }
       // this functions doesn't do anything yet
     }
-  return;
-}
+  }
 
 template<typename T>
 void QwClock<T>::FillTreeVector(std::vector<Double_t> &values) const
@@ -418,8 +411,7 @@ void QwClock<T>::FillTreeVector(std::vector<Double_t> &values) const
       fClock.FillTreeVector(values);
       // this functions doesn't do anything yet
     }
-  return;
-}
+  }
 
 #ifdef HAS_RNTUPLE_SUPPORT
 template<typename T>

@@ -32,7 +32,7 @@ void QwSIS3320_LogicalAccumulator::ProcessEvent()
 void QwSIS3320_LogicalAccumulator::AddAccumulatorReference(
     QwSIS3320_Accumulator *accum, Double_t weight)
 {
-  if (accum) {
+  if (accum != nullptr) {
     fAccumulators.push_back(accum);
     fAccumulatorWeights.push_back(weight);
   }

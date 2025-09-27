@@ -6,7 +6,7 @@ MQwCodaControlEvent::MQwCodaControlEvent(){
   ResetControlParameters();
 }
 
-MQwCodaControlEvent::~MQwCodaControlEvent() { }
+MQwCodaControlEvent::~MQwCodaControlEvent() = default;
 
 void MQwCodaControlEvent::ResetControlParameters()
 {
@@ -28,9 +28,9 @@ void MQwCodaControlEvent::ResetControlParameters()
   fEndDatime.Set(UInt_t(0));
 }
 
-void MQwCodaControlEvent::ProcessControlEvent(UInt_t evtype, UInt_t* buffer){
-  UInt_t local_time;
-  UInt_t local_evcount;
+void MQwCodaControlEvent::ProcessControlEvent(UInt_t evtype, const UInt_t* buffer){
+  UInt_t local_time = 0;
+  UInt_t local_evcount = 0;
 
   local_time      = buffer[0];
   local_evcount   = buffer[2];
@@ -108,25 +108,29 @@ void MQwCodaControlEvent::ProcessEnd(UInt_t local_time, UInt_t evt_count)
 
 UInt_t MQwCodaControlEvent::GetGoTime(int index)
 {
-  if (index>=0 && index<(Int_t)fNumberGo) return fGoTime[index];
+  if (index>=0 && index<(Int_t)fNumberGo) { return fGoTime[index];
+}
   return 0;
 }
 
 UInt_t MQwCodaControlEvent::GetGoEventCount(int index)
 {
-  if (index>=0 && index<(Int_t)fNumberGo) return fGoEventCount[index];
+  if (index>=0 && index<(Int_t)fNumberGo) { return fGoEventCount[index];
+}
   return 0;
 }
 
 UInt_t MQwCodaControlEvent::GetPauseTime(int index)
 {
-  if (index>=0 && index<(Int_t)fNumberPause) return fPauseTime[index];
+  if (index>=0 && index<(Int_t)fNumberPause) { return fPauseTime[index];
+}
   return 0;
 }
 
 UInt_t MQwCodaControlEvent::GetPauseEventCount(int index)
 {
-  if (index>=0 && index<(Int_t)fNumberPause) return fPauseEventCount[index];
+  if (index>=0 && index<(Int_t)fNumberPause) { return fPauseEventCount[index];
+}
   return 0;
 }
 
@@ -147,17 +151,18 @@ void MQwCodaControlEvent::ReportRunSummary()
   if (fFoundControlEvents){
     //  At least one control event has been found.
     //  Report the control event data we did find.
-    Int_t i;
+    Int_t i = 0;
     QwMessage << "Run Number:         " << fPrestartRunNumber << QwLog::endl;
     QwMessage << "Run Type:           " << fRunType << QwLog::endl;
     QwMessage << "PreStart Time:      " << fPrestartTime << QwLog::endl;
     QwMessage << "Start Time:         " << fStartTime << QwLog::endl;
     QwMessage << "End Time:           " << fEndTime << QwLog::endl;
     QwMessage << "End Event Counter:  " << fEndEventCount << QwLog::endl;
-    if (fEndTime>0 && fStartTime>0)
+    if (fEndTime>0 && fStartTime>0) {
       QwMessage << "Run Duration (sec): " << fEndTime-fStartTime << QwLog::endl;
-    else
+    } else {
       QwMessage << "Run Duration (sec): " << "n/a" << QwLog::endl;
+}
     QwMessage << "SQL-Formatted Start Time: " << GetStartSQLTime()
 	      << QwLog::endl; 
     QwMessage << "SQL-Formatted End Time:   " << GetEndSQLTime()
@@ -198,6 +203,6 @@ time_t MQwCodaControlEvent::GetEndUnixTime()
   // $date -d@1338523199 
   // Thu May 31 23:59:59 EDT 2012 in a xterm (Linux)
 
-  if(end_time) return (time_t) end_time;
-  else         return (time_t) qweak_end_time;
+  if(end_time != 0u) { return (time_t) end_time;
+  }         return (time_t) qweak_end_time;
 }

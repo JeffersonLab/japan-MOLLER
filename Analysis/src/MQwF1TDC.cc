@@ -37,28 +37,28 @@ const UInt_t MQwF1TDC::kF1Mask_HeaderChannelAddress = 0x00000007;
 
 
 
-MQwF1TDC::MQwF1TDC()
+MQwF1TDC::MQwF1TDC() : fF1HeaderFlag(kFALSE), fF1FakeDataFlag(kFALSE), fF1HeaderTrigFIFOFlag(kFALSE), fF1HeaderXorSetupFlag(kFALSE), fF1HitFIFOFlag(kFALSE), fF1OutputFIFOFlag(kFALSE), fF1OverFlowEntryFlag(kFALSE), fF1ResolutionLockFlag(kFALSE), fF1ValidDataSlotFlag(kFALSE)
 { 
-  fF1ROCNumber          = 0;
-  fF1SlotNumber         = 0;
+  
+  
 
-  fF1HeaderFlag         = kFALSE;
+  
 
-  fF1HitFIFOFlag        = kFALSE;
-  fF1OutputFIFOFlag     = kFALSE;
-  fF1ResolutionLockFlag = kFALSE;
+  
+  
+  
 
-  fF1FakeDataFlag       = kFALSE;
-  fF1ChannelNumber      = 0;
-  fF1Dataword           = 0;
+  
+  
+  
 
 
-  fF1HeaderTrigFIFOFlag = kFALSE;
-  fF1HeaderEventNumber  = 0;
-  fF1HeaderTriggerTime  = 0;
-  fF1HeaderXorSetupFlag = kFALSE;
+  
+  
+  
+  
 
-  fF1MaxChannelsPerModule = 64; 
+  
 
   // This initial fF1MaxChannelsPerModule 64
   // is used to "resize" a vector in RegisterSlotNumber() function
@@ -74,11 +74,11 @@ MQwF1TDC::MQwF1TDC()
   // it would be better to change this number to 32 by hand.
   // Friday, September  3 13:50:49 EDT 2010, jhlee
 
-  fF1OverFlowEntryFlag  = kFALSE;
-  fF1ValidDataSlotFlag  = kFALSE;
+  
+  
 }
 
-MQwF1TDC::~MQwF1TDC() { }
+MQwF1TDC::~MQwF1TDC() = default;
 
 
 void MQwF1TDC::DecodeTDCWord(UInt_t &word, const ROCID_t roc_id)
@@ -87,8 +87,9 @@ void MQwF1TDC::DecodeTDCWord(UInt_t &word, const ROCID_t roc_id)
   fF1ROCNumber  = roc_id;
   fF1SlotNumber = (word & kF1Mask_SlotNumber)>>27;
 
-  if( fF1SlotNumber>=1 && fF1SlotNumber<=21 ) fF1ValidDataSlotFlag = kTRUE;
-  else                                        fF1ValidDataSlotFlag = kFALSE;
+  if( fF1SlotNumber>=1 && fF1SlotNumber<=21 ) { fF1ValidDataSlotFlag = kTRUE;
+  } else {                                        fF1ValidDataSlotFlag = kFALSE;
+}
 
   
   fF1HeaderFlag         = ((word & kF1Mask_HeaderFlag)==0); 
@@ -118,8 +119,9 @@ void MQwF1TDC::DecodeTDCWord(UInt_t &word, const ROCID_t roc_id)
     fF1ChannelAddress = ( word & kF1Mask_ChannelAddress )>>16;
     fF1Dataword       = ( word & kF1Mask_Dataword );
 
-    if(fF1Dataword == 65535) fF1OverFlowEntryFlag = kTRUE;
-    else                     fF1OverFlowEntryFlag = kFALSE;
+    if(fF1Dataword == 65535) { fF1OverFlowEntryFlag = kTRUE;
+    } else {                     fF1OverFlowEntryFlag = kFALSE;
+}
     // skip to record overflow dataword entry (65535, 0xFFFF)
     fF1HeaderEventNumber   = 0;
     fF1HeaderTriggerTime   = 0;
@@ -128,8 +130,7 @@ void MQwF1TDC::DecodeTDCWord(UInt_t &word, const ROCID_t roc_id)
     // 	      << " raw time: " << fF1Dataword 
     // 	      << std::endl;
   }
-  return;
-}
+  }
 
 std::ostream& operator<< (std::ostream& os, const MQwF1TDC &f1tdc)
 {
@@ -188,7 +189,7 @@ std::ostream& operator<< (std::ostream& os, const MQwF1TDC &f1tdc)
 
 
 
-void MQwF1TDC::Print(Bool_t flag)
+void MQwF1TDC::Print(Bool_t flag) const
 {
   if(flag) {
     std::cout << *this << std::endl;
@@ -196,7 +197,7 @@ void MQwF1TDC::Print(Bool_t flag)
 }
 
 
-void MQwF1TDC::PrintTDCHeader(Bool_t flag)
+void MQwF1TDC::PrintTDCHeader(Bool_t flag) const
 {
   if(flag) {
     std::cout << *this << std::endl;
@@ -204,7 +205,7 @@ void MQwF1TDC::PrintTDCHeader(Bool_t flag)
 }
 
 
-void MQwF1TDC::PrintTDCData(Bool_t flag)
+void MQwF1TDC::PrintTDCData(Bool_t flag) const
 {
   if(flag) {
     std::cout << *this << std::endl;
@@ -281,39 +282,36 @@ void MQwF1TDC::PrintTDCData(Bool_t flag)
 
 
 
-void MQwF1TDC::PrintResolutionLockStatus(const ROCID_t roc_id)
+void MQwF1TDC::PrintResolutionLockStatus(const ROCID_t roc_id) const
 {
   if (not fF1ResolutionLockFlag) {
     QwWarning << "F1TDC board RESOULTION LOCK FAIL at Ch " 
 	      << GetTDCChannelNumber() << " ROC " << roc_id
 	      << " Slot " << GetTDCSlotNumber() << QwLog::endl;
   }
-  return;
-}
+  }
 
 
 
-void MQwF1TDC::PrintHitFIFOStatus(const ROCID_t roc_id)
+void MQwF1TDC::PrintHitFIFOStatus(const ROCID_t roc_id) const
 {
   if (fF1HitFIFOFlag) {
     QwWarning << "F1TDC board HIT FIFO FULL at Ch "
               << GetTDCChannelNumber() << " ROC " << roc_id
               << " Slot " << GetTDCSlotNumber() << QwLog::endl;
   }
-  return;
-}
+  }
 
 
 
-void MQwF1TDC::PrintOutputFIFOStatus(const ROCID_t roc_id)
+void MQwF1TDC::PrintOutputFIFOStatus(const ROCID_t roc_id) const
 {
   if (fF1OutputFIFOFlag) {
     QwWarning << "F1TDC board OUTPUT FIFO FULL at Ch "
               << GetTDCChannelNumber() << " ROC " << roc_id
               << " Slot " << GetTDCSlotNumber() << QwLog::endl;
   }
-  return;
-}
+  }
 
 
 Bool_t MQwF1TDC::IsValidDataword() const
@@ -323,10 +321,10 @@ Bool_t MQwF1TDC::IsValidDataword() const
   // fF1HeaderFlag        = FALSE, 
   // fF1OverFlowEntry     = FALSE, 
   // fF1FakeDataWord      = FALSE, then it is a valid data word.
-  if( fF1ValidDataSlotFlag && fF1ResolutionLockFlag && !fF1HeaderFlag && !fF1OverFlowEntryFlag && !fF1FakeDataFlag)
+  if( fF1ValidDataSlotFlag && fF1ResolutionLockFlag && !fF1HeaderFlag && !fF1OverFlowEntryFlag && !fF1FakeDataFlag) {
     //  if( fF1ValidDataSlotFlag && fF1ResolutionLockFlag && !fF1HeaderFlag)
     return kTRUE;
-  else                                             
+  }                                             
     return kFALSE; 
 }
 

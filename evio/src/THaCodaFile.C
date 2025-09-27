@@ -69,7 +69,7 @@ using namespace std;
 //_____________________________________________________________________________
   Int_t THaCodaFile::codaClose() {
 // Close the file. Do nothing if file not opened.
-    if( !handle ) {
+    if( handle == 0 ) {
       return ReturnCode(S_SUCCESS);
     }
     Int_t status = evClose(handle);
@@ -83,7 +83,7 @@ using namespace std;
   Int_t THaCodaFile::codaRead() {
 // codaRead: Reads data from file, stored in evbuffer.
 // Must be called once per event.
-    if( !handle ) {
+    if( handle == 0 ) {
       if (verbose > 0) {
         cout << "codaRead ERROR: tried to access a file with handle = 0" << endl;
         cout << "You need to call codaOpen(filename)" << endl;
@@ -102,13 +102,15 @@ using namespace std;
         // Unfortunately, the EVIO C-API does not provide any means to access
         // the actual event length here, so we have to guess how much more
         // space is needed.  TODO: Make an EVIO feature request?
-        if( !evbuffer.grow() )
+        if( !evbuffer.grow() ) {
           break;
+}
       }
     } while( status == S_EVFILE_TRUNC );
 
-    if( status == S_SUCCESS )
+    if( status == S_SUCCESS ) {
       evbuffer.recordSize();
+}
 
     fIsGood = (status == S_SUCCESS || status == EOF );
     staterr("read",status);
@@ -119,7 +121,7 @@ using namespace std;
 //_____________________________________________________________________________
   Int_t THaCodaFile::codaWrite(const UInt_t* evbuf) {
 // codaWrite: Writes data from 'evbuf' to file
-    if( !handle ) {
+    if( handle == 0 ) {
       cout << "codaWrite ERROR: tried to access file with handle = 0" << endl;
       return ReturnCode(S_EVFILE_BADHANDLE);
     }
@@ -174,7 +176,8 @@ Int_t THaCodaFile::filterToFile( const char* output_file )
   }
 
   UInt_t nfilt = 0;
-  Int_t status = CODA_OK, fout_status = CODA_OK;
+  Int_t status = CODA_OK;
+  Int_t fout_status = CODA_OK;
   while( (status = codaRead()) == CODA_OK ) {
     UInt_t* rawbuff = getEvBuffer();
     UInt_t evtype = rawbuff[1] >> 16;
@@ -188,8 +191,9 @@ Int_t THaCodaFile::filterToFile( const char* output_file )
     }
 
     Bool_t oktofilt = true;
-    if( !evtypes.empty() )
+    if( !evtypes.empty() ) {
       oktofilt = any_of(ALL(evtypes), Equals<UInt_t>(evtype));
+}
     // JOH: Added this test to let the filter act as a logical AND of
     // the configured event types and event numbers, which is more general.
     // Empty event type or event number lists always pass. I.e. if both lists
@@ -198,12 +202,15 @@ Int_t THaCodaFile::filterToFile( const char* output_file )
     // The previous behavior was to ignore any configured event types if
     // event numbers were also configured. Obviously, that's a special case of
     // the above which one can achieve by leaving the event type list empty.
-    if( !oktofilt )
+    if( !oktofilt ) {
       continue;
-    if( !evlist.empty() )
+}
+    if( !evlist.empty() ) {
       oktofilt = any_of(ALL(evlist), Equals<UInt_t>(evnum));
-    if( !oktofilt )
+}
+    if( !oktofilt ) {
       continue;
+}
 
     nfilt++;
     if (verbose > 1) {
@@ -223,8 +230,9 @@ Int_t THaCodaFile::filterToFile( const char* output_file )
       }
     }
   }
-  if( status == CODA_EOF) // EOF is normal
+  if( status == CODA_EOF) { // EOF is normal
     status = CODA_OK;
+}
   fIsGood = (status == CODA_OK);
 
   fout_status = fout->codaClose();
@@ -236,9 +244,10 @@ Int_t THaCodaFile::filterToFile( const char* output_file )
   void THaCodaFile::addEvTypeFilt(UInt_t evtype_to_filt)
 // Function to set up filtering by event type
   {
-     if( evtypes.capacity() < 16 )
+     if( evtypes.capacity() < 16 ) {
        // Typical filtering scenarios involve a small number of event types
        evtypes.reserve(16);
+}
      evtypes.push_back(evtype_to_filt);
   }
 
@@ -246,9 +255,10 @@ Int_t THaCodaFile::filterToFile( const char* output_file )
   void THaCodaFile::addEvListFilt(UInt_t event_to_filt)
 // Function to set up filtering by list of event numbers
   {
-     if( evlist.capacity() < 1024 )
+     if( evlist.capacity() < 1024 ) {
        // Event lists tend to be lengthy, so start out with a generous size
        evlist.reserve(1024);
+}
      evlist.push_back(event_to_filt);
   }
 

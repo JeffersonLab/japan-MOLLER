@@ -183,19 +183,19 @@ class QwEventBuffer {
 	// Coda Version that is set by void VerifyCodaVersion( ) 
 	// Compared against the user-input coda version
 	Int_t fDataVersionVerify = 0;
-  Int_t fDataVersion; // User-input Coda Version	
+  Int_t fDataVersion{}; // User-input Coda Version	
 
  protected:
   ///
-  Bool_t fOnline;
+  Bool_t fOnline{};
   TString fETHostname;
   TString fETSession;
   TString fETStationName;
-  Int_t   fETWaitMode;
-  Bool_t  fExitOnEnd;
+  Int_t   fETWaitMode{};
+  Bool_t  fExitOnEnd{};
 
 
-  Bool_t fChainDataFiles;
+  Bool_t fChainDataFiles{};
   std::pair<Int_t, Int_t> fRunRange;
   std::string fRunListFileName;
   QwParameterFile* fRunListFile;
@@ -203,7 +203,7 @@ class QwEventBuffer {
 
   std::pair<UInt_t, UInt_t> fEventRange;
   std::string fEventListFileName;
-  QwParameterFile* fEventListFile;
+  QwParameterFile* fEventListFile{};
   std::vector<UInt_t> fEventList;
 
   std::pair<Int_t, Int_t> fSegmentRange;
@@ -248,7 +248,7 @@ class QwEventBuffer {
 
   Int_t fCurrentRun;
 
-  Bool_t fRunIsSegmented;
+  Bool_t fRunIsSegmented{};
 
 
   std::vector<Int_t>           fRunSegments;
@@ -256,7 +256,7 @@ class QwEventBuffer {
 
 
  protected:
-  Double_t fCleanParameter[3]; ///< Scan data/clean data from the green monster
+  Double_t fCleanParameter[3]{}; ///< Scan data/clean data from the green monster
 
 
   TStopwatch fRunTimer;      ///<  Timer used for runlet processing loop
@@ -269,13 +269,13 @@ class QwEventBuffer {
   std::unordered_map<RocBankLabel_t, std::vector<UInt_t> > fOffsetList;
 
   Int_t CheckForMarkerWords(QwSubsystemArray &subsystems);
-  RocBankLabel_t fThisRocBankLabel;
-  UInt_t FindMarkerWord(UInt_t markerID, UInt_t* buffer, UInt_t num_words);
+  RocBankLabel_t fThisRocBankLabel{};
+  UInt_t FindMarkerWord(UInt_t markerindex, const UInt_t* buffer, UInt_t num_words);
   UInt_t GetMarkerWord(UInt_t markerID);
 
  protected:
   UInt_t     fNumPhysicsEvents;
-  UInt_t     fStartingPhysicsEvent;
+  UInt_t     fStartingPhysicsEvent{};
 
   Bool_t fSingleFile;
 

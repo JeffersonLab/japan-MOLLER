@@ -56,7 +56,8 @@ Int_t QwBeamMod::LoadChannelMap(TString mapfile){
   Int_t bankindex=-1;
  
 
-  TString varname, varvalue;
+  TString varname;
+  TString varvalue;
 
   // Open the file
   QwParameterFile mapstr(mapfile.Data());
@@ -69,7 +70,7 @@ Int_t QwBeamMod::LoadChannelMap(TString mapfile){
     if(bankindex!=GetSubbankIndex(fCurrentROC_ID,fCurrentBank_ID)) { 
       bankindex=GetSubbankIndex(fCurrentROC_ID,fCurrentBank_ID);
       if ((bankindex+1)>0){
-	UInt_t numbanks = UInt_t(bankindex+1);
+	auto numbanks = UInt_t(bankindex+1);
 	if (fWordsPerSubbank.size()<numbanks){
 	  fWordsPerSubbank.resize(numbanks,
 				  std::pair<Int_t, Int_t>(fWord.size(),fWord.size()));
@@ -78,7 +79,8 @@ Int_t QwBeamMod::LoadChannelMap(TString mapfile){
       wordsofar=0;
     }
     mapstr.TrimWhitespace();   // Get rid of leading and trailing spaces.
-    if (mapstr.LineIsEmpty())  continue;
+    if (mapstr.LineIsEmpty()) {  continue;
+}
 
    
     if (mapstr.HasVariablePair("=",varname,varvalue))
@@ -118,8 +120,9 @@ Int_t QwBeamMod::LoadChannelMap(TString mapfile){
         {
           localModChannelID.Print();
           std::cout<<"line ok=";
-          if(lineok) std::cout<<"TRUE"<<std::endl;
-          else std::cout<<"FALSE"<<std::endl;
+          if(lineok) { std::cout<<"TRUE"<<std::endl;
+          } else { std::cout<<"FALSE"<<std::endl;
+}
         }
       }
 
@@ -147,8 +150,9 @@ Int_t QwBeamMod::LoadChannelMap(TString mapfile){
         {
           localModChannelID.Print();
           std::cout<<"line ok=";
-          if(lineok) std::cout<<"TRUE"<<std::endl;
-          else std::cout<<"FALSE"<<std::endl;
+          if(lineok) { std::cout<<"TRUE"<<std::endl;
+          } else { std::cout<<"FALSE"<<std::endl;
+}
         }	
 	
       }
@@ -177,14 +181,16 @@ Int_t QwBeamMod::LoadChannelMap(TString mapfile){
         {
           localModChannelID.Print();
           std::cout<<"line ok=";
-          if(lineok) std::cout<<"TRUE"<<std::endl;
-          else std::cout<<"FALSE"<<std::endl;
+          if(lineok) { std::cout<<"TRUE"<<std::endl;
+          } else { std::cout<<"FALSE"<<std::endl;
+}
         }
       }
 
       if(localModChannelID.fmoduletype=="SKIP"){
-	if (localModChannelID.modnum<=0) wordsofar+=1;
-	else           wordsofar+= localModChannelID.modnum;
+	if (localModChannelID.modnum<=0) { wordsofar+=1;
+	} else {           wordsofar+= localModChannelID.modnum;
+}
       
        }
 
@@ -206,8 +212,9 @@ Int_t QwBeamMod::LoadChannelMap(TString mapfile){
           fPatternWordIndex = fWord.size() - 1;
         }
 
-        if(namech=="ffb_status")//save the location of this word to access this later
+        if(namech=="ffb_status") {//save the location of this word to access this later
           fFFB_Index=fWord.size()-1;
+}
 	//store reference to bmwobj
 	if(namech == "bmwobj"){
 	  fBmwObj_Index = fWord.size() - 1;
@@ -223,11 +230,13 @@ Int_t QwBeamMod::LoadChannelMap(TString mapfile){
   if(ldebug)
   {
     std::cout<<"Done with Load map channel \n";
-    for(size_t i=0;i<fModChannelID.size();i++)
-      fModChannelID[i].Print();
+    for(auto & i : fModChannelID) {
+      i.Print();
+}
 
-    for(size_t i=0;i<fWord.size();i++)
-      fWord[i].PrintID();
+    for(const auto & i : fWord) {
+      i.PrintID();
+}
   }
   return 0;
 }
@@ -244,19 +253,19 @@ Int_t QwBeamMod::LoadChannelMap(TString mapfile){
 
 QwModChannelID::QwModChannelID(Int_t subbankid,
 				   QwParameterFile &paramfile):
-  fSubbankIndex(subbankid), fIndex(-1)
+  fSubbankIndex(subbankid), channum(paramfile.GetTypedNextToken<Int_t>()), modnum(paramfile.GetTypedNextToken<Int_t>()), fIndex(-1)
 {
   
   fmoduletype   = paramfile.GetTypedNextToken<TString>();
-  modnum        = paramfile.GetTypedNextToken<Int_t>();    //slot number
-  channum       = paramfile.GetTypedNextToken<Int_t>();    //channel number
+     //slot number
+     //channel number
   //  fdetectortype = paramfile.GetTypedNextToken<TString>();  //type-purpose of the detector
   fmodulename  = paramfile.GetTypedNextToken<TString>();  //name of the detector
   fmoduletype.ToUpper();
   //  fdetectortype.ToLower();
   fmodulename.ToLower();
 
-  Int_t offset;
+  Int_t offset = 0;
   if (fmoduletype == "VQWK") {
     fWordInSubbank = QwVQWK_Channel::GetBufferOffset(modnum, channum);
     if (paramfile.ReturnValue("vqwk_buffer_offset",offset)) {
@@ -288,19 +297,19 @@ void QwBeamMod::LoadEventCuts_Init(){
 }
 
 void QwBeamMod::LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, Int_t &eventcut_flag){
-  TString device_type = mapstr.GetTypedNextToken<TString>();
+  auto device_type = mapstr.GetTypedNextToken<TString>();
   device_type.ToUpper();
-  TString device_name = mapstr.GetTypedNextToken<TString>();
+  auto device_name = mapstr.GetTypedNextToken<TString>();
   device_name.ToUpper();
 
   if (device_type == "VQWK"||device_type=="SCALER" ||device_type=="SIS3801D24" ||device_type=="SIS3801D32"){
 	  device_name.ToLower();
-	  Double_t LLX = mapstr.GetTypedNextToken<Double_t>();	//lower limit for BCM value
-	  Double_t ULX = mapstr.GetTypedNextToken<Double_t>();	//upper limit for BCM value
+	  auto LLX = mapstr.GetTypedNextToken<Double_t>();	//lower limit for BCM value
+	  auto ULX = mapstr.GetTypedNextToken<Double_t>();	//upper limit for BCM value
 	  varvalue = mapstr.GetTypedNextToken<TString>();//global/loacal
-    Double_t burplevel = mapstr.GetTypedNextToken<Double_t>();
+    auto burplevel = mapstr.GetTypedNextToken<Double_t>();
 	  varvalue.ToLower();
-	  Double_t stabilitycut = mapstr.GetTypedNextToken<Double_t>();
+	  auto stabilitycut = mapstr.GetTypedNextToken<Double_t>();
   	QwMessage<<"QwBeamMod Error Code  "<<GetGlobalErrorFlag(varvalue,eventcut_flag,stabilitycut)<<QwLog::endl;
 	  Int_t det_index=GetDetectorIndex(device_name);
 	  QwMessage << "*****************************" << QwLog::endl;
@@ -322,16 +331,17 @@ void QwBeamMod::LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, I
 
 void QwBeamMod::LoadEventCuts_Fin(Int_t &eventcut_flag){
   //update the event cut ON/OFF for all the devices
-  for (size_t i=0;i<fModChannel.size();i++)
-    fModChannel[i]->SetEventCutMode(eventcut_flag);
+  for (auto & i : fModChannel) {
+    i->SetEventCutMode(eventcut_flag);
+}
 }
 
 //*****************************************************************
 Bool_t QwBeamMod::CheckForBurpFail(const VQwSubsystem *subsys){
   Bool_t burpstatus = kFALSE;
-  VQwSubsystem* tmp = const_cast<VQwSubsystem *>(subsys);
+  auto* tmp = const_cast<VQwSubsystem *>(subsys);
   if(Compare(tmp)) {
-    const QwBeamMod* input = dynamic_cast<const QwBeamMod*>(subsys);
+    const auto* input = dynamic_cast<const QwBeamMod*>(subsys);
     for(size_t i=0;i<input->fModChannel.size();i++){
       //QwError << "************* test Clock *****************" << QwLog::endl;
       burpstatus |= (this->fModChannel[i])->CheckForBurpFail(input->fModChannel[i]);
@@ -348,19 +358,20 @@ Int_t QwBeamMod::LoadInputParameters(TString pedestalfile)
 
   Int_t lineread=1;
 
-  if(ldebug)std::cout<<"QwBeamMod::LoadInputParameters("<< pedestalfile<<")\n";
+  if(ldebug) {std::cout<<"QwBeamMod::LoadInputParameters("<< pedestalfile<<")\n";
+}
 
   QwParameterFile mapstr(pedestalfile.Data());  //Open the file
   while (mapstr.ReadNextLine())
     {
       lineread+=1;
-      if(ldebug)std::cout<<" line read so far ="<<lineread<<"\n";
+      if(ldebug) {std::cout<<" line read so far ="<<lineread<<"\n";
+}
       mapstr.TrimComment('!');   // Remove everything after a '!' character.
       mapstr.TrimWhitespace();   // Get rid of leading and trailing spaces.
-      if (mapstr.LineIsEmpty())  continue;
-      else
-	{
-	  TString varname = mapstr.GetTypedNextToken<TString>();	//name of the channel
+      if (mapstr.LineIsEmpty()) {  continue;
+      } 
+		  TString varname = mapstr.GetTypedNextToken<TString>();	//name of the channel
 	  varname.ToLower();
 	  varname.Remove(TString::kBoth,' ');
 	  Double_t varped = mapstr.GetTypedNextToken<Double_t>(); // value of the pedestal
@@ -376,10 +387,11 @@ Int_t QwBeamMod::LoadInputParameters(TString pedestalfile)
 		  fModChannel[i]->SetCalibrationFactor(varcal);
 		  break;
 		}
-	}
+
 
     }
-  if(ldebug) std::cout<<" line read in the pedestal + cal file ="<<lineread<<" \n";
+  if(ldebug) { std::cout<<" line read in the pedestal + cal file ="<<lineread<<" \n";
+}
 
   ldebug=kFALSE;
   return 0;
@@ -397,28 +409,30 @@ Int_t QwBeamMod::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, U
 
   if (index>=0 && num_words>0){
     //  We want to process this ROC.  Begin looping through the data.
-    if (lkDEBUG)
+    if (lkDEBUG) {
       QwMessage << "QwBeamMod::ProcessEvBuffer:  "
 		<< "Begin processing ROC" << roc_id
 		<< " and subbank "<<bank_id
 		<< " number of words="<<num_words<<QwLog::endl;
+}
     if (buffer[0]==0xf0f0f0f0 && num_words%2==1){
       buffer++;
      
-      if (lkDEBUG)
+      if (lkDEBUG) {
 	QwMessage << "QwBeamMod::ProcessEvBuffer:  "
 		  << "Skipped padding word 0xf0f0f0f0 at beginning of buffer."
 		  << QwLog::endl;
+}
     }
 
-    for(size_t i=0;i<fModChannelID.size();i++) {
-      if(fModChannelID[i].fSubbankIndex==index)	{
+    for(auto & i : fModChannelID) {
+      if(i.fSubbankIndex==index)	{
 	if (lkDEBUG) {
-	  std::cout<<"found modulation data for "<<fModChannelID[i].fmodulename<<std::endl;
-	  std::cout<<"word left to read in this buffer:"<<num_words-fModChannelID[i].fWordInSubbank<<std::endl;
+	  std::cout<<"found modulation data for "<<i.fmodulename<<std::endl;
+	  std::cout<<"word left to read in this buffer:"<<num_words-i.fWordInSubbank<<std::endl;
 	}
-	fModChannel[fModChannelID[i].fIndex]->ProcessEvBuffer(&(buffer[fModChannelID[i].fWordInSubbank]),
-							      num_words-fModChannelID[i].fWordInSubbank);
+	fModChannel[i.fIndex]->ProcessEvBuffer(&(buffer[i.fWordInSubbank]),
+							      num_words-i.fWordInSubbank);
 	//fModChannel[fModChannelID[i].fIndex]->PrintInfo();
 	//fModChannel[fModChannelID[i].fIndex]->PrintValue();
 	//fModChannel[fModChannelID[i].fIndex]->PrintErrorCounters();
@@ -475,7 +489,8 @@ Bool_t QwBeamMod::ApplySingleEventCuts(){
     //}
     
 
-    if(!test_BCM1 &&  bDEBUG) std::cout<<"******* QwBeamMod::SingleEventCuts()->BCM[ "<<i<<" , "<<fModChannel[i]->GetElementName()<<" ] ******" << std::endl;
+    if(!test_BCM1 &&  bDEBUG) { std::cout<<"******* QwBeamMod::SingleEventCuts()->BCM[ "<<i<<" , "<<fModChannel[i]->GetElementName()<<" ] ******" << std::endl;
+}
   }
   
   
@@ -518,8 +533,8 @@ Bool_t QwBeamMod::ApplySingleEventCuts(){
 
 void QwBeamMod::IncrementErrorCounters()
 {
-  for(size_t i=0;i<fModChannel.size();i++){
-    fModChannel[i]->IncrementErrorCounters();
+  for(auto & i : fModChannel){
+    i->IncrementErrorCounters();
   }
 }
 
@@ -527,15 +542,15 @@ void QwBeamMod::PrintErrorCounters() const{//inherited from the VQwSubsystemPari
 
   std::cout<<"*********QwBeamMod Error Summary****************"<<std::endl;
   QwVQWK_Channel::PrintErrorCounterHead();
-  for(size_t i=0;i<fModChannel.size();i++){
-    fModChannel[i]->PrintErrorCounters();
+  for(auto i : fModChannel){
+    i->PrintErrorCounters();
   }
   QwVQWK_Channel::PrintErrorCounterTail();
 }
 
 void QwBeamMod::UpdateErrorFlag(const VQwSubsystem *ev_error)
 {
-  const QwBeamMod* input = dynamic_cast<const QwBeamMod*> (ev_error);
+  const auto* input = dynamic_cast<const QwBeamMod*> (ev_error);
 
   for(size_t i=0;i<fModChannel.size();i++){
     fModChannel[i]->UpdateErrorFlag(input->fModChannel[i]->GetEventcutErrorFlag());
@@ -545,10 +560,10 @@ void QwBeamMod::UpdateErrorFlag(const VQwSubsystem *ev_error)
 }
 
 UInt_t QwBeamMod::GetEventcutErrorFlag(){//return the error flag
-  UInt_t ErrorFlag;
+  UInt_t ErrorFlag = 0;
   ErrorFlag=0;
-  for(size_t i=0;i<fModChannel.size();i++){
-    ErrorFlag |= fModChannel[i]->GetEventcutErrorFlag();
+  for(auto & i : fModChannel){
+    ErrorFlag |= i->GetEventcutErrorFlag();
   }
   ErrorFlag |= fFFB_ErrorFlag;
   
@@ -560,10 +575,10 @@ UInt_t QwBeamMod::GetEventcutErrorFlag(){//return the error flag
 
 void  QwBeamMod::ProcessEvent(){
   //std::cout << "Here in ProcessEvent() " << std::endl;
-  for (size_t i = 0; i < fModChannel.size(); i++) {
+  for (auto & i : fModChannel) {
     // First apply HW checks and update HW  error flags.
-    fModChannel[i]->ApplyHWChecks();
-    fModChannel[i]->ProcessEvent();
+    i->ApplyHWChecks();
+    i->ProcessEvent();
     //fModChannel[i]->PrintValue();
   }
 }
@@ -583,11 +598,13 @@ Int_t QwBeamMod::ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t
 
  void QwBeamMod::ClearEventData(){
    // std::cout << "Here in ClearEventData " << std::endl;
-   for(size_t i=0;i<fModChannel.size();i++)
-    fModChannel[i]->ClearEventData();
+   for(auto & i : fModChannel) {
+    i->ClearEventData();
+}
 
-   for (size_t i=0;i<fWord.size();i++)
-    fWord[i].ClearEventData();
+   for (auto & i : fWord) {
+    i.ClearEventData();
+}
    //std::cout << "Error Flag: " << fFFB_ErrorFlag << std::endl;
    fFFB_ErrorFlag=0;
 }
@@ -603,17 +620,17 @@ Int_t QwBeamMod::GetDetectorIndex(TString name)
     }
 
   Int_t result=-1;
-  for(size_t i=0;i<fModChannelID.size();i++)
+  for(auto & i : fModChannelID)
     {
 
-      if(fModChannelID[i].fmodulename==name){
-	  result=fModChannelID[i].fIndex;
+      if(i.fmodulename==name){
+	  result=i.fIndex;
       }
    
       if(ldebug)
 	{
-	  std::cout<<"testing against ("<<fModChannelID[i].fTypeID
-		   <<","<<fModChannelID[i].fmodulename<<")=>"<<result<<"\n";
+	  std::cout<<"testing against ("<<i.fTypeID
+		   <<","<<i.fmodulename<<")=>"<<result<<"\n";
 	}
     }
   //do it over the words, fWords
@@ -633,15 +650,16 @@ VQwSubsystem&  QwBeamMod::operator=  (VQwSubsystem *value)
   if(Compare(value))
     {
 
-      QwBeamMod* input = dynamic_cast<QwBeamMod*>(value);
+      auto* input = dynamic_cast<QwBeamMod*>(value);
       
       for(size_t i=0;i<input->fModChannel.size();i++){
 	//input->fModChannel[i]->PrintValue();
 	this->fModChannel[i]->AssignValueFrom(input->fModChannel[i]);
 	//fModChannel[i]->PrintValue();
       }
-      for(size_t i=0;i<input->fWord.size();i++)
+      for(size_t i=0;i<input->fWord.size();i++) {
   	this->fWord[i].fValue=input->fWord[i].fValue;
+}
       this->fFFB_ErrorFlag=input->fFFB_ErrorFlag;
      
     }
@@ -653,10 +671,11 @@ VQwSubsystem&  QwBeamMod::operator+=  (VQwSubsystem *value)
   if(Compare(value)){
     // std::cout << "Here in operator+= " << std::endl;
       //QwBeamMod* input= (QwBeamMod*)value ;
-      QwBeamMod* input = dynamic_cast<QwBeamMod*>(value);
+      auto* input = dynamic_cast<QwBeamMod*>(value);
 
-      for(size_t i=0;i<input->fModChannel.size();i++)
+      for(size_t i=0;i<input->fModChannel.size();i++) {
 	*(this->fModChannel[i]) += *(input->fModChannel[i]);
+}
 //         for(size_t i=0;i<input->fWord.size();i++)
 //    	this->fWord[i]+=input->fWord[i];
       this->fFFB_ErrorFlag |= input->fFFB_ErrorFlag;
@@ -670,10 +689,11 @@ VQwSubsystem&  QwBeamMod::operator-=  (VQwSubsystem *value){
   if(Compare(value))
     {
       //QwBeamMod* input= (QwBeamMod*)value;
-      QwBeamMod* input = dynamic_cast<QwBeamMod*>(value);
+      auto* input = dynamic_cast<QwBeamMod*>(value);
 
-      for(size_t i=0;i<input->fModChannel.size();i++)
+      for(size_t i=0;i<input->fModChannel.size();i++) {
 	*(this->fModChannel[i]) -= *(input->fModChannel[i]);
+}
 //       for(size_t i=0;i<input->fWord.size();i++)
 //         this->fWord[i]-=input->fWord[i];
       this->fFFB_ErrorFlag |= input->fFFB_ErrorFlag;
@@ -687,14 +707,16 @@ void QwBeamMod::Ratio(VQwSubsystem  *numer, VQwSubsystem  *denom)
   if(Compare(numer)&&Compare(denom))
     {
       //QwBeamMod* innumer= (QwBeamMod*)numer ;
-      QwBeamMod* innumer = dynamic_cast<QwBeamMod*>(numer);
+      auto* innumer = dynamic_cast<QwBeamMod*>(numer);
       //QwBeamMod* indenom= (QwBeamMod*)denom ;
-      QwBeamMod* indenom = dynamic_cast<QwBeamMod*>(denom);
+      auto* indenom = dynamic_cast<QwBeamMod*>(denom);
 
-      for(size_t i=0;i<innumer->fModChannel.size();i++)
+      for(size_t i=0;i<innumer->fModChannel.size();i++) {
 	this->fModChannel[i]->Ratio(innumer->fModChannel[i],indenom->fModChannel[i]);
-      for(size_t i=0;i<innumer->fWord.size();i++)
+}
+      for(size_t i=0;i<innumer->fWord.size();i++) {
 	this->fWord[i].fValue=innumer->fWord[i].fValue;
+}
 
     }
 }
@@ -702,13 +724,14 @@ void QwBeamMod::Ratio(VQwSubsystem  *numer, VQwSubsystem  *denom)
 
 void QwBeamMod::Scale(Double_t factor)
 {
-  for(size_t i=0;i<fModChannel.size();i++)
-    fModChannel[i]->Scale(factor);
+  for(auto & i : fModChannel) {
+    i->Scale(factor);
+}
 }
 
 void QwBeamMod::CalculateRunningAverage() { }
 
-void QwBeamMod::AccumulateRunningSum(VQwSubsystem*, Int_t count, Int_t ErrorMask) { }
+void QwBeamMod::AccumulateRunningSum(VQwSubsystem* /*value*/, Int_t count, Int_t ErrorMask) { }
 
 Bool_t QwBeamMod::Compare(VQwSubsystem *value)
 {
@@ -721,7 +744,7 @@ Bool_t QwBeamMod::Compare(VQwSubsystem *value)
     }
   else
     {
-      QwBeamMod* input = dynamic_cast<QwBeamMod*>(value);
+      auto* input = dynamic_cast<QwBeamMod*>(value);
 
 	if(input->fModChannel.size()!=fModChannel.size())
 	  {
@@ -738,10 +761,12 @@ Bool_t QwBeamMod::Compare(VQwSubsystem *value)
 void  QwBeamMod::ConstructHistograms(TDirectory *folder, TString &prefix)
 {
   // Go to the specified folder
-  if (folder != NULL) folder->cd();
+  if (folder != nullptr) { folder->cd();
+}
 
   // No histogram creation for asym, yield, diff, etc
-  if (prefix != "") return;
+  if (prefix != "") { return;
+}
 
   // Beam modulation channels
   //for (size_t i = 0; i < fModChannel.size(); i++)
@@ -751,35 +776,42 @@ void  QwBeamMod::ConstructHistograms(TDirectory *folder, TString &prefix)
 void  QwBeamMod::FillHistograms()
 {
   // No data loaded
-  if (! HasDataLoaded()) return;
+  if (! HasDataLoaded()) { return;
+}
 
   // No histograms defined
-  if (fHistograms.size() == 0) return;
+  if (fHistograms.empty()) { return;
+}
 
   // Beam modulation channels
   //for (size_t i = 0; i < fModChannel.size(); i++)
   //  fModChannel[i]->FillHistograms();
 
   // Do we have a ramp channel?
-  if (fRampChannelIndex < 0 || fRampChannelIndex > Int_t(fModChannel.size())) return;
+  if (fRampChannelIndex < 0 || fRampChannelIndex > Int_t(fModChannel.size())) { return;
+}
 
   // Do we have a pattern word?
-  if (fPatternWordIndex < 0 || fPatternWordIndex > Int_t(fWord.size())) return;
+  if (fPatternWordIndex < 0 || fPatternWordIndex > Int_t(fWord.size())) { return;
+}
 
   // Determine the ramp/phase
   Double_t ramp = fModChannel[fRampChannelIndex]->GetValue();
-  if (ramp < 0) return;
+  if (ramp < 0) { return;
+}
 
   // Determine the pattern number -- the pattern number for single coil is
   // between [0, 4] so we need to check for this.
   Int_t pattern = -1;
   
-  if(fWord[fPatternWordIndex].fValue < 11 && fWord[fPatternWordIndex].fValue > 0)
+  if(fWord[fPatternWordIndex].fValue < 11 && fWord[fPatternWordIndex].fValue > 0) {
     pattern = fWord[fPatternWordIndex].fValue;
-  else
+  } else {
     pattern = fWord[fPatternWordIndex].fValue - 11;
+}
   
-  if (pattern < 0 || pattern > 4) return;
+  if (pattern < 0 || pattern > 4) { return;
+}
 
   // Fill histograms for all BPMs and each of the modulation patterns
   //
@@ -800,16 +832,16 @@ void QwBeamMod::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vec
 {
   TString basename;
   
-  for(size_t i = 0; i < fModChannel.size(); i++){
-    fModChannel[i]->ConstructBranchAndVector(tree, prefix, values);
+  for(auto & i : fModChannel){
+    i->ConstructBranchAndVector(tree, prefix, values);
   }
   //   for (size_t i=0;i<fWord.size();i++)
   //     fWord[i].ConstructBranchAndVector(tree, prefix, values);
   fTreeArrayIndex  = values.size();
-  for (size_t i=0; i<fWord.size(); i++) {
+  for (auto & i : fWord) {
     // 	  basename = fWord[i].fWordName;
     basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length());
-    basename += fWord[i].fWordName;
+    basename += i.fWordName;
     values.push_back(0.0);
     tree->Branch(basename, &(values.back()), basename+"/D");
   }
@@ -821,12 +853,12 @@ void QwBeamMod::FillTreeVector(std::vector<Double_t> &values) const
   //std::cout << "fTreeArrayIndex: " << fTreeArrayIndex << std::endl;
   size_t index = fTreeArrayIndex;
   
-  for (size_t i = 0; i < fModChannel.size(); i++){
-    fModChannel[i]->FillTreeVector(values);
+  for (auto i : fModChannel){
+    i->FillTreeVector(values);
     // fModChannel[i]->PrintValue();
   }
-  for (size_t i = 0; i < fWord.size(); i++){
-    values[index++] = fWord[i].fValue;
+  for (const auto & i : fWord){
+    values[index++] = i.fValue;
     //std::cout << fWord[i].fValue<< std::endl;
   }
   //for (size_t i=0; i<values.size(); i++){
@@ -876,10 +908,12 @@ void  QwBeamMod::Print()
   QwMessage << "there are " << fModChannel.size() << " mods" << QwLog::endl;
 
   QwMessage << " Printing Running AVG and other channel info for fModChannel" << QwLog::endl;
-  for(size_t i=0;i<fModChannel.size();i++)
-    fModChannel[i]->PrintValue();
-  for(size_t i=0;i<fWord.size();i++)
-    fWord[i].Print();
+  for(auto & i : fModChannel) {
+    i->PrintValue();
+}
+  for(const auto & i : fWord) {
+    i.Print();
+}
 }
 
 void  QwBeamMod::PrintModChannelID()
@@ -893,7 +927,7 @@ void  QwBeamMod::PrintModChannelID()
 }
 
 
-void  QwModChannelID::Print()
+void  QwModChannelID::Print() const
 {
   QwMessage <<std::endl<<"Detector name= "<<fmodulename<<QwLog::endl;
   QwMessage <<"SubbankkIndex= "<<fSubbankIndex<<QwLog::endl;
@@ -983,5 +1017,4 @@ void QwBeamMod::FillErrDB(QwParityDB *db, TString datatype)
 
 void QwBeamMod::WritePromptSummary(QwPromptSummary *ps, TString datatype)
 {
-  return;
-};
+  };

@@ -114,7 +114,7 @@ class QwBlinder {
 
 
     void  WriteFinalValuesToDB(QwParityDB* db);
-    void  PrintCountersValues(std::vector<Int_t> fCounters, TString counter_type);
+    static void  PrintCountersValues(std::vector<Int_t> fCounters, TString counter_type);
     void  PrintFinalValues(Int_t kVerbosity=1);
 
 
@@ -248,7 +248,7 @@ class QwBlinder {
     //  Target position look-up index for PREX/CREX.
     //  Index value of -1 is for the PREX positons
     //  CREX index values in date order go from "min" to "Max" and must correspond to cases in the QwBlinder::Update(const QwEPICSEvent& epics) function.
-    Int_t  fCREXTargetIndex;
+    Int_t  fCREXTargetIndex{-1};
     Int_t  kCREXTgtIndexMin = 1;
     Int_t  kCREXTgtIndexMax = 2;
 
@@ -281,7 +281,7 @@ class QwBlinder {
     Double_t fMaximumBlindingAsymmetry; /// Maximum blinding asymmetry (in ppm)
     Double_t fMaximumBlindingFactor;    /// Maximum blinding factor (in fraction from identity)
 
-    UInt_t fSeedID;      /// ID of seed used (seeds.seed_id)
+    UInt_t fSeedID{0};      /// ID of seed used (seeds.seed_id)
     TString fSeed;       /// Seed string (seeds.seed)
     static const TString kDefaultSeed; /// Default seed
 
@@ -301,10 +301,10 @@ class QwBlinder {
 
     Int_t UseMD5(const TString &barestring);          /// Returns an integer from a string using MD5
 
-    Int_t UseStringManip(const TString &barestring);  /// Returns an integer from a string using
+    static Int_t UseStringManip(const TString &barestring);  /// Returns an integer from a string using
                                                       /// a character manipulation algorithm
 
-    Int_t UsePseudorandom(const TString &barestring); /// Returns an integer from a string using
+    static Int_t UsePseudorandom(const TString &barestring); /// Returns an integer from a string using
                                                       /// a version of the helicity bit pseudorandom algorithm.
 
 
@@ -320,7 +320,7 @@ class QwBlinder {
     void WriteChecksum(QwParityDB* db);     ///  Writes fSeedID and fBFChecksum to DB for this analysis ID
     void WriteTestValues(QwParityDB* db);   ///  Writes fTestNumber and fBlindTestValue to DB for this analysis ID
 
-    std::vector<UChar_t> GenerateDigest(const TString& input) const;
+    static std::vector<UChar_t> GenerateDigest(const TString& input) ;
 
     std::vector<Int_t> fPatternCounters; ///< Counts the number of events in each failure mode
     std::vector<Int_t> fPairCounters; ///< Counts the number of helicity pairs in each failure mode

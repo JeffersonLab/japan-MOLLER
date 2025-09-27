@@ -31,28 +31,28 @@ const std::ios_base::openmode QwLog::kAppend = std::ios::app;
 /*! The constructor initializes the screen stream and resets the file stream
  */
 QwLog::QwLog()
-: std::ostream(std::cout.rdbuf())
+: std::ostream(std::cout.rdbuf()), fScreen(&std::cout)
 {
-  fScreenThreshold = kMessage;
-  fScreen = &std::cout;
+  
+  
 
-  fFileThreshold = kMessage;
-  fFile = 0;
+  
+  
 
-  fLogLevel = kMessage;
+  
 
-  fUseColor = true;
+  
 
-  fPrintFunctionSignature = false;
+  
 }
 
 /*! The destructor destroys the log file, if it was present
  */
 QwLog::~QwLog()
 {
-  if (fFile) {
+  if (fFile != nullptr) {
     delete fFile;
-    fFile = 0;
+    fFile = nullptr;
   }
 }
 
@@ -106,8 +106,9 @@ void QwLog::DefineOptions(QwOptions* options)
 void QwLog::ProcessOptions(QwOptions* options)
 {
   // Initialize log file
-  if (options->HasValue("QwLog.logfile"))
+  if (options->HasValue("QwLog.logfile")) {
     InitLogFile(options->GetValue<std::string>("QwLog.logfile"));
+}
 
   // Set the logging thresholds
   SetFileThreshold(options->GetValue<int>("QwLog.loglevel-file"));
@@ -121,8 +122,9 @@ void QwLog::ProcessOptions(QwOptions* options)
 
   // Set the list of regular expressions for functions to debug
   fDebugFunctionRegexString = options->GetValueVector<std::string>("QwLog.debug-function");
-  if (fDebugFunctionRegexString.size() > 0)
+  if (!fDebugFunctionRegexString.empty()) {
     std::cout << "Debug regex list:" << std::endl;
+}
   for (size_t i = 0; i < fDebugFunctionRegexString.size(); i++) {
     std::cout << fDebugFunctionRegexString.back() << std::endl;
   }
@@ -138,9 +140,9 @@ bool QwLog::IsDebugFunction(const string func_sig)
   if (fIsDebugFunction.find(func_sig) == fIsDebugFunction.end()) {
     // Look through all regexes
     fIsDebugFunction[func_sig] = false;
-    for (size_t i = 0; i < fDebugFunctionRegexString.size(); i++) {
+    for (const auto & i : fDebugFunctionRegexString) {
       // When we find a match, cache it and break out
-      std::regex regex(fDebugFunctionRegexString.at(i));
+      std::regex regex(i);
       if (std::regex_match(func_sig, regex)) {
         fIsDebugFunction[func_sig] = true;
         break;
@@ -154,9 +156,9 @@ bool QwLog::IsDebugFunction(const string func_sig)
  */
 void QwLog::InitLogFile(const string name, const std::ios_base::openmode mode)
 {
-  if (fFile) {
+  if (fFile != nullptr) {
     delete fFile;
-    fFile = 0;
+    fFile = nullptr;
   }
 
   std::ios_base::openmode flags = std::ios::out | mode;
@@ -195,9 +197,10 @@ QwLog& QwLog::operator()(
   fLogLevel = level;
 
   // Override log level of this sink when in a debugged function
-  if (IsDebugFunction(func_sig)) fLogLevel = QwLog::kAlways;
+  if (IsDebugFunction(func_sig)) { fLogLevel = QwLog::kAlways;
+}
 
-  if (fScreen && fLogLevel <= fScreenThreshold) {
+  if ((fScreen != nullptr) && fLogLevel <= fScreenThreshold) {
     if (fScreenAtNewLine) {
       // Put something at the beginning of a new line
       switch (level) {
@@ -206,20 +209,22 @@ QwLog& QwLog::operator()(
           *(fScreen) << QwColor(Qw::kRed);
           fScreenInColor = true;
         }
-        if (fPrintFunctionSignature)
+        if (fPrintFunctionSignature) {
           *(fScreen) << "Error (in " << func_sig << "): ";
-        else
+        } else {
           *(fScreen) << "Error: ";
+}
         break;
       case kWarning:
         if (fUseColor) {
           *(fScreen) << QwColor(Qw::kRed);
           fScreenInColor = true;
         }
-        if (fPrintFunctionSignature)
+        if (fPrintFunctionSignature) {
           *(fScreen) << "Warning (in " << func_sig << "): ";
-        else
+        } else {
           *(fScreen) << "Warning: ";
+}
         if (fUseColor) {
           *(fScreen) << QwColor(Qw::kNormal);
           fScreenInColor = false;
@@ -233,7 +238,7 @@ QwLog& QwLog::operator()(
     fScreenAtNewLine = false;
   }
 
-  if (fFile && fLogLevel <= fFileThreshold) {
+  if ((fFile != nullptr) && fLogLevel <= fFileThreshold) {
     if (fFileAtNewLine) {
       *(fFile) << GetTime();
       switch (level) {
@@ -257,7 +262,7 @@ QwLog& QwLog::operator()(
  */
 QwLog& QwLog::operator<<(std::ios_base& (*manip) (std::ios_base&))
 {
-  if (fScreen && (fLogLevel <= fScreenThreshold || fLogLevel <= fFileThreshold) ) {
+  if ((fScreen != nullptr) && (fLogLevel <= fScreenThreshold || fLogLevel <= fFileThreshold) ) {
     *(fScreen) << manip;
   }
 
@@ -277,7 +282,7 @@ QwLog& QwLog::operator<<(std::ios_base& (*manip) (std::ios_base&))
  */
 QwLog& QwLog::operator<<(std::ostream& (*manip) (std::ostream&))
 {
-  if (fScreen && (fLogLevel <= fScreenThreshold || fLogLevel <= fFileThreshold) ) {
+  if ((fScreen != nullptr) && (fLogLevel <= fScreenThreshold || fLogLevel <= fFileThreshold) ) {
     *(fScreen) << manip;
   }
 
@@ -296,15 +301,16 @@ QwLog& QwLog::operator<<(std::ostream& (*manip) (std::ostream&))
  */
 std::ostream& QwLog::endl(std::ostream& strm)
 {
-  if (gQwLog.fScreen && gQwLog.fLogLevel <= gQwLog.fScreenThreshold) {
-    if (fScreenInColor)
+  if ((gQwLog.fScreen != nullptr) && gQwLog.fLogLevel <= gQwLog.fScreenThreshold) {
+    if (fScreenInColor) {
       *(gQwLog.fScreen) << QwColor(Qw::kNormal) << std::endl;
-    else
+    } else {
       *(gQwLog.fScreen) << std::endl;
+}
     fScreenAtNewLine = true;
     fScreenInColor = false;
   }
-  if (gQwLog.fFile && gQwLog.fLogLevel <= gQwLog.fFileThreshold) {
+  if ((gQwLog.fFile != nullptr) && gQwLog.fLogLevel <= gQwLog.fFileThreshold) {
     *(gQwLog.fFile) << std::endl;
     fFileAtNewLine = true;
   }
@@ -316,10 +322,10 @@ std::ostream& QwLog::endl(std::ostream& strm)
  */
 std::ostream& QwLog::flush(std::ostream& strm)
 {
-  if (gQwLog.fScreen) {
+  if (gQwLog.fScreen != nullptr) {
     *(gQwLog.fScreen) << std::flush;
   }
-  if (gQwLog.fFile) {
+  if (gQwLog.fFile != nullptr) {
     *(gQwLog.fFile) << std::flush;
   }
   return strm;
@@ -329,12 +335,11 @@ std::ostream& QwLog::flush(std::ostream& strm)
  */
 const char* QwLog::GetTime()
 {
-  time_t now = time(0);
+  time_t now = time(nullptr);
   if (now >= 0) {
     struct tm *currentTime = localtime(&now);
     strftime(fTimeString, 128, "%Y-%m-%d, %T", currentTime);
     return fTimeString;
-  } else {
-    return "";
-  }
+  }     return "";
+ 
 }

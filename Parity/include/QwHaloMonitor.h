@@ -81,7 +81,7 @@ class  QwHaloMonitor : public VQwDataElement{
   void Difference(QwHaloMonitor &value1, QwHaloMonitor &value2);
   void Ratio(QwHaloMonitor &numer, QwHaloMonitor &denom);
   void Offset(Double_t Offset);
-  void Scale(Double_t Offset);
+  void Scale(Double_t factor);
 
   void     SetPedestal(Double_t ped) { fHalo_Counter.SetPedestal(ped); };
   void     SetCalibrationFactor(Double_t factor) { fHalo_Counter.SetCalibrationFactor(factor); };
@@ -101,7 +101,7 @@ class  QwHaloMonitor : public VQwDataElement{
   };
 
   void PrintErrorCounters() const;// report number of events failed due to HW and event cut faliure
-  Bool_t ApplyHWChecks();
+  static Bool_t ApplyHWChecks();
   void SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel){
     QwError<<"***************************"<<QwLog::endl;
     fHalo_Counter.SetSingleEventCuts(errorflag,min,max,stability,burplevel);

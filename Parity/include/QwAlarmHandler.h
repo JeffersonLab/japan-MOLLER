@@ -57,7 +57,7 @@ class QwAlarmHandler:public VQwDataHandler, public MQwDataHandlerCloneable<QwAla
     UInt_t fCounter = 0;
     int fAlarmNupdate = 350;
     int fAlarmActive = 0; // Default to not actually doing the alarm loop unless specified by the user
-    std::pair<std::string,std::string> ParseAlarmMapVariable(const string&, char);
+    static std::pair<std::string,std::string> ParseAlarmMapVariable(const string&, char);
 
     // List of parameters to use in the alarm handler
     // Cameron's Alarm Stuff

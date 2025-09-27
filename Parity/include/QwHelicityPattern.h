@@ -217,19 +217,19 @@ class QwHelicityPattern {
   std::vector<Bool_t> fEventLoaded;
   std::vector<Int_t> fHelicity;// this is here up to when we code the Helicity decoding routine
   std::vector<Int_t> fEventNumber;
-  Int_t fCurrentPatternNumber;
+  Int_t fCurrentPatternNumber{};
   Int_t fPatternSize;
-  Int_t fQuartetNumber;
+  Int_t fQuartetNumber{};
 
   // Blinding strategy
   QwBlinder fBlinder;
 
   /// This indicates if the subsystem arrays are missing the helicity object.
   /// It is updated once during initialization and once when processing the first event
-  Bool_t fHelicityIsMissing;
+  Bool_t fHelicityIsMissing{};
   /// This is true if any of the helicity objects of this pattern have indicated that
   /// we should ignore the helicity.  It is updated every event and reset by ClearEventData.
-  Bool_t fIgnoreHelicity;
+  Bool_t fIgnoreHelicity{};
 
   // Yield and asymmetry of a single helicity pattern
   QwSubsystemArrayParity fYield;
@@ -241,7 +241,7 @@ class QwHelicityPattern {
   QwSubsystemArrayParity fAsymmetry2;
 
   // Yield and asymmetry of a single helicity pair
-  Bool_t fEnablePairs;
+  Bool_t fEnablePairs{};
   QwSubsystemArrayParity fPairYield;
   QwSubsystemArrayParity fPairDifference;
   QwSubsystemArrayParity fPairAsymmetry;

@@ -12,6 +12,7 @@
 #include <stdexcept>
 
 #include <QwLog.h>
+#include <math.h>
 
 
 const Bool_t VQwScaler_Channel::kDEBUG = kFALSE;
@@ -20,7 +21,7 @@ const Bool_t VQwScaler_Channel::kDEBUG = kFALSE;
 /********************************************************/
 void  VQwScaler_Channel::InitializeChannel(TString name, TString datatosave)
 {
-  fNormChannelPtr = NULL;
+  fNormChannelPtr = nullptr;
   fNeedsExternalClock = kFALSE;
   fIsDifferentialScaler = false;
 
@@ -52,7 +53,6 @@ void  VQwScaler_Channel::InitializeChannel(TString name, TString datatosave)
   fErrorFlag = 0;
   fErrorConfigFlag=0;
   fGoodEventCount = 0;
-  return;
 };
 
 /********************************************************/
@@ -176,10 +176,11 @@ Int_t QwScaler_Channel<data_mask,data_shift>::ProcessEvBuffer(UInt_t* buffer, UI
     words_read = fNumberOfDataWords;
 
     // Store old raw value for differential scalers
-    if (IsDifferentialScaler())
+    if (IsDifferentialScaler()) {
       fValue_Raw_Old = fValue_Raw;
-    else
+    } else {
       fValue_Raw_Old = 0;
+}
 
   } else {
     //QwError << "QwScaler_Channel::ProcessEvBuffer: Not enough words!"<< QwLog::endl;
@@ -191,7 +192,7 @@ Int_t QwScaler_Channel<data_mask,data_shift>::ProcessEvBuffer(UInt_t* buffer, UI
 void VQwScaler_Channel::ProcessEvent()
 {
   if (NeedsExternalClock()){
-    if(fNormChannelPtr){
+    if(fNormChannelPtr != nullptr){
       Double_t time = fNormChannelPtr->GetValue();
       //QwError << "VQwScaler_Channel::ProcessEvent() "<<GetElementName()<<" "<< fValue_Raw<< " "<< fValue<<" "<<fCalibrationFactor<<" "<< fPedestal<<QwLog::endl;
       fValue = fCalibrationFactor * (Double_t(fValue_Raw)/time - fPedestal);
@@ -229,7 +230,8 @@ void VQwScaler_Channel::PrintInfo() const
 
 void VQwScaler_Channel::ConstructHistograms(TDirectory *folder, TString &prefix){
   //  If we have defined a subdirectory in the ROOT file, then change into it.
-  if (folder != NULL) folder->cd();
+  if (folder != nullptr) { folder->cd();
+}
 
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
@@ -237,7 +239,7 @@ void VQwScaler_Channel::ConstructHistograms(TDirectory *folder, TString &prefix)
     //  Now create the histograms.
     TString basename = prefix + GetElementName();
 
-    fHistograms.resize(1, NULL);
+    fHistograms.resize(1, nullptr);
     size_t index=0;
     fHistograms[index]   = gQwHists.Construct1DHist(basename);
     index += 1;
@@ -250,8 +252,9 @@ void  VQwScaler_Channel::FillHistograms()
   if (IsNameEmpty()) {
     //  This channel is not used, so skip creating the histograms.
   } else {
-    if (index < fHistograms.size() && fHistograms[index] != NULL  && fErrorFlag==0)
+    if (index < fHistograms.size() && fHistograms[index] != nullptr  && fErrorFlag==0) {
       fHistograms[index]->Fill(this->fValue);
+}
     index += 1;
   }
 }
@@ -292,8 +295,9 @@ void QwScaler_Channel<data_mask,data_shift>::ConstructBranchAndVector(TTree *tre
     }
     //std::cout << basename <<": first==" << fTreeArrayIndex << ", last==" << values.size() << std::endl;
     fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
-    if (gQwHists.MatchDeviceParamsFromList(basename.Data()))
+    if (gQwHists.MatchDeviceParamsFromList(basename.Data())) {
       tree->Branch(basename, &(values[fTreeArrayIndex]), list);
+}
   }
 }
 
@@ -449,9 +453,9 @@ void QwScaler_Channel<data_mask,data_shift>::FillNTupleVector(std::vector<Double
 
 
 void VQwScaler_Channel::AssignValueFrom(const VQwDataElement* valueptr){
-  const VQwScaler_Channel* tmpptr;
+  const VQwScaler_Channel* tmpptr = nullptr;
   tmpptr = dynamic_cast<const VQwScaler_Channel*>(valueptr);
-  if (tmpptr!=NULL){
+  if (tmpptr!=nullptr){
     *this = *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::AssignValueFrom = "
@@ -461,9 +465,9 @@ void VQwScaler_Channel::AssignValueFrom(const VQwDataElement* valueptr){
 }
 void VQwScaler_Channel::AddValueFrom(const  VQwHardwareChannel* valueptr)
 {
-  const VQwScaler_Channel* tmpptr;
+  const VQwScaler_Channel* tmpptr = nullptr;
   tmpptr = dynamic_cast<const VQwScaler_Channel*>(valueptr);
-  if (tmpptr!=NULL){
+  if (tmpptr!=nullptr){
     *this += *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::AddValueFrom = "
@@ -473,9 +477,9 @@ void VQwScaler_Channel::AddValueFrom(const  VQwHardwareChannel* valueptr)
 }
 void VQwScaler_Channel::SubtractValueFrom(const  VQwHardwareChannel* valueptr)
 {
-  const VQwScaler_Channel* tmpptr;
+  const VQwScaler_Channel* tmpptr = nullptr;
   tmpptr = dynamic_cast<const VQwScaler_Channel*>(valueptr);
-  if (tmpptr!=NULL){
+  if (tmpptr!=nullptr){
     *this -= *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::SubtractValueFrom = "
@@ -485,9 +489,9 @@ void VQwScaler_Channel::SubtractValueFrom(const  VQwHardwareChannel* valueptr)
 }
 void VQwScaler_Channel::MultiplyBy(const VQwHardwareChannel* valueptr)
 {
-  const VQwScaler_Channel* tmpptr;
+  const VQwScaler_Channel* tmpptr = nullptr;
   tmpptr = dynamic_cast<const VQwScaler_Channel*>(valueptr);
-  if (tmpptr!=NULL){
+  if (tmpptr!=nullptr){
     *this *= *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::MultiplyBy = "
@@ -498,9 +502,9 @@ void VQwScaler_Channel::MultiplyBy(const VQwHardwareChannel* valueptr)
 
 void VQwScaler_Channel::DivideBy(const VQwHardwareChannel* valueptr)
 {
-  const VQwScaler_Channel* tmpptr;
+  const VQwScaler_Channel* tmpptr = nullptr;
   tmpptr = dynamic_cast<const VQwScaler_Channel*>(valueptr);
-  if (tmpptr!=NULL){
+  if (tmpptr!=nullptr){
     *this /= *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::DivideBy = "
@@ -511,7 +515,8 @@ void VQwScaler_Channel::DivideBy(const VQwHardwareChannel* valueptr)
 
 VQwScaler_Channel& VQwScaler_Channel::operator=(const VQwScaler_Channel &value)
 {
-  if(this == &value) return *this;
+  if(this == &value) { return *this;
+}
   if (!IsNameEmpty()) {
     VQwHardwareChannel::operator=(value);
     this->fHeader     = value.fHeader;
@@ -533,8 +538,7 @@ void VQwScaler_Channel::AssignScaledValue(const VQwScaler_Channel &value,
     this->fErrorFlag  = value.fErrorFlag;//error code is updated.
     this->fGoodEventCount = value.fGoodEventCount;
   }
-  return;
-}
+  }
 
 
 VQwScaler_Channel& VQwScaler_Channel::operator+= (const VQwScaler_Channel &value)
@@ -572,7 +576,7 @@ VQwScaler_Channel& VQwScaler_Channel::operator*= (const VQwScaler_Channel &value
 VQwHardwareChannel& VQwScaler_Channel::operator+=(const VQwHardwareChannel &source)
 {
   try {
-    const VQwScaler_Channel* tmpptr;
+    const VQwScaler_Channel* tmpptr = nullptr;
     tmpptr = dynamic_cast<const VQwScaler_Channel*>(&source);
     *this += *tmpptr;
   } catch(const std::exception& e) {
@@ -585,9 +589,9 @@ VQwHardwareChannel& VQwScaler_Channel::operator+=(const VQwHardwareChannel &sour
 }
 VQwHardwareChannel& VQwScaler_Channel::operator-=(const VQwHardwareChannel &source)
 {
-  const VQwScaler_Channel* tmpptr;
+  const VQwScaler_Channel* tmpptr = nullptr;
   tmpptr = dynamic_cast<const VQwScaler_Channel*>(&source);
-  if (tmpptr!=NULL){
+  if (tmpptr!=nullptr){
     *this -= *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::operator-= "
@@ -599,9 +603,9 @@ VQwHardwareChannel& VQwScaler_Channel::operator-=(const VQwHardwareChannel &sour
 }
 VQwHardwareChannel& VQwScaler_Channel::operator*=(const VQwHardwareChannel &source)
 {
-  const VQwScaler_Channel* tmpptr;
+  const VQwScaler_Channel* tmpptr = nullptr;
   tmpptr = dynamic_cast<const VQwScaler_Channel*>(&source);
-  if (tmpptr!=NULL){
+  if (tmpptr!=nullptr){
     *this *= *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::operator*= "
@@ -613,9 +617,9 @@ VQwHardwareChannel& VQwScaler_Channel::operator*=(const VQwHardwareChannel &sour
 }
 VQwHardwareChannel& VQwScaler_Channel::operator/=(const VQwHardwareChannel &source)
 {
-  const VQwScaler_Channel* tmpptr;
+  const VQwScaler_Channel* tmpptr = nullptr;
   tmpptr = dynamic_cast<const VQwScaler_Channel*>(&source);
-  if (tmpptr!=NULL){
+  if (tmpptr!=nullptr){
     *this /= *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::operator/= "
@@ -656,8 +660,8 @@ void VQwScaler_Channel::Ratio(const VQwScaler_Channel &numer, const VQwScaler_Ch
 VQwScaler_Channel& VQwScaler_Channel::operator/= (const VQwScaler_Channel &denom)
 {
   //  In this function, leave the "raw" variables untouched.
-  Double_t ratio;
-  Double_t variance;
+  Double_t ratio = NAN;
+  Double_t variance = NAN;
   if (!IsNameEmpty()){
     // The variances are calculated using the following formula:
     //   Var[ratio] = ratio^2 (Var[numer] / numer^2 + Var[denom] / denom^2)
@@ -688,8 +692,9 @@ VQwScaler_Channel& VQwScaler_Channel::operator/= (const VQwScaler_Channel &denom
   }
 
   // Nanny
-  if (fValue != fValue)
+  if (fValue != fValue) {
     QwWarning << "Angry Nanny: NaN detected in " << GetElementName() << QwLog::endl;
+}
   return *this;
 }
 
@@ -747,7 +752,7 @@ Int_t VQwScaler_Channel::ApplyHWChecks() {
 Bool_t VQwScaler_Channel::ApplySingleEventCuts()
 {
   //std::cout << "Here in VQwScaler_Channel: "<< std::endl; 
-  Bool_t status;
+  Bool_t status = false;
   //QwError<<" Single Event Check ! "<<QwLog::endl;
   if (bEVENTCUTMODE>=2){//Global switch to ON/OFF event cuts set at the event cut file
     //std::cout << "Upper : " << fULimit << " , Lower: " << fLLimit << std::endl;
@@ -757,18 +762,20 @@ Bool_t VQwScaler_Channel::ApplySingleEventCuts()
     } else  if (GetValue()<=fULimit && GetValue()>=fLLimit){
       //std::cout << "Second" << std::endl;
       //QwError<<" Single Event Cut passed "<<GetElementName()<<" "<<GetValue()<<QwLog::endl;
-      if (fErrorFlag !=0)
+      if (fErrorFlag !=0) {
 	status=kFALSE;
-      else
+      } else {
 	status=kTRUE;
+}
     }
     else{
       //std::cout << "Third" << std::endl;
       //QwError<<" Single Event Cut Failed "<<GetElementName()<<" "<<GetValue()<<QwLog::endl;
-      if (GetValue()> fULimit)
+      if (GetValue()> fULimit) {
 	fErrorFlag|=kErrorFlag_EventCut_U;
-      else
+      } else {
 	fErrorFlag|=kErrorFlag_EventCut_L;
+}
       status=kFALSE;
     }
 
@@ -843,7 +850,7 @@ void VQwScaler_Channel::AccumulateRunningSum(const VQwScaler_Channel& value, Int
   if (n2 == 0) {
     // no good events for addition
     return;
-  } else if (n2 == -1) {
+  } if (n2 == -1) {
     // simple version for removal of single event from the sum
     fGoodEventCount--;
     if (n > 1) {
@@ -879,8 +886,9 @@ void VQwScaler_Channel::AccumulateRunningSum(const VQwScaler_Channel& value, Int
   }
 
   // Nanny
-  if (fValue != fValue)
+  if (fValue != fValue) {
     QwWarning << "Angry Nanny: NaN detected in " << GetElementName() << QwLog::endl;
+}
 }
 
 void VQwScaler_Channel::CalculateRunningAverage()
@@ -899,25 +907,27 @@ void VQwScaler_Channel::CalculateRunningAverage()
 }
 
 void  VQwScaler_Channel::PrintErrorCounters() const{
-    if (fNumEvtsWithHWErrors>0)
+    if (fNumEvtsWithHWErrors>0) {
       QwMessage << "QwScaler_Channel " << GetElementName()
 		<< " had " << fNumEvtsWithHWErrors
 		<< " events with a hardware faliure."
 		<< QwLog::endl;
+}
 
-    if (fNumEvtsWithEventCutsRejected>0)
+    if (fNumEvtsWithEventCutsRejected>0) {
       QwMessage << "QwScaler_Channel " << GetElementName()
 		<< " had " << fNumEvtsWithEventCutsRejected
 		<< " events rejected by Event Cuts."
 		<< QwLog::endl;
+}
   }
 
 void VQwScaler_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *value){
 
-    const VQwScaler_Channel* input = dynamic_cast<const VQwScaler_Channel*>(value);
+    const auto* input = dynamic_cast<const VQwScaler_Channel*>(value);
 
     // follows same steps as += but w/ scaling factor
-    if (input!=NULL && !IsNameEmpty()){
+    if (input!=nullptr && !IsNameEmpty()){
         this->fValue  += scale * input->fValue;
         this->fValueM2 = 0.0;
 	this->fErrorFlag |= (input->fErrorFlag);

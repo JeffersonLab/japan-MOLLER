@@ -20,11 +20,11 @@
  * Create a handler array based on the configuration option 'detectors'
  */
 QwDataHandlerArray::QwDataHandlerArray(QwOptions& options, QwHelicityPattern& helicitypattern, const TString &run)
-  : fHelicityPattern(0),fSubsystemArray(0),fDataHandlersMapFile(""),fArrayScope(kPatternScope)
+  : fHelicityPattern(nullptr),fSubsystemArray(nullptr),fArrayScope(kPatternScope)
 {
   ProcessOptions(options);
-  if (fDataHandlersMapFile != ""){
-    QwParameterFile mapfile(fDataHandlersMapFile.c_str());
+  if (!fDataHandlersMapFile.empty()){
+    QwParameterFile mapfile(fDataHandlersMapFile);
     QwMessage << "Loading handlers from " << fDataHandlersMapFile << "." << QwLog::endl;
     LoadDataHandlersFromParameterFile(mapfile, helicitypattern, run);
   }
@@ -34,11 +34,11 @@ QwDataHandlerArray::QwDataHandlerArray(QwOptions& options, QwHelicityPattern& he
  * Create a handler array based on the configuration option 'detectors'
  */
 QwDataHandlerArray::QwDataHandlerArray(QwOptions& options, QwSubsystemArrayParity& detectors, const TString &run)
-  : fHelicityPattern(0),fSubsystemArray(0),fDataHandlersMapFile(""),fArrayScope(kEventScope)
+  : fHelicityPattern(nullptr),fSubsystemArray(nullptr),fArrayScope(kEventScope)
 {
   ProcessOptions(options);
-  if (fDataHandlersMapFile != ""){
-    QwParameterFile mapfile(fDataHandlersMapFile.c_str());
+  if (!fDataHandlersMapFile.empty()){
+    QwParameterFile mapfile(fDataHandlersMapFile);
     QwMessage << "Loading handlers from " << fDataHandlersMapFile << "." << QwLog::endl;
     LoadDataHandlersFromParameterFile(mapfile, detectors, run);
   }
@@ -56,8 +56,8 @@ QwDataHandlerArray::QwDataHandlerArray(const QwDataHandlerArray& source)
   fDataHandlersDisabledByType(source.fDataHandlersDisabledByType)
 {
   // Make copies of all handlers rather than copying just the pointers
-  for (const_iterator handler = source.begin(); handler != source.end(); ++handler) {
-    this->push_back(handler->get()->Clone());
+  for (const auto & handler : source) {
+    this->push_back(handler.get()->Clone());
     /*
     // Instruct the handler to publish variables
     if (this->back()->PublishInternalValues() == kFALSE) {
@@ -91,14 +91,14 @@ void QwDataHandlerArray::LoadDataHandlersFromParameterFile(
   SetPointer(detectors);
 
   // This is how this should work
-  QwParameterFile* preamble;
+  QwParameterFile* preamble = nullptr;
   preamble = mapfile.ReadSectionPreamble();
   // Process preamble
   QwVerbose << "Preamble:" << QwLog::endl;
   QwVerbose << *preamble << QwLog::endl;
-  if (preamble) delete preamble;
+  delete preamble;
 
-  QwParameterFile* section;
+  QwParameterFile* section = nullptr;
   std::string section_name;
   while ((section = mapfile.ReadNextSection(section_name))) {
 
@@ -112,43 +112,49 @@ void QwDataHandlerArray::LoadDataHandlersFromParameterFile(
     std::string handler_scope;
     if (! section->FileHasVariablePair("=","name",handler_name)) {
       QwError << "No name defined in section for handler " << handler_type << "." << QwLog::endl;
-      delete section; section = 0;
+      delete section; section = nullptr;
       continue;
     }
     if (section->FileHasVariablePair("=","scope",handler_scope)) {
-      if (ScopeMismatch(handler_scope)) continue;
+      if (ScopeMismatch(handler_scope)) { continue;
+}
     } else {
       //  Assume the scope of a handler without a scope specifier is
       //  "pattern".
-      if (fArrayScope != kPatternScope) continue;
+      if (fArrayScope != kPatternScope) { continue;
+}
     }
 
     // If handler type is explicitly disabled
     bool disabled_by_type = false;
-    for (size_t i = 0; i < fDataHandlersDisabledByType.size(); i++)
-      if (handler_type == fDataHandlersDisabledByType.at(i))
+    for (const auto & i : fDataHandlersDisabledByType) {
+      if (handler_type == i) {
         disabled_by_type = true;
+}
+}
     if (disabled_by_type) {
       QwWarning << "DataHandler of type " << handler_type << " disabled." << QwLog::endl;
-      delete section; section = 0;
+      delete section; section = nullptr;
       continue;
     }
 
     // If handler name is explicitly disabled
     bool disabled_by_name = false;
-    for (size_t i = 0; i < fDataHandlersDisabledByName.size(); i++)
-      if (handler_name == fDataHandlersDisabledByName.at(i))
+    for (const auto & i : fDataHandlersDisabledByName) {
+      if (handler_name == i) {
         disabled_by_name = true;
+}
+}
     if (disabled_by_name) {
       QwWarning << "DataHandler with name " << handler_name << " disabled." << QwLog::endl;
-      delete section; section = 0;
+      delete section; section = nullptr;
       continue;
     }
 
     // Create handler
     QwMessage << "Creating handler of type " << handler_type << " "
               << "with name " << handler_name << "." << QwLog::endl;
-    VQwDataHandler* handler = 0;
+    VQwDataHandler* handler = nullptr;
     
     try {
       handler =
@@ -159,7 +165,7 @@ void QwDataHandlerArray::LoadDataHandlersFromParameterFile(
     }
     if (! handler) {
       QwError << "Could not create handler " << handler_type << "." << QwLog::endl;
-      delete section; section = 0;
+      delete section; section = nullptr;
       continue;
     }
 
@@ -168,8 +174,8 @@ void QwDataHandlerArray::LoadDataHandlersFromParameterFile(
       QwMessage << "DataHandler " << handler_name << " cannot be stored in this "
                 << "handler array." << QwLog::endl;
       QwMessage << "Deleting handler " << handler_name << " again" << QwLog::endl;
-      delete section; section = 0;
-      delete handler; handler = 0;
+      delete section; section = nullptr;
+      delete handler; handler = nullptr;
       continue;
     }
 
@@ -192,7 +198,7 @@ void QwDataHandlerArray::LoadDataHandlersFromParameterFile(
     }
     */
     // Delete parameter file section
-    delete section; section = 0;
+    delete section; section = nullptr;
   }
 }
 //*****************************************************************
@@ -204,13 +210,13 @@ void QwDataHandlerArray::LoadDataHandlersFromParameterFile(
  */
 void QwDataHandlerArray::push_back(VQwDataHandler* handler)
 {
-  if (handler == NULL) {
+  if (handler == nullptr) {
     QwError << "QwDataHandlerArray::push_back(): NULL handler"
             << QwLog::endl;
     //  This is an empty handler...
     //  Do nothing for now.
 
-  } else if (!this->empty() && GetDataHandlerByName(handler->GetName())){
+  } else if (!this->empty() && (GetDataHandlerByName(handler->GetName()) != nullptr)){
     //  There is already a handler with this name!
     QwError << "QwDataHandlerArray::push_back(): handler " << handler->GetName()
             << " already exists" << QwLog::endl;
@@ -285,14 +291,14 @@ void QwDataHandlerArray::ProcessOptions(QwOptions &options)
  */
 VQwDataHandler* QwDataHandlerArray::GetDataHandlerByName(const TString& name)
 {
-  VQwDataHandler* tmp = NULL;
+  VQwDataHandler* tmp = nullptr;
   if (!empty()) {
     // Loop over the handlers
-    for (const_iterator handler = begin(); handler != end(); ++handler) {
+    for (const auto & handler : *this) {
       // Check the name of this handler
       // std::cout<<"QwDataHandlerArray::GetDataHandlerByName available name=="<<(*handler)->GetName()<<"== to be compared to =="<<name<<"==\n";
-      if ((*handler)->GetName() == name) {
-        tmp = (*handler).get();
+      if (handler->GetName() == name) {
+        tmp = handler.get();
         //std::cout<<"QwDataHandlerArray::GetDataHandlerByName found a matching name \n";
       } else {
         // nothing
@@ -317,11 +323,11 @@ std::vector<VQwDataHandler*> QwDataHandlerArray::GetDataHandlerByType(const std:
   if (!empty()) {
 
     // Loop over the handlers
-    for (const_iterator handler = begin(); handler != end(); ++handler) {
+    for (const auto & handler : *this) {
 
       // Test to see if the handler inherits from the required type
-      if (VQwDataHandlerFactory::InheritsFrom((*handler).get(),type)) {
-        handler_list.push_back((*handler).get());
+      if (VQwDataHandlerFactory::InheritsFrom(handler.get(),type)) {
+        handler_list.push_back(handler.get());
       }
 
     } // end of loop over handlers
@@ -354,8 +360,8 @@ void  QwDataHandlerArray::ConstructTreeBranches(
     const std::string& branchprefix)
 {
   if (!empty()){
-    for (iterator handler = begin(); handler != end(); ++handler) {
-      handler->get()->ConstructTreeBranches(treerootfile, treeprefix, branchprefix);
+    for (auto & handler : *this) {
+      handler.get()->ConstructTreeBranches(treerootfile, treeprefix, branchprefix);
     }
   }
 }
@@ -363,8 +369,8 @@ void  QwDataHandlerArray::ConstructTreeBranches(
 void  QwDataHandlerArray::FillTreeBranches(QwRootFile *treerootfile)
 {
   if (!empty()){
-    for (iterator handler = begin(); handler != end(); ++handler) {
-      handler->get()->FillTreeBranches(treerootfile);
+    for (auto & handler : *this) {
+      handler.get()->FillTreeBranches(treerootfile);
     }
   }
 }
@@ -375,8 +381,8 @@ void  QwDataHandlerArray::ConstructNTupleFields(
     const std::string& branchprefix)
 {
   if (!empty()){
-    for (iterator handler = begin(); handler != end(); ++handler) {
-      handler->get()->ConstructNTupleFields(treerootfile, treeprefix, branchprefix);
+    for (auto & handler : *this) {
+      handler.get()->ConstructNTupleFields(treerootfile, treeprefix, branchprefix);
     }
   }
 }
@@ -384,8 +390,8 @@ void  QwDataHandlerArray::ConstructNTupleFields(
 void  QwDataHandlerArray::FillNTupleFields(QwRootFile *treerootfile)
 {
   if (!empty()){
-    for (iterator handler = begin(); handler != end(); ++handler) {
-      handler->get()->FillNTupleFields(treerootfile);
+    for (auto & handler : *this) {
+      handler.get()->FillNTupleFields(treerootfile);
     }
   }
 }
@@ -397,8 +403,8 @@ void  QwDataHandlerArray::FillNTupleFields(QwRootFile *treerootfile)
 void  QwDataHandlerArray::ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector <Double_t> &values)
 {
   if (!empty()){
-    for (iterator handler = begin(); handler != end(); ++handler) {
-      VQwDataHandler* handler_parity = dynamic_cast<VQwDataHandler*>(handler->get());
+    for (auto & handler : *this) {
+      auto* handler_parity = dynamic_cast<VQwDataHandler*>(handler.get());
       handler_parity->ConstructBranchAndVector(tree,prefix,values);
     }
   }
@@ -407,8 +413,8 @@ void  QwDataHandlerArray::ConstructBranchAndVector(TTree *tree, TString& prefix,
 void  QwDataHandlerArray::FillTreeVector(std::vector <Double_t> &values) const
 {
   if (!empty()){
-    for (const_iterator handler = begin(); handler != end(); ++handler) {
-      VQwDataHandler* handler_parity = dynamic_cast<VQwDataHandler*>(handler->get());
+    for (const auto & handler : *this) {
+      auto* handler_parity = dynamic_cast<VQwDataHandler*>(handler.get());
       handler_parity->FillTreeVector(values);
     }
   }
@@ -419,16 +425,17 @@ void  QwDataHandlerArray::FillTreeVector(std::vector <Double_t> &values) const
 void  QwDataHandlerArray::ConstructHistograms(TDirectory *folder, TString &prefix)
 {
   if (!empty()) {
-    for (iterator subsys = begin(); subsys != end(); ++subsys){
-      (*subsys)->ConstructHistograms(folder,prefix);
+    for (auto & subsys : *this){
+      subsys->ConstructHistograms(folder,prefix);
     }
   }
 }
 
 void  QwDataHandlerArray::FillHistograms()
 {
-  if (!empty())
+  if (!empty()) {
     std::for_each(begin(), end(), boost::mem_fn(&VQwDataHandler::FillHistograms));
+}
 }
 
 
@@ -436,8 +443,8 @@ void  QwDataHandlerArray::FillHistograms()
 
 void  QwDataHandlerArray::FillDB(QwParityDB *db, TString type)
 {
-  for (iterator handler = begin(); handler != end(); ++handler) {
-    VQwDataHandler* handler_parity = dynamic_cast<VQwDataHandler*>(handler->get());
+  for (auto & handler : *this) {
+    auto* handler_parity = dynamic_cast<VQwDataHandler*>(handler.get());
     handler_parity->FillDB(db, type);
   }
 }
@@ -457,8 +464,8 @@ void  QwDataHandlerArray::FillErrDB(QwParityDB *db, TString type)
 void QwDataHandlerArray::WritePromptSummary(QwPromptSummary *ps, TString type)
 {
   if (!empty()){
-    for (const_iterator handler = begin(); handler != end(); ++handler) {
-      VQwDataHandler* handler_parity = dynamic_cast<VQwDataHandler*>(handler->get());
+    for (const auto & handler : *this) {
+      auto* handler_parity = dynamic_cast<VQwDataHandler*>(handler.get());
       handler_parity->WritePromptSummary(ps, type);
     }
   }
@@ -475,19 +482,21 @@ void QwDataHandlerArray::WritePromptSummary(QwPromptSummary *ps, TString type)
 QwDataHandlerArray& QwDataHandlerArray::operator= (const QwDataHandlerArray &source)
 {
   Bool_t localdebug=kFALSE;
-  if(localdebug)  std::cout<<"QwDataHandlerArray::operator= \n";
+  if(localdebug) {  std::cout<<"QwDataHandlerArray::operator= \n";
+}
   if (!source.empty()){
     if (this->size() == source.size()){
       for(size_t i=0;i<source.size();i++){
-	if (source.at(i)==NULL || this->at(i)==NULL){
+	if (source.at(i)==nullptr || this->at(i)==nullptr){
 	  //  Either the source or the destination handler
 	  //  are null
 	} else {
-	  VQwDataHandler *ptr1 =
+	  auto *ptr1 =
 	    dynamic_cast<VQwDataHandler*>(this->at(i).get());
           VQwDataHandler *ptr2 = source.at(i).get();
 	  if (typeid(*ptr1)==typeid(*ptr2)){
-	    if(localdebug) std::cout<<" here in QwDataHandlerArray::operator= types mach \n";
+	    if(localdebug) { std::cout<<" here in QwDataHandlerArray::operator= types mach \n";
+}
 	    *(ptr1) = *(source.at(i).get());
 	  } else {
 	    //  DataHandlers don't match
@@ -523,8 +532,8 @@ void  QwDataHandlerArray::PrintInfo() const
 void QwDataHandlerArray::PrintValue() const
 {
   if (!empty()) {
-    for (const_iterator handler = begin(); handler != end(); ++handler) {
-      VQwDataHandler* handler_parity = dynamic_cast<VQwDataHandler*>(handler->get());
+    for (const auto & handler : *this) {
+      auto* handler_parity = dynamic_cast<VQwDataHandler*>(handler.get());
       handler_parity->PrintValue();
     }
   }
@@ -538,8 +547,8 @@ void QwDataHandlerArray::PrintValue() const
 void QwDataHandlerArray::CalculateRunningAverage()
 {
   if (!empty()) {
-    for (iterator handler = begin(); handler != end(); ++handler) {
-      VQwDataHandler* handler_parity = dynamic_cast<VQwDataHandler*>(handler->get());
+    for (auto & handler : *this) {
+      auto* handler_parity = dynamic_cast<VQwDataHandler*>(handler.get());
       handler_parity->CalculateRunningAverage();
     }
   }
@@ -551,11 +560,11 @@ void QwDataHandlerArray::AccumulateRunningSum(const QwDataHandlerArray& value, I
   if (!value.empty()) {
     if (this->size() == value.size()) {
 	for (size_t i = 0; i < value.size(); i++) {
-	  if (value.at(i)==NULL || this->at(i)==NULL) {
+	  if (value.at(i)==nullptr || this->at(i)==nullptr) {
 	    //  Either the value or the destination handler
 	    //  are null
 	  } else {
-	    VQwDataHandler *ptr1 =
+	    auto *ptr1 =
 	      dynamic_cast<VQwDataHandler*>(this->at(i).get());
             VQwDataHandler *ptr2 = value.at(i).get();
 	    if (typeid(*ptr1) == typeid(*ptr2)) {
@@ -584,11 +593,11 @@ void QwDataHandlerArray::AccumulateAllRunningSum(const QwDataHandlerArray& value
   if (!value.empty()) {
     if (this->size() == value.size()) {
 	for (size_t i = 0; i < value.size(); i++) {
-	  if (value.at(i)==NULL || this->at(i)==NULL) {
+	  if (value.at(i)==nullptr || this->at(i)==nullptr) {
 	    //  Either the value or the destination handler
 	    //  are null
 	  } else {
-	    VQwDataHandler *ptr1 =
+	    auto *ptr1 =
 	      dynamic_cast<VQwDataHandler*>(this->at(i).get());
             VQwDataHandler *ptr2 = value.at(i).get();
 	    if (typeid(*ptr1) == typeid(*ptr2)) {
@@ -633,13 +642,13 @@ void QwDataHandlerArray::PrintErrorCounters() const{// report number of events f
 void QwDataHandlerArray::push_back(boost::shared_ptr<VQwDataHandler> handler)
 {
   
- if (handler.get() == NULL) {
+ if (handler.get() == nullptr) {
    QwError << "QwDataHandlerArray::push_back(): NULL handler"
            << QwLog::endl;
    //  This is an empty handler...
    //  Do nothing for now.
 
- } else if (!this->empty() && GetDataHandlerByName(handler->GetName())){
+ } else if (!this->empty() && (GetDataHandlerByName(handler->GetName()) != nullptr)){
    //  There is already a handler with this name!
    QwError << "QwDataHandlerArray::push_back(): handler " << handler->GetName()
            << " already exists" << QwLog::endl;
@@ -711,9 +720,9 @@ TList* QwDataHandlerArray::GetParamFileNameList(TString name) const
 void QwDataHandlerArray::ProcessDataHandlerEntry()
 {
   if (!empty()) {
-    for(iterator handler = begin(); handler != end(); ++handler){
-      (*handler)->ProcessData();
-      (*handler)->AccumulateRunningSum();
+    for(auto & handler : *this){
+      handler->ProcessData();
+      handler->AccumulateRunningSum();
     }
   }
 }
@@ -721,8 +730,8 @@ void QwDataHandlerArray::ProcessDataHandlerEntry()
 void QwDataHandlerArray::FinishDataHandler()
 {
   if (!empty()) {
-    for(iterator handler = begin(); handler != end(); ++handler){
-      (*handler)->FinishDataHandler();
+    for(auto & handler : *this){
+      handler->FinishDataHandler();
     }
   }
 }

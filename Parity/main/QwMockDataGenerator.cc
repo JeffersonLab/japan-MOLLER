@@ -26,7 +26,9 @@
 
 
 // Number of variables to correlate
-#define NVARS 3
+enum {
+NVARS = 3
+};
 
 
 // Multiplet structure
@@ -79,7 +81,8 @@ int main(int argc, char* argv[])
 
   // Get the helicity
   QwHelicity* helicity = dynamic_cast<QwHelicity*>(detectors.GetSubsystemByName("Helicity Info"));
-  if (! helicity) QwWarning << "No helicity subsystem defined!" << QwLog::endl;
+  if (helicity == nullptr) { QwWarning << "No helicity subsystem defined!" << QwLog::endl;
+}
 
   // Possible scenarios:
   // - everything is random, no correlations at all, no asymmetries at all
@@ -106,8 +109,8 @@ int main(int argc, char* argv[])
   std::vector <VQwSubsystem*> tempvector = detectors.GetSubsystemByType("QwDetectorArray");
   //  detectors.GetSubsystemByType;
 
-  for (std::size_t i = 0; i < tempvector.size(); i++){
-    detchannels.push_back(dynamic_cast<QwDetectorArray*>(tempvector[i]));
+  for (auto & i : tempvector){
+    detchannels.push_back(dynamic_cast<QwDetectorArray*>(i));
 
   //return detchannels;
   }
@@ -195,14 +198,16 @@ if(1==2){
 
 
     // Retrieve the requested range of event numbers
-    if (kDebug) std::cout << "Starting event loop..." << std::endl;
+    if (kDebug) { std::cout << "Starting event loop..." << std::endl;
+}
     Int_t eventnumber_min = gQwOptions.GetIntValuePairFirst("event");
     Int_t eventnumber_max = gQwOptions.GetIntValuePairLast("event");
 
     // Warn when only few events are requested, probably a problem in the input
-    if (abs(eventnumber_max - eventnumber_min) < 10)
+    if (abs(eventnumber_max - eventnumber_min) < 10) {
       QwWarning << "Only " << abs(eventnumber_max - eventnumber_min)
                 << " events will be generated." << QwLog::endl;
+}
 
     // Event generation loop
     for (Int_t event = eventnumber_min; event <= eventnumber_max; event++) {
@@ -221,13 +226,15 @@ if(1==2){
       // Concise helicity printout
       if (kDebug) {
         // - actual helicity
-        if      (helicity->GetHelicityActual() == 0) std::cout << "-";
-        else if (helicity->GetHelicityActual() == 1) std::cout << "+";
-        else std::cout << "?";
+        if      (helicity->GetHelicityActual() == 0) { std::cout << "-";
+        } else if (helicity->GetHelicityActual() == 1) { std::cout << "+";
+        } else { std::cout << "?";
+}
         // - delayed helicity
-        if      (helicity->GetHelicityDelayed() == 0) std::cout << "(-) ";
-        else if (helicity->GetHelicityDelayed() == 1) std::cout << "(+) ";
-        else std::cout << "(?) ";
+        if      (helicity->GetHelicityDelayed() == 0) { std::cout << "(-) ";
+        } else if (helicity->GetHelicityDelayed() == 1) { std::cout << "(+) ";
+        } else { std::cout << "(?) ";
+}
         if (event % kMultiplet + 1 == 4) {
           std::cout << std::hex << helicity->GetRandomSeedActual()  << std::dec << ",  \t";
           std::cout << std::hex << helicity->GetRandomSeedDelayed() << std::dec << std::endl;
@@ -239,7 +246,7 @@ if(1==2){
 
       // Fill the detectors with randomized data
       
-      int myhelicity = helicity->GetHelicityActual() ? +1 : -1;
+      int myhelicity = (helicity->GetHelicityActual() != 0) ? +1 : -1;
       //std::cout << myhelicity << std::endl;
 
       // Secondly introduce correlations between variables
@@ -264,7 +271,8 @@ if(1==2){
 
          Sigma = C' * C
        */
-      double z[NVARS], x[NVARS];
+      double z[NVARS];
+      double x[NVARS];
       double C[NVARS][NVARS];
       for (int var = 0; var < NVARS; var++) {
         x[var] = 0.0;
@@ -274,9 +282,11 @@ if(1==2){
       C[0][0] = 1.0; C[0][1] = 0.5;     C[0][2] = 0.5;
       C[1][0] = 0.0; C[1][1] = 1.32288; C[1][2] = 0.03780;
       C[2][0] = 0.0; C[2][1] = 0.0;     C[2][2] = 1.11739;
-      for (int i = 0; i < NVARS; i++)
-        for (int j = 0; j < NVARS; j++)
+      for (int i = 0; i < NVARS; i++) {
+        for (int j = 0; j < NVARS; j++) {
           x[i] += C[j][i] * z[j];
+}
+}
 
       // Assign to data elements
       //maindetector->GetChannel("MD2Neg")->SetExternalRandomVariable(x[0]);
@@ -289,9 +299,9 @@ if(1==2){
 //      detectors.ProcessEvent();
 //      beamline-> ProcessEvent(); //Do we need to keep this line now?  Check the maindetector correlation with beamline devices with and without it.
       
-     for (std::size_t i = 0; i < detchannels.size(); i++){
-      detchannels[i]->ExchangeProcessedData();
-      detchannels[i]->RandomizeMollerEvent(myhelicity);
+     for (auto & detchannel : detchannels){
+      detchannel->ExchangeProcessedData();
+      detchannel->RandomizeMollerEvent(myhelicity);
       }
 
       // Write this event to file
@@ -299,8 +309,9 @@ if(1==2){
 
       // Periodically print event number
       if ((kDebug && event % 1000 == 0)
-                  || event % 10000 == 0)
+                  || event % 10000 == 0) {
         std::cout << "Generated " << event << " events." << std::endl;
+}
 
 
     } // end of event loop

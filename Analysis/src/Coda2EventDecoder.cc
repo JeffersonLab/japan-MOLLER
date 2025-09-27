@@ -97,8 +97,8 @@ void Coda2EventDecoder::EncodeEndEventHeader(int* buffer, int eventcount, int lo
 Int_t Coda2EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 {
 
-	UInt_t local_datatype;
-	UInt_t local_eventtype;
+	UInt_t local_datatype = 0;
+	UInt_t local_eventtype = 0;
 
 	fPhysicsEventFlag = kFALSE;
 

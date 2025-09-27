@@ -8,7 +8,7 @@
 
 #if __STDC_VERSION__ < 199901L
 # if __GNUC__ >= 2
-#  define __func__ __FUNCTION__
+#  define _func_ __FUNCTION__
 # else
 #  define __func__ "<unknown>"
 # endif
@@ -17,10 +17,11 @@
 #include "QwOptions.h"
 
 // System headers
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
 #include <TROOT.h>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <utility>
 // Qweak headers
 #include "QwLog.h"
 #include "QwParameterFile.h"
@@ -39,7 +40,7 @@
 extern const char* const gGitInfo;
 
 // Initialize the static command line arguments to zero
-QwOptions* QwOptions::fInstance = 0;
+QwOptions* QwOptions::fInstance = nullptr;
 
 /**
  * The default constructor sets up the options description object with some
@@ -47,7 +48,7 @@ QwOptions* QwOptions::fInstance = 0;
  * wherever this object is accessible.
  */
 QwOptions::QwOptions()
-  : fArgc(0), fArgv(NULL), fParsed(false)
+  : fArgc(0), fArgv(nullptr), fParsed(false)
 {
   // No default config files
   fConfigFiles.clear();
@@ -93,12 +94,14 @@ QwOptions::~QwOptions()
   // Clean up the copy of the command line arguments
   // Note: only the array of arguments is allocated, the arguments themselves
   // are still owned by main.
-  if (fArgv)
+   {
     delete[] fArgv;
+}
 
   // Delete the option blocks
-  for (size_t i = 0; i < fOptionBlock.size(); i++)
-    delete fOptionBlock.at(i);
+  for (auto & i : fOptionBlock) {
+    delete i;
+}
   fOptionBlock.clear();
 }
 
@@ -113,7 +116,7 @@ void QwOptions::SetCommandLine(int argc, char* argv[], bool default_config_file)
 {
   // Copy command line options
   fArgc = argc;
-  if (fArgv) delete[] fArgv;
+  delete[] fArgv;
   fArgv = new char*[fArgc];
   QwDebug << "Arguments:";
   for (int i = 0; i < argc; i++) {
@@ -130,12 +133,13 @@ void QwOptions::SetCommandLine(int argc, char* argv[], bool default_config_file)
     QwDebug << "Invocation name: " << path << QwLog::endl;
     // Find file name from full path
     size_t pos = path.find_last_of('/');
-    if (pos != std::string::npos)
+    if (pos != std::string::npos) {
       // Called with path
       AddConfigFile(path.substr(pos+1) + ".conf");
-    else
+    } else {
       // Called without path
       AddConfigFile(path + ".conf");
+}
   }
 }
 
@@ -161,8 +165,8 @@ void QwOptions::SetConfigFile(const std::string& configfile)
 void QwOptions::AddConfigFile(const std::string& configfile)
 {
   Bool_t notfound = kTRUE;
-  for (size_t i = 0; i < fConfigFiles.size(); i++){
-    if (fConfigFiles.at(i) == configfile){
+  for (const auto & fConfigFile : fConfigFiles){
+    if (fConfigFile == configfile){
       notfound=kFALSE;
       break;
     }
@@ -185,7 +189,7 @@ po::options_description* QwOptions::CombineOptions()
   // The options can be grouped by defining a vector fOptions of
   // options_description objects. Each entry can have a name and
   // will show up as a separate section in the usage information.
-  po::options_description* options = new po::options_description("options");
+  auto* options = new po::options_description("options");
   for (size_t i = 0; i < fOptionBlockName.size(); i++) {
     // Right now every parser gets access to all options
     options->add(*fOptionBlock.at(i));
@@ -232,13 +236,13 @@ void QwOptions::ParseCommandLine()
   po::notify(fVariablesMap);
 
   // If option help/usage, print help text
-  if (fVariablesMap.count("help") || fVariablesMap.count("usage")) {
+  if ((fVariablesMap.count("help") != 0u) || (fVariablesMap.count("usage") != 0u)) {
     Usage();
     exit(0);
   }
 
   // If option version, print version string
-  if (fVariablesMap.count("version")) {
+  if (fVariablesMap.count("version") != 0u) {
     Version();
     exit(0);
   }
@@ -260,8 +264,8 @@ void QwOptions::ParseEnvironment()
 {
   class name_mapper {
     public:
-      name_mapper(const std::string& prefix, const std::string& ignore)
-      : prefix(prefix),ignore(ignore) { }
+      name_mapper(std::string  prefix, std::string  ignore)
+      : prefix(std::move(prefix)),ignore(std::move(ignore)) { }
       std::string operator()(const std::string& s) {
         string lc;
         if (s.find(prefix) == 0) {
@@ -269,8 +273,8 @@ void QwOptions::ParseEnvironment()
             lc += static_cast<char>(tolower(s[n]));
           }
         }
-        if (ignore.find(lc) == std::string::npos) return lc;
-        else return "";
+        if (ignore.find(lc) == std::string::npos) { return lc;
+        } return "";
       }
   private:
     std::string prefix, ignore;
@@ -295,7 +299,7 @@ void QwOptions::ParseEnvironment()
 void QwOptions::ParseConfigFile()
 {
   for (size_t i = 0; i < fConfigFiles.size(); i++) {
-    QwParameterFile configfile(fConfigFiles.at(i).c_str());
+    QwParameterFile configfile(fConfigFiles.at(i));
     std::stringstream configstream;
     configstream << configfile.rdbuf();
 
@@ -343,8 +347,9 @@ void QwOptions::Usage()
   QwMessage << QwLog::endl;
   QwMessage << "Welcome to the Qweak analyzer code." << QwLog::endl;
   QwMessage << QwLog::endl;
-  for (size_t i = 0; i < fOptionBlock.size(); i++)
-    QwMessage << *(fOptionBlock.at(i)) << QwLog::endl;
+  for (auto & i : fOptionBlock) {
+    QwMessage << *i << QwLog::endl;
+}
 }
 
 
@@ -389,8 +394,9 @@ std::pair<int,int> QwOptions::GetIntValuePair(const std::string& key)
   mypair.first = 0;
   mypair.second = 0;
 
-  if (fParsed == false) Parse();
-  if (fVariablesMap.count(key)) {
+  if (!fParsed) { Parse();
+}
+  if (fVariablesMap.count(key) != 0u) {
     std::string range = fVariablesMap[key].as<std::string>();
     mypair = QwParameterFile::ParseIntRange(":",range);
   }

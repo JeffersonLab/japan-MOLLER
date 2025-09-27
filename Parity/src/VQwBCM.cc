@@ -32,13 +32,14 @@ VQwBCM* VQwBCM::Create(TString subsystemname, TString name, TString type, TStrin
 {
   Bool_t localDebug = kFALSE;
   type.ToUpper();
-  if( localDebug ) QwMessage<<"Creating BCM of type: "<<type<<" with name: "<<
+  if( localDebug ) { QwMessage<<"Creating BCM of type: "<<type<<" with name: "<<
     name<<". Subsystem Name: " <<subsystemname<<" and clock name="<<clock<<"\n";
+}
   // (jc2) As a first try, let's do this the ugly way (but rather very
   // simple), just list out the types of BCM's supported by this code!!!
   if( type == "VQWK") {
     return new QwBCM<QwVQWK_Channel>(subsystemname,name,type);
-  } else if ( type == "ADC18" ) {
+  } if ( type == "ADC18" ) {
     return new QwBCM<QwADC18_Channel>(subsystemname,name,type,clock);
   } else if ( type == "SIS3801" ) {
     return new QwBCM<QwSIS3801_Channel>(subsystemname,name,type,clock);
@@ -57,12 +58,13 @@ VQwBCM* VQwBCM::Create(const VQwBCM& source)
   Bool_t localDebug = kFALSE;
   TString type = source.GetModuleType();
   type.ToUpper();
-  if( localDebug ) QwMessage<<"Creating BCM of type: "<<type<<QwLog::endl;
+  if( localDebug ) { QwMessage<<"Creating BCM of type: "<<type<<QwLog::endl;
+}
   // (jc2) As a first try, let's do this the ugly way (but rather very
   // simple), just list out the types of BCM's supported by this code!!!
   if( type == "VQWK") {
     return new QwBCM<QwVQWK_Channel>(dynamic_cast<const QwBCM<QwVQWK_Channel>&>(source));
-  } else if ( type == "ADC18" ) {
+  } if ( type == "ADC18" ) {
     return new QwBCM<QwADC18_Channel>(dynamic_cast<const QwBCM<QwADC18_Channel>&>(source));
   } else if ( type == "SIS3801" ) {
     return new QwBCM<QwSIS3801_Channel>(dynamic_cast<const QwBCM<QwSIS3801_Channel>&>(source));
@@ -83,13 +85,14 @@ VQwBCM* VQwBCM::CreateCombo(TString subsystemname, TString name, TString type)
 {
   Bool_t localDebug = kFALSE;
   type.ToUpper();
-  if( localDebug ) QwMessage<<"Creating CombinedBCM of type: "<<type<<" with name: "<<
+  if( localDebug ) { QwMessage<<"Creating CombinedBCM of type: "<<type<<" with name: "<<
     name<<". Subsystem Name: " <<subsystemname<<"\n";
+}
   // (jc2) As a first try, let's do this the ugly way (but rather very
   // simple), just list out the types of BCM's supported by this code!!!
   if( type == "VQWK") {
     return new QwCombinedBCM<QwVQWK_Channel>(subsystemname,name,type);
-  } else if ( type == "ADC18" ) {
+  } if ( type == "ADC18" ) {
     return new QwCombinedBCM<QwADC18_Channel>(subsystemname,name,type);
   } else if ( type == "SIS3801" ) {
     return new QwCombinedBCM<QwSIS3801_Channel>(subsystemname,name,type);
@@ -108,12 +111,13 @@ VQwBCM* VQwBCM::CreateCombo(const VQwBCM& source)
   Bool_t localDebug = kFALSE;
   TString type = source.GetModuleType();
   type.ToUpper();
-  if( localDebug ) QwMessage<<"Creating CombinedBCM of type: "<<type<< QwLog::endl;
+  if( localDebug ) { QwMessage<<"Creating CombinedBCM of type: "<<type<< QwLog::endl;
+}
   // (jc2) As a first try, let's do this the ugly way (but rather very
   // simple), just list out the types of BCM's supported by this code!!!
   if( type == "VQWK") {
     return new QwCombinedBCM<QwVQWK_Channel>(dynamic_cast<const QwCombinedBCM<QwVQWK_Channel>&>(source));
-  } else if ( type == "ADC18" ) {
+  } if ( type == "ADC18" ) {
     return new QwCombinedBCM<QwADC18_Channel>(dynamic_cast<const QwCombinedBCM<QwADC18_Channel>&>(source));
   } else if ( type == "SIS3801" ) {
     return new QwCombinedBCM<QwSIS3801_Channel>(dynamic_cast<const QwCombinedBCM<QwSIS3801_Channel>&>(source));

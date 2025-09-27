@@ -24,7 +24,7 @@ QwSubsystemArray::QwSubsystemArray(QwOptions& options, CanContainFn myCanContain
 : fCleanParameter{0,0,0},fEventTypeMask(0x0),fnCanContain(myCanContain)
 {
   ProcessOptionsToplevel(options);
-  QwParameterFile detectors(fSubsystemsMapFile.c_str());
+  QwParameterFile detectors(fSubsystemsMapFile);
   QwMessage << "Loading subsystems from " << fSubsystemsMapFile << "." << QwLog::endl;
   LoadSubsystemsFromParameterFile(detectors);
 }
@@ -47,12 +47,13 @@ QwSubsystemArray::QwSubsystemArray(const QwSubsystemArray& source)
   fSubsystemsDisabledByName(source.fSubsystemsDisabledByName),
   fSubsystemsDisabledByType(source.fSubsystemsDisabledByType)
 {
-  for (size_t i = 0; i < 3; i++)
+  for (size_t i = 0; i < 3; i++) {
     fCleanParameter[i] = source.fCleanParameter[i];
+}
 
   // Make copies of all subsystems rather than copying just the pointers
-  for (const_iterator subsys = source.begin(); subsys != source.end(); ++subsys) {
-    this->push_back(subsys->get()->Clone());
+  for (const auto & subsys : source) {
+    this->push_back(subsys.get()->Clone());
     // Instruct the subsystem to publish variables
     if (this->back()->PublishInternalValues() == kFALSE) {
       QwError << "Not all variables for " << this->back()->GetName()
@@ -74,11 +75,11 @@ QwSubsystemArray& QwSubsystemArray::operator=(const QwSubsystemArray& source)
   if (!source.empty()){
     if (this->size() == source.size()){
       for(size_t i=0;i<source.size();i++){
-        if (source.at(i)==NULL || this->at(i)==NULL){
+        if (source.at(i)==nullptr || this->at(i)==nullptr){
           //  Either the source or the destination subsystem
           //  are null
         } else {
-          VQwSubsystem *ptr1 =
+          auto *ptr1 =
             dynamic_cast<VQwSubsystem*>(this->at(i).get());
           VQwSubsystem *ptr2 = source.at(i).get();
           if (typeid(*ptr1)==typeid(*(ptr2))){
@@ -108,16 +109,16 @@ QwSubsystemArray& QwSubsystemArray::operator=(const QwSubsystemArray& source)
 void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detectors)
 {
   // This is how this should work
-  QwParameterFile* preamble;
+  QwParameterFile* preamble = nullptr;
   preamble = detectors.ReadSectionPreamble();
   // Process preamble
   QwVerbose << "Preamble:" << QwLog::endl;
   QwVerbose << *preamble << QwLog::endl;
-  if (preamble) delete preamble;
+  delete preamble;
 
-  QwParameterFile* section;
+  QwParameterFile* section = nullptr;
   std::string section_name;
-  while ((section = detectors.ReadNextSection(section_name))) {
+  while ((section = detectors.ReadNextSection(section_name)) != nullptr) {
 
     // Debugging output of configuration section
     QwVerbose << "[" << section_name << "]" << QwLog::endl;
@@ -128,36 +129,40 @@ void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detector
     std::string subsys_name;
     if (! section->FileHasVariablePair("=","name",subsys_name)) {
       QwError << "No name defined in section for subsystem " << subsys_type << "." << QwLog::endl;
-      delete section; section = 0;
+      delete section; section = nullptr;
       continue;
     }
 
     // If subsystem type is explicitly disabled
     bool disabled_by_type = false;
-    for (size_t i = 0; i < fSubsystemsDisabledByType.size(); i++)
-      if (subsys_type == fSubsystemsDisabledByType.at(i))
+    for (const auto & i : fSubsystemsDisabledByType) {
+      if (subsys_type == i) {
         disabled_by_type = true;
+}
+}
     if (disabled_by_type) {
       QwWarning << "Subsystem of type " << subsys_type << " disabled." << QwLog::endl;
-      delete section; section = 0;
+      delete section; section = nullptr;
       continue;
     }
 
     // If subsystem name is explicitly disabled
     bool disabled_by_name = false;
-    for (size_t i = 0; i < fSubsystemsDisabledByName.size(); i++)
-      if (subsys_name == fSubsystemsDisabledByName.at(i))
+    for (const auto & i : fSubsystemsDisabledByName) {
+      if (subsys_name == i) {
         disabled_by_name = true;
+}
+}
     if (disabled_by_name) {
       QwWarning << "Subsystem with name " << subsys_name << " disabled." << QwLog::endl;
-      delete section; section = 0;
+      delete section; section = nullptr;
       continue;
     }
 
     // Create subsystem
     QwMessage << "Creating subsystem of type " << subsys_type << " "
               << "with name " << subsys_name << "." << QwLog::endl;
-    VQwSubsystem* subsys = 0;
+    VQwSubsystem* subsys = nullptr;
     try {
       subsys =
         VQwSubsystemFactory::Create(subsys_type, subsys_name);
@@ -165,9 +170,9 @@ void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detector
       QwError << "No support for subsystems of type " << subsys_type << "." << QwLog::endl;
       // Fall-through to next error for more the psychological effect of many warnings
     }
-    if (! subsys) {
+    if (subsys == nullptr) {
       QwError << "Could not create subsystem " << subsys_type << "." << QwLog::endl;
-      delete section; section = 0;
+      delete section; section = nullptr;
       continue;
     }
 
@@ -176,8 +181,8 @@ void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detector
       QwMessage << "Subsystem " << subsys_name << " cannot be stored in this "
                 << "subsystem array." << QwLog::endl;
       QwMessage << "Deleting subsystem " << subsys_name << " again" << QwLog::endl;
-      delete section; section = 0;
-      delete subsys; subsys = 0;
+      delete section; section = nullptr;
+      delete subsys; subsys = nullptr;
       continue;
     }
 
@@ -193,7 +198,7 @@ void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detector
     }
 
     // Delete parameter file section
-    delete section; section = 0;
+    delete section; section = nullptr;
   }
 }
 
@@ -206,13 +211,13 @@ void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detector
  */
 void QwSubsystemArray::push_back(VQwSubsystem* subsys)
 {
-  if (subsys == NULL) {
+  if (subsys == nullptr) {
     QwError << "QwSubsystemArray::push_back(): NULL subsys"
             << QwLog::endl;
     //  This is an empty subsystem...
     //  Do nothing for now.
 
-  } else if (!this->empty() && GetSubsystemByName(subsys->GetName())){
+  } else if (!this->empty() && (GetSubsystemByName(subsys->GetName()) != nullptr)){
     //  There is already a subsystem with this name!
     QwError << "QwSubsystemArray::push_back(): subsys " << subsys->GetName()
             << " already exists" << QwLog::endl;
@@ -293,16 +298,16 @@ void QwSubsystemArray::ProcessOptionsSubsystems(QwOptions &options)
 {
   LoadAllEventRanges(options);
 
-  for (iterator subsys_iter = begin(); subsys_iter != end(); ++subsys_iter) {
-    VQwSubsystem* subsys = dynamic_cast<VQwSubsystem*>(subsys_iter->get());
+  for (auto & subsys_iter : *this) {
+    auto* subsys = dynamic_cast<VQwSubsystem*>(subsys_iter.get());
     subsys->ProcessOptions(options);
   }
 }
 
 void QwSubsystemArray::LoadAllEventRanges(QwOptions &options){
 
-  std::string fBadEventListFileName = options.GetValue<std::string>("bad-event-list");
-  if (fBadEventListFileName.size() > 0) {
+  auto fBadEventListFileName = options.GetValue<std::string>("bad-event-list");
+  if (!fBadEventListFileName.empty()) {
     QwParameterFile fBadEventListFile(fBadEventListFileName);
     // If there is an event list, open the next section
     std::string bad_event_range;
@@ -310,7 +315,8 @@ void QwSubsystemArray::LoadAllEventRanges(QwOptions &options){
       // Find next non-whitespace, non-comment, non-empty line, before EOF
       fBadEventListFile.TrimWhitespace();
       fBadEventListFile.TrimComment('#');
-      if (fBadEventListFile.LineIsEmpty()) continue;
+      if (fBadEventListFile.LineIsEmpty()) { continue;
+}
       std::pair<UInt_t,UInt_t> aBadEventRange = QwParameterFile::ParseIntRange(":",bad_event_range);
       fBadEventRange.push_back(aBadEventRange);
       QwMessage << "Next Bad event range is " << bad_event_range << QwLog::endl;
@@ -325,14 +331,14 @@ void QwSubsystemArray::LoadAllEventRanges(QwOptions &options){
  */
 VQwSubsystem* QwSubsystemArray::GetSubsystemByName(const TString& name)
 {
-  VQwSubsystem* tmp = NULL;
+  VQwSubsystem* tmp = nullptr;
   if (!empty()) {
     // Loop over the subsystems
-    for (const_iterator subsys = begin(); subsys != end(); ++subsys) {
+    for (const auto & subsys : *this) {
       // Check the name of this subsystem
       // std::cout<<"QwSubsystemArray::GetSubsystemByName available name=="<<(*subsys)->GetName()<<"== to be compared to =="<<name<<"==\n";
-      if ((*subsys)->GetName() == name) {
-        tmp = (*subsys).get();
+      if (subsys->GetName() == name) {
+        tmp = subsys.get();
         //std::cout<<"QwSubsystemArray::GetSubsystemByName found a matching name \n";
       } else {
         // nothing
@@ -357,11 +363,11 @@ std::vector<VQwSubsystem*> QwSubsystemArray::GetSubsystemByType(const std::strin
   if (!empty()) {
 
     // Loop over the subsystems
-    for (const_iterator subsys = begin(); subsys != end(); ++subsys) {
+    for (const auto & subsys : *this) {
 
       // Test to see if the subsystem inherits from the required type
-      if (VQwSubsystemFactory::InheritsFrom((*subsys).get(),type)) {
-        subsys_list.push_back((*subsys).get());
+      if (VQwSubsystemFactory::InheritsFrom(subsys.get(),type)) {
+        subsys_list.push_back(subsys.get());
       }
 
     } // end of loop over subsystems
@@ -389,10 +395,11 @@ Int_t QwSubsystemArray::ProcessConfigurationBuffer(
   UInt_t* buffer,
   UInt_t num_words)
 {
-  if (!empty())
-    for (iterator subsys = begin(); subsys != end(); ++subsys){
-      (*subsys)->ProcessConfigurationBuffer(roc_id, bank_id, buffer, num_words);
+  if (!empty()) {
+    for (auto & subsys : *this){
+      subsys->ProcessConfigurationBuffer(roc_id, bank_id, buffer, num_words);
     }
+}
   return 0;
 }
 
@@ -405,8 +412,8 @@ void  QwSubsystemArray::GetMarkerWordList(
   std::vector<UInt_t>& marker) const
 {
   if (!empty()){
-    for (const_iterator subsys = begin(); subsys != end(); ++subsys) {
-      (*subsys)->GetMarkerWordList(roc_id, bank_id, marker);
+    for (const auto & subsys : *this) {
+      subsys->GetMarkerWordList(roc_id, bank_id, marker);
     }
   }
 }
@@ -421,8 +428,8 @@ Int_t QwSubsystemArray::ProcessEvBuffer(
 {
   if (!empty()) {
     SetDataLoaded(kTRUE);
-    for (iterator subsys = begin(); subsys != end(); ++subsys) {
-      (*subsys)->ProcessEvBuffer(event_type, roc_id, bank_id, buffer, num_words);
+    for (auto & subsys : *this) {
+      subsys->ProcessEvBuffer(event_type, roc_id, bank_id, buffer, num_words);
     }
   }
   return 0;
@@ -449,30 +456,33 @@ void  QwSubsystemArray::AtEndOfEventLoop()
 //*****************************************************************
 void  QwSubsystemArray::RandomizeEventData(int helicity, double time)
 {
-  if (!empty())
-    for (iterator subsys = begin(); subsys != end(); ++subsys) {
-      (*subsys)->RandomizeEventData(helicity, time);
+  if (!empty()) {
+    for (auto & subsys : *this) {
+      subsys->RandomizeEventData(helicity, time);
     }
+}
 }
 
 //*****************************************************************
 void  QwSubsystemArray::EncodeEventData(std::vector<UInt_t> &buffer)
 {
-  if (!empty())
-    for (iterator subsys = begin(); subsys != end(); ++subsys) {
-      (*subsys)->EncodeEventData(buffer);
+  if (!empty()) {
+    for (auto & subsys : *this) {
+      subsys->EncodeEventData(buffer);
     }
+}
 }
 //*****************************************************************
 void  QwSubsystemArray::GetROCIDList(std::vector<ROCID_t> &list)
 {
   if (!empty()){
 		std::vector<ROCID_t> tmp;
-    for (iterator subsys = begin(); subsys != end(); ++subsys) {
-			tmp = (*subsys)->GetROCIds();
-			for(auto it = tmp.begin(); it!=tmp.end();it++){
-				if(std::find(list.begin(), list.end(), *it) == list.end() )
-					list.push_back(*it);
+    for (auto & subsys : *this) {
+			tmp = subsys->GetROCIds();
+			for(unsigned int & it : tmp){
+				if(std::find(list.begin(), list.end(), it) == list.end() ) {
+					list.push_back(it);
+}
 			}
     }
 	}
@@ -482,8 +492,8 @@ void  QwSubsystemArray::GetROCIDList(std::vector<ROCID_t> &list)
 void  QwSubsystemArray::ConstructObjects(TDirectory *folder, TString &prefix)
 {
   if (!empty()) {
-    for (iterator subsys = begin(); subsys != end(); ++subsys){
-      (*subsys)->ConstructObjects(folder,prefix);
+    for (auto & subsys : *this){
+      subsys->ConstructObjects(folder,prefix);
     }
   }
 }
@@ -492,16 +502,17 @@ void  QwSubsystemArray::ConstructObjects(TDirectory *folder, TString &prefix)
 void  QwSubsystemArray::ConstructHistograms(TDirectory *folder, TString &prefix)
 {
   if (!empty()) {
-    for (iterator subsys = begin(); subsys != end(); ++subsys){
-      (*subsys)->ConstructHistograms(folder,prefix);
+    for (auto & subsys : *this){
+      subsys->ConstructHistograms(folder,prefix);
     }
   }
 }
 
 void  QwSubsystemArray::FillHistograms()
 {
-  if (!empty())
+  if (!empty()) {
     std::for_each(begin(), end(), boost::mem_fn(&VQwSubsystem::FillHistograms));
+}
 }
 
 void  QwSubsystemArray::ShareHistograms(const QwSubsystemArray& source)
@@ -524,8 +535,8 @@ void  QwSubsystemArray::ShareHistograms(const QwSubsystemArray& source)
 void  QwSubsystemArray::ConstructTree(TDirectory *folder, TString &prefix)
 {
   if (!empty()) {
-    for (iterator subsys = begin(); subsys != end(); ++subsys){
-      (*subsys)->ConstructTree(folder, prefix);
+    for (auto & subsys : *this){
+      subsys->ConstructTree(folder, prefix);
     }
   }
 }
@@ -535,8 +546,9 @@ void  QwSubsystemArray::ConstructTree(TDirectory *folder, TString &prefix)
  */
 void  QwSubsystemArray::FillTree()
 {
-  if (!empty())
+  if (!empty()) {
     std::for_each(begin(), end(), boost::mem_fn(&VQwSubsystem::FillTree));
+}
 }
 
 /**
@@ -544,8 +556,9 @@ void  QwSubsystemArray::FillTree()
  */
 void  QwSubsystemArray::DeleteTree()
 {
-  if (!empty())
+  if (!empty()) {
     std::for_each(begin(), end(), boost::mem_fn(&VQwSubsystem::DeleteTree));
+}
 }
 
 //*****************************************************************
@@ -553,8 +566,8 @@ void  QwSubsystemArray::DeleteTree()
 void  QwSubsystemArray::PrintInfo() const
 {
   if (!empty()) {
-    for (const_iterator subsys = begin(); subsys != end(); ++subsys) {
-      (*subsys)->PrintInfo();
+    for (const auto & subsys : *this) {
+      subsys->PrintInfo();
     }
   }
 }
@@ -589,8 +602,8 @@ void  QwSubsystemArray::ConstructBranchAndVector(
     tree->Branch("Coda_ScanData1",&(values[fTreeArrayIndex+3]),"Coda_ScanData1/D");
     tree->Branch("Coda_ScanData2",&(values[fTreeArrayIndex+4]),"Coda_ScanData2/D");
   }
-  for (iterator subsys = begin(); subsys != end(); ++subsys) {
-    VQwSubsystem* subsys_ptr = dynamic_cast<VQwSubsystem*>(subsys->get());
+  for (auto & subsys : *this) {
+    auto* subsys_ptr = dynamic_cast<VQwSubsystem*>(subsys.get());
     subsys_ptr->ConstructBranchAndVector(tree, prefix, values);
   }
 
@@ -610,8 +623,8 @@ void QwSubsystemArray::ConstructBranch(TTree *tree, TString& prefix)
     tree->Branch("CodaEventType",&fCodaEventType,"CodaEventType/I");
   }
 
-  for (iterator subsys = begin(); subsys != end(); ++subsys) {
-    VQwSubsystem* subsys_ptr = dynamic_cast<VQwSubsystem*>(subsys->get());
+  for (auto & subsys : *this) {
+    auto* subsys_ptr = dynamic_cast<VQwSubsystem*>(subsys.get());
     subsys_ptr->ConstructBranch(tree, prefix);
   }
 }
@@ -630,8 +643,8 @@ void QwSubsystemArray::ConstructBranch(
 {
   QwMessage << " QwSubsystemArray::ConstructBranch " << QwLog::endl;
 
-  QwParameterFile* preamble;
-  QwParameterFile* nextsection;
+  QwParameterFile* preamble = nullptr;
+  QwParameterFile* nextsection = nullptr;
   preamble = trim_file.ReadSectionPreamble();
 
   // Process preamble
@@ -643,8 +656,8 @@ void QwSubsystemArray::ConstructBranch(
     tree->Branch("CodaEventType",&fCodaEventType,"CodaEventType/I");
   }
 
-  for (iterator subsys = begin(); subsys != end(); ++subsys) {
-    VQwSubsystem* subsys_ptr = dynamic_cast<VQwSubsystem*>(subsys->get());
+  for (auto & subsys : *this) {
+    auto* subsys_ptr = dynamic_cast<VQwSubsystem*>(subsys.get());
 
     TString subsysname = subsys_ptr->GetName();
     //QwMessage << "Tree leaves created for " << subsysname << QwLog::endl;
@@ -654,8 +667,9 @@ void QwSubsystemArray::ConstructBranch(
       nextsection = trim_file.ReadUntilNextSection();
       subsys_ptr->ConstructBranch(tree, prefix, *nextsection);
       QwMessage << "Tree leaves created for " << subsysname << QwLog::endl;
-    } else
+    } else {
       QwMessage << "No tree leaves created for " << subsysname << QwLog::endl;
+}
   }
 }
 
@@ -676,8 +690,8 @@ void QwSubsystemArray::FillTreeVector(std::vector<Double_t>& values) const
 
 
   // Fill the subsystem data
-  for (const_iterator subsys = begin(); subsys != end(); ++subsys) {
-    VQwSubsystem* subsys_ptr = dynamic_cast<VQwSubsystem*>(subsys->get());
+  for (const auto & subsys : *this) {
+    auto* subsys_ptr = dynamic_cast<VQwSubsystem*>(subsys.get());
     subsys_ptr->FillTreeVector(values);
   }
 }
@@ -797,9 +811,9 @@ void QwSubsystemArray::FillNTupleVector(std::vector<Double_t>& values) const
 void QwSubsystemArray::PrintParamFileList() const
 {
   if (not empty()) {
-    for (const_iterator subsys = begin(); subsys != end(); ++subsys)
+    for (const auto & subsys : *this)
       {
-        (*subsys)->PrintDetectorMaps(true);
+        subsys->PrintDetectorMaps(true);
       }
   }
 }
@@ -808,28 +822,27 @@ TList* QwSubsystemArray::GetParamFileNameList(TString name) const
 {
   if (not empty()) {
 
-    TList* return_maps_TList = new TList;
+    auto* return_maps_TList = new TList;
     return_maps_TList->SetName(name);
 
     std::map<TString, TString> mapfiles_subsystem;
 
-    for (const_iterator subsys = begin(); subsys != end(); ++subsys) 
+    for (const auto & subsys : *this) 
       {
-	mapfiles_subsystem = (*subsys)->GetDetectorMaps();
-	for( std::map<TString, TString>::iterator ii= mapfiles_subsystem.begin(); ii!= mapfiles_subsystem.end(); ++ii)
+	mapfiles_subsystem = subsys->GetDetectorMaps();
+	for(auto & ii : mapfiles_subsystem)
 	  {	
-	    TList *test = new TList;
-	    test->SetName((*ii).first);
-	    test->AddLast(new TObjString((*ii).second));
+	    auto *test = new TList;
+	    test->SetName(ii.first);
+	    test->AddLast(new TObjString(ii.second));
 	    return_maps_TList -> AddLast(test);
 	  }
       }
 
     return return_maps_TList;
   }
-  else {
-    return NULL;
-  }
+      return NULL;
+ 
 };
 
 
@@ -842,13 +855,13 @@ TList* QwSubsystemArray::GetParamFileNameList(TString name) const
 void QwSubsystemArray::push_back(boost::shared_ptr<VQwSubsystem> subsys)
 {
   
- if (subsys.get() == NULL) {
+ if (subsys.get() == nullptr) {
    QwError << "QwSubsystemArray::push_back(): NULL subsys"
            << QwLog::endl;
    //  This is an empty subsystem...
    //  Do nothing for now.
 
- } else if (!this->empty() && GetSubsystemByName(subsys->GetName())){
+ } else if (!this->empty() && (GetSubsystemByName(subsys->GetName()) != nullptr)){
    //  There is already a subsystem with this name!
    QwError << "QwSubsystemArray::push_back(): subsys " << subsys->GetName()
            << " already exists" << QwLog::endl;

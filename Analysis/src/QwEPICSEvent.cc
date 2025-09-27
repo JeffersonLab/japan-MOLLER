@@ -56,13 +56,13 @@ QwEPICSEvent::QwEPICSEvent():fNumberEPICSVariables(0),
 {
   SetDataLoaded(kFALSE);
   QwEPICSEvent::InitDefaultAutogainList();
-  if (kDebug == 1) PrintVariableList();
+  if (kDebug == 1) { PrintVariableList();
+}
 }
 
 
 QwEPICSEvent::~QwEPICSEvent()
-{
-}
+= default;
 
 
 /*************************************
@@ -111,13 +111,15 @@ Int_t QwEPICSEvent::LoadChannelMap(TString mapfile)
 
   // Open the file
   QwParameterFile mapstr(mapfile.Data());
-  std::string varname, varvalue;
+  std::string varname;
+  std::string varvalue;
   while (mapstr.ReadNextLine()) {
     lineread++;
 
     mapstr.TrimComment();      // Remove everything after a '!' character.
     mapstr.TrimWhitespace();   // Get rid of leading and trailing spaces.
-    if (mapstr.LineIsEmpty())  continue;
+    if (mapstr.LineIsEmpty()) {  continue;
+}
 
     if (mapstr.HasVariablePair("=",varname,varvalue)){
       QwDebug << "QwEPICSEvent::LoadChannelMap:  keyword,value pair:"
@@ -145,21 +147,26 @@ Int_t QwEPICSEvent::LoadChannelMap(TString mapfile)
 
     varname = mapstr.GetTypedNextToken<std::string>();
     std::string dbtable = mapstr.GetTypedNextToken<std::string>();
-    TString datatype    = mapstr.GetTypedNextToken<TString>();
+    auto datatype    = mapstr.GetTypedNextToken<TString>();
     datatype.ToLower();
 
     if (datatype == "") {
       AddEPICSTag(varname,dbtable);
     } else {
       EQwEPICSDataType datatypeid = kEPICSString;
-      if (datatype == "string")  datatypeid = kEPICSString;
-      if (datatype == "float")   datatypeid = kEPICSFloat;
-      if (datatype == "int")     datatypeid = kEPICSInt;
+      if (datatype == "string") {  datatypeid = kEPICSString;
+}
+      if (datatype == "float") {   datatypeid = kEPICSFloat;
+}
+      if (datatype == "int") {     datatypeid = kEPICSInt;
+}
       AddEPICSTag(varname,dbtable,datatypeid);
     }
   }
-  if (kDebug == 1) std::cout << "fNumberEPICSVariables = " << fNumberEPICSVariables << std::endl << std::endl;
-  if (kDebug == 1) std::cout << "line read in the parameter file =" << lineread << std::endl;
+  if (kDebug == 1) { std::cout << "fNumberEPICSVariables = " << fNumberEPICSVariables << std::endl << std::endl;
+}
+  if (kDebug == 1) { std::cout << "line read in the parameter file =" << lineread << std::endl;
+}
 
   ResetCounters();
   mapstr.Close(); // Close the file (ifstream)
@@ -305,14 +312,17 @@ Int_t QwEPICSEvent::AddEPICSTag(
 
 void QwEPICSEvent::CalculateRunningValues()
 {
-  if (kDebug == 1) std::cout <<"Here we are in 'CalculateRunningValues'!!"<<std::endl;
-  if (kDebug == 1) std::cout<<"fNumberEPICSVariables = "<<fNumberEPICSVariables<<std::endl<<std::endl;
+  if (kDebug == 1) { std::cout <<"Here we are in 'CalculateRunningValues'!!"<<std::endl;
+}
+  if (kDebug == 1) { std::cout<<"fNumberEPICSVariables = "<<fNumberEPICSVariables<<std::endl<<std::endl;
+}
 
   Bool_t anyFilled = kFALSE;
-  for (size_t tagindex = 0; tagindex < fEPICSDataEvent.size(); tagindex++) {
-    anyFilled |=  fEPICSDataEvent[tagindex].Filled;
+  for (auto & tagindex : fEPICSDataEvent) {
+    anyFilled |=  tagindex.Filled;
   }
-  if (! anyFilled) return;
+  if (! anyFilled) { return;
+}
 
   for (size_t tagindex = 0; tagindex < fEPICSVariableType.size(); tagindex++) {
     if (fEPICSVariableType[tagindex] == kEPICSFloat ||
@@ -345,15 +355,17 @@ void QwEPICSEvent::CalculateRunningValues()
           fEPICSCumulativeData[tagindex].Minimum       =
               fEPICSDataEvent[tagindex].Value;
         }
-        if (kDebug == 1) std::cout << "This event has "<<fEPICSVariableList[tagindex]
+        if (kDebug == 1) { std::cout << "This event has "<<fEPICSVariableList[tagindex]
                                    << " equal to "<< fEPICSDataEvent[tagindex].Value
 				   << " giving a running average of "
 				   << fEPICSCumulativeData[tagindex].Sum /
 				      fEPICSCumulativeData[tagindex].NumberRecords
 				   << std::endl;
+}
       } else {
-        if (kDebug == 1) std::cout << fEPICSVariableList[tagindex]
+        if (kDebug == 1) { std::cout << fEPICSVariableList[tagindex]
                                    << " seems to be not filled."<<std::endl;
+}
       }
     }
 
@@ -378,7 +390,8 @@ void QwEPICSEvent::CalculateRunningValues()
   fNumberEPICSEvents++;
   //////////////////////
 
-  if (kDebug == 1) std::cout << "fNumberEPICSEvents = " << fNumberEPICSEvents << std::endl;
+  if (kDebug == 1) { std::cout << "fNumberEPICSEvents = " << fNumberEPICSEvents << std::endl;
+}
 }
 
 
@@ -387,7 +400,8 @@ void QwEPICSEvent::ExtractEPICSValues(const string& data, int event)
   /* This routine will decode the input string, which holds the  *
    * epics buffer and extract the EPICS values from it.          */
 
-  if (kDebug == 1) std::cout <<"Here we are, entering 'ExtractEPICSValues'!!"<<std::endl;
+  if (kDebug == 1) { std::cout <<"Here we are, entering 'ExtractEPICSValues'!!"<<std::endl;
+}
 
   for (size_t tagindex = 0; tagindex < fEPICSVariableList.size(); tagindex++) {
     fEPICSDataEvent[tagindex].Filled = kFALSE;
@@ -399,7 +413,8 @@ void QwEPICSEvent::ExtractEPICSValues(const string& data, int event)
   QwParameterFile file(ss);
   while (file.ReadNextLine()) {
     file.TrimWhitespace();
-    string varname, varvalue;
+    string varname;
+    string varvalue;
     if (file.HasVariablePair(" \t\n", varname, varvalue)) {
       Int_t tagindex = FindIndex(varname);
       if (tagindex != kEPICS_Error) {
@@ -418,14 +433,13 @@ void QwEPICSEvent::ExtractEPICSValues(const string& data, int event)
 Int_t QwEPICSEvent::FindIndex(const string& tag) const
 {
   // Find a match for the tag
-  std::map<std::string,Int_t>::const_iterator match = fEPICSVariableMap.find(tag);
+  auto match = fEPICSVariableMap.find(tag);
 
-  if (match != fEPICSVariableMap.end())
+  if (match != fEPICSVariableMap.end()) {
     // A match was found
     return match->second;
 
-  else
-    // Otherwise return error
+  }     // Otherwise return error
     return kEPICS_Error;
 }
 
@@ -451,7 +465,7 @@ TString QwEPICSEvent::GetDataString(const string& tag) const
       return(fEPICSDataEvent[tagindex].StringValue);
     }
   }
-  return TString("");
+  return {""};
 }
 
 void QwEPICSEvent::InitDefaultAutogainList()
@@ -460,41 +474,41 @@ void QwEPICSEvent::InitDefaultAutogainList()
 	fDefaultAutogainList.clear();
 
 	// Add default autogain channels
-  fDefaultAutogainList.push_back("IPM3C17.XIFG");
-  fDefaultAutogainList.push_back("IPM3C17.YIFG");
-  fDefaultAutogainList.push_back("IBC3C17.XIFG");
-  fDefaultAutogainList.push_back("IBC3C17.YIFG");
-  fDefaultAutogainList.push_back("IPM3C18.XIFG");
-  fDefaultAutogainList.push_back("IPM3C18.YIFG");
-  fDefaultAutogainList.push_back("IPM3C19.XIFG");
-  fDefaultAutogainList.push_back("IPM3C19.YIFG");
-  fDefaultAutogainList.push_back("IPM3C03.YIFG");
-  fDefaultAutogainList.push_back("IPM3P01.XIFG");
-  fDefaultAutogainList.push_back("IPM3P01.YIFG");
-  fDefaultAutogainList.push_back("IPM3P02A.XIFG");
-  fDefaultAutogainList.push_back("IPM3P02A.YIFG");
-  fDefaultAutogainList.push_back("IPM3P03A.XIFG");
-  fDefaultAutogainList.push_back("IPM3P03A.YIFG");
-  fDefaultAutogainList.push_back("IPM3P02B.XIFG");
-  fDefaultAutogainList.push_back("IPM3P02B.YIFG");
-  fDefaultAutogainList.push_back("IPM3C20.XIFG");
-  fDefaultAutogainList.push_back("IPM3C20.YIFG");
-  fDefaultAutogainList.push_back("IPM3C21.XIFG");
-  fDefaultAutogainList.push_back("IPM3C21.YIFG");
-  fDefaultAutogainList.push_back("IPM3H02.XIFG");
-  fDefaultAutogainList.push_back("IPM3H02.YIFG");
-  fDefaultAutogainList.push_back("IPM3H04.XIFG");
-  fDefaultAutogainList.push_back("IPM3H04.YIFG");
-  fDefaultAutogainList.push_back("IPM3H07A.XIFG");
-  fDefaultAutogainList.push_back("IPM3H07A.YIFG");
-  fDefaultAutogainList.push_back("IPM3H07B.XIFG");
-  fDefaultAutogainList.push_back("IPM3H07B.YIFG");
-  fDefaultAutogainList.push_back("IPM3H07C.XIFG");
-  fDefaultAutogainList.push_back("IPM3H07C.YIFG");
-  fDefaultAutogainList.push_back("IPM3H09.XIFG");
-  fDefaultAutogainList.push_back("IPM3H09.YIFG");
-  fDefaultAutogainList.push_back("IPM3H09B.XIFG");
-  fDefaultAutogainList.push_back("IPM3H09B.YIFG");
+  fDefaultAutogainList.emplace_back("IPM3C17.XIFG");
+  fDefaultAutogainList.emplace_back("IPM3C17.YIFG");
+  fDefaultAutogainList.emplace_back("IBC3C17.XIFG");
+  fDefaultAutogainList.emplace_back("IBC3C17.YIFG");
+  fDefaultAutogainList.emplace_back("IPM3C18.XIFG");
+  fDefaultAutogainList.emplace_back("IPM3C18.YIFG");
+  fDefaultAutogainList.emplace_back("IPM3C19.XIFG");
+  fDefaultAutogainList.emplace_back("IPM3C19.YIFG");
+  fDefaultAutogainList.emplace_back("IPM3C03.YIFG");
+  fDefaultAutogainList.emplace_back("IPM3P01.XIFG");
+  fDefaultAutogainList.emplace_back("IPM3P01.YIFG");
+  fDefaultAutogainList.emplace_back("IPM3P02A.XIFG");
+  fDefaultAutogainList.emplace_back("IPM3P02A.YIFG");
+  fDefaultAutogainList.emplace_back("IPM3P03A.XIFG");
+  fDefaultAutogainList.emplace_back("IPM3P03A.YIFG");
+  fDefaultAutogainList.emplace_back("IPM3P02B.XIFG");
+  fDefaultAutogainList.emplace_back("IPM3P02B.YIFG");
+  fDefaultAutogainList.emplace_back("IPM3C20.XIFG");
+  fDefaultAutogainList.emplace_back("IPM3C20.YIFG");
+  fDefaultAutogainList.emplace_back("IPM3C21.XIFG");
+  fDefaultAutogainList.emplace_back("IPM3C21.YIFG");
+  fDefaultAutogainList.emplace_back("IPM3H02.XIFG");
+  fDefaultAutogainList.emplace_back("IPM3H02.YIFG");
+  fDefaultAutogainList.emplace_back("IPM3H04.XIFG");
+  fDefaultAutogainList.emplace_back("IPM3H04.YIFG");
+  fDefaultAutogainList.emplace_back("IPM3H07A.XIFG");
+  fDefaultAutogainList.emplace_back("IPM3H07A.YIFG");
+  fDefaultAutogainList.emplace_back("IPM3H07B.XIFG");
+  fDefaultAutogainList.emplace_back("IPM3H07B.YIFG");
+  fDefaultAutogainList.emplace_back("IPM3H07C.XIFG");
+  fDefaultAutogainList.emplace_back("IPM3H07C.YIFG");
+  fDefaultAutogainList.emplace_back("IPM3H09.XIFG");
+  fDefaultAutogainList.emplace_back("IPM3H09.YIFG");
+  fDefaultAutogainList.emplace_back("IPM3H09B.XIFG");
+  fDefaultAutogainList.emplace_back("IPM3H09B.YIFG");
 }
 
 void QwEPICSEvent::SetDefaultAutogainList(std::vector<std::string>& input_list)
@@ -518,8 +532,10 @@ int QwEPICSEvent::SetDataValue(const string& tag, const string& value, const int
 
 int QwEPICSEvent::SetDataValue(int index, const double value, const int event)
 {
-  if (index == kEPICS_Error) return kEPICS_Error;
-  if (index < 0)             return kEPICS_Error;
+  if (index == kEPICS_Error) { return kEPICS_Error;
+}
+  if (index < 0) {             return kEPICS_Error;
+}
 
   if (value != kInvalidEPICSData) {
     fEPICSDataEvent[index].EventNumber = event;
@@ -533,8 +549,10 @@ int QwEPICSEvent::SetDataValue(int index, const double value, const int event)
 
 int QwEPICSEvent::SetDataValue(int index, const string& value, const int event)
 {
-  if (index == kEPICS_Error) return kEPICS_Error;
-  if (index < 0)             return kEPICS_Error;
+  if (index == kEPICS_Error) { return kEPICS_Error;
+}
+  if (index < 0) {             return kEPICS_Error;
+}
 
   Double_t tmpvalue = kInvalidEPICSData;
   switch (fEPICSVariableType[index]) {
@@ -649,7 +667,7 @@ void QwEPICSEvent::PrintVariableList() const
 }
 
 
-std::vector<Double_t> QwEPICSEvent::ReportAutogains(std::vector<std::string> tag_list)
+std::vector<Double_t> QwEPICSEvent::ReportAutogains(std::vector<std::string> tag_list) const
 {
   std::vector<Double_t> autogain_values;
   std::vector<std::string>::iterator ptr_tag;
@@ -1310,7 +1328,7 @@ TList *QwEPICSEvent::GetEPICSStringValues()
 {
   Bool_t local_debug = false;
 
-  TList *string_list = new TList;
+  auto *string_list = new TList;
   string_list->SetOwner(true);
 
   std::size_t tagindex = 0;
@@ -1348,12 +1366,12 @@ void QwEPICSEvent::WriteEPICSStringValues()
 
   TSeqCollection *file_list = gROOT->GetListOfFiles();
 
-  if (file_list) {
+  if (file_list != nullptr) {
     
     Int_t size = file_list->GetSize();
     for (Int_t i=0; i<size; i++) 
       {
-	TFile *file = (TFile*) file_list->At(i);
+	auto *file = dynamic_cast<TFile*>( file_list->At(i));
 
 	if(local_debug) {
 	  std::cout << "QwEPICSEvent::WriteEPICSStringValue()"
@@ -1361,7 +1379,7 @@ void QwEPICSEvent::WriteEPICSStringValues()
 		    << std::endl;
 	}
 	
-	TTree *slow_tree = (TTree*) file->Get("slow");
+	auto *slow_tree = dynamic_cast<TTree*>( file->Get("slow"));
 	
 	for (std::size_t tagindex=0; tagindex<fEPICSVariableList.size(); tagindex++) 
 	  {
@@ -1401,9 +1419,7 @@ void QwEPICSEvent::WriteEPICSStringValues()
   }
 
   QwDebug << "Leaving QwEPICSEvent::WriteEPICSStringValues() normally"  << QwLog::endl;
-
-  return;
-  
+ 
 }
 
 

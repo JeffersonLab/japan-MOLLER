@@ -2,8 +2,9 @@
 #include "THaCodaFile.h"
 #include "QwOptions.h"
 
-#include <vector>
+#include <cstddef>
 #include <ctime>
+#include <vector>
 
 #include "TError.h"
 
@@ -14,7 +15,7 @@
  */
 std::vector<UInt_t> Coda3EventDecoder::EncodePHYSEventHeader(std::vector<ROCID_t> &ROCList)
 {
-	int localtime = (int) time(0);
+	int localtime = (int) time(nullptr);
 	int ROCCount = ROCList.size();
 	int wordcount = (8 + ROCCount*3);
 	std::vector<UInt_t> header;
@@ -33,9 +34,9 @@ std::vector<UInt_t> Coda3EventDecoder::EncodePHYSEventHeader(std::vector<ROCID_t
 
 	header.push_back(0x1850001);
 	header.push_back(0xc0da); // TS# Trigger
-	for(auto it = ROCList.begin(); it != ROCList.end(); it++){
+	for(unsigned int & it : ROCList){
 		int base = 0x010002;
-		int roc  = (*it << 24);
+		int roc  = (it << 24);
 		header.push_back(roc | base);
 		header.push_back(0x4D6F636B); // ASCII for 'MOCK'
 		header.push_back(0x4D6F636B); // ASCII for 'MOCK'
@@ -171,7 +172,7 @@ Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 		//  Arbitrarily set the event type to "fEvtTag".
 		//  The first two words have been examined.
 		QwWarning << "Undetermined Event Type" << QwLog::endl;
-		for(size_t index = 0; fEvtLength; index++){
+		for(size_t index = 0; fEvtLength != 0u; index++){
 			QwVerbose << "\t" << buffer[index];
 			if(index % 4 == 0){ QwVerbose << QwLog::endl; }
 		}	
@@ -279,12 +280,13 @@ void Coda3EventDecoder::printUserEvent(const UInt_t *buffer)
 			// something else ?
 			QwWarning << "\n--- Special event type: " << fEvtTag << " ---\n" << QwLog::endl;
 	}
-	if(print_it) {
+	if(print_it != 0) {
 		char *cbuf = (char *)buffer; // These are character data
 		size_t elen = sizeof(int)*(buffer[0]+1);
 		QwMessage << "Dump of event buffer .  Len = "<<elen<<QwLog::endl;
 		// This dump will look exactly like the text file that was inserted.
-		for (size_t ii=0; ii<elen; ii++) QwMessage << cbuf[ii];
+		for (size_t ii=0; ii<elen; ii++) { QwMessage << cbuf[ii];
+}
 	}
 }
 
@@ -340,8 +342,9 @@ Int_t Coda3EventDecoder::trigBankDecode( UInt_t* buffer)
 uint32_t Coda3EventDecoder::TBOBJ::Fill( const uint32_t* evbuffer,
 		uint32_t blkSize, uint32_t tsroc )
 {
-	if( blkSize == 0 )
+	if( blkSize == 0 ) {
 		throw std::invalid_argument("CODA block size must be > 0");
+}
 	start = evbuffer;
 	blksize = blkSize;
 	len = evbuffer[0] + 1;
@@ -355,24 +358,27 @@ uint32_t Coda3EventDecoder::TBOBJ::Fill( const uint32_t* evbuffer,
 	//  uint64_t time_stamp[blkSize]     if withTimeStamp
 	{
 		uint32_t slen = *p & 0xffff;
-		if( slen != 2*(1 + (withRunInfo() ? 1 : 0) + (withTimeStamp() ? blkSize : 0)))
+		if( slen != 2*(1 + (withRunInfo() ? 1 : 0) + (withTimeStamp() ? blkSize : 0))) {
 			throw coda_format_error("Invalid length for Trigger Bank seg 1");
+}
 		const auto* q = (const uint64_t*) (p + 1);
 		evtNum  = *q++;
 		runInfo = withRunInfo()   ? *q++ : 0;
 		evTS    = withTimeStamp() ? q    : nullptr;
 		p += slen + 1;
 	}
-	if( p-evbuffer >= len )
+	if( p-evbuffer >= len ) {
 		throw coda_format_error("Past end of bank after Trigger Bank seg 1");
+}
 
 	// Segment 2:
 	//  uint16_t event_type[blkSize]
 	//  padded to next 32-bit boundary
 	{
 		uint32_t slen = *p & 0xffff;
-		if( slen != (blkSize-1)/2 + 1 )
+		if( slen != (blkSize-1)/2 + 1 ) {
 			throw coda_format_error("Invalid length for Trigger Bank seg 2");
+}
 		evType = (const uint16_t*) (p + 1);
 		p += slen + 1;
 	}
@@ -386,8 +392,9 @@ uint32_t Coda3EventDecoder::TBOBJ::Fill( const uint32_t* evbuffer,
 	TSROC = nullptr;
 	tsrocLen = 0;
 	for( uint32_t i = 0; i < nrocs; ++i ) {
-		if( p-evbuffer >= len )
+		if( p-evbuffer >= len ) {
 			throw coda_format_error("Past end of bank while scanning trigger bank segments");
+}
 		uint32_t slen = *p & 0xffff;
 		uint32_t rocnum = (*p & 0xff000000) >> 24;
 		// TODO:
@@ -417,14 +424,15 @@ Int_t Coda3EventDecoder::LoadTrigBankInfo( UInt_t i )
 	// in event block buffer. index_buffer must be < block size.
 
 	assert(i < tbank.blksize);
-	if( i >= tbank.blksize )
+	if( i >= tbank.blksize ) {
 		return -1;
+}
 	tsEvType = tbank.evType[i];      // event type (configuration-dependent)
-	if( tbank.evTS )
+	if( tbank.evTS != nullptr ) {
 		evt_time = tbank.evTS[i];      // event time (4ns clock, I think)
-	else if( tbank.TSROC ) {
+	} else if( tbank.TSROC != nullptr ) {
 		UInt_t struct_size = tbank.withTriggerBits() ? 3 : 2;
-		evt_time = *(const uint64_t*) (tbank.TSROC + struct_size * i);
+		evt_time = *(const uint64_t*) (tbank.TSROC + static_cast<size_t>(struct_size * i));
 		// Only the lower 48 bits seem to contain the time
 		evt_time &= 0x0000FFFFFFFFFFFF;
 	}

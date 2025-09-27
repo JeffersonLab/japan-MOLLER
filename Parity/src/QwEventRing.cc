@@ -2,23 +2,24 @@
 
 
 QwEventRing::QwEventRing(QwOptions &options, QwSubsystemArrayParity &event)
-  : fRollingAvg(event), fBurpAvg(event)
+  : bEVENT_READY(kTRUE), bRING_READY(kFALSE), fNextToBeFilled(0), fNextToBeRead(0), fNumberOfEvents(0), fRollingAvg(event), countdown(0), fBurpAvg(event)
 {
   ProcessOptions(options);
 
   fEvent_Ring.resize(fRING_SIZE,event);
 
-  bRING_READY = kFALSE;
-  bEVENT_READY = kTRUE;
+  
+  
 
-  fNumberOfEvents = 0;
-  fNextToBeFilled = 0;
-  fNextToBeRead = 0;
-  countdown = 0;
+  
+  
+  
+  
 
   //open the log file
-  if (bDEBUG_Write)
+  if (bDEBUG_Write) {
     out_file = fopen("Ring_log.txt", "wt");
+}
 }
 
 
@@ -56,14 +57,17 @@ void QwEventRing::ProcessOptions(QwOptions &options)
 {
   // Reads Event Ring parameters from cmd
   Double_t stability = 0.0;
-  if (gQwOptions.HasValue("ring.size"))
+  if (gQwOptions.HasValue("ring.size")) {
     fRING_SIZE=gQwOptions.GetValue<int>("ring.size");
+}
 
-  if (gQwOptions.HasValue("burp.extent"))
+  if (gQwOptions.HasValue("burp.extent")) {
     fBurpExtent=gQwOptions.GetValue<int>("burp.extent");
+}
 
-  if (gQwOptions.HasValue("burp.precut"))
+  if (gQwOptions.HasValue("burp.precut")) {
     fBurpPrecut=gQwOptions.GetValue<int>("burp.precut");
+}
 
   int tmpval = fBurpExtent;
   if (fBurpPrecut>fBurpExtent){
@@ -83,22 +87,26 @@ void QwEventRing::ProcessOptions(QwOptions &options)
     fRING_SIZE = tmpval;
   }
 
-  if (gQwOptions.HasValue("ring.stability_cut"))
+  if (gQwOptions.HasValue("ring.stability_cut")) {
     stability=gQwOptions.GetValue<double>("ring.stability_cut");
+}
 
-  if(gQwOptions.HasValue("ring.holdoff"))
+  if(gQwOptions.HasValue("ring.holdoff")) {
     holdoff=gQwOptions.GetValue<int>("ring.holdoff");
+}
 
-  if (stability>0.0)
+  if (stability>0.0) {
     bStability=kTRUE;
-  else
+  } else {
     bStability=kFALSE;
+}
 
   fPrintAfterUnwind = gQwOptions.GetValue<bool>("ring.print-after-unwind");
 }
 void QwEventRing::push(QwSubsystemArrayParity &event)
 {
-  if (bDEBUG) QwMessage << "QwEventRing::push:  BEGIN" <<QwLog::endl;
+  if (bDEBUG) { QwMessage << "QwEventRing::push:  BEGIN" <<QwLog::endl;
+}
 
   
 
@@ -111,8 +119,10 @@ void QwEventRing::push(QwSubsystemArrayParity &event)
     }
 
 
-    if (bDEBUG) QwMessage<<" Filled at "<<thisevent;//<<"Ring count "<<fRing_Count<<QwLog::endl; 
-    if (bDEBUG_Write) fprintf(out_file," Filled at %d ",thisevent);
+    if (bDEBUG) { QwMessage<<" Filled at "<<thisevent;//<<"Ring count "<<fRing_Count<<QwLog::endl; 
+}
+    if (bDEBUG_Write) { fprintf(out_file," Filled at %d ",thisevent);
+}
 
     // Increment fill index
     fNumberOfEvents ++;
@@ -120,8 +130,10 @@ void QwEventRing::push(QwSubsystemArrayParity &event)
     
     if(fNextToBeFilled == 0){
       //then we have RING_SIZE events to process
-      if (bDEBUG) QwMessage<<" RING FILLED "<<thisevent; //<<QwLog::endl; 
-      if (bDEBUG_Write) fprintf(out_file," RING FILLED ");
+      if (bDEBUG) { QwMessage<<" RING FILLED "<<thisevent; //<<QwLog::endl; 
+}
+      if (bDEBUG_Write) { fprintf(out_file," RING FILLED ");
+}
       bRING_READY=kTRUE;//ring is filled with good multiplets
       fNextToBeFilled=0;//next event to be filled is the first element  
     }
@@ -166,10 +178,12 @@ void QwEventRing::push(QwSubsystemArrayParity &event)
 
 
 QwSubsystemArrayParity& QwEventRing::pop(){
-  Int_t tempIndex;
+  Int_t tempIndex = 0;
   tempIndex=fNextToBeRead;  
-  if (bDEBUG) QwMessage<<" Read at "<<fNextToBeRead<<QwLog::endl; 
-  if (bDEBUG_Write) fprintf(out_file," Read at %d \n",fNextToBeRead);
+  if (bDEBUG) { QwMessage<<" Read at "<<fNextToBeRead<<QwLog::endl; 
+}
+  if (bDEBUG_Write) { fprintf(out_file," Read at %d \n",fNextToBeRead);
+}
   
   if (fNextToBeRead==(fRING_SIZE-1)){
     bRING_READY=kFALSE;//setting to false is an extra measure of security to prevent reading a NULL value. 
@@ -187,7 +201,7 @@ QwSubsystemArrayParity& QwEventRing::pop(){
 }
 
 
-Bool_t QwEventRing::IsReady(){ //Check for readyness to read data from the ring using the pop() routine   
+Bool_t QwEventRing::IsReady() const{ //Check for readyness to read data from the ring using the pop() routine   
   return bRING_READY;
 }
 

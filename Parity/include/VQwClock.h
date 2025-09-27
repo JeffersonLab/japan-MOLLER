@@ -91,7 +91,7 @@ public:
   virtual VQwClock& operator-= (const VQwClock &value) =0;
 
   // Factory function to produce appropriate Clock
-  static VQwClock* Create(TString subsystemname, TString type, TString name);
+  static VQwClock* Create(TString subsystemname, TString name, TString type);
   static VQwClock* Create(const VQwClock& source);
 
   // These are related to those hardware channels that need to normalize

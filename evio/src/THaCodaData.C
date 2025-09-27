@@ -54,11 +54,13 @@ void THaCodaData::staterr(const char* tried_to, Int_t status) const
   // of what the status returns from evio mean.
   // Note: severe errors can cause job to exit(0)
   // and the user has to pay attention to why.
-  if (status == S_SUCCESS) return;  // everything is fine.
+  if (status == S_SUCCESS) { return;  // everything is fine.
+}
   if (status == EOF) {
-    if (verbose > 0)
+    if (verbose > 0) {
       cout << endl << "Normal end of file " << filename << " encountered"
            << endl;
+}
     return;
   }
   cerr << Form("THaCodaFile: ERROR while trying to %s %s: ",
@@ -171,10 +173,11 @@ void EvtBuffer::recordSize()
     assert(it != fSaved.end());
     if( evtsize > *it ) {
       fChanged = true;
-      if( fSaved.size() < fMaxSaved )
+      if( fSaved.size() < fMaxSaved ) {
         fSaved.push_back(evtsize);
-      else
+      } else {
         *it = evtsize;
+}
     }
   }
 
@@ -242,8 +245,9 @@ void EvtBuffer::updateImpl()
   fBuffer.resize(newsize);
 
   // Shrink buffer if it could offer substantial memory savings
-  if( fBuffer.capacity() > 2 * newsize )
+  if( fBuffer.capacity() > 2 * newsize ) {
     fBuffer.shrink_to_fit();
+}
 
   fChanged = false;
 }
@@ -256,8 +260,9 @@ void EvtBuffer::updateImpl()
 // Returns false if buffer is already at maximum size.
 Bool_t EvtBuffer::grow( UInt_t newsize )
 {
-  if( size() == kMaxBufSize )
+  if( size() == kMaxBufSize ) {
     return false;
+}
 
   if( newsize == 0 ) {
     UInt_t maybe_newsize = 0;
@@ -279,8 +284,9 @@ Bool_t EvtBuffer::grow( UInt_t newsize )
   } else if( newsize <= size() ) {
     return true;
   }
-  if( newsize > kMaxBufSize)
+  if( newsize > kMaxBufSize) {
     newsize = kMaxBufSize;
+}
 
   fBuffer.resize(newsize);
   fDidGrow = true;

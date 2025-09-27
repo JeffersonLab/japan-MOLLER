@@ -27,8 +27,8 @@ const unsigned int QwSIS3320_Accumulator::INDEX_SUM = 1;
 Int_t QwSIS3320_Accumulator::ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t subelement)
 {
   UInt_t words_read = 0;
-  Long64_t hw_sum;
-  Long64_t num_samples;
+  Long64_t hw_sum = 0;
+  Long64_t num_samples = 0;
   if (num_words_left >= fNumberOfDataWords) {
 
     // Read all words
@@ -54,7 +54,7 @@ Int_t QwSIS3320_Accumulator::ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_le
  * @param value Right-hand side
  * @return Left-hand side
  */
-const QwSIS3320_Accumulator QwSIS3320_Accumulator::operator+ (const Double_t &value) const
+QwSIS3320_Accumulator QwSIS3320_Accumulator::operator+ (const Double_t &value) const
 {
   QwSIS3320_Accumulator result = *this;
   result += value;
@@ -66,7 +66,7 @@ const QwSIS3320_Accumulator QwSIS3320_Accumulator::operator+ (const Double_t &va
  * @param value Right-hand side
  * @return Left-hand side
  */
-const QwSIS3320_Accumulator QwSIS3320_Accumulator::operator- (const Double_t &value) const
+QwSIS3320_Accumulator QwSIS3320_Accumulator::operator- (const Double_t &value) const
 {
   QwSIS3320_Accumulator result = *this;
   result -= value;
@@ -78,7 +78,7 @@ const QwSIS3320_Accumulator QwSIS3320_Accumulator::operator- (const Double_t &va
  * @param value Right-hand side
  * @return Left-hand side
  */
-const QwSIS3320_Accumulator QwSIS3320_Accumulator::operator* (const Double_t &value) const
+QwSIS3320_Accumulator QwSIS3320_Accumulator::operator* (const Double_t &value) const
 {
   QwSIS3320_Accumulator result = *this;
   result *= value;
@@ -90,11 +90,12 @@ const QwSIS3320_Accumulator QwSIS3320_Accumulator::operator* (const Double_t &va
  * @param value Right-hand side
  * @return Left-hand side
  */
-const QwSIS3320_Accumulator QwSIS3320_Accumulator::operator/ (const Double_t &value) const
+QwSIS3320_Accumulator QwSIS3320_Accumulator::operator/ (const Double_t &value) const
 {
   QwSIS3320_Accumulator result = *this;
-  if (value != 0)
+  if (value != 0) {
     result /= value;
+}
   return result;
 }
 
@@ -119,8 +120,9 @@ QwSIS3320_Accumulator& QwSIS3320_Accumulator::operator*= (const Double_t &value)
 QwSIS3320_Accumulator& QwSIS3320_Accumulator::operator/= (const Double_t &value)
 {
   if (!IsNameEmpty()) {
-    if (value != 0.0)
+    if (value != 0.0) {
       this->fAccumulatorSum /= value;
+}
   }
   return *this;
 }
@@ -156,7 +158,7 @@ QwSIS3320_Accumulator& QwSIS3320_Accumulator::operator-= (const Double_t &value)
  * @param value Right-hand side
  * @return Left-hand side
  */
-const QwSIS3320_Accumulator QwSIS3320_Accumulator::operator+ (const QwSIS3320_Accumulator &value) const
+QwSIS3320_Accumulator QwSIS3320_Accumulator::operator+ (const QwSIS3320_Accumulator &value) const
 {
   QwSIS3320_Accumulator result = *this;
   result += value;
@@ -168,7 +170,7 @@ const QwSIS3320_Accumulator QwSIS3320_Accumulator::operator+ (const QwSIS3320_Ac
  * @param value Right-hand side
  * @return Left-hand side
  */
-const QwSIS3320_Accumulator QwSIS3320_Accumulator::operator- (const QwSIS3320_Accumulator &value) const
+QwSIS3320_Accumulator QwSIS3320_Accumulator::operator- (const QwSIS3320_Accumulator &value) const
 {
   QwSIS3320_Accumulator result = *this;
   result -= value;
@@ -238,8 +240,9 @@ void QwSIS3320_Accumulator::Difference(const QwSIS3320_Accumulator &value1, cons
 void QwSIS3320_Accumulator::Ratio(const QwSIS3320_Accumulator &numer, const QwSIS3320_Accumulator &denom)
 {
   if (!IsNameEmpty()) {
-    if (denom.fAccumulatorSum != 0.0)
+    if (denom.fAccumulatorSum != 0.0) {
       fAccumulatorSum = numer.fAccumulatorSum / denom.fAccumulatorSum;
+}
     fNumberOfSamples = numer.fNumberOfSamples + denom.fNumberOfSamples;
   }
 }
@@ -287,7 +290,8 @@ void QwSIS3320_Accumulator::FillTreeVector(std::vector<Double_t> &values) const
 void QwSIS3320_Accumulator::ConstructHistograms(TDirectory *folder, TString &prefix)
 {
   //  If we have defined a subdirectory in the ROOT file, then change into it.
-  if (folder != NULL) folder->cd();
+  if (folder != nullptr) { folder->cd();
+}
 
   if (IsNameEmpty()) {
 
@@ -297,7 +301,7 @@ void QwSIS3320_Accumulator::ConstructHistograms(TDirectory *folder, TString &pre
 
     TString basename = prefix + GetElementName();
 
-    fHistograms.resize(3, NULL);
+    fHistograms.resize(3, nullptr);
     size_t index = 0;
     fHistograms[index++]   = gQwHists.Construct1DHist(basename + Form("_nevents"));
     fHistograms[index++]   = gQwHists.Construct1DHist(basename + Form("_sum"));
@@ -315,12 +319,15 @@ void QwSIS3320_Accumulator::FillHistograms()
 
   } else {
 
-    if (fHistograms[index] != NULL)
+    if (fHistograms[index] != nullptr) {
       fHistograms[index++]->Fill(GetNumberOfSamples());
-    if (fHistograms[index] != NULL)
+}
+    if (fHistograms[index] != nullptr) {
       fHistograms[index+1]->Fill(GetAccumulatorSum());
-    if (fHistograms[index] != NULL)
+}
+    if (fHistograms[index] != nullptr) {
       fHistograms[index+1]->Fill(GetAccumulatorAvg());
+}
 
   }
 }

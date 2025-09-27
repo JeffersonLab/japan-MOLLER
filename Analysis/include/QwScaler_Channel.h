@@ -150,17 +150,17 @@ public:
   VQwScaler_Channel& operator-= (const VQwScaler_Channel &value);
   VQwScaler_Channel& operator*= (const VQwScaler_Channel &value);
 
-  VQwHardwareChannel& operator+=(const VQwHardwareChannel& input) override;
-  VQwHardwareChannel& operator-=(const VQwHardwareChannel& input) override;
-  VQwHardwareChannel& operator*=(const VQwHardwareChannel& input) override;
-  VQwHardwareChannel& operator/=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator+=(const VQwHardwareChannel& source) override;
+  VQwHardwareChannel& operator-=(const VQwHardwareChannel& source) override;
+  VQwHardwareChannel& operator*=(const VQwHardwareChannel& source) override;
+  VQwHardwareChannel& operator/=(const VQwHardwareChannel& source) override;
 
   void Sum(VQwScaler_Channel &value1, VQwScaler_Channel &value2);
   void Difference(VQwScaler_Channel &value1, VQwScaler_Channel &value2);
   void Ratio(const VQwScaler_Channel &numer, const VQwScaler_Channel &denom);
   void Product(VQwScaler_Channel &numer, VQwScaler_Channel &denom);
   void AddChannelOffset(Double_t Offset);
-  void Scale(Double_t Offset);
+  void Scale(Double_t scale);
   void DivideBy(const VQwScaler_Channel &denom);
   
 

@@ -72,11 +72,11 @@ class QwModChannelID
 
   // TString fdetectortype;
 
-  Int_t  kUnknownDeviceType;
-  Int_t  fTypeID;           // type of detector eg: lumi or stripline, etc..
+  Int_t  kUnknownDeviceType{};
+  Int_t  fTypeID{};           // type of detector eg: lumi or stripline, etc..
   Int_t  fIndex;            // index of this detector in the vector containing all the detector of same type
 
-  void Print();
+  void Print() const;
 
 };
 
@@ -191,7 +191,7 @@ class QwBeamMod: public VQwSubsystemParity, public MQwSubsystemCloneable<QwBeamM
 #endif // __USE_DATABASE__
   void WritePromptSummary(QwPromptSummary *ps, TString type);
 
-  Bool_t Compare(VQwSubsystem *source);
+  Bool_t Compare(VQwSubsystem *value);
 
   void Print();
 

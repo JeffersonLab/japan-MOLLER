@@ -71,7 +71,7 @@ class QwSubsystemArrayParity: public QwSubsystemArray {
     void FillErrDB(QwParityDB *db, TString type);
 
     /// \brief Assignment operator
-    QwSubsystemArrayParity& operator=  (const QwSubsystemArrayParity &value);
+    QwSubsystemArrayParity& operator=  (const QwSubsystemArrayParity &source);
     /// \brief Addition-assignment operator
     QwSubsystemArrayParity& operator+= (const QwSubsystemArrayParity &value);
     /// \brief Subtraction-assignment operator

@@ -8,8 +8,10 @@
  * "Formulas for Robust, One-Pass Parallel Computation of Covariances and Arbitrary-Order Statistical Moments" Philippe Peba, SANDIA REPORT SAND2008-6212, Unlimited Release, Printed September 2008
  *********************************************************************/
 
-#include <assert.h>
-#include <math.h>
+#include <cassert>
+#include <cmath>
+
+#include <cstddef>
 
 #include "TString.h"
 
@@ -183,8 +185,9 @@ LinRegBevPeb& LinRegBevPeb::operator+=(const LinRegBevPeb& rhs)
   // on Scientific and Statistical Database Management.
   // https://doi.org/10.1145/3221269.3223036
 
-  if(fGoodEventNumber + rhs.fGoodEventNumber == 0)
+  if(fGoodEventNumber + rhs.fGoodEventNumber == 0) {
     return *this;
+}
 
   // Deviations from mean
   TVectorD delta_y(mMY - rhs.mMY);
@@ -216,8 +219,10 @@ LinRegBevPeb& LinRegBevPeb::operator+=(const LinRegBevPeb& rhs)
 Int_t LinRegBevPeb::getMeanP(const int i, Double_t &mean) const
 {
    mean=-1e50;
-   if(i<0 || i >= nP ) return -1;
-   if( fGoodEventNumber<1) return -3;
+   if(i<0 || i >= nP ) { return -1;
+}
+   if( fGoodEventNumber<1) { return -3;
+}
    mean = mMP(i);    return 0;
 }
 
@@ -227,8 +232,10 @@ Int_t LinRegBevPeb::getMeanP(const int i, Double_t &mean) const
 Int_t LinRegBevPeb::getMeanY(const int i, Double_t &mean) const
 {
   mean=-1e50;
-  if(i<0 || i >= nY ) return -1;
-  if( fGoodEventNumber<1) return -3;
+  if(i<0 || i >= nY ) { return -1;
+}
+  if( fGoodEventNumber<1) { return -3;
+}
   mean = mMY(i);    return 0;
 }
 
@@ -238,8 +245,10 @@ Int_t LinRegBevPeb::getMeanY(const int i, Double_t &mean) const
 Int_t LinRegBevPeb::getMeanYprime(const int i, Double_t &mean) const
 {
   mean=-1e50;
-  if(i<0 || i >= nY ) return -1;
-  if( fGoodEventNumber<1) return -3;
+  if(i<0 || i >= nY ) { return -1;
+}
+  if( fGoodEventNumber<1) { return -3;
+}
   mean = mMYp(i);    return 0;
 }
 
@@ -249,8 +258,10 @@ Int_t LinRegBevPeb::getMeanYprime(const int i, Double_t &mean) const
 Int_t LinRegBevPeb::getSigmaP(const int i, Double_t &sigma) const
 {
   sigma=-1e50;
-  if(i<0 || i >= nP ) return -1;
-  if( fGoodEventNumber<2) return -3;
+  if(i<0 || i >= nP ) { return -1;
+}
+  if( fGoodEventNumber<2) { return -3;
+}
   sigma=sqrt(mVPP(i,i)/(fGoodEventNumber-1.));
   return 0;
 }
@@ -261,8 +272,10 @@ Int_t LinRegBevPeb::getSigmaP(const int i, Double_t &sigma) const
 Int_t LinRegBevPeb::getSigmaY(const int i, Double_t &sigma) const
 {
   sigma=-1e50;
-  if(i<0 || i >= nY ) return -1;
-  if( fGoodEventNumber<2) return -3;
+  if(i<0 || i >= nY ) { return -1;
+}
+  if( fGoodEventNumber<2) { return -3;
+}
   sigma=sqrt(mVYY(i,i)/(fGoodEventNumber-1.));
   return 0;
 }
@@ -272,8 +285,10 @@ Int_t LinRegBevPeb::getSigmaY(const int i, Double_t &sigma) const
 Int_t LinRegBevPeb::getSigmaYprime(const int i, Double_t &sigma) const
 {
   sigma=-1e50;
-  if(i<0 || i >= nY ) return -1;
-  if( fGoodEventNumber<2) return -3;
+  if(i<0 || i >= nY ) { return -1;
+}
+  if( fGoodEventNumber<2) { return -3;
+}
   sigma=sqrt(mVYYp(i,i)/(fGoodEventNumber-1.));
   return 0;
 }
@@ -285,8 +300,10 @@ Int_t LinRegBevPeb::getCovarianceP( int i, int j, Double_t &covar) const
     covar=-1e50;
     if( i>j) { int k=i; i=j; j=k; }//swap i & j
     //... now we need only upper right triangle
-    if(i<0 || i >= nP ) return -11;
-    if( fGoodEventNumber<2) return -14;
+    if(i<0 || i >= nP ) { return -11;
+}
+    if( fGoodEventNumber<2) { return -14;
+}
     covar=mVPP(i,j)/(fGoodEventNumber-1.);
     return 0;
 }
@@ -297,9 +314,12 @@ Int_t LinRegBevPeb::getCovariancePY(  int ip, int iy, Double_t &covar) const
 {
     covar=-1e50;
     //... now we need only upper right triangle
-    if(ip<0 || ip >= nP ) return -11;
-    if(iy<0 || iy >= nY ) return -12;
-    if( fGoodEventNumber<2) return -14;
+    if(ip<0 || ip >= nP ) { return -11;
+}
+    if(iy<0 || iy >= nY ) { return -12;
+}
+    if( fGoodEventNumber<2) { return -14;
+}
     covar=mVPY(ip,iy)/(fGoodEventNumber-1.);
     return 0;
 }
@@ -311,8 +331,10 @@ Int_t LinRegBevPeb::getCovarianceY( int i, int j, Double_t &covar) const
     covar=-1e50;
     if( i>j) { int k=i; i=j; j=k; }//swap i & j
     //... now we need only upper right triangle
-    if(i<0 || i >= nY ) return -11;
-    if( fGoodEventNumber<2) return -14;
+    if(i<0 || i >= nY ) { return -11;
+}
+    if( fGoodEventNumber<2) { return -14;
+}
     covar=mVYY(i,j)/(fGoodEventNumber-1.);
     return 0;
 }
@@ -331,19 +353,26 @@ void LinRegBevPeb::printSummaryP() const
     }
     QwMessage << Form("\n           mean     sig(distrib)   nSig(mean)       corelation-matrix ....\n");
     for (size_t i = 0; i <dim; i++) {
-      double meanI,sigI;
-      if (getMeanP(i,meanI) < 0) QwWarning << "LRB::getMeanP failed" << QwLog::endl;
-      if (getSigmaP(i,sigI) < 0) QwWarning << "LRB::getSigmaP failed" << QwLog::endl;
+      double meanI;
+      double sigI;
+      if (getMeanP(i,meanI) < 0) { QwWarning << "LRB::getMeanP failed" << QwLog::endl;
+}
+      if (getSigmaP(i,sigI) < 0) { QwWarning << "LRB::getSigmaP failed" << QwLog::endl;
+}
       double nSig=-1;
       double err=sigI/sqrt(fGoodEventNumber);
-      if(sigI>0.) nSig=meanI/err;
+      if(sigI>0.) { nSig=meanI/err;
+}
 
       QwMessage << Form("P%d:  %+12.4g  %12.3g      %.1f    ",(int)i,meanI,sigI,nSig);
       for (size_t j = 1; j <dim; j++) {
         if( j<=i) { QwMessage << Form("  %12s","._._._."); continue;}
-        double sigJ,cov;
-        if (getSigmaP(j,sigJ) < 0) QwWarning << "LRB::getSigmaP failed" << QwLog::endl;
-        if (getCovarianceP(i,j,cov) < 0) QwWarning << "LRB::getCovarianceP failed" << QwLog::endl;
+        double sigJ;
+        double cov;
+        if (getSigmaP(j,sigJ) < 0) { QwWarning << "LRB::getSigmaP failed" << QwLog::endl;
+}
+        if (getCovarianceP(i,j,cov) < 0) { QwWarning << "LRB::getCovarianceP failed" << QwLog::endl;
+}
         double corel=cov / sigI / sigJ;
         
         QwMessage << Form("  %12.3g",corel);
@@ -362,9 +391,12 @@ void LinRegBevPeb::printSummaryY() const
   QwMessage << Form("  j,       mean,     sig(mean),   nSig(mean),  sig(distribution)    \n");
   
   for (int i = 0; i <nY; i++) {
-    double meanI,sigI;
-    if (getMeanY(i,meanI) < 0) QwWarning << "LRB::getMeanY failed" << QwLog::endl;
-    if (getSigmaY(i,sigI) < 0) QwWarning << "LRB::getSigmaY failed" << QwLog::endl;
+    double meanI;
+    double sigI;
+    if (getMeanY(i,meanI) < 0) { QwWarning << "LRB::getMeanY failed" << QwLog::endl;
+}
+    if (getSigmaY(i,sigI) < 0) { QwWarning << "LRB::getSigmaY failed" << QwLog::endl;
+}
     double err = sigI / sqrt(fGoodEventNumber);
     double nSigErr = meanI / err;
     QwMessage << Form("Y%02d, %+11.4g, %12.4g, %8.1f, %12.4g "" ",i,meanI,err,nSigErr,sigI)<<QwLog::endl;
@@ -387,7 +419,8 @@ void LinRegBevPeb::printSummaryAlphas() const
       double err=dAxy(j,iy);
       double nSig=val/err;
       char x=' ';
-      if(fabs(nSig)>3.) x='*';
+      if(fabs(nSig)>3.) { x='*';
+}
       QwMessage << Form("  slope_%d = %11.3g  +/-%11.3g  (nSig=%.2f) %c\n",j,val, err,nSig,x);
     }
   }
@@ -407,15 +440,21 @@ void LinRegBevPeb::printSummaryYP() const
   }
   QwMessage << Form("\n  j                   meanY         sigY      corelation with Ps ....\n");
   for (int iy = 0; iy <nY; iy++) {
-    double meanI,sigI;
-    if (getMeanY(iy,meanI) < 0) QwWarning << "LRB::getMeanY failed" << QwLog::endl;
-    if (getSigmaY(iy,sigI) < 0) QwWarning << "LRB::getSigmaY failed" << QwLog::endl;
+    double meanI;
+    double sigI;
+    if (getMeanY(iy,meanI) < 0) { QwWarning << "LRB::getMeanY failed" << QwLog::endl;
+}
+    if (getSigmaY(iy,sigI) < 0) { QwWarning << "LRB::getSigmaY failed" << QwLog::endl;
+}
     
     QwMessage << Form(" %3d %6sY%d:  %+12.4g  %12.4g ",iy," ",iy,meanI,sigI);
     for (int ip = 0; ip <nP; ip++) {
-      double sigJ,cov; 
-      if (getSigmaP(ip,sigJ) < 0) QwWarning << "LRB::getSigmaP failed" << QwLog::endl;
-      if (getCovariancePY(ip,iy,cov) < 0) QwWarning << "LRB::getCovariancePY failed" << QwLog::endl;
+      double sigJ;
+      double cov; 
+      if (getSigmaP(ip,sigJ) < 0) { QwWarning << "LRB::getSigmaP failed" << QwLog::endl;
+}
+      if (getCovariancePY(ip,iy,cov) < 0) { QwWarning << "LRB::getCovariancePY failed" << QwLog::endl;
+}
       double corel = cov / sigI / sigJ;
       QwMessage << Form("  %12.3g",corel);
     }
@@ -482,7 +521,7 @@ void LinRegBevPeb::solve()
               << "determinant = " << mRPP.Determinant()
               << " (set includes highly correlated variable pairs)"
               << QwLog::endl;
-    if (fGoodEventNumber > 10*nP) {
+    if (fGoodEventNumber > static_cast<Long64_t>(10*nP)) {
       QwMessage << fGoodEventNumber << " events" << QwLog::endl;
       QwMessage << "Covariance matrix: " << QwLog::endl; mVPP.Print();
       QwMessage << "Correlation matrix: " << QwLog::endl; mRPP.Print();

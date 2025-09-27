@@ -8,6 +8,8 @@
 
 #include "QwBlinder.h"
 
+#include <math.h>
+
 // System headers
 #include <string>
 #include <limits>
@@ -87,24 +89,27 @@ QwBlinder::QwBlinder(const EQwBlindingStrategy blinding_strategy):
   fBlindingFactor(1.0),
   //
   fMaximumBlindingAsymmetry(kDefaultMaximumBlindingAsymmetry),
-  fMaximumBlindingFactor(kDefaultMaximumBlindingFactor)
+  fMaximumBlindingFactor(kDefaultMaximumBlindingFactor), fSeed(kDefaultSeed)
 {
   // Set up the blinder with seed_id 0
-  fSeed = kDefaultSeed;
-  fSeedID = 0;
+  
+  
 
-  fCREXTargetIndex  = -1;
+  
 
-  Int_t tgt_index;
+  Int_t tgt_index = 0;
 
   // Read parameter file
   QwParameterFile blinder("blinder.map");
-  if (blinder.FileHasVariablePair("=", "seed", fSeed))
+  if (blinder.FileHasVariablePair("=", "seed", fSeed)) {
     QwVerbose << "Using seed from file: " << fSeed << QwLog::endl;
-  if (blinder.FileHasVariablePair("=", "max_asymmetry", fMaximumBlindingAsymmetry))
+}
+  if (blinder.FileHasVariablePair("=", "max_asymmetry", fMaximumBlindingAsymmetry)) {
     QwVerbose << "Using blinding box: " << fMaximumBlindingAsymmetry << " ppm" << QwLog::endl;
-  if (blinder.FileHasVariablePair("=", "max_factor", fMaximumBlindingFactor))
+}
+  if (blinder.FileHasVariablePair("=", "max_factor", fMaximumBlindingFactor)) {
     QwVerbose << "Using blinding factor: " << fMaximumBlindingFactor << QwLog::endl;
+}
   if (blinder.FileHasVariablePair("=", "crex_target_index", tgt_index)){
     if (tgt_index>=kCREXTgtIndexMin && tgt_index<=kCREXTgtIndexMax){
       fCREXTargetIndex = tgt_index;
@@ -123,11 +128,12 @@ QwBlinder::QwBlinder(const EQwBlindingStrategy blinding_strategy):
   if (blinder.FileHasVariablePair("=", "strategy", strategy)) {
     std::transform(strategy.begin(), strategy.end(), strategy.begin(), ::tolower);
     QwVerbose << "Using blinding strategy from file: " << strategy << QwLog::endl;
-    if (strategy == "diabled") fBlindingStrategy = kDisabled;
-    else if (strategy == "additive") fBlindingStrategy = kAdditive;
-    else if (strategy == "multiplicative") fBlindingStrategy = kMultiplicative;
-    else if (strategy == "additivemultiplicative") fBlindingStrategy = kAdditiveMultiplicative;
-    else QwWarning << "Blinding strategy " << strategy << " not recognized" << QwLog::endl;
+    if (strategy == "diabled") { fBlindingStrategy = kDisabled;
+    } else if (strategy == "additive") { fBlindingStrategy = kAdditive;
+    } else if (strategy == "multiplicative") { fBlindingStrategy = kMultiplicative;
+    } else if (strategy == "additivemultiplicative") { fBlindingStrategy = kAdditiveMultiplicative;
+    } else { QwWarning << "Blinding strategy " << strategy << " not recognized" << QwLog::endl;
+}
   }
 
   std::string spin_direction;
@@ -521,11 +527,11 @@ Int_t QwBlinder::ReadRandomSeed()
   Int_t strLen = sizeof(alphanum) - 1;
   Char_t randomchar[20];
   // Initialize random number generator.
-  srand(time(0));
+  srand(time(nullptr));
   //get  a "random" positive integer 
   
-  for (int i = 0; i < 20; ++i) {
-    randomchar[i] = alphanum[rand() % strLen];
+  for (char & i : randomchar) {
+    i = alphanum[rand() % strLen];
   }
   fSeedID=rand();
   TString frandomSeed(randomchar);
@@ -643,7 +649,7 @@ void QwBlinder::InitBlinders(const UInt_t seed_id)
 
     Int_t finalseed = UseMD5(fSeed);
 
-    Double_t newtempout;
+    Double_t newtempout = NAN;
     if ((finalseed & 0x80000000) == 0x80000000) {
       newtempout = -1.0 * (finalseed & 0x7FFFFFFF);
     } else {
@@ -661,7 +667,7 @@ void QwBlinder::InitBlinders(const UInt_t seed_id)
     fBlindingOffset = tmp1 * fabs(tmp1) * 0.000001;
 
     //  Do another little calulation to round off the blinding asymmetry
-    Double_t tmp2;
+    Double_t tmp2 = NAN;
     tmp1 = fBlindingOffset * 4;    // Exactly shifts by two binary places
     tmp2 = tmp1 + fBlindingOffset; // Rounds 5*fBlindingOffset
     fBlindingOffset = tmp2 - tmp1; // fBlindingOffset has been rounded.
@@ -688,8 +694,9 @@ void QwBlinder::InitBlinders(const UInt_t seed_id)
   hex_string.Form("%.16llx%.16llx", *(ULong64_t*)(&fBlindingFactor), *(ULong64_t*)(&fBlindingOffset));
   fDigest = GenerateDigest(hex_string);
   fChecksum = "";
-  for (size_t i = 0; i < fDigest.size(); i++)
-    fChecksum += string(Form("%.2x",fDigest[i]));
+  for (unsigned char i : fDigest) {
+    fChecksum += string(Form("%.2x",i));
+}
 }
 
 #ifdef __USE_DATABASE__
@@ -760,13 +767,14 @@ void QwBlinder::InitTestValues(const int n)
 Int_t QwBlinder::UseStringManip(const TString& barestring)
 {
   std::vector<UInt_t> choppedwords;
-  UInt_t tmpword;
+  UInt_t tmpword = 0;
   Int_t finalseed = 0;
 
   for (Int_t i = 0; i < barestring.Length(); i++)
     {
-      if (i % 4 == 0) tmpword = 0;
-      tmpword |= (char(barestring[i]))<<(24-8*(i%4));
+      if (i % 4 == 0) { tmpword = 0;
+}
+      tmpword |= (barestring[i])<<(24-8*(i%4));
       if (i%4 == 3 || i == barestring.Length()-1)
         {
           choppedwords.push_back(tmpword);
@@ -804,8 +812,8 @@ Int_t QwBlinder::UseStringManip(const TString& barestring)
  */
 Int_t QwBlinder::UsePseudorandom(const TString& barestring)
 {
-  ULong64_t finalseed;
-  Int_t bitcount;
+  ULong64_t finalseed = 0;
+  Int_t bitcount = 0;
   Int_t tempout = 0;
 
   //  This is an attempt to build a portable 64-bit constant
@@ -1040,13 +1048,14 @@ Bool_t QwBlinder::CheckTestValues()
  * @param input Input string
  * @return MD5 digest of the input string
  */
-std::vector<UChar_t> QwBlinder::GenerateDigest(const TString& input) const
+std::vector<UChar_t> QwBlinder::GenerateDigest(const TString& input) 
 {
   // Initialize MD5 checksum array
   const UInt_t length = 16;
   UChar_t value[length];
-  for (UInt_t i = 0; i < length; i++)
-    value[i] = 0;
+  for (unsigned char & i : value) {
+    i = 0;
+}
 
   // Calculate MD5 checksum from input and store in md5_value
   TMD5 md5;
@@ -1055,8 +1064,9 @@ std::vector<UChar_t> QwBlinder::GenerateDigest(const TString& input) const
 
   // Copy the MD5 checksum in an STL vector
   std::vector<UChar_t> output;
-  for (UInt_t i = 0; i < length; i++)
-    output.push_back(value[i]);
+  for (unsigned char i : value) {
+    output.push_back(i);
+}
 
   return output;
 }
@@ -1071,7 +1081,8 @@ void QwBlinder::PrintFinalValues(Int_t kVerbosity)
   for (size_t i=0; i<kBlinderCount_NumCounters; i++){
     total_count += fPatternCounters.at(i);
   }
-  if (total_count<=0) return;
+  if (total_count<=0) { return;
+}
   
   QwMessage << "QwBlinder::PrintFinalValues():  Begin summary"    << QwLog::endl;
   QwMessage << "================================================" << QwLog::endl;
@@ -1096,10 +1107,11 @@ void QwBlinder::PrintFinalValues(Int_t kVerbosity)
             << QwLog::endl;
   for (size_t i = 0; i < fTestValues.size(); i++) {
     if ((fTestValues[i]-fUnBlindTestValues[i]) < -epsilon 
-	|| (fTestValues[i]-fUnBlindTestValues[i]) > epsilon )
+	|| (fTestValues[i]-fUnBlindTestValues[i]) > epsilon ) {
       diff = Form("% 9g ppb", fTestValues[i]-fUnBlindTestValues[i]*1e9);
-    else
+    } else {
       diff = "epsilon";
+}
     QwMessage << std::setw(8)  << i
               << std::setw(16) << Form(" [CENSORED]")
 	      << std::setw(16) << Form("% 9.3f ppb",fBlindTestValues[i]*1e9)

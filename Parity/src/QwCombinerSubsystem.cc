@@ -15,11 +15,10 @@ RegisterSubsystemFactory(QwCombinerSubsystem);
 
 
 QwCombinerSubsystem::~QwCombinerSubsystem()
-{
-}
+= default;
 
 struct null_deleter { 
-  void operator()(void const *) const { }
+  void operator()(void const * /*unused*/) const { }
 };
 
 boost::shared_ptr<VQwSubsystem> QwCombinerSubsystem::GetSharedPointerToStaticObject(){
@@ -29,8 +28,8 @@ boost::shared_ptr<VQwSubsystem> QwCombinerSubsystem::GetSharedPointerToStaticObj
 
 VQwSubsystem& QwCombinerSubsystem::operator=(VQwSubsystem* value)
 {
-  QwCombinerSubsystem* input= dynamic_cast<QwCombinerSubsystem*>(value);
-  if (input!=NULL) {
+  auto* input= dynamic_cast<QwCombinerSubsystem*>(value);
+  if (input!=nullptr) {
     for(size_t i = 0; i < input->fDependentVar.size(); i++) {
       this->fOutputVar.at(i)->AssignValueFrom(input->fOutputVar.at(i));
     }
@@ -40,8 +39,8 @@ VQwSubsystem& QwCombinerSubsystem::operator=(VQwSubsystem* value)
 
 VQwSubsystem& QwCombinerSubsystem::operator+=(VQwSubsystem* value)
 {
-  QwCombinerSubsystem* input = dynamic_cast<QwCombinerSubsystem*>(value);
-  if (input!=NULL) {
+  auto* input = dynamic_cast<QwCombinerSubsystem*>(value);
+  if (input!=nullptr) {
     for(size_t i = 0; i < input->fDependentVar.size(); i++) {
       this->fOutputVar.at(i)->AddValueFrom(input->fOutputVar.at(i));
     }
@@ -51,8 +50,8 @@ VQwSubsystem& QwCombinerSubsystem::operator+=(VQwSubsystem* value)
 
 VQwSubsystem& QwCombinerSubsystem:: operator-=(VQwSubsystem* value)
 {
-  QwCombinerSubsystem* input = dynamic_cast<QwCombinerSubsystem*>(value);
-  if (input!=NULL) {
+  auto* input = dynamic_cast<QwCombinerSubsystem*>(value);
+  if (input!=nullptr) {
     for(size_t i = 0; i<input->fDependentVar.size(); i++) {
       this->fOutputVar.at(i)->SubtractValueFrom(input->fOutputVar.at(i));
     }
@@ -62,8 +61,8 @@ VQwSubsystem& QwCombinerSubsystem:: operator-=(VQwSubsystem* value)
 
 VQwSubsystem& QwCombinerSubsystem:: operator*=(VQwSubsystem* value)
 {
-  QwCombinerSubsystem* input = dynamic_cast<QwCombinerSubsystem*>(value);
-  if (input!=NULL) {
+  auto* input = dynamic_cast<QwCombinerSubsystem*>(value);
+  if (input!=nullptr) {
     for(size_t i = 0; i<input->fDependentVar.size(); i++) {
       this->fOutputVar.at(i)->MultiplyBy(input->fOutputVar.at(i));
     }
@@ -73,8 +72,8 @@ VQwSubsystem& QwCombinerSubsystem:: operator*=(VQwSubsystem* value)
 
 VQwSubsystem& QwCombinerSubsystem:: operator/=(VQwSubsystem* value)
 {
-  QwCombinerSubsystem* input = dynamic_cast<QwCombinerSubsystem*>(value);
-  if (input!=NULL) {
+  auto* input = dynamic_cast<QwCombinerSubsystem*>(value);
+  if (input!=nullptr) {
     for(size_t i = 0; i<input->fDependentVar.size(); i++) {
       this->fOutputVar.at(i)->DivideBy(input->fOutputVar.at(i));
     }
@@ -101,16 +100,16 @@ void QwCombinerSubsystem::Scale(Double_t value)
 
 void QwCombinerSubsystem::AccumulateRunningSum(VQwSubsystem* input, Int_t count, Int_t ErrorMask)
 {
-  QwCombinerSubsystem* value = dynamic_cast<QwCombinerSubsystem*> (input);
-  if (value!=NULL){
+  auto* value = dynamic_cast<QwCombinerSubsystem*> (input);
+  if (value!=nullptr){
     QwCombiner::AccumulateRunningSum(*value, count, ErrorMask);
   }
 }
 
 void QwCombinerSubsystem::DeaccumulateRunningSum(VQwSubsystem* input, Int_t ErrorMask)
 {
-  QwCombinerSubsystem* value = dynamic_cast<QwCombinerSubsystem*> (input);
-  if (value!=NULL) {
+  auto* value = dynamic_cast<QwCombinerSubsystem*> (input);
+  if (value!=nullptr) {
     for (size_t i = 0; i < value-> fDependentVar.size(); i++) {
       fOutputVar.at(i)->DeaccumulateRunningSum(value->fOutputVar.at(i), ErrorMask);
     }
@@ -158,7 +157,7 @@ void QwCombinerSubsystem::ConstructBranch(TTree *tree, TString & prefix)
 void QwCombinerSubsystem::ConstructBranch(TTree *tree, TString & prefix, QwParameterFile& trim_file)
 {
   TString tmp;
-  QwParameterFile* nextmodule;
+  QwParameterFile* nextmodule = nullptr;
   trim_file.RewindToFileStart();
   tmp="Combiner";
   trim_file.RewindToFileStart();
@@ -193,21 +192,21 @@ void QwCombinerSubsystem::UpdateErrorFlag(const VQwSubsystem *ev_error){
 
 
 
-Int_t QwCombinerSubsystem::LoadChannelMap(TString)
+Int_t QwCombinerSubsystem::LoadChannelMap(TString /*mapfile*/)
 {
   Int_t sample = 0;
   return sample;
 }
 
 
-Int_t QwCombinerSubsystem::LoadInputParameters(TString)
+Int_t QwCombinerSubsystem::LoadInputParameters(TString /*mapfile*/)
 {
   Int_t sample = 0;
   return sample;
 }
 
 
-Int_t QwCombinerSubsystem::LoadEventCuts(TString)
+Int_t QwCombinerSubsystem::LoadEventCuts(TString /*filename*/)
 {
   Int_t sample = 0;
   return sample;

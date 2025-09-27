@@ -184,7 +184,7 @@ Bool_t QwBCM<T>::ApplyHWChecks()
   Bool_t eventokay=kTRUE;
 
   UInt_t deviceerror=fBeamCurrent.ApplyHWChecks();//will check for HW consistancy and return the error code (=0 is HW good)
-  eventokay=(deviceerror & 0x0);//if no HW error return true
+  eventokay=((deviceerror & 0x0) != 0u);//if no HW error return true
 
   return eventokay;
 }
@@ -248,7 +248,7 @@ void QwBCM<T>::UpdateErrorFlag(const VQwBCM *ev_error){
     if(typeid(*ev_error)==typeid(*this)) {
       // std::cout<<" Here in QwBCM::UpdateErrorFlag \n";
       if (this->GetElementName()!="") {
-        const QwBCM<T>* value_bcm = dynamic_cast<const QwBCM<T>* >(ev_error);
+        const auto* value_bcm = dynamic_cast<const QwBCM<T>* >(ev_error);
 	fBeamCurrent.UpdateErrorFlag(value_bcm->fBeamCurrent);
       }
     } else {
@@ -295,8 +295,8 @@ VQwBCM& QwBCM<T>::operator= (const VQwBCM &value)
     if(typeid(value)==typeid(*this)) {
       // std::cout<<" Here in QwBCM::operator= \n";
       if (this->GetElementName()!="") {
-        const QwBCM<T>* value_bcm = dynamic_cast<const QwBCM<T>* >(&value);
-        QwBCM<T>* this_cast = dynamic_cast<QwBCM<T>* >(this);
+        const auto* value_bcm = dynamic_cast<const QwBCM<T>* >(&value);
+        auto* this_cast = dynamic_cast<QwBCM<T>* >(this);
         this_cast->fBeamCurrent= value_bcm->fBeamCurrent;
       }
     } else {
@@ -333,8 +333,8 @@ VQwBCM& QwBCM<T>::operator+= (const VQwBCM &value)
     if(typeid(value)==typeid(*this)) {
       // std::cout<<" Here in QwBCM::operator+= \n";
       if (this->GetElementName()!="") {
-        const QwBCM<T>* value_bcm = dynamic_cast<const QwBCM<T>* >(&value);
-        QwBCM<T>* this_cast = dynamic_cast<QwBCM<T>* >(this);
+        const auto* value_bcm = dynamic_cast<const QwBCM<T>* >(&value);
+        auto* this_cast = dynamic_cast<QwBCM<T>* >(this);
         this_cast->fBeamCurrent+=value_bcm->fBeamCurrent;
       }
     } else {
@@ -355,8 +355,8 @@ VQwBCM& QwBCM<T>::operator-= (const VQwBCM &value)
 {
   if (this->GetElementName()!="")
     {
-      const QwBCM<T>* value_bcm = dynamic_cast<const QwBCM<T>* >(&value);
-      QwBCM<T>* this_cast = dynamic_cast<QwBCM<T>* >(this);
+      const auto* value_bcm = dynamic_cast<const QwBCM<T>* >(&value);
+      auto* this_cast = dynamic_cast<QwBCM<T>* >(this);
       this_cast->fBeamCurrent-=value_bcm->fBeamCurrent;
     }
   return *this;
@@ -369,8 +369,8 @@ QwBCM<T>& QwBCM<T>::operator-= (const QwBCM<T> &value)
     if(typeid(value)==typeid(*this)) {
       // std::cout<<" Here in QwBCM::operator-= \n";
       if (this->GetElementName()!="") {
-        const QwBCM<T>* value_bcm = dynamic_cast<const QwBCM<T>* >(&value);
-        QwBCM<T>* this_cast = dynamic_cast<QwBCM<T>* >(this);
+        const auto* value_bcm = dynamic_cast<const QwBCM<T>* >(&value);
+        auto* this_cast = dynamic_cast<QwBCM<T>* >(this);
         this_cast->fBeamCurrent-=value_bcm->fBeamCurrent;
       }
     } else {
@@ -424,7 +424,7 @@ Bool_t QwBCM<T>::CheckForBurpFail(const VQwDataElement *ev_error){
     if(typeid(*ev_error)==typeid(*this)) {
       //std::cout<<" Here in VQwBCM::CheckForBurpFail \n";
       if (this->GetElementName()!="") {
-        const QwBCM<T>* value_bcm = dynamic_cast<const QwBCM<T>* >(ev_error);
+        const auto* value_bcm = dynamic_cast<const QwBCM<T>* >(ev_error);
         burpstatus |= fBeamCurrent.CheckForBurpFail(&(value_bcm->fBeamCurrent)); 
       }
     } else {

@@ -38,9 +38,14 @@ RegisterSubsystemFactory(QwMollerDetector);
 
 Int_t QwMollerDetector::LoadChannelMap(TString mapfile)
 {
-  TString varname, varvalue;
-  TString modtype, dettype, name, keyword;
-  Int_t modnum, channum;
+  TString varname;
+  TString varvalue;
+  TString modtype;
+  TString dettype;
+  TString name;
+  TString keyword;
+  Int_t modnum;
+  Int_t channum;
   Int_t wordsofar = 0;
   Int_t currentsubbankindex = -1;
   
@@ -49,7 +54,8 @@ Int_t QwMollerDetector::LoadChannelMap(TString mapfile)
   while (mapstr.ReadNextLine()) {
     mapstr.TrimComment('!');   // Remove everything after a '!' character.
     mapstr.TrimWhitespace();   // Get rid of leading and trailing whitespace (spaces or tabs).
-    if (mapstr.LineIsEmpty())  continue;
+    if (mapstr.LineIsEmpty()) {  continue;
+}
 
     if (mapstr.HasVariablePair("=", varname, varvalue)) {
       // This is a declaration line.  Decode it.
@@ -97,7 +103,7 @@ Int_t QwMollerDetector::LoadChannelMap(TString mapfile)
       }
 
 //    add new modules until current number (modnum) is reached 
-      std::size_t chan_size;
+      std::size_t chan_size = 0;
       chan_size = fSTR7200_Channel.size();
       while ((Int_t) chan_size <= modnum) {
         std::vector<QwSTR7200_Channel> new_module;
@@ -131,8 +137,8 @@ Int_t QwMollerDetector::LoadChannelMap(TString mapfile)
   return 0;
 }
 
-void QwMollerDetector::ProcessOptions(QwOptions &){}
-Int_t QwMollerDetector::LoadInputParameters(TString){ return 0;}
+void QwMollerDetector::ProcessOptions(QwOptions & /*unused*/){}
+Int_t QwMollerDetector::LoadInputParameters(TString /*mapfile*/){ return 0;}
 void QwMollerDetector::ClearEventData(){}
 
 
@@ -159,14 +165,14 @@ Int_t QwMollerDetector::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t ban
     //we want to process this ROC
 
     //Loop through all the channels as defined in map file.. should be 96 in standard 3 module, 32 channel Moller configuration
-    for(size_t i = 0; i < fMollerChannelID.size(); i++){
+    for(auto & i : fMollerChannelID){
 
-      Int_t wordsLeft = num_words - fMollerChannelID[i].fWordInSubbank;
+      Int_t wordsLeft = num_words - i.fWordInSubbank;
 
 //       std::cout << std::dec << fMollerChannelID[i].fChannelName << ' ' << fMollerChannelID[i].fIndex << " in module " << fMollerChannelID[i].fModuleNumber << " has data " << std::hex << buffer[fMollerChannelID[i].fWordInSubbank] << std::dec << std::endl;
 
-      UInt_t mod_index = fMollerChannelID[i].fModuleNumber;
-      Int_t chan_index = fMollerChannelID[i].fIndex;
+      UInt_t mod_index = i.fModuleNumber;
+      Int_t chan_index = i.fIndex;
 //      char *junk = new char[2];
       if (mod_index < fSTR7200_Channel.size()) {
         //mod_index should be less than 3, next_module is reference to vector where the Channel should be located
@@ -174,7 +180,7 @@ Int_t QwMollerDetector::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t ban
         //std::cin.getline(junk, 1);
 //         std::cout << '(' << mod_index << ',' << chan_index << ')' << buffer[fMollerChannelID[i].fWordInSubbank] - fSTR7200_Channel[mod_index][chan_index].GetValue() << ' ' << std::endl;
 
-        fSTR7200_Channel[mod_index][chan_index].ProcessEvBuffer(&(buffer[fMollerChannelID[i].fWordInSubbank]), wordsLeft);
+        fSTR7200_Channel[mod_index][chan_index].ProcessEvBuffer(&(buffer[i.fWordInSubbank]), wordsLeft);
       } else {
         std::cout << "Problem reading buffer, incorrect structure of map file?" << std::endl;
       }
@@ -206,33 +212,33 @@ void QwMollerDetector::ProcessEvent()
 
 
 void QwMollerDetector::ConstructHistograms(TDirectory* folder, TString& prefix){
-  for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
-    for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
-      fSTR7200_Channel[i][j].ConstructHistograms(folder, prefix);
+  for(auto & i : fSTR7200_Channel){
+    for(size_t j = 0; j < i.size(); j++){
+      i[j].ConstructHistograms(folder, prefix);
     }
   }
 }
 
 void QwMollerDetector::FillHistograms(){
-  for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
-    for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
-      fSTR7200_Channel[i][j].FillHistograms();
+  for(auto & i : fSTR7200_Channel){
+    for(size_t j = 0; j < i.size(); j++){
+      i[j].FillHistograms();
     }
   }
 }
 
 void QwMollerDetector::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values){
-  for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
-    for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
-      fSTR7200_Channel[i][j].ConstructBranchAndVector(tree, prefix, values);
+  for(auto & i : fSTR7200_Channel){
+    for(size_t j = 0; j < i.size(); j++){
+      i[j].ConstructBranchAndVector(tree, prefix, values);
     }
   }
 }
 
 void QwMollerDetector::FillTreeVector(std::vector<Double_t> &values) const {
-  for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
-    for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
-      fSTR7200_Channel[i][j].FillTreeVector(values);
+  for(const auto & i : fSTR7200_Channel){
+    for(size_t j = 0; j < i.size(); j++){
+      i[j].FillTreeVector(values);
     }
   }
 }
@@ -261,7 +267,7 @@ VQwSubsystem&  QwMollerDetector::operator=(VQwSubsystem *value){
   // std::cout << "QwMollerDetector assignment (operator=)" << std::endl;
   if(this != value && Compare(value)){
     //VQwSubsystem::operator=(value);
-    QwMollerDetector* input = dynamic_cast<QwMollerDetector *> (value);
+    auto* input = dynamic_cast<QwMollerDetector *> (value);
     for(size_t i = 0; i < input->fSTR7200_Channel.size(); i++){
       for(size_t j = 0; j < input->fSTR7200_Channel[i].size(); j++){
         this->fSTR7200_Channel[i][j] = input->fSTR7200_Channel[i][j];
@@ -274,7 +280,7 @@ VQwSubsystem&  QwMollerDetector::operator=(VQwSubsystem *value){
 VQwSubsystem&  QwMollerDetector::operator+=(VQwSubsystem *value){
   //std::cout << "QwMollerDetector addition assignment (operator+=)" << std::endl;
   if(Compare(value)){
-    QwMollerDetector* input = dynamic_cast<QwMollerDetector *> (value);
+    auto* input = dynamic_cast<QwMollerDetector *> (value);
     for(size_t i = 0; i < input->fSTR7200_Channel.size(); i++){
       for(size_t j = 0; j < input->fSTR7200_Channel[i].size(); j++){
         this->fSTR7200_Channel[i][j] += input->fSTR7200_Channel[i][j];
@@ -288,7 +294,7 @@ VQwSubsystem&  QwMollerDetector::operator+=(VQwSubsystem *value){
 VQwSubsystem&  QwMollerDetector::operator-=(VQwSubsystem *value){
   //std::cout << "QwMollerDetector subtraction assignment (operator-=)" << std::endl;
   if(Compare(value)){
-    QwMollerDetector* input = dynamic_cast<QwMollerDetector *> (value);
+    auto* input = dynamic_cast<QwMollerDetector *> (value);
     for(size_t i = 0; i < input->fSTR7200_Channel.size(); i++){
       for(size_t j = 0; j < input->fSTR7200_Channel[i].size(); j++){
         this->fSTR7200_Channel[i][j] -= input->fSTR7200_Channel[i][j];
@@ -300,8 +306,8 @@ VQwSubsystem&  QwMollerDetector::operator-=(VQwSubsystem *value){
 
 void QwMollerDetector::Ratio(VQwSubsystem  *value1, VQwSubsystem  *value2){
   if (Compare(value1) && Compare(value2)) {
-    QwMollerDetector* v1 = dynamic_cast<QwMollerDetector *> (value1);
-    QwMollerDetector* v2 = dynamic_cast<QwMollerDetector *> (value2);
+    auto* v1 = dynamic_cast<QwMollerDetector *> (value1);
+    auto* v2 = dynamic_cast<QwMollerDetector *> (value2);
 
     for(size_t i = 0; i < v1->fSTR7200_Channel.size(); i++){
       for(size_t j = 0; j < v1->fSTR7200_Channel[i].size(); j++){
@@ -309,20 +315,19 @@ void QwMollerDetector::Ratio(VQwSubsystem  *value1, VQwSubsystem  *value2){
       }
     }
   }
-  return;
-}
+  }
 
 void QwMollerDetector::Scale(Double_t factor){
-  for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
-    for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
-      fSTR7200_Channel[i][j].Scale(factor);
+  for(auto & i : fSTR7200_Channel){
+    for(size_t j = 0; j < i.size(); j++){
+      i[j].Scale(factor);
     }
   }
 }
 
 void QwMollerDetector::AccumulateRunningSum(VQwSubsystem* value, Int_t count, Int_t ErrorMask){
   if (Compare(value)) {
-    QwMollerDetector* v = dynamic_cast<QwMollerDetector*>(value);
+    auto* v = dynamic_cast<QwMollerDetector*>(value);
 
     for (size_t i = 0; i < fSTR7200_Channel.size(); i++){
       for (size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
@@ -334,9 +339,9 @@ void QwMollerDetector::AccumulateRunningSum(VQwSubsystem* value, Int_t count, In
 }
 
 void QwMollerDetector::CalculateRunningAverage(){
-  for (size_t i = 0; i < fSTR7200_Channel.size(); i++){
-    for (size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
-      fSTR7200_Channel[i][j].CalculateRunningAverage();
+  for (auto & i : fSTR7200_Channel){
+    for (size_t j = 0; j < i.size(); j++){
+      i[j].CalculateRunningAverage();
     }
   }
 }
@@ -345,7 +350,8 @@ Int_t QwMollerDetector::LoadEventCuts(TString filename){return 0;}
 
 Bool_t QwMollerDetector::ApplySingleEventCuts(){
   std::cout << "QwMoller::ApplySingleEventCuts() ";
-  Bool_t test = kTRUE, test_1 = kTRUE;
+  Bool_t test = kTRUE;
+  Bool_t test_1 = kTRUE;
 
   for (size_t i = 0; i < fSTR7200_Channel.size(); i++){
     for (size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
@@ -361,9 +367,9 @@ Bool_t QwMollerDetector::ApplySingleEventCuts(){
 
 void QwMollerDetector::PrintErrorCounters() const{
   std::cout << "***************QwMoller Error Summary****************" << std::endl;
-  for (size_t i = 0; i < fSTR7200_Channel.size(); i++){
-    for (size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
-      fSTR7200_Channel[i][j].PrintErrorCounters();
+  for (const auto & i : fSTR7200_Channel){
+    for (size_t j = 0; j < i.size(); j++){
+      i[j].PrintErrorCounters();
     }
   }
   std::cout << "total failed events: " << fQwMollerErrorCount << std::endl;
@@ -376,21 +382,21 @@ UInt_t QwMollerDetector::GetEventcutErrorFlag(){
 
 float* QwMollerDetector::GetRawChannelArray(){
   size_t len = 0;
-  for (size_t i = 0; i < fSTR7200_Channel.size(); i++){
-    for (size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
+  for (const auto & i : fSTR7200_Channel){
+    for (size_t j = 0; j < i.size(); j++){
       len++;
     }
   }
-  float *result = new float[len];
+  auto *result = new float[len];
   
   //float result[96];
 
   int n = 0;
-  for (size_t i = 0; i < fSTR7200_Channel.size(); i++){
-    for (size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
-      result[n+j] = fSTR7200_Channel[i][j].GetValue();
+  for (auto & i : fSTR7200_Channel){
+    for (size_t j = 0; j < i.size(); j++){
+      result[n+j] = i[j].GetValue();
     }
-    n=fSTR7200_Channel[i].size();
+    n=i.size();
   }
  
   return result;
@@ -408,8 +414,8 @@ Int_t QwMollerDetector::GetChannelIndex(TString channelName, UInt_t module_numbe
   }
 
   Int_t result = -1;
-  for(size_t i = 0; i < fMollerChannelID.size(); i++){
-    QwMollerChannelID *nextChannel = &fMollerChannelID[i];
+  for(auto & i : fMollerChannelID){
+    QwMollerChannelID *nextChannel = &i;
     //std::cout << ' '<< nextChannel->fChannelName << '=' << channelName << ':' << (nextChannel->fChannelName == channelName) << std::endl;
     if (nextChannel->fChannelName == channelName && nextChannel->fModuleNumber == module_number){
       result = nextChannel->fIndex;
@@ -424,14 +430,15 @@ Int_t QwMollerDetector::GetChannelIndex(TString channelName, UInt_t module_numbe
 Bool_t QwMollerDetector::Compare(VQwSubsystem *source){
   //std::cout << "Beginning QwMollerDetector::Compare" << std::endl;
   
-  if (source == 0) return kFALSE;
+  if (source == nullptr) { return kFALSE;
+}
 
   Bool_t result = kTRUE;
   if(typeid(*source) != typeid(*this)){
     result = kFALSE;
     std::cout << " Type mismatch! This is bypassed for now but should be fixed eventually." << std::endl;
   } else { //same type, test for # of modules
-    QwMollerDetector* input = dynamic_cast<QwMollerDetector*>(source);
+    auto* input = dynamic_cast<QwMollerDetector*>(source);
     if(input->fSTR7200_Channel.size() != fSTR7200_Channel.size()){
       result = kFALSE;
       std::cout << " Not the same number of Modules" << std::endl;
@@ -450,8 +457,8 @@ Bool_t QwMollerDetector::Compare(VQwSubsystem *source){
 void QwMollerDetector::print(){
   std::cout << " " << fSTR7200_Channel.size() << std::endl;
   UInt_t max = 0;
-  for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
-    UInt_t next = fSTR7200_Channel[i].size();
+  for(const auto & i : fSTR7200_Channel){
+    UInt_t next = i.size();
     if (next > max){
       max = next;
     }
@@ -459,10 +466,10 @@ void QwMollerDetector::print(){
 
   for(size_t i = 0; i < max; i++){
     std::cout << fMollerChannelID[i].fChannelName << ":\t" << (fMollerChannelID[i].fChannelName.Length() < 14 ? "\t" : "");
-    for(size_t j = 0; j < fSTR7200_Channel.size(); j++){
+    for(auto & j : fSTR7200_Channel){
 
-      if ( i < fSTR7200_Channel[j].size()){
-        std::cout << "0x" << std::hex << (int)fSTR7200_Channel[j][i].GetValue() << std::dec;
+      if ( i < j.size()){
+        std::cout << "0x" << std::hex << (int)j[i].GetValue() << std::dec;
       } else {
         std::cout << "            ";
       }
@@ -474,9 +481,9 @@ void QwMollerDetector::print(){
 }
 
 void QwMollerDetector::PrintValue() const {
-  for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
-    for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
-         fSTR7200_Channel[i][j].PrintValue();
+  for(const auto & i : fSTR7200_Channel){
+    for(size_t j = 0; j < i.size(); j++){
+         i[j].PrintValue();
     }
   }
 }

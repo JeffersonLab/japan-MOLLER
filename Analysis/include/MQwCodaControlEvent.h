@@ -17,7 +17,7 @@ class MQwCodaControlEvent
   ~MQwCodaControlEvent();
 
   void ResetControlParameters();
-  void ProcessControlEvent(UInt_t evtype, UInt_t* buffer);
+  void ProcessControlEvent(UInt_t evtype, const UInt_t* buffer);
   void ReportRunSummary();
 
   UInt_t GetStartTime() {return fStartTime;};
@@ -59,23 +59,23 @@ class MQwCodaControlEvent
   };
 
  protected:
-  Bool_t fFoundControlEvents;
+  Bool_t fFoundControlEvents{};
 
-  UInt_t fPrestartTime;
-  UInt_t fPrestartRunNumber;
-  UInt_t fRunType;
+  UInt_t fPrestartTime{};
+  UInt_t fPrestartRunNumber{};
+  UInt_t fRunType{};
 
-  UInt_t fEndTime;
-  UInt_t fEndEventCount;
+  UInt_t fEndTime{};
+  UInt_t fEndEventCount{};
   
-  UInt_t fNumberPause;
+  UInt_t fNumberPause{};
   std::vector<UInt_t> fPauseEventCount;
   std::vector<UInt_t> fPauseTime;
 
-  UInt_t fNumberGo;
+  UInt_t fNumberGo{};
   std::vector<UInt_t> fGoEventCount;
   std::vector<UInt_t> fGoTime;
-  UInt_t fStartTime;
+  UInt_t fStartTime{};
 
   TDatime fPrestartDatime;
   TDatime fStartDatime;

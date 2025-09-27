@@ -119,20 +119,22 @@ TString GetQwBeamInstrumentTypeName(EQwBeamInstrumentType type){
   else if (type==kQwHaloMonitor){
     result = "halomonitor";
   }
-  else if (type==kQwBPMCavity)
+  else if (type==kQwBPMCavity) {
     result = "bpmcavity";
+}
   return result;
 }
 
 UInt_t GetGlobalErrorFlag(TString evtype,Int_t evMode,Double_t stabilitycut){
-  UInt_t evntMode;
-  if (evMode==3)
+  UInt_t evntMode = 0;
+  if (evMode==3) {
     evntMode=kEventCutMode3;
-  else
+  } else {
     evntMode=0;
-  if (evtype=="g" && stabilitycut>0)
+}
+  if (evtype=="g" && stabilitycut>0) {
     return (kGlobalCut|kStabilityCut|evntMode);
-  else if (evtype=="g" && stabilitycut<=0)
+  } if (evtype=="g" && stabilitycut<=0)
     return (kGlobalCut|evntMode);  
   else if (evtype=="l" && stabilitycut>0)
     return (kLocalCut|evntMode|kStabilityCut);

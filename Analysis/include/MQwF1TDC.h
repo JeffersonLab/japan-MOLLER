@@ -64,9 +64,9 @@ class MQwF1TDC{
   /* Double_t SubtractReference(Double_t rawtime, Double_t reftime); */
   /* Double_t ActualTimeDifference(Double_t raw_time, Double_t ref_time); */
   /* Bool_t CheckDataIntegrity(const ROCID_t roc_id, UInt_t *buffer, UInt_t num_words); */
-  void   PrintTDCHeader(Bool_t flag);
-  void   PrintTDCData(Bool_t flag);
-  void   Print(Bool_t flag);
+  void   PrintTDCHeader(Bool_t flag) const;
+  void   PrintTDCData(Bool_t flag) const;
+  void   Print(Bool_t flag) const;
   
 
 
@@ -142,8 +142,8 @@ class MQwF1TDC{
   
   
   //  static const UInt_t offset;
-  UInt_t fF1ROCNumber;
-  UInt_t fF1SlotNumber;
+  UInt_t fF1ROCNumber{0};
+  UInt_t fF1SlotNumber{0};
 
   Bool_t fF1HeaderFlag;              // true(1) if word is 0 (header) and false(0) 
                                      // if word is 1 (data)
@@ -153,20 +153,20 @@ class MQwF1TDC{
 
  
   Bool_t fF1FakeDataFlag;            // true(1) if word is 1 (Fake)
-  UInt_t fF1ChannelNumber;
-  UInt_t fF1ChipAddress;
-  UInt_t fF1ChannelAddress;
-  UInt_t fF1Dataword;
+  UInt_t fF1ChannelNumber{0};
+  UInt_t fF1ChipAddress{};
+  UInt_t fF1ChannelAddress{};
+  UInt_t fF1Dataword{0};
 
 
 
   Bool_t fF1HeaderTrigFIFOFlag;
-  UInt_t fF1HeaderEventNumber;
-  UInt_t fF1HeaderTriggerTime;
+  UInt_t fF1HeaderEventNumber{0};
+  UInt_t fF1HeaderTriggerTime{0};
   Bool_t fF1HeaderXorSetupFlag;
  
   
-  UInt_t fF1MaxChannelsPerModule;
+  UInt_t fF1MaxChannelsPerModule{64};
   Bool_t fF1OverFlowEntryFlag;
   Bool_t fF1ValidDataSlotFlag;  
 
@@ -181,9 +181,9 @@ class MQwF1TDC{
   //           MQwV775TDC. I think "IsSlotRegistered()" can do instead of this
   //                   
 
-  void   PrintHitFIFOStatus(const ROCID_t roc_id);
-  void   PrintOutputFIFOStatus(const ROCID_t roc_id);
-  void   PrintResolutionLockStatus(const ROCID_t roc_id);
+  void   PrintHitFIFOStatus(const ROCID_t roc_id) const;
+  void   PrintOutputFIFOStatus(const ROCID_t roc_id) const;
+  void   PrintResolutionLockStatus(const ROCID_t roc_id) const;
 
  
 

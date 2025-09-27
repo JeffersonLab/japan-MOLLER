@@ -113,7 +113,7 @@ class QwLog : public std::ostream {
 
     /*! \brief Determine whether the function name matches a specified list of regular expressions
      */
-    bool                        IsDebugFunction(const string func_name);
+    bool                        IsDebugFunction(const string func_sig);
 
     /*! \brief Initialize the log file with name 'name'
      */
@@ -168,26 +168,26 @@ class QwLog : public std::ostream {
     /*! \brief Get the local time
      */
     const char*                 GetTime();
-    char                        fTimeString[128];
+    char                        fTimeString[128]{};
 
     //! Screen thresholds and stream
-    QwLogLevel    fScreenThreshold;
+    QwLogLevel    fScreenThreshold{kMessage};
     std::ostream *fScreen;
     //! File thresholds and stream
-    QwLogLevel    fFileThreshold;
-    std::ostream *fFile;
+    QwLogLevel    fFileThreshold{kMessage};
+    std::ostream *fFile{0};
     //! Log level of this stream
-    QwLogLevel fLogLevel;
+    QwLogLevel fLogLevel{kMessage};
 
     //! Flag to print function signature on warning or error
-    bool fPrintFunctionSignature;
+    bool fPrintFunctionSignature{false};
 
     //! List of regular expressions for functions that will have increased log level
     std::map<std::string,bool> fIsDebugFunction;
     std::vector<std::string> fDebugFunctionRegexString;
 
     //! Flag to disable color
-    bool fUseColor;
+    bool fUseColor{true};
 
     //! Flags only relevant for current line, but static for use in static function
     static bool fFileAtNewLine;

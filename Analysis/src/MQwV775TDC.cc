@@ -33,19 +33,19 @@ const UInt_t MQwV775TDC::kV775WordType_Tail     = 4;
 const UInt_t MQwV775TDC::kV775WordType_Datum    = 0;
 
 
-MQwV775TDC::MQwV775TDC()
+MQwV775TDC::MQwV775TDC() : fV775ValidFlag(kFALSE), fV775HeaderFlag(kFALSE)
 {
-  fV775ValidFlag            = kFALSE;
-  fV775HeaderFlag           = kFALSE;
+  
+  
 
-  fV775SlotNumber           = 0;
-  fV775ChannelNumber        = 0;
-  fV775Dataword             = 0;
-  fV775EventNumber          = 0;
-  fV775MaxChannelsPerModule = 32;
+  
+  
+  
+  
+  
 }
 
-MQwV775TDC::~MQwV775TDC() { }
+MQwV775TDC::~MQwV775TDC() = default;
 
 
 // See page 43 at https://qweak.jlab.org/wiki/images/V775.pdf
@@ -75,8 +75,7 @@ void MQwV775TDC::DecodeTDCWord(UInt_t &word, const ROCID_t roc_id)
   }
 
  
-  return;
-}
+  }
 
 // UInt_t MQwV775TDC::SubtractReference(UInt_t a, UInt_t rawtime){
 //   UInt_t b=rawtime;
@@ -114,11 +113,10 @@ Bool_t MQwV775TDC::CheckDataIntegrity(const ROCID_t roc_id, UInt_t *buffer, UInt
 
 void MQwV775TDC::PrintTDCHeader(Bool_t flag)
 {
-  return;
-}
+  }
 
 
-void MQwV775TDC::PrintTDCData(Bool_t flag)
+void MQwV775TDC::PrintTDCData(Bool_t flag) const
 {
   if(flag)
     {
@@ -130,5 +128,4 @@ void MQwV775TDC::PrintTDCData(Bool_t flag)
 		<< std::setw(12) << fV775Dataword
 		<< std::endl;
     }
-  return;
-}
+  }

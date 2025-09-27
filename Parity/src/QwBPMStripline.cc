@@ -37,23 +37,24 @@ void  QwBPMStripline<T>::InitializeChannel(TString name)
 
   VQwBPM::InitializeChannel(name);
 
-  for(i=kXAxis;i<kNumAxes;i++)
+  for(i=kXAxis;i<kNumAxes;i++) {
     fAbsPos[i].InitializeChannel(name+kAxisLabel[i],"derived");
+}
 
   fEffectiveCharge.InitializeChannel(name+"WS","derived");
   fEllipticity.InitializeChannel(name+"Elli","derived");
 
   for(i=0;i<4;i++) {
     fWire[i].InitializeChannel(name+subelement[i],"raw");
-    if(localdebug)
+    if(localdebug) {
       std::cout<<" Wire ["<<i<<"]="<<fWire[i].GetElementName()<<"\n";
+}
   }
 
-  for(i=kXAxis;i<kNumAxes;i++) fRelPos[i].InitializeChannel(name+"Rel"+kAxisLabel[i],"derived");
+  for(i=kXAxis;i<kNumAxes;i++) { fRelPos[i].InitializeChannel(name+"Rel"+kAxisLabel[i],"derived");
+}
 
   bFullSave=kTRUE;
-
-  return;
 }
 
 template<typename T>
@@ -72,23 +73,24 @@ void  QwBPMStripline<T>::InitializeChannel(TString subsystem, TString name)
 
   VQwBPM::InitializeChannel(name);
 
-  for(i=kXAxis;i<kNumAxes;i++)
+  for(i=kXAxis;i<kNumAxes;i++) {
     fAbsPos[i].InitializeChannel(subsystem, "QwBPMStripline", name+kAxisLabel[i],"derived");
+}
 
   fEffectiveCharge.InitializeChannel(subsystem, "QwBPMStripline", name+"WS","derived");
   fEllipticity.InitializeChannel(subsystem, "QwBPMStripline", name+"Elli","derived");
 
   for(i=0;i<4;i++) {
     fWire[i].InitializeChannel(subsystem, "QwBPMStripline", name+subelement[i],"raw");
-    if(localdebug)
+    if(localdebug) {
       std::cout<<" Wire ["<<i<<"]="<<fWire[i].GetElementName()<<"\n";
+}
   }
 
-  for(i=kXAxis;i<kNumAxes;i++) fRelPos[i].InitializeChannel(subsystem, "QwBPMStripline", name+"Rel"+kAxisLabel[i],"derived");
+  for(i=kXAxis;i<kNumAxes;i++) { fRelPos[i].InitializeChannel(subsystem, "QwBPMStripline", name+"Rel"+kAxisLabel[i],"derived");
+}
 
   bFullSave=kTRUE;
-
-  return;
 }
 
 template<typename T>
@@ -96,7 +98,8 @@ void QwBPMStripline<T>::ClearEventData()
 {
   Short_t i=0;
 
-  for(i=0;i<4;i++) fWire[i].ClearEventData();
+  for(i=0;i<4;i++) { fWire[i].ClearEventData();
+}
 
   for(i=kXAxis;i<kNumAxes;i++){
     fAbsPos[i].ClearEventData();
@@ -104,8 +107,6 @@ void QwBPMStripline<T>::ClearEventData()
   }
   fEffectiveCharge.ClearEventData();
   fEllipticity.ClearEventData();
-
- return;
 }
 
 
@@ -133,7 +134,8 @@ void QwBPMStripline<T>::IncrementErrorCounters()
 {
   Short_t i=0;
 
-  for(i=0;i<4;i++) fWire[i].IncrementErrorCounters();
+  for(i=0;i<4;i++) { fWire[i].IncrementErrorCounters();
+}
   for(i=kXAxis;i<kNumAxes;i++) {
     fRelPos[i].IncrementErrorCounters();
     fAbsPos[i].IncrementErrorCounters();
@@ -147,7 +149,8 @@ void QwBPMStripline<T>::PrintErrorCounters() const
 {
   Short_t i=0;
 
-  for(i=0;i<4;i++) fWire[i].PrintErrorCounters();
+  for(i=0;i<4;i++) { fWire[i].PrintErrorCounters();
+}
   for(i=kXAxis;i<kNumAxes;i++) {
     fRelPos[i].PrintErrorCounters();
     fAbsPos[i].PrintErrorCounters();
@@ -160,7 +163,8 @@ template<typename T>
 UInt_t QwBPMStripline<T>::GetEventcutErrorFlag(){
   Short_t i=0;
   UInt_t error=0;
-  for(i=0;i<4;i++) error|=fWire[i].GetEventcutErrorFlag();
+  for(i=0;i<4;i++) { error|=fWire[i].GetEventcutErrorFlag();
+}
   for(i=kXAxis;i<kNumAxes;i++) {
     error|=fRelPos[i].GetEventcutErrorFlag();
     error|=fAbsPos[i].GetEventcutErrorFlag();
@@ -202,7 +206,7 @@ Bool_t QwBPMStripline<T>::CheckForBurpFail(const VQwDataElement *ev_error){
     if(typeid(*ev_error)==typeid(*this)) {
       //std::cout<<" Here in QwBPMStripline::CheckForBurpFail \n";
       if (this->GetElementName()!="") {
-        const QwBPMStripline<T>* value_bpm = dynamic_cast<const QwBPMStripline<T>* >(ev_error);
+        const auto* value_bpm = dynamic_cast<const QwBPMStripline<T>* >(ev_error);
 	      for(i=0;i<4;i++){
 	        burpstatus |= fWire[i].CheckForBurpFail(&(value_bpm->fWire[i]));
 	      }
@@ -233,7 +237,7 @@ void QwBPMStripline<T>::UpdateErrorFlag(const VQwBPM *ev_error){
     if(typeid(*ev_error)==typeid(*this)) {
       // std::cout<<" Here in QwBPMStripline::UpdateErrorFlag \n";
       if (this->GetElementName()!="") {
-        const QwBPMStripline<T>* value_bpm = dynamic_cast<const QwBPMStripline<T>* >(ev_error);
+        const auto* value_bpm = dynamic_cast<const QwBPMStripline<T>* >(ev_error);
 	      for(i=0;i<4;i++){
 	        fWire[i].UpdateErrorFlag(value_bpm->fWire[i]);
 	      }
@@ -270,7 +274,8 @@ Bool_t QwBPMStripline<T>::ApplySingleEventCuts()
     }
     else{
       status&=kFALSE;
-      if (bDEBUG) std::cout<<" Abs X event cut failed ";
+      if (bDEBUG) { std::cout<<" Abs X event cut failed ";
+}
     }
   }
 
@@ -296,7 +301,8 @@ Bool_t QwBPMStripline<T>::ApplySingleEventCuts()
     }
     else{
       status&=kFALSE;
-      if (bDEBUG) std::cout<<" Rel X event cut failed ";
+      if (bDEBUG) { std::cout<<" Rel X event cut failed ";
+}
     }
   }
 
@@ -306,7 +312,8 @@ Bool_t QwBPMStripline<T>::ApplySingleEventCuts()
     }
     else{
       status&=kFALSE;
-      if (bDEBUG) std::cout<<" Abs X event cut failed ";
+      if (bDEBUG) { std::cout<<" Abs X event cut failed ";
+}
     }
   }
 
@@ -319,7 +326,8 @@ Bool_t QwBPMStripline<T>::ApplySingleEventCuts()
   }
   else{
     status&=kFALSE;
-    if (bDEBUG) std::cout<<"EffectiveCharge event cut failed ";
+    if (bDEBUG) { std::cout<<"EffectiveCharge event cut failed ";
+}
   }
   return status;
 }
@@ -327,7 +335,7 @@ Bool_t QwBPMStripline<T>::ApplySingleEventCuts()
 template<typename T>
 VQwHardwareChannel* QwBPMStripline<T>::GetSubelementByName(TString ch_name)
 {
-  VQwHardwareChannel* tmpptr = NULL;
+  VQwHardwareChannel* tmpptr = nullptr;
   ch_name.ToLower();
   if (ch_name=="xp"){
     tmpptr = &fWire[0];
@@ -421,9 +429,12 @@ template<typename T>
 void  QwBPMStripline<T>::ProcessEvent()
 {
   Bool_t localdebug = kFALSE;
-  static T numer("numerator","derived"), denom("denominator","derived");
-  static T tmp1("tmp1","derived"), tmp2("tmp2","derived");
-  static T tmp3("tmp3","derived"), tmp4("tmp4","derived");
+  static T numer("numerator","derived");
+  static T denom("denominator","derived");
+  static T tmp1("tmp1","derived");
+  static T tmp2("tmp2","derived");
+  static T tmp3("tmp3","derived");
+  static T tmp4("tmp4","derived");
   static T tmp5("tmp3","derived");
   static T rawpos[2] = {T("rawpos_0","derived"),T("rawpos_1","derived")};
 
@@ -530,10 +541,7 @@ void  QwBPMStripline<T>::ProcessEvent()
   tmp4.Product(fRelPos[kYAxis],fRelPos[kYAxis]);
   tmp5.Difference(tmp3,tmp4);
   tmp5.Scale(-1.0*0.250014); // FIXME Does this correction factor need a BPM specific (i.e. BSEN) scaling factor? - It already includes BSENfactor^2 because it is made of post-BSENfactor scaled X and Y values, so lets assume its ok for now
-  fEllipticity.Sum(fEllipticity,tmp5); // Correction to ellipticity (only 1st order correction)
-
-  return;
-}
+  fEllipticity.Sum(fEllipticity,tmp5); }
 
 
 template<typename T>
@@ -570,11 +578,6 @@ void QwBPMStripline<T>::WritePromptSummary(QwPromptSummary *ps, TString type)
 {
 
   QwMessage << "void QwBPMStripline<T>::WritePromptSummary() const test " << QwLog::endl;
-  //  for (Short_t i = 0; i < 2; i++) {
-  //    fAbsPos[i].PrintValue();
-  //    fRelPos[i].PrintValue();
-  //  }
-  return;
 }
 
 
@@ -582,7 +585,8 @@ template<typename T>
 void QwBPMStripline<T>::PrintInfo() const
 {
   Short_t i = 0;
-  for (i = 0; i < 4; i++) fWire[i].PrintInfo();
+  for (i = 0; i < 4; i++) { fWire[i].PrintInfo();
+}
   for (i = 0; i < 2; i++) {
     fRelPos[i].PrintInfo();
     fAbsPos[i].PrintInfo();
@@ -596,11 +600,12 @@ template<typename T>
 TString QwBPMStripline<T>::GetSubElementName(Int_t subindex)
 {
   TString thisname;
-  if(subindex<4&&subindex>-1)
+  if(subindex<4&&subindex>-1) {
     thisname=fWire[subindex].GetElementName();
-  else
+  } else {
     std::cerr<<"QwBPMStripline::GetSubElementName for "<<
       GetElementName()<<" this subindex doesn't exists \n";
+}
 
   return thisname;
 }
@@ -610,11 +615,14 @@ UInt_t QwBPMStripline<T>::GetSubElementIndex(TString subname)
 {
   subname.ToUpper();
   UInt_t localindex = kInvalidSubelementIndex;
-  for(Short_t i=0;i<4;i++) if(subname==subelement[i])localindex=i;
+  for(Short_t i=0;i<4;i++) { if(subname==subelement[i]) {localindex=i;
+}
+}
 
-  if(localindex==kInvalidSubelementIndex)
+  if(localindex==kInvalidSubelementIndex) {
     std::cerr << "QwBPMStripline::GetSubElementIndex is unable to associate the string -"
 	      <<subname<<"- to any index"<<std::endl;
+}
   return localindex;
 }
 
@@ -649,7 +657,8 @@ QwBPMStripline<T>& QwBPMStripline<T>::operator= (const QwBPMStripline<T> &value)
     Short_t i = 0;
     this->fEffectiveCharge=value.fEffectiveCharge;
     this->fEllipticity=value.fEllipticity;
-    for(i=0;i<4;i++) this->fWire[i]=value.fWire[i];
+    for(i=0;i<4;i++) { this->fWire[i]=value.fWire[i];
+}
     for(i=kXAxis;i<kNumAxes;i++) {
       this->fRelPos[i]=value.fRelPos[i];
       this->fAbsPos[i]=value.fAbsPos[i];
@@ -674,7 +683,8 @@ QwBPMStripline<T>& QwBPMStripline<T>::operator+= (const QwBPMStripline<T> &value
     Short_t i = 0;
     this->fEffectiveCharge+=value.fEffectiveCharge;
     this->fEllipticity+=value.fEllipticity;
-    for(i=0;i<4;i++) this->fWire[i]+=value.fWire[i];
+    for(i=0;i<4;i++) { this->fWire[i]+=value.fWire[i];
+}
     for(i=kXAxis;i<kNumAxes;i++) {
       this->fRelPos[i]+=value.fRelPos[i];
       this->fAbsPos[i]+=value.fAbsPos[i];
@@ -698,7 +708,8 @@ QwBPMStripline<T>& QwBPMStripline<T>::operator-= (const QwBPMStripline<T> &value
     Short_t i = 0;
     this->fEffectiveCharge-=value.fEffectiveCharge;
     this->fEllipticity-=value.fEllipticity;
-    for(i=0;i<4;i++) this->fWire[i]-=value.fWire[i];
+    for(i=0;i<4;i++) { this->fWire[i]-=value.fWire[i];
+}
     for(i=kXAxis;i<kNumAxes;i++) {
       this->fRelPos[i]-=value.fRelPos[i];
       this->fAbsPos[i]-=value.fAbsPos[i];
@@ -734,7 +745,8 @@ void QwBPMStripline<T>::Scale(Double_t factor)
   fEffectiveCharge.Scale(factor);
   fEllipticity.Scale(factor);
 
-  for(i=0;i<4;i++) fWire[i].Scale(factor);
+  for(i=0;i<4;i++) { fWire[i].Scale(factor);
+}
   for(Short_t i=kXAxis;i<kNumAxes;i++){
     fRelPos[i].Scale(factor);
     fAbsPos[i].Scale(factor);
@@ -809,20 +821,21 @@ void  QwBPMStripline<T>::ConstructHistograms(TDirectory *folder, TString &prefix
     fEllipticity.ConstructHistograms(folder, prefix);
     TString thisprefix=prefix;
 
-    if(prefix.Contains("asym_"))
+    if(prefix.Contains("asym_")) {
       thisprefix.ReplaceAll("asym_","diff_");
+}
     this->SetRootSaveStatus(prefix);
     Short_t i = 0;
     if(bFullSave) {
-      for(i=0;i<4;i++) fWire[i].ConstructHistograms(folder, thisprefix);
+      for(i=0;i<4;i++) { fWire[i].ConstructHistograms(folder, thisprefix);
+}
     }
     for(i=kXAxis;i<kNumAxes;i++) {
       fRelPos[i].ConstructHistograms(folder, thisprefix);
       fAbsPos[i].ConstructHistograms(folder, thisprefix);
     }
   }
-  return;
-}
+  }
 
 template<typename T>
 void  QwBPMStripline<T>::FillHistograms()
@@ -835,7 +848,8 @@ void  QwBPMStripline<T>::FillHistograms()
     fEllipticity.FillHistograms();
     Short_t i = 0;
     if(bFullSave) {
-      for(i=0;i<4;i++) fWire[i].FillHistograms();
+      for(i=0;i<4;i++) { fWire[i].FillHistograms();
+}
     }
     for(i=kXAxis;i<kNumAxes;i++){
       fRelPos[i].FillHistograms();
@@ -843,8 +857,7 @@ void  QwBPMStripline<T>::FillHistograms()
     }
     //No data for z position
   }
-  return;
-}
+  }
 
 template<typename T>
 void  QwBPMStripline<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
@@ -854,8 +867,9 @@ void  QwBPMStripline<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, 
   }
   else {
     TString thisprefix=prefix;
-    if(prefix.Contains("asym_"))
+    if(prefix.Contains("asym_")) {
       thisprefix.ReplaceAll("asym_","diff_");
+}
 
     this->SetRootSaveStatus(prefix);
 
@@ -863,7 +877,8 @@ void  QwBPMStripline<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, 
     fEllipticity.ConstructBranchAndVector(tree,prefix,values);
     Short_t i = 0;
     if(bFullSave) {
-      for(i=0;i<4;i++) fWire[i].ConstructBranchAndVector(tree,thisprefix,values);
+      for(i=0;i<4;i++) { fWire[i].ConstructBranchAndVector(tree,thisprefix,values);
+}
     }
     for(i=kXAxis;i<kNumAxes;i++) {
       //  2018dec20, pking:  Do not output the relative positions to Trees
@@ -872,8 +887,7 @@ void  QwBPMStripline<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, 
     }
 
   }
-  return;
-}
+  }
 
 template<typename T>
 void  QwBPMStripline<T>::ConstructBranch(TTree *tree, TString &prefix)
@@ -883,8 +897,9 @@ void  QwBPMStripline<T>::ConstructBranch(TTree *tree, TString &prefix)
   }
   else {
     TString thisprefix=prefix;
-    if(prefix.Contains("asym_"))
+    if(prefix.Contains("asym_")) {
       thisprefix.ReplaceAll("asym_","diff_");
+}
 
     this->SetRootSaveStatus(prefix);
 
@@ -892,7 +907,8 @@ void  QwBPMStripline<T>::ConstructBranch(TTree *tree, TString &prefix)
     fEllipticity.ConstructBranch(tree,prefix);
     Short_t i = 0;
     if(bFullSave) {
-      for(i=0;i<4;i++) fWire[i].ConstructBranch(tree,thisprefix);
+      for(i=0;i<4;i++) { fWire[i].ConstructBranch(tree,thisprefix);
+}
     }
     for(i=kXAxis;i<kNumAxes;i++) {
       //  2018dec20, pking:  Do not output the relative positions to Trees
@@ -901,8 +917,7 @@ void  QwBPMStripline<T>::ConstructBranch(TTree *tree, TString &prefix)
     }
 
   }
-  return;
-}
+  }
 
 template<typename T>
 void  QwBPMStripline<T>::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist)
@@ -926,8 +941,9 @@ void  QwBPMStripline<T>::ConstructBranch(TTree *tree, TString &prefix, QwParamet
     {
       if (modulelist.HasValue(devicename)){
 	TString thisprefix=prefix;
-	if(prefix.Contains("asym_"))
+	if(prefix.Contains("asym_")) {
 	  thisprefix.ReplaceAll("asym_","diff_");
+}
 
 	this->SetRootSaveStatus(prefix);
 
@@ -935,7 +951,8 @@ void  QwBPMStripline<T>::ConstructBranch(TTree *tree, TString &prefix, QwParamet
 	fEllipticity.ConstructBranch(tree,prefix);
 	Short_t i = 0;
 	if(bFullSave) {
-	  for(i=0;i<4;i++) fWire[i].ConstructBranch(tree,thisprefix);
+	  for(i=0;i<4;i++) { fWire[i].ConstructBranch(tree,thisprefix);
+}
 	}
 	for(i=kXAxis;i<kNumAxes;i++) {
 	  //  2018dec20, pking:  Do not output the relative positions to Trees
@@ -948,8 +965,7 @@ void  QwBPMStripline<T>::ConstructBranch(TTree *tree, TString &prefix, QwParamet
       // this functions doesn't do anything yet
     }
 
-  return;
-}
+  }
 
 
 template<typename T>
@@ -963,7 +979,8 @@ void  QwBPMStripline<T>::FillTreeVector(std::vector<Double_t> &values) const
     fEllipticity.FillTreeVector(values);
     Short_t i = 0;
     if(bFullSave) {
-      for(i=0;i<4;i++) fWire[i].FillTreeVector(values);
+      for(i=0;i<4;i++) { fWire[i].FillTreeVector(values);
+}
     }
     for(i=kXAxis;i<kNumAxes;i++){
       //  2018dec20, pking:  Do not output the relative positions to Trees
@@ -971,8 +988,7 @@ void  QwBPMStripline<T>::FillTreeVector(std::vector<Double_t> &values) const
       fAbsPos[i].FillTreeVector(values);
     }
   }
-  return;
-}
+  }
 
 #ifdef HAS_RNTUPLE_SUPPORT
 template<typename T>
@@ -1029,7 +1045,8 @@ void QwBPMStripline<T>::SetEventCutMode(Int_t bcuts)
 {
   Short_t i = 0;
   //  bEVENTCUTMODE=bcuts;
-  for (i=0;i<4;i++) fWire[i].SetEventCutMode(bcuts);
+  for (i=0;i<4;i++) { fWire[i].SetEventCutMode(bcuts);
+}
   for (i=kXAxis;i<kNumAxes;i++) {
     fRelPos[i].SetEventCutMode(bcuts);
     fAbsPos[i].SetEventCutMode(bcuts);
@@ -1154,9 +1171,11 @@ void QwBPMStripline<T>::RandomizeEventData(int helicity, double time)
   
 /* First randomize AbsX and AbsY, then go backwards through the steps of QwBPMStripline<T>::ProcessEvent() to get the randomized wire values.*/
 
-  size_t i;
-  static T numer("numerator","derived"), denom("denominator","derived");
-  static T tmp1("tmp1","derived"), tmp2("tmp2","derived");
+  size_t i = 0;
+  static T numer("numerator","derived");
+  static T denom("denominator","derived");
+  static T tmp1("tmp1","derived");
+  static T tmp2("tmp2","derived");
   static T rawpos[2] = {T("rawpos_0","derived"),T("rawpos_1","derived")};
 
   //  std::cout << "In QwBPMStripline<T>::RandomizeEventData" << std::endl;
@@ -1180,7 +1199,8 @@ void QwBPMStripline<T>::LoadMockDataParameters(QwParameterFile &paramfile) {
   //Bool_t ldebug=kFALSE;
   //Double_t asym=0.0, meanX=0.0, sigmaX=0.0, meanY=0.0, sigmaY=0.0;
 
-  Double_t xres=0.0, yres=0.0;
+  Double_t xres=0.0;
+  Double_t yres=0.0;
 
   if (paramfile.GetLine().find("resolution")!=std::string::npos){
     paramfile.GetNextToken();
@@ -1236,9 +1256,11 @@ void QwBPMStripline<T>::FillRawEventData()
  //std::cout <<  "*******In QwBPMStripline::FillRawEventData for channel:\t" << this->GetElementName() << std::endl;
  // XP = XM*(A+tmpX)/(A-tmpX);
 
-  size_t i;
-  static T numer("numerator","derived"), denom("denominator","derived");
-  static T tmp1("tmp1","derived"), tmp2("tmp2","derived");
+  size_t i = 0;
+  static T numer("numerator","derived");
+  static T denom("denominator","derived");
+  static T tmp1("tmp1","derived");
+  static T tmp2("tmp2","derived");
   static T rawpos[2] = {T("rawpos_0","derived"),T("rawpos_1","derived")};
   int helicity = 0; double time = 0.0;
 
@@ -1306,8 +1328,7 @@ void QwBPMStripline<T>::FillRawEventData()
    fWire[i].PrintInfo();
    }
 */
-  return;
-}
+  }
 
 
 template<typename T>
@@ -1317,22 +1338,22 @@ void QwBPMStripline<T>::SetEventData(Double_t* relpos, UInt_t sequencenumber)
       //fRelPos[i].SetHardwareSum(relpos[i], sequencenumber);
     }
 
-  return;
-}
+  }
 
 
 template<typename T>
 void QwBPMStripline<T>::EncodeEventData(std::vector<UInt_t> &buffer)
 {
-  for (Short_t i=0; i<4; i++) fWire[i].EncodeEventData(buffer);
+  for (Short_t i=0; i<4; i++) { fWire[i].EncodeEventData(buffer);
+}
 }
 
 
 template<typename T>
 void QwBPMStripline<T>::SetDefaultSampleSize(Int_t sample_size)
 {
-  for(Short_t i=0;i<4;i++) fWire[i].SetDefaultSampleSize((size_t)sample_size);
-  return;
+  for(Short_t i=0;i<4;i++) { fWire[i].SetDefaultSampleSize((size_t)sample_size);
+}
 }
 
 
@@ -1340,14 +1361,12 @@ template<typename T>
 void QwBPMStripline<T>::SetSubElementPedestal(Int_t j, Double_t value)
 {
   fWire[j].SetPedestal(value);
-  return;
 }
 
 template<typename T>
 void QwBPMStripline<T>::SetSubElementCalibrationFactor(Int_t j, Double_t value)
 {
   fWire[j].SetCalibrationFactor(value);
-  return;
 }
 
 

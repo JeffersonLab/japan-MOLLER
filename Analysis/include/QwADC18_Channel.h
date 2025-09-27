@@ -117,8 +117,8 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   void  EncodeEventData(std::vector<UInt_t> &buffer);
 
   /// Decode the event data from a CODA buffer
-  Bool_t IsHeaderWord(UInt_t word) const;
-  Int_t ProcessDataWord(UInt_t word);
+  static Bool_t IsHeaderWord(UInt_t rawd) ;
+  Int_t ProcessDataWord(UInt_t rawd);
   Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t index = 0);
 
   /// Process the event data according to pedestal and calibration factor
@@ -137,21 +137,21 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   QwADC18_Channel& operator-= (const QwADC18_Channel &value);
   QwADC18_Channel& operator*= (const QwADC18_Channel &value);
 
-  VQwHardwareChannel& operator+=(const VQwHardwareChannel& input) override;
-  VQwHardwareChannel& operator-=(const VQwHardwareChannel& input) override;
-  VQwHardwareChannel& operator*=(const VQwHardwareChannel& input) override;
-  VQwHardwareChannel& operator/=(const VQwHardwareChannel& input) override;
+  VQwHardwareChannel& operator+=(const VQwHardwareChannel& source) override;
+  VQwHardwareChannel& operator-=(const VQwHardwareChannel& source) override;
+  VQwHardwareChannel& operator*=(const VQwHardwareChannel& source) override;
+  VQwHardwareChannel& operator/=(const VQwHardwareChannel& source) override;
 
-  const QwADC18_Channel operator+ (const QwADC18_Channel &value) const;
-  const QwADC18_Channel operator- (const QwADC18_Channel &value) const;
-  const QwADC18_Channel operator* (const QwADC18_Channel &value) const;
+  QwADC18_Channel operator+ (const QwADC18_Channel &value) const;
+  QwADC18_Channel operator- (const QwADC18_Channel &value) const;
+  QwADC18_Channel operator* (const QwADC18_Channel &value) const;
   void Sum(const QwADC18_Channel &value1, const QwADC18_Channel &value2);
   void Difference(const QwADC18_Channel &value1, const QwADC18_Channel &value2);
   void Ratio(const QwADC18_Channel &numer, const QwADC18_Channel &denom);
   void Product(const QwADC18_Channel &value1, const QwADC18_Channel &value2);
   void DivideBy(const QwADC18_Channel& denom);
   void AddChannelOffset(Double_t Offset);
-  void Scale(Double_t Offset);
+  void Scale(Double_t scale);
 
   void AccumulateRunningSum(const QwADC18_Channel& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
   void AccumulateRunningSum(const VQwHardwareChannel *value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF){
@@ -242,7 +242,7 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
 #endif
 
  protected:
-  QwADC18_Channel& operator/= (const QwADC18_Channel &value);
+  QwADC18_Channel& operator/= (const QwADC18_Channel &denom);
 
  private:
   UInt_t   fDiff_Raw;

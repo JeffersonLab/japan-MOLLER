@@ -124,7 +124,7 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
     Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
 
     void  ClearEventData();
-    Bool_t IsGoodEvent();
+    static Bool_t IsGoodEvent();
 
     void  ProcessEvent();
     void  ExchangeProcessedData();
@@ -164,7 +164,7 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
 
     const QwIntegrationPMT* GetChannel(const TString name) const;
 
-    Bool_t Compare(VQwSubsystem* source);
+    Bool_t Compare(VQwSubsystem* value);
 
 
     VQwSubsystem&  operator=  ( VQwSubsystem *value);
@@ -212,12 +212,12 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
 
     Bool_t fDEBUG;
 
-    EQwPMTInstrumentType GetDetectorTypeID(TString name);
+    static EQwPMTInstrumentType GetDetectorTypeID(TString name);
 
     // when the type and the name is passed the detector index from appropriate vector
     // will be returned. For example if TypeID is IntegrationPMT  then the index of
     // the detector from fIntegrationPMT vector for given name will be returnd.
-    Int_t GetDetectorIndex(EQwPMTInstrumentType TypeID, TString name);
+    Int_t GetDetectorIndex(EQwPMTInstrumentType type_id, TString name);
 
     std::vector <QwIntegrationPMT> fIntegrationPMT;
     std::vector <QwCombinedPMT> fCombinedPMT;

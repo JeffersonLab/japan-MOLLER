@@ -56,7 +56,7 @@ class QwHistogramHelper{
   Bool_t MatchDeviceParamsFromList(const std::string& devicename);
   Bool_t MatchVQWKElementFromList(const std::string& subsystemname,
       const std::string& moduletype,
-      const std::string& devicename);
+      const std::string& elementname);
   
  protected:
 
@@ -123,20 +123,20 @@ class QwHistogramHelper{
   };
 
  protected:
-  TH1F* Construct1DHist(const HistParams &params);
-  TH2F* Construct2DHist(const HistParams &params);
+  TH1F* Construct1DHist(const HistParams &params) const;
+  TH2F* Construct2DHist(const HistParams &params) const;
 
-  TProfile* Construct1DProf(const HistParams &params);
-  TProfile2D* Construct2DProf(const HistParams &params);
+  TProfile* Construct1DProf(const HistParams &params) const;
+  TProfile2D* Construct2DProf(const HistParams &params) const;
   
-  const HistParams GetHistParamsFromLine(QwParameterFile &mapstr);
+  static HistParams GetHistParamsFromLine(QwParameterFile &mapstr);
 
   // Look up the histogram parameters from a file according to histname.
-  const HistParams GetHistParamsFromFile(const std::string& filename,
+  HistParams GetHistParamsFromFile(const std::string& filename,
                                          const TString& histname);
-  const HistParams GetHistParamsFromList(const TString& histname);
+  HistParams GetHistParamsFromList(const TString& histname);
 
-  Bool_t DoesMatch(const TString& s, const TRegexp& wildcard);
+  static Bool_t DoesMatch(const TString& s, const TRegexp& wildcard);
 
  protected:
   static const Double_t fInvalidNumber;
