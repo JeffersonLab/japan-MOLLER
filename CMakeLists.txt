@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
 
 # Name of this project
 project(QwAnalysis VERSION 2.0.0 LANGUAGES CXX)
@@ -203,6 +203,7 @@ target_link_libraries(${PROJECT_NAME}
     eviowrapper
   PUBLIC
     ROOT::Core ROOT::Tree ROOT::Hist ROOT::Rint
+    $<TARGET_NAME_IF_EXISTS:ROOT::ROOTNTuple>
     ${MYSQLPP_LIBRARIES}
     ${Boost_LIBRARIES}
   )
