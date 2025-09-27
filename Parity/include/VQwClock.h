@@ -44,22 +44,22 @@ public:
   VQwClock(const VQwClock& source)
   : VQwDataElement(source)
   { }
-  virtual ~VQwClock() {};
+  ~VQwClock() override {};
 
   // VQwDataElement virtual functions
-  virtual Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0) = 0;
-  virtual void  ConstructHistograms(TDirectory *folder, TString &prefix) = 0;
-  virtual void  FillHistograms() = 0;
+  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0) override = 0;
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override = 0;
+  void  FillHistograms() override = 0;
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   virtual void SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel) = 0;
   virtual void Ratio( const VQwClock &/*numer*/, const VQwClock &/*denom*/)
     { std::cerr << "Ratio not defined! (VQwClock)" << std::endl; }
-  virtual void ClearEventData() = 0;
+  void ClearEventData() override = 0;
 
   // Virtual functions delegated to sub classes
   virtual void  InitializeChannel(TString subsystem, TString name, TString datatosave, TString type = "") = 0;
 
-  virtual void LoadChannelParameters(QwParameterFile &paramfile) = 0;
+  void LoadChannelParameters(QwParameterFile &paramfile) override = 0;
 
   virtual void SetEventCutMode(Int_t bcuts) = 0;
   virtual void SetPedestal(Double_t ped) = 0;
@@ -95,7 +95,7 @@ public:
 
   // These are related to those hardware channels that need to normalize
   // to an external clock
-  virtual Double_t GetNormClockValue() = 0;
+  Double_t GetNormClockValue() override = 0;
   virtual Double_t GetStandardClockValue() = 0;
 
   virtual const VQwHardwareChannel* GetTime() const = 0;

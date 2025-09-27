@@ -50,7 +50,7 @@ class VQwSubsystemParity: virtual public VQwSubsystem {
     : VQwSubsystem(source)
     { }
     /// Default destructor
-    virtual ~VQwSubsystemParity() { };
+    ~VQwSubsystemParity() override { };
 
     /// \brief Fill the database with MPS-based variables
     ///        Note that most subsystems don't need to do this.
@@ -60,7 +60,7 @@ class VQwSubsystemParity: virtual public VQwSubsystem {
     virtual void FillErrDB(QwParityDB * /*db*/, TString /*type*/) { };
 
     // VQwSubsystem routine is overridden. Call it at the beginning by VQwSubsystem::operator=(value)
-    virtual VQwSubsystem& operator=  (VQwSubsystem *value) = 0;
+    VQwSubsystem& operator=  (VQwSubsystem *value) override = 0;
     virtual VQwSubsystem& operator+= (VQwSubsystem *value) = 0;
     virtual VQwSubsystem& operator-= (VQwSubsystem *value) = 0;
     virtual void Sum(VQwSubsystem *value1, VQwSubsystem *value2)
@@ -89,7 +89,7 @@ class VQwSubsystemParity: virtual public VQwSubsystem {
     virtual void CalculateRunningAverage() = 0;
 
     /// \brief Load the event cuts file
-    virtual Int_t LoadEventCuts(TString filename){
+    Int_t LoadEventCuts(TString filename) override{
       Int_t eventcut_flag = 1;
 
       // Open the file

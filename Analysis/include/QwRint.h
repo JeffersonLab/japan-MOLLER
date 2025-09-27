@@ -34,7 +34,7 @@ class QwRint : public TRint {
 		void* options = 0, int numOptions = 0, bool noLogo = kFALSE);
 
     /// \brief Destructor
-    virtual ~QwRint();
+    ~QwRint() override;
 
 }; // class QwRint
 
