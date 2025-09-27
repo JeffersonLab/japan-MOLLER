@@ -27,10 +27,10 @@ class QwAlarmHandler:public VQwDataHandler, public MQwDataHandlerCloneable<QwAla
     /// \brief Copy constructor
     QwAlarmHandler(const QwAlarmHandler &source);
     /// Virtual destructor
-    virtual ~QwAlarmHandler() {};
+    ~QwAlarmHandler() override {};
 
     /// \brief Load the channels and sensitivities
-    Int_t LoadChannelMap(const std::string& mapfile);
+    Int_t LoadChannelMap(const std::string& mapfile) override;
 
     /// \brief Connect to Channels (event only)
     //Int_t ConnectChannels(QwSubsystemArrayParity& event);
@@ -38,13 +38,13 @@ class QwAlarmHandler:public VQwDataHandler, public MQwDataHandlerCloneable<QwAla
     Int_t ConnectChannels(
         QwSubsystemArrayParity& yield,
         QwSubsystemArrayParity& asym,
-			  QwSubsystemArrayParity& diff);
+			  QwSubsystemArrayParity& diff) override;
     
 
-    void ProcessData();
+    void ProcessData() override;
     void CheckAlarms();
     void UpdateAlarmFile();
-    void ParseConfigFile(QwParameterFile&);
+    void ParseConfigFile(QwParameterFile&) override;
 
 
   

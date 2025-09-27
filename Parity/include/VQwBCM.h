@@ -51,32 +51,32 @@ protected:
   VQwBCM(VQwDataElement& beamcurrent, TString /*name*/): fBeamCurrent_ref(beamcurrent) { };
 
 public:
-  virtual ~VQwBCM() { };
+  ~VQwBCM() override { };
 
   // VQwDataElement virtual functions
-  virtual Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0) = 0;
-  virtual void  ConstructHistograms(TDirectory *folder, TString &prefix) = 0;
-  virtual void  FillHistograms() = 0;
+  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0) override = 0;
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override = 0;
+  void  FillHistograms() override = 0;
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   virtual void SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel) = 0;
   virtual void Ratio( const VQwBCM &/*numer*/, const VQwBCM &/*denom*/)
     { std::cerr << "Ratio not defined! (VQwBCM)" << std::endl; }
-  virtual void ClearEventData() = 0;
+  void ClearEventData() override = 0;
 
   // Virtual functions delegated to sub classes
   virtual void  InitializeChannel(TString name, TString datatosave) = 0;
   // new routine added to update necessary information for tree trimming
   virtual void  InitializeChannel(TString subsystem, TString name, TString datatosave) = 0;
 
-  virtual void LoadChannelParameters(QwParameterFile &paramfile) = 0;
-  virtual Bool_t NeedsExternalClock() = 0;
-  virtual void SetExternalClockPtr( const VQwHardwareChannel* clock) = 0;
-  virtual void SetExternalClockName( const std::string name) = 0;
-  virtual Double_t GetNormClockValue() = 0;
+  void LoadChannelParameters(QwParameterFile &paramfile) override = 0;
+  Bool_t NeedsExternalClock() override = 0;
+  void SetExternalClockPtr( const VQwHardwareChannel* clock) override = 0;
+  void SetExternalClockName( const std::string name) override = 0;
+  Double_t GetNormClockValue() override = 0;
 
   virtual void SetDefaultSampleSize(Int_t sample_size) = 0;
   virtual void SetEventCutMode(Int_t bcuts) = 0;
-  virtual UInt_t UpdateErrorFlag(){return this->GetEventcutErrorFlag();};
+  UInt_t UpdateErrorFlag() override{return this->GetEventcutErrorFlag();};
   virtual void UpdateErrorFlag(const VQwBCM *ev_error) = 0;
   virtual void SetPedestal(Double_t ped) = 0;
   virtual void SetCalibrationFactor(Double_t calib) = 0;

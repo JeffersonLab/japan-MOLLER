@@ -109,7 +109,7 @@ class QwLog : public std::ostream {
 
     /*! \brief The destructor
      */
-    virtual ~QwLog();
+    ~QwLog() override;
 
     /*! \brief Determine whether the function name matches a specified list of regular expressions
      */

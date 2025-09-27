@@ -113,12 +113,12 @@ class QwFactory: public VQwFactory<base_t> {
     }
 
     /// Concrete type creation
-    base_t* Create(const std::string& name) const {
+    base_t* Create(const std::string& name) const override {
       return new type_t(name);
     }
 
     /// Dynamic cast of type
-    type_t* Cast(base_t* base) const {
+    type_t* Cast(base_t* base) const override {
       return dynamic_cast<type_t*>(base);
     }
 
@@ -194,15 +194,15 @@ class MQwCloneable: virtual public VQwCloneable<base_t> {
   public:
 
     /// Virtual destructor
-    virtual ~MQwCloneable() { };
+    ~MQwCloneable() override { };
 
     /// Concrete clone method
-    virtual base_t* Clone() const {
+    base_t* Clone() const override {
       return new type_t(static_cast<const type_t&>(*this));
     }
 
     /// Factory getter
-    const VQwFactory<base_t>* Factory() const { return fFactory; }
+    const VQwFactory<base_t>* Factory() const override { return fFactory; }
 
     /// Object creation
     static base_t* Create(const std::string& name) {

@@ -24,21 +24,21 @@ class QwFakeHelicity: public QwHelicity {
       // using the constructor of the base class
     };
 
-    virtual ~QwFakeHelicity() { };
+    ~QwFakeHelicity() override { };
 
-    void    ClearEventData();
-    Bool_t  IsGoodHelicity();
-    void    ProcessEvent();
+    void    ClearEventData() override;
+    Bool_t  IsGoodHelicity() override;
+    void    ProcessEvent() override;
 
-    Bool_t CheckForBurpFail(const VQwSubsystem *subsys){
+    Bool_t CheckForBurpFail(const VQwSubsystem *subsys) override{
       return kFALSE;
     };
 
  protected:
     Int_t fMinPatternPhase;
 
-    Bool_t CollectRandBits();
-    UInt_t GetRandbit(UInt_t& ranseed);
+    Bool_t CollectRandBits() override;
+    UInt_t GetRandbit(UInt_t& ranseed) override;
 
 };
 

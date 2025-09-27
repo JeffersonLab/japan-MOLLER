@@ -24,15 +24,15 @@ class LRBCorrector : public VQwDataHandler, public MQwDataHandlerCloneable<LRBCo
     /// \brief Constructor with name
     LRBCorrector(const TString& name);
 
-    void ParseConfigFile(QwParameterFile& file);
+    void ParseConfigFile(QwParameterFile& file) override;
 
-    Int_t LoadChannelMap(const std::string& mapfile);
+    Int_t LoadChannelMap(const std::string& mapfile) override;
 
-    Int_t ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff);
+    Int_t ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff) override;
     
-    void ProcessData();
+    void ProcessData() override;
 
-    void UpdateBurstCounter(Short_t burstcounter){
+    void UpdateBurstCounter(Short_t burstcounter) override{
       if (burstcounter<fLastCycle){
 	fBurstCounter=burstcounter;
       } else if (fLastCycle==1){

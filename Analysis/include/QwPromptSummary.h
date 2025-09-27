@@ -31,7 +31,7 @@ class PromptSummaryElement :  public TObject
  public:
   PromptSummaryElement();
   PromptSummaryElement(TString name);
-  virtual ~PromptSummaryElement();
+  ~PromptSummaryElement() override;
   //  friend std::ostream& operator<<(std::ostream& os, const PromptSummaryElement &ps_element);
 
   void FillData(Double_t yield, Double_t yield_err, Double_t yield_width, TString yield_unit, 
