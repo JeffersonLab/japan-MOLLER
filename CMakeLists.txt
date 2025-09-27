@@ -90,7 +90,7 @@ endif(MYSQLPP_FOUND)
 #----------------------------------------------------------------------------
 # Boost
 #
-find_package(Boost COMPONENTS program_options filesystem system REQUIRED)
+find_package(Boost COMPONENTS program_options system REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIR})
 
