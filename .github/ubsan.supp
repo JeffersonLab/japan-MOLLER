@@ -72,4 +72,4 @@ float-divide-by-zero:*Asymmetry*
 float-divide-by-zero:*Parity*
 
 # Suppress alignment issues in Code3EventDecoder
-alignment:Analysis/src/Coda3EventDecoder.cc
+alignment:libQwAnalysis.so
