@@ -10,7 +10,6 @@
 
 // System headers
 #include <vector>
-#include <boost/shared_ptr.hpp>
 
 // ROOT headers
 #include <TTree.h>
@@ -103,6 +102,6 @@ public:
 
 };
 
-typedef boost::shared_ptr<VQwClock> VQwClock_ptr;
+typedef std::shared_ptr<VQwClock> VQwClock_ptr;
 
 #endif // __VQWCLOCK__

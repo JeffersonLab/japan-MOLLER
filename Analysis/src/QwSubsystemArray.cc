@@ -223,7 +223,7 @@ void QwSubsystemArray::push_back(VQwSubsystem* subsys)
             << " is not supported by this subsystem array" << QwLog::endl;
 
   } else {
-    boost::shared_ptr<VQwSubsystem> subsys_tmp(subsys);
+    std::shared_ptr<VQwSubsystem> subsys_tmp(subsys);
     SubsysPtrs::push_back(subsys_tmp);
 
     // Set the parent of the subsystem to this array
@@ -379,7 +379,7 @@ void  QwSubsystemArray::ClearEventData()
     SetCodaEventNumber(0);
     SetCodaEventType(0);
     std::for_each(begin(), end(),
-		  boost::mem_fn(&VQwSubsystem::ClearEventData));
+		  std::mem_fn(&VQwSubsystem::ClearEventData));
   }
 }
 
@@ -839,7 +839,7 @@ TList* QwSubsystemArray::GetParamFileNameList(TString name) const
  * there is already a subsystem with that name in the array.
  * @param subsys Subsystem to add to the array
  */
-void QwSubsystemArray::push_back(boost::shared_ptr<VQwSubsystem> subsys)
+void QwSubsystemArray::push_back(std::shared_ptr<VQwSubsystem> subsys)
 {
   
  if (subsys.get() == NULL) {
@@ -859,7 +859,7 @@ void QwSubsystemArray::push_back(boost::shared_ptr<VQwSubsystem> subsys)
            << " is not supported by this subsystem array" << QwLog::endl;
 
  } else {
-   boost::shared_ptr<VQwSubsystem> subsys_tmp(subsys);
+   std::shared_ptr<VQwSubsystem> subsys_tmp(subsys);
    SubsysPtrs::push_back(subsys_tmp);
 
    // Set the parent of the subsystem to this array

@@ -5,9 +5,6 @@
 // System headers
 #include <vector>
 
-// Boost headers
-#include <boost/shared_ptr.hpp>
-
 // ROOT headers
 #ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTupleModel.hxx"

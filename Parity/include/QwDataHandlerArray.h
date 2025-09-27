@@ -15,16 +15,12 @@
 #include "TDirectory.h"
 #include <TTree.h>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/mem_fn.hpp>
-
 // ROOT headers
 #ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTupleModel.hxx"
 #endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
-
 #include "QwDataHandlerArray.h"
 #include "VQwDataHandler.h"
 #include "QwOptions.h"
@@ -48,11 +44,11 @@ class QwPromptSummary;
  *
  */
 class QwDataHandlerArray:
-    public std::vector<boost::shared_ptr<VQwDataHandler> >,
+    public std::vector<std::shared_ptr<VQwDataHandler> >,
     public MQwPublishable<QwDataHandlerArray,VQwDataHandler>
 {
  private:
-  typedef std::vector<boost::shared_ptr<VQwDataHandler> >  HandlerPtrs;
+  typedef std::vector<std::shared_ptr<VQwDataHandler> >  HandlerPtrs;
  public:
   using HandlerPtrs::const_iterator;
   using HandlerPtrs::iterator;
@@ -86,7 +82,7 @@ class QwDataHandlerArray:
 
     /// \brief Add the datahandler to this array
     void push_back(VQwDataHandler* handler);
-    void push_back(boost::shared_ptr<VQwDataHandler> handler);
+    void push_back(std::shared_ptr<VQwDataHandler> handler);
 
     /// \brief Get the handler with the specified name
     VQwDataHandler* GetDataHandlerByName(const TString& name);
