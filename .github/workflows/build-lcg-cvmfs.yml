@@ -269,7 +269,7 @@ jobs:
       - name: Install clang-tidy
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-tidy clang-tools-extra
+          sudo apt-get install -y clang-tidy
 
       - name: Run clang-tidy on changed files
         if: ${{ github.event_name == 'pull_request' }}
