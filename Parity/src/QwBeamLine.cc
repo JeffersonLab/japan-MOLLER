@@ -1974,7 +1974,7 @@ VQwBCM* QwBeamLine::GetBCM(const TString name)
   //QwWarning << "QwBeamLine::GetBCM" << QwLog::endl;
   if (! fBCM.empty()) {
     for (std::vector<VQwBCM_ptr >::iterator bcm = fBCM.begin(); bcm != fBCM.end(); ++bcm) {
-      if (*bcm->GetElementName() == name) {
+      if (bcm->get()->GetElementName() == name) {
 	return (*bcm).get();
       }
     }
@@ -1992,7 +1992,7 @@ VQwClock* QwBeamLine::GetClock(const TString name)
   //QwWarning << "QwBeamLine::GetClock" << QwLog::endl;
   if (! fClock.empty()) {
     for (std::vector<VQwClock_ptr >::iterator clock = fClock.begin(); clock != fClock.end(); ++clock) {
-      if (*clock->GetElementName() == name) {
+      if (clock->get()->GetElementName() == name) {
 	return (*clock).get();
       }
     }
@@ -2010,7 +2010,7 @@ VQwBCM* QwBeamLine::GetCombinedBCM(const TString name)
   if (! fBCMCombo.empty()) {
     
     for (std::vector<VQwBCM_ptr>::iterator cbcm = fBCMCombo.begin(); cbcm != fBCMCombo.end(); ++cbcm) {
-      if (*cbcm->GetElementName() == name) {
+      if (cbcm->get()->GetElementName() == name) {
 	return (*cbcm).get();
       }
     }
@@ -2027,7 +2027,7 @@ VQwBPM* QwBeamLine::GetCombinedBPM(const TString name)
   if (! fBPMCombo.empty()) {
     
     for (std::vector<VQwBPM_ptr>::iterator cbpm = fBPMCombo.begin(); cbpm != fBPMCombo.end(); ++cbpm) {
-      if (*cbpm->GetElementName() == name) {
+      if (cbpm->get()->GetElementName() == name) {
 	return (*cbpm).get();
       }
     }
