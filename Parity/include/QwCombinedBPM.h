@@ -155,8 +155,8 @@ class QwCombinedBPM : public VQwBPM {
 
 #ifdef HAS_RNTUPLE_SUPPORT
   // RNTuple methods
-  void    ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
-  void    FillNTupleVector(std::vector<Double_t>& values) const;
+  void    ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
+  void    FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif // HAS_RNTUPLE_SUPPORT
 
 //------------------------------------------------------------------------------------------------

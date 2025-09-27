@@ -223,8 +223,8 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
 
 #ifdef HAS_RNTUPLE_SUPPORT
   // RNTuple support methods
-  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, std::vector<Double_t> &values, std::vector<std::shared_ptr<Double_t>> &fieldPtrs);
-  void  FillNTupleVector(std::vector<Double_t> &values) const;
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, std::vector<Double_t> &values, std::vector<std::shared_ptr<Double_t>> &fieldPtrs) override;
+  void  FillNTupleVector(std::vector<Double_t> &values) const override;
 #endif // HAS_RNTUPLE_SUPPORT
 
   Int_t GetRawValue(size_t element) const override {
