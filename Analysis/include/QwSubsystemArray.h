@@ -308,7 +308,7 @@ public:
   double GetWindowPeriod(){return fWindowPeriod;};
 
 protected:
-  double fWindowPeriod{}{};
+  double fWindowPeriod{};
   
 
 }; // class QwSubsystemArray
