@@ -77,7 +77,7 @@ if(NOT Sqlpp11_FOUND)
     # to hide compiler warnings
     include_directories(SYSTEM ${date_SOURCE_DIR}/include)
   else()
-    message(WARNING "sqlpp11 not available in thirdparty directory. Use 'git submodules init --recursive' to setup.")
+    message(WARNING "sqlpp11 not available in thirdparty directory. Use 'git submodule init --recursive' to setup.")
   endif()
 endif()
 if(TARGET sqlpp11::sqlpp11)
