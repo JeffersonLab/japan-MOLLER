@@ -255,6 +255,10 @@ jobs:
         with:
           release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           run: |
+            echo "::group::Mock data generation"
+            build/qwmockdatagenerator -r 4 -e 1:20000 --config qwparity_simple.conf --detectors mock_newdets.map --data .
+            echo "::endgroup::"
+
             echo "::group::Run callgrind on mock data analysis"
             valgrind --tool=callgrind --instr-atstart=no \
               build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary --callgrind-instr-start-event-loop
