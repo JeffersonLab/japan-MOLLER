@@ -109,12 +109,13 @@ jobs:
             gprof build/qwparity | tee qwparity.txt
             echo "::endgroup::"
 
-      - name: Upload build 
+      - name: Compress build directory
+        run: tar -caf build.tar.zst build/
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
-          path: |
-            build/
+          path: build.tar.zst
           retention-days: 7
           if-no-files-found: error
 
@@ -238,10 +239,14 @@ jobs:
             opt: "opt"
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
         with:
           name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
-          path: build/
+          path: .
+      - name: Uncompress build artifact
+        run: tar -xaf build.tar.zst
 
       - uses: cvmfs-contrib/github-action-cvmfs@v3
         with:
