@@ -109,6 +109,15 @@ jobs:
             gprof build/qwparity | tee qwparity.txt
             echo "::endgroup::"
 
+      - name: Upload build 
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: |
+            build/
+          retention-days: 7
+          if-no-files-found: error
+
       - name: Upload profiling analysis
         uses: actions/upload-artifact@v4
         with:
@@ -212,3 +221,51 @@ jobs:
           else
             echo "✅ All artifacts match expected results (ignoring timestamps)."
           fi
+          
+
+  valgrind:
+    runs-on: ubuntu-latest
+    needs: linux
+    if: github.event_name == 'pull_request'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - release: "LCG_106"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc13"
+            opt: "opt"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: build/
+
+      - uses: cvmfs-contrib/github-action-cvmfs@v3
+        with:
+          cvmfs_repositories: 'sft.cern.ch,geant4.cern.ch'
+      - uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::Run callgrind on mock data analysis"
+            valgrind --tool=callgrind --instr-atstart=no \
+              build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary --callgrind-instr-start-event-loop
+            echo "::endgroup::"
+
+            echo "::group::Annotate callgrind info on source code"
+            callgrind_annotate \
+              -I=Parity/src/ -I=Parity/include -I=Analysis/src -I=Analysis/include \
+              callgrind.out.* Parity/main/QwParity.cc | tee -a callgrind.txt
+            echo "::endgroup::"
+
+      - name: Upload callgrind analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: callgrind-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: |
+            callgrind.txt
+          retention-days: 7
+          if-no-files-found: error
