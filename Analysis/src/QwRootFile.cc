@@ -91,6 +91,7 @@ QwRootFile::QwRootFile(const TString& run_label)
       );
     }
 
+    fRootFile->SetCompressionAlgorithm(fCompressionAlgorithm);
     fRootFile->SetCompressionLevel(fCompressionLevel);
   }
 }
@@ -242,8 +243,11 @@ void QwRootFile::DefineOptions(QwOptions &options)
     ("circular-buffer", po::value<int>()->default_value(0),
      "TTree circular buffer");
   options.AddOptions("ROOT performance options")
+    ("compression-algorithm", po::value<int>()->default_value(1),
+     "TFile compression algorithm (default = 1 ZLIB)");
+  options.AddOptions("ROOT performance options")
     ("compression-level", po::value<int>()->default_value(1),
-     "TFile compression level");
+     "TFile compression level (default = 1, no compression = 0)");
 }
 
 
@@ -303,6 +307,7 @@ void QwRootFile::ProcessOptions(QwOptions &options)
   // Update interval for the map file
   fCircularBufferSize = options.GetValue<int>("circular-buffer");
   fUpdateInterval = options.GetValue<int>("mapfile-update-interval");
+  fCompressionAlgorithm = options.GetValue<int>("compression-algorithm");
   fCompressionLevel = options.GetValue<int>("compression-level");
   fBasketSize = options.GetValue<int>("basket-size");
 
