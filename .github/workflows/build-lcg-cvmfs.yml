@@ -100,37 +100,8 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
-  compare-artifacts:
-    runs-on: ubuntu-latest
-    needs: linux
-    if: github.event_name == 'pull_request'
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - release: "LCG_106"
-            arch: "x86_64"
-            os: "el9"
-            compiler: "gcc13"
-            opt: "opt"
-          - release: "LCG_107"
-            arch: "x86_64"
-            os: "el9"
-            compiler: "clang16"
-            opt: "opt"
-          - release: "LCG_107"
-            arch: "x86_64"
-            os: "el9"
-            compiler: "gcc14"
-            opt: "opt"
-    steps:
-      - name: Download current artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
-          path: ./current
-
-      - name: Download target branch artifacts
+      - name: Download target branch artifacts (prompt summary)
+        if: github.event_name == 'pull_request'
         uses: dawidd6/action-download-artifact@v6
         with:
           workflow: build-lcg-cvmfs.yml
@@ -139,7 +110,18 @@ jobs:
           path: ./target
           if_no_artifact_found: warn
 
+      - name: Download target branch artifacts (regalias)
+        if: github.event_name == 'pull_request'
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: build-lcg-cvmfs.yml
+          branch: ${{ github.event.pull_request.base.ref }}
+          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: ./target
+          if_no_artifact_found: warn
+
       - name: Compare artifacts
+        if: github.event_name == 'pull_request'
         run: |
           echo "Comparing artifacts for ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}"
 
@@ -151,8 +133,8 @@ jobs:
           fi
 
           # Find summary files in both directories
-          current_files=$(find ./current -name "summary_*.txt" | sort)
-          target_files=$(find ./target -name "summary_*.txt" | sort)
+          current_files=$(find ./ -maxdepth 1 -name "summary_*.txt" -o -name "*regalias*.txt" | sort)
+          target_files=$(find ./target -name "summary_*.txt" -o -name "*regalias*.txt" | sort)
 
           echo "Current files found:"
           echo "$current_files"
@@ -189,7 +171,7 @@ jobs:
           done
 
           if [ "$comparison_failed" = "true" ]; then
-            echo "❌ Artifact comparison failed. Changes detected in prompt summary beyond timestamps."
+            echo "❌ Artifact comparison failed. Changes detected in artifacts beyond timestamps."
             exit 1
           else
             echo "✅ All artifacts match expected results (ignoring timestamps)."
