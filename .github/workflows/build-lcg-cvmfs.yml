@@ -222,7 +222,7 @@ jobs:
           else
             echo "✅ All artifacts match expected results (ignoring timestamps)."
           fi
-          
+
 
   valgrind:
     runs-on: ubuntu-latest
@@ -259,15 +259,39 @@ jobs:
             build/qwmockdatagenerator -r 4 -e 1:20000 --config qwparity_simple.conf --detectors mock_newdets.map --data .
             echo "::endgroup::"
 
-            echo "::group::Run callgrind on mock data analysis"
-            valgrind --tool=callgrind --instr-atstart=no \
+            echo "::group::Run callgrind on mock data analysis (no rntuples, no trees, no hists)"
+            valgrind --tool=callgrind --callgrind-out-file=callgrind.out.no-out --instr-atstart=no \
+              build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary --callgrind-instr-start-event-loop \
+                --disable-trees --disable-hists
+            echo "::endgroup::"
+
+            echo "::group::Annotate callgrind info on source code (no rntuples, no trees, no hists)"
+            callgrind_annotate \
+              -I=Parity/src/ -I=Parity/include -I=Analysis/src -I=Analysis/include \
+              callgrind.out.no-out Parity/main/QwParity.cc | tee -a callgrind-no-out.txt
+            echo "::endgroup::"
+
+            echo "::group::Run callgrind on mock data analysis (trees, hists)"
+            valgrind --tool=callgrind --callgrind-out-file=callgrind.out.trees --instr-atstart=no \
               build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary --callgrind-instr-start-event-loop
             echo "::endgroup::"
 
-            echo "::group::Annotate callgrind info on source code"
+            echo "::group::Annotate callgrind info on source code (trees, hists)"
             callgrind_annotate \
               -I=Parity/src/ -I=Parity/include -I=Analysis/src -I=Analysis/include \
-              callgrind.out.* Parity/main/QwParity.cc | tee -a callgrind.txt
+              callgrind.out.trees Parity/main/QwParity.cc | tee -a callgrind-trees.txt
+            echo "::endgroup::"
+
+            echo "::group::Run callgrind on mock data analysis (rntuples, hists)"
+            valgrind --tool=callgrind --callgrind-out-file=callgrind.out.rntuples --instr-atstart=no \
+              build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary --callgrind-instr-start-event-loop \
+                --enable-rntuples --disable-trees
+            echo "::endgroup::"
+
+            echo "::group::Annotate callgrind info on source code (rntuples, hists)"
+            callgrind_annotate \
+              -I=Parity/src/ -I=Parity/include -I=Analysis/src -I=Analysis/include \
+              callgrind.out.rntuples Parity/main/QwParity.cc | tee -a callgrind-rntuples.txt
             echo "::endgroup::"
 
       - name: Upload callgrind analysis
@@ -275,6 +299,6 @@ jobs:
         with:
           name: callgrind-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
           path: |
-            callgrind.txt
+            callgrind*.txt
           retention-days: 7
           if-no-files-found: error
