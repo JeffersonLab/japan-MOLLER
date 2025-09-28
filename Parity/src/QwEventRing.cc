@@ -83,6 +83,9 @@ void QwEventRing::ProcessOptions(QwOptions &options)
     fRING_SIZE = tmpval;
   }
 
+  if (gQwOptions.HasValue("burp.holdoff"))
+    VQwHardwareChannel::SetBurpHoldoff(gQwOptions.GetValue<int>("burp.holdoff"));
+
   if (gQwOptions.HasValue("ring.stability_cut"))
     stability=gQwOptions.GetValue<double>("ring.stability_cut");
 

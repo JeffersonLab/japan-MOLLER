@@ -8,6 +8,8 @@
 #include "QwParameterFile.h"
 #include "QwOptions.h"
 
+Int_t VQwHardwareChannel::fBurpHoldoff = 10;
+
 VQwHardwareChannel::VQwHardwareChannel():
   fNumberOfDataWords(0),
   fNumberOfSubElements(0), fDataToSave(kRaw)
@@ -16,10 +18,7 @@ VQwHardwareChannel::VQwHardwareChannel():
   fLLimit = 1;
   fErrorFlag = 0;
   fErrorConfigFlag = 0;
-  fBurpHoldoff = 10;
   fBurpThreshold = -1.0;
-  
-  ProcessOptions();
 }
 
 VQwHardwareChannel::VQwHardwareChannel(const VQwHardwareChannel& value)
@@ -38,8 +37,7 @@ VQwHardwareChannel::VQwHardwareChannel(const VQwHardwareChannel& value)
    fLLimit(value.fLLimit),
    fStability(value.fStability),
    fBurpThreshold(value.fBurpThreshold),
-   fBurpCountdown(value.fBurpCountdown),
-   fBurpHoldoff(value.fBurpHoldoff)
+   fBurpCountdown(value.fBurpCountdown)
 {
 }
 
@@ -59,8 +57,7 @@ VQwHardwareChannel::VQwHardwareChannel(const VQwHardwareChannel& value, VQwDataE
    fLLimit(value.fLLimit),
    fStability(value.fStability),
    fBurpThreshold(value.fBurpThreshold),
-   fBurpCountdown(value.fBurpCountdown),
-   fBurpHoldoff(value.fBurpHoldoff)
+   fBurpCountdown(value.fBurpCountdown)
 {
 }
 
@@ -82,14 +79,6 @@ void VQwHardwareChannel::CopyFrom(const VQwHardwareChannel& value)
   fStability = value.fStability;
   fBurpThreshold = value.fBurpThreshold;
   fBurpCountdown = value.fBurpCountdown;
-  fBurpHoldoff = value.fBurpHoldoff;
-}
-
-
-
-void VQwHardwareChannel::ProcessOptions(){
-  if (gQwOptions.HasValue("burp.holdoff"))
-    fBurpHoldoff=gQwOptions.GetValue<int>("burp.holdoff");
 }
 
 void VQwHardwareChannel::SetSingleEventCuts(Double_t min, Double_t max)
