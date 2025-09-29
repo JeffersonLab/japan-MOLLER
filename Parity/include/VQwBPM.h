@@ -9,9 +9,6 @@
 #ifndef __VQWBPM__
 #define __VQWBPM__
 
-// System headers
-#include <boost/shared_ptr.hpp>
-
 // ROOT headers
 #include <TTree.h>
 #include <TMath.h>
@@ -334,7 +331,7 @@ public:
 
 };
 
-typedef boost::shared_ptr<VQwBPM> VQwBPM_ptr;
+typedef std::shared_ptr<VQwBPM> VQwBPM_ptr;
 
 #endif
 

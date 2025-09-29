@@ -221,7 +221,7 @@ void QwDataHandlerArray::push_back(VQwDataHandler* handler)
             << " is not supported by this handler array" << QwLog::endl;
 
   } else {
-    boost::shared_ptr<VQwDataHandler> handler_tmp(handler);
+    std::shared_ptr<VQwDataHandler> handler_tmp(handler);
     HandlerPtrs::push_back(handler_tmp);
 
     // Set the parent of the handler to this array
@@ -335,7 +335,7 @@ void  QwDataHandlerArray::ClearEventData()
 {
   if (!empty()) {
     std::for_each(begin(), end(),
-		  boost::mem_fn(&VQwDataHandler::ClearEventData));
+		  std::mem_fn(&VQwDataHandler::ClearEventData));
   }
 }
 
@@ -344,7 +344,7 @@ void  QwDataHandlerArray::ClearEventData()
 void  QwDataHandlerArray::ProcessEvent()
 {
   if (!empty()){
-    std::for_each(begin(), end(), boost::mem_fn(&VQwDataHandler::ProcessData));
+    std::for_each(begin(), end(), std::mem_fn(&VQwDataHandler::ProcessData));
   }
 }
 
@@ -428,7 +428,7 @@ void  QwDataHandlerArray::ConstructHistograms(TDirectory *folder, TString &prefi
 void  QwDataHandlerArray::FillHistograms()
 {
   if (!empty())
-    std::for_each(begin(), end(), boost::mem_fn(&VQwDataHandler::FillHistograms));
+    std::for_each(begin(), end(), std::mem_fn(&VQwDataHandler::FillHistograms));
 }
 
 
@@ -630,7 +630,7 @@ void QwDataHandlerArray::PrintErrorCounters() const{// report number of events f
  * there is already a handler with that name in the array.
  * @param handler DataHandler to add to the array
  */
-void QwDataHandlerArray::push_back(boost::shared_ptr<VQwDataHandler> handler)
+void QwDataHandlerArray::push_back(std::shared_ptr<VQwDataHandler> handler)
 {
   
  if (handler.get() == NULL) {
@@ -650,7 +650,7 @@ void QwDataHandlerArray::push_back(boost::shared_ptr<VQwDataHandler> handler)
            << " is not supported by this handler array" << QwLog::endl;
 
  } else {
-   boost::shared_ptr<VQwDataHandler> handler_tmp(handler);
+   std::shared_ptr<VQwDataHandler> handler_tmp(handler);
    HandlerPtrs::push_back(handler_tmp);
 
 /*

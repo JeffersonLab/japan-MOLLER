@@ -14,7 +14,7 @@ class MQwHistograms {
 
     /// Regular pointers for the histograms
     typedef TH1* TH1_ptr;
-    // Shared pointers (boost::shared_ptr) are not advisable
+    // Shared pointers (std::shared_ptr) are not advisable
     // because ROOT keep ownership of all histograms.  They
     // are automatically deleted when ROOT closes the file.
     // If we put them in a shared_ptr here, they would be

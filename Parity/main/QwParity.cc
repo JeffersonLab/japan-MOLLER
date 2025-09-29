@@ -12,9 +12,6 @@
 #include <vector>
 #include <new>
 
-// Boost headers
-#include <boost/shared_ptr.hpp>
-
 // ROOT headers
 #include "Rtypes.h"
 #include "TROOT.h"
