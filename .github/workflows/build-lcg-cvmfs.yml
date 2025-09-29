@@ -112,7 +112,7 @@ jobs:
       - name: Upload profiling analysis
         uses: actions/upload-artifact@v4
         with:
-          name: profiling-analysis-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: gprof-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
           path: |
             qwparity.txt
           retention-days: 7
