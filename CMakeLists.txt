@@ -68,11 +68,11 @@ file(GLOB my_project_headers
 list(APPEND SQLPP11_OPTIONAL_COMPONENTS SQLite3 MySQL MariaDB PostgreSQL)
 find_package(Sqlpp11 QUIET OPTIONAL_COMPONENTS ${SQLPP11_OPTIONAL_COMPONENTS})
 if(NOT Sqlpp11_FOUND)
-  if(EXISTS thirdparty/sqlpp11/CMakeLists.txt)
+  if(EXISTS ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11/CMakeLists.txt)
     message(STATUS "sqlpp11 included as subproject")
-    add_subdirectory(thirdparty/sqlpp11)
-    list(APPEND CMAKE_MODULE_PATH thirdparty/sqlpp11/cmake/modules)
-    set(Sqlpp11_INCLUDE_DIR thirdparty/sqlpp11/include)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11)
+    list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11/cmake/modules)
+    set(Sqlpp11_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11/include)
     # Treat date dependency of sqlpp11 as system headers
     # to hide compiler warnings
     include_directories(SYSTEM ${date_SOURCE_DIR}/include)
