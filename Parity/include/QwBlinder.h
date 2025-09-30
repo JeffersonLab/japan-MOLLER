@@ -75,7 +75,7 @@ class QwBlinder {
     kMultiplicative,
     kAdditiveMultiplicative
   };
-  /// Status of the blinding process or intermediate steps of the process  
+  /// Status of the blinding process or intermediate steps of the process
   enum EQwBlinderStatus {
     kIndeterminate = 0,
     kNotBlindable,
@@ -83,8 +83,8 @@ class QwBlinder {
     kBlindableFail
   };
   static const TString fStatusName[4];
-  
-  ///  Error flag value 
+
+  ///  Error flag value
   static const UInt_t kErrorFlag_BlinderFail = 0x200;
   constexpr static const Double_t kValue_BlinderFail   = -1.0;
 
@@ -159,11 +159,11 @@ class QwBlinder {
     void  BlindValue(Double_t& value, const Double_t& yield) const {
       switch (fBlindingStrategy) {
       case kAdditive:
-	value += yield * fBlindingOffset; break;
+        value += yield * fBlindingOffset; break;
       case kMultiplicative:
-	value *= fBlindingFactor; break;
+        value *= fBlindingFactor; break;
       case kAdditiveMultiplicative:
-	value = (value + fBlindingOffset * yield) * fBlindingFactor; break;
+        value = (value + fBlindingOffset * yield) * fBlindingFactor; break;
       default: break;
       }
     };
@@ -183,13 +183,13 @@ class QwBlinder {
     /// Blind the asymmetry of an array of subsystems
     void  Blind(QwSubsystemArrayParity& diff) {
       if (CheckBlindability(fPatternCounters)!=kNotBlindable)
-	diff.Blind(this);
+        diff.Blind(this);
     };
-    /// Blind the pair asymmetry 
+    /// Blind the pair asymmetry
     /// and only check fBlindingStrategy to avoid  overcounting fPatternCounters
     void  BlindPair(QwSubsystemArrayParity& diff) {
       if (CheckBlindability(fPairCounters)!=kNotBlindable)
-	diff.Blind(this);
+        diff.Blind(this);
     };
 
     /// Unblind the asymmetry of an array of subsystems
@@ -200,12 +200,12 @@ class QwBlinder {
     /// Blind the difference of an array of subsystems
     void  Blind(QwSubsystemArrayParity& diff, const QwSubsystemArrayParity& yield) {
       if (CheckBlindability(fPatternCounters)!=kNotBlindable)
-	diff.Blind(this, yield);
+        diff.Blind(this, yield);
     };
     /// Blind the pair difference of an array of subsystems
     void  BlindPair(QwSubsystemArrayParity& diff, const QwSubsystemArrayParity& yield) {
       if (CheckBlindability(fPairCounters)!=kNotBlindable)
-	diff.Blind(this, yield);
+        diff.Blind(this, yield);
     };
 
     /// Unblind the difference of an array of subsystems
@@ -232,7 +232,7 @@ class QwBlinder {
     };
 
  private:
-    ///  Indicates the first value recieved of the blindability of the target 
+    ///  Indicates the first value recieved of the blindability of the target
     EQwBlinderStatus fTargetBlindability_firstread;
     EQwBlinderStatus fTargetBlindability;
     Bool_t fTargetPositionForced;
@@ -258,7 +258,7 @@ class QwBlinder {
     EQwBlinderStatus CheckBlindability(std::vector<Int_t> &fCounters);
     Bool_t fBlinderIsOkay;
 
-    
+
 
 
  private:

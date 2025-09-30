@@ -3,4 +3,4 @@ objects = make_mul_tree draw_mul_plots draw_single_arm draw_mul_plots_sign_corre
 all: $(objects)
 
 $(objects): %:%.C
-	g++ -o $@ $< `root-config --cflags --libs`
+        g++ -o $@ $< `root-config --cflags --libs`

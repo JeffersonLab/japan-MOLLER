@@ -197,7 +197,7 @@ class QwOptions {
     /// \brief Add some configuration files
     void AddConfigFile(std::vector<std::string> configfiles) {
       for (size_t i = 0; i < configfiles.size(); i++)
-	AddConfigFile(configfiles.at(i));
+        AddConfigFile(configfiles.at(i));
     };
 
     /// \brief List the configuration files

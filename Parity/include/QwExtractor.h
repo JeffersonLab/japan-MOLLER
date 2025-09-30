@@ -32,7 +32,7 @@ class QwExtractor:public VQwDataHandler, public MQwDataHandlerCloneable<QwExtrac
     void ProcessData();
     void SetPointer(QwSubsystemArrayParity *ptr){fSourcePointer = ptr;};
     void FillTreeBranches(QwRootFile *treerootfile);
-  
+
   protected:
     /// Default constructor (Protected for child class access)
 
@@ -52,4 +52,3 @@ class QwExtractor:public VQwDataHandler, public MQwDataHandlerCloneable<QwExtrac
 }; // class QwExtractor
 
 #endif // QWEXTRACTOR_H_
-

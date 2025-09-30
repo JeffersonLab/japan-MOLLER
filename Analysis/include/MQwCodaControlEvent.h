@@ -39,12 +39,12 @@ class MQwCodaControlEvent
 
   time_t  GetStartUnixTime();
   time_t  GetEndUnixTime();
-    
+
 
  protected:
   void ProcessSync(UInt_t local_time, UInt_t statuscode);
   void ProcessPrestart(UInt_t local_time, UInt_t local_runnumber,
-		       UInt_t local_runtype);
+                       UInt_t local_runtype);
   void ProcessGo(UInt_t local_time, UInt_t evt_count);
   void ProcessPause(UInt_t local_time, UInt_t evt_count);
   void ProcessEnd(UInt_t local_time, UInt_t evt_count);
@@ -67,7 +67,7 @@ class MQwCodaControlEvent
 
   UInt_t fEndTime;
   UInt_t fEndEventCount;
-  
+
   UInt_t fNumberPause;
   std::vector<UInt_t> fPauseEventCount;
   std::vector<UInt_t> fPauseTime;

@@ -132,7 +132,7 @@ void QwADC18_Channel::IncrementErrorCounters(){
     fErrorCount_SameHW++; //increment the hw error counter
   if ( (kErrorFlag_ZeroHW &  fErrorFlag)==kErrorFlag_ZeroHW)
     fErrorCount_ZeroHW++; //increment the hw error counter
-  if ( ((kErrorFlag_EventCut_L &  fErrorFlag)==kErrorFlag_EventCut_L) 
+  if ( ((kErrorFlag_EventCut_L &  fErrorFlag)==kErrorFlag_EventCut_L)
        || ((kErrorFlag_EventCut_U &  fErrorFlag)==kErrorFlag_EventCut_U)){
     fNumEvtsWithEventCutsRejected++; //increment the event cut error counter
   }
@@ -220,9 +220,9 @@ void QwADC18_Channel::LoadChannelParameters(QwParameterFile &paramfile){
     SetDefaultSampleSize(value);
   } else {
     QwWarning << "ADC18 Channel "
-	      << GetElementName()
-	      << " cannot set the default sample size."
-	      << QwLog::endl;
+              << GetElementName()
+              << " cannot set the default sample size."
+              << QwLog::endl;
   }
 };
 
@@ -522,20 +522,20 @@ void  QwADC18_Channel::ConstructHistograms(TDirectory *folder, TString &prefix)
 
     if(fDataToSave==kRaw)
       {
-	fHistograms.resize(2, NULL);
-	size_t index=0;
-	fHistograms[index++] = gQwHists.Construct1DHist(basename);
-	fHistograms[index++] = gQwHists.Construct1DHist(basename+Form("_raw"));
+        fHistograms.resize(2, NULL);
+        size_t index=0;
+        fHistograms[index++] = gQwHists.Construct1DHist(basename);
+        fHistograms[index++] = gQwHists.Construct1DHist(basename+Form("_raw"));
       }
     else if(fDataToSave==kDerived)
       {
-	fHistograms.resize(1, NULL);
-	Int_t index=0;
-	fHistograms[index++] = gQwHists.Construct1DHist(basename);
+        fHistograms.resize(1, NULL);
+        Int_t index=0;
+        fHistograms[index++] = gQwHists.Construct1DHist(basename);
       }
     else
       {
-	// this is not recognized
+        // this is not recognized
       }
   }
 }
@@ -549,18 +549,18 @@ void  QwADC18_Channel::FillHistograms()
       //  This channel is not used, so skip creating the histograms.
     } else
       {
-	if(fDataToSave==kRaw)
-	  {
-	    if (fHistograms[index] != NULL && (fErrorFlag)==0)
-	      fHistograms[index++]->Fill(GetValue());
-	    if (fHistograms[index] != NULL && (fErrorFlag)==0)
-	      fHistograms[index++]->Fill(GetRawValue());
-	  }
-	else if(fDataToSave==kDerived)
-	  {
-	    if (fHistograms[index] != NULL && (fErrorFlag)==0)
-	      fHistograms[index++]->Fill(GetValue());
-	  }
+        if(fDataToSave==kRaw)
+          {
+            if (fHistograms[index] != NULL && (fErrorFlag)==0)
+              fHistograms[index++]->Fill(GetValue());
+            if (fHistograms[index] != NULL && (fErrorFlag)==0)
+              fHistograms[index++]->Fill(GetRawValue());
+          }
+        else if(fDataToSave==kDerived)
+          {
+            if (fHistograms[index] != NULL && (fErrorFlag)==0)
+              fHistograms[index++]->Fill(GetValue());
+          }
     }
 }
 
@@ -672,15 +672,15 @@ void  QwADC18_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleMod
     size_t numElements = 2; // value + Device_Error_Code
     if (fDataToSave == kMoments) numElements += 2; // _m2 + _err
     if (fDataToSave == kRaw) numElements += 4; // _raw + _diff + _peak + _base
-    
+
     // Resize vectors once to avoid reallocation
     size_t oldSize = values.size();
     values.resize(oldSize + numElements, 0.0);
     fieldPtrs.reserve(fieldPtrs.size() + numElements);
-    
+
     // Main value
     fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
-    
+
     if (fDataToSave == kMoments) {
       fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_m2").Data()));
       fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_err").Data()));
@@ -759,7 +759,7 @@ QwADC18_Channel& QwADC18_Channel::operator= (const QwADC18_Channel &value)
 }
 
 void QwADC18_Channel::AssignScaledValue(const QwADC18_Channel &value,
-				 Double_t scale)
+                                 Double_t scale)
 {
   if(this == &value) return;
 
@@ -1000,7 +1000,7 @@ QwADC18_Channel& QwADC18_Channel::operator/= (const QwADC18_Channel &denom)
       fValue   = 0.0;
       fValueM2 = 0.0;
     } else {
-      QwVerbose << "Attempting to divide by zero in " 
+      QwVerbose << "Attempting to divide by zero in "
                 << GetElementName() << QwLog::endl;
       fValue   = 0.0;
       fValueM2 = 0.0;
@@ -1124,7 +1124,7 @@ void QwADC18_Channel::AccumulateRunningSum(const QwADC18_Channel& value, Int_t c
   if(count==0){
     count = value.fGoodEventCount;
   }
-  
+
   // Moment calculations
   Int_t n1 = fGoodEventCount;
   Int_t n2 = count;
@@ -1194,7 +1194,7 @@ void QwADC18_Channel::PrintValue() const
             << std::setw(18) << std::left << GetElementName()      << ""
             << std::setw(12) << std::left << GetValue()            << " +/- "
             << std::setw(12) << std::left << GetValueError()       << " sig "
-	    << std::setw(12) << std::left << GetValueWidth()       << ""
+            << std::setw(12) << std::left << GetValueWidth()       << ""
             << std::setw(12) << std::left << fGoodEventCount       << ""
             << QwLog::endl;
 }
@@ -1254,11 +1254,11 @@ Bool_t QwADC18_Channel::MatchNumberOfSamples(size_t numsamp)
     status = (fNumberOfSamples==numsamp);
     if (! status){
       if (bDEBUG)
-	QwError << "QwADC18_Channel::MatchNumberOfSamples:  Channel "
-		<< GetElementName()
-		<< " had fNumberOfSamples==" << fNumberOfSamples
-		<< " and was supposed to have " << numsamp
-		<< std::endl;
+        QwError << "QwADC18_Channel::MatchNumberOfSamples:  Channel "
+                << GetElementName()
+                << " had fNumberOfSamples==" << fNumberOfSamples
+                << " and was supposed to have " << numsamp
+                << std::endl;
     }
   }
   return status;
@@ -1291,15 +1291,15 @@ Bool_t QwADC18_Channel::ApplySingleEventCuts()//This will check the limits and u
       status=kTRUE;
     } else  if (GetValue()<=fULimit && GetValue()>=fLLimit){
       if ((fErrorFlag)==0)
-	status=kTRUE;
+        status=kTRUE;
       else
-	status=kFALSE;//If the device HW is failed
+        status=kFALSE;//If the device HW is failed
     }
     else{
       if (GetValue()> fULimit)
-	fErrorFlag|=kErrorFlag_EventCut_U;
+        fErrorFlag|=kErrorFlag_EventCut_U;
       else
-	fErrorFlag|=kErrorFlag_EventCut_L;
+        fErrorFlag|=kErrorFlag_EventCut_L;
       status=kFALSE;
     }
 
@@ -1311,7 +1311,7 @@ Bool_t QwADC18_Channel::ApplySingleEventCuts()//This will check the limits and u
   }
   else{
     status=kTRUE;
-    //fErrorFlag=0;//we need to keep the device error codes 
+    //fErrorFlag=0;//we need to keep the device error codes
   }
 
   return status;
@@ -1329,7 +1329,7 @@ void  QwADC18_Channel::PrintErrorCounterHead()
   message += Form("%9s", "ZeroHW");
   message += Form("%9s", "EventCut");
   QwMessage << "---------------------------------------------------------------------------------------------" << QwLog::endl;
-  QwMessage << message << QwLog::endl; 
+  QwMessage << message << QwLog::endl;
   QwMessage << "---------------------------------------------------------------------------------------------" << QwLog::endl;
 }
 
@@ -1366,9 +1366,9 @@ void QwADC18_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *value)
   // follows same steps as += but w/ scaling factor
   if(input!=NULL && !IsNameEmpty()){
     //     QwWarning << "Adding " << input->GetElementName()
-    // 	      << " to " << GetElementName()
-    // 	      << " with scale factor " << scale
-    // 	      << QwLog::endl;
+    //        << " to " << GetElementName()
+    //        << " with scale factor " << scale
+    //        << QwLog::endl;
     //     PrintValue();
     //     input->PrintValue();
     this->fDiff_Raw = 0;
@@ -1378,7 +1378,7 @@ void QwADC18_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *value)
     this->fValueM2 = 0.0;
     this->fNumberOfSamples += input->fNumberOfSamples;
     this->fSequenceNumber  =  0;
-    this->fErrorFlag       |= (input->fErrorFlag);   
+    this->fErrorFlag       |= (input->fErrorFlag);
   }
   //   QwWarning << "Finsihed with addition"  << QwLog::endl;
   //   PrintValue();
@@ -1438,52 +1438,52 @@ void QwADC18_Channel::AddErrEntriesToList(std::vector<QwErrDBInterface> &row_lis
 
   QwErrDBInterface row;
   TString name    = GetElementName();
-  
+
   row.Reset();
   row.SetDeviceName(name);
-  row.SetErrorCodeId(1); 
+  row.SetErrorCodeId(1);
   row.SetN(fErrorCount_HWSat);
   row_list.push_back(row);
-  
+
   row.Reset();
   row.SetDeviceName(name);
   row.SetErrorCodeId(2);
   row.SetN(fErrorCount_sample);
   row_list.push_back(row);
-  
+
   row.Reset();
   row.SetDeviceName(name);
   row.SetErrorCodeId(3);
   row.SetN(fErrorCount_SW_HW);
   row_list.push_back(row);
-  
-  
+
+
   row.Reset();
   row.SetDeviceName(name);
   row.SetErrorCodeId(4);
   row.SetN(fErrorCount_Sequence);
   row_list.push_back(row);
-  
-  
+
+
   row.Reset();
   row.SetDeviceName(name);
-  row.SetErrorCodeId(5); 
+  row.SetErrorCodeId(5);
   row.SetN(fErrorCount_SameHW);
   row_list.push_back(row);
-  
+
   row.Reset();
   row.SetDeviceName(name);
-  row.SetErrorCodeId(6); 
+  row.SetErrorCodeId(6);
   row.SetN(fErrorCount_ZeroHW);
   row_list.push_back(row);
 
 
   row.Reset();
   row.SetDeviceName(name);
-  row.SetErrorCodeId(7); 
+  row.SetErrorCodeId(7);
   row.SetN(fNumEvtsWithEventCutsRejected);
   row_list.push_back(row);
   return;
-  
+
 }
 #endif

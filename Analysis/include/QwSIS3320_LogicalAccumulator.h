@@ -1,11 +1,11 @@
 /**
- * \class	QwSIS3320_LogicalAccumulator	QwSIS3320_LogicalAccumulator.h
+ * \class       QwSIS3320_LogicalAccumulator    QwSIS3320_LogicalAccumulator.h
  *
- * \brief	SIS3320 sampling ADC accumulator
+ * \brief       SIS3320 sampling ADC accumulator
  *
- * \author	W. Deconinck
- * \date	2009-09-04 18:06:23
- * \ingroup	QwCompton
+ * \author      W. Deconinck
+ * \date        2009-09-04 18:06:23
+ * \ingroup     QwCompton
  *
  * The QwSIS3320_LogicalAccumulator should allow convenient access to the accumulator
  * data collected with the SIS3320 for the Compton photon detector.  This class

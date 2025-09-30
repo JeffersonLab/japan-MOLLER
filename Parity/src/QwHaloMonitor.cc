@@ -147,7 +147,7 @@ Bool_t QwHaloMonitor::CheckForBurpFail(const VQwDataElement *ev_error){
       //std::cout<<" Here in QwHaloMonitor::CheckForBurpFail \n";
       if (this->GetElementName()!="") {
         const QwHaloMonitor* value_halo = dynamic_cast<const QwHaloMonitor* >(ev_error);
-        burpstatus |= fHalo_Counter.CheckForBurpFail(&(value_halo->fHalo_Counter)); 
+        burpstatus |= fHalo_Counter.CheckForBurpFail(&(value_halo->fHalo_Counter));
       }
     } else {
       TString loc="Standard exception from QwHaloMonitor::CheckForBurpFail :"+

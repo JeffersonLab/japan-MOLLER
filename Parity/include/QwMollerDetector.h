@@ -143,11 +143,11 @@ class QwMollerDetector:
     void PrintValue() const;
     float* GetRawChannelArray();
 
-    Int_t GetChannelIndex(TString channelName, UInt_t module_number); 
+    Int_t GetChannelIndex(TString channelName, UInt_t module_number);
     float GetDataForChannelInModule(Int_t module_number, Int_t channel_index){
       return fSTR7200_Channel[module_number][channel_index].GetValue();
     }
-      
+
     float GetDataForChannelInModule(Int_t module_number, TString channel_name){
       return GetDataForChannelInModule(module_number, GetChannelIndex(channel_name,module_number));
     }
@@ -155,7 +155,7 @@ class QwMollerDetector:
   protected:
     //Array of ChannelIDs which contain the map file
     std::vector<QwMollerChannelID> fMollerChannelID;
-    
+
     //the running total scaler structure
     std::vector< std::vector<QwSTR7200_Channel> > fSTR7200_Channel;
     std::vector< std::vector<QwSTR7200_Channel> > fPrevious_STR7200_Channel;

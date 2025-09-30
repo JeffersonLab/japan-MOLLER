@@ -7,19 +7,19 @@ qwparity_simple.conf
 [31mWarning: [0mOverriding the default configuration files with user-defined configuration file qwparity_simple.conf
 Parameter file: [32m/home/wdconinc/git/japan/Parity/prminput/qwparity_simple.conf[0m
 tree-trim is disabled
-histo-trim is disabled 
+histo-trim is disabled
 Parameter file: [32m/home/wdconinc/git/japan/Parity/prminput/parity_hist.in[0m
 Opening data file:  /home/wdconinc/qweak/QwScratch/data/QwMock_10.log
 Parameter file: [32m/home/wdconinc/git/japan/Parity/prminput/mock_detectors.map[0m
 Loading subsystems from mock_detectors.map.
 Creating subsystem of type QwHelicity with name Helicity Info.
 Parameter file: [32m/home/wdconinc/git/japan/Parity/prminput/mock_qweak_helicity.map[0m
- **** Input Register Mode **** 
+ **** Input Register Mode ****
 Creating subsystem of type QwBeamLine with name Injector BeamLine.
 Parameter file: [32m/home/wdconinc/git/japan/Parity/prminput/mock_qweak_beamline.map[0m
-Error: At end of processing the combined device 
-Error: At end of processing the combined device 
-Error: At end of processing the combined device 
+Error: At end of processing the combined device
+Error: At end of processing the combined device
+Error: At end of processing the combined device
 Variables to publish:
 q_targ combobcm bcm_target c
 x_targ combobpm bpm_target x
@@ -83,7 +83,7 @@ Collecting information (+) from event #112 to generate helicity seed (need 30 bi
 Collecting information (+) from event #116 to generate helicity seed (need 30 bit, so far got 29 bits )
 Number of events processed at end of run: 10001
 Root file is /home/wdconinc/qweak/QwScratch/rootfiles/isu_sample_10.root
- ------------ error counters ------------------ 
+ ------------ error counters ------------------
 
 *********QwHelicity Error Summary****************
 First helicity gate counter:  -1; last helicity gate counter:  9999
@@ -401,19 +401,19 @@ destructor QwkRegBlueCorrelator done
 QwBlinder::PrintFinalValues():  Begin summary
 ================================================
 Blinder Passed Patterns
-	Patterns with blinding disabled: 0
-	Patterns on a non-blindable target: 2471
-	Patterns with transverse beam: 0
-	Patterns on blindable target with beam present: 0
+        Patterns with blinding disabled: 0
+        Patterns on a non-blindable target: 2471
+        Patterns with transverse beam: 0
+        Patterns on blindable target with beam present: 0
 Blinder Failed Patterns
-	Patterns with unknown target position: 0
-	Patterns with changed target position: 0
-	Patterns with an undefined Wien setting: 0
-	Patterns with a changed Wien setting: 0
-	Patterns with an undefined IHWP setting: 0
-	Patterns with a changed IHWP setting: 0
-	Patterns on blindable target with no beam: 0
-	Patterns with other blinding failure: 0
+        Patterns with unknown target position: 0
+        Patterns with changed target position: 0
+        Patterns with an undefined Wien setting: 0
+        Patterns with a changed Wien setting: 0
+        Patterns with an undefined IHWP setting: 0
+        Patterns with a changed IHWP setting: 0
+        Patterns on blindable target with no beam: 0
+        Patterns with other blinding failure: 0
 ================================================
 The blinding parameters checksum for seed ID 0 is:
 97b0bed785d0a063d21343abfd3504e0

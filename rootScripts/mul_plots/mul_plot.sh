@@ -25,7 +25,7 @@ check_file_existance() {
       fi
 
       if [ -f "$1" ]; then
-        read -p "file $1 already exist, do you want to remove it? [yn] " yesno 
+        read -p "file $1 already exist, do you want to remove it? [yn] " yesno
         case $yesno in
         [yY*])
           echo "removing $1 now..."
@@ -120,7 +120,7 @@ slugs=()
 if $do_slug; then
     while [ $# -gt 0 ]; do
       slug_range=$1 && shift
-      if [[ "$slug_range" =~ ^[0-9]{1,2}$ ]]; then	# a single slug
+      if [[ "$slug_range" =~ ^[0-9]{1,2}$ ]]; then      # a single slug
         slugs=( ${slugs[@]} $slug_range )
       elif [[ "$slug_range" =~ ^[0-9]{1,2}-[0-9]{1,2}$ ]]; then
         slug_start=${slug_range%-*}
@@ -131,7 +131,7 @@ if $do_slug; then
           exit 3
         fi
         slugs=( ${slugs[@]} `seq $slug_start $slug_end` )
-      else	# make sure ${#slugs} > 0
+      else      # make sure ${#slugs} > 0
         echo "Error: invalid slug number: $slug_range, please check it"
         usage
         exit 3
@@ -160,7 +160,7 @@ else
     while [ $# -gt 0 ]; do
       run_range=$1 && shift
       # check slug validity
-      if [[ "$run_range" =~ ^[0-9]{4}$ ]]; then	# a single run
+      if [[ "$run_range" =~ ^[0-9]{4}$ ]]; then # a single run
         runs=( ${runs[@]} $run_range )
       elif [[ "$run_range" =~ ^[0-9]{4}-[0-9]{4}$ ]]; then
         run_start=${run_range%-*}
@@ -197,4 +197,4 @@ echo "Find valid run list: " ${runs[@]}
 check_file_existance "${name_prefix}_mul_tree.root"
 ./make_mul_tree -n "$name_prefix" ${runs[@]}
 mv "${name_prefix}_mul_tree.root" results/
-# ./draw_mul_plots_sign_corredted "$name_prefix" "reg_results/${start_run}-${end_run}_regress_postpan.root" 
+# ./draw_mul_plots_sign_corredted "$name_prefix" "reg_results/${start_run}-${end_run}_regress_postpan.root"

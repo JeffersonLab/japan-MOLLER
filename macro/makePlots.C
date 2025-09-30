@@ -1,8 +1,8 @@
 void makePlots(TString expt = "CREX", TString ana = "unser", TString version = "new", TString type = "orig", Double_t errorThreshold = 10.0 /*Needs to be ~0.02 for old error bar type of runs, and needs to be ~4.0 for ALL type analysis*/) {
   TString rf_name =Form("./%s_%s_pedestals_%s_%s.root",version.Data(),ana.Data(),expt.Data(),type.Data());
-  TFile *rootfile = TFile::Open(rf_name);  
+  TFile *rootfile = TFile::Open(rf_name);
   if(rootfile == NULL){
-    cout << rf_name 
+    cout << rf_name
       << " doesn't exist !!" << endl;
     return;
   }
@@ -10,13 +10,13 @@ void makePlots(TString expt = "CREX", TString ana = "unser", TString version = "
   TTree *ped = (TTree*)rootfile->Get("ped");
 
   TString rf_name2 =Form("./%s_unser_pedestals_%s_orig.root",version.Data(),expt.Data());
-  TFile *rootfile2 = TFile::Open(rf_name2);  
+  TFile *rootfile2 = TFile::Open(rf_name2);
   TTree *ped2 = NULL;
   if(rootfile2 == NULL){
     cout << rf_name2
       << " doesn't exist !!" << endl;
   }
-  else { 
+  else {
     ped2 = (TTree*)rootfile2->Get("ped");
   }
 
@@ -26,7 +26,7 @@ void makePlots(TString expt = "CREX", TString ana = "unser", TString version = "
     "bcm_dg_us","bcm_dg_ds","cav4bQ",
     "cav4cQ","cav4dQ","bcm_dg_usc","bcm_dg_dsc",
     "cav4bXI","cav4bYI","cav4cXI","cav4cYI","cav4dXI","cav4dYI"};
-  if (expt == "PREX") { //PREX 
+  if (expt == "PREX") { //PREX
     devices =
     {"bcm_an_us", "bcm_an_ds",
       "bcm_an_ds3","bcm_an_ds10",
@@ -35,7 +35,7 @@ void makePlots(TString expt = "CREX", TString ana = "unser", TString version = "
       "cav4bXI","cav4bYI","cav4cXI","cav4cYI","cav4dXI","cav4dYI"};
   }
   if (ana == "all"){
-    devices = 
+    devices =
     {"bcm_an_us", "bcm_an_ds",
       "bcm_an_ds3","bcm_an_ds10",
       "bcm_dg_us","bcm_dg_ds","cav4bQ",
@@ -44,7 +44,7 @@ void makePlots(TString expt = "CREX", TString ana = "unser", TString version = "
       "usl","usr","dsl","dsr",
       "atl1","atr1","atl2","atr2",
       "sam1","sam2","sam3","sam4","sam5","sam6","sam7","sam8"};
-    if (expt == "PREX") { //PREX 
+    if (expt == "PREX") { //PREX
       devices =
       {"bcm_an_us", "bcm_an_ds",
         "bcm_an_ds3","bcm_an_ds10",

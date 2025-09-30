@@ -142,8 +142,8 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
       }
     }
   }
- 
-  TString varvalue; 
+
+  TString varvalue;
   // Now load the variables to publish
   std::vector<std::vector<TString> > fPublishList;
   map.RewindToFileStart();
@@ -199,7 +199,7 @@ Int_t QwCombiner::ConnectChannels(
     const QwVQWK_Channel* vqwk = NULL;
     string name = "";
     string calc = "calc_";
-    
+
     if (fDependentType.at(dv)==kHandleTypeMps){
       //  Quietly ignore the MPS type when we're connecting the asym & diff
       continue;
@@ -208,7 +208,7 @@ Int_t QwCombiner::ConnectChannels(
     }else{
       dv_ptr = this->RequestExternalPointer(fDependentFull.at(dv));
       if (dv_ptr==NULL){
-	switch (fDependentType.at(dv)) {
+        switch (fDependentType.at(dv)) {
         case kHandleTypeAsym:
           dv_ptr = asym.RequestExternalPointer(fDependentName.at(dv));
           break;
@@ -217,11 +217,11 @@ Int_t QwCombiner::ConnectChannels(
           break;
         default:
           QwWarning << "QwCombiner::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff):  Dependent variable, "
-		                << fDependentName.at(dv)
-		                << ", for asym/diff combiner does not have proper type, type=="
-		                << fDependentType.at(dv) << "."<< QwLog::endl;
+                                << fDependentName.at(dv)
+                                << ", for asym/diff combiner does not have proper type, type=="
+                                << fDependentType.at(dv) << "."<< QwLog::endl;
           break;
-	}
+        }
       }
 
       vqwk = dynamic_cast<const QwVQWK_Channel*>(dv_ptr);
@@ -244,7 +244,7 @@ Int_t QwCombiner::ConnectChannels(
     }else {
       QwWarning << "Dependent variable " << fDependentName.at(dv) << " could not be found, "
                 << "or is not a VQWK channel." << QwLog::endl;
-      continue; 
+      continue;
     }
 
     // pair creation
@@ -262,7 +262,7 @@ Int_t QwCombiner::ConnectChannels(
       const VQwHardwareChannel* iv_ptr = 0;
       iv_ptr = RequestExternalPointer(fIndependentName.at(dv).at(iv));
       if (iv_ptr == NULL){
-	switch (fIndependentType.at(dv).at(iv)) {
+        switch (fIndependentType.at(dv).at(iv)) {
         case kHandleTypeAsym:
           iv_ptr = asym.RequestExternalPointer(fIndependentName.at(dv).at(iv));
           break;
@@ -273,7 +273,7 @@ Int_t QwCombiner::ConnectChannels(
           QwWarning << "Independent variable for combiner has unknown type."
                     << QwLog::endl;
           break;
-	}
+        }
       }
       if (iv_ptr) {
         //QwMessage << " iv: " << fIndependentName.at(dv).at(iv) << " (sens = " << fSensitivity.at(dv).at(iv) << ")" << QwLog::endl;
@@ -285,7 +285,7 @@ Int_t QwCombiner::ConnectChannels(
       }
     }
   }
-  
+
   // Store error flag pointer
   QwMessage << "Using asymmetry error flag" << QwLog::endl;
   fErrorFlagPointer = asym.GetEventcutErrorFlagPointer();
@@ -318,8 +318,8 @@ Int_t QwCombiner::ConnectChannels(QwSubsystemArrayParity& event)
     } else if(fDependentType.at(dv) != kHandleTypeMps){
       QwWarning << "QwCombiner::ConnectChannels(QwSubsystemArrayParity& event):  Dependent variable, "
                 << fDependentName.at(dv)
-	              << ", for MPS combiner does not have MPS type, type=="
-	              << fDependentType.at(dv) << "."<< QwLog::endl;
+                      << ", for MPS combiner does not have MPS type, type=="
+                      << fDependentType.at(dv) << "."<< QwLog::endl;
       continue;
     } else {
       if(fDependentName.at(dv).at(0) == '@' ){
@@ -341,7 +341,7 @@ Int_t QwCombiner::ConnectChannels(QwSubsystemArrayParity& event)
     if(new_vqwk==NULL){
       QwWarning << "Dependent variable " << fDependentName.at(dv) << " could not be found, "
                 << "or is not a VQWK channel." << QwLog::endl;
-      continue; 
+      continue;
     } else {
       //QwMessage << "dv: " << new_vqwk->GetElementName() << QwLog::endl;
       // pair creation
@@ -358,7 +358,7 @@ Int_t QwCombiner::ConnectChannels(QwSubsystemArrayParity& event)
       const VQwHardwareChannel* iv_ptr = 0;
       if(fIndependentType.at(dv).at(iv) == kHandleTypeMps){
         iv_ptr = event.RequestExternalPointer(fIndependentName.at(dv).at(iv));
-    	} else {
+        } else {
         QwWarning << "Independent variable for MPS combiner has unknown type."
                   << QwLog::endl;
       }
@@ -372,7 +372,7 @@ Int_t QwCombiner::ConnectChannels(QwSubsystemArrayParity& event)
       }
     }
   }
-  
+
   // Store error flag pointer
   QwMessage << "Using event error flag" << QwLog::endl;
   fErrorFlagPointer = event.GetEventcutErrorFlagPointer();

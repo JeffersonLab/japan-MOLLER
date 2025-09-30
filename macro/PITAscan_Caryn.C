@@ -2,33 +2,33 @@ void plot_element(TPad *p1, TPad* p2, TString devnam, TString lcut, Int_t dset);
 
 void PITAscan_Caryn(Int_t dset=1,TString device="det1", TString ucut ="1"){
   gROOT->Reset();
-  //  gROOT->LoadMacro("macro/open.macro");  
-  
+  //  gROOT->LoadMacro("macro/open.macro");
+
     TString scantype;
 
     TString gtitle;
     TString pstit;
 
-    
+
     gtitle = "PITA Scan, Run ";
     gtitle += dset;
     pstit = "PITAscan_run";
     pstit += dset;
-    
-  // define style here 
+
+  // define style here
   // general parameters
   gStyle->SetOptDate(0);     gStyle->SetOptTitle(0);
   gStyle->SetStatColor(10);  gStyle->SetStatH(0.2);
-  gStyle->SetStatW(0.3);     gStyle->SetOptStat(0); 
+  gStyle->SetStatW(0.3);     gStyle->SetOptStat(0);
 
-  gStyle->SetPaperSize(12,15);  
+  gStyle->SetPaperSize(12,15);
   // canvas parameters
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
   gStyle->SetFrameFillColor(10);
   // pads parameters
-  //  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  //  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.18);
@@ -36,25 +36,25 @@ void PITAscan_Caryn(Int_t dset=1,TString device="det1", TString ucut ="1"){
   gStyle->SetPadLeftMargin(0.15);
   gStyle->SetLabelSize(0.05,"x");
   gStyle->SetLabelSize(0.05,"y");
-  gROOT->ForceStyle();  
+  gROOT->ForceStyle();
 
   TPad* a1_p[7];
 
   TCanvas *a1 = new TCanvas("a1", "Scan",
-			    0,0,900,600);
+                            0,0,900,600);
 
 
 
-  a1_p[0]  = new TPad( "a1_1", "a1_1",0.00,0.31,0.75,0.92);    
- a1_p[1]  = new TPad( "a1_7", "a1_7",0.75,0.31,1.00,0.92);    
+  a1_p[0]  = new TPad( "a1_1", "a1_1",0.00,0.31,0.75,0.92);
+ a1_p[1]  = new TPad( "a1_7", "a1_7",0.75,0.31,1.00,0.92);
 
-  a1_p[2]  = new TPad( "a1_1", "a1_1",0.00,0.31,0.75,0.30);    
-  a1_p[3]  = new TPad( "a1_7", "a1_7",0.75,0.31,1.00,0.3);    
+  a1_p[2]  = new TPad( "a1_1", "a1_1",0.00,0.31,0.75,0.30);
+  a1_p[3]  = new TPad( "a1_7", "a1_7",0.75,0.31,1.00,0.3);
 
-  a1_p[4]  = new TPad( "a1_1", "a1_1",0.00,0.01,0.75,0.30);    
-  a1_p[5]  = new TPad( "a1_7", "a1_7",0.75,0.01,1.00,0.30);    
+  a1_p[4]  = new TPad( "a1_1", "a1_1",0.00,0.01,0.75,0.30);
+  a1_p[5]  = new TPad( "a1_7", "a1_7",0.75,0.01,1.00,0.30);
 
-  TPad* a1_title = new TPad("a1_title","a1_title",0.0,0.92,1.0,1.0);    
+  TPad* a1_title = new TPad("a1_title","a1_title",0.0,0.92,1.0,1.0);
 
   a1->cd();
   for (Int_t i =0; i<6; i++) a1_p[i]->Draw();
@@ -82,11 +82,11 @@ void PITAscan_Caryn(Int_t dset=1,TString device="det1", TString ucut ="1"){
   psnam += pstit.Data();
   psnam += ".png";
   a1->Print(psnam.Data());
-  
+
 }
 
-void plot_element(TPad *p1, TPad* p2, TString devnam, TString lcut, 
-		  Int_t dset) 
+void plot_element(TPad *p1, TPad* p2, TString devnam, TString lcut,
+                  Int_t dset)
 {
 
   TString *bpmNam = new TString(devnam);
@@ -101,7 +101,7 @@ void plot_element(TPad *p1, TPad* p2, TString devnam, TString lcut,
     Int_t irun = dset;
     //   if (irun!=icurRun) {
       // Int_t run = open(irun,"standard");
-      
+
       //TTree *p = (TTree*)gROOT->FindObject("P");
       //TTree *r = (TTree*)gROOT->FindObject("R");
 
@@ -109,7 +109,7 @@ void plot_element(TPad *p1, TPad* p2, TString devnam, TString lcut,
    TTree* p=(TTree*)f->Get("mul");
   TTree* r=(TTree*)f->Get("evt");
 
-  //    } 
+  //    }
 
     //    if(dset==1314) lcut="m_ev_num<11700";
 
@@ -178,4 +178,3 @@ void plot_element(TPad *p1, TPad* p2, TString devnam, TString lcut,
     pt->Draw();
 
 }
-

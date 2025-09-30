@@ -117,7 +117,7 @@ class VQwDataElement: public MQwHistograms {
 
   UInt_t GetGoodEventCount() const { return fGoodEventCount; };
 
-  
+
   virtual void AssignValueFrom(const VQwDataElement* /*valueptr*/){
     std::cerr << "Operation AssignValueFrom not defined!" << std::endl;
   };
@@ -131,15 +131,15 @@ class VQwDataElement: public MQwHistograms {
 
   /*! \brief Sum operator */
   virtual void Sum(const VQwDataElement &value1, const VQwDataElement &value2)
-    { 
-      //std::cerr << "Sum not defined!" << std::endl; 
+    {
+      //std::cerr << "Sum not defined!" << std::endl;
       *this =  value1;
       *this += value2;
     }
   /*! \brief Difference operator */
   virtual void Difference(const VQwDataElement &value1, const VQwDataElement &value2)
-    { 
-      //std::cerr << "Difference not defined!" << std::endl; 
+    {
+      //std::cerr << "Difference not defined!" << std::endl;
       *this =  value1;
       *this -= value2;
     }
@@ -192,8 +192,8 @@ class VQwDataElement: public MQwHistograms {
   virtual void SetExternalClockName( const std::string /*name*/) {};
   virtual Double_t GetNormClockValue() { return 1.;}
 
-  
-  
+
+
   /*! \brief Return the name of the inheriting subsystem name*/
   TString GetSubsystemName() const {
     return fSubsystemName;
@@ -203,7 +203,7 @@ class VQwDataElement: public MQwHistograms {
   void SetSubsystemName(TString sysname){
     fSubsystemName=sysname;
   }
-  
+
    /*! \brief Return the type of the beam instrument*/
   TString GetModuleType() const {
     return fModuleType;

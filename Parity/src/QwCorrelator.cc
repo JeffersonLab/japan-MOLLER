@@ -310,14 +310,14 @@ Int_t QwCorrelator::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArr
     // Get the dependent variables
 
     const VQwHardwareChannel* dv_ptr = 0;
-    
+
     if (fDependentType.at(dv)==kHandleTypeMps){
       //  Quietly ignore the MPS type when we're connecting the asym & diff
       continue;
     }else{
       dv_ptr = this->RequestExternalPointer(fDependentFull.at(dv));
       if (dv_ptr==NULL){
-	switch (fDependentType.at(dv)) {
+        switch (fDependentType.at(dv)) {
         case kHandleTypeAsym:
           dv_ptr = asym.RequestExternalPointer(fDependentName.at(dv));
           break;
@@ -333,11 +333,11 @@ Int_t QwCorrelator::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArr
         }
       }
       if (dv_ptr == NULL){
-	QwWarning << "QwCombiner::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff):  Dependent variable, "
-		  << fDependentName.at(dv)
-		  << ", was not found (fullname=="
-		  << fDependentFull.at(dv)<< ")." << QwLog::endl;
-	 continue;
+        QwWarning << "QwCombiner::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff):  Dependent variable, "
+                  << fDependentName.at(dv)
+                  << ", was not found (fullname=="
+                  << fDependentFull.at(dv)<< ")." << QwLog::endl;
+         continue;
       }
     }
 
@@ -348,7 +348,7 @@ Int_t QwCorrelator::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArr
     }
 
   }
-  
+
   // Add independent variables
   for (size_t iv = 0; iv < fIndependentName.size(); iv++) {
     // Get the independent variables
@@ -374,11 +374,11 @@ Int_t QwCorrelator::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArr
       QwWarning << "Independent variable " << fIndependentName.at(iv) << " for correlator could not be found."
                 << QwLog::endl;
     }
-      
+
   }
   fIndependentValues.resize(fIndependentVar.size());
   fDependentValues.resize(fDependentVar.size());
- 
+
   nP = fIndependentName.size();
   nY = fDependentName.size();
 
@@ -470,7 +470,7 @@ void QwCorrelator::ConstructTreeBranches(
   branchm(fTree,linReg.mRYYp, "RYYp");
 
   branchv(fTree,linReg.mMP,  "MP");   // Parameter mean
-  branchv(fTree,linReg.mMY,  "MY");   // Uncorrected mean 
+  branchv(fTree,linReg.mMY,  "MY");   // Uncorrected mean
   branchv(fTree,linReg.mMYp, "MYp");  // Corrected mean
 
   branchv(fTree,linReg.mSP,  "dMP");  // Parameter mean error
@@ -731,4 +731,3 @@ void QwCorrelator::WriteAliasFile()
   // Increment call counter
   fCycleCounter++;
 }
-

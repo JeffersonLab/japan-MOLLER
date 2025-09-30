@@ -19,8 +19,8 @@
 
 //*****************************************************************
 QwBeamDetectorID::QwBeamDetectorID(Int_t subbankid, Int_t offset,
-				   TString name, TString dettype,
-				   TString modtype):
+                                   TString name, TString dettype,
+                                   TString modtype):
   fSubbankIndex(subbankid),fWordInSubbank(offset),
   fmoduletype(modtype),fdetectorname(name),fdetectortype(dettype),
   fIndex(-1)
@@ -29,7 +29,7 @@ QwBeamDetectorID::QwBeamDetectorID(Int_t subbankid, Int_t offset,
 }
 
 QwBeamDetectorID::QwBeamDetectorID(Int_t subbankid,
-				   QwParameterFile &paramfile):
+                                   QwParameterFile &paramfile):
   fSubbankIndex(subbankid), fIndex(-1)
 {
   Int_t modnum, channum;
@@ -87,7 +87,7 @@ QwBeamDetectorID::QwBeamDetectorID(Int_t subbankid,
     break;
   case kQwBPMCavity:
     QwBPMCavity::ParseChannelName(fChannelName,fdetectorname,
-				  fSubelementName, fSubelement);
+                                  fSubelementName, fSubelement);
     break;
   default:
     fdetectorname   = fChannelName;
@@ -118,23 +118,23 @@ Bool_t QwBeamDetectorID::ReportInitErrors() const
   lineok = kTRUE;
   if(fWordInSubbank<0){
     QwError<< "QwBeamLine::LoadChannelMap:  Unknown module type, "
-	   << fmoduletype <<", the detector "
-	   << fChannelName <<" will not be decoded "
-	   << QwLog::endl;
+           << fmoduletype <<", the detector "
+           << fChannelName <<" will not be decoded "
+           << QwLog::endl;
     lineok=kFALSE;
   }
   if(fTypeID==kQwUnknownDeviceType){
     QwError << "QwBeamLine::LoadChannelMap:  Unknown detector type, "
-	    << fdetectortype <<", the detector "
-	    << fChannelName <<" will not be decoded "
-	    << QwLog::endl;
+            << fdetectortype <<", the detector "
+            << fChannelName <<" will not be decoded "
+            << QwLog::endl;
     lineok=kFALSE;
   }
   if(fSubelement==kInvalidSubelementIndex){
     QwError << "QwBeamLine::LoadChannelMap: "<< fSubelementName
-	    << " was not recognized as a valid subelement for "
-	    << fdetectortype << "device type (channel name=="
-	    << fChannelName << ")" <<QwLog::endl;;
+            << " was not recognized as a valid subelement for "
+            << fdetectortype << "device type (channel name=="
+            << fChannelName << ")" <<QwLog::endl;;
     lineok=kFALSE;
   }
   return lineok;

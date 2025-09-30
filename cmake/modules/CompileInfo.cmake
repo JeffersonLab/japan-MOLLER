@@ -1,26 +1,26 @@
-# Get metadata about the configuration and build process
-# The actual work is done by a small helper script.
+# Get metadata about the configuration and build process The actual work is done
+# by a small helper script.
 
 # If shell scripts are not supported on some platform, one could put logic here
 # to select a platform-specfic script/program
 set(_compileinfo_cmd get_compileinfo.sh)
 
-find_program(GET_COMPILEINFO ${_compileinfo_cmd}
-  HINTS
-    ${CMAKE_CURRENT_LIST_DIR}/..
+find_program(
+  GET_COMPILEINFO ${_compileinfo_cmd}
+  HINTS ${CMAKE_CURRENT_LIST_DIR}/..
   PATH_SUFFIXES scripts
-  DOC "External helper program to report current build metadata"
-  )
+  DOC "External helper program to report current build metadata")
 if(NOT GET_COMPILEINFO)
-  message(FATAL_ERROR
-    "CompileInfo: Cannot find ${_compileinfo_cmd}. Check your installation.")
+  message(
+    FATAL_ERROR
+      "CompileInfo: Cannot find ${_compileinfo_cmd}. Check your installation.")
 endif()
 
-execute_process(COMMAND "${GET_COMPILEINFO}" "${CMAKE_CXX_COMPILER}"
+execute_process(
+  COMMAND "${GET_COMPILEINFO}" "${CMAKE_CXX_COMPILER}"
   OUTPUT_VARIABLE _compileinfo_out
   ERROR_VARIABLE _compileinfo_err
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 if(_compileinfo_err)
   message(FATAL_ERROR "Error running ${_compileinfo_cmd}:
@@ -30,8 +30,9 @@ endif()
 string(REGEX REPLACE "\n" ";" _compileinfo "${_compileinfo_out}")
 list(LENGTH _compileinfo _compileinfo_len)
 if(NOT _compileinfo_len EQUAL 7)
-  message(FATAL_ERROR
-    "Need exactly 7 items from ${_compileinfo_cmd}, got ${_compileinfo_len}")
+  message(
+    FATAL_ERROR
+      "Need exactly 7 items from ${_compileinfo_cmd}, got ${_compileinfo_len}")
 endif()
 list(GET _compileinfo 0 ${PROJECT_NAME_UC}_BUILD_DATE)
 list(GET _compileinfo 1 ${PROJECT_NAME_UC}_BUILD_DATETIME)

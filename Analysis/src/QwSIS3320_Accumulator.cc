@@ -1,11 +1,11 @@
 /**
- * \file	QwSIS3320_Accumulator.cc
+ * \file        QwSIS3320_Accumulator.cc
  *
- * \brief	Implementation of the SIS3320 sampling ADC accumulator
+ * \brief       Implementation of the SIS3320 sampling ADC accumulator
  *
- * \author	W. Deconinck
- * \date	2009-09-04 18:06:23
- * \ingroup	QwCompton
+ * \author      W. Deconinck
+ * \date        2009-09-04 18:06:23
+ * \ingroup     QwCompton
  *
  * The QwSIS3320_Accumulator should allow convenient access to the accumulator
  * data collected with the SIS3320 for the Compton photon detector.  This class
@@ -33,8 +33,8 @@ Int_t QwSIS3320_Accumulator::ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_le
 
     // Read all words
     num_samples = buffer[0];
-    hw_sum = buffer[2];		// first assign Int_t to Long_t, so that we
-    hw_sum <<= sizeof(Int_t);	// can shift it into the higher registers
+    hw_sum = buffer[2];         // first assign Int_t to Long_t, so that we
+    hw_sum <<= sizeof(Int_t);   // can shift it into the higher registers
     hw_sum += buffer[1];
     words_read = fNumberOfDataWords;
 

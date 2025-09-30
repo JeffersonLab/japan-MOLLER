@@ -70,10 +70,10 @@ class QwEnergyCalculator : public VQwDataElement{
     TString GetSubElementName(Int_t index) {return fDevice.at(index)->GetElementName();};
     void    LoadMockDataParameters(QwParameterFile &paramfile);
 //------------------------------------------------------------------------------------
-    
+
     void    ClearEventData();
     Int_t   ProcessEvBuffer(UInt_t* buffer,
-			    UInt_t word_position_in_buffer,UInt_t indexnumber);
+                            UInt_t word_position_in_buffer,UInt_t indexnumber);
     void    ProcessEvent();
     void    PrintValue() const;
     void    PrintInfo() const;
@@ -98,7 +98,7 @@ class QwEnergyCalculator : public VQwDataElement{
     UInt_t   UpdateErrorFlag();
 
     void    UpdateErrorFlag(const QwEnergyCalculator *ev_error);
-  
+
 
     void    Set(const VQwBPM* device,TString type, TString property ,Double_t tmatrix_ratio);
     void    Ratio(QwEnergyCalculator &numer,QwEnergyCalculator &denom);

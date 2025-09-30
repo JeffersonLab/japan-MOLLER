@@ -114,14 +114,14 @@ Int_t VQwScaler_Channel::GetBufferOffset(Int_t scalerindex, Int_t wordindex, UIn
 
   if (scalerindex<0 ){
     QwError << "QwScaler_Channel::GetBufferOffset:  Invalid scaler index,"
-	    << scalerindex
-	    << ".  Must be zero or greater."
-	    << QwLog::endl;
+            << scalerindex
+            << ".  Must be zero or greater."
+            << QwLog::endl;
   } else if (scalerindex<0 || wordindex>kMaxWords){
     QwError << "QwScaler_Channel::GetBufferOffset:  Invalid word index,"
-	    << wordindex
-	    << ".  Must be in range [0," << kMaxWords << "]."
-	    << QwLog::endl;
+            << wordindex
+            << ".  Must be in range [0," << kMaxWords << "]."
+            << QwLog::endl;
   } else {
     offset = (header + kMaxWords)*scalerindex + header + wordindex ;
   }
@@ -162,7 +162,7 @@ void QwScaler_Channel<data_mask,data_shift>::EncodeEventData(std::vector<UInt_t>
 
 template<unsigned int data_mask, unsigned int data_shift>
 Int_t QwScaler_Channel<data_mask,data_shift>::ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left,
-							      UInt_t index)
+                                                              UInt_t index)
 {
   UInt_t words_read = 0;
   if (IsNameEmpty()){
@@ -197,11 +197,11 @@ void VQwScaler_Channel::ProcessEvent()
       fValue = fCalibrationFactor * (Double_t(fValue_Raw)/time - fPedestal);
     } else {
       QwWarning << "VQwScaler_Channel::ProcessEvent:  "
-		<< "Missing the reference clock, "
-		<< fNormChannelName
-		<< ", for data element "
-		<< GetElementName()
-		<< QwLog::endl;
+                << "Missing the reference clock, "
+                << fNormChannelName
+                << ", for data element "
+                << GetElementName()
+                << QwLog::endl;
     }
   }
 }
@@ -213,11 +213,11 @@ void VQwScaler_Channel::PrintValue() const
             << std::setw(18) << std::left << GetSubsystemName()  << " "
             << std::setw(18) << std::left << GetModuleType()     << " "
             << std::setw(18) << std::left << GetElementName()    << " "
-	    << std::setw(12) << std::left << GetValue()          << "  +/-  "
-	    << std::setw(12) << std::left << GetValueError()     << "  sig  "
+            << std::setw(12) << std::left << GetValue()          << "  +/-  "
+            << std::setw(12) << std::left << GetValueError()     << "  sig  "
             << std::setw(12) << std::left << GetValueWidth()     << " "
             << std::setw(12) << std::left << GetGoodEventCount() << " "
-	    << QwLog::endl;
+            << QwLog::endl;
 }
 
 void VQwScaler_Channel::PrintInfo() const
@@ -286,8 +286,8 @@ void QwScaler_Channel<data_mask,data_shift>::ConstructBranchAndVector(TTree *tre
       values.push_back(0.0);
       list += ":raw/D";
       if ((~data_mask) != 0){
-	values.push_back(0.0);
-	list += ":header/D"; 
+        values.push_back(0.0);
+        list += ":header/D";
       }
     }
     //std::cout << basename <<": first==" << fTreeArrayIndex << ", last==" << values.size() << std::endl;
@@ -316,7 +316,7 @@ void QwScaler_Channel<data_mask,data_shift>::FillTreeVector(std::vector<Double_t
     //  This channel is not used, so skip setting up the tree.
   } else if (fTreeArrayNumEntries < 0) {
     QwError << "VQwScaler_Channel::FillTreeVector:  fTreeArrayNumEntries=="
-	    << fTreeArrayNumEntries << QwLog::endl;
+            << fTreeArrayNumEntries << QwLog::endl;
   } else if (fTreeArrayNumEntries == 0) {
     static bool warned = false;
     if (!warned) {
@@ -327,11 +327,11 @@ void QwScaler_Channel<data_mask,data_shift>::FillTreeVector(std::vector<Double_t
     }
   } else if (values.size() < fTreeArrayIndex+fTreeArrayNumEntries) {
     QwError << "VQwScaler_Channel::FillTreeVector:  values.size()=="
-	    << values.size() << " name: " << fElementName
-	    << "; fTreeArrayIndex+fTreeArrayNumEntries=="
+            << values.size() << " name: " << fElementName
+            << "; fTreeArrayIndex+fTreeArrayNumEntries=="
             << fTreeArrayIndex << '+' << fTreeArrayNumEntries << '='
-	    << fTreeArrayIndex+fTreeArrayNumEntries
-	    << QwLog::endl;
+            << fTreeArrayIndex+fTreeArrayNumEntries
+            << QwLog::endl;
   } else {
     size_t index = fTreeArrayIndex;
     values[index++] = this->fValue;
@@ -344,7 +344,7 @@ void QwScaler_Channel<data_mask,data_shift>::FillTreeVector(std::vector<Double_t
     if(fDataToSave==kRaw){
       values[index++] = this->fValue_Raw;
       if ((~data_mask) != 0){
-	values[index++] = this->fHeader;
+        values[index++] = this->fHeader;
       }
 
     }
@@ -352,7 +352,7 @@ void QwScaler_Channel<data_mask,data_shift>::FillTreeVector(std::vector<Double_t
     //std::cout<<"value: "<< this->fValue << std::endl;
     //std::cout <<"index: " << index  << std::endl;
   }
-  
+
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
@@ -375,15 +375,15 @@ void QwScaler_Channel<data_mask,data_shift>::ConstructNTupleAndVector(std::uniqu
       numElements += 1; // raw
       if ((~data_mask) != 0) numElements += 1; // header
     }
-    
+
     // Resize vectors once to avoid reallocation
     size_t oldSize = values.size();
     values.resize(oldSize + numElements, 0.0);
     fieldPtrs.reserve(fieldPtrs.size() + numElements);
-    
+
     // Main value
     fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
-    
+
     if (fDataToSave == kMoments) {
       fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_m2").Data()));
       fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_err").Data()));
@@ -395,7 +395,7 @@ void QwScaler_Channel<data_mask,data_shift>::ConstructNTupleAndVector(std::uniqu
 
     if(fDataToSave==kRaw){
       fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_raw").Data()));
-      
+
       if ((~data_mask) != 0){
         fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_header").Data()));
       }
@@ -412,7 +412,7 @@ void QwScaler_Channel<data_mask,data_shift>::FillNTupleVector(std::vector<Double
     //  This channel is not used, so skip filling.
   } else if (fTreeArrayNumEntries < 0) {
     QwError << "QwScaler_Channel::FillNTupleVector:  fTreeArrayNumEntries=="
-	    << fTreeArrayNumEntries << QwLog::endl;
+            << fTreeArrayNumEntries << QwLog::endl;
   } else if (fTreeArrayNumEntries == 0) {
     static bool warned = false;
     if (!warned) {
@@ -423,11 +423,11 @@ void QwScaler_Channel<data_mask,data_shift>::FillNTupleVector(std::vector<Double
     }
   } else if (values.size() < fTreeArrayIndex+fTreeArrayNumEntries) {
     QwError << "QwScaler_Channel::FillNTupleVector:  values.size()=="
-	    << values.size() << " name: " << fElementName
-	    << "; fTreeArrayIndex+fTreeArrayNumEntries=="
+            << values.size() << " name: " << fElementName
+            << "; fTreeArrayIndex+fTreeArrayNumEntries=="
             << fTreeArrayIndex << '+' << fTreeArrayNumEntries << '='
-	    << fTreeArrayIndex+fTreeArrayNumEntries
-	    << QwLog::endl;
+            << fTreeArrayIndex+fTreeArrayNumEntries
+            << QwLog::endl;
   } else {
     size_t index = fTreeArrayIndex;
     values[index++] = this->fValue;
@@ -440,7 +440,7 @@ void QwScaler_Channel<data_mask,data_shift>::FillNTupleVector(std::vector<Double
     if(fDataToSave==kRaw){
       values[index++] = this->fValue_Raw;
       if ((~data_mask) != 0){
-	values[index++] = this->fHeader;
+        values[index++] = this->fHeader;
       }
     }
   }
@@ -524,7 +524,7 @@ VQwScaler_Channel& VQwScaler_Channel::operator=(const VQwScaler_Channel &value)
 }
 
 void VQwScaler_Channel::AssignScaledValue(const VQwScaler_Channel &value,
-				    Double_t scale)
+                                    Double_t scale)
 {
   if (!IsNameEmpty()) {
     this->fValue      = value.fValue * scale;
@@ -642,14 +642,14 @@ void VQwScaler_Channel::Ratio(const VQwScaler_Channel &numer, const VQwScaler_Ch
   if (!IsNameEmpty()){
     *this  = numer;
     *this /= denom;
-    
+
     //  Set the raw values to zero.
     fHeader    = 0;
     fValue_Raw = 0;
-    
+
     // Remaining variables
     fGoodEventCount  = denom.fGoodEventCount;
-    fErrorFlag = (numer.fErrorFlag|denom.fErrorFlag);//error code is ORed.    
+    fErrorFlag = (numer.fErrorFlag|denom.fErrorFlag);//error code is ORed.
   }
 }
 
@@ -667,16 +667,16 @@ VQwScaler_Channel& VQwScaler_Channel::operator/= (const VQwScaler_Channel &denom
     if (this->fValue != 0.0 && denom.fValue != 0.0){
       ratio = (this->fValue) / (denom.fValue);
       variance =  ratio * ratio *
-	(this->fValueM2 / this->fValue / this->fValue
-	 + denom.fValueM2 / denom.fValue / denom.fValue);
+        (this->fValueM2 / this->fValue / this->fValue
+         + denom.fValueM2 / denom.fValue / denom.fValue);
       fValue   = ratio;
       fValueM2 = variance;
     } else if (this->fValue == 0.0) {
       fValue   = 0.0;
       fValueM2 = 0.0;
     } else {
-      QwVerbose << "Attempting to divide by zero in " 
-		<< GetElementName() << QwLog::endl;
+      QwVerbose << "Attempting to divide by zero in "
+                << GetElementName() << QwLog::endl;
       fValue   = 0.0;
       fValueM2 = 0.0;
     }
@@ -699,7 +699,7 @@ void VQwScaler_Channel::Product(VQwScaler_Channel &numer, VQwScaler_Channel &den
     fValue = numer.fValue * denom.fValue;
     fHeader    = 0;
     fValue_Raw = 0;
-    
+
     // Remaining variables
     fGoodEventCount  = denom.fGoodEventCount;
     fErrorFlag = (numer.fErrorFlag|denom.fErrorFlag);//error code is ORed.
@@ -746,7 +746,7 @@ Int_t VQwScaler_Channel::ApplyHWChecks() {
 
 Bool_t VQwScaler_Channel::ApplySingleEventCuts()
 {
-  //std::cout << "Here in VQwScaler_Channel: "<< std::endl; 
+  //std::cout << "Here in VQwScaler_Channel: "<< std::endl;
   Bool_t status;
   //QwError<<" Single Event Check ! "<<QwLog::endl;
   if (bEVENTCUTMODE>=2){//Global switch to ON/OFF event cuts set at the event cut file
@@ -758,17 +758,17 @@ Bool_t VQwScaler_Channel::ApplySingleEventCuts()
       //std::cout << "Second" << std::endl;
       //QwError<<" Single Event Cut passed "<<GetElementName()<<" "<<GetValue()<<QwLog::endl;
       if (fErrorFlag !=0)
-	status=kFALSE;
+        status=kFALSE;
       else
-	status=kTRUE;
+        status=kTRUE;
     }
     else{
       //std::cout << "Third" << std::endl;
       //QwError<<" Single Event Cut Failed "<<GetElementName()<<" "<<GetValue()<<QwLog::endl;
       if (GetValue()> fULimit)
-	fErrorFlag|=kErrorFlag_EventCut_U;
+        fErrorFlag|=kErrorFlag_EventCut_U;
       else
-	fErrorFlag|=kErrorFlag_EventCut_L;
+        fErrorFlag|=kErrorFlag_EventCut_L;
       status=kFALSE;
     }
 
@@ -783,7 +783,7 @@ Bool_t VQwScaler_Channel::ApplySingleEventCuts()
   }
 
 
-  return status;  
+  return status;
 }
 
 void VQwScaler_Channel::IncrementErrorCounters()
@@ -791,7 +791,7 @@ void VQwScaler_Channel::IncrementErrorCounters()
   if ( (kErrorFlag_ZeroHW &  fErrorFlag)==kErrorFlag_ZeroHW){
     fNumEvtsWithHWErrors++; //increment the hw error counter
   }
-  if ( ((kErrorFlag_EventCut_L &  fErrorFlag)==kErrorFlag_EventCut_L) 
+  if ( ((kErrorFlag_EventCut_L &  fErrorFlag)==kErrorFlag_EventCut_L)
        || ((kErrorFlag_EventCut_U &  fErrorFlag)==kErrorFlag_EventCut_U)){
     fNumEvtsWithEventCutsRejected++; //increment the event cut error counter
   }
@@ -804,7 +804,7 @@ void VQwScaler_Channel::AccumulateRunningSum(const VQwScaler_Channel& value, Int
   if(count==0){
     count = value.fGoodEventCount;
   }
-  
+
   // Moment calculations
   Int_t n1 = fGoodEventCount;
   Int_t n2 = count;
@@ -901,15 +901,15 @@ void VQwScaler_Channel::CalculateRunningAverage()
 void  VQwScaler_Channel::PrintErrorCounters() const{
     if (fNumEvtsWithHWErrors>0)
       QwMessage << "QwScaler_Channel " << GetElementName()
-		<< " had " << fNumEvtsWithHWErrors
-		<< " events with a hardware faliure."
-		<< QwLog::endl;
+                << " had " << fNumEvtsWithHWErrors
+                << " events with a hardware faliure."
+                << QwLog::endl;
 
     if (fNumEvtsWithEventCutsRejected>0)
       QwMessage << "QwScaler_Channel " << GetElementName()
-		<< " had " << fNumEvtsWithEventCutsRejected
-		<< " events rejected by Event Cuts."
-		<< QwLog::endl;
+                << " had " << fNumEvtsWithEventCutsRejected
+                << " events rejected by Event Cuts."
+                << QwLog::endl;
   }
 
 void VQwScaler_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *value){
@@ -920,7 +920,7 @@ void VQwScaler_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *valu
     if (input!=NULL && !IsNameEmpty()){
         this->fValue  += scale * input->fValue;
         this->fValueM2 = 0.0;
-	this->fErrorFlag |= (input->fErrorFlag);
+        this->fErrorFlag |= (input->fErrorFlag);
     }
 }
 
@@ -939,5 +939,3 @@ VQwHardwareChannel* QwScaler_Channel<0xffffffff,0>::Clone(VQwDataElement::EDataT
 //  types that are typedef'ed in the header file.
 template class QwScaler_Channel<0x00ffffff,0>;  // QwSIS3801D24_Channel
 template class QwScaler_Channel<0xffffffff,0>;  // QwSIS3801_Channel, etc.
-
-

@@ -117,13 +117,13 @@ void  QwPMT_Channel::FillTreeVector(std::vector<Double_t> &values) const
     //  This channel is not used, so skip filling the tree vector.
   } else if (fTreeArrayNumEntries<=0){
     std::cerr << "QwPMT_Channel::FillTreeVector:  fTreeArrayNumEntries=="
-	      << fTreeArrayNumEntries << std::endl;
+              << fTreeArrayNumEntries << std::endl;
   } else if (values.size() < fTreeArrayIndex+fTreeArrayNumEntries){
     std::cerr << "QwPMT_Channel::FillTreeVector:  values.size()=="
-	      << values.size()
-	      << "; fTreeArrayIndex+fTreeArrayNumEntries=="
-	      << fTreeArrayIndex+fTreeArrayNumEntries
-	      << std::endl;
+              << values.size()
+              << "; fTreeArrayIndex+fTreeArrayNumEntries=="
+              << fTreeArrayIndex+fTreeArrayNumEntries
+              << std::endl;
   } else {
     size_t index=fTreeArrayIndex;
     values[index++] = this->fValue;

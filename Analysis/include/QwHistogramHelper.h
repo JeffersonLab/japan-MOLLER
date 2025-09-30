@@ -57,7 +57,7 @@ class QwHistogramHelper{
   Bool_t MatchVQWKElementFromList(const std::string& subsystemname,
       const std::string& moduletype,
       const std::string& devicename);
-  
+
  protected:
 
   /// Histogram parameter class
@@ -67,7 +67,7 @@ class QwHistogramHelper{
     TString name_title;
     TString type;
     Int_t nbins;
-    Int_t x_nbins;          
+    Int_t x_nbins;
     Float_t x_min;
     Float_t x_max;
     Int_t y_nbins;
@@ -85,7 +85,7 @@ class QwHistogramHelper{
     HistParams(): expression("") {};
 
    public:
-    /// Relational less-than operator overload  
+    /// Relational less-than operator overload
     bool operator< (const HistParams& that) const {
       // Compare only lowercase strings
       TString thisname(this->name_title); thisname.ToLower();
@@ -128,7 +128,7 @@ class QwHistogramHelper{
 
   TProfile* Construct1DProf(const HistParams &params);
   TProfile2D* Construct2DProf(const HistParams &params);
-  
+
   const HistParams GetHistParamsFromLine(QwParameterFile &mapstr);
 
   // Look up the histogram parameters from a file according to histname.
@@ -152,7 +152,7 @@ class QwHistogramHelper{
 
   std::vector<TString> fSubsystemList;//stores the list of subsystems
   std::vector<std::vector<TString> > fModuleList;//will store list modules in  each subsystem (ex. for BCM, BPM etc in Beam line sub system)
-  std::vector<std::vector<std::vector<TString> > > fVQWKTrimmedList; //will store list of VQWK elements for each subsystem for each module  
+  std::vector<std::vector<std::vector<TString> > > fVQWKTrimmedList; //will store list of VQWK elements for each subsystem for each module
 };
 
 //  Declare a global copy of the histogram helper.
@@ -160,5 +160,3 @@ class QwHistogramHelper{
 extern QwHistogramHelper gQwHists;
 
 #endif
-
-

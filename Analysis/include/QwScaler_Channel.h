@@ -47,7 +47,7 @@ public:
   VQwScaler_Channel(): MQwMockable() {
     InitializeChannel("","");
   }
-    
+
   VQwScaler_Channel(TString name, TString datatosave = "raw"): MQwMockable() {
     InitializeChannel(name,datatosave);
   };
@@ -162,7 +162,7 @@ public:
   void AddChannelOffset(Double_t Offset);
   void Scale(Double_t Offset);
   void DivideBy(const VQwScaler_Channel &denom);
-  
+
 
   Int_t ApplyHWChecks(); //Check for harware errors in the devices. This will return the device error code.
 
@@ -199,7 +199,7 @@ public:
   inline void DeaccumulateRunningSum(const VQwScaler_Channel& value, Int_t ErrorMask){
     AccumulateRunningSum(value, -1, ErrorMask);
   };
-  
+
   void PrintValue() const;
   void PrintInfo() const;
   void CalculateRunningAverage();
@@ -220,7 +220,7 @@ public:
 
 protected:
   VQwScaler_Channel& operator/=(const VQwScaler_Channel&);
-  
+
 protected:
   static const Bool_t kDEBUG;
 

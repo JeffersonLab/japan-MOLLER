@@ -8,14 +8,14 @@ void PITAscan_main_run4611(int run_num = 4611, TString mainBCM = "bcm_an_us", TS
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.15);
   gStyle->SetStatW(0.37);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(111);
   gStyle->SetStatX(0.9);
   gStyle->SetStatY(0.9);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -25,10 +25,10 @@ void PITAscan_main_run4611(int run_num = 4611, TString mainBCM = "bcm_an_us", TS
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.05,"hxyz");
   gStyle->SetTitleOffset(1.3,"y");
-  gROOT->ForceStyle();  
+  gROOT->ForceStyle();
 
   TString mydir = "~/PREX/japan/plots/parityOutputs";
-  
+
   //   TString rf_name =Form("$QW_ROOTFILES/prexPrompt_pass1_%d.000.root",run_num);
       TString rf_name =Form("$QW_ROOTFILES/prexALL_%d.000.root",run_num);
 
@@ -107,7 +107,7 @@ TString device_name[] =
   double bcm_dev[nBCM];
   TString my_cut = Form("%s",ucut.Data());
 
-  
+
 
 
   for(int idet=0;idet<nDET;idet++){
@@ -271,13 +271,13 @@ TString device_name[] =
     cout<<"diff_bpm11X pita-slope nm/count: "<<myEslope*1000<<endl;
     cout<<"Energy loading nm/ppm: "<<myEslope*1000/myslope<<endl;
    for(int ibcm=0;ibcm<nBCM;ibcm++){
-	bcm_dev[ibcm] = Aq[ibcm]/myslope*100;
+        bcm_dev[ibcm] = Aq[ibcm]/myslope*100;
         cout<< Form("%s slope(%s of pita-slope):",bcm_name[ibcm].Data(),"%")<<"\t"<<bcm_dev[ibcm]<<"%"<<endl;
    }
 
 
       for(int i=0;i<nDET;i++){
-	sam_dev[i] = Asam[i]/myslope*100;
+        sam_dev[i] = Asam[i]/myslope*100;
         cout<< Form("%s slope(%s of pita-slope):",device_name[i].Data(),"%")<<"\t"<<sam_dev[i]<<"%"<<endl;
       }
  rootfile->Close();

@@ -36,7 +36,7 @@ class MQwV775TDC{
   ~MQwV775TDC();
 
   void DecodeTDCWord(UInt_t &word, const ROCID_t roc_id=0);
-  
+
   Bool_t IsValidDataword()    {return fV775ValidFlag;};
   Bool_t IsHeaderword()       {return fV775HeaderFlag;};
 
@@ -49,15 +49,15 @@ class MQwV775TDC{
   UInt_t GetTDCTriggerTime();
 
   void SetReferenceParameters(Double_t mindiff, Double_t maxdiff,
-			      Double_t offset, Double_t shift){
+                              Double_t offset, Double_t shift){
     //  Do nothing, but keep this function to behave like
     //  the MQwF1TDC class.
   };
 
   Double_t SubtractReference(Double_t rawtime, Double_t reftime);
   Bool_t CheckDataIntegrity(const ROCID_t roc_id, UInt_t *buffer, UInt_t num_words);
-  void   PrintTDCHeader(Bool_t flag) ; 
-  void   PrintTDCData(Bool_t flag) ; 
+  void   PrintTDCHeader(Bool_t flag) ;
+  void   PrintTDCData(Bool_t flag) ;
 
  private:
   static const UInt_t kV775Mask_SlotNumber;

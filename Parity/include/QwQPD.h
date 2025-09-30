@@ -72,7 +72,7 @@ class QwQPD : public VQwBPM {
 
   void    ClearEventData();
   Int_t   ProcessEvBuffer(UInt_t* buffer,
-			UInt_t word_position_in_buffer,UInt_t indexnumber);
+                        UInt_t word_position_in_buffer,UInt_t indexnumber);
   void    ProcessEvent();
 
   const VQwHardwareChannel* GetPosition(EBeamPositionMonitorAxis axis) const {

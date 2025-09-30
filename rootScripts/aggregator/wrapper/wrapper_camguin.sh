@@ -2,14 +2,14 @@
 
 
 usage()
-{ 
-	[ $1 -eq 2 ] && echo "Please enter runnumber."
+{
+        [ $1 -eq 2 ] && echo "Please enter runnumber."
   [ $1 -eq 3 ] && echo "Please enter minirunnumber."
   [ $1 -eq 4 ] && echo "Please enter splitnumber."
   [ $1 -eq 5 ] && echo "Please enter input file name."
   [ $1 -eq 6 ] && echo "Please enter number of miniruns."
   [ $1 -eq 7 ] && echo "./wrapper.sh -f input.txt -r 1296 -s 000 -n 1"
-	exit $1
+        exit $1
 }
 
 source ../setup_camguin.sh
@@ -24,7 +24,7 @@ do
     s) SPLITNUM=$OPTARG;;
     f) CONFIG=$OPTARG ;;
     n) NRUNS=$OPTARG ;;
-    h) usage 5 ;;  
+    h) usage 5 ;;
   esac
 done
 

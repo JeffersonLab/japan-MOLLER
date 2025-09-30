@@ -35,7 +35,7 @@ class VQwClock : public VQwDataElement {
   /***************************************************************
    *  Class:  VQwClock
    *          Pure Virtual base class for the clocks in the datastream
-   *          Through use of the Create factory function, one can 
+   *          Through use of the Create factory function, one can
    *          get a concrete instance of a templated QwClock.
    *
    ***************************************************************/

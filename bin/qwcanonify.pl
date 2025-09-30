@@ -10,20 +10,20 @@ use File::Glob qw[:glob];
 ### search for "helpstring" below for documentation
 ################################################################
 
-my ($help,$quiet,$dryrun,$runrange); 
+my ($help,$quiet,$dryrun,$runrange);
 my @searchpaths = (`pwd`, $ENV{QW_DATA});
 
 ## Add other useful defalut paths here, whitespace-separated
 push @searchpaths, qw[
-	/home/cdaq/qweak/QwScratch
-	/cache/mss/hallc/qweak/raw
+        /home/cdaq/qweak/QwScratch
+        /cache/mss/hallc/qweak/raw
   ];
 
 my $optstatus = GetOptions
-  "help|h|?"	=> \$help,
-  "quiet|q"	=> \$quiet,
-  "dryrun"	=> \$dryrun,
-  "runrange=s"	=> \$runrange,
+  "help|h|?"    => \$help,
+  "quiet|q"     => \$quiet,
+  "dryrun"      => \$dryrun,
+  "runrange=s"  => \$runrange,
 ;
 
 ## If there are any arguments left, search those paths INSTEAD of the defaults
@@ -38,14 +38,14 @@ my $helpstring = <<EOF;
 qwcanonify: create analyzer-friendly symlinks to data files
 Usage: qwcanonify -r <runrange> [/optional/search/path]
 Required argument:
-	-r runrange	run number(s) to look for
+        -r runrange     run number(s) to look for
 Options:
-	--help		print this stuff
-	--quiet		just do things, don't yak about it
-	--dryrun	just yak about it, don't do anything
+        --help          print this stuff
+        --quiet         just do things, don't yak about it
+        --dryrun        just yak about it, don't do anything
 Symlinks are made in \$QW_DATA; yours is
-	$ENV{QW_DATA}
-Your search path is 
+        $ENV{QW_DATA}
+Your search path is
 EOF
 $helpstring .= "\t$_\n" foreach @searchpaths;
 
@@ -85,12 +85,12 @@ RUN: foreach my $run ($lowrun .. $highrun) {
     my @found = glob "$path/*_$run.{dat,log}*";
 
     FILE: foreach my $src (@found) {
-      my($segment) = ($src =~ /(\.\d+)?$/); 
+      my($segment) = ($src =~ /(\.\d+)?$/);
       $segment = "" unless defined $segment;
       print "$src -> $dest$segment\n" unless $quiet;
       unless ($dryrun) {
-	symlink "$src", "$dest$segment"
-	  or die "symlink failed: $!\n";
+        symlink "$src", "$dest$segment"
+          or die "symlink failed: $!\n";
       }
     }
     next RUN if @found;

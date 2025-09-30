@@ -305,7 +305,7 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   Int_t fErrorCount_SameHW;   ///< check to see ADC returning same HW value
   Int_t fErrorCount_ZeroHW;   ///< check to see ADC returning zero
 
-  Int_t fNumEvtsWithEventCutsRejected; ///< Counts the Event cut rejected events 
+  Int_t fNumEvtsWithEventCutsRejected; ///< Counts the Event cut rejected events
 
 
 

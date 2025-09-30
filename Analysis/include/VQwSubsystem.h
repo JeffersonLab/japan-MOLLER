@@ -242,11 +242,11 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   virtual void ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file) = 0;
   /// \brief Fill the tree vector
   virtual void FillTreeVector(std::vector<Double_t>& values) const = 0;
-  
+
 #ifdef HAS_RNTUPLE_SUPPORT
   /// \brief Construct the RNTuple fields and vector
   virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
-  /// \brief Construct the RNTuple fields and vector  
+  /// \brief Construct the RNTuple fields and vector
   virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) {
     TString tmpstr("");
     ConstructNTupleAndVector(model, tmpstr, values, fieldPtrs);
@@ -257,7 +257,7 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   // @}
 
 
- 
+
 
   /// \name Expert tree construction and maintenance
   /// These functions are not purely virtual, since not every subsystem is
@@ -325,8 +325,8 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
     if (rocindex>=0){
       Int_t bankindex = FindIndex(fBank_IDs[rocindex],bank_id);
       if (bankindex>=0 && fMarkerWords.at(rocindex).at(bankindex).size()>0){
-	std::vector<UInt_t> m = fMarkerWords.at(rocindex).at(bankindex);
-	marker.insert(marker.end(), m.begin(), m.end());
+        std::vector<UInt_t> m = fMarkerWords.at(rocindex).at(bankindex);
+        marker.insert(marker.end(), m.begin(), m.end());
       }
     }
   }
@@ -337,14 +337,14 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
     {
       Int_t index = -1;
       for (size_t i=0 ; i < myvec.size(); i++ ){
-	if (myvec[i]==value){
-	  index=i;
-	  break;
-	}
+        if (myvec[i]==value){
+          index=i;
+          break;
+        }
       }
       return index;
     };
-  
+
  protected:
 
   TString  fSystemName; ///< Name of this subsystem
@@ -358,7 +358,7 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
  protected:
 
   ROCID_t  fCurrentROC_ID; ///< ROC ID that is currently being processed
-  BankID_t fCurrentBank_ID; ///< Bank ID (and Marker word) that is currently being processed; 
+  BankID_t fCurrentBank_ID; ///< Bank ID (and Marker word) that is currently being processed;
 
   /// Vector of ROC IDs associated with this subsystem
   std::vector<ROCID_t> fROC_IDs;

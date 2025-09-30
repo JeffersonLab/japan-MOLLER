@@ -1,7 +1,7 @@
 void evtBlockMacro(char* ch, int a, int b){
 
   evt->Draw(Form("%s.block%i-%s.block%i",ch,a,ch,b),
-  	Form("ErrorFlag==0 && %s.Device_Error_Code == 0",ch));
+        Form("ErrorFlag==0 && %s.Device_Error_Code == 0",ch));
   TH1* htemp = (TH1*)gROOT->FindObject("htemp");
 
   htemp->SetTitle(Form("%s Block %i - Block %i",ch,a,b));

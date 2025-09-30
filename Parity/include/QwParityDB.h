@@ -68,7 +68,7 @@ class QwParityDB: public QwDatabase {
     const string GetMeasurementID(const Int_t index);
     UInt_t GetSlowControlDetectorID(const string& name);         //<! Get slow_controls_data_id for epics name
     UInt_t GetErrorCodeID(const string& name);         //<! Get error_code_id for error code name
-    
+
     UInt_t GetRunNumber() {return fRunNumber;}       //<! Run number getter
     UInt_t GetSegmentNumber() {return fSegmentNumber;}       //<! CODA File segment number getter
     UInt_t GetRunID()     {return fRunID;}           //<! Run ID getter
@@ -121,4 +121,4 @@ class QwParityDB: public QwDatabase {
 
 #endif
 
-#endif // #ifdef __USE_DATABASE__                                                                                                         
+#endif // #ifdef __USE_DATABASE__

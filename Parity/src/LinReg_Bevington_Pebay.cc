@@ -345,7 +345,7 @@ void LinRegBevPeb::printSummaryP() const
         if (getSigmaP(j,sigJ) < 0) QwWarning << "LRB::getSigmaP failed" << QwLog::endl;
         if (getCovarianceP(i,j,cov) < 0) QwWarning << "LRB::getCovarianceP failed" << QwLog::endl;
         double corel=cov / sigI / sigJ;
-        
+
         QwMessage << Form("  %12.3g",corel);
       }
       QwMessage << Form("\n");
@@ -360,7 +360,7 @@ void LinRegBevPeb::printSummaryY() const
 {
   QwMessage << Form("\nLinRegBevPeb::printSummaryY seen good eve=%lld  (CSV-format)",fGoodEventNumber)<<QwLog::endl;
   QwMessage << Form("  j,       mean,     sig(mean),   nSig(mean),  sig(distribution)    \n");
-  
+
   for (int i = 0; i <nY; i++) {
     double meanI,sigI;
     if (getMeanY(i,meanI) < 0) QwWarning << "LRB::getMeanY failed" << QwLog::endl;
@@ -410,10 +410,10 @@ void LinRegBevPeb::printSummaryYP() const
     double meanI,sigI;
     if (getMeanY(iy,meanI) < 0) QwWarning << "LRB::getMeanY failed" << QwLog::endl;
     if (getSigmaY(iy,sigI) < 0) QwWarning << "LRB::getSigmaY failed" << QwLog::endl;
-    
+
     QwMessage << Form(" %3d %6sY%d:  %+12.4g  %12.4g ",iy," ",iy,meanI,sigI);
     for (int ip = 0; ip <nP; ip++) {
-      double sigJ,cov; 
+      double sigJ,cov;
       if (getSigmaP(ip,sigJ) < 0) QwWarning << "LRB::getSigmaP failed" << QwLog::endl;
       if (getCovariancePY(ip,iy,cov) < 0) QwWarning << "LRB::getCovariancePY failed" << QwLog::endl;
       double corel = cov / sigI / sigJ;
@@ -525,4 +525,3 @@ void LinRegBevPeb::solve()
 
   fErrorFlag = 0;
 }
-

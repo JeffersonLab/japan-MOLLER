@@ -1,6 +1,6 @@
-// Injector BPMs Plot Macro 
+// Injector BPMs Plot Macro
 // Source from Caryn Palatchi
-// Adapted by Tao Ye for JAPAN 
+// Adapted by Tao Ye for JAPAN
 // Adapted by KDP and PK for panguin
 // Last Update : 05-2019
 
@@ -15,9 +15,9 @@
 vector<const char*> vBPMall = {"bpm2i01","bpm2i02","bpm1i02","bpm1i04",
                                "bpm1i06", "bpm0i01","bpm0i01a","bpm0i02",
                                "bpm0i02a","bpm0i05","bpm0i07","bpm0l01",
-			    "bpm0l02","bpm0l03","bpm0l04","bpm0l05","bpm0l06",
-			    "bpm0l07","bpm0l08","bpm0l09","bpm0l10","bpm0r03",
-			    "bpm0r05"};
+                            "bpm0l02","bpm0l03","bpm0l04","bpm0l05","bpm0l06",
+                            "bpm0l07","bpm0l08","bpm0l09","bpm0l10","bpm0r03",
+                            "bpm0r05"};
 
 void PlotInjBPMS(TString ucut){
 
@@ -55,7 +55,7 @@ void PlotInjBPMS(TString ucut){
     thishist = (TH1D*)gDirectory->FindObject(objnam);
     Aq[dd] = thishist->GetMean();
     eAq[dd]= thishist->GetMeanError();
-    rmsAq[dd]= thishist->GetRMS();    
+    rmsAq[dd]= thishist->GetRMS();
     zero[dd]=0;
     // delete thishist;
     mul_tree->Draw(Form("1e3*diff_%sX>>histx%d",vBPMall[dd],dd),lcut,"goff");
@@ -98,7 +98,7 @@ void PlotInjBPMS(TString ucut){
   Aqgraph= new TGraphErrors(numchains,chain,&(Aq[0]),chainerr,&(eAq[0]));
   Aqrmsgraph = new TGraphErrors(numchains,chain,&(rmsAq[0]),chainerr,&(zero[0]));
 
-  
+
   TMultiGraph *xygraph = new TMultiGraph();
   TMultiGraph *xyrmsgraph = new TMultiGraph();
 
@@ -199,4 +199,3 @@ void PlotInjBPMS(TString ucut){
   pad_buff->SetGrid();
 
 }
-

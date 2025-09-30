@@ -24,7 +24,7 @@ class QwParameterFile;
 class QwBeamDetectorID {
 public:
   QwBeamDetectorID(Int_t subbankid, Int_t offset,TString name, TString dettype,
-		   TString modtype);
+                   TString modtype);
   QwBeamDetectorID(Int_t subbankid, QwParameterFile &paramfile);
   QwBeamDetectorID(const QwBeamDetectorID& input);
   ~QwBeamDetectorID(){};

@@ -21,7 +21,7 @@ cd $OLDPWD
 
 ##  Backup the old versions of SET_ME_UP
 for setupfile in `find $local_path -name SET_ME_UP\* -print | sort -r` ; do
-	 mv ${setupfile} ${setupfile}_
+         mv ${setupfile} ${setupfile}_
 done
 
 export QWANALYSIS=`echo $local_path | sed 's/\/SetupFiles//'`
@@ -59,30 +59,30 @@ echo "Libraries will be searched for in ${lib}."
 function first_existing_directory() {
     for dir ; ### iterate through the function's positional arguments
     do
-	if [[ -d "$dir" ]] ; then
-	    echo "$dir"
-	    return
-	fi
+        if [[ -d "$dir" ]] ; then
+            echo "$dir"
+            return
+        fi
     done
     {
-	echo "None of the paths"
-	for dir ; do [[ -n $dir ]] && echo "  " "$dir" ; done
-	echo "is a directory"
-    } >&2 
+        echo "None of the paths"
+        for dir ; do [[ -n $dir ]] && echo "  " "$dir" ; done
+        echo "is a directory"
+    } >&2
 }
 function first_path_with_file() {
     file=$1 ; shift
     for dir; do
-	if [[ -e "$dir/$file" ]] ; then
-	    echo $dir
-	    return
-	fi
+        if [[ -e "$dir/$file" ]] ; then
+            echo $dir
+            return
+        fi
     done
     {
-	echo "None of the paths"
-	for dir ; do [[ -n $dir ]] && echo "  " "$dir" ; done
-	echo "contains the file $file"
-    } >&2 
+        echo "None of the paths"
+        for dir ; do [[ -n $dir ]] && echo "  " "$dir" ; done
+        echo "contains the file $file"
+    } >&2
 }
 function report_status() {
     ## If bash had any sort of references or pointers this would be a
@@ -91,10 +91,10 @@ function report_status() {
     name=$1
     value=$2
     if [[ -d $value ]] ; then
-	echo "Set $name to $value"
+        echo "Set $name to $value"
     else
-	echo "Unable to set $name"
-	exit 1;
+        echo "Unable to set $name"
+        exit 1;
     fi
 }
 
@@ -210,7 +210,7 @@ report_status BOOST_LIB_DIR ${BOOST_LIB_DIR}
 ###  Set up ROOT if it isn't done yet.
 ###  Expect to use /apps/root/PRO
 
-###  This section could in principle use the first_existing_directory() 
+###  This section could in principle use the first_existing_directory()
 ###  pattern, but so far root-config is doing its job
 
 #  Verify the existence of the ROOTSYS directory
@@ -228,8 +228,8 @@ if [[ -z ${ROOTSYS} && -e ${jlab_prod_setup} ]]; then
     echo "ROOTSYS not defined; trying to get it from ${jlab_prod_setup}..."
     nextsearchpath=`/bin/csh -c "source ${jlab_prod_setup} >/dev/null ; printenv ROOTSYS"`
     if [[ -d ${nextsearchpath} ]]; then
-	export ROOTSYS=${nextsearchpath}
-	echo "Setting ROOTSYS to ${ROOTSYS} using ${jlab_prod_setup}"
+        export ROOTSYS=${nextsearchpath}
+        echo "Setting ROOTSYS to ${ROOTSYS} using ${jlab_prod_setup}"
     fi
 fi
 #  Try root-config assuming user has setup PATH correctly
@@ -238,8 +238,8 @@ if [[ -z ${ROOTSYS} ]]; then
   if [[ `which root-config` ]]; then
       nextsearchpath=`root-config --prefix`
       if [[ -d ${nextsearchpath} ]]; then
-	  export ROOTSYS=${nextsearchpath}
-	  echo "Setting ROOTSYS to ${ROOTSYS} using root-config"
+          export ROOTSYS=${nextsearchpath}
+          echo "Setting ROOTSYS to ${ROOTSYS} using root-config"
       fi
   fi
 fi

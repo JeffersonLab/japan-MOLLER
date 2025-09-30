@@ -16,7 +16,7 @@ QwRint* QwRint::fExists = NULL;
 
 //--------------------------------------------------------------------------
 QwRint::QwRint (const char* appClassName, int* argc, char** argv,
-		      void* options, int numOptions, bool noLogo)
+                      void* options, int numOptions, bool noLogo)
 : TRint (appClassName, argc, argv, options, numOptions, noLogo)
 {
   gQwRint = this;

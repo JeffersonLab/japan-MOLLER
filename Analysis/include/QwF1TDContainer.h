@@ -2,7 +2,7 @@
 #define __QwF1TDContainer__
 /**
  *  \file   QwF1TDContainer.h
- *  \brief  
+ *  \brief
  *  \author jhlee@jlab.org
  *  \date   Tuesday, September 14 23:04:45 EDT 2010
  */
@@ -70,7 +70,7 @@ class QwF1TDC :  public TObject
   Double_t GetF1TDC_tframe()     const {return fF1TDC_tframe_ns;};
   Double_t GetF1TDC_full_range() const {return fF1TDC_full_range_ns;};
   Double_t GetF1TDC_window()     const {return fF1TDC_window_ns;};
-  Double_t GetF1TDC_latency()    const {return fF1TDC_latency_ns;}; 
+  Double_t GetF1TDC_latency()    const {return fF1TDC_latency_ns;};
   Double_t GetF1TDC_resolution() const {return fF1TDC_resolution_ns;};
   Double_t GetF1TDC_bin_size()   const {return fF1TDC_resolution_ns;};
 
@@ -91,7 +91,7 @@ class QwF1TDC :  public TObject
   void SetF1TDCIndex  (const Int_t tdc_index)   {fF1TDCIndex = tdc_index;};
   void SetF1BankIndex (const Int_t bank_index)  {fF1BankIndex = bank_index;};
   void SetF1SystemName(const TString name)      {fSystemName = name;};
-  
+
   void SetF1TDCBuffer(UInt_t *buffer, UInt_t num_words);
   const UInt_t * GetF1TDCBuffer() const {return fBuffer;};
 
@@ -153,12 +153,12 @@ class QwF1TDC :  public TObject
 
 
  public:
-  Int_t fROC;          // F1TDC physical roc number, not index 
-                       // 4  : ROC 4   
+  Int_t fROC;          // F1TDC physical roc number, not index
+                       // 4  : ROC 4
                        // 9  : ROC 9
                        // 10 : ROC 10
 
-  Int_t fSlot;         // F1TDC slot number 
+  Int_t fSlot;         // F1TDC slot number
                        // QwAnalysis' slot range 0-20. But, the physical VME
                        // slot range is 1-21. QwAlaysis's slot range is acceptable
                        // if we carefully match them with each other as follows:
@@ -171,8 +171,8 @@ class QwF1TDC :  public TObject
                        // we do.
                        // Friday, July 30 11:26:36 EDT 2010, jhlee
 
- 
-  
+
+
   Int_t   fChannelNumber;
   UInt_t   *fBuffer;
 
@@ -182,7 +182,7 @@ class QwF1TDC :  public TObject
   UInt_t   fF1TDC_refclkdiv;
   UInt_t   fF1TDC_trigwin;
   UInt_t   fF1TDC_triglat;
-  
+
   Double_t fF1TDC_tframe_ns;
   Double_t fF1TDC_full_range_ns;
   //  Double_t fF1TDC_bin_size_ns;
@@ -214,10 +214,10 @@ class QwF1TDC :  public TObject
   UInt_t *fF1TDC_RLF_counter;   // Resolution Lock Fail couter
   UInt_t *fF1TDC_HFO_counter;   // Hit    Fifo Overflow counter
   UInt_t *fF1TDC_OFO_counter;   // Output Fifo Overflow coutner;
-  UInt_t *fF1TDC_FDF_counter;   // Fake Data Flag counter 
+  UInt_t *fF1TDC_FDF_counter;   // Fake Data Flag counter
   UInt_t *fF1TDC_S30_counter;   // Slot 30 counter
 
-  Bool_t   fReferenceSlotFlag; //! 
+  Bool_t   fReferenceSlotFlag; //!
   TArrayD  *fReferenceSignals; //!
 
   Bool_t   fF1TDCNormResFlag;
@@ -228,7 +228,7 @@ class QwF1TDC :  public TObject
   Int_t    fF1BankIndex; // This is the Bank index, which
                          // is the redefined index to access "bank=0x0901"
                          // defined in map file (e.g. qweak_R2.map)
- 
+
  private:
 
   //TString  fF1ErrorSummaryString;
@@ -236,7 +236,7 @@ class QwF1TDC :  public TObject
   TString  fSystemName;
   static const Int_t fWordsPerBuffer;
   static const Int_t fMaxF1TDCChannelNumber;
-  
+
   UInt_t  fF1TDC_RFM_counter;  // ReFerence signal Miss counter
 
   UInt_t GetTotal(UInt_t* error_counter);
@@ -250,7 +250,7 @@ class QwF1TDC :  public TObject
  *  \ingroup QwAnalysis
  *
  *  \brief  F1TDCs configuration and reference siganls container
- * 
+ *
  *  This would be used to be a configuration and reference signal(s)
  *  container for F1TDCs which are used in one subsystem. The subsystem
  *  has one QwF1TDContaier that have DetectorType, Region, and QwF1TDC(s)
@@ -261,15 +261,15 @@ class QwF1TDC :  public TObject
 // * Reference signal(s) holder?
 // * How to let a shift crew to recognize F1TDC problems
 // * Is it valuable to save these errors into ROOT file?
-// 
+//
 
 class QwF1TDContainer :  public TObject
 {
-  
+
  public:
   Int_t                    fNQwF1TDCs;
-  TObjArray               *fQwF1TDCList; 
- 
+  TObjArray               *fQwF1TDCList;
+
  public:
   QwF1TDContainer();
   virtual ~QwF1TDContainer();
@@ -307,7 +307,7 @@ class QwF1TDContainer :  public TObject
   Int_t GetF1TDCChannelNumber();
   const TH2F* GetF1TDCErrorHist();
 
-  
+
   void AddSYN(Int_t roc, Int_t slot, Int_t channel);
   void AddEMM(Int_t roc, Int_t slot, Int_t channel);
   void AddSEU(Int_t roc, Int_t slot, Int_t channel);
@@ -320,17 +320,17 @@ class QwF1TDContainer :  public TObject
   void AddFDF(Int_t roc, Int_t slot, Int_t channel);
   void AddS30(Int_t roc, Int_t slot, Int_t channel);
 
- 
+
   Bool_t  CheckDataIntegrity(const ROCID_t roc_id, UInt_t *buffer, UInt_t num_words);
 
   const MQwF1TDC GetF1TDCDecoder() const {return fF1TDCDecoder;};
-  
+
   Double_t ReferenceSignalCorrection(Double_t raw_time, Double_t ref_time, Int_t bank_index, Int_t slot);
 
   void PrintErrorSummary();
   void WriteErrorSummary(Bool_t hist_flag=true);
   //  void WriteErrorSummaryToDedicatedRootFile(QwRootFile* rootfile, Bool_t hist_flag=true);
-  // a stupid boost prevents this function, use a generic way to access root files internally. 
+  // a stupid boost prevents this function, use a generic way to access root files internally.
   // Tuesday, December 13 12:27:39 EST 2011, jhlee
 
  public:
@@ -338,7 +338,7 @@ class QwF1TDContainer :  public TObject
   EQwDetectorType    fDetectorType;
   EQwRegionID        fRegion;
   TString            fSystemName;
-  
+
   TH2F              *fError2DHist;
 
 private:
@@ -351,7 +351,7 @@ private:
 
   Bool_t fLocalDebug;
   Bool_t fLocalF1ErrorDebug;
-  
+
   Double_t fF1TDCOneResolutionNS;
   Double_t GetF1TDCsResolution();
 
@@ -361,9 +361,9 @@ private:
   TString PrintNoF1TDC(Int_t roc, Int_t slot);
   TString PrintNoF1TDC(Int_t tdc_index);
   Bool_t  CheckRegisteredF1(Int_t roc, Int_t slot);
-  Double_t GetF1TDCTriggerRollover(); 
+  Double_t GetF1TDCTriggerRollover();
 
-  Double_t fF1TDCTriggerRollover; 
+  Double_t fF1TDCTriggerRollover;
 
   void SetErrorHistOptions();
 
@@ -406,14 +406,14 @@ class F1TDCReferenceSignal :  public TObject
 
 
   void SetSlotNumber  (const Int_t slot)       {fSlot = slot;};
-  void SetChanNumber  (const Int_t chan)       {fChannelNumber = chan;};    
+  void SetChanNumber  (const Int_t chan)       {fChannelNumber = chan;};
   void SetBankIndex   (const Int_t bank_index) {fBankIndex = bank_index;};
   void SetRefSignalName  (const TString name)  {fRefSignalName = name;};
 
   Bool_t SetRefTimeAU   (const Double_t ref_time);// { if  fFirstHitFlag  = false;fRefTimeArbUnit = ref_time;};
-  
+
   Bool_t HasFirstHit() {return fFirstHitFlag; };
-  Bool_t HasRefTime(); 
+  Bool_t HasRefTime();
   const UInt_t GetCounter() const {return fCounter;};
 
 
@@ -424,7 +424,7 @@ class F1TDCReferenceSignal :  public TObject
 
  private:
 
-  Int_t fSlot;         // F1TDC slot number 
+  Int_t fSlot;         // F1TDC slot number
                        // QwAnalysis' slot range 0-20. But, the physical VME
                        // slot range is 1-21. QwAlaysis's slot range is acceptable
                        // if we carefully match them with each other as follows:
@@ -437,13 +437,13 @@ class F1TDCReferenceSignal :  public TObject
                        // we do.
                        // Friday, July 30 11:26:36 EDT 2010, jhlee
 
-   
+
   Int_t    fChannelNumber;
 
   Int_t    fBankIndex; // This is the Bank index, which
                          // is the redefined index to access "bank=0x0901"
                          // defined in map file (e.g. qweak_R2.map)
- 
+
   TString  fRefSignalName;
 
   Double_t  fRefTimeArbUnit;
@@ -452,7 +452,7 @@ class F1TDCReferenceSignal :  public TObject
 
   TString            fSystemName;
 
-  static const UInt_t fNoRefTimeArbUnit; 
+  static const UInt_t fNoRefTimeArbUnit;
   Bool_t    fRefTimeFlag;
 
   void Clear() { fRefTimeArbUnit = (Double_t) fNoRefTimeArbUnit; fFirstHitFlag = false;};
@@ -465,11 +465,11 @@ class F1TDCReferenceSignal :  public TObject
 
 class F1TDCReferenceContainer :  public TObject
 {
-  
+
  public:
   Int_t                    fNF1TDCReferenceSignals;
-  TObjArray               *fF1TDCReferenceSignalsList; 
- 
+  TObjArray               *fF1TDCReferenceSignalsList;
+
  public:
   F1TDCReferenceContainer();
   virtual ~F1TDCReferenceContainer();
@@ -489,14 +489,14 @@ class F1TDCReferenceContainer :  public TObject
 
   //  F1TDCReferenceSignal* GetReferenceSignal(Int_t bank_index, Int_t slot, Int_t chan);
   void SetReferenceSignal(Int_t bank_index, Int_t slot, Int_t chan, UInt_t data, Bool_t debug=false);
-  
+
 
   Double_t GetReferenceTimeAU  (Int_t bank_index, TString name);
   // Double_t GetNoReferneceTimeAU(Int_t bank_index, TString name);
 
   void     ClearEventData();
   // we need Double_t to return a negative refererence time so that
-  // we can distinguish them with "zero" reference time. 
+  // we can distinguish them with "zero" reference time.
 private:
 
   TString            fSystemName;

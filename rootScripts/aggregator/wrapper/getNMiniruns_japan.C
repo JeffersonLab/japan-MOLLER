@@ -7,7 +7,7 @@ void getNMiniruns_japan(TString runNumber = "0") {
 
   TString filename;
   TString stemlist[5] = {"prexPrompt_pass2_",
-    "prexPrompt_pass1_", 
+    "prexPrompt_pass1_",
     "prexALL_",
     "prexALLminusR_",
     "prexinj_"};
@@ -20,8 +20,8 @@ void getNMiniruns_japan(TString runNumber = "0") {
   if (fin->IsOpen()) {
     std::cerr << "Opened file "<< filename << std::endl;
   } else {
-    std::cerr << "No file found for run " << runNumber << " in path " 
-	      << FILE_PATH << std::endl;
+    std::cerr << "No file found for run " << runNumber << " in path "
+              << FILE_PATH << std::endl;
     return NULL;
   }
   TTree *T=(TTree*)fin->Get("burst");

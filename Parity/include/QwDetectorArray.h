@@ -22,9 +22,9 @@
 // Forward declarations
 class QwDetectorArrayID;
 
-class QwDetectorArray: 
- public VQwDetectorArray, 
- virtual public VQwSubsystemParity, 
+class QwDetectorArray:
+ public VQwDetectorArray,
+ virtual public VQwSubsystemParity,
  public MQwSubsystemCloneable<QwDetectorArray> {
 
 /******************************************************************
@@ -41,7 +41,7 @@ QwDetectorArray();
 public:
 
 /// Constructor with name
-QwDetectorArray(const TString& name) 
+QwDetectorArray(const TString& name)
  :VQwSubsystem(name), VQwSubsystemParity(name), VQwDetectorArray(name){};
 
 

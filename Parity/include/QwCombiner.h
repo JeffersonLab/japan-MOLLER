@@ -35,12 +35,12 @@ class QwCombiner:public VQwDataHandler, public MQwDataHandlerCloneable<QwCombine
     Int_t ConnectChannels(QwSubsystemArrayParity& event);
     /// \brief Connect to Channels (asymmetry/difference only)
     Int_t ConnectChannels(QwSubsystemArrayParity& asym,
-			  QwSubsystemArrayParity& diff);
+                          QwSubsystemArrayParity& diff);
 
     void ProcessData();
-  
+
   protected:
-  
+
     /// Default constructor (Protected for child class access)
     QwCombiner() { };
 

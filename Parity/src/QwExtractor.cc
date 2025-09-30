@@ -123,4 +123,3 @@ void QwExtractor::FillTreeBranches(QwRootFile *treerootfile)
   //  QwMessage << fLocalFlag << " failed mask " << "0x" << fErrorFlagMask << std::dec << QwLog::endl;
   //}
 }
-

@@ -26,12 +26,12 @@ class QwRint : public TRint {
 
   protected:
 
-    static QwRint* fExists;	///< Check whether interface already existing
+    static QwRint* fExists;     ///< Check whether interface already existing
 
   public:
     /// \brief Constructor
     QwRint (const char* appClassName, int* argc, char** argv,
-		void* options = 0, int numOptions = 0, bool noLogo = kFALSE);
+                void* options = 0, int numOptions = 0, bool noLogo = kFALSE);
 
     /// \brief Destructor
     virtual ~QwRint();

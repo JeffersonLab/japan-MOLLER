@@ -4,14 +4,14 @@ void GetHallBCMPedestal_Caryn(int run_num ,TString user_cut ="1",TString scan_da
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.2);
   gStyle->SetStatW(0.3);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(1011);
   gStyle->SetStatX(0.7);
   gStyle->SetStatY(0.9);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -20,8 +20,8 @@ void GetHallBCMPedestal_Caryn(int run_num ,TString user_cut ="1",TString scan_da
   gStyle->SetLabelSize(0.035,"x");
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.06,"hxyz");
-  gROOT->ForceStyle();  
-  
+  gROOT->ForceStyle();
+
   // TString rf_name =Form("$QW_ROOTFILES/prexPrompt_pass2_%d.000.root",run_num);
   TFile *rootfile = TFile::Open(Form("$QW_ROOTFILES/prexPrompt_pass2_%d.000.root",run_num));
   TTree *tree= (TTree*)rootfile->Get("evt");
@@ -37,9 +37,9 @@ void GetHallBCMPedestal_Caryn(int run_num ,TString user_cut ="1",TString scan_da
   int nbinx = (int)(10*max); // to one-tenth precision.
 
   vector<double> vec_scandata;
-  TH1D *hsd = new TH1D(Form("hsd%d",myii),"scan data",nbinx,-0.05,max-0.05); 
+  TH1D *hsd = new TH1D(Form("hsd%d",myii),"scan data",nbinx,-0.05,max-0.05);
   tree->Draw(Form("beam_current>>hsd%d",myii),Form("%s&&scandata1!=0",user_cut.Data()),"goff");
-  int bin_content; 
+  int bin_content;
   double bin_center;
   for(int ibin=0;ibin<nbinx;ibin++){
     bin_content = hsd->GetBinContent(ibin+1); // Histogram bin number starts from 1
@@ -50,10 +50,10 @@ void GetHallBCMPedestal_Caryn(int run_num ,TString user_cut ="1",TString scan_da
   }
   const int ndata = vec_scandata.size();
 
-  
-	TString outputDir = "/adaqfs/home/apar/PREX/japan/plots/pedestalOutputs";
-	//TString plotDir = "/adaqfs/home/apar/PREX/japan/plots/pedestaloutput";
-	//TString outputdir = "texts";
+
+        TString outputDir = "/adaqfs/home/apar/PREX/japan/plots/pedestalOutputs";
+        //TString plotDir = "/adaqfs/home/apar/PREX/japan/plots/pedestaloutput";
+        //TString outputdir = "texts";
 
 
   TString device_name[] =
@@ -74,19 +74,19 @@ void GetHallBCMPedestal_Caryn(int run_num ,TString user_cut ="1",TString scan_da
 
   TCanvas *c_bcm = new TCanvas("c_bcm","c_bcm",1000,500);
   c_bcm->Divide(2,1);
-  
+
   TF1 *f_zero = new TF1("f_zero","0",0,10000);
   f_zero->SetLineWidth(2);
   f_zero->SetLineColor(kRed);
   f_zero->SetLineStyle(9);
-  
+
   TString branch_name;
   TString num_samples_name;
- 
 
-  double bcm_mean[ndata]; 
+
+  double bcm_mean[ndata];
   double bcm_error[ndata];
-  double unser_mean[ndata]; 
+  double unser_mean[ndata];
   double unser_error[ndata];
   double bcm_res[ndata]; // residual
 
@@ -97,16 +97,16 @@ void GetHallBCMPedestal_Caryn(int run_num ,TString user_cut ="1",TString scan_da
   double gain[nbcm];
  double slope[nbcm];
 
-	char outfilename[255];
-	sprintf(outfilename,"%s/run%d_bcm_pedestal_fit.txt",
-			outputDir.Data(),run_num);
-	printf("Writing output to %s\n",outfilename);
-	//FILE *outfile = fopen(outfilename, "w"); 
-	ofstream outfile;
-	outfile.open(outfilename);
+        char outfilename[255];
+        sprintf(outfilename,"%s/run%d_bcm_pedestal_fit.txt",
+                        outputDir.Data(),run_num);
+        printf("Writing output to %s\n",outfilename);
+        //FILE *outfile = fopen(outfilename, "w");
+        ofstream outfile;
+        outfile.open(outfilename);
 
   TGraphErrors *g_res;
-  TGraphErrors *g_fit;  
+  TGraphErrors *g_fit;
   TGraphErrors *g_res_ref;
   TGraphErrors *g_fit_ref;
   TMultiGraph *mg_res;
@@ -122,14 +122,14 @@ void GetHallBCMPedestal_Caryn(int run_num ,TString user_cut ="1",TString scan_da
   for(int i=0;i<ndata;i++){
      my_cut = Form("cleandata==1&&scandata2==%d&&scandata1!=0",i+1);
     tree->Draw(Form("%s>>h_unser_%d_%d",scan_data.Data(),i,myii),
-	       my_cut.Data(),"goff");
+               my_cut.Data(),"goff");
     h_stat =(TH1D*)gDirectory->FindObject(Form("h_unser_%d_%d",i,myii));
     unser_mean[i] = h_stat->GetMean();
     unser_error[i] = h_stat->GetRMS()/TMath::Sqrt(h_stat->GetEntries());
     //cout << unser_mean[i] << endl;
      my_cut = Form("cleandata==1&&scandata2==%d&&scandata1==0",i+1);
     tree->Draw(Form("%s>>h_ped_%d_%d",scan_data.Data(),i,myii),
-	       my_cut.Data(),"goff");
+               my_cut.Data(),"goff");
     h_stat =(TH1D*)gDirectory->FindObject(Form("h_ped_%d_%d",i,myii));
     if(scan_data=="unser"){
       unser_mean[i]  = unser_mean[i] - h_stat->GetMean(); // pedestal subtraction
@@ -139,15 +139,15 @@ void GetHallBCMPedestal_Caryn(int run_num ,TString user_cut ="1",TString scan_da
 
   for(int ibcm=0;ibcm<nbcm;ibcm++){
     branch_name = Form("%s.hw_sum_raw/%s.num_samples",
-		       device_name[ibcm].Data(),device_name[ibcm].Data());
+                       device_name[ibcm].Data(),device_name[ibcm].Data());
 
       for(int i=0;i<ndata;i++){
-	my_cut = Form("cleandata==1&&scandata2==%d&&scandata1!=0",i+1);
-	tree->Draw(Form("%s>>h_bcm%d_%d_%d",branch_name.Data(),ibcm,i,myii),
-		  my_cut.Data(),"goff");
-	h_stat =(TH1D*)gDirectory->FindObject(Form("h_bcm%d_%d_%d",ibcm,i,myii));
-	bcm_mean[i] = h_stat->GetMean();
-	bcm_error[i] = h_stat->GetRMS()/TMath::Sqrt(h_stat->GetEntries());
+        my_cut = Form("cleandata==1&&scandata2==%d&&scandata1!=0",i+1);
+        tree->Draw(Form("%s>>h_bcm%d_%d_%d",branch_name.Data(),ibcm,i,myii),
+                  my_cut.Data(),"goff");
+        h_stat =(TH1D*)gDirectory->FindObject(Form("h_bcm%d_%d_%d",ibcm,i,myii));
+        bcm_mean[i] = h_stat->GetMean();
+        bcm_error[i] = h_stat->GetRMS()/TMath::Sqrt(h_stat->GetEntries());
       }
       c_bcm->cd(1);
 
@@ -159,7 +159,7 @@ void GetHallBCMPedestal_Caryn(int run_num ,TString user_cut ="1",TString scan_da
       f_fit->SetParameters(init_par);
       f_fit->SetLineColor(kRed);
       if(device_name[ibcm]=="bcm_an_ds10")
-	{      g_fit->Fit("f_fit","Q","",19,37);}
+        {      g_fit->Fit("f_fit","Q","",19,37);}
       else{
       g_fit->Fit("f_fit","Q","",MIN,MAX);
       }
@@ -167,15 +167,15 @@ void GetHallBCMPedestal_Caryn(int run_num ,TString user_cut ="1",TString scan_da
       ped[ibcm] = f_fit->GetParameter(0);
       slope[ibcm] = f_fit->GetParameter(1);
       gain[ibcm] = 1/slope[ibcm];
-      
+
       for(int i=0;i<ndata;i++){
-	//	bcm_res[i] = (bcm_mean[i]-ped[ibcm])*gain[ibcm] - unser_mean[i];
-	//	bcm_error[i] = bcm_error[i] *gain[ibcm];
-	bcm_res[i] = bcm_mean[i] - f_fit->Eval(unser_mean[i]);
-	bcm_error[i] = bcm_error[i];
+        //      bcm_res[i] = (bcm_mean[i]-ped[ibcm])*gain[ibcm] - unser_mean[i];
+        //      bcm_error[i] = bcm_error[i] *gain[ibcm];
+        bcm_res[i] = bcm_mean[i] - f_fit->Eval(unser_mean[i]);
+        bcm_error[i] = bcm_error[i];
 
       }
-      
+
       c_bcm->cd(2);
       g_res = new TGraphErrors(ndata,unser_mean,bcm_res,unser_error,bcm_error);
       g_res->SetMarkerStyle(20);
@@ -191,13 +191,13 @@ void GetHallBCMPedestal_Caryn(int run_num ,TString user_cut ="1",TString scan_da
 
   for(int ibcm=0;ibcm<nbcm;ibcm++){
       printf("%s, %.2f, %f \n",
-	     device_name[ibcm].Data(),
-	     ped[ibcm],
-	     gain[ibcm]);
+             device_name[ibcm].Data(),
+             ped[ibcm],
+             gain[ibcm]);
       outfile<<Form("%s, %.2f, %f ",
-	     device_name[ibcm].Data(),
-	     ped[ibcm],
-	     gain[ibcm])<<endl;
+             device_name[ibcm].Data(),
+             ped[ibcm],
+             gain[ibcm])<<endl;
 
 
   }

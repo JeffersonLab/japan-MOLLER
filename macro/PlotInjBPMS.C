@@ -1,6 +1,6 @@
-// Injector BPMs Plot Macro 
+// Injector BPMs Plot Macro
 // Source from Caryn Palatchi
-// Adapted by Tao Ye for JAPAN 
+// Adapted by Tao Ye for JAPAN
 // Last Update : 05-2019
 
 //HOWTO: Must open the rootfile first, then run PlotInjBPMS.C() in terminal with rootfile already open
@@ -9,13 +9,13 @@
 
 //FIXME : IHWPstatus should be able to obtain from slow tree. -TY
 
-void PlotInjBPMS(vector<const char*> &vBPM , 
-		 Int_t IHWPstatus, TString ucut);  // Generic function
+void PlotInjBPMS(vector<const char*> &vBPM ,
+                 Int_t IHWPstatus, TString ucut);  // Generic function
 void PlotInjBPMS(Int_t IHWPstatus, TString ucut); // interface to panguin
 void PlotInjBPMS();// interface to summary plots
 
 void PlotInjBPMS(Int_t docaryn=1, Int_t run_number=0, Int_t IHWPstatus=0, TString ucut="1"){
-  
+
   TString rf_name =Form("$QW_ROOTFILES/prexPrompt_pass1_%d.000.root",run_number);
   TFile *rootfile = TFile::Open(rf_name);
 
@@ -31,10 +31,10 @@ void PlotInjBPMS(Int_t docaryn=1, Int_t run_number=0, Int_t IHWPstatus=0, TStrin
 
 void PlotInjBPMS( Int_t IHWPstatus, TString ucut){
   PlotInjBPMS(vInjBPM,IHWPstatus,ucut);
-} 
+}
 
-void PlotInjBPMS(vector<const char*> &vBPM , 
-		 Int_t IHWPstatus, TString ucut){
+void PlotInjBPMS(vector<const char*> &vBPM ,
+                 Int_t IHWPstatus, TString ucut){
 
   //collect data points from first run file
   TTree* evt_tree = (TTree*)gROOT->FindObject("evt");
@@ -97,7 +97,7 @@ void PlotInjBPMS(vector<const char*> &vBPM ,
   Dygraph= new TGraphErrors(numchains,chain,&(Dy[0]),chainerr,&(eDy[0]));
   Dxrmsgraph = new TGraphErrors(numchains,chain,&(rmsDx[0]),chainerr,&(zero[0]));
   Dyrmsgraph= new TGraphErrors(numchains,chain,&(rmsDy[0]),chainerr,&(zero[0]));
-  
+
   TMultiGraph *xygraph = new TMultiGraph();
   TMultiGraph *xyrmsgraph = new TMultiGraph();
 
@@ -164,4 +164,3 @@ void PlotInjBPMS(vector<const char*> &vBPM ,
   pad_buff->SetGrid();
 
 }
-

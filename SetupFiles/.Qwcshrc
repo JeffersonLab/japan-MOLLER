@@ -70,6 +70,6 @@ rehash
 foreach exefile (qwanalysis_adc qwanalysis_beamline qwsimtracking  qwtracking)
     unalias $exefile
     if (! -x ${QW_BIN}/$exefile) then
-	alias $exefile ${QW_BIN}/$exefile
+        alias $exefile ${QW_BIN}/$exefile
     endif
 end

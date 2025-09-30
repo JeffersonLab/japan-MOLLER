@@ -133,7 +133,7 @@ Bool_t QwCombinedPMT::ApplyHWChecks()
 {
   Bool_t eventokay=kTRUE;
 
- 
+
   return eventokay;
 }
 /********************************************************/
@@ -143,7 +143,7 @@ void QwCombinedPMT::SetSingleEventCuts(UInt_t errorflag, Double_t LL=0, Double_t
   //errorflag|=kPMTErrorFlag;
   QwMessage<<"QwCombinedPMT Error Code passing to QwIntegrationPMT "<<errorflag<<QwLog::endl;
   fSumADC.SetSingleEventCuts(errorflag,LL,UL,stability,burplevel);
-  
+
 }
 
 
@@ -175,7 +175,7 @@ Bool_t QwCombinedPMT::CheckForBurpFail(const VQwDataElement *ev_error){
       //std::cout<<" Here in QwCombinedPMT::CheckForBurpFail \n";
       if (this->GetElementName()!="") {
         const QwCombinedPMT* value_pmt = dynamic_cast<const QwCombinedPMT* >(ev_error);
-        burpstatus |= fSumADC.CheckForBurpFail(&(value_pmt->fSumADC)); 
+        burpstatus |= fSumADC.CheckForBurpFail(&(value_pmt->fSumADC));
       }
     } else {
       TString loc="Standard exception from QwCombinedPMT::CheckForBurpFail :"+
@@ -205,7 +205,7 @@ void QwCombinedPMT::UpdateErrorFlag(const QwCombinedPMT *ev_error){
     if(typeid(*ev_error)==typeid(*this)) {
       // std::cout<<" Here in QwCombinedPMT::UpdateErrorFlag \n";
       if (this->GetElementName()!="") {
-	fSumADC.UpdateErrorFlag(&(ev_error->fSumADC));
+        fSumADC.UpdateErrorFlag(&(ev_error->fSumADC));
       }
     } else {
       TString loc="Standard exception from QwCombinedPMT::UpdateErrorFlag :"+
@@ -215,7 +215,7 @@ void QwCombinedPMT::UpdateErrorFlag(const QwCombinedPMT *ev_error){
     }
   } catch (std::exception& e) {
     std::cerr<< e.what()<<std::endl;
-  }  
+  }
 };
 
 
@@ -436,9 +436,9 @@ void  QwCombinedPMT::ConstructBranch(TTree *tree, TString &prefix, QwParameterFi
   else
     {
       if (modulelist.HasValue(devicename)){
-	TString sumprefix =  prefix+"";
-	fSumADC.ConstructBranch(tree, sumprefix);
-	QwMessage <<" Tree leave added to "<<devicename<<QwLog::endl;
+        TString sumprefix =  prefix+"";
+        fSumADC.ConstructBranch(tree, sumprefix);
+        QwMessage <<" Tree leave added to "<<devicename<<QwLog::endl;
       }
     }
   return;

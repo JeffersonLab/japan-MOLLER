@@ -24,7 +24,7 @@ bpmstripline,     BPM1C20,       resolution    0.0e-6,       0.0e-4
 bpmstripline,     BPM1P02B,      resolution    0.0e-6,       0.0e-4
 bpmstripline,     BPM1P03A,      resolution    0.0e-6,       0.0e-4
 bpmstripline,     BPM1H01,       resolution    0.0e-6,       0.0e-4
-bpmstripline,     BPM1H02,       resolution    0.0e-6,       0.0e-4 
+bpmstripline,     BPM1H02,       resolution    0.0e-6,       0.0e-4
 bpmstripline,     BPM1H03,       resolution    0.0e-6,       0.0e-4
 bpmstripline,     BPM1H04,       resolution    0.0e-6,       0.0e-4
 bpmstripline,     BPM1H05,       resolution    0.0e-6,       0.0e-4
@@ -36,9 +36,9 @@ bpmstripline,     BPM1H14,       resolution    0.0e-6,       0.0e-4
 combinedbpm,      bpm_target,     xpos          0.0e-2,       0.0,          1.0e-3
 combinedbpm,      bpm_target,     ypos          0.0e-2,       0.0,          1.0e-3
 combinedbpm,      bpm_target,     xslope        0.0e-6,       0.0,          1.0e-7
-combinedbpm,      bpm_target,     yslope        0.0e-6,       0.0,          1.0e-7 
+combinedbpm,      bpm_target,     yslope        0.0e-6,       0.0,          1.0e-7
 
-!  CombinedBPM drifts              	      amplitude (abs), phase shift (rad), frequency (Hz)
+!  CombinedBPM drifts                         amplitude (abs), phase shift (rad), frequency (Hz)
 combinedbpm,      bpm_target,     xpos      drift     1.0e-2,      0.456,        39.0 !1
 combinedbpm,      bpm_target,     ypos      drift     1.0e-2,      0.456,        47.0 !1
 combinedbpm,      bpm_target,     xslope    drift     1.0e-6,      0.654,        49.0 !3
@@ -85,4 +85,3 @@ energycalculator, target_energy,  0.0e-5,       0.0e-3,      1.0e-6 !1.0e-6
 
 !EnergyCalculator drifts               amplitude (abs), phase shift (rad), frequency (Hz)
 energycalculator, target_energy,  drift         1.0e-5,        0.0,          53.0 !1.0e-5
-

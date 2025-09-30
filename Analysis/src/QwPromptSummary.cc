@@ -10,7 +10,7 @@
 
 /**
  *  \file   QwPromptSummary.cc
- *  \brief  
+ *  \brief
  *  \author jhlee@jlab.org
  *  \date   Friday, December 16 10:55:31 EST 2011
  */
@@ -27,7 +27,7 @@
 PromptSummaryElement::PromptSummaryElement()
 {
   fElementName         = "";
-  
+
   fYield               = 0.0;
   fYieldError          = 0.0;
   fYieldWidth          = 0.0;
@@ -44,7 +44,7 @@ PromptSummaryElement::PromptSummaryElement()
 PromptSummaryElement::PromptSummaryElement(TString name)
 {
   fElementName         = name;
-  
+
   fYield               = 0.0;
   fYieldError          = 0.0;
   fYieldWidth          = 0.0;
@@ -64,15 +64,15 @@ PromptSummaryElement::~PromptSummaryElement()
 
 void
 PromptSummaryElement::FillData(
-			       Double_t yield, 
-			       Double_t yield_err, 
-			       Double_t yield_width,
-			       TString  yield_unit,
-			       Double_t asym_diff, 
-			       Double_t asym_diff_err, 
-			       Double_t asym_diff_width, 
-			       TString  asym_diff_unit
-			       )
+                               Double_t yield,
+                               Double_t yield_err,
+                               Double_t yield_width,
+                               TString  yield_unit,
+                               Double_t asym_diff,
+                               Double_t asym_diff_err,
+                               Double_t asym_diff_width,
+                               TString  asym_diff_unit
+                               )
 {
   fYield                = yield;
   fYieldError           = yield_err;
@@ -106,24 +106,24 @@ Bool_t dd= fElementName.Contains("_dd");
 Bool_t da= fElementName.Contains("_da");
 
 
-if (type.Contains("yield")&& !(dd||da)){     
-   		out = Form("%20s | Mean: %8.3f +/- %8.3f \t Width: %8.3f\n", fElementName.Data(), fYield, fYieldError, fYieldWidth); 
+if (type.Contains("yield")&& !(dd||da)){
+                out = Form("%20s | Mean: %8.3f +/- %8.3f \t Width: %8.3f\n", fElementName.Data(), fYield, fYieldError, fYieldWidth);
 }
 if (type.Contains("asy")&& !(dd||da)){
       out = Form("%20s | Mean: %8.3f +/- %8.3f \t Width: %8.3f\n", fElementName.Data(), fAsymDiff, fAsymDiffError, fAsymDiffWidth);
 }
 if (type.Contains("double")&& (dd||da)) {
-     	out = Form ("%20s | Mean: %8.3f +/- %8.3f \t Width: %8.3f\n", fElementName.Data(), fAsymDiff, fAsymDiffError, fAsymDiffWidth);
-}     
+        out = Form ("%20s | Mean: %8.3f +/- %8.3f \t Width: %8.3f\n", fElementName.Data(), fAsymDiff, fAsymDiffError, fAsymDiffWidth);
+}
 
 
 return out;
- 
+
 };
 
 
-void 
-PromptSummaryElement::Set(TString type, const Double_t a, const Double_t a_err, const Double_t a_width)   
+void
+PromptSummaryElement::Set(TString type, const Double_t a, const Double_t a_err, const Double_t a_width)
 {
   Double_t unit= 1;
 //REMOVE THIS:  Bool_t qtarg=fElementName.EqualTo("bcm_an_ds3"); //Estimator for good events
@@ -133,7 +133,7 @@ PromptSummaryElement::Set(TString type, const Double_t a, const Double_t a_err, 
   Bool_t md= fElementName.Contains("md");
   Bool_t dd=fElementName.Contains("_dd");
   Bool_t da=fElementName.Contains("_da");
-  
+
 
   if (type.Contains("yield")){
     if (bcm) {
@@ -163,17 +163,17 @@ PromptSummaryElement::Set(TString type, const Double_t a, const Double_t a_err, 
       this->SetDifference(a/unit);
       this->SetDifferenceError(a_err/unit);
       this->SetDifferenceWidth(a_width/unit);
-    } 
+    }
     else {
       this->SetAsymmetryUnit("ppm");
       unit=Qw::ppm;
       this->SetAsymmetry(a/unit);
       this->SetAsymmetryError(a_err/unit);
       this->SetAsymmetryWidth(a_width/unit);
-    } 
-  } 
+    }
+  }
   else if(type.Contains("difference")) {
-  } 
+  }
   else {
   }
   return;
@@ -183,12 +183,12 @@ QwPromptSummary::QwPromptSummary()
 {
   fRunNumber    = 0;
   fRunletNumber = 0;
- 
- 
+
+
   fNElements = 0;
 
   fLocalDebug = kTRUE;
-  
+
   this->SetupElementList();
 
 };
@@ -199,11 +199,11 @@ QwPromptSummary::QwPromptSummary(Int_t run_number, Int_t runlet_number)
   fRunNumber    = run_number;
   fRunletNumber = runlet_number;
 
- 
+
   fNElements = 0;
 
   fLocalDebug = kFALSE;
-  
+
   this->SetupElementList();
 
 };
@@ -214,11 +214,11 @@ QwPromptSummary::QwPromptSummary(Int_t run_number, Int_t runlet_number, const st
   fRunNumber    = run_number;
   fRunletNumber = runlet_number;
 
- 
+
   fNElements = 0;
 
   fLocalDebug = kFALSE;
-  
+
   this->LoadElementsFromParameterFile(parameter_file);
 
 };
@@ -228,7 +228,7 @@ QwPromptSummary::~QwPromptSummary()
 {
 
   for (auto i=fElementList.begin() ; i!=fElementList.end();i++){
-  	delete *i;
+        delete *i;
   }
   fElementList.clear();
 
@@ -236,12 +236,12 @@ QwPromptSummary::~QwPromptSummary()
 
 
 
-void 
+void
 QwPromptSummary::SetupElementList()
 {
   // Try to load from default parameter file first
   std::string default_param_file = "prompt_summary.map";
-  
+
   try {
     QwParameterFile paramfile(default_param_file);
     LoadElementsFromParameterFile(paramfile);
@@ -251,14 +251,14 @@ QwPromptSummary::SetupElementList()
     }
   } catch (const std::exception& e) {
     if (fLocalDebug) {
-      QwMessage << "QwPromptSummary: Could not load from " << default_param_file 
+      QwMessage << "QwPromptSummary: Could not load from " << default_param_file
                 << ", using default elements: " << e.what() << QwLog::endl;
     }
   }
-  
+
   // Fall back to default hard-coded elements if parameter file not found or empty
   QwMessage << "QwPromptSummary: Using default hard-coded element list" << QwLog::endl;
-  
+
   // Add the originally commented out elements
   this->AddElement(new PromptSummaryElement("bcm_an_us"));
   this->AddElement(new PromptSummaryElement("bcm_an_ds"));
@@ -266,18 +266,18 @@ QwPromptSummary::SetupElementList()
   this->AddElement(new PromptSummaryElement("bcm_an_ds10"));
   this->AddElement(new PromptSummaryElement("bcm_dg_us"));
   this->AddElement(new PromptSummaryElement("bcm_dg_ds"));
-  
+
   this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_an_ds"));
   this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_an_ds3"));
   this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_an_ds10"));
   this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_dg_us"));
   this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_dg_ds"));
-  
+
   this->AddElement(new PromptSummaryElement("bcm_an_ds-bcm_an_ds3"));
   this->AddElement(new PromptSummaryElement("bcm_an_ds-bcm_an_ds10"));
   this->AddElement(new PromptSummaryElement("bcm_an_ds-bcm_dg_us"));
   this->AddElement(new PromptSummaryElement("bcm_an_ds-bcm_dg_ds"));
-  
+
   this->AddElement(new PromptSummaryElement("bcm_an_ds3-bcm_an_ds10"));
   this->AddElement(new PromptSummaryElement("bcm_an_ds3-bcm_dg_us"));
   this->AddElement(new PromptSummaryElement("bcm_an_ds3-bcm_dg_ds"));
@@ -290,25 +290,25 @@ QwPromptSummary::SetupElementList()
 };
 
 
-void 
+void
 QwPromptSummary::LoadElementsFromParameterFile(const std::string& parameter_file)
 {
   try {
     QwParameterFile paramfile(parameter_file);
     LoadElementsFromParameterFile(paramfile);
   } catch (const std::exception& e) {
-    QwError << "QwPromptSummary::LoadElementsFromParameterFile: Unable to open parameter file: " 
+    QwError << "QwPromptSummary::LoadElementsFromParameterFile: Unable to open parameter file: "
             << parameter_file << " - " << e.what() << QwLog::endl;
     QwMessage << "Falling back to default (empty) element list." << QwLog::endl;
   }
 };
 
 
-void 
+void
 QwPromptSummary::LoadElementsFromParameterFile(QwParameterFile& parameterfile)
 {
   QwMessage << "QwPromptSummary::LoadElementsFromParameterFile: Loading prompt summary elements" << QwLog::endl;
-  
+
   // Read preamble
   QwParameterFile* preamble = parameterfile.ReadSectionPreamble();
   if (preamble) {
@@ -316,13 +316,13 @@ QwPromptSummary::LoadElementsFromParameterFile(QwParameterFile& parameterfile)
     QwVerbose << *preamble << QwLog::endl;
     delete preamble;
   }
-  
+
   // Read sections
   QwParameterFile* section;
   std::string section_name;
   while ((section = parameterfile.ReadNextSection(section_name))) {
     QwVerbose << "Processing section: " << section_name << QwLog::endl;
-    
+
     // Check if this is a prompt summary elements section
     if (section_name == "prompt_summary_elements" || section_name == "elements") {
       // Process individual elements in this section
@@ -330,13 +330,13 @@ QwPromptSummary::LoadElementsFromParameterFile(QwParameterFile& parameterfile)
         section->TrimWhitespace();
         section->TrimComment();
         if (section->LineIsEmpty()) continue;
-        
+
         std::string line = section->GetLine();
-        
+
         // Parse element definitions
         // Format 1: Simple element name
         // Format 2: element_name = type (where type could be single, difference, etc.)
-        
+
         std::string element_name, element_type;
         if (section->HasVariablePair("=", element_name, element_type)) {
           // Format: element_name = type
@@ -345,7 +345,7 @@ QwPromptSummary::LoadElementsFromParameterFile(QwParameterFile& parameterfile)
           element_name.erase(element_name.find_last_not_of(" \t\r\n") + 1);
           element_type.erase(0, element_type.find_first_not_of(" \t\r\n"));
           element_type.erase(element_type.find_last_not_of(" \t\r\n") + 1);
-          
+
           if (fLocalDebug) {
             QwMessage << "Adding element: " << element_name << " (type: " << element_type << ")" << QwLog::endl;
           }
@@ -353,12 +353,12 @@ QwPromptSummary::LoadElementsFromParameterFile(QwParameterFile& parameterfile)
           // Format: simple element name
           element_name = line;
           element_type = "single"; // default type
-          
+
           if (fLocalDebug) {
             QwMessage << "Adding element: " << element_name << " (default type)" << QwLog::endl;
           }
         }
-        
+
         // Create and add the element
         if (!element_name.empty()) {
           this->AddElement(new PromptSummaryElement(TString(element_name.c_str())));
@@ -367,12 +367,12 @@ QwPromptSummary::LoadElementsFromParameterFile(QwParameterFile& parameterfile)
     }
     delete section;
   }
-  
+
   QwMessage << "QwPromptSummary: Loaded " << fNElements << " elements from parameter file" << QwLog::endl;
 };
 
 
-void 
+void
 QwPromptSummary::AddElement(PromptSummaryElement *in)
 {
   Int_t pos = 0;
@@ -391,7 +391,7 @@ PromptSummaryElement *
 QwPromptSummary::GetElementByName(TString name)
 {
 
-  
+
   TString get_name = "";
 
   for (auto i=fElementList.begin(); i!=fElementList.end(); i++  )
@@ -399,11 +399,11 @@ QwPromptSummary::GetElementByName(TString name)
       PromptSummaryElement* an_element = *i;
       get_name   = an_element->GetName();
       if( get_name.EqualTo(name) ) {
-	if(fLocalDebug) {
-	  std::cout << "System " << an_element->GetName()
-		    << " QwPromptSummary::GetElementByName address at" << an_element << std::endl;
-	}
-	return an_element;
+        if(fLocalDebug) {
+          std::cout << "System " << an_element->GetName()
+                    << " QwPromptSummary::GetElementByName address at" << an_element << std::endl;
+        }
+        return an_element;
       }
     }
 
@@ -418,7 +418,7 @@ QwPromptSummary::PrintTextSummaryHeader()
   //  TString filename = "";
 
   //  filename = Form("summary_%d_%d.txt", fRunNumber, fRunletNumber);
-  
+
   out = "======= BEGIN ======= \n";
   out += Form("        RUN = %5d RUNLET %2d \n\n\n\n\n\n", fRunNumber, fRunletNumber);
   return out;
@@ -430,7 +430,7 @@ TString
 QwPromptSummary::PrintTextSummaryTailer()
 {
   TString out = "";
-  
+
   out =  "==================================================\n";
   return out;
 };
@@ -440,10 +440,10 @@ TString
 QwPromptSummary::PrintCSVHeader(Int_t nEvents, TString start_time, TString end_time)
 {
   TString out = "";
-   
+
   Double_t goodEvents = 0.0;
   TString referenceElement = "N/A";
-  
+
   // Use the first element in the list to determine good events
   if (!fElementList.empty()) {
     PromptSummaryElement* first_elem = fElementList.front();
@@ -466,8 +466,8 @@ QwPromptSummary::PrintCSVHeader(Int_t nEvents, TString start_time, TString end_t
   out += "Asymmetry/Difference Units: bcm(ppm), cavq(ppm), bpm(um), sam(ppm)\n";
 
   out += "=========================================================================\n";
-  
-  
+
+
 
   return out;
 };
@@ -475,18 +475,18 @@ QwPromptSummary::PrintCSVHeader(Int_t nEvents, TString start_time, TString end_t
 
 
 void
-QwPromptSummary::FillDataInElement(TString  name, 
-				   Double_t yield, 
-				   Double_t yield_err, 
-				   Double_t yield_width, 
-				   TString  yield_unit, 
-				   Double_t asym_diff, 
-				   Double_t asym_diff_err, 
-				   Double_t asym_diff_width,
-				   TString  asym_diff_unit
-				   )
+QwPromptSummary::FillDataInElement(TString  name,
+                                   Double_t yield,
+                                   Double_t yield_err,
+                                   Double_t yield_width,
+                                   TString  yield_unit,
+                                   Double_t asym_diff,
+                                   Double_t asym_diff_err,
+                                   Double_t asym_diff_width,
+                                   TString  asym_diff_unit
+                                   )
 {
- 
+
   PromptSummaryElement* an_element = NULL;
   an_element = this->GetElementByName(name);
   if(an_element) {
@@ -494,10 +494,10 @@ QwPromptSummary::FillDataInElement(TString  name,
   }
   else {
     if(fLocalDebug) {
-      std::cout 
-	<< "QwPromptSummary::FillDataInElement : No Element with the name " 
-	<< name 
-	<<  std::endl;
+      std::cout
+        << "QwPromptSummary::FillDataInElement : No Element with the name "
+        << name
+        <<  std::endl;
     }
   }
   return;
@@ -505,12 +505,12 @@ QwPromptSummary::FillDataInElement(TString  name,
 
 
 void
-QwPromptSummary::FillYieldToElement(TString name, 
-				    Double_t yield, 
-				    Double_t yield_error, 
-				    Double_t yield_width,
-				    TString yield_unit
-				    )
+QwPromptSummary::FillYieldToElement(TString name,
+                                    Double_t yield,
+                                    Double_t yield_error,
+                                    Double_t yield_width,
+                                    TString yield_unit
+                                    )
 {
   PromptSummaryElement* an_element = NULL;
   an_element = this->GetElementByName(name);
@@ -521,22 +521,22 @@ QwPromptSummary::FillYieldToElement(TString name,
   }
   else {
     if(fLocalDebug) {
-      std::cout 
-	<< "QwPromptSummary::FillYieldToElement : No Element with the name " 
-	<< name 
-	<<  std::endl;
+      std::cout
+        << "QwPromptSummary::FillYieldToElement : No Element with the name "
+        << name
+        <<  std::endl;
     }
   }
   return;
 };
 
-void 
-QwPromptSummary::FillAsymDiffToElement(TString name, 
-				       Double_t asym_diff, 
-				       Double_t asym_diff_err, 
-				       Double_t asym_diff_width,
-				       TString asym_diff_unit
-				       )
+void
+QwPromptSummary::FillAsymDiffToElement(TString name,
+                                       Double_t asym_diff,
+                                       Double_t asym_diff_err,
+                                       Double_t asym_diff_width,
+                                       TString asym_diff_unit
+                                       )
 {
   PromptSummaryElement* an_element = NULL;
   an_element = this->GetElementByName(name);
@@ -547,17 +547,17 @@ QwPromptSummary::FillAsymDiffToElement(TString name,
   }
   else {
     if(fLocalDebug) {
-      std::cout 
-	<< "QwPromptSummary::FillYieldToElement : No Element with the name " 
-	<< name 
-	<<  std::endl;
+      std::cout
+        << "QwPromptSummary::FillYieldToElement : No Element with the name "
+        << name
+        <<  std::endl;
     }
   }
 
   return;
 };
 
-void 
+void
 QwPromptSummary::FillDoubleDifference(TString type, TString name1, TString name2)
 {
   PromptSummaryElement* an_element = NULL;
@@ -574,72 +574,72 @@ QwPromptSummary::FillDoubleDifference(TString type, TString name1, TString name2
     an_element = this->GetElementByName(name1+"-"+name2);
 
     if(an_element) {
-   
-      
+
+
       Double_t diff       = 0.0;
       Double_t error_diff = 0.0;
       Double_t width_diff = 0.0;
-      
+
       Double_t a = 0.0;
       Double_t b = 0.0;
       Double_t a_err = 0.0;
       Double_t b_err = 0.0;
       Double_t a_wit = 0.0;
       Double_t b_wit = 0.0;
-     
+
 
       if(type.Contains("yield")) {
-	a     = one_element -> GetYield();
-	b     = two_element -> GetYield();
-	a_err = one_element -> GetYieldError();
-	b_err = two_element -> GetYieldError();
-	a_wit = one_element -> GetYieldWidth();
-	b_wit = two_element -> GetYieldWidth();
-	
-	diff       = a - b;
-	error_diff = TMath::Sqrt(a_err*a_err + b_err*b_err);
-	width_diff = a_wit - b_wit;
+        a     = one_element -> GetYield();
+        b     = two_element -> GetYield();
+        a_err = one_element -> GetYieldError();
+        b_err = two_element -> GetYieldError();
+        a_wit = one_element -> GetYieldWidth();
+        b_wit = two_element -> GetYieldWidth();
 
-	an_element -> SetYield(diff);
-	an_element -> SetYieldError(error_diff);
-	an_element -> SetYieldWidth(width_diff);
-	
+        diff       = a - b;
+        error_diff = TMath::Sqrt(a_err*a_err + b_err*b_err);
+        width_diff = a_wit - b_wit;
+
+        an_element -> SetYield(diff);
+        an_element -> SetYieldError(error_diff);
+        an_element -> SetYieldWidth(width_diff);
+
       } else {
-	a     = one_element -> GetAsymmetry();
-	b     = two_element -> GetAsymmetry();
-	a_err = one_element -> GetAsymmetryError();
-	b_err = two_element -> GetAsymmetryError();
-	a_wit = one_element -> GetAsymmetryWidth();
-	b_wit = two_element -> GetAsymmetryWidth();
-	
-	diff       = a - b;
-	error_diff = TMath::Sqrt(a_err*a_err + b_err*b_err);
-	width_diff = a_wit - b_wit;
+        a     = one_element -> GetAsymmetry();
+        b     = two_element -> GetAsymmetry();
+        a_err = one_element -> GetAsymmetryError();
+        b_err = two_element -> GetAsymmetryError();
+        a_wit = one_element -> GetAsymmetryWidth();
+        b_wit = two_element -> GetAsymmetryWidth();
 
-	an_element -> SetAsymmetry(diff);
-	an_element -> SetAsymmetryError(error_diff);
-	an_element -> SetAsymmetryWidth(width_diff);
-        
-	
+        diff       = a - b;
+        error_diff = TMath::Sqrt(a_err*a_err + b_err*b_err);
+        width_diff = a_wit - b_wit;
+
+        an_element -> SetAsymmetry(diff);
+        an_element -> SetAsymmetryError(error_diff);
+        an_element -> SetAsymmetryWidth(width_diff);
+
+
       }
-    
+
     }
     else {
       if(fLocalDebug) {
-	std::cout 
-	  << "QwPromptSummary::FillYieldToElement : No Element with the name " 
-	  << name1 + "-" + name2 
-	  <<  std::endl;
+        std::cout
+          << "QwPromptSummary::FillYieldToElement : No Element with the name "
+          << name1 + "-" + name2
+          <<  std::endl;
       }
   }
 
   }
   else {
     if(fLocalDebug) {
-      std::cout 
-	<< "QwPromptSummary::FillDoubleDifference: No Elements with the name " 
-	<< name1 << " and " << name2  
-	<<  std::endl;
+      std::cout
+        << "QwPromptSummary::FillDoubleDifference: No Elements with the name "
+        << name1 << " and " << name2
+        <<  std::endl;
     }
   }
 }
@@ -654,23 +654,23 @@ QwPromptSummary::PrintCSV(Int_t nEvents, TString start_time, TString end_time)
   std::ofstream output;
   output.open(filename.Data());
   output<< header.Data();
-  
+
   TString secheader= "=========================================================================\n";
   secheader+=Form("%40s \n","Yields");
   secheader+="=========================================================================\n" ;
   output << secheader.Data() ;
- 
+
   for (auto i=fElementList.begin(); i!=fElementList.end(); i++  )
     {
       output << (*i)->GetCSVSummary("yield") ;
     }
-  
+
 
   secheader= "=========================================================================\n";
   secheader+=Form("%50s\n","Asymmetries/Differences");
   secheader+="=========================================================================\n";
   output << secheader.Data();
- 
+
   for ( auto j=fElementList.begin(); j!=fElementList.end(); j++ )
     {
       output << (*j)->GetCSVSummary("asymmetry");
@@ -692,13 +692,12 @@ QwPromptSummary::PrintCSV(Int_t nEvents, TString start_time, TString end_time)
   output<< Form("%45s\n"," End of Summary");
   output<< "=========================================================================\n";
   output.close();
-  
+
   return;
 };
 
 void
 QwPromptSummary::PrintTextSummary()
-{  
+{
   return;
 };
-

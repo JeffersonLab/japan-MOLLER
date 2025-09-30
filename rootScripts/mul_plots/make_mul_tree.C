@@ -10,16 +10,16 @@ void make_mul_tree(const char * name, const char* runs[], const int nruns=1){
     TChain * treg = new TChain("reg");
     TChain * tdit = new TChain("dit");
     for(int i=0; i<nruns; i++) {
-      const char * run = runs[i];	
+      const char * run = runs[i];
       char * reg_file = Form("/chafs2/work1/apar/postpan-outputs/prexPrompt_%s_regress_postpan.root", run);
       treg->AddFile(reg_file);
-      cout << "add reg file: " << reg_file << endl; 
+      cout << "add reg file: " << reg_file << endl;
       char * dit_file = Form("/chafs2/work1/apar/DitherCorrection/prexPrompt_dither_%s.root", run);
       tdit->AddFile(dit_file);
-      cout << "add dit file: " << dit_file << endl; 
+      cout << "add dit file: " << dit_file << endl;
     }
 
-    // int run = runs[0];	// how to make sure each run contains the mul tree ?
+    // int run = runs[0];       // how to make sure each run contains the mul tree ?
     typedef struct {double hw_sum, block0, block1, block2, block3, num_samples, Device_Error_Code;} DEVICE;
     struct {double ppm, ppb;} units = {1e-6, 1e-9};
     double ErrorFlag, ok_cut;
@@ -239,7 +239,7 @@ int main(int argc, char *argv[]) {
         case 'n':
           name = optarg;
           break;
-      }   
+      }
     }
 
     if (argc == optind) {

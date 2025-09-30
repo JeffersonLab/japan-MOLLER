@@ -4,14 +4,14 @@ void GetHallBCM10XPedestal_panguin_Caryn(TString user_cut ="1",TString scan_data
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.2);
   gStyle->SetStatW(0.3);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(1011);
   gStyle->SetStatX(0.7);
   gStyle->SetStatY(0.9);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -20,10 +20,10 @@ void GetHallBCM10XPedestal_panguin_Caryn(TString user_cut ="1",TString scan_data
   gStyle->SetLabelSize(0.035,"x");
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.06,"hxyz");
-  gROOT->ForceStyle();  
-  
+  gROOT->ForceStyle();
+
   //T
- 
+
   TTree *tree= (TTree*)gROOT->FindObject("evt");
 
   //---------------------------
@@ -37,9 +37,9 @@ void GetHallBCM10XPedestal_panguin_Caryn(TString user_cut ="1",TString scan_data
   int nbinx = (int)(10*max); // to one-tenth precision.
 
   vector<double> vec_scandata;
-  TH1D *hsd = new TH1D(Form("hsd%d",myii),"scan data",nbinx,-0.05,max-0.05); 
+  TH1D *hsd = new TH1D(Form("hsd%d",myii),"scan data",nbinx,-0.05,max-0.05);
   tree->Draw(Form("beam_current>>hsd%d",myii),Form("%s&&scandata1!=0",user_cut.Data()),"goff");
-  int bin_content; 
+  int bin_content;
   double bin_center;
   for(int ibin=0;ibin<nbinx;ibin++){
     bin_content = hsd->GetBinContent(ibin+1); // Histogram bin number starts from 1
@@ -93,15 +93,15 @@ void GetHallBCM10XPedestal_panguin_Caryn(TString user_cut ="1",TString scan_data
   f_zero->SetLineWidth(2);
   f_zero->SetLineColor(kRed);
   f_zero->SetLineStyle(9);
-  
+
   TString branch_name;
   TString num_samples_name;
 
 
   //  const int ndata = sizeof(beam_evtcut)/sizeof(*beam_evtcut);
-  double bcm_mean[ndata]; 
+  double bcm_mean[ndata];
   double bcm_error[ndata];
-  double unser_mean[ndata]; 
+  double unser_mean[ndata];
   double unser_error[ndata];
   double bcm_res[ndata]; // residual
 
@@ -112,10 +112,10 @@ void GetHallBCM10XPedestal_panguin_Caryn(TString user_cut ="1",TString scan_data
   double gain[nbcm];
   double slope[nbcm];
 
-	char outfilename[255];
+        char outfilename[255];
 
   TGraphErrors *g_bcm_res;
-  TGraphErrors *g_bcm_fit;  
+  TGraphErrors *g_bcm_fit;
   TGraphErrors *g_bcm_res_ref;
   TGraphErrors *g_bcm_fit_ref;
   TMultiGraph *mg_bcm_res;
@@ -131,7 +131,7 @@ void GetHallBCM10XPedestal_panguin_Caryn(TString user_cut ="1",TString scan_data
     //    my_cut = beam_evtcut[i];
     my_cut = Form("cleandata==1&&scandata2==%d&&scandata1!=0",i+1);
     tree->Draw(Form("%s>>h_unser_%d_%d",scan_data.Data(),i,myii),
-	       my_cut.Data(),"goff");
+               my_cut.Data(),"goff");
     h_stat =(TH1D*)gDirectory->FindObject(Form("h_unser_%d_%d",i,myii));
     unser_mean[i] = h_stat->GetMean();
     unser_error[i] = h_stat->GetRMS()/TMath::Sqrt(h_stat->GetEntries());
@@ -139,26 +139,26 @@ void GetHallBCM10XPedestal_panguin_Caryn(TString user_cut ="1",TString scan_data
     //  my_cut = pedestal_unser_evtcut[i];
     my_cut = Form("cleandata==1&&scandata2==%d&&scandata1==0",i+1);
     tree->Draw(Form("%s>>h_ped_%d_%d",scan_data.Data(),i,myii),
-	       my_cut.Data(),"goff");
+               my_cut.Data(),"goff");
     h_stat =(TH1D*)gDirectory->FindObject(Form("h_ped_%d_%d",i,myii));
      if(scan_data=="unser"){
           unser_mean[i]  = unser_mean[i] - h_stat->GetMean(); // pedestal subtraction
-	  // cout << unser_mean[i] << endl;
+          // cout << unser_mean[i] << endl;
     }
   }
 
   for(int ibcm=0;ibcm<nbcm;ibcm++){
     branch_name = Form("%s.hw_sum_raw/%s.num_samples",
-		       device_name[ibcm].Data(),device_name[ibcm].Data());
+                       device_name[ibcm].Data(),device_name[ibcm].Data());
 
       for(int i=0;i<ndata;i++){
-	//	my_cut = beam_evtcut[i];
-	my_cut = Form("cleandata==1&&scandata2==%d&&scandata1!=0",i+1);
-	tree->Draw(Form("%s>>h_bcm%d_%d_%d",branch_name.Data(),ibcm,i,myii),
-		  my_cut.Data(),"goff");
-	h_stat =(TH1D*)gDirectory->FindObject(Form("h_bcm%d_%d_%d",ibcm,i,myii));
-	bcm_mean[i] = h_stat->GetMean();
-	bcm_error[i] = h_stat->GetRMS()/TMath::Sqrt(h_stat->GetEntries());
+        //      my_cut = beam_evtcut[i];
+        my_cut = Form("cleandata==1&&scandata2==%d&&scandata1!=0",i+1);
+        tree->Draw(Form("%s>>h_bcm%d_%d_%d",branch_name.Data(),ibcm,i,myii),
+                  my_cut.Data(),"goff");
+        h_stat =(TH1D*)gDirectory->FindObject(Form("h_bcm%d_%d_%d",ibcm,i,myii));
+        bcm_mean[i] = h_stat->GetMean();
+        bcm_error[i] = h_stat->GetRMS()/TMath::Sqrt(h_stat->GetEntries());
       }
       c_fit->cd(ibcm+1);
 
@@ -174,13 +174,13 @@ void GetHallBCM10XPedestal_panguin_Caryn(TString user_cut ="1",TString scan_data
       ped[ibcm] = f_fit->GetParameter(0);
       slope[ibcm] = f_fit->GetParameter(1);
       gain[ibcm] = 1/slope[ibcm];
-      
+
       for(int i=0;i<ndata;i++){
-	//	bcm_res[i] = (bcm_mean[i]-ped[ibcm])*gain[ibcm] - unser_mean[i];
-	bcm_res[i] = bcm_mean[i] - f_fit->Eval(unser_mean[i]);
-	bcm_error[i] = bcm_error[i];
+        //      bcm_res[i] = (bcm_mean[i]-ped[ibcm])*gain[ibcm] - unser_mean[i];
+        bcm_res[i] = bcm_mean[i] - f_fit->Eval(unser_mean[i]);
+        bcm_error[i] = bcm_error[i];
       }
-      
+
       c_res->cd(ibcm+1);
       g_bcm_res = new TGraphErrors(ndata,unser_mean,bcm_res,unser_error,bcm_error);
       g_bcm_res->SetMarkerStyle(20);

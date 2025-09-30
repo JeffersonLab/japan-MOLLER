@@ -147,8 +147,8 @@ void QwOptions::SetCommandLine(int argc, char* argv[], bool default_config_file)
 void QwOptions::SetConfigFile(const std::string& configfile)
 {
   QwWarning << "Overriding the default configuration files with "
-	    << "user-defined configuration file "
-	    << configfile.c_str() << QwLog::endl;
+            << "user-defined configuration file "
+            << configfile.c_str() << QwLog::endl;
   fConfigFiles.clear();
   fConfigFiles.push_back(configfile);
   fParsed = false;
@@ -169,7 +169,7 @@ void QwOptions::AddConfigFile(const std::string& configfile)
   }
   if (notfound){
     QwMessage << "Adding user-defined configuration file "
-	      << configfile.c_str() << QwLog::endl;
+              << configfile.c_str() << QwLog::endl;
     fConfigFiles.push_back(configfile);
     fParsed = false;
   }
@@ -305,14 +305,14 @@ void QwOptions::ParseConfigFile()
       // their signature.  This allows for unknown options in the config file.
       po::options_description* config_file_options = CombineOptions();
       po::store(po::parse_config_file(configstream, *config_file_options, true),
-		fVariablesMap);
+                fVariablesMap);
       delete config_file_options;
 #else
       // Boost versions before 1.35 cannot handle files with unregistered
       // options.
       po::options_description* config_file_options = CombineOptions();
       po::store(po::parse_config_file(configstream, *config_file_options),
-		fVariablesMap);
+                fVariablesMap);
       delete config_file_options;
 #endif
     } catch (std::exception const& e) {
@@ -325,7 +325,7 @@ void QwOptions::ParseConfigFile()
     }
     // Notify of new options
     po::notify(fVariablesMap);
-    
+
     // If a configuration file is specified, load it.
     if (fVariablesMap.count("add-config") > 0) {
       AddConfigFile(fVariablesMap["add-config"].as<std::vector<std::string> >());

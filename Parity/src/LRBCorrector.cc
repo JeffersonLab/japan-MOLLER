@@ -31,10 +31,10 @@ Last Modified: August 1, 2018 1:41 PM
 #include <TFile.h>
 #include <TH2.h>
 #include <TKey.h>
-#include <TTree.h> 
+#include <TTree.h>
 #include <TChain.h>
 #include <TObjArray.h>
-#include <TEventList.h> 
+#include <TEventList.h>
 
 #include <TMatrixD.h>
 
@@ -43,7 +43,7 @@ RegisterHandlerFactory(LRBCorrector);
 
 /// \brief Constructor with name
 LRBCorrector::LRBCorrector(const TString& name):VQwDataHandler(name),
-						fLastCycle(0)
+                                                fLastCycle(0)
 {
   ParseSeparator = "_";
   fKeepRunningSum = kTRUE;
@@ -165,15 +165,15 @@ Int_t LRBCorrector::LoadChannelMap(const std::string& mapfile)
     }
     if (alphasM->GetNrows() != Int_t(fIndependentType.size())) {
       QwWarning << "Slope matrix has wrong number of rows: "
-		<< alphasM->GetNrows() << " != " << fIndependentType.size()
-		<< QwLog::endl;
+                << alphasM->GetNrows() << " != " << fIndependentType.size()
+                << QwLog::endl;
       corFile->Close();
       return 0;
     }
     if (alphasM->GetNcols() != Int_t(fDependentType.size())) {
       QwWarning << "Slope matrix has wrong number of cols: "
-		<< alphasM->GetNcols() << " != " << fDependentType.size()
-		<< QwLog::endl;
+                << alphasM->GetNcols() << " != " << fDependentType.size()
+                << QwLog::endl;
       corFile->Close();
       return 0;
     }
@@ -183,7 +183,7 @@ Int_t LRBCorrector::LoadChannelMap(const std::string& mapfile)
     for (size_t i = 0; i != fDependentType.size(); ++i) {
       fSensitivity[cycle].at(i).resize(fIndependentType.size());
       for (size_t j = 0; j != fIndependentType.size(); ++j) {
-	fSensitivity[cycle].at(i).at(j) = -1.0*(*alphasM)(j,i);
+        fSensitivity[cycle].at(i).at(j) = -1.0*(*alphasM)(j,i);
       }
     }
   }

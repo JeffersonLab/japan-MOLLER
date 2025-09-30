@@ -400,8 +400,8 @@ void  QwClock<T>::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile&
 
       //QwMessage <<" QwClock "<<devicename<<QwLog::endl;
       if (modulelist.HasValue(devicename)){
-	fClock.ConstructBranch(tree, prefix);
-	QwMessage <<" Tree leave added to "<<devicename<<QwLog::endl;
+        fClock.ConstructBranch(tree, prefix);
+        QwMessage <<" Tree leave added to "<<devicename<<QwLog::endl;
       }
       // this functions doesn't do anything yet
     }
@@ -457,6 +457,6 @@ std::vector<QwDBInterface> QwClock<T>::GetDBEntry()
 }
 #endif // __USE_DATABASE__
 
-template class QwClock<QwVQWK_Channel>; 
-template class QwClock<QwSIS3801_Channel>; 
-template class QwClock<QwSIS3801D24_Channel>; 
+template class QwClock<QwVQWK_Channel>;
+template class QwClock<QwSIS3801_Channel>;
+template class QwClock<QwSIS3801D24_Channel>;

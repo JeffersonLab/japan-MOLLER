@@ -35,7 +35,7 @@ class QwDBInterface;
 class QwIntegrationPMT : public VQwDataElement{
 /////
  public:
-  QwIntegrationPMT() { 
+  QwIntegrationPMT() {
     InitializeChannel("","raw");
   };
   QwIntegrationPMT(TString name){
@@ -61,9 +61,9 @@ class QwIntegrationPMT : public VQwDataElement{
 
   void  InitializeChannel(TString name, TString datatosave);
   // new routine added to update necessary information for tree trimming
-  void  InitializeChannel(TString subsystem, TString name, TString datatosave); 
-  // same purpose as above but this was needed to accormodate combinedPMT. Unlike Beamline combined devices where they have MollerADC channels, Combined PMT has integration PMT 
-  void  InitializeChannel(TString subsystem, TString module, TString name, TString datatosave); 
+  void  InitializeChannel(TString subsystem, TString name, TString datatosave);
+  // same purpose as above but this was needed to accormodate combinedPMT. Unlike Beamline combined devices where they have MollerADC channels, Combined PMT has integration PMT
+  void  InitializeChannel(TString subsystem, TString module, TString name, TString datatosave);
   void SetElementName(const TString &name) { fElementName = name; fTriumf_ADC.SetElementName(name);};
 
   const QwMollerADC_Channel* GetChannel(const TString name) const {
@@ -111,7 +111,7 @@ void RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeam
   }
 
   Bool_t CheckForBurpFail(const VQwDataElement *ev_error);
-  
+
   UInt_t UpdateErrorFlag() {return GetEventcutErrorFlag();};
   void UpdateErrorFlag(const QwIntegrationPMT *ev_error);
 

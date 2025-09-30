@@ -38,8 +38,8 @@ class QwAlarmHandler:public VQwDataHandler, public MQwDataHandlerCloneable<QwAla
     Int_t ConnectChannels(
         QwSubsystemArrayParity& yield,
         QwSubsystemArrayParity& asym,
-			  QwSubsystemArrayParity& diff);
-    
+                          QwSubsystemArrayParity& diff);
+
 
     void ProcessData();
     void CheckAlarms();
@@ -47,9 +47,9 @@ class QwAlarmHandler:public VQwDataHandler, public MQwDataHandlerCloneable<QwAla
     void ParseConfigFile(QwParameterFile&);
 
 
-  
+
   protected:
-  
+
     /// Default constructor (Protected for child class access)
     QwAlarmHandler() { };
 

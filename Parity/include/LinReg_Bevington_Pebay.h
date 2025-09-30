@@ -21,10 +21,10 @@
 class LinRegBevPeb {
   int  nP; // number of independent variables
   int  nY; // number of   dependent variables
- 
+
  private:
   Int_t fErrorFlag;             ///< is information valid
-  Long64_t fGoodEventNumber;    ///< accumulated so far  
+  Long64_t fGoodEventNumber;    ///< accumulated so far
 
   /// correlations
   TMatrixD mRPY, mRYP;
