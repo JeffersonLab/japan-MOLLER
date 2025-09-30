@@ -8,9 +8,9 @@ diff:bcm_target, 1
 diff:bcm1h15, -1
 
 [diff:@diff_bpm1h04x_bpm1h14x]
-diff:bpm1h04x, 1
-diff:bpm1h14x, -1
+diff:bpm1h04X, 1
+diff:bpm1h14X, -1
 
 [diff:@diff_bpm1h04x_bpm1h14y]
-diff:bpm1h04x, 1
-diff:bpm1h14y, -1
+diff:bpm1h04X, 1
+diff:bpm1h14Y, -1
