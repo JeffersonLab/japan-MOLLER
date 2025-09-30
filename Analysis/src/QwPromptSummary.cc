@@ -113,7 +113,7 @@ if (type.Contains("asy")&& !(dd||da)){
       out = Form("%20s | Mean: %8.3f +/- %8.3f \t Width: %8.3f\n", fElementName.Data(), fAsymDiff, fAsymDiffError, fAsymDiffWidth);
 }
 if (type.Contains("double")&& (dd||da)) {
-     	out = Form ("%20s | Mean: %8.3f +/- %8.3f \t Width: %8.3f\n", fElementName.Data(), fAsymDiff, fAsymDiffError, fAsymDiffWidth);
+     	out = Form("%20s | Mean: %8.3f +/- %8.3f \t Width: %8.3f\n", fElementName.Data(), fAsymDiff, fAsymDiffError, fAsymDiffWidth);
 }     
 
 
@@ -184,9 +184,6 @@ QwPromptSummary::QwPromptSummary()
   fRunNumber    = 0;
   fRunletNumber = 0;
  
- 
-  fNElements = 0;
-
   fLocalDebug = kTRUE;
   
   this->SetupElementList();
@@ -198,9 +195,6 @@ QwPromptSummary::QwPromptSummary(Int_t run_number, Int_t runlet_number)
 {
   fRunNumber    = run_number;
   fRunletNumber = runlet_number;
-
- 
-  fNElements = 0;
 
   fLocalDebug = kFALSE;
   
@@ -214,9 +208,6 @@ QwPromptSummary::QwPromptSummary(Int_t run_number, Int_t runlet_number, const st
   fRunNumber    = run_number;
   fRunletNumber = runlet_number;
 
- 
-  fNElements = 0;
-
   fLocalDebug = kFALSE;
   
   this->LoadElementsFromParameterFile(parameter_file);
@@ -228,7 +219,7 @@ QwPromptSummary::~QwPromptSummary()
 {
 
   for (auto i=fElementList.begin() ; i!=fElementList.end();i++){
-  	delete *i;
+    delete i->second;
   }
   fElementList.clear();
 
@@ -245,8 +236,8 @@ QwPromptSummary::SetupElementList()
   try {
     QwParameterFile paramfile(default_param_file);
     LoadElementsFromParameterFile(paramfile);
-    if (fNElements > 0) {
-      QwMessage << "QwPromptSummary: Loaded " << fNElements << " elements from " << default_param_file << QwLog::endl;
+    if (fElementList.size() > 0) {
+      QwMessage << "QwPromptSummary: Loaded " << fElementList.size() << " elements from " << default_param_file << QwLog::endl;
       return; // Successfully loaded from file
     }
   } catch (const std::exception& e) {
@@ -255,38 +246,6 @@ QwPromptSummary::SetupElementList()
                 << ", using default elements: " << e.what() << QwLog::endl;
     }
   }
-  
-  // Fall back to default hard-coded elements if parameter file not found or empty
-  QwMessage << "QwPromptSummary: Using default hard-coded element list" << QwLog::endl;
-  
-  // Add the originally commented out elements
-  this->AddElement(new PromptSummaryElement("bcm_an_us"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds3"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds10"));
-  this->AddElement(new PromptSummaryElement("bcm_dg_us"));
-  this->AddElement(new PromptSummaryElement("bcm_dg_ds"));
-  
-  this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_an_ds"));
-  this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_an_ds3"));
-  this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_an_ds10"));
-  this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_dg_us"));
-  this->AddElement(new PromptSummaryElement("bcm_an_us-bcm_dg_ds"));
-  
-  this->AddElement(new PromptSummaryElement("bcm_an_ds-bcm_an_ds3"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds-bcm_an_ds10"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds-bcm_dg_us"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds-bcm_dg_ds"));
-  
-  this->AddElement(new PromptSummaryElement("bcm_an_ds3-bcm_an_ds10"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds3-bcm_dg_us"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds3-bcm_dg_ds"));
-
-  this->AddElement(new PromptSummaryElement("bcm_an_ds10-bcm_dg_us"));
-  this->AddElement(new PromptSummaryElement("bcm_an_ds10-bcm_dg_ds"));
-
-  this->AddElement(new PromptSummaryElement("bcm_dg_us-bcm_dg_ds"));
-
 };
 
 
@@ -368,45 +327,40 @@ QwPromptSummary::LoadElementsFromParameterFile(QwParameterFile& parameterfile)
     delete section;
   }
   
-  QwMessage << "QwPromptSummary: Loaded " << fNElements << " elements from parameter file" << QwLog::endl;
+  QwMessage << "QwPromptSummary: Loaded " << fElementList.size() << " elements from parameter file" << QwLog::endl;
 };
 
 
 void 
 QwPromptSummary::AddElement(PromptSummaryElement *in)
 {
-  Int_t pos = 0;
-
-  fElementList.push_back(in);
+  TString name = in->GetName(); name.ToLower();
+  fElementList[name] = in;
   if(fLocalDebug) {
-    printf("AddElement at pos %d\n", pos);
+    printf("AddElement %s at pos %lu\n", in->GetName().Data(), fElementList.size()-1);
   }
-
-  fNElements++;
-  return;
+  if (fElementList.size() == 1) {
+    QwMessage << "First element: " << in->GetName() << " will be reference" << QwLog::endl;
+    fReferenceElement = in;
+  }
 };
 
 
 PromptSummaryElement *
 QwPromptSummary::GetElementByName(TString name)
 {
-
-  
-  TString get_name = "";
-
-  for (auto i=fElementList.begin(); i!=fElementList.end(); i++  )
-    {
-      PromptSummaryElement* an_element = *i;
-      get_name   = an_element->GetName();
-      if( get_name.EqualTo(name) ) {
-	if(fLocalDebug) {
-	  std::cout << "System " << an_element->GetName()
-		    << " QwPromptSummary::GetElementByName address at" << an_element << std::endl;
-	}
-	return an_element;
-      }
+  name.ToLower();
+  if (fElementList.find(name) != fElementList.end()) {
+    PromptSummaryElement* an_element = fElementList[name];
+    if(fLocalDebug) {
+      std::cout << "System " << an_element->GetName()
+                << " QwPromptSummary::GetElementByName address at " << an_element << std::endl;
     }
-
+    return an_element;
+  } else {
+      QwDebug << "System " << name
+              << " QwPromptSummary::GetElementByName not found" << std::endl;
+  }
   return NULL;
 };
 
@@ -442,17 +396,14 @@ QwPromptSummary::PrintCSVHeader(Int_t nEvents, TString start_time, TString end_t
   TString out = "";
    
   Double_t goodEvents = 0.0;
-  TString referenceElement = "N/A";
+  TString referenceElementName = "N/A";
   
   // Use the first element in the list to determine good events
-  if (!fElementList.empty()) {
-    PromptSummaryElement* first_elem = fElementList.front();
-    if (first_elem) {
-      goodEvents = first_elem->GetNumGoodEvents() * fPatternSize;
-      referenceElement = first_elem->GetName();
-    }
+  if (fReferenceElement) {
+    goodEvents = fReferenceElement->GetNumGoodEvents() * fPatternSize;
+    referenceElementName = fReferenceElement->GetName();
   } else {
-    QwError << "Warning: No elements found in QwPromptSummary. Setting goodEvents=0." << QwLog::endl;
+    QwError << "Warning: No reference element found in QwPromptSummary. Setting goodEvents=0." << QwLog::endl;
   }
 
   out += Form("Run: %d \n",fRunNumber);
@@ -460,7 +411,7 @@ QwPromptSummary::PrintCSVHeader(Int_t nEvents, TString start_time, TString end_t
   out += Form("Number of events processed: %i\n",nEvents);
   out += Form("Number of events in good multiplicity patterns: %3.0f\n", goodEvents);
   out += Form("Percentage of good events: %3.1f %%\n", goodEvents/nEvents*100);
-  out += Form("Good events reference: %s (first element from parameter file)\n", referenceElement.Data());
+  out += Form("Good events reference: %s (first element from parameter file)\n", referenceElementName.Data());
   out += "=========================================================================\n";
   out += "Yield Units: bcm(uA), cavq(uA), bpm(mm), sam(mV/uA)\n";
   out += "Asymmetry/Difference Units: bcm(ppm), cavq(ppm), bpm(um), sam(ppm)\n";
@@ -662,7 +613,7 @@ QwPromptSummary::PrintCSV(Int_t nEvents, TString start_time, TString end_time)
  
   for (auto i=fElementList.begin(); i!=fElementList.end(); i++  )
     {
-      output << (*i)->GetCSVSummary("yield") ;
+      output << i->second->GetCSVSummary("yield") ;
     }
   
 
@@ -673,7 +624,7 @@ QwPromptSummary::PrintCSV(Int_t nEvents, TString start_time, TString end_time)
  
   for ( auto j=fElementList.begin(); j!=fElementList.end(); j++ )
     {
-      output << (*j)->GetCSVSummary("asymmetry");
+      output << j->second->GetCSVSummary("asymmetry");
     }
 
 
@@ -685,7 +636,7 @@ QwPromptSummary::PrintCSV(Int_t nEvents, TString start_time, TString end_time)
 
   for ( auto j=fElementList.begin(); j!=fElementList.end(); j++ )
     {
-      output << (*j)->GetCSVSummary("double");
+      output << j->second->GetCSVSummary("double");
     }
 
   output<< "=========================================================================\n";
