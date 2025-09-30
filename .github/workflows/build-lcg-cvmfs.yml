@@ -82,7 +82,7 @@ jobs:
 
             echo "::group::Compilation"
             # Build the project with ccache
-            cmake -Bbuild -S. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
+            cmake -Bbuild -S. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS="-g -pg"
             cmake --build build -j$(nproc)
             echo "::endgroup::"
             
@@ -104,6 +104,19 @@ jobs:
             /usr/bin/time -v \
             build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary
             echo "::endgroup::"
+
+            echo "::group:: Profile analysis"
+            gprof build/qwparity | tee qwparity.txt
+            echo "::endgroup::"
+
+      - name: Upload profiling analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: gprof-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: |
+            qwparity.txt
+          retention-days: 7
+          if-no-files-found: error
 
       - name: Upload prompt summary
         uses: actions/upload-artifact@v4
