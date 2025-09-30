@@ -1,11 +1,11 @@
 /**
- * \file	QwSIS3320_LogicalAccumulator.cc
+ * \file        QwSIS3320_LogicalAccumulator.cc
  *
- * \brief	Implementation of the SIS3320 sampling ADC accumulator
+ * \brief       Implementation of the SIS3320 sampling ADC accumulator
  *
- * \author	W. Deconinck
- * \date	2009-09-04 18:06:23
- * \ingroup	QwCompton
+ * \author      W. Deconinck
+ * \date        2009-09-04 18:06:23
+ * \ingroup     QwCompton
  *
  * The QwSIS3320_LogicalAccumulator should allow convenient access to the accumulator
  * data collected with the SIS3320 for the Compton photon detector.  This class
@@ -37,4 +37,3 @@ void QwSIS3320_LogicalAccumulator::AddAccumulatorReference(
     fAccumulatorWeights.push_back(weight);
   }
 }
-

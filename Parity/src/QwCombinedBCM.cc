@@ -114,7 +114,7 @@ void  QwCombinedBCM<T>::ProcessEvent()
   if (ldebug) {
     QwMessage << "*****************" << QwLog::endl;
     QwMessage << "QwCombinedBCM: " << this->GetElementName() << QwLog::endl
-	            << "weighted average of hardware sums = " << this->fBeamCurrent.GetValue() << QwLog::endl;
+                    << "weighted average of hardware sums = " << this->fBeamCurrent.GetValue() << QwLog::endl;
     if (this->fBeamCurrent.GetNumberOfSubelements() > 1) {
       for (size_t i = 0; i < 4; i++) {
         QwMessage << "weighted average of block[" << i << "] = " << this->fBeamCurrent.GetValue(i) << QwLog::endl;
@@ -170,7 +170,7 @@ void  QwCombinedBCM<T>::RandomizeEventData(int helicity, double time)
     //std::cout << "(fTripPeriod - fmod(time, fTripPeriod))=="<<(fTripPeriod - fmod(time, fTripPeriod))<<"; fTripLength=="<<fTripLength
     //          << "; ((fTripPeriod - fmod(time, fTripPeriod)) / fTripLength)=="<<((fTripPeriod - fmod(time, fTripPeriod)) / fTripLength)
     //          << std::endl;
-    this->fBeamCurrent.Scale(factor); 
+    this->fBeamCurrent.Scale(factor);
     //std::cout << "fBeamCurrent.Scale(factor) = " << factor << std::endl;
   }
 }
@@ -209,16 +209,16 @@ void  QwCombinedBCM<T>::LoadMockDataParameters(QwParameterFile &paramfile){
 template<typename T>
 Bool_t QwCombinedBCM<T>::ApplySingleEventCuts()
 {
-  
+
   //This is required to update single event cut faliures in individual channels
   //  First update the error code based on the codes
   //  of the elements.  This requires that the BCMs
   //  have had ApplySingleEventCuts run on them already.
-  
+
   for (size_t i=0;i<fElement.size();i++){
     this->fBeamCurrent.UpdateErrorFlag(fElement.at(i)->fBeamCurrent.GetErrorCode());
   }
-  
+
 
   //  Everything is identical as for a regular BCM
   return QwBCM<T>::ApplySingleEventCuts();
@@ -237,14 +237,14 @@ UInt_t QwCombinedBCM<T>::UpdateErrorFlag(){
 /*
 template<typename T>
 void QwCombinedBCM<T>::UpdateErrorFlag(const VQwBCM *ev_error){
-    
+
   try {
     if(typeid(*ev_error)==typeid(*this)) {
       // std::cout<<" Here in QwCombinedBCM::UpdateErrorFlag \n";
       if (this->GetElementName()!="") {
         QwCombinedBCM<T>* value_bcm = dynamic_cast<QwCombinedBCM<T>* >(ev_error);
-	VQwDataElement *value_data = dynamic_cast<VQwDataElement *>(&(value_bcm->fBeamCurrent));
-	fBeamCurrent.UpdateErrorFlag(value_data->GetErrorCode());//the routine GetErrorCode() return the error flag + configuration flag unconditionally
+        VQwDataElement *value_data = dynamic_cast<VQwDataElement *>(&(value_bcm->fBeamCurrent));
+        fBeamCurrent.UpdateErrorFlag(value_data->GetErrorCode());//the routine GetErrorCode() return the error flag + configuration flag unconditionally
       }
     } else {
       TString loc="Standard exception from QwCombinedBCM::UpdateErrorFlag :"+
@@ -254,8 +254,8 @@ void QwCombinedBCM<T>::UpdateErrorFlag(const VQwBCM *ev_error){
     }
   } catch (std::exception& e) {
     std::cerr<< e.what()<<std::endl;
-  }  
-    
+  }
+
     QwBCM<T>::UpdateErrorFlag(const ev_error);
 };
 */
@@ -408,8 +408,8 @@ void  QwCombinedBCM<T>::ConstructBranch(TTree *tree, TString &prefix, QwParamete
   } else
     {
       if (modulelist.HasValue(devicename)){
-	fBeamCurrent.ConstructBranch(tree,prefix);
-	QwMessage <<" Tree leave added to "<<devicename<<QwLog::endl;
+        fBeamCurrent.ConstructBranch(tree,prefix);
+        QwMessage <<" Tree leave added to "<<devicename<<QwLog::endl;
       }
     }
   return;

@@ -5,14 +5,14 @@ void IAScan_BPMs(int run_num = 3431){
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.15);
   gStyle->SetStatW(0.25);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(111);
   gStyle->SetStatX(0.8);
   gStyle->SetStatY(0.9);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -21,8 +21,8 @@ void IAScan_BPMs(int run_num = 3431){
   gStyle->SetLabelSize(0.035,"x");
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.06,"hxyz");
-  gROOT->ForceStyle();  
-  
+  gROOT->ForceStyle();
+
   TString rf_name =Form("$QW_ROOTFILES/prexTest_%d.000.root",run_num);
   TFile *rootfile = TFile::Open(rf_name);
   TTree *tree= (TTree*)rootfile->Get("mul");
@@ -90,7 +90,7 @@ TCanvas *c_bcm = new TCanvas("c_bcm","c_bcm",800,600);
     gSystem->Exec(Form("pdfunite *.pdf plots/run%d_IAscan_bpm.pdf",run_num));
     gSystem->Exec(Form("rm -rf *.pdf"));
       for(int i=0;i<nDET;i++){
-	bpm_dev[i] = Abpm[i]/Aq*100;
+        bpm_dev[i] = Abpm[i]/Aq*100;
         cout<< Form("%s deviation",device_name[i].Data())<<"\t"<<bpm_dev[i]<<"%"<<endl;
       }
  rootfile->Close();

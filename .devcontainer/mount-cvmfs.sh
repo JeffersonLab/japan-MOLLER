@@ -16,7 +16,7 @@ mount_cvmfs() {
 
     while [ $attempt -le $max_attempts ]; do
         echo "📁 Mounting $repo (attempt $attempt/$max_attempts)..."
-        
+
         if sudo mount -t cvmfs "$repo" "$mount_point" 2>/dev/null; then
             echo "✅ Successfully mounted $repo"
             return 0
@@ -26,7 +26,7 @@ mount_cvmfs() {
             sleep 2
         fi
     done
-    
+
     echo "❌ Failed to mount $repo after $max_attempts attempts"
     return 1
 }

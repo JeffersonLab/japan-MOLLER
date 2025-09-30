@@ -29,15 +29,15 @@ class QwWord
     TString fWordName;
     TString fWordType;
     Int_t fValue;
-    
+
     Double_t GetValue() const       {return this->GetValue(0);};
     Double_t GetValue(size_t element) const      { return fValue; };
     TString GetModType() const {return fModuleType;};
-  
 
 
 
-  
+
+
     void PrintID() const {
       QwOut << fWordName << " :: " << fSubbankIndex << " ; "
             << fModuleType << " ; " << fWordType << QwLog::endl;
@@ -52,7 +52,7 @@ class QwWord
     }
 
     TString GetWordName() const { return fWordName; };
-   
+
 
 };
 

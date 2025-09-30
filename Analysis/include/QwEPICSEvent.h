@@ -120,7 +120,7 @@ class QwEPICSEvent
   static void SetDefaultAutogainList(std::vector<std::string>& input_list);
 
   void WriteEPICSStringValues();
-  
+
  private:
 
   /// Default autogain list
@@ -187,7 +187,7 @@ class QwEPICSEvent
   Double_t fNominalWienAngle;
   Int_t    fExtraHelicityReversal;
 
-  
+
 }; // class QwEPICSEvent
 
 #endif // __QWEPICSEVENT__

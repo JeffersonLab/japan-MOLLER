@@ -13,15 +13,15 @@
 
 // Qweak headers
 
-sql_create_6(db_schema, 1, 2 
+sql_create_6(db_schema, 1, 2
   , mysqlpp::sql_int_unsigned , db_schema_id
   , mysqlpp::sql_char , major_release_number
   , mysqlpp::sql_char , minor_release_number
   , mysqlpp::sql_char , point_release_number
   , mysqlpp::sql_timestamp , time
   , mysqlpp::Null<mysqlpp::sql_text> , script_name
-) 
- 
+)
+
 
 /*! The simple constructor initializes member fields.  This class is not
  * used to establish the database connection.  It sets up a
@@ -117,7 +117,7 @@ Bool_t QwDatabase::ValidateConnection()
     //
     try {
       connect(fDatabase.c_str(), fDBServer.c_str(), fDBUsername.c_str(),
-	      fDBPassword.c_str(), (unsigned int) fDBPortNumber);
+              fDBPassword.c_str(), (unsigned int) fDBPortNumber);
       //    connect(dbname.Data(), server.Data(), username.Data(), password.Data(), (unsigned int) port);
     } catch (std::exception const& e) {
       QwError << "QwDatabase::ValidateConnection() : " << QwLog::endl;
@@ -153,7 +153,7 @@ Bool_t QwDatabase::ValidateConnection()
   }
 
   // Check to make sure database and QwDatabase schema versions match up.
-  if (fAccessLevel==kQwDatabaseReadWrite && 
+  if (fAccessLevel==kQwDatabaseReadWrite &&
       (fVersionMajor != kValidVersionMajor ||
       fVersionMinor != kValidVersionMinor ||
       fVersionPoint < kValidVersionPoint)) {
@@ -270,8 +270,8 @@ void QwDatabase::SetAccessLevel(string accesslevel)
   else if (level=="rw") fAccessLevel = kQwDatabaseReadWrite;
   else{
     QwWarning << "QwDatabase::SetAccessLevel  : Unrecognized access level \""
-	      << accesslevel << "\"; setting database access OFF"
-	      << QwLog::endl;
+              << accesslevel << "\"; setting database access OFF"
+              << QwLog::endl;
     fAccessLevel = kQwDatabaseOff;
   }
   return;
@@ -328,24 +328,24 @@ bool QwDatabase::StoreDBVersion()
 
       // If there is more than one run in the DB with the same run number, then there will be trouble later on.  Catch and bomb out.
       if (res.size()>1)
-	{
-	  QwError << "Unable to find unique schema version in database." << QwLog::endl;
-	  QwError << "Schema query returned " << res.size() << "rows." << QwLog::endl;
-	  QwError << "Please make sure that db_schema contains one unique." << QwLog::endl;
-	  this->Disconnect();
-	  return false;
-	}
+        {
+          QwError << "Unable to find unique schema version in database." << QwLog::endl;
+          QwError << "Schema query returned " << res.size() << "rows." << QwLog::endl;
+          QwError << "Please make sure that db_schema contains one unique." << QwLog::endl;
+          this->Disconnect();
+          return false;
+        }
 
       // Run already exists in database.  Pull run_id and move along.
       if (res.size()==1)
-	{
-	  QwDebug << "QwDatabase::StoreDBVersion => db_schema_id = " << res.at(0).db_schema_id << QwLog::endl;
+        {
+          QwDebug << "QwDatabase::StoreDBVersion => db_schema_id = " << res.at(0).db_schema_id << QwLog::endl;
 
-	  fVersionMajor=res.at(0).major_release_number;
-	  fVersionMinor=res.at(0).minor_release_number;
-	  fVersionPoint=res.at(0).point_release_number;
-	  this->Disconnect();
-	}
+          fVersionMajor=res.at(0).major_release_number;
+          fVersionMinor=res.at(0).minor_release_number;
+          fVersionPoint=res.at(0).point_release_number;
+          this->Disconnect();
+        }
     }
   catch (const mysqlpp::Exception& er)
     {

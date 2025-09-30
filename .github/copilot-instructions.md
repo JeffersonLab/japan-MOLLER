@@ -79,7 +79,7 @@ make -C build install
 
 # Individual tests (require completed build first):
 ./Tests/001_compilation.sh    # Build test (may use different build system)
-./Tests/002_setupfiles.sh     # Environment test  
+./Tests/002_setupfiles.sh     # Environment test
 ./Tests/003_qwanalysis.sh     # Basic analysis
 ./Tests/004_qwparity.sh       # Mock data test
 
@@ -94,8 +94,8 @@ After making changes, always test these complete workflows:
    ```bash
    # Generate mock data - takes 1-2 minutes
    build/qwmockdatagenerator -r 10 -e :10000 --config qwparity_simple.conf --detectors mock_detectors.map
-   
-   # Analyze mock data - takes 2-5 minutes  
+
+   # Analyze mock data - takes 2-5 minutes
    build/qwparity -r 10 -e :10000 --config qwparity_simple.conf --detectors mock_detectors.map
    ```
 
@@ -104,7 +104,7 @@ After making changes, always test these complete workflows:
    # Build panguin separately
    cd panguin && mkdir -p build
    cmake -B build -S . && make -C build
-   
+
    # Test basic plotting functionality
    ./build/panguin -f macros/default.cfg
    ```
@@ -113,7 +113,7 @@ After making changes, always test these complete workflows:
    ```bash
    # Verify all environment variables are set
    echo $QWANALYSIS $QWSCRATCH $ROOTSYS
-   
+
    # Test ROOT functionality
    root-config --version
    root -l -q -e "gROOT->GetVersion()"
@@ -128,7 +128,7 @@ After making changes, always test these complete workflows:
   - `Parity/prminput/` - Configuration files (*.conf) and detector maps (*.map)
 - **panguin/** - Standalone plotting/visualization tool with separate build
 - **Tests/** - Regression test framework
-- **SetupFiles/** - Environment configuration scripts  
+- **SetupFiles/** - Environment configuration scripts
 - **evio/** - CODA event I/O library (auto-downloaded during build)
 - **cmake/** - Build system configuration
 
@@ -141,7 +141,7 @@ After making changes, always test these complete workflows:
 - `Parity/prminput/prex*.conf` - Main analysis configurations
 - `Parity/prminput/qwparity_simple.conf` - Simple configuration for testing
 - `Parity/prminput/mock_detectors.map` - Mock detector mappings for testing
-- `Parity/prminput/*.map` - Detector and data handler mappings  
+- `Parity/prminput/*.map` - Detector and data handler mappings
 - `panguin/macros/*.cfg` - Plotting configuration files
 
 ## Common Issues and Solutions
@@ -153,7 +153,7 @@ After making changes, always test these complete workflows:
 - **Compiler errors**: Ensure C++11 or later compiler (GCC 4.8+)
 - **features.h not found**: Mixed conda/system library conflict - use pure Docker or pure system approach
 
-### Environment Issues  
+### Environment Issues
 - **QWSCRATCH errors**: Create directory and set environment variable before sourcing setup
 - **Path conflicts**: Use clean environment, avoid mixing conda and system libraries
 - **Permission errors**: Ensure write access to build directories
@@ -166,7 +166,7 @@ After making changes, always test these complete workflows:
 ## Timing Expectations
 
 - **Docker build**: 15-45 minutes (includes dependency compilation)
-- **CMake configuration**: 1-3 minutes  
+- **CMake configuration**: 1-3 minutes
 - **Compilation (make)**: 5-15 minutes with parallel build
 - **Full test suite**: 5-10 minutes
 - **Mock data generation**: 1-2 minutes for small datasets
@@ -193,7 +193,7 @@ After making changes, always test these complete workflows:
 ## Critical Notes
 
 - **Database support is optional** - MySQL++ failures will not prevent build
-- **Mac builds have known issues** - use Docker on macOS  
+- **Mac builds have known issues** - use Docker on macOS
 - **Large memory requirements** - ensure adequate RAM for data processing
 - **Environment variables are critical** - always source setup scripts
 - **Configuration files are required** - analysis will fail without proper *.conf and *.map files
@@ -209,7 +209,7 @@ The following are outputs from frequently run commands. Reference them instead o
 ls -la
 Analysis/          # Core analysis framework
 CMakeLists.txt     # Main build configuration
-Dockerfile         # Container build definition  
+Dockerfile         # Container build definition
 Parity/            # Main analysis executables and configs
 README.md          # Basic project documentation
 SetupFiles/        # Environment setup scripts
@@ -244,7 +244,7 @@ panguin/macros/defaultOnline.cfg       # Online monitoring configuration
 
 ### Environment Variables After Setup
 ```
-QWANALYSIS=/path/to/japan-MOLLER       # Project root directory  
+QWANALYSIS=/path/to/japan-MOLLER       # Project root directory
 QWSCRATCH=/path/to/scratch             # Scratch/temporary directory
 ROOTSYS=/path/to/root                  # ROOT installation directory
 BOOST_INC_DIR=/usr/include             # Boost headers location

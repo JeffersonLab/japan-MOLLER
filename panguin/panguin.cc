@@ -13,7 +13,7 @@ void online(TString type="standard",UInt_t run=0,Bool_t printonly=kFALSE, int ve
 
 int main(int argc, char **argv){
   tStart = clock();
- 
+
   TString type="default";
   UInt_t run=0;
   Bool_t printonly=kFALSE;
@@ -34,11 +34,11 @@ int main(int argc, char **argv){
     if(sArg=="-f") {
       type = theApp.Argv(++i);
       cout << " File specifier: "
-	   <<  type << endl;
+           <<  type << endl;
     } else if (sArg=="-r") {
       run = atoi(theApp.Argv(++i));
       cout << " Runnumber: "
-	   << run << endl;
+           << run << endl;
     } else if (sArg=="-v") {
       verbosity = atoi(theApp.Argv(++i));
     } else if (sArg=="-P") {
@@ -107,4 +107,3 @@ void Usage(){
   cerr << "  -P : Only Print Summary Plots" << endl;
   cerr << endl;
 }
-

@@ -5,14 +5,14 @@ void PITAScan_BPM(int run_num = 3431){
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.15);
   gStyle->SetStatW(0.37);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(111);
   gStyle->SetStatX(0.9);
   gStyle->SetStatY(0.9);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -21,8 +21,8 @@ void PITAScan_BPM(int run_num = 3431){
   gStyle->SetLabelSize(0.035,"x");
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.06,"hxyz");
-  gROOT->ForceStyle();  
-  
+  gROOT->ForceStyle();
+
   TString rf_name =Form("$QW_ROOTFILES/prexPrompt_pass2_%d.000.root",run_num);
   TFile *rootfile = TFile::Open(rf_name);
   TTree *tree= (TTree*)rootfile->Get("mul");
@@ -59,7 +59,7 @@ void PITAScan_BPM(int run_num = 3431){
   double bcm_dev[nBCM];
   TString my_cut = Form("cleandata&&ErrorFlag==0");
 
-  
+
 
 
   for(int idet=0;idet<nDET;idet++){
@@ -130,13 +130,13 @@ TCanvas *c_bcm = new TCanvas("c_bcm","c_bcm",1200,600);
     cout<<"asym_bcm_an_ds Slope: "<<myslope<<endl;
 
    for(int ibcm=0;ibcm<nBCM-1;ibcm++){
-	bcm_dev[ibcm] = Aq[ibcm]/myslope*100;
+        bcm_dev[ibcm] = Aq[ibcm]/myslope*100;
         cout<< Form("%s deviation",bcm_name[ibcm].Data())<<"\t"<<bcm_dev[ibcm]<<"%"<<endl;
    }
 
 
       for(int i=0;i<nDET;i++){
-	sam_dev[i] = Asam[i]/myslope*100;
+        sam_dev[i] = Asam[i]/myslope*100;
         cout<< Form("%s deviation",device_name[i].Data())<<"\t"<<sam_dev[i]<<"%"<<endl;
       }
  rootfile->Close();

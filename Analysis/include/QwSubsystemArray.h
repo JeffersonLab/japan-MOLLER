@@ -99,7 +99,7 @@ class QwSubsystemArray:
       VQwSubsystem* subsys = dynamic_cast<VQwSubsystem*>(subsys_iter->get());
       fEventTypeMask |= subsys->GetEventTypeMask();
     }
-    return fEventTypeMask; 
+    return fEventTypeMask;
   };
 
 
@@ -117,7 +117,7 @@ class QwSubsystemArray:
   /// \brief Process configuration options (default behavior)
   void ProcessOptions(QwOptions &options) { ProcessOptionsSubsystems(options); };
   void LoadAllEventRanges(QwOptions &options);
-  
+
   /// \brief Add the subsystem to this array
   void push_back(VQwSubsystem* subsys);
 
@@ -133,12 +133,12 @@ class QwSubsystemArray:
 
   /// \brief Process the event buffer for configuration events
   Int_t ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id,
-				   UInt_t *buffer, UInt_t num_words);
+                                   UInt_t *buffer, UInt_t num_words);
 
   /// \brief Process the event buffer for events
   Int_t ProcessEvBuffer(const UInt_t event_type, const ROCID_t roc_id,
-			const BankID_t bank_id, UInt_t *buffer,
-			UInt_t num_words);
+                        const BankID_t bank_id, UInt_t *buffer,
+                        UInt_t num_words);
 
   /// \brief Get the ROCID list
   void GetROCIDList(std::vector<ROCID_t> &list);
@@ -211,7 +211,7 @@ class QwSubsystemArray:
   void ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file);
   /// \brief Fill the vector for this subsystem
   void  FillTreeVector(std::vector<Double_t> &values) const;
-  
+
 #ifdef HAS_RNTUPLE_SUPPORT
   /// \brief Construct RNTuple fields and vector for this subsystem
   void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) {
@@ -252,7 +252,7 @@ class QwSubsystemArray:
 
   /// \brief Print some information about the subsystem
   void PrintInfo() const;
-  
+
   void push_back(std::shared_ptr<VQwSubsystem> subsys);
 
  protected:
@@ -287,7 +287,7 @@ class QwSubsystemArray:
     return kFALSE;
   };
 
-  std::vector< std::pair<UInt_t,UInt_t> > fBadEventRange; 
+  std::vector< std::pair<UInt_t,UInt_t> > fBadEventRange;
 
  private:
   /// Filename of the global detector map
@@ -307,7 +307,7 @@ public:
 
 protected:
   double fWindowPeriod;
-  
+
 
 }; // class QwSubsystemArray
 

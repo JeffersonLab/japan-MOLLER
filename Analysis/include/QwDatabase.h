@@ -67,7 +67,7 @@ class QwDatabase: private mysqlpp::Connection {
     mysqlpp::Query Query(const char *qstr=0     ) {return query(qstr);} //<! Generate a query to the database.
     mysqlpp::Query Query(const std::string &qstr) {return query(qstr);} //<! Generate a query to the database.
 
-    
+
     const string GetVersion();                             //! Return a full version string for the DB schema
     const string GetVersionMajor() {return fVersionMajor;} //<! fVersionMajor getter
     const string GetVersionMinor() {return fVersionMinor;} //<! fVersionMinor getter

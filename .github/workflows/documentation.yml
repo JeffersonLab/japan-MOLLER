@@ -21,7 +21,7 @@ concurrency:
 jobs:
   generate-docs:
     runs-on: ubuntu-24.04
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -48,34 +48,34 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y doxygen graphviz plantuml texlive-latex-base texlive-latex-extra
-        
+
     - name: Verify Doxygen installation
       run: |
         doxygen --version
         dot -V
         latex --version || echo "LaTeX installed for formula support"
-        
+
     - name: Update Doxygen configuration (remove obsolete tags)
       run: |
         echo "Updating Doxyfile to remove obsolete tags..."
         doxygen -u Doxyfile || true
-        
+
     - name: Generate Doxygen configuration info
       run: |
         echo "Doxygen configuration summary:"
         echo "PROJECT_NAME: $(grep '^PROJECT_NAME' Doxyfile | cut -d'=' -f2- | xargs)"
-        echo "PROJECT_VERSION: $(grep '^PROJECT_VERSION' Doxyfile | cut -d'=' -f2- | xargs)"  
+        echo "PROJECT_VERSION: $(grep '^PROJECT_VERSION' Doxyfile | cut -d'=' -f2- | xargs)"
         echo "OUTPUT_DIRECTORY: $(grep '^OUTPUT_DIRECTORY' Doxyfile | cut -d'=' -f2- | xargs)"
         echo "GENERATE_HTML: $(grep '^GENERATE_HTML' Doxyfile | cut -d'=' -f2- | xargs)"
         echo "HTML_OUTPUT: $(grep '^HTML_OUTPUT' Doxyfile | cut -d'=' -f2- | xargs)"
-        
+
     - name: Generate Doxygen documentation
       run: |
         echo "Generating Doxygen documentation..."
         echo "This may take several minutes for large codebases..."
         doxygen Doxyfile 2>&1 | tee doxygen_output.log
         echo "Documentation generation completed!"
-        
+
     - name: Check for critical errors
       run: |
         if grep -q "error.*Problems running" doxygen_output.log; then
@@ -85,7 +85,7 @@ jobs:
           echo "❌ Critical errors found in Doxygen output"
           exit 1
         fi
-        
+
     - name: Check generated documentation
       run: |
         echo "Documentation generation completed. Checking output..."
@@ -104,18 +104,18 @@ jobs:
           ls -la Doxygen/ 2>/dev/null || echo "Doxygen/ directory not found"
           exit 1
         fi
-        
+
     - name: Upload documentation artifacts (for PR preview)
       uses: actions/upload-artifact@v4
       with:
         name: doxygen-documentation
         path: Doxygen/html/
         retention-days: 30
-        
+
     - name: Setup GitHub Pages (main branch only)
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: actions/configure-pages@v4
-      
+
     - name: Upload to GitHub Pages (main branch only)
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: actions/upload-pages-artifact@v3
@@ -125,19 +125,19 @@ jobs:
   deploy-pages:
     # Only run deployment job for pushes to main branch
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-      
+
     runs-on: ubuntu-24.04
     needs: generate-docs
-    
+
     steps:
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
-      
+
     - name: Output documentation URL
       run: |
         echo "📚 Documentation published successfully!"

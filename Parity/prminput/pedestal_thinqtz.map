@@ -1,4 +1,4 @@
-! Name		Offset		Gain		NormRate(Hz/uA)	VoltPerHz	Asym		C_x		C_y		C_xp		C_yp		C_e
+! Name          Offset          Gain            NormRate(Hz/uA) VoltPerHz       Asym            C_x             C_y             C_xp            C_yp            C_e
 TQ01_R1           0.000        7.62930e-05
 TQ01_R2           0.000        7.62930e-05
 TQ01_R3           0.000        7.62930e-05

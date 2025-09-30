@@ -106,7 +106,7 @@ class QwDataHandlerArray:
         QwRootFile *treerootfile,
         const std::string& treeprefix = "",
         const std::string& branchprefix = "");
-    
+
     void FillNTupleFields(QwRootFile *treerootfile);
 
     /// Construct the histograms for this subsystem
@@ -134,9 +134,9 @@ class QwDataHandlerArray:
     void UpdateBurstCounter(Short_t burstcounter)
     {
       if (!empty()) {
-	for(iterator handler = begin(); handler != end(); ++handler){
-	  (*handler)->UpdateBurstCounter(burstcounter);
-	}
+        for(iterator handler = begin(); handler != end(); ++handler){
+          (*handler)->UpdateBurstCounter(burstcounter);
+        }
       }
     }
 
@@ -172,10 +172,10 @@ class QwDataHandlerArray:
     /// \brief Print value of all channels
     void PrintValue() const;
 
-    
+
     void WritePromptSummary(QwPromptSummary *ps, TString type);
-    
-    
+
+
     void ProcessDataHandlerEntry();
 
     void FinishDataHandler();

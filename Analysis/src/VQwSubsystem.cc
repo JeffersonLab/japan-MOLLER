@@ -51,55 +51,55 @@ Int_t VQwSubsystem::LoadDetectorMaps(QwParameterFile& file)
     if (file.HasVariablePair("=", key, value)) {
       if ( value.size() > 0) {
 
-	// If-Ordering Optimization for parity
-	// Beamline     1423
-	// MainDetector 123
-	// Lumi         123
-	// Helicity     1
-	// Scanner      12
-	// Beammod      1
-	//              1(6),2(4),3(3),4(1)
-	//              map, param, eventcut, geom
+        // If-Ordering Optimization for parity
+        // Beamline     1423
+        // MainDetector 123
+        // Lumi         123
+        // Helicity     1
+        // Scanner      12
+        // Beammod      1
+        //              1(6),2(4),3(3),4(1)
+        //              map, param, eventcut, geom
 
-	// Map file definition
-	if (key == "map" ) {
-	  LoadChannelMap(value);
-	  //	  fDetectorMapsNames.push_back(value);
-	}
-	// Parameter file definition
-	else if (key == "param" ) {
-	  LoadInputParameters(value); 
-	  // fDetectorMapsNames.push_back(value);
-	}
-	// Event cut file definition
-	else if (key == "eventcut") {
-	  LoadEventCuts(value);
-	  // fDetectorMapsNames.push_back(value);
-	}
-	// Geometry file definition
-	else if (key == "geom" ) {
-	  LoadGeometryDefinition(value);
-	  // fDetectorMapsNames.push_back(value);
-	}
+        // Map file definition
+        if (key == "map" ) {
+          LoadChannelMap(value);
+          //      fDetectorMapsNames.push_back(value);
+        }
+        // Parameter file definition
+        else if (key == "param" ) {
+          LoadInputParameters(value);
+          // fDetectorMapsNames.push_back(value);
+        }
+        // Event cut file definition
+        else if (key == "eventcut") {
+          LoadEventCuts(value);
+          // fDetectorMapsNames.push_back(value);
+        }
+        // Geometry file definition
+        else if (key == "geom" ) {
+          LoadGeometryDefinition(value);
+          // fDetectorMapsNames.push_back(value);
+        }
         // Crosstalk file definition
         else if (key == "cross" ) {
           LoadCrosstalkDefinition(value);
           // fDetectorMapsNames.push_back(value);
         }
- 	//Event type mask
-	else if (key == "mask") {
-	  SetEventTypeMask(file.GetUInt(value));
-	}
+        //Event type mask
+        else if (key == "mask") {
+          SetEventTypeMask(file.GetUInt(value));
+        }
       }
-      
+
     } // end of HasVariablePair
-  } // end of while 
-  
-  
+  } // end of while
+
+
   //
   // The above approach that fDetectorMapsNames.push_back(value) in VQwSubsystem doesn't work, because it reads the following...
   //
-  // >>> VQwSubsystem::LoadDetectorMaps Subsytem Main Detector uses the following map files : 
+  // >>> VQwSubsystem::LoadDetectorMaps Subsytem Main Detector uses the following map files :
   //   --->    1/3 :        qweak_maindet.map
   //   --->    2/3 : qweak_maindet_pedestal.map
   //   --->    3/3 : qweak_maindet_eventcuts.in
@@ -108,7 +108,7 @@ Int_t VQwSubsystem::LoadDetectorMaps(QwParameterFile& file)
   // So, fDetectorMapsNams.push_back will be called LoadChannelMap(), LoadInputParameter(), LoadEventCuts(),
   // and  LoadGeometryDefinition() in each subsystem.
   //
-  // >>> VQwSubsystem::LoadDetectorMaps Subsytem Main Detector uses the following map files : 
+  // >>> VQwSubsystem::LoadDetectorMaps Subsytem Main Detector uses the following map files :
   //   --->    1/3 : /home/jhlee/QwAnalysis/trunk/Parity/prminput/qweak_maindet.10213-.map
   //   --->    2/3 : /home/jhlee/QwAnalysis/trunk/Parity/prminput/qweak_maindet_pedestal.10229-.map
   //   --->    3/3 : /home/jhlee/QwAnalysis/trunk/Parity/prminput/qweak_maindet_eventcuts.in
@@ -158,16 +158,16 @@ Int_t VQwSubsystem::GetSubbankIndex(const ROCID_t roc_id, const BankID_t bank_id
   if (roc_index>=0){
     index = FindIndex(fBank_IDs[roc_index],bank_id);
     // std::cout << " Find Index " << index
-    // 	      << " roc index " << roc_index
-    // 	      << " index " << index <<std::endl;
+    //        << " roc index " << roc_index
+    //        << " index " << index <<std::endl;
 
     if (index>=0){
       for (Int_t i=0; i<roc_index; i++){
-	index += (fBank_IDs[i].size());
-	// std::cout << " i " << i
-	// 	  << " fBank_IDs[i].size() " << fBank_IDs[i].size()
-	// 	  << " index " << index
-	// 	  << std::endl;
+        index += (fBank_IDs[i].size());
+        // std::cout << " i " << i
+        //        << " fBank_IDs[i].size() " << fBank_IDs[i].size()
+        //        << " index " << index
+        //        << std::endl;
       }
     }
   }

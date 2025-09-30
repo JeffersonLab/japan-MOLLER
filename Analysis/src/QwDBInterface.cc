@@ -18,7 +18,7 @@
 std::map<TString, TString> QwDBInterface::fPrefix;
 
 TString QwDBInterface::DetermineMeasurementTypeID(TString type, TString suffix,
-						  Bool_t forcediffs)
+                                                  Bool_t forcediffs)
 {
   if (fPrefix.empty()){
     fPrefix["yield"]      = "y";
@@ -30,10 +30,10 @@ TString QwDBInterface::DetermineMeasurementTypeID(TString type, TString suffix,
   TString measurement_type("");
   if (fPrefix.count(type)==1){
     measurement_type = fPrefix[type];
-    if (measurement_type[0] == 'a' && 
-	(forcediffs
-	 || (suffix == "p" || suffix == "a" 
-	     || suffix == "m"))	){
+    if (measurement_type[0] == 'a' &&
+        (forcediffs
+         || (suffix == "p" || suffix == "a"
+             || suffix == "m")) ){
       //  Change the type to difference for position,
       //  angle, or slope asymmetry variables.
       measurement_type[0] = 'd';
@@ -42,8 +42,8 @@ TString QwDBInterface::DetermineMeasurementTypeID(TString type, TString suffix,
     }
   }
   QwDebug << "\n"
-	  << type << ", " << suffix
-	  << " \'" <<  measurement_type.Data() << "\'" << QwLog::endl;
+          << type << ", " << suffix
+          << " \'" <<  measurement_type.Data() << "\'" << QwLog::endl;
   return measurement_type;
 }
 
@@ -127,7 +127,7 @@ QwDBInterface::TypedDBClone<QwParitySSQLS::beam>() {
 
 
 
-// QwErrDBInterface 
+// QwErrDBInterface
 
 #ifdef __USE_DATABASE__
 void QwErrDBInterface::SetMonitorID(QwParityDB *db)
@@ -196,5 +196,3 @@ QwErrDBInterface::TypedDBClone<QwParitySSQLS::general_errors>() {
   return row;
 };
 #endif // __USE_DATABASE__
-
-

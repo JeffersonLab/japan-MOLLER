@@ -14,7 +14,7 @@
 // ROOT headers
 #include <TTree.h>
 
-// RNTuple headers  
+// RNTuple headers
 #ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTupleModel.hxx"
 #endif // HAS_RNTUPLE_SUPPORT
@@ -39,7 +39,7 @@ class VQwBCM : public VQwDataElement {
   /***************************************************************
    *  Class:  VQwBCM
    *          Pure Virtual base class for the BCMs in the beamline.
-   *          Through use of the Create factory function, one can 
+   *          Through use of the Create factory function, one can
    *          get a concrete instance of a templated QwBCM.
    *
    ***************************************************************/
@@ -106,7 +106,7 @@ public:
     {std::cerr << "FillRawEventData for VQwBPM not implemented!\n";};
   virtual void GetProjectedCharge(VQwBCM */*device*/){};
   virtual size_t GetNumberOfElements(){return size_t(1);}
-  virtual TString GetSubElementName(Int_t /*subindex*/) 
+  virtual TString GetSubElementName(Int_t /*subindex*/)
   {
     std::cerr << "GetSubElementName()  is not implemented!! for device: " << GetElementName() << "\n";
     return TString("OBJECT_UNDEFINED"); // Return an erroneous TString
@@ -132,7 +132,7 @@ public:
 
 protected:
   virtual VQwHardwareChannel* GetCharge() = 0;
-  
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 public:

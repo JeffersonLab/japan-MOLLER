@@ -30,9 +30,9 @@ const TString QwBPMCavity::subelement[QwBPMCavity::kNumElements]={"XI","YI","Q"}
 
 
 Bool_t QwBPMCavity::ParseChannelName(const TString &channel,
-				     TString &detname,
-				     TString &subname,
-				     UInt_t &localindex)
+                                     TString &detname,
+                                     TString &subname,
+                                     UInt_t &localindex)
 {
   localindex=kInvalidSubelementIndex;
   //QwMessage << "Channel Name: " << channel << QwLog::endl;
@@ -53,7 +53,7 @@ Bool_t QwBPMCavity::ParseChannelName(const TString &channel,
     detname = "";
     subname = "";
     QwWarning << "QwBPMCavity::GetSubElementIndex is unable to associate the string -"
-	      <<subname<<"- to any index" << QwLog::endl;
+              <<subname<<"- to any index" << QwLog::endl;
   }
   return (localindex!=kInvalidSubelementIndex);
 }
@@ -86,22 +86,22 @@ void  QwBPMCavity::InitializeChannel(TString subsystem, TString name)
 {
   size_t i=0;
   Bool_t localdebug = kFALSE;
-  
+
   VQwBPM::InitializeChannel(name);
-  
+
   for(i=0;i<kNumElements;i++) {
     fElement[i].InitializeChannel(subsystem, "QwBPMCavity", name+subelement[i],"raw");
     if(localdebug)
       std::cout<<" Wire ["<<i<<"]="<<fElement[i].GetElementName()<<"\n";
   }
-  
+
   for(i=kXAxis;i<kNumAxes;i++){
     fRelPos[i].InitializeChannel(subsystem, "QwBPMCavity", name+"Rel"+subelement[i],"derived");
     fAbsPos[i].InitializeChannel(subsystem, "QwBPMCavity", name+kAxisLabel[i],"derived");
   }
-  
+
   bFullSave=kTRUE;
-  
+
   return;
 }
 
@@ -178,7 +178,7 @@ UInt_t QwBPMCavity::UpdateErrorFlag()
 {
   size_t i=0;
   UInt_t error1=0;
-  UInt_t error2=0;  
+  UInt_t error2=0;
   for(i=0;i<kNumElements;i++) {
     error1|=fElement[i].GetErrorCode();
     error2|=fElement[i].GetEventcutErrorFlag();
@@ -205,7 +205,7 @@ Bool_t QwBPMCavity::ApplySingleEventCuts()
     else{
       status&=kFALSE;
       if (bDEBUG) std::cout<<" Element "<< fElement[i].GetElementName()
-			   << " event cut failed ";
+                           << " event cut failed ";
     }
     error_code |= fElement[i].GetErrorCode();
   }
@@ -289,15 +289,15 @@ void QwBPMCavity::SetSingleEventCuts(TString ch_name, UInt_t errorflag,Double_t 
   errorflag|=kBPMErrorFlag;//update the device flag
   if (ch_name=="relx"){
     QwMessage<<"RelX LL " <<  minX <<" UL " << maxX <<QwLog::endl;
-     fRelPos[0].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel); 
+     fRelPos[0].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel);
 
   }else if (ch_name=="rely"){
     QwMessage<<"RelY LL " <<  minX <<" UL " << maxX <<QwLog::endl;
-    fRelPos[1].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel); 
+    fRelPos[1].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel);
 
   } else  if (ch_name=="absx"){
     QwMessage<<"AbsX LL " <<  minX <<" UL " << maxX <<QwLog::endl;
-    fAbsPos[0].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel); 
+    fAbsPos[0].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel);
 
   }else if (ch_name=="absy"){
     QwMessage<<"AbsY LL " <<  minX <<" UL " << maxX <<QwLog::endl;
@@ -353,13 +353,13 @@ void QwBPMCavity::UpdateErrorFlag(const VQwBPM *ev_error){
       // std::cout<<" Here in QwBPMStripline::UpdateErrorFlag \n";
       if (this->GetElementName()!="") {
         const QwBPMCavity* value_bpm = dynamic_cast<const QwBPMCavity* >(ev_error);
-	for(i=0;i<kNumElements;i++){
-	  fElement[i].UpdateErrorFlag(value_bpm->fElement[i]);
-	}
-	for(i=kXAxis;i<kNumAxes;i++) {
-	  fRelPos[i].UpdateErrorFlag(value_bpm->fRelPos[i]);
-	  fAbsPos[i].UpdateErrorFlag(value_bpm->fAbsPos[i]);
-	}
+        for(i=0;i<kNumElements;i++){
+          fElement[i].UpdateErrorFlag(value_bpm->fElement[i]);
+        }
+        for(i=kXAxis;i<kNumAxes;i++) {
+          fRelPos[i].UpdateErrorFlag(value_bpm->fRelPos[i]);
+          fAbsPos[i].UpdateErrorFlag(value_bpm->fAbsPos[i]);
+        }
       }
     } else {
       TString loc="Standard exception from QwBPMCavity::UpdateErrorFlag :"+
@@ -369,7 +369,7 @@ void QwBPMCavity::UpdateErrorFlag(const VQwBPM *ev_error){
     }
   } catch (std::exception& e) {
     std::cerr<< e.what()<<std::endl;
-  }   
+  }
 };
 
 
@@ -379,8 +379,8 @@ void  QwBPMCavity::ProcessEvent()
   size_t i = 0;
 
   ApplyHWChecks();
-  /**First apply HW checks and update HW  error flags. 
-     Calling this routine here and not in ApplySingleEventCuts  
+  /**First apply HW checks and update HW  error flags.
+     Calling this routine here and not in ApplySingleEventCuts
      makes a difference for a BPMs because they have derrived devices.
   */
   for(i=0;i<kNumElements;i++) {
@@ -456,7 +456,7 @@ UInt_t QwBPMCavity::GetSubElementIndex(TString subname)
 
   if(localindex==kInvalidSubelementIndex)
     std::cerr << "QwBPMCavity::GetSubElementIndex is unable to associate the string -"
-	      <<subname<<"- to any index"<<std::endl;
+              <<subname<<"- to any index"<<std::endl;
 
   return localindex;
 }
@@ -736,8 +736,8 @@ void  QwBPMCavity::ConstructBranchAndVector(TTree *tree, TString &prefix, std::v
        fElement[kQElem].ConstructBranch(tree,prefix);
        size_t i = 0;
        for(i=kXAxis;i<kNumAxes;i++) {
-	 if (bFullSave) fElement[i].ConstructBranch(tree,thisprefix);
-	 //	 fRelPos[i].ConstructBranch(tree,thisprefix);
+         if (bFullSave) fElement[i].ConstructBranch(tree,thisprefix);
+         //      fRelPos[i].ConstructBranch(tree,thisprefix);
          fAbsPos[i].ConstructBranch(tree,thisprefix);
        }
 
@@ -830,9 +830,9 @@ void QwBPMCavity::SetEventCutMode(Int_t bcuts)
 void QwBPMCavity::MakeBPMCavityList()
 {
   for (size_t i = kXAxis; i < kNumAxes; i++) {
-	QwVQWK_Channel relpos(fRelPos[i]);
-	relpos = fRelPos[i];
-	fBPMElementList.push_back(relpos);
+        QwVQWK_Channel relpos(fRelPos[i]);
+        relpos = fRelPos[i];
+        fBPMElementList.push_back(relpos);
   }
   QwVQWK_Channel effectivecharge(fElement[kQElem]);
   effectivecharge = fElement[kQElem];
@@ -946,4 +946,3 @@ void QwBPMCavity::SetSubElementCalibrationFactor(Int_t j, Double_t value)
 {
   fElement[j].SetCalibrationFactor(value);
 }
-

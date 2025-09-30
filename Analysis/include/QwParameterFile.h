@@ -79,7 +79,7 @@ class QwParameterFile {
       else           status = ReadNextLine_Single(varvalue);
       return status;
     }
-    Bool_t ReadNextLine_Greedy(std::string &varvalue);  
+    Bool_t ReadNextLine_Greedy(std::string &varvalue);
     Bool_t ReadNextLine_Single(std::string &varvalue) {
       fCurrentPos = 0;
       if (! getline(fStream, fLine))
@@ -150,7 +150,7 @@ class QwParameterFile {
       std::string strvalue;
       Bool_t status = FileHasVariablePair(separatorchars, varname, strvalue);
       if (status){
-	varvalue = ConvertValue<T>(strvalue);
+        varvalue = ConvertValue<T>(strvalue);
       }
       return status;
     }
@@ -219,26 +219,26 @@ class QwParameterFile {
       return status;
     };
 
-    template <typename T> 
+    template <typename T>
       Bool_t ReturnValue(const std::string keyname, T &retvalue){
       std::string value;
       Bool_t status = GetKeyValue(keyname, value);
       if (status){
-	retvalue = ConvertValue<T>(value);
+        retvalue = ConvertValue<T>(value);
       }
       return status;
     }
-    template <typename T> 
+    template <typename T>
       Bool_t PopValue(const std::string keyname, T &retvalue){
       std::string value;
       Bool_t status = GetKeyValue(keyname, value, kTRUE);
       if (status){
-	retvalue = ConvertValue<T>(value);
+        retvalue = ConvertValue<T>(value);
       }
       return status;
     };
 
-    
+
 
   protected:
     void Trim(const std::string& chars, std::string& token, TString::EStripType head_tail = TString::kBoth);
@@ -317,16 +317,16 @@ class QwParameterFile {
  protected:
 
     Bool_t GetKeyValue(const std::string keyname, std::string &retvalue,
-		       Bool_t should_erase = kFALSE){
+                       Bool_t should_erase = kFALSE){
       Bool_t status = kFALSE;
       std::map<std::string,std::string>::iterator it;
       it = fKeyValuePair.find(keyname);
       if (it != fKeyValuePair.end()) {
-	status = kTRUE;
-	retvalue = (*it).second;
-	if (should_erase){
-	  fKeyValuePair.erase(it);
-	}
+        status = kTRUE;
+        retvalue = (*it).second;
+        if (should_erase){
+          fKeyValuePair.erase(it);
+        }
       }
       return status;
     }

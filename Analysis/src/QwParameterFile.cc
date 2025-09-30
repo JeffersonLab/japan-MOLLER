@@ -37,7 +37,7 @@ void QwParameterFile::AppendToSearchPath(const TString& searchdir)
   bfs::path tmppath(searchdir.Data());
   if( bfs::exists(tmppath) && bfs::is_directory(tmppath)) {
     std::cout << tmppath.string()
-	      << " is a directory; adding it to the search path\n";
+              << " is a directory; adding it to the search path\n";
     fSearchPaths.push_back(tmppath);
   } else if( bfs::exists(tmppath)) {
     std::cout<<tmppath.string()<<" exists but is not a directory.\n";
@@ -57,8 +57,8 @@ UInt_t QwParameterFile::GetUInt(const TString& varvalue)
   if (varvalue.IsDigit()){
     value = varvalue.Atoi();
   } else if (varvalue.BeginsWith("0x") || varvalue.BeginsWith("0X")
-	     || varvalue.BeginsWith("x") || varvalue.BeginsWith("X")
-	     || varvalue.IsHex()){
+             || varvalue.BeginsWith("x") || varvalue.BeginsWith("X")
+             || varvalue.IsHex()){
     //any whitespace ?
     Int_t end = varvalue.Index(" ");
     std::istringstream stream1;
@@ -209,7 +209,7 @@ bool QwParameterFile::OpenFile(const bfs::path& file)
   Bool_t status = false;
 
   Bool_t check_whether_path_exists_and_is_a_regular_file = false;
-  
+
   // Check whether path exists and is a regular file
 #if BOOST_VERSION >= 103600
   check_whether_path_exists_and_is_a_regular_file = bfs::exists(file) && bfs::is_regular_file(file);
@@ -220,15 +220,15 @@ bool QwParameterFile::OpenFile(const bfs::path& file)
 #endif
 
   if (check_whether_path_exists_and_is_a_regular_file) {
-    
+
     fBestParamFileNameAndPath = file.string();
     this->SetParamFilename();
-    
+
     // Connect stream (fFile) to file
     fFile.open(file.string().c_str());
     if (! fFile.good())
       QwError << "QwParameterFile::OpenFile Unable to read parameter file "
-	      << file.string() << QwLog::endl;
+              << file.string() << QwLog::endl;
     // Load into stream
     fStream << fFile.rdbuf();
     status = true;
@@ -244,14 +244,14 @@ bool QwParameterFile::OpenFile(const bfs::path& file)
 
     // File does not exist or is not a regular file
     QwError << "QwParameterFile::OpenFile Unable to open parameter file "
-	    << file.string() << QwLog::endl;
+            << file.string() << QwLog::endl;
     status = false;
   }
   if(local_debug) {
     std::cout << "-------after close ----------" << std::endl;
     std::cout << fStream.str() << std::endl;
   }
-  
+
   return status;
 }
 
@@ -265,10 +265,10 @@ bool QwParameterFile::OpenFile(const bfs::path& file)
  * @return Score of file
  */
 int QwParameterFile::FindFile(
-	const bfs::path&   directory,
-	const std::string& file_stem,
-	const std::string& file_ext,
-	bfs::path&         best_path)
+        const bfs::path&   directory,
+        const std::string& file_stem,
+        const std::string& file_ext,
+        bfs::path&         best_path)
 {
   // Return false if the directory does not exist
   if (! bfs::exists(directory)) return false;
@@ -363,8 +363,8 @@ int QwParameterFile::FindFile(
           // run not in range
           score = -1;
       } else
-	// run label does not start with a dot (i.e. partial match of stem)
-	score = -1;
+        // run label does not start with a dot (i.e. partial match of stem)
+        score = -1;
     }
 
     // Look for the match with highest score
@@ -386,9 +386,9 @@ void QwParameterFile::TrimWhitespace(TString::EStripType head_tail)
 }
 
 void QwParameterFile::Trim(
-	const std::string& chars,
-	std::string& token,
-	TString::EStripType head_tail)
+        const std::string& chars,
+        std::string& token,
+        TString::EStripType head_tail)
 {
   //  If the first bit is set, this routine removes leading chars from the
   //  line.  If the second bit is set, this routine removes trailing chars
@@ -409,8 +409,8 @@ void QwParameterFile::Trim(
 }
 
 void QwParameterFile::TrimWhitespace(
-	std::string &token,
-	TString::EStripType head_tail)
+        std::string &token,
+        TString::EStripType head_tail)
 {
   Trim(fWhitespaceChars,token,head_tail);
 }
@@ -469,9 +469,9 @@ Bool_t QwParameterFile::HasValue(TString& vname)
 
 
 Bool_t QwParameterFile::HasVariablePair(
-	const std::string& separatorchars,
-	TString &varname,
-	TString &varvalue)
+        const std::string& separatorchars,
+        TString &varname,
+        TString &varvalue)
 {
   std::string tmpvar, tmpval;
   Bool_t status = HasVariablePair(separatorchars, tmpvar, tmpval);
@@ -483,9 +483,9 @@ Bool_t QwParameterFile::HasVariablePair(
 }
 
 Bool_t QwParameterFile::HasVariablePair(
-	const std::string& separatorchars,
-	std::string &varname,
-	std::string &varvalue)
+        const std::string& separatorchars,
+        std::string &varname,
+        std::string &varvalue)
 {
   Bool_t status = kFALSE;
   size_t equiv_pos1 = fLine.find_first_of(separatorchars);
@@ -503,9 +503,9 @@ Bool_t QwParameterFile::HasVariablePair(
 }
 
 Bool_t QwParameterFile::FileHasVariablePair(
-	const std::string& separatorchars,
-	const TString& varname,
-	TString& varvalue)
+        const std::string& separatorchars,
+        const TString& varname,
+        TString& varvalue)
 {
   std::string tmpval;
   Bool_t status = FileHasVariablePair(separatorchars, varname.Data(), tmpval);
@@ -514,9 +514,9 @@ Bool_t QwParameterFile::FileHasVariablePair(
 }
 
 Bool_t QwParameterFile::FileHasVariablePair(
-	const std::string& separatorchars,
-	const std::string& varname,
-	std::string& varvalue)
+        const std::string& separatorchars,
+        const std::string& varname,
+        std::string& varvalue)
 {
   RewindToFileStart();
   while (ReadNextLine()) {
@@ -679,18 +679,18 @@ Bool_t QwParameterFile::SkipSection(std::string secname)
   if (LineHasSectionHeader(tmpname)){
     if (tmpname == secname){
       QwDebug << "QwParameterFile::SkipSection:  "
-	      << "Begin skipping section " << tmpname << QwLog::endl;
+              << "Begin skipping section " << tmpname << QwLog::endl;
       while ((status=ReadNextLine()) && ! LineHasSectionHeader(tmpname)) {
-	//  Do nothing for each line.
+        //  Do nothing for each line.
       }
       QwDebug << "QwParameterFile::SkipSection:  "
-	      << "Reached the end of the section." 
-	      << QwLog::endl;
+              << "Reached the end of the section."
+              << QwLog::endl;
       if (status){
-	// Recurse, in case the next section has the same
-	// section name, but only if we found a new section
-	// header.
-	status = SkipSection(secname);
+        // Recurse, in case the next section has the same
+        // section name, but only if we found a new section
+        // header.
+        status = SkipSection(secname);
       }
     }
   }
@@ -865,36 +865,36 @@ std::pair<int,int> QwParameterFile::ParseIntRange(const std::string& separatorch
     return std::pair<int,int>(INT_MAX,INT_MAX);
   } else if (mypair.first > mypair.second){
     QwError << "The first value ("<< mypair.first<< ") must not be larger than the second value (" << mypair.second <<")"
-	    << QwLog::endl;
+            << QwLog::endl;
     return std::pair<int,int>(INT_MAX,INT_MAX);
   }
 
   //  Print the contents of the pair for debugging.
   QwVerbose << "The range goes from " << mypair.first
-	    << " to " << mypair.second << QwLog::endl;
+            << " to " << mypair.second << QwLog::endl;
 
   return mypair;
 }
 
 
 
-void QwParameterFile::SetParamFilename() 
+void QwParameterFile::SetParamFilename()
 {
   Char_t delimiters[] = "/";
-  fBestParamFileName = LastString(fBestParamFileNameAndPath, delimiters);  
+  fBestParamFileName = LastString(fBestParamFileNameAndPath, delimiters);
   return;
 };
- 
+
 
 TString QwParameterFile::LastString(TString in, char* delim)
-{	
-  TObjArray*  all_strings = in.Tokenize(delim); 
+{
+  TObjArray*  all_strings = in.Tokenize(delim);
   TObjString* last_string = (TObjString*) all_strings->Last();
   TString return_string = last_string->GetString();
   delete all_strings;
   return return_string;
 };
- 
+
 
 TString QwParameterFile::GetParameterFileContents()
 {
@@ -913,7 +913,7 @@ TString QwParameterFile::GetParameterFileContents()
 
 void  QwParameterFile::AddBreakpointKeyword(std::string keyname){
   std::transform(keyname.begin(), keyname.end(),
-		 keyname.begin(), ::tolower);
+                 keyname.begin(), ::tolower);
   fBreakpointWords.insert(keyname);
 }
 
@@ -929,16 +929,16 @@ Bool_t QwParameterFile::ReadNextLine_Greedy(std::string &varvalue)
     if (LineIsEmpty()) continue;
     if (HasVariablePair("=",tmpname,tmpvalue)){
       std::transform(tmpname.begin(), tmpname.end(),
-		     tmpname.begin(), ::tolower);
+                     tmpname.begin(), ::tolower);
       QwDebug << "QwParameterFile::ReadNextLine_Greedy: varname="
-	      << tmpname << "; varvalue=" << tmpvalue <<QwLog::endl;
+              << tmpname << "; varvalue=" << tmpvalue <<QwLog::endl;
       if (fBreakpointWords.count(tmpname)==1){
-	RewindToLineStart();
-	break;
+        RewindToLineStart();
+        break;
       } else {
-	fKeyValuePair[tmpname] = tmpvalue;
-	fHasNewPairs = kTRUE;
-	continue;
+        fKeyValuePair[tmpname] = tmpvalue;
+        fHasNewPairs = kTRUE;
+        continue;
       }
     }
     break;

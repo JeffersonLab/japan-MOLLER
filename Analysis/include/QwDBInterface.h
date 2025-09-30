@@ -37,8 +37,8 @@ class QwParityDB;
 
 class QwDBInterface {
  public:
-  enum EQwDBIDataTableType{kQwDBI_OtherTable, kQwDBI_BeamTable, 
-			   kQwDBI_MDTable, kQwDBI_LumiTable};
+  enum EQwDBIDataTableType{kQwDBI_OtherTable, kQwDBI_BeamTable,
+                           kQwDBI_MDTable, kQwDBI_LumiTable};
  private:
   static std::map<TString, TString> fPrefix;
 
@@ -58,7 +58,7 @@ class QwDBInterface {
 
  public:
   static TString DetermineMeasurementTypeID(TString type, TString suffix = "",
-					    Bool_t forcediffs = kFALSE);
+                                            Bool_t forcediffs = kFALSE);
 
  public:
 

@@ -28,8 +28,8 @@ class MQwF1TDC{
    *         of F1TDC data and provide the components of the word
    *         through member functions.
    ******************************************************************/
- 
-  
+
+
  public:
   MQwF1TDC();
   ~MQwF1TDC();
@@ -40,7 +40,7 @@ class MQwF1TDC{
 
   Bool_t IsValidDataword() const;
   const Bool_t& IsHeaderword()        const {return fF1HeaderFlag;};
- 
+
   const UInt_t& GetTDCSlotNumber()    const {return fF1SlotNumber;};
   const UInt_t& GetTDCChannelNumber() const {return fF1ChannelNumber;};
   const UInt_t& GetTDCChipAddress()   const {return fF1ChipAddress;};
@@ -48,8 +48,8 @@ class MQwF1TDC{
 
   const UInt_t& GetTDCData()          const {return fF1Dataword;};
   const UInt_t& GetTDCMaxChannels()   const {return fF1MaxChannelsPerModule;};
-  
- 
+
+
   UInt_t GetTDCEventNumber()       const {return GetTDCHeaderEventNumber();};
   UInt_t GetTDCTriggerTime()       const {return GetTDCHeaderTriggerTime();};
 
@@ -60,14 +60,14 @@ class MQwF1TDC{
 
 
 
-  
+
   /* Double_t SubtractReference(Double_t rawtime, Double_t reftime); */
   /* Double_t ActualTimeDifference(Double_t raw_time, Double_t ref_time); */
   /* Bool_t CheckDataIntegrity(const ROCID_t roc_id, UInt_t *buffer, UInt_t num_words); */
   void   PrintTDCHeader(Bool_t flag);
   void   PrintTDCData(Bool_t flag);
   void   Print(Bool_t flag);
-  
+
 
 
   UInt_t GetTDCHeaderEventNumber() const {return fF1HeaderEventNumber;};
@@ -75,7 +75,7 @@ class MQwF1TDC{
 
 
   Bool_t IsValidDataSlot()         const {return fF1ValidDataSlotFlag;};
- 
+
   Bool_t IsHeaderXorSetup()        const {return fF1HeaderXorSetupFlag;};
   Bool_t IsNotHeaderTrigFIFO()     const {return !fF1HeaderTrigFIFOFlag;};
   Bool_t IsOverFlowEntry()         const {return fF1OverFlowEntryFlag;};
@@ -105,9 +105,9 @@ class MQwF1TDC{
   //  *********  DATA words ************
   // 22    bit  : 1 Bit Fake Data Flag
   //              0 > a real data
-  //              1 > a fake data 
+  //              1 > a fake data
   // This bit is not described in the F1TDC manual (1.2), I think,
-  // is introduced by after private communcation with Ed Jastrzembski. 
+  // is introduced by after private communcation with Ed Jastrzembski.
   // Thursday, September 16 14:04:18 EDT 2010, jhlee
   static const UInt_t kF1Mask_FakeDataFlag;
 
@@ -119,12 +119,12 @@ class MQwF1TDC{
 
   // 15- 0 bit : 16 Bit time
   static const UInt_t kF1Mask_Dataword;
-  
+
 
   //  *********  Header words ************
   // 22    bit : 1 Bit Trigger FIFO overflow
   static const UInt_t kF1Mask_HeaderTrigFIFOFlag;
-  
+
   // 21-16 bit : 6 Bit Event Number
   static const UInt_t kF1Mask_HeaderEventNumber;
 
@@ -139,19 +139,19 @@ class MQwF1TDC{
   static const UInt_t kF1Mask_HeaderChannelNumber;
   static const UInt_t kF1Mask_HeaderChipAddress;
   static const UInt_t kF1Mask_HeaderChannelAddress;
-  
-  
+
+
   //  static const UInt_t offset;
   UInt_t fF1ROCNumber;
   UInt_t fF1SlotNumber;
 
-  Bool_t fF1HeaderFlag;              // true(1) if word is 0 (header) and false(0) 
+  Bool_t fF1HeaderFlag;              // true(1) if word is 0 (header) and false(0)
                                      // if word is 1 (data)
-  Bool_t fF1HitFIFOFlag;             // true(1) if word is 1 
+  Bool_t fF1HitFIFOFlag;             // true(1) if word is 1
   Bool_t fF1OutputFIFOFlag;          // true(1) if word is 1
   Bool_t fF1ResolutionLockFlag;      // true(1) if word is 1
 
- 
+
   Bool_t fF1FakeDataFlag;            // true(1) if word is 1 (Fake)
   UInt_t fF1ChannelNumber;
   UInt_t fF1ChipAddress;
@@ -164,28 +164,28 @@ class MQwF1TDC{
   UInt_t fF1HeaderEventNumber;
   UInt_t fF1HeaderTriggerTime;
   Bool_t fF1HeaderXorSetupFlag;
- 
-  
+
+
   UInt_t fF1MaxChannelsPerModule;
   Bool_t fF1OverFlowEntryFlag;
-  Bool_t fF1ValidDataSlotFlag;  
+  Bool_t fF1ValidDataSlotFlag;
 
   // Slot 1 - 21 indicates valid data
   // Slot 0  is the tag for a "filler" word. This is a non-valid data word that is
   //         inserted to make the block of data output from the module consist of
   //         an "even" number of words.
   // Slot 30 : the module will return 30 when the data is not valid
-  // 
+  //
   //           Tempoararily comment out, because I have no idea how
-  //           to check this inside MQwF1TDC so we don't interrupt 
+  //           to check this inside MQwF1TDC so we don't interrupt
   //           MQwV775TDC. I think "IsSlotRegistered()" can do instead of this
-  //                   
+  //
 
   void   PrintHitFIFOStatus(const ROCID_t roc_id);
   void   PrintOutputFIFOStatus(const ROCID_t roc_id);
   void   PrintResolutionLockStatus(const ROCID_t roc_id);
 
- 
+
 
 };
 

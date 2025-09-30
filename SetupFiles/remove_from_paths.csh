@@ -14,6 +14,6 @@ if ($1 == "") then
 else
     set pattern_to_remove = $1
     foreach pathvar (`printenv | awk -F"=" '{print $1}' | grep PATH`)
-	setenv $pathvar `printenv $pathvar | sed 's/:/\n/g' | grep -v $pattern_to_remove | awk '{printf"%s:",$1}' | sed 's/:$//'`
+        setenv $pathvar `printenv $pathvar | sed 's/:/\n/g' | grep -v $pattern_to_remove | awk '{printf"%s:",$1}' | sed 's/:$//'`
     end
 endif

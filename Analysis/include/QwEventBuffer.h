@@ -41,13 +41,13 @@ class QwEventBuffer {
  public:
   static void DefineOptions(QwOptions &options);
   static void SetDefaultDataDirectory(const std::string& dir) {
-	fDefaultDataDirectory = dir;
+        fDefaultDataDirectory = dir;
   }
   static void SetDefaultDataFileStem(const std::string& stem) {
-	fDefaultDataFileStem = stem;
+        fDefaultDataFileStem = stem;
   }
   static void SetDefaultDataFileExtension(const std::string& extension) {
-	fDefaultDataFileExtension = extension;
+        fDefaultDataFileExtension = extension;
   }
 
  public:
@@ -72,11 +72,11 @@ class QwEventBuffer {
       delete fRunListFile;
       fRunListFile = NULL;
     }
-	  // Delete Decoder
-	  if(decoder != NULL) {
-			delete decoder;
-			decoder = NULL;
-	  }
+          // Delete Decoder
+          if(decoder != NULL) {
+                        delete decoder;
+                        decoder = NULL;
+          }
   };
 
   /// \brief Sets internal flags based on the QwOptions
@@ -124,7 +124,7 @@ class QwEventBuffer {
   Int_t CloseETStream();
 
   Bool_t IsPhysicsEvent() {
-		return ( decoder->IsPhysicsEvent() );
+                return ( decoder->IsPhysicsEvent() );
   };
 
   Int_t GetPhysicsEventNumber() {return fNumPhysicsEvents;};
@@ -133,7 +133,7 @@ class QwEventBuffer {
   Bool_t GetNextEventRange();
   Bool_t GetNextRunRange();
   Bool_t GetNextRunNumber();
-	void VerifyCodaVersion( const UInt_t *buffer);
+        void VerifyCodaVersion( const UInt_t *buffer);
 
   Int_t GetNextEvent();
 
@@ -148,7 +148,7 @@ class QwEventBuffer {
 
   Bool_t IsEPICSEvent(){
     return ( decoder->IsEPICSEvent() ); // Defined in CodaDecoder.h
-	}
+        }
 
   Bool_t FillSubsystemConfigurationData(QwSubsystemArray &subsystems);
   Bool_t FillSubsystemData(QwSubsystemArray &subsystems);
@@ -159,17 +159,17 @@ class QwEventBuffer {
 
 
   void ResetControlParameters();
-	void ReportRunSummary();
+        void ReportRunSummary();
   Int_t EncodeSubsystemData(QwSubsystemArray &subsystems);
   Int_t EncodePrestartEvent(int runnumber, int runtype = 0);
   Int_t EncodeGoEvent();
   Int_t EncodePauseEvent();
   Int_t EncodeEndEvent();
 
-	TString GetStartSQLTime();
-	TString GetEndSQLTime();
-	time_t  GetStartUnixTime();
-	time_t  GetEndUnixTime();
+        TString GetStartSQLTime();
+        TString GetEndSQLTime();
+        time_t  GetStartUnixTime();
+        time_t  GetEndUnixTime();
 
   void ResetFlags();
 
@@ -179,11 +179,11 @@ class QwEventBuffer {
 
   Bool_t FillSubsystemConfigurationData(std::vector<VQwSubsystem*> &subsystems);
   Bool_t FillSubsystemData(std::vector<VQwSubsystem*> &subsystems);
-	
-	// Coda Version that is set by void VerifyCodaVersion( ) 
-	// Compared against the user-input coda version
-	Int_t fDataVersionVerify = 0;
-  Int_t fDataVersion; // User-input Coda Version	
+
+        // Coda Version that is set by void VerifyCodaVersion( )
+        // Compared against the user-input coda version
+        Int_t fDataVersionVerify = 0;
+  Int_t fDataVersion; // User-input Coda Version
 
  protected:
   ///
@@ -280,7 +280,7 @@ class QwEventBuffer {
   Bool_t fSingleFile;
 
  protected:
-	VEventDecoder* decoder;
+        VEventDecoder* decoder;
 };
 
 template < class T > Bool_t QwEventBuffer::FillObjectWithEventData(T &object){
@@ -292,7 +292,7 @@ template < class T > Bool_t QwEventBuffer::FillObjectWithEventData(T &object){
   ///  - Bool_t T::CanUseThisEventType(const UInt_t event_type);
   ///  - Bool_t T::ClearEventData(const UInt_t event_type);
   ///  - Int_t  T::ProcessBuffer(const UInt_t event_type,
-  ///       const ROCID_t roc_id, const BankID_t bank_id, 
+  ///       const ROCID_t roc_id, const BankID_t bank_id,
   ///       const UInt_t banktype, UInt_t* buffer, UInt_t num_words);
   ///
   Bool_t okay = kFALSE;
@@ -307,24 +307,24 @@ template < class T > Bool_t QwEventBuffer::FillObjectWithEventData(T &object){
     if (decoder->GetBankDataType() == 0x10){
       //  This bank is subbanked; loop through subbanks
       while ((okay = decoder->DecodeSubbankHeader(&localbuff[decoder->GetWordsSoFar()]))){
-	//  If this bank has further subbanks, restart the loop.
-	if (decoder->GetSubbankType() == 0x10) continue;
-	//  If this bank only contains the word 'NULL' then skip
-	//  this bank.
-	if (decoder->GetFragLength()==1 && localbuff[decoder->GetWordsSoFar()]==kNullDataWord){
-	  decoder->AddWordsSoFarAndFragLength();
-	  continue;
-	}
-	object.ProcessBuffer(decoder->GetEvtType(), decoder->GetROC(), decoder->GetSubbankTag(), decoder->GetSubbankType(),
-			     &localbuff[decoder->GetWordsSoFar()],
-			     decoder->GetFragLength());
-	decoder->AddWordsSoFarAndFragLength();
+        //  If this bank has further subbanks, restart the loop.
+        if (decoder->GetSubbankType() == 0x10) continue;
+        //  If this bank only contains the word 'NULL' then skip
+        //  this bank.
+        if (decoder->GetFragLength()==1 && localbuff[decoder->GetWordsSoFar()]==kNullDataWord){
+          decoder->AddWordsSoFarAndFragLength();
+          continue;
+        }
+        object.ProcessBuffer(decoder->GetEvtType(), decoder->GetROC(), decoder->GetSubbankTag(), decoder->GetSubbankType(),
+                             &localbuff[decoder->GetWordsSoFar()],
+                             decoder->GetFragLength());
+        decoder->AddWordsSoFarAndFragLength();
       }
     } else {
       //  This is a single bank of some type
       object.ProcessBuffer(decoder->GetEvtType(), 0, decoder->GetBankDataType(),
-			   &localbuff[decoder->GetWordsSoFar()],
-			   decoder->GetEvtLength());
+                           &localbuff[decoder->GetWordsSoFar()],
+                           decoder->GetEvtLength());
     }
   }
   return okay;

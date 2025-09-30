@@ -52,8 +52,8 @@ MQwV775TDC::~MQwV775TDC() { }
 
 void MQwV775TDC::DecodeTDCWord(UInt_t &word, const ROCID_t roc_id)
 {
-  
-  
+
+
   fV775SlotNumber = (word & kV775Mask_SlotNumber)>>27;
   UInt_t wordtype = (word & kV775Mask_WordType)>>24;
   if (wordtype == kV775WordType_Datum){
@@ -74,7 +74,7 @@ void MQwV775TDC::DecodeTDCWord(UInt_t &word, const ROCID_t roc_id)
     fV775EventNumber   = 0;
   }
 
- 
+
   return;
 }
 
@@ -85,7 +85,7 @@ void MQwV775TDC::DecodeTDCWord(UInt_t &word, const ROCID_t roc_id)
 
 Double_t MQwV775TDC::SubtractReference(Double_t rawtime, Double_t reftime)
 {
-  Double_t real_time = rawtime - reftime;  
+  Double_t real_time = rawtime - reftime;
   return real_time;
 }
 
@@ -93,7 +93,7 @@ Double_t MQwV775TDC::SubtractReference(Double_t rawtime, Double_t reftime)
 
 UInt_t  MQwV775TDC::GetTDCTriggerTime()
 {
-  UInt_t trigger_time = 512; 
+  UInt_t trigger_time = 512;
   // V775TDC has no trigger time information into its data stream.
   // To keep the same function name between V775TDC and F1TDC,
   // I use this function in order to return "trigger_time" as 512.
@@ -123,12 +123,12 @@ void MQwV775TDC::PrintTDCData(Bool_t flag)
   if(flag)
     {
       std::cout << ">>>>>>>>> DATA : "
-		<< "Slot " << fV775SlotNumber << " "
-		<< "Ch "
-		<< std::setw(2) << fV775ChannelNumber
-		<< ", Raw dataword "
-		<< std::setw(12) << fV775Dataword
-		<< std::endl;
+                << "Slot " << fV775SlotNumber << " "
+                << "Ch "
+                << std::setw(2) << fV775ChannelNumber
+                << ", Raw dataword "
+                << std::setw(12) << fV775Dataword
+                << std::endl;
     }
   return;
 }

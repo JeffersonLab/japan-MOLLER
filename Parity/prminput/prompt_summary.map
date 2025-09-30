@@ -1,5 +1,5 @@
 ! Prompt Summary Elements Configuration File
-! 
+!
 ! This file defines the elements that will be included in the prompt summary output
 ! when using the --write-promptsummary option with qwparity.
 !

@@ -13,7 +13,7 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <fstream>
- 
+
 void DET_noise(){
          gStyle->SetTitleYOffset(1.5);
 //         gStyle->SetOptStat(0);
@@ -28,8 +28,8 @@ void DET_noise(){
          TH1D *h_uV[DET_num];
          TH1D *h_ppm[DET_num];
    if(run1<=0){
-	    cout << "\nPlease enter a Run Number (-1 to exit):";
-	    cin >> run1;
+            cout << "\nPlease enter a Run Number (-1 to exit):";
+            cin >> run1;
     }
         ofstream outfile(Form("TextFiles/diff_run%d.txt",run1));
         TString root_file1 =Form("$QW_ROOTFILES/prexALL_%d.000.root",run1);
@@ -56,11 +56,11 @@ void DET_noise(){
         mulTree1->Draw(Form("1e6*asym_atl2*yield_atl2/5>>hppm7"),"pattern_number>1",".");
 
    for(int i=0;i<DET_num;i++){
-	h_uV[i] =(TH1D*)gDirectory->FindObject(Form("huV%d",i));
+        h_uV[i] =(TH1D*)gDirectory->FindObject(Form("huV%d",i));
         h_uV[i]->SetDirectory(gROOT);
     }
     for(int i=0;i<DET_num;i++){
-	h_ppm[i] =(TH1D*)gDirectory->FindObject(Form("hppm%d",i));
+        h_ppm[i] =(TH1D*)gDirectory->FindObject(Form("hppm%d",i));
         h_ppm[i]->SetDirectory(gROOT);
     }
         TCanvas *c1 = new TCanvas("c1","",1200,700);
@@ -107,8 +107,8 @@ void DET_noise(){
         h_uV[7]->SetXTitle(Form("1e6*diff_atl2(uV)"));
         h_uV[7]->Fit("gaus");
    for(int i=0;i<DET_num;i++){
-    cout << h_uV[i]->GetMean() <<"	"<< h_uV[i]->GetRMS() << endl;
-    outfile << h_uV[i]->GetMean() <<"	"<< h_uV[i]->GetRMS() << endl;
+    cout << h_uV[i]->GetMean() <<"      "<< h_uV[i]->GetRMS() << endl;
+    outfile << h_uV[i]->GetMean() <<"   "<< h_uV[i]->GetRMS() << endl;
     }
     c1->SaveAs(Form("Plots/det_diff_uV_run%d.pdf",run1));
 
@@ -159,5 +159,3 @@ void DET_noise(){
 
         rootfile1->Close();
     }
-
-

@@ -34,7 +34,7 @@ EQwBeamInstrumentType GetQwBeamInstrumentType(TString name){
   result = kQwUnknownDeviceType;
   if (name=="bpmstripline"){
     result = kQwBPMStripline;
-  } 
+  }
   else if (name=="bcm"){
     result = kQwBCM;
   }
@@ -69,7 +69,7 @@ EQwBeamInstrumentType GetQwBeamInstrumentType(TString name){
 /**
  * Get the text name of a EQwPMTInstrumentType, as it would be
  * used in the channel map files.
- * @param  type   EQwPMTInstrumentType value for which the name should be 
+ * @param  type   EQwPMTInstrumentType value for which the name should be
  *                returned, such as kQwPMTIntegrationPMT
  * @return        Text name corresponding to the type
  */
@@ -79,11 +79,11 @@ TString GetQwPMTInstrumentTypeName(EQwPMTInstrumentType type){
   if (type==kQwIntegrationPMT){
     result = "IntegrationPMT";
     result.ToLower();
-  } 
+  }
   else if (type==kQwScalerPMT){
     result = "ScalerPMT";
     result.ToLower();
-  } 
+  }
   else if (type==kQwCombinedPMT){
     result = "CombinationPMT";
     result.ToLower();
@@ -97,7 +97,7 @@ TString GetQwBeamInstrumentTypeName(EQwBeamInstrumentType type){
   result = "kQwUnknownDeviceType";
   if (type==kQwBPMStripline){
     result = "bpmstripline";
-  } 
+  }
   else if (type==kQwBCM){
     result = "bcm";
   }
@@ -133,18 +133,18 @@ UInt_t GetGlobalErrorFlag(TString evtype,Int_t evMode,Double_t stabilitycut){
   if (evtype=="g" && stabilitycut>0)
     return (kGlobalCut|kStabilityCut|evntMode);
   else if (evtype=="g" && stabilitycut<=0)
-    return (kGlobalCut|evntMode);  
+    return (kGlobalCut|evntMode);
   else if (evtype=="l" && stabilitycut>0)
     return (kLocalCut|evntMode|kStabilityCut);
   else if (evtype=="l" && stabilitycut<=0)
-    return (kLocalCut|evntMode); 
-  
+    return (kLocalCut|evntMode);
+
   return 0;
 }
 
 std::string WienModeName(EQwWienMode type){
   const std::string wienname[5] = {"Indeterminate", "Forward", "Backward",
-			       "Vertical", "Horizontal"};
+                               "Vertical", "Horizontal"};
   return wienname[type];
 };
 

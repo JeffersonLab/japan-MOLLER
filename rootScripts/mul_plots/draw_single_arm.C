@@ -12,7 +12,7 @@
 
 using namespace std;
 
-void draw_mul_plots(const char * name, const char * regress_files[], const int nfiles) {	// draw both raw and reg pair plot in normal and log scale
+void draw_mul_plots(const char * name, const char * regress_files[], const int nfiles) {        // draw both raw and reg pair plot in normal and log scale
     TChain * treg = new TChain("reg");
     for(int i=0; i<nfiles; i++) {
       treg->AddFile(regress_files[i]);

@@ -17,22 +17,22 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
   char* qwrootfile_path = getenv("QW_ROOTFILES");
   TString rf_name =Form("%s/prexPrompt_pass2_%d.000.root",
       qwrootfile_path,run_num);
-  TFile *rootfile = TFile::Open(rf_name);  
+  TFile *rootfile = TFile::Open(rf_name);
 
   if(rootfile == NULL){
-    cout << rf_name 
+    cout << rf_name
       << " doesn't exist !!" << endl;
     TString rf_name =Form("%s/prexALL_%d.000.root",
         qwrootfile_path,run_num);
-    rootfile = TFile::Open(rf_name);  
+    rootfile = TFile::Open(rf_name);
     if (rootfile == NULL) {
-      cout << rf_name 
+      cout << rf_name
         << " doesn't exist !!" << endl;
       TString rf_name =Form("%s/prexPrompt_pass1_%d.000.root",
           qwrootfile_path,run_num);
-      rootfile = TFile::Open(rf_name);  
+      rootfile = TFile::Open(rf_name);
       if (rootfile == NULL) {
-        cout << rf_name 
+        cout << rf_name
           << " doesn't exist !!" << endl;
         return;
       }
@@ -46,14 +46,14 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
   TTree *tree= (TTree*)rootfile->Get("evt");
   std::vector<TString> device_name;
   if (ana == "unser"){
-    device_name = 
+    device_name =
     {"bcm_an_us", "bcm_an_ds",
       "bcm_an_ds3","bcm_an_ds10",
       "bcm_dg_us","bcm_dg_ds",
       "bpm4aX","bpm4aY","bpm4eX","bpm4eY","bpm1X","bpm11X","bpm12X","bpm16X","bpm11Y",
       "cav4bQ","cav4cQ","cav4dQ","bcm_dg_usc","bcm_dg_dsc",
       "cav4bXI","cav4bYI","cav4cXI","cav4cYI","cav4dXI","cav4dYI"};
-    if (run_num < 5000.0) { //PREX 
+    if (run_num < 5000.0) { //PREX
       device_name =
       {"bcm_an_us", "bcm_an_ds",
         "bcm_an_ds3","bcm_an_ds10",
@@ -64,7 +64,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     }
   }
   if (ana == "all"){
-    device_name = 
+    device_name =
     {"bcm_an_us", "bcm_an_ds",
       "bcm_an_ds3","bcm_an_ds10",
       "bcm_dg_us","bcm_dg_ds",
@@ -74,7 +74,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
       "usl","usr","dsl","dsr",
       "atl1","atr1","atl2","atr2",
       "sam1","sam2","sam3","sam4","sam5","sam6","sam7","sam8"};
-    if (run_num < 5000.0) { //PREX 
+    if (run_num < 5000.0) { //PREX
       device_name =
       {"bcm_an_us", "bcm_an_ds",
         "bcm_an_ds3","bcm_an_ds10",
@@ -101,7 +101,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
   device_blacklist[3106] = {"usl","usr","dsl","dsr","atl1","atl2","atr1","atr2","sam1","sam2","sam3","sam4","sam5","sam6","sam7","sam8","cav4bQ","cav4dQ","cav4bXI","cav4bYI","cav4dXI","cav4dYI","bpm4aX","bpm4aY","bpm4eX","bpm4eY","bpm1X","bpm11X","bpm12X","bpm16X","bpm11Y"};
   device_blacklist[3135] = {"usl","usr","dsl","dsr","atl1","atl2","atr1","atr2","sam1","sam2","sam3","sam4","sam5","sam6","sam7","sam8","bpm4aX","bpm4aY","bpm4eX","bpm4eY","bpm1X","bpm11X","bpm12X","bpm16X","bpm11Y"};
   // First Beam on with Maindets in place
-  // Run 3138 has a bad BCM scan and sam8, but it is fine for the main detectors 
+  // Run 3138 has a bad BCM scan and sam8, but it is fine for the main detectors
   device_blacklist[3138] = {"sam8","atl1","atl2","atr1","atr2","bcm_an_us","bcm_an_ds","bcm_an_ds3","bcm_an_ds10","bcm_dg_us","bcm_dg_ds","bpm4aX","bpm4aY","bpm4eX","bpm4eY","bpm1X","bpm11X","bpm12X","bpm16X","bpm11Y","cav4bQ","cav4cQ","cav4dQ","cav4bXI","cav4bYI","cav4cXI","cav4cYI","cav4dXI","cav4dYI"};
   // Run 3125 has HV changes invalidating prior calibrations for SAMs and Main Det HVs
   // Run 3395 has no target in it
@@ -142,7 +142,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
   device_blacklist[6176] = {"bpm4aX","bpm4aY","bpm4eX","bpm4eY","bpm1X","bpm11X","bpm12X","bpm16X","bpm11Y"};
   device_blacklist[6196] = {"bpm4aX","bpm4aY","bpm4eX","bpm4eY","bpm1X","bpm11X","bpm12X","bpm16X","bpm11Y"};
   device_blacklist[6233] = {"bpm4aX","bpm4aY","bpm4eX","bpm4eY","bpm1X","bpm11X","bpm12X","bpm16X","bpm11Y"};
-	device_blacklist[6242] = {"bpm4aX","bpm4aY","bpm4eX","bpm4eY","bpm1X","bpm11X","bpm12X","bpm16X","bpm11Y"};
+        device_blacklist[6242] = {"bpm4aX","bpm4aY","bpm4eX","bpm4eY","bpm1X","bpm11X","bpm12X","bpm16X","bpm11Y"};
   device_blacklist[6442] = {"bpm4aX","bpm4aY","bpm4eX","bpm4eY","bpm1X","bpm11X","bpm12X","bpm16X","bpm11Y"};
   device_blacklist[6560] = {"usr","dsr","atr1","atr2","bpm4aX","bpm4aY","bpm4eX","bpm4eY","bpm1X","bpm11X","bpm12X","bpm16X","bpm11Y"};
   device_blacklist[6563] = {"bpm4aX","bpm4aY","bpm4eX","bpm4eY","bpm1X","bpm11X","bpm12X","bpm16X","bpm11Y"};
@@ -194,8 +194,8 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
   TString branch_name;
   TString num_samples_name;
 
-  std::map <Int_t,std::vector<TCut>> beam_evtcut;// 
-  beam_evtcut[2769] = { 
+  std::map <Int_t,std::vector<TCut>> beam_evtcut;//
+  beam_evtcut[2769] = {
     "cleandata==1 && scandata2==1 && scandata1>50",
     "cleandata==1 && scandata2==2 && scandata1>50",
     "cleandata==1 && scandata2==3 && scandata1>50",
@@ -249,7 +249,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "Entry$>126.6e3 && Entry$<140e3"
   };
   beam_evtcut[3105] = {
-    "CodaEventNumber>10e3&&CodaEventNumber<33e3",  
+    "CodaEventNumber>10e3&&CodaEventNumber<33e3",
     "CodaEventNumber>45e3&&CodaEventNumber<52e3",
     "CodaEventNumber>58e3&&CodaEventNumber<72e3",
     "CodaEventNumber>91e3&&CodaEventNumber<96e3"
@@ -286,7 +286,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "CodaEventNumber>103.62e3&&CodaEventNumber<103.68e3",
     "CodaEventNumber>109.15e3&&CodaEventNumber<109.44e3"
   };
-  beam_evtcut[3395] = { 
+  beam_evtcut[3395] = {
     "cleandata==1 && scandata2==1 && scandata1>50",
     "cleandata==1 && scandata2==2 && scandata1>50",
     "cleandata==1 && scandata2==3 && scandata1>50",
@@ -299,19 +299,19 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata==1 && scandata2==10 && scandata1>50",
     "cleandata==1 && scandata2==11 && scandata1>50"
   };
-  beam_evtcut[3424] = { 
+  beam_evtcut[3424] = {
     "cleandata==1 && scandata2==1 && scandata1>0 && CodaEventNumber>37000",
     "cleandata==1 && scandata2==2 && scandata1>0",
     "cleandata==1 && scandata2==3 && scandata1>0",
     "cleandata==1 && scandata2==4 && scandata1>0",
     "cleandata==1 && scandata2==5 && scandata1>0",
   };
-  beam_evtcut[3429] = { 
+  beam_evtcut[3429] = {
     "cleandata==1 && scandata2==1 && scandata1>0",
     "cleandata==1 && scandata2==2 && scandata1>0",
     "cleandata==1 && scandata2==3 && scandata1>0",
   };
-  beam_evtcut[3430] = { 
+  beam_evtcut[3430] = {
     "cleandata==1 && scandata2==1 && scandata1>0",
     "cleandata==1 && scandata2==2 && scandata1>0",
     "cleandata==1 && scandata2==3 && scandata1>0",
@@ -320,7 +320,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata==1 && scandata2==6 && scandata1>0",
     "cleandata==1 && scandata2==7 && scandata1>0",
   };
-  beam_evtcut[3597] = { 
+  beam_evtcut[3597] = {
     "cleandata==1 && scandata2==1 && scandata1>0",
     "cleandata==1 && scandata2==2 && scandata1>0",
     "cleandata==1 && scandata2==3 && scandata1>0",
@@ -331,7 +331,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata==1 && scandata2==8 && scandata1>0",
     "cleandata==1 && scandata2==9 && scandata1>0",
   };
-  beam_evtcut[3645] = { 
+  beam_evtcut[3645] = {
     "cleandata && scandata1>0 && scandata2==1",
     "cleandata && scandata1>0 && scandata2==2",
     "cleandata && scandata1>0 && scandata2==3",
@@ -341,7 +341,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata && scandata1>0 && scandata2==7",
     "cleandata && scandata1>0 && scandata2==8"
   };
-  beam_evtcut[3735] = { 
+  beam_evtcut[3735] = {
     "cleandata && scandata1>0 && scandata2==1",
     "cleandata && scandata1>0 && scandata2==2",
     "cleandata && scandata1>0 && scandata2==3",
@@ -350,13 +350,13 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata && scandata1>0 && scandata2==6",
     "cleandata && scandata1>0 && scandata2==7"
   };
-  beam_evtcut[3749] = { 
+  beam_evtcut[3749] = {
     "Entry$>21.5e3 && Entry$<25.8e3",
     "Entry$>34.7e3 && Entry$<39.4e3",
     "Entry$>47.2e3 && Entry$<50.2e3",
     "Entry$>60.6e3 && Entry$<64.7e3"
   };
-  beam_evtcut[3751] = { 
+  beam_evtcut[3751] = {
     "cleandata && scandata1>0 && scandata2==1&&!(scandata1==700&&CodaEventNumber>85800&&CodaEventNumber<89300)",
     "cleandata && scandata1>0 && scandata2==4&&!(scandata1==550&&CodaEventNumber>121e3&&CodaEventNumber<126e3)",
     "cleandata && scandata1>0 && scandata2==5",
@@ -365,7 +365,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata && scandata1>0 && scandata2==9"
   };
   if (ana == "all") {
-    beam_evtcut[3751] = { 
+    beam_evtcut[3751] = {
       "cleandata && scandata1>0 && scandata2==1",
       "cleandata && scandata1>0 && scandata2==2",
       "cleandata && scandata1>0 && scandata2==3",
@@ -376,7 +376,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
       "cleandata && scandata1>0 && scandata2==9"
     };
   }
-  beam_evtcut[4229] = { 
+  beam_evtcut[4229] = {
     "cleandata && scandata1>0 && (scandata2==0)&&CodaEventNumber>26e3",
     "cleandata && scandata1>0 && scandata2==2&&unser>10",
     "cleandata && scandata1>0 && scandata2==3",
@@ -389,13 +389,13 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata && scandata1>0 && scandata2==10",
     "cleandata && scandata1>0 && (scandata2==1)"
   };
-  beam_evtcut[4309] = { 
+  beam_evtcut[4309] = {
     "cleandata && scandata1>0 && scandata2==0",
     "cleandata && scandata1>0 && scandata2==1",
     "cleandata && scandata1>0 && scandata2==2",
     "cleandata && scandata1>0 && scandata2==3"
   };
-  beam_evtcut[4610] = { 
+  beam_evtcut[4610] = {
     "cleandata && scandata1>0 && scandata2==1",
     "cleandata && scandata1>0 && scandata2==2",
     "cleandata && scandata1>0 && scandata2==3",
@@ -406,7 +406,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata && scandata1>0 && scandata2==8",
     "cleandata && scandata1>0 && scandata2==9"
   };
-  beam_evtcut[4650] = { 
+  beam_evtcut[4650] = {
     "cleandata && scandata1>0 && scandata2==1",
     "cleandata && scandata1>0 && scandata2==2",
     "cleandata && scandata1>0 && scandata2==3",
@@ -415,7 +415,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata && scandata1>0 && scandata2==6",
     "cleandata && scandata1>0 && scandata2==7"
   };
-  beam_evtcut[4652] = { 
+  beam_evtcut[4652] = {
     "cleandata && scandata1>0 && scandata2==1",
     "cleandata && scandata1>0 && scandata2==2",
     "cleandata && scandata1>0 && scandata2==3",
@@ -424,7 +424,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata && scandata1>0 && scandata2==6",
     "cleandata && scandata1>0 && scandata2==7"
   };
-  beam_evtcut[4806] = { 
+  beam_evtcut[4806] = {
     "cleandata && scandata1>0 && scandata2==1",
     "cleandata && scandata1>0 && scandata2==2",
     "cleandata && scandata1>0 && scandata2==3",
@@ -435,7 +435,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata && scandata1>0 && scandata2==8",
     "cleandata && scandata1>0 && scandata2==9"
   };
-  beam_evtcut[4872] = { 
+  beam_evtcut[4872] = {
     "cleandata && scandata1>0 && scandata2==1",
     "cleandata && scandata1>0 && scandata2==2",
     "cleandata && scandata1>0 && scandata2==3",
@@ -447,7 +447,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata && scandata1>0 && scandata2==9",
     "cleandata && scandata1>0 && scandata2==10"
   };
-  beam_evtcut[4901] = { 
+  beam_evtcut[4901] = {
     "cleandata && scandata1>0 && scandata2==1",
     "cleandata && scandata1>0 && scandata2==2",
     "cleandata && scandata1>0 && scandata2==3",
@@ -458,19 +458,19 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata && scandata1>0 && scandata2==8"
   };
   // CREX
-  beam_evtcut[5360] = { 
+  beam_evtcut[5360] = {
     "CodaEventNumber>48.5e3&&CodaEventNumber<51e3",
     "CodaEventNumber>116e3&&CodaEventNumber<120e3",
     "CodaEventNumber>210e3&&CodaEventNumber<214e3",
     "CodaEventNumber>250e3&&CodaEventNumber<262e3"
   };
-  beam_evtcut[5396] = { 
+  beam_evtcut[5396] = {
     "CodaEventNumber>120*60*2.1&&CodaEventNumber<120*60*2.6",
     "CodaEventNumber>120*60*13.3&&CodaEventNumber<120*60*13.8",
     "CodaEventNumber>120*60*18.3&&CodaEventNumber<120*60*18.8",
     "CodaEventNumber>120*60*25.5&&CodaEventNumber<120*60*26"
   };
-  beam_evtcut[5417] = { 
+  beam_evtcut[5417] = {
     "scandata2==1",
     "scandata2==2",
     "scandata2==3",
@@ -479,7 +479,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "scandata2==6",
     "scandata2==7"
   };
-  beam_evtcut[5434] = { 
+  beam_evtcut[5434] = {
     "cleandata && scandata1>0 && scandata2==1",
     "cleandata && scandata1>0 && scandata2==2",
     "cleandata && scandata1>0 && scandata2==3",
@@ -489,7 +489,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata && scandata1>0 && scandata2==7",
     "cleandata && scandata1>0 && scandata2==8 && Entry$>181e3"
   };
-  beam_evtcut[5436] = { 
+  beam_evtcut[5436] = {
     "scandata2==1",
     "scandata2==2",
     //"scandata2==2 && bcm_an_us>130",
@@ -502,7 +502,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     //"scandata2==8 && bcm_an_us>40",
     "scandata2==9"
   };
-  beam_evtcut[5474] = { 
+  beam_evtcut[5474] = {
     "scandata2==1",
     "scandata2==2",
     "scandata2==3",
@@ -512,7 +512,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "scandata2==7",
     "scandata2==8"
   };
-  beam_evtcut[5566] = { 
+  beam_evtcut[5566] = {
     "CodaEventNumber>10e3&&CodaEventNumber<32e3", //50uA
     "CodaEventNumber>40e3&&CodaEventNumber<43.2e3", //50uA
     "CodaEventNumber>50.2e3&&CodaEventNumber<51.3e3", //75uA
@@ -524,17 +524,17 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "CodaEventNumber>290e3&&CodaEventNumber<295.5e3",//70uA
     "CodaEventNumber>390e3&&CodaEventNumber<405e3" //80uA
   };
-  beam_evtcut[5576] = { 
+  beam_evtcut[5576] = {
     "CodaEventNumber>4e3&&CodaEventNumber<8e3", //20uA
     "CodaEventNumber>11e3&&CodaEventNumber<14.57e3",//40uA
-    "CodaEventNumber>40.8e3&&CodaEventNumber<41.9e3",//22uA 
+    "CodaEventNumber>40.8e3&&CodaEventNumber<41.9e3",//22uA
     "CodaEventNumber>43.2e3&&CodaEventNumber<46e3",//20uA
     "CodaEventNumber>85.1e3&&CodaEventNumber<85.4e3",//11uA
     "CodaEventNumber>113.4e3&&CodaEventNumber<115.5e3",//60uA
     "CodaEventNumber>120.8e3&&CodaEventNumber<121.14e3",//10uA
     "CodaEventNumber>136.7e3&&CodaEventNumber<137.2e3",//90uA
     "CodaEventNumber>152.2e3&&CodaEventNumber<152.7e3",//120uA
-    "CodaEventNumber>169e3&&CodaEventNumber<169.7e3",//145uA 
+    "CodaEventNumber>169e3&&CodaEventNumber<169.7e3",//145uA
     "CodaEventNumber>192.4e3&&CodaEventNumber<193e3",//146uA
     "CodaEventNumber>201e3&&CodaEventNumber<203.6e3",//140uA
     "CodaEventNumber>272e3&&CodaEventNumber<275e3"//155uA
@@ -545,14 +545,14 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     // "CodaEventNumber>120*60*2.1&&CodaEventNumber<120*60*2.6",
     //   " CodaEventNumber>4e3&&CodaEventNumber<8e3", //20uA
     "CodaEventNumber>11e3&&CodaEventNumber<14.57e3",//40uA
-    // "CodaEventNumber>40.8e3&&CodaEventNumber<41.9e3",//22uA 
+    // "CodaEventNumber>40.8e3&&CodaEventNumber<41.9e3",//22uA
     // "CodaEventNumber>43.2e3&&CodaEventNumber<46e3",//20uA
     // "CodaEventNumber>85.1e3&&CodaEventNumber<85.4e3",//11uA
     //"CodaEventNumber>113.4e3&&CodaEventNumber<115.5e3",//60uA
     // "CodaEventNumber>120.8e3&&CodaEventNumber<121.14e3",//10uA
     "CodaEventNumber>136.7e3&&CodaEventNumber<137.2e3",//90uA
     "CodaEventNumber>152.2e3&&CodaEventNumber<152.7e3",//120uA
-    "CodaEventNumber>169e3&&CodaEventNumber<169.7e3",//145uA 
+    "CodaEventNumber>169e3&&CodaEventNumber<169.7e3",//145uA
     "CodaEventNumber>192.4e3&&CodaEventNumber<193e3",//146uA
     "CodaEventNumber>201e3&&CodaEventNumber<203.6e3",//140uA
     "CodaEventNumber>272e3&&CodaEventNumber<275e3"//155uA
@@ -568,18 +568,18 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
   }
   // Depreciated
   if (ana == "all" && 1==0) {
-    beam_evtcut[5576] = { 
+    beam_evtcut[5576] = {
     // "CodaEventNumber>120*60*2.1&&CodaEventNumber<120*60*2.6",
     //   " CodaEventNumber>4e3&&CodaEventNumber<8e3", //20uA
     "CodaEventNumber>11e3&&CodaEventNumber<14.57e3",//40uA
-    // "CodaEventNumber>40.8e3&&CodaEventNumber<41.9e3",//22uA 
+    // "CodaEventNumber>40.8e3&&CodaEventNumber<41.9e3",//22uA
     // "CodaEventNumber>43.2e3&&CodaEventNumber<46e3",//20uA
     // "CodaEventNumber>85.1e3&&CodaEventNumber<85.4e3",//11uA
     //"CodaEventNumber>113.4e3&&CodaEventNumber<115.5e3",//60uA
     // "CodaEventNumber>120.8e3&&CodaEventNumber<121.14e3",//10uA
     "CodaEventNumber>136.7e3&&CodaEventNumber<137.2e3",//90uA
     //  "CodaEventNumber>152.2e3&&CodaEventNumber<152.7e3",//120uA
-    "CodaEventNumber>169e3&&CodaEventNumber<169.7e3",//145uA 
+    "CodaEventNumber>169e3&&CodaEventNumber<169.7e3",//145uA
     "CodaEventNumber>192.4e3&&CodaEventNumber<193e3",//146uA
     "CodaEventNumber>201e3&&CodaEventNumber<203.6e3",//140uA
     "CodaEventNumber>272e3&&CodaEventNumber<275e3"//155uA
@@ -593,7 +593,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     //  "cleandata && scandata1>0 && scandata2==8 && Entry$>181e3",
     };
   }
-  beam_evtcut[5653] = { 
+  beam_evtcut[5653] = {
     "scandata2==1",
     "scandata2==2",
     "scandata2==3",
@@ -604,7 +604,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "scandata2==8",
     "scandata2==9"
   };
-  beam_evtcut[5778] = { 
+  beam_evtcut[5778] = {
     // points 1 and 2 get cut out by the usercut anyways... They are duplicate 140 and 150 uA points
     "scandata2==3",
     "scandata2==4",
@@ -614,7 +614,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "scandata2==8",
     "scandata2==9"
   };
-  beam_evtcut[6049] = { 
+  beam_evtcut[6049] = {
     "CodaEventNumber>10.1e3&&CodaEventNumber<11.4e3",//107
     "CodaEventNumber>28.6e3&&CodaEventNumber<28.83e3", //95
     "CodaEventNumber>50e3&&CodaEventNumber<52.8e3",    //107
@@ -626,13 +626,13 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "CodaEventNumber>220e3&&CodaEventNumber<229.5e3",//125
     "CodaEventNumber>250e3&&CodaEventNumber<300e3"//140
   };
-  beam_evtcut[6176] = { 
+  beam_evtcut[6176] = {
     "CodaEventNumber>40e3&&CodaEventNumber<46e3",
     "CodaEventNumber>156e3&&CodaEventNumber<163e3",
     "CodaEventNumber>290e3&&CodaEventNumber<315e3",
     "CodaEventNumber>371e3&&CodaEventNumber<390e3"
   };
-  beam_evtcut[6196] = { 
+  beam_evtcut[6196] = {
     "scandata2==1",
     "scandata2==2",
     "scandata2==3",
@@ -643,8 +643,8 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "scandata2==8",
     "scandata2==9"
   };
-  beam_evtcut[6233] = { 
-    "CodaEventNumber>100e3&&CodaEventNumber<103.5e3",//150 
+  beam_evtcut[6233] = {
+    "CodaEventNumber>100e3&&CodaEventNumber<103.5e3",//150
     "CodaEventNumber>217e3&&CodaEventNumber<225e3",//35
     "CodaEventNumber>245e3&&CodaEventNumber<248e3",//45
     "CodaEventNumber>278.6e3&&CodaEventNumber<281e3",//85
@@ -656,15 +656,15 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "CodaEventNumber>521.5e3&&CodaEventNumber<524.5e3",//145
     "CodaEventNumber>560e3&&CodaEventNumber<577e3"//140
   };
-  beam_evtcut[6242] = { 
-    // OLD 
+  beam_evtcut[6242] = {
+    // OLD
     // //"CodaEventNumber>38e3&&CodaEventNumber<44.5e3", //150uA
     //"CodaEventNumber>110e3&&CodaEventNumber<121e3", //140uA
     //"CodaEventNumber>156e3&&CodaEventNumber<162e3", //130uA
     //"CodaEventNumber>212e3&&CodaEventNumber<222e3", //120uA
     //"CodaEventNumber>274e3&&CodaEventNumber<280e3", //110uA
     //"CodaEventNumber>354e3&&CodaEventNumber<364e3" //100uA
-    // NEW 
+    // NEW
     "scandata1==150&&CodaEventNumber<45100",
     "scandata1==140&&CodaEventNumber<79e3",
     "scandata1==140&&cleandata&&CodaEventNumber<100e3",
@@ -676,12 +676,12 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "CodaEventNumber>311.5e3&&CodaEventNumber<314e3",//100uA
     "scandata1==100&&CodaEventNumber<368e3"//100uA
   };
-  beam_evtcut[6442] = { 
+  beam_evtcut[6442] = {
     "CodaEventNumber>82e3&&CodaEventNumber<87e3", //150uA
     "CodaEventNumber>114e3&&CodaEventNumber<125e3", //140uA
     "CodaEventNumber>161e3&&CodaEventNumber<170e3" //130uA
   };
-  beam_evtcut[6560] = { 
+  beam_evtcut[6560] = {
     "scandata1==150",
     "scandata1==140",
     "scandata1==130",
@@ -716,7 +716,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "(CodaEventNumber>355e3&&CodaEventNumber<362e3)"//45
     //"(CodaEventNumber>371e3)"    //150 noisy
   };
-  beam_evtcut[6739] = { 
+  beam_evtcut[6739] = {
     "cleandata&&scandata1==20&&CodaEventNumber<113.2e3",
     "cleandata&&scandata1==50&&CodaEventNumber<209.5e3",
     "cleandata&&scandata1==101&&!(CodaEventNumber<135e3&&CodaEventNumber>130.2e3)",
@@ -734,7 +734,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "CodaEventNumber>283.17e3&&CodaEventNumber<283.45e3",//35uA
     "CodaEventNumber>359.7e3&&CodaEventNumber<360e3",//35uA
     "CodaEventNumber>370.8e3&&CodaEventNumber<371.05e3",//35uA
-    //37 lots 
+    //37 lots
     "CodaEventNumber>137.35e3&&CodaEventNumber<137.65e3",//46uA
     "CodaEventNumber>145.6e3&&CodaEventNumber<145.9e3",//46uA
     "CodaEventNumber>203.1e3&&CodaEventNumber<203.4e3",//46uA
@@ -777,7 +777,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "scandata1==30 && cleandata",
     "scandata1==10 && cleandata && Entry$>164.5e3"
   };
-  beam_evtcut[7122] = { 
+  beam_evtcut[7122] = {
     "cleandata&&scandata1==150",
     "cleandata&&scandata1==131 && CodaEventNumber<143.9e3",
     "cleandata&&scandata1==110",
@@ -797,7 +797,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
      "scandata1==30 && cleandata",
      "scandata1==10 && cleandata && Entry$>182e3"
   };
-  beam_evtcut[7282] = { 
+  beam_evtcut[7282] = {
     "cleandata&&scandata1==150",
     "cleandata&&scandata1==130&&CodaEventNumber<86.9e3",
     "cleandata&&scandata1==110",
@@ -807,7 +807,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata&&scandata1==30"
     // "cleandata&&scandata1==10",
   };
-   beam_evtcut[7406] = { 
+   beam_evtcut[7406] = {
     "cleandata&&scandata1==150",
     "cleandata&&scandata1==130",
     "cleandata&&scandata1==120",
@@ -835,8 +835,8 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
 
 
 
-  std::map <Int_t,std::vector<TCut>> pedestal_evtcut;// 
-  pedestal_evtcut[2769] = { 
+  std::map <Int_t,std::vector<TCut>> pedestal_evtcut;//
+  pedestal_evtcut[2769] = {
     "cleandata==1 && scandata2==1 && scandata1<50", // Scandata2 tag = current/10
     "cleandata==1 && scandata2==2 && scandata1<50",
     "cleandata==1 && scandata2==3 && scandata1<50",
@@ -879,8 +879,8 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
      "Entry$<16e3",
      "Entry$>38e3 && Entry$<42.1e3",
      "Entry$>49.2e3 && Entry$<51.6e3",
-     "Entry$>49.15e3 && Entry$<51.6e3", 
-     "Entry$>49.15e3 && Entry$<51.6e3", 
+     "Entry$>49.15e3 && Entry$<51.6e3",
+     "Entry$>49.15e3 && Entry$<51.6e3",
      "Entry$>181e3",
      "Entry$>181e3"
   };
@@ -891,7 +891,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "CodaEventNumber>97e3&&CodaEventNumber<98e3"
   };
   pedestal_evtcut[3135] = {
-    "CodaEventNumber>47.1e3&&CodaEventNumber<48.5e3", 
+    "CodaEventNumber>47.1e3&&CodaEventNumber<48.5e3",
     "CodaEventNumber>75.2e3&&CodaEventNumber<76.5e3",
     "CodaEventNumber>100.5e3&&CodaEventNumber<102e3",
     "CodaEventNumber>103.72e3&&CodaEventNumber<105e3",
@@ -904,7 +904,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "CodaEventNumber>70e3&&CodaEventNumber<71e3",
     "CodaEventNumber>76e3&&CodaEventNumber<77e3"
   };
-  pedestal_evtcut[3395] = { 
+  pedestal_evtcut[3395] = {
     /*
     "cleandata==1 && scandata2==1 && scandata1<50",
     "cleandata==1 && scandata2==2 && scandata1<50",
@@ -930,7 +930,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata && scandata1==0 && (scandata2==10 || scandata2==9)",
     "cleandata && scandata1==0 && (scandata2==11 || scandata2==10)"
   };
-  pedestal_evtcut[3645] = { 
+  pedestal_evtcut[3645] = {
     "cleandata && scandata1==0 && (scandata2==1)",
     "cleandata && scandata1==0 && (scandata2==2 || scandata2==1)",
     "cleandata && scandata1==0 && (scandata2==3 || scandata2==2)",
@@ -940,7 +940,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata && scandata1==0 && (scandata2==7 || scandata2==6)",
     "cleandata && scandata1==0 && (scandata2==8 || scandata2==7)"
   };
-  pedestal_evtcut[3735] = { 
+  pedestal_evtcut[3735] = {
     "cleandata && scandata1==0 && (scandata2==1)",
     "cleandata && scandata1==0 && (scandata2==2 || scandata2==1)",
     "cleandata && scandata1==0 && (scandata2==3 || scandata2==2)",
@@ -950,10 +950,10 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "cleandata && scandata1==0 && (scandata2==7)"
   };
   pedestal_evtcut[3749] = {
-    "Entry$>19.6e3 && Entry$<21.3e3",    
-    "Entry$>33e3 && Entry$<34.6e3",    
+    "Entry$>19.6e3 && Entry$<21.3e3",
+    "Entry$>33e3 && Entry$<34.6e3",
     "Entry$>50.3e3 && Entry$<55.3e3",
-    "Entry$>65e3 && Entry$<80e3"   
+    "Entry$>65e3 && Entry$<80e3"
   };
   pedestal_evtcut[3751] = {
     "scandata2==1 && (CodaEventNumber>86000&&CodaEventNumber<87100)",
@@ -1095,21 +1095,21 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "CodaEventNumber>155.5e3&&CodaEventNumber<158.5e3" //130uA
   };
   pedestal_evtcut[6560] ={
-    "scandata2==1&&CodaEventNumber<205e3&&scandata1==0&&cleandata",    
-    "scandata2==2&&CodaEventNumber<205e3&&scandata1==0&&cleandata",    
-    "scandata2==3&&CodaEventNumber<205e3&&scandata1==0&&cleandata",    
-    "scandata2==4&&CodaEventNumber<205e3&&scandata1==0&&cleandata",    
-    "scandata2==5&&CodaEventNumber<205e3&&scandata1==0&&cleandata",    
-    "scandata2==6&&CodaEventNumber<205e3&&scandata1==0&&cleandata",    
-    "scandata2==7&&CodaEventNumber<205e3&&scandata1==0&&cleandata",    
-    "scandata2==8&&CodaEventNumber<205e3&&scandata1==0&&cleandata",    
-    "scandata2==7&&CodaEventNumber>205e3&&scandata1==0&&cleandata",  
-    "scandata2==6&&CodaEventNumber>205e3&&scandata1==0&&cleandata",  
-    "scandata2==5&&CodaEventNumber>205e3&&scandata1==0&&cleandata", 
-    "scandata2==4&&CodaEventNumber>205e3&&scandata1==0&&cleandata",  
-    "scandata2==3&&CodaEventNumber>205e3&&scandata1==0&&cleandata", 
-    "scandata2==9&&CodaEventNumber>205e3&&scandata1==0&&cleandata",      
-    "scandata2==10&&CodaEventNumber>205e3&&scandata1==0&&cleandata"   
+    "scandata2==1&&CodaEventNumber<205e3&&scandata1==0&&cleandata",
+    "scandata2==2&&CodaEventNumber<205e3&&scandata1==0&&cleandata",
+    "scandata2==3&&CodaEventNumber<205e3&&scandata1==0&&cleandata",
+    "scandata2==4&&CodaEventNumber<205e3&&scandata1==0&&cleandata",
+    "scandata2==5&&CodaEventNumber<205e3&&scandata1==0&&cleandata",
+    "scandata2==6&&CodaEventNumber<205e3&&scandata1==0&&cleandata",
+    "scandata2==7&&CodaEventNumber<205e3&&scandata1==0&&cleandata",
+    "scandata2==8&&CodaEventNumber<205e3&&scandata1==0&&cleandata",
+    "scandata2==7&&CodaEventNumber>205e3&&scandata1==0&&cleandata",
+    "scandata2==6&&CodaEventNumber>205e3&&scandata1==0&&cleandata",
+    "scandata2==5&&CodaEventNumber>205e3&&scandata1==0&&cleandata",
+    "scandata2==4&&CodaEventNumber>205e3&&scandata1==0&&cleandata",
+    "scandata2==3&&CodaEventNumber>205e3&&scandata1==0&&cleandata",
+    "scandata2==9&&CodaEventNumber>205e3&&scandata1==0&&cleandata",
+    "scandata2==10&&CodaEventNumber>205e3&&scandata1==0&&cleandata"
   };
   pedestal_evtcut[7121] = {
     "scandata1==0 && CodaEventNumber>30e3 && CodaEventNumber<55e3 && cleandata",
@@ -1118,8 +1118,8 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     "scandata1==0 && CodaEventNumber>90e3 && CodaEventNumber<103e3 && cleandata",
     "scandata1==0 && CodaEventNumber>112e3 && CodaEventNumber<120e3 && cleandata",
     "scandata1==0 && CodaEventNumber>120e3 && CodaEventNumber<153e3 && cleandata",
-    "scandata1==0 && CodaEventNumber>153e3 && CodaEventNumber<165e3 && cleandata",      
-    "scandata1==0 && CodaEventNumber>165e3 && cleandata"   
+    "scandata1==0 && CodaEventNumber>153e3 && CodaEventNumber<165e3 && cleandata",
+    "scandata1==0 && CodaEventNumber>165e3 && cleandata"
   };
   pedestal_evtcut[7279] = {
      "scandata1==0 && scandata2==2 && cleandata",
@@ -1129,7 +1129,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
      "scandata1==0 && scandata2==6 && cleandata",
      "scandata1==0 && scandata2==7 && cleandata",
      "scandata1==0 && scandata2==8 && cleandata",
-     "scandata1==0 && scandata2==9 && cleandata"   
+     "scandata1==0 && scandata2==9 && cleandata"
   };
   pedestal_evtcut[7407] = {
      "scandata1==0 && scandata2==1 && cleandata && Entry$>22e3",
@@ -1139,7 +1139,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
      "scandata1==0 && scandata2==5 && cleandata",
      "scandata1==0 && scandata2==6 && cleandata",
      "Entry$>180e3 && Entry$< 186e3",
-     "scandata1==0 && scandata2==7 && cleandata"   
+     "scandata1==0 && scandata2==7 && cleandata"
   };
 
   if (beam_evtcut.count(run_num) == 0 || (ana=="unser" && pedestal_evtcut.count(run_num) == 0)){
@@ -1147,7 +1147,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     return;
   }
   const int ndata = beam_evtcut[run_num].size(); // sizeof(beam_evtcut)/sizeof(*beam_evtcut);
-  if (ana=="unser" && ndata != pedestal_evtcut[run_num].size()) 
+  if (ana=="unser" && ndata != pedestal_evtcut[run_num].size())
   {
     Printf("Error, incommensurate pedestal vs. beam on Unser scan data");
     return;
@@ -1200,7 +1200,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
   user_cuts[5474] = "cleandata && !(CodaEventNumber<85e3&&CodaEventNumber>78e3)";
   user_cuts[5566] = "";
   user_cuts[5576] = "";
-	if (ana == "all") {
+        if (ana == "all") {
     user_cuts[5576] = "((CodaEventNumber>4e3&&CodaEventNumber<8e3)||(CodaEventNumber>11e3&&CodaEventNumber<14.57e3)||(CodaEventNumber>40.8e3&&CodaEventNumber<41.9e3)||(CodaEventNumber>43.2e3&&CodaEventNumber<46e3)||(CodaEventNumber>85.1e3&&CodaEventNumber<85.4e3)||(CodaEventNumber>113.4e3&&CodaEventNumber<115.5e3)||(CodaEventNumber>136.7e3&&CodaEventNumber<137.2e3)||(CodaEventNumber>152.2e3&&CodaEventNumber<152.7e3)||(CodaEventNumber>169e3&&CodaEventNumber<169.7e3)||(CodaEventNumber>192.4e3&&CodaEventNumber<193e3)||(CodaEventNumber>201e3&&CodaEventNumber<203.6e3)||(CodaEventNumber>272e3&&CodaEventNumber<275e3))&&!(CodaEventNumber>60e3&&CodaEventNumber<120e3)&&bpm4eY>1&&bpm12X<-0.7&&CodaEventNumber>10e3&&!(CodaEventNumber>30e3&&CodaEventNumber<60e3)";
   }
   //user_cuts[5653] = "cleandata && !(CodaEventNumber>24600 && CodaEventNumber<25500)",
@@ -1221,7 +1221,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
   user_cuts[7122] = "cleandata && bpm12X>-1.9";
   user_cuts[7279] = "";
   user_cuts[7282] = "cleandata && bpm4aX<-0.35";
-	user_cuts[7406] = "cleandata && bpm4eY>0.28";
+        user_cuts[7406] = "cleandata && bpm4eY>0.28";
   user_cuts[7407] = "";
   // Allow actual user cut from command line to override
   if (user_cut != "") {
@@ -1275,7 +1275,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
   uplimit[6176] = 175.0;
   uplimit[6196] = 175.0;
   uplimit[6233] = 200.0;
-	uplimit[6242] = 200.0;
+        uplimit[6242] = 200.0;
   uplimit[6442] = 200.0;
   uplimit[6560] = 200.0;
   uplimit[6563] = 200.0;
@@ -1361,7 +1361,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     return;
   }
 
-  std::map <Int_t,TString> user_bcms; 
+  std::map <Int_t,TString> user_bcms;
   user_bcms[2965] ="bcm_an_us";
   user_bcms[3098] ="bcm_an_us";
   user_bcms[3105] ="bcm_an_us";
@@ -1392,7 +1392,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
   user_bcms[6560] ="bcm_an_us";
   user_bcms[6563] ="bcm_an_us";
   //user_bcms[6731] ="bcm_an_us"; // Transverse running Ca40 2x2
-  //user_bcms[6732] ="bcm_an_us"; // Transverse running Pb 4x4 
+  //user_bcms[6732] ="bcm_an_us"; // Transverse running Pb 4x4
   user_bcms[6739] ="bcm_an_us";
   //user_bcms[6758] ="bcm_an_us"; // Transverse running Carbon 2x2
   user_bcms[7122] ="bcm_an_us";
@@ -1462,7 +1462,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
   user_norms[5653] = 0.008924;
   user_norms[5778] = 0.008924;
   //user_norms[6196] = 0.009289; // "Original" macro was wrong
-  user_norms[6196] = 0.0089691; // Most recent gain was 0.0089691 from run 6176 
+  user_norms[6196] = 0.0089691; // Most recent gain was 0.0089691 from run 6176
   //user_norms[6196] = 0.0091642; // ?
   user_norms[6560] = 0.008921;
   user_norms[6563] = 0.008921;
@@ -1508,10 +1508,10 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
     label = label + user_bcms.at(run_num);
   }
 
-  double bcm_mean[ndata]; 
+  double bcm_mean[ndata];
   double bcm_error[ndata];
-  double unser_mean[ndata]; 
-  double unser_ped[ndata]; 
+  double unser_mean[ndata];
+  double unser_ped[ndata];
   double unser_error[ndata];
   double unserped_error[ndata];
   double bcm_res[ndata]; // residual
@@ -1528,7 +1528,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
 
 
   TGraphErrors *g_unser;
-  //TMultiGraph *g_unser_t = new TMultiGraph();  
+  //TMultiGraph *g_unser_t = new TMultiGraph();
   TGraph *g_unser_t1;
   TGraph *g_unser_t2;
   TGraph *g_relative;
@@ -1579,7 +1579,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
       if (h_stat!=0) {
         unser_ped[i]=h_stat->GetMean();
         unser_mean[i]  = unser_mean[i] - unser_ped[i]; // pedestal subtraction
-        if (version == "new") 
+        if (version == "new")
         {
           unserped_error[i] = h_stat->GetRMS();///TMath::Sqrt(h_stat->GetEntries());
           unser_error[i]= sqrt(pow(unser_error[i],2)+pow(unserped_error[i],2));
@@ -1670,7 +1670,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
       }
     }
     full_beamon_cut = full_beamon_cut + ")";
-    if (user_cuts[run_num] != "") { 
+    if (user_cuts[run_num] != "") {
      full_beamon_cut = full_beamon_cut + " && " + (TString)user_cuts[run_num];
     }
     // QA Plots for ALL scans
@@ -1749,12 +1749,12 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
       if (((run_num < 3583 && branch_name.Contains("dsl")) || (run_num<3733 && branch_name.Contains("dsr"))) && lowlimit[run_num]<35)
       {
         // DS main detectors get a limited high current range to fit, due to non-linear thicker quartz
-        g_fit->Fit("f_fit","QR","",35,uplimit[run_num]); 
+        g_fit->Fit("f_fit","QR","",35,uplimit[run_num]);
       }
-      if (run_num == 4872 && (branch_name.Contains("usl") || branch_name.Contains("usr") || branch_name.Contains("dsl") || branch_name.Contains("dsr") || branch_name.Contains("atl") || branch_name.Contains("atr")) && lowlimit[run_num]<55)  
+      if (run_num == 4872 && (branch_name.Contains("usl") || branch_name.Contains("usr") || branch_name.Contains("dsl") || branch_name.Contains("dsr") || branch_name.Contains("atl") || branch_name.Contains("atr")) && lowlimit[run_num]<55)
       {
         // Run 4872 has a 55 lower limit
-        g_fit->Fit("f_fit","QR","",55,uplimit[run_num]); 
+        g_fit->Fit("f_fit","QR","",55,uplimit[run_num]);
       }
       else
       {
@@ -1771,13 +1771,13 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
       gain[ibcm]=76.293e-6;
     }*/
 
-    p0err[ibcm]=f_fit->GetParError(0);      
-    p1err[ibcm]=f_fit->GetParError(1);      
+    p0err[ibcm]=f_fit->GetParError(0);
+    p1err[ibcm]=f_fit->GetParError(1);
     for(int i=0;i<ndata;i++){
       if (ana == "all") {
         bcm_res[i] = (bcm_mean[i]-ped[ibcm]) - unser_mean[i]*slope[ibcm];
         bcm_res_error[i] = sqrt(pow(bcm_error[i],2)+pow(unser_error[i]*slope[ibcm],2)+pow(p0err[ibcm],2)+pow(p1err[ibcm]*unser_mean[i],2)+pow(p0err[ibcm],2));
-        //	bcm_res_error[i] = sqrt(pow(bcm_error[i] *gain[ibcm],2)+pow(p0err[ibcm]*gain[ibcm],2)+pow(p1err[ibcm]*(bcm_mean[i]-ped[ibcm])*pow(gain[ibcm],2),2)+pow(p0err[ibcm]*gain[ibcm],2));
+        //      bcm_res_error[i] = sqrt(pow(bcm_error[i] *gain[ibcm],2)+pow(p0err[ibcm]*gain[ibcm],2)+pow(p1err[ibcm]*(bcm_mean[i]-ped[ibcm])*pow(gain[ibcm],2),2)+pow(p0err[ibcm]*gain[ibcm],2));
 
         // bcm_res[i] = (bcm_mean[i]-ped[ibcm]) - unser_mean[i]*slope[ibcm];
         // bcm_res_error[i] = sqrt(pow(bcm_error[i],2)+pow(unser_error[i]*slope[ibcm],2));
@@ -1787,7 +1787,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
         bcm_res[i] = (bcm_mean[i]-ped[ibcm])*gain[ibcm] - unser_mean[i];
         if (version == "new") {
           bcm_res_error[i] = sqrt(pow(bcm_error[i] *gain[ibcm],2)+pow(unser_error[i],2)+pow(p0err[ibcm]*gain[ibcm],2)+pow(p1err[ibcm]*(bcm_mean[i]-ped[ibcm])*pow(gain[ibcm],2),2)+pow(p0err[ibcm]*gain[ibcm],2));
-          //	bcm_res_error[i] = sqrt(pow(bcm_error[i] *gain[ibcm],2)+pow(p0err[ibcm]*gain[ibcm],2)+pow(p1err[ibcm]*(bcm_mean[i]-ped[ibcm])*pow(gain[ibcm],2),2)+pow(p0err[ibcm]*gain[ibcm],2));
+          //    bcm_res_error[i] = sqrt(pow(bcm_error[i] *gain[ibcm],2)+pow(p0err[ibcm]*gain[ibcm],2)+pow(p1err[ibcm]*(bcm_mean[i]-ped[ibcm])*pow(gain[ibcm],2),2)+pow(p0err[ibcm]*gain[ibcm],2));
           // bcm_res[i] = (bcm_mean[i]-ped[ibcm]) - unser_mean[i]*slope[ibcm];
           // bcm_res_error[i] = sqrt(pow(bcm_error[i],2)+pow(unser_error[i]*slope[ibcm],2));
         }
@@ -1842,7 +1842,7 @@ void GetBCMPedestals_Cameron_anyrun_all_witherr(
   for(int ibcm=0;ibcm<nbcm;ibcm++){
     if(ana == "all" && (device_name[ibcm]=="usl"||device_name[ibcm]=="usr"||device_name[ibcm]=="atl1"||device_name[ibcm]=="atl2"||device_name[ibcm]=="atr1"||device_name[ibcm]=="atr2"||device_name[ibcm]=="sam1"||device_name[ibcm]=="sam2"||device_name[ibcm]=="sam3"||device_name[ibcm]=="sam4"||device_name[ibcm]=="sam5"||device_name[ibcm]=="sam6"||device_name[ibcm]=="sam7"||device_name[ibcm]=="sam8")){
       gain[ibcm]=76.293e-6;
-    }    
+    }
 
     if (device_blacknumbers[run_num].at(ibcm) > 1) { continue; }
     if (device_blacknumbers[run_num].at(ibcm) == 0)
@@ -1932,14 +1932,14 @@ void LoadStyle(){
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.15);
   gStyle->SetStatW(0.2);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(1111);
   gStyle->SetStatX(0.55);
   gStyle->SetStatY(0.92);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -1949,5 +1949,5 @@ void LoadStyle(){
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.05,"hxyz");
   gStyle->SetTitleOffset(1.5,"y");
-  gROOT->ForceStyle();  
+  gROOT->ForceStyle();
 }

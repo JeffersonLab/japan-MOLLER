@@ -53,7 +53,7 @@ namespace Podd {
   //___________________________________________________________________________
   template< typename VectorElem > inline void
   NthCombination( UInt_t n, const std::vector<std::vector<VectorElem> >& vec,
-		  std::vector<VectorElem>& selected )
+                  std::vector<VectorElem>& selected )
   {
     // Get the n-th combination of the elements in "vec" and
     // put result in "selected". selected[k] is one of the
@@ -74,10 +74,10 @@ namespace Podd {
       assert(npt);
       UInt_t k;
       if( npt == 1 )
-	k = 0;
+        k = 0;
       else {
-	k = n % npt;
-	n /= npt;
+        k = n % npt;
+        n /= npt;
       }
       // Copy the selected element
       (*is) = (*iv)[k];
@@ -109,9 +109,9 @@ namespace Podd {
     UniqueCombo& operator++()
     {
       if( fCurrent.empty() )
-	fGood = false;
+        fGood = false;
       else
-	fGood = recursive_plus( fCurrent.size()-1 );
+        fGood = recursive_plus( fCurrent.size()-1 );
       return *this;
     }
     const UniqueCombo operator++(int)
@@ -131,14 +131,14 @@ namespace Podd {
   private:
     bool recursive_plus( vint_t::size_type pos ) { // NOLINT(misc-no-recursion)
       if( fCurrent[pos] < fN+int(pos-fCurrent.size()) ) {
-	++fCurrent[pos];
-	return true;
+        ++fCurrent[pos];
+        return true;
       }
       if( pos == 0 )
-	return false;
+        return false;
       if( recursive_plus(pos-1) ) {
-	fCurrent[pos] = fCurrent[pos-1]+1;
-	return true;
+        fCurrent[pos] = fCurrent[pos-1]+1;
+        return true;
       }
       return false;
     }
@@ -169,7 +169,7 @@ namespace Podd {
   {
     // Delete all elements of given container of containers of pointers
     std::for_each( ALL(cc),
-	      DeleteContainer<typename ContainerOfContainers::value_type> );
+              DeleteContainer<typename ContainerOfContainers::value_type> );
     cc.clear();
   }
 

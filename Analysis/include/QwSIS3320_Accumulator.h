@@ -1,11 +1,11 @@
 /**
- * \class	QwSIS3320_Accumulator	QwSIS3320_Accumulator.h
+ * \class       QwSIS3320_Accumulator   QwSIS3320_Accumulator.h
  *
- * \brief	SIS3320 sampling ADC accumulator
+ * \brief       SIS3320 sampling ADC accumulator
  *
- * \author	W. Deconinck
- * \date	2009-09-04 18:06:23
- * \ingroup	QwCompton
+ * \author      W. Deconinck
+ * \date        2009-09-04 18:06:23
+ * \ingroup     QwCompton
  *
  * The QwSIS3320_Accumulator should allow convenient access to the accumulator
  * data collected with the SIS3320 for the Compton photon detector.  This class
@@ -90,9 +90,9 @@ class QwSIS3320_Accumulator: public VQwDataElement {
 
   protected:
 
-    Double_t fNumberOfSamples;	///< Number of accumulated samples
-    Double_t fAccumulatorSum;	///< Accumulator sum
-    Double_t fAccumulatorAvg;	///< Accumulator average
+    Double_t fNumberOfSamples;  ///< Number of accumulated samples
+    Double_t fAccumulatorSum;   ///< Accumulator sum
+    Double_t fAccumulatorAvg;   ///< Accumulator average
 
   private:
 

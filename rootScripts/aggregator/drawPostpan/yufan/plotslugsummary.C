@@ -3,7 +3,7 @@
 //Before running the script, you need to change the variables.txt file
   //The first line contains the number of variables you put
   //You need to put
-  //variable_name	unit	slug_cut(cut out bad slug)
+  //variable_name       unit    slug_cut(cut out bad slug)
   //below is the unit chart for units
     //Yield bpm(mm), bcm(uA), sam/det(mV_uA)
     //Diff bpm(nm)
@@ -102,9 +102,9 @@ void plotslugsummary(){
     }
   }
   //putting mean and err to x,y,ex,ey array, to plot 4 separated TGraphErrors(IHWP IN/OUT WIEN L/R)
-  Double_t x_lin[sl];  Double_t ex_lin[sl];  Double_t y_lin[sl];   Double_t ey_lin[sl]; 
+  Double_t x_lin[sl];  Double_t ex_lin[sl];  Double_t y_lin[sl];   Double_t ey_lin[sl];
   Double_t x_lout[sl];  Double_t ex_lout[sl];  Double_t y_lout[sl];   Double_t ey_lout[sl];
-  Double_t x_rin[sl];  Double_t ex_rin[sl];  Double_t y_rin[sl];   Double_t ey_rin[sl]; 
+  Double_t x_rin[sl];  Double_t ex_rin[sl];  Double_t y_rin[sl];   Double_t ey_rin[sl];
   Double_t x_rout[sl];  Double_t ex_rout[sl]; Double_t y_rout[sl];   Double_t ey_rout[sl];
   TGraphErrors *slin;   TGraphErrors *slout;   TGraphErrors *srin;   TGraphErrors *srout;
   TCanvas *c1;
@@ -131,7 +131,7 @@ void plotslugsummary(){
           x_rin[o]=slug[i][j];
           ex_rin[o]=0;
           y_rin[o]=mean[i][j];
-          ey_rin[o]=err[i][j];  
+          ey_rin[o]=err[i][j];
           o+=1;
         }else{
           x_rout[p]=slug[i][j];
@@ -152,8 +152,8 @@ void plotslugsummary(){
       slin->Fit("pol0");
       TF1 *fitslin=slin->GetFunction("pol0");
       fitslin->SetLineColor(6);
-      ave_lin = fitslin->GetParameter(0);  
-      error_lin = fitslin->GetParError(0); 
+      ave_lin = fitslin->GetParameter(0);
+      error_lin = fitslin->GetParError(0);
       ndf_lin = fitslin->GetNDF();
       ksq_lin = fitslin->GetChisquare();
       p_lin = fitslin->GetProb();
@@ -165,7 +165,7 @@ void plotslugsummary(){
       slout->Fit("pol0");
       TF1 *fitslout=slout->GetFunction("pol0");
       fitslout->SetLineColor(4);
-      ave_lout = fitslout->GetParameter(0);  
+      ave_lout = fitslout->GetParameter(0);
       error_lout = fitslout->GetParError(0);
       ndf_lout = fitslout->GetNDF();
       ksq_lout = fitslout->GetChisquare();
@@ -178,8 +178,8 @@ void plotslugsummary(){
       srin->Fit("pol0");
       TF1 *fitsrin=srin->GetFunction("pol0");
       fitsrin->SetLineColor(6);
-      ave_rin = fitsrin->GetParameter(0);  
-      error_rin = fitsrin->GetParError(0); 
+      ave_rin = fitsrin->GetParameter(0);
+      error_rin = fitsrin->GetParError(0);
       ndf_rin = fitsrin->GetNDF();
       ksq_rin = fitsrin->GetChisquare();
       p_rin = fitsrin->GetProb();
@@ -191,7 +191,7 @@ void plotslugsummary(){
       srout->Fit("pol0");
       TF1 *fitsrout=srout->GetFunction("pol0");
       fitsrout->SetLineColor(4);
-      ave_rout = fitsrout->GetParameter(0);  
+      ave_rout = fitsrout->GetParameter(0);
       error_rout = fitsrout->GetParError(0);
       ndf_rout = fitsrout->GetNDF();
       ksq_rout = fitsrout->GetChisquare();

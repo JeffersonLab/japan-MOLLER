@@ -83,17 +83,17 @@ public:
     switch (statusSCN)
       {
       case SCN_INT_CLN:
-	{
-	  std::cout << "Scan Status is CLEAN" << std::endl;
-	  break;
-	}
+        {
+          std::cout << "Scan Status is CLEAN" << std::endl;
+          break;
+        }
       case SCN_INT_NOT:
-	{
-	  std::cout << "Scan Status is NOT_CLEAN" << std::endl;
-	  break;
-	}
+        {
+          std::cout << "Scan Status is NOT_CLEAN" << std::endl;
+          break;
+        }
       default:
-	std::cout << "ERROR: Unrecognized SCAN status flag" << std::endl;
+        std::cout << "ERROR: Unrecognized SCAN status flag" << std::endl;
       }
     std::cout << "Scan data 1: " << setpoint1SCN << std::endl;
     std::cout << "Scan data 2: " << setpoint2SCN << std::endl;
@@ -116,5 +116,5 @@ private:
   void SCNUpdateStatus(Int_t);
   Bool_t SCNCheckStatus();
   void SCNCheckValues();
-  
+
 };

@@ -1,5 +1,5 @@
-Smart HADD is a ROOT "hadd" replacement script. 
-  Notably, it will take the final entry passed in the listOfFiles text list and will use its device list to define the allowed devices for all prior entries. 
+Smart HADD is a ROOT "hadd" replacement script.
+  Notably, it will take the final entry passed in the listOfFiles text list and will use its device list to define the allowed devices for all prior entries.
   It will sort by index1 and index2 using a ROOT sorting method.
   It will fill with empties (Double_t 0.0) without erroring on all branches that don't exist in prior entrys but which do exist in the final entry (the one that defines the available branch list).
 

@@ -96,16 +96,16 @@ class VQwSubsystemParity: virtual public VQwSubsystem {
       QwParameterFile mapstr(filename.Data());
       fDetectorMaps.insert(mapstr.GetParamFileNameContents());
       this->LoadEventCuts_Init();
-  
+
       while (mapstr.ReadNextLine()){
         mapstr.TrimComment('!');   // Remove everything after a '!' character.
         mapstr.TrimWhitespace();   // Get rid of leading and trailing spaces.
-        if (mapstr.LineIsEmpty())  
+        if (mapstr.LineIsEmpty())
           continue;
         TString varname, varvalue;
         if (mapstr.HasVariablePair("=",varname,varvalue)){
           if (varname == "EVENTCUTS"){
-	          eventcut_flag = QwParameterFile::GetUInt(varvalue);
+                  eventcut_flag = QwParameterFile::GetUInt(varvalue);
           }
         } else {
           this->LoadEventCuts_Line(mapstr, varvalue, eventcut_flag);
@@ -132,7 +132,7 @@ class VQwSubsystemParity: virtual public VQwSubsystem {
     /// \brief Return the error flag to the top level routines related to stability checks and ErrorFlag updates
     virtual UInt_t GetEventcutErrorFlag() = 0;
     /// \brief Uses the error flags of contained data elements to update
-    ///        Returns the error flag to the top level routines related 
+    ///        Returns the error flag to the top level routines related
     ///        to stability checks and ErrorFlag updates
     virtual UInt_t UpdateErrorFlag(){return GetEventcutErrorFlag();};
 
@@ -154,7 +154,7 @@ class VQwSubsystemParity: virtual public VQwSubsystem {
     virtual Bool_t CheckForEndOfBurst() const {return kFALSE;};
 
     virtual void LoadMockDataParameters(TString /*mapfile*/) {};
-	
+
 }; // class VQwSubsystemParity
 
 #endif // __VQWSUBSYSTEMPARITY__

@@ -1,12 +1,12 @@
-// Injector BPMs Plot Macro 
+// Injector BPMs Plot Macro
 // Source from Caryn Palatchi
-// Adapted by Tao Ye for JAPAN 
+// Adapted by Tao Ye for JAPAN
 // Last Update : 05-2019
 
 #include "device_list_Caryn.h"
 
-void PlotInjBPMSDr(vector<const char*> &vBPM, 
-		   Int_t IHWPstatus, TString ucut); // generic
+void PlotInjBPMSDr(vector<const char*> &vBPM,
+                   Int_t IHWPstatus, TString ucut); // generic
 void PlotInjBPMSDr(Int_t IHWPstatus, TString ucut); // interface to panguin
 void PlotInjBPMSDr(); // interface to summary plots
 
@@ -17,7 +17,7 @@ void PlotInjBPMSDr(Int_t docaryn=1, Int_t run_number=0, Int_t IHWPstatus=0, TStr
   TString outputDir = "/adaqfs/home/apar/PREX/japan/plots/PosDiffoutputs";
   TCanvas *c1 = new TCanvas("c1","c1",2400,4800);
   c1->cd();
-  PlotInjBPMSDr(vInjBPM,IHWPstatus,ucut);  
+  PlotInjBPMSDr(vInjBPM,IHWPstatus,ucut);
   plot_title = Form("%s/run%d_injector_BPM_dr.png",outputDir.Data(),run_number);
   c1->SaveAs(output_path+plot_title);
 }
@@ -25,8 +25,8 @@ void PlotInjBPMSDr(Int_t docaryn=1, Int_t run_number=0, Int_t IHWPstatus=0, TStr
 void PlotInjBPMSDr(Int_t IHWPstatus, TString ucut){
   PlotInjBPMSDr(vInjBPM,IHWPstatus,ucut);
 }
-void PlotInjBPMSDr(vector<const char*> &vBPM, 
-		   Int_t IHWPstatus, TString ucut){
+void PlotInjBPMSDr(vector<const char*> &vBPM,
+                   Int_t IHWPstatus, TString ucut){
 
   //open first run file
   TTree* evt_tree = (TTree*)gROOT->FindObject("evt");
@@ -82,7 +82,7 @@ void PlotInjBPMSDr(vector<const char*> &vBPM,
       // cout<<vBPM[dd]<<" Aq[ppm](RMS)+-error,Dx[nm](RMS)+-err,Dy[nm](RMS)+-err,Aelli(RMS*10^3)+-error,Dr[nm]+-err,theta[deg]: "<<Aq[dd]<<" "<<rmsAq[dd]<<" "<<eAq[dd]<<" "<<1e3*Dx[dd]<<" "<<1e3*rmsDx[dd]<<" "<<1e3*eDx[dd]<<" "<<1e3*Dy[dd]<<" "<<1e3*rmsDy[dd]<<" "<<1e3*eDy[dd]<<" "<<Aelli[dd]<<" "<<rmsAelli[dd]<<" "<<eAelli[dd]<<" "<<1e3*Dr[dd]<<" "<<1e3*eDr[dd]<<" "<<theta[dd]<<endl;
     }
 
- 
+
   const Int_t numchains=ndeti;
   Double_t chain[numchains];
   Double_t chainerr[numchains];
@@ -106,7 +106,7 @@ void PlotInjBPMSDr(vector<const char*> &vBPM,
   // Double_t x2 = ax->GetBinUpEdge(ax->GetNbins());
   Double_t x1 = chain[0]-0.5;
   Double_t x2 = chain[numchains-1]+0.5;
- 
+
   pad1->cd(1);
 
   Drgraph->GetHistogram()->GetXaxis()->Set(numchains,x1,x2);
@@ -180,4 +180,3 @@ void PlotInjBPMSDr(vector<const char*> &vBPM,
   // Aellirmsgraph->GetXaxis()->SetLabelSize(0.045);
 
 }
-

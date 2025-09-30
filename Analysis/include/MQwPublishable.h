@@ -66,7 +66,7 @@ class MQwPublishable {
 
     /// \brief Retrieve the variable name from other subsystem arrays
     const VQwHardwareChannel* RequestExternalPointer(const TString& name) const;
-    
+
     /// \brief Retrieve the variable name from subsystems in this subsystem array
     virtual const VQwHardwareChannel* ReturnInternalValue(const TString& name) const;
 
@@ -91,7 +91,7 @@ class MQwPublishable {
     std::map<TString, const VQwHardwareChannel*> fPublishedValuesDataElement;
     std::map<TString, const T*>                  fPublishedValuesSubsystem;
     std::map<TString, TString>                   fPublishedValuesDescription;
- 
+
 };
 
 #endif

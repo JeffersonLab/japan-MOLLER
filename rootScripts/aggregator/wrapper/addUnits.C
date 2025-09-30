@@ -1,5 +1,5 @@
 struct units_t
-{ 
+{
   double ppm;
   double ppb;
   double mm;
@@ -18,7 +18,7 @@ void addUnits(TString fnm, TString tree = "agg") {
   unit.um=1e-3;
   unit.nm=1e-6;
   unit.V_uA=1;
-  unit.mV_uA=1e-3;  
+  unit.mV_uA=1e-3;
 /*
     static const TString kUnitsName;
     static Double_t kUnitsValue[];
@@ -38,11 +38,11 @@ void addUnits(TString fnm, TString tree = "agg") {
   // Get the post pan file, open it, find minirun, find its final entry, get that value, return
   //Open(runNumber); // FIXME For JAPAN version of code
   TFile *fin = TFile::Open(fnm.Data(),"UPDATE");
-  TTree *T=(TTree*)fin->Get(tree);  
-    
+  TTree *T=(TTree*)fin->Get(tree);
+
   TBranch *branch= T->Branch("units", &unit, "ppm/D:ppb/D:mm/D:nm/D:um/D:V_uA/D:mV_uA/D");
   for (auto i=0;i <T->GetEntries();i++){
-  	T->GetEntry(i);
+        T->GetEntry(i);
         branch->Fill();
   }
 

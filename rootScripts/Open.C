@@ -35,7 +35,7 @@ TFile* Open(int runnum, TString filestem = "", Int_t segment=0) {
 
   if(filestem != "") {
     filename = Form("%s/%s%d.%03d.root",FILE_PATH,
-		    filestem.Data(),runnum,segment);
+                    filestem.Data(),runnum,segment);
     myfile = new TFile(filename);
     if (!(myfile->IsOpen())) {
       std::cout << "File, "<< filename <<", not found" << std::endl;
@@ -43,12 +43,12 @@ TFile* Open(int runnum, TString filestem = "", Int_t segment=0) {
     }
   } else {
     TString stemlist[4] = {"prexPrompt_pass2_",
-			   "prexPrompt_pass1_", 
-			   "prexALL_",
-			   "prexinj_"};
+                           "prexPrompt_pass1_",
+                           "prexALL_",
+                           "prexinj_"};
     for  (int i=0; i<4; i++){
       filename = Form("%s/%s%d.%03d.root",FILE_PATH,
-		      stemlist[i].Data(),runnum,segment);
+                      stemlist[i].Data(),runnum,segment);
       myfile = new TFile(filename);
       if (myfile->IsOpen()) {break;}
     }
@@ -56,8 +56,8 @@ TFile* Open(int runnum, TString filestem = "", Int_t segment=0) {
   if (myfile->IsOpen()) {
     std::cout << "Opened file "<< filename << std::endl;
   } else {
-    std::cout << "No file found for run " << runnum << " in path " 
-	      << FILE_PATH << std::endl;
+    std::cout << "No file found for run " << runnum << " in path "
+              << FILE_PATH << std::endl;
     return NULL;
   }
 
@@ -67,6 +67,6 @@ TFile* Open(int runnum, TString filestem = "", Int_t segment=0) {
 
   mymul->AddFriend(mymulc);
   mymul->AddFriend(mymulc_lrb);
-  
+
   return myfile;
 }

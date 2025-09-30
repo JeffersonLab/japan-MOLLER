@@ -12,4 +12,3 @@ sample_size=15000
 !!VQWK, 0, 5,  IntegrationPMT,  S1_R2_Open
 !!VQWK, 0, 6,  IntegrationPMT,  S1_R2_Tr2
 !!VQWK, 0, 7,  IntegrationPMT,  S1_R2_Closed
-

@@ -9,5 +9,3 @@
 
 // Register this subsystem with the factory
 RegisterSubsystemFactory(QwDetectorArray);
-
-

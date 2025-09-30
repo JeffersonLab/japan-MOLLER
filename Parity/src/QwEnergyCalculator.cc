@@ -53,7 +53,7 @@ void QwEnergyCalculator::Set(const VQwBPM* device, TString type, TString propert
 
   if(ldebug)
     std::cout<<"QwEnergyCalculator:: Using "<<device->GetElementName()<<" with ratio "<< tmatrix_ratio <<" for "<<property<<std::endl;
- 
+
   return;
 }
 
@@ -61,7 +61,7 @@ void QwEnergyCalculator::SetRootSaveStatus(TString &prefix)
 {
   if(prefix.Contains("diff_")||prefix.Contains("yield_")|| prefix.Contains("asym_"))
     bFullSave=kFALSE;
-  
+
   return;
 }
 
@@ -145,7 +145,7 @@ void QwEnergyCalculator::GetProjectedPosition(VQwBPM *device)
   static QwMollerADC_Channel tmp;
   tmp.InitializeChannel("tmp","derived");
   tmp.ClearEventData();
-  //  Set the device position value to be equal to the energy change 
+  //  Set the device position value to be equal to the energy change
   (device->GetPosition(VQwBPM::kXAxis))->AssignValueFrom(&fEnergyChange);
   /** qwk_1c12X changes only **/
 
@@ -205,15 +205,15 @@ void QwEnergyCalculator::LoadMockDataParameters(QwParameterFile &paramfile){
 /*  Bool_t   ldebug=kFALSE;
   Double_t mean=0.0, sigma=0.0;
 
-  mean  = paramfile.GetTypedNextToken<Double_t>(); 
-  sigma = paramfile.GetTypedNextToken<Double_t>();      
+  mean  = paramfile.GetTypedNextToken<Double_t>();
+  sigma = paramfile.GetTypedNextToken<Double_t>();
 
    if (ldebug==1) {
      std::cout << "#################### \n";
      std::cout << "! mean, sigma \n" << std::endl;
      std::cout << mean                             << " / "
-	       << sigma                            << " / "
-	       << std::endl;
+               << sigma                            << " / "
+               << std::endl;
    }
   this->SetRandomEventParameters(mean, sigma);
 */
@@ -254,7 +254,7 @@ void QwEnergyCalculator::PrintErrorCounters() const{
 }
 /*
 void QwEnergyCalculator::PrintRandomEventParameters(){
-  
+
 }
 */
 UInt_t QwEnergyCalculator::UpdateErrorFlag()
@@ -378,7 +378,7 @@ Bool_t QwEnergyCalculator::CheckForBurpFail(const VQwDataElement *ev_error){
       //std::cout<<" Here in QwEnergyCalculator::CheckForBurpFail \n";
       if (this->GetElementName()!="") {
         const QwEnergyCalculator* value_halo = dynamic_cast<const QwEnergyCalculator* >(ev_error);
-        burpstatus |= fEnergyChange.CheckForBurpFail(&(value_halo->fEnergyChange)); 
+        burpstatus |= fEnergyChange.CheckForBurpFail(&(value_halo->fEnergyChange));
       }
     } else {
       TString loc="Standard exception from QwEnergyCalculator::CheckForBurpFail :"+
@@ -412,12 +412,12 @@ void  QwEnergyCalculator::FillHistograms(){
   }
   else
     fEnergyChange.FillHistograms();
-  
+
   return;
 }
 
 void  QwEnergyCalculator::ConstructBranchAndVector(TTree *tree, TString &prefix,
-						   std::vector<Double_t> &values){
+                                                   std::vector<Double_t> &values){
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
   }
@@ -425,9 +425,9 @@ void  QwEnergyCalculator::ConstructBranchAndVector(TTree *tree, TString &prefix,
     TString thisprefix=prefix;
     if(prefix.Contains("asym_"))
       thisprefix.ReplaceAll("asym_","diff_");
-    
+
     SetRootSaveStatus(thisprefix);
-    
+
     fEnergyChange.ConstructBranchAndVector(tree,thisprefix,values);
   }
     return;
@@ -462,8 +462,8 @@ void  QwEnergyCalculator::ConstructBranch(TTree *tree, TString &prefix, QwParame
     if (modulelist.HasValue(devicename)){
       TString thisprefix=prefix;
       if(prefix.Contains("asym_"))
-	thisprefix.ReplaceAll("asym_","diff_");
-      SetRootSaveStatus(thisprefix);   
+        thisprefix.ReplaceAll("asym_","diff_");
+      SetRootSaveStatus(thisprefix);
       fEnergyChange.ConstructBranch(tree,thisprefix);
       QwMessage <<" Tree leave added to "<<devicename<<QwLog::endl;
       }
@@ -490,7 +490,7 @@ void  QwEnergyCalculator::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTuple
     TString thisprefix=prefix;
     if(prefix.Contains("asym_"))
       thisprefix.ReplaceAll("asym_","diff_");
-    
+
     fEnergyChange.ConstructNTupleAndVector(model, thisprefix, values, fieldPtrs);
   }
   return;

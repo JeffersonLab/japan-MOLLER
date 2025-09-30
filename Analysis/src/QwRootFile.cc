@@ -61,8 +61,8 @@ QwRootFile::QwRootFile(const TString& run_label)
       + Form("/%s%s.root", fRootFileStem.Data(), run_label.Data());
     if (fUseTemporaryFile){
       rootfilename += Form("/%s%s.%s.%d.root",
-			   fRootFileStem.Data(), run_label.Data(),
-			   hostname.Data(), pid);
+                           fRootFileStem.Data(), run_label.Data(),
+                           hostname.Data(), pid);
     } else {
       rootfilename = fPermanentName;
     }
@@ -73,7 +73,7 @@ QwRootFile::QwRootFile(const TString& run_label)
       return;
     } else {
       QwMessage << "Opened "<< (fUseTemporaryFile?"temporary ":"")
-		<<"rootfile " << rootfilename << QwLog::endl;
+                <<"rootfile " << rootfilename << QwLog::endl;
     }
 
     TString run_condition_name = Form("condition_%s", run_label.Data());
@@ -125,19 +125,19 @@ QwRootFile::~QwRootFile()
     const char* action;
     if (fUseTemporaryFile){
       if (fMakePermanent) {
-	action = " rename ";
-	err = rename( rootfilename.Data(), fPermanentName.Data() );
+        action = " rename ";
+        err = rename( rootfilename.Data(), fPermanentName.Data() );
       } else {
-	action = " remove ";
-	err = remove( rootfilename.Data() );
+        action = " remove ";
+        err = remove( rootfilename.Data() );
       }
       // It'd be proper to "extern int errno" and strerror() here,
       // but that doesn't seem very C++-ish.
       if (err) {
-	QwWarning << "Couldn't" << action << rootfilename << QwLog::endl;
+        QwWarning << "Couldn't" << action << rootfilename << QwLog::endl;
       } else {
-	QwMessage << "Was able to" << action << rootfilename << QwLog::endl;
-	QwMessage << "Root file is " << fPermanentName << QwLog::endl;
+        QwMessage << "Was able to" << action << rootfilename << QwLog::endl;
+        QwMessage << "Root file is " << fPermanentName << QwLog::endl;
       }
     }
   }
@@ -331,7 +331,7 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
 
     return false;
   }
-  
+
   // First check if any in-memory trees have been filled
   for (auto& pair : fTreeByName) {
     for (auto& tree : pair.second) {
@@ -344,7 +344,7 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
       }
     }
   }
-  
+
 #ifdef HAS_RNTUPLE_SUPPORT
   // Then check if any RNTuples have been filled
   for (auto& pair : fNTupleByName) {

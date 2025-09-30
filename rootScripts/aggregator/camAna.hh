@@ -10,7 +10,7 @@ Int_t writeNEvents_Loop_h(TString tree = "mul", TString branch = "asym_vqwk_04_0
   minirunNumber = getMinirunNumber_h(minirunNumber);
   nRuns     = getNruns_h(nRuns);
   TString channel = tree + "_" + branch + "_" + leaf;
-  // Make an instance of the relevant data source 
+  // Make an instance of the relevant data source
   TLeaf   *Leaf   = getLeaf_h(tree,branch,leaf,runNumber,minirunNumber,splitNumber,nRuns);
   if (!Leaf){
     Printf("Event counting terminated, branch not found");
@@ -62,7 +62,7 @@ Int_t writeNEvents_Loop_h(TString tree = "mul", TString branch = "asym_vqwk_04_0
   TString  number_stabilityRingStart = channel+"_number_stability_ring_start"; // Entry number that begins good cut passing stability ring of length stabilityRing
   TString  number_stabilityRingLength = channel+"_number_stability_ring_length"; // length of stabilityRing
 
-  for (int j = 0; j < numEntries; j++) 
+  for (int j = 0; j < numEntries; j++)
   { // Loop over the input file's entries
     Tree->GetEntry(j);
     if ( cutValue || (CutBranch->GetValue(0) == 0 && CutLeaf->GetValue(0) == 0) ){ // cutValue = 1 iff overwrote cuts with 1, branch==leaf if overwritecuts==1, branch and leaf defined by default cuts or with added on top of non-deviceerrorcode leaf
@@ -112,7 +112,7 @@ Int_t writeEventLoopN_Loop_h(TString tree = "mul", TString branch = "asym_vqwk_0
   minirunNumber = getMinirunNumber_h(minirunNumber);
   nRuns     = getNruns_h(nRuns);
   TString channel = tree + "_" + branch + "_" + leaf;
-  // Make an instance of the relevant data source 
+  // Make an instance of the relevant data source
   TLeaf   *Leaf   = getLeaf_h(tree,branch,leaf,runNumber,minirunNumber,splitNumber,nRuns);
   if (!Leaf){
     Printf("Event counting terminated, branch not found");
@@ -199,7 +199,7 @@ void writeLast_Loop_h(TString tree = "mul", TString branch = "asym_vqwk_04_0ch0"
   minirunNumber = getMinirunNumber_h(minirunNumber);
   nRuns     = getNruns_h(nRuns);
   TString channel = tree + "_" + branch + "_" + leaf;
-  // Make an instance of the relevant data source 
+  // Make an instance of the relevant data source
   TLeaf   *Leaf   = getLeaf_h(tree,branch,leaf,runNumber,minirunNumber,splitNumber,nRuns);
   if (!Leaf){
     return;
@@ -243,7 +243,7 @@ void writeMean_Loop_h(TString tree = "mul", TString branch = "asym_vqwk_04_0ch0"
   minirunNumber = getMinirunNumber_h(minirunNumber);
   nRuns     = getNruns_h(nRuns);
   TString channel = tree + "_" + branch + "_" + leaf;
-  // Make an instance of the relevant data source 
+  // Make an instance of the relevant data source
   TLeaf   *Leaf   = getLeaf_h(tree,branch,leaf,runNumber,minirunNumber,splitNumber,nRuns);
   if (!Leaf){
     return;
@@ -290,7 +290,7 @@ void writeMean_Loop_h(TString tree = "mul", TString branch = "asym_vqwk_04_0ch0"
   Double_t data_mean = 0.0;
   TString  analysis = "mean_"+channel;
 
-  for (int j = 0; j < numEntries; j++) 
+  for (int j = 0; j < numEntries; j++)
   { // Loop over the input file's entries
     Tree->GetEntry(j);
     if ( cutValue || (CutBranch->GetValue(0) == 0 && CutLeaf->GetValue(0) == 0) ){ // cutValue = 1 iff overwrote cuts with 1, branch==leaf if overwritecuts==1, branch and leaf defined by default cuts or with added on top of non-deviceerrorcode leaf
@@ -314,7 +314,7 @@ void writeInt_loop_h(TString tree = "mul", TString branch = "asym_vqwk_04_0ch0",
   minirunNumber = getMinirunNumber_h(minirunNumber);
   nRuns     = getNruns_h(nRuns);
   TString channel = tree + "_" + branch + "_" + leaf;
-  // Make an instance of the relevant data source 
+  // Make an instance of the relevant data source
   TLeaf   *Leaf   = getLeaf_h(tree,branch,leaf,runNumber,minirunNumber,splitNumber,nRuns);
   if (!Leaf){
     return;
@@ -360,7 +360,7 @@ void writeInt_loop_h(TString tree = "mul", TString branch = "asym_vqwk_04_0ch0",
   Int_t    n_data   = 0;
   TString  analysis = "integral_"+channel;
 
-  for (int j = 0; j < numEntries; j++) 
+  for (int j = 0; j < numEntries; j++)
   { // Loop over the input file's entries
     Tree->GetEntry(j);
     if ( cutValue || (CutBranch->GetValue(0) == 0 && CutLeaf->GetValue(0) == 0) ){ // cutValue = 1 iff overwrote cuts with 1, branch==leaf if overwritecuts==1, branch and leaf defined by default cuts or with added on top of non-deviceerrorcode leaf
@@ -384,7 +384,7 @@ void writeMean_leafHist_h(TString mode = "default", TString tree = "mul", TStrin
   minirunNumber = getMinirunNumber_h(minirunNumber);
   nRuns     = getNruns_h(nRuns);
 
-  // Make an instance of the relevant data source 
+  // Make an instance of the relevant data source
   TLeaf   *Leaf   = getLeaf_h(tree,branch,leaf,runNumber,minirunNumber,splitNumber,nRuns);
   if (!Leaf){
     return 0;
@@ -404,22 +404,22 @@ void writeMean_leafHist_h(TString mode = "default", TString tree = "mul", TStrin
   Printf("Leaf name: %s",(const char*)leafName);
   Tree->Draw(Form("%s>>h1",(const char*)leafName));
   TH1 *h1 = (TH1*)gDirectory->Get("h1");
-  
+
   if (mode == "default"){
-	  data_mean = h1->GetMean();
-	  data_rms = h1->GetRMS();
+          data_mean = h1->GetMean();
+          data_rms = h1->GetRMS();
   }
   else if (mode == "clean" || mode == "manual"){
     TH1 *h2 = rebinTH1_h(h1,mode,2,1,1000); // example use case of rebinTH1_h method
     TString h2_name = h2->GetName();
     Tree->Draw(Form("%s>>%s",(const char*)leafName,(const char*)h2_name)); // Manual
-	  data_mean = h2->GetMean();
-	  data_rms = h2->GetRMS();
+          data_mean = h2->GetMean();
+          data_rms = h2->GetRMS();
   }
   else if (mode == "auto" || mode == "loop"){
     TH1 *h2 = rebinTH1_h(h1,mode,2,1,1000); // example use case of rebinTH1_h method
-	  data_mean = h2->GetMean();
-	  data_rms = h2->GetRMS();
+          data_mean = h2->GetMean();
+          data_rms = h2->GetRMS();
   }
 
   Printf("Run %d mean %s: %f",runNumber,(const char*)mean,data_mean);

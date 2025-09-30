@@ -1,25 +1,25 @@
 // GetBCMPedestal.C
-// 	jaPAN Macro Script - BCM Pedestal Scan
-// 	based on UNSER readout
-//	author: Tao Ye
+//      jaPAN Macro Script - BCM Pedestal Scan
+//      based on UNSER readout
+//      author: Tao Ye
 //      modified: July 14, 2019 by Caryn
 
 void LoadStyle();
 void GetBCMPedestal_copy2769(int run_num=2769,
-			     Double_t lowlimit=5,Double_t uplimit=80,
-		    TCut user_cut ="1");
+                             Double_t lowlimit=5,Double_t uplimit=80,
+                    TCut user_cut ="1");
 
 void GetBCMPedestal_copy2769(int run_num=2769,
-			     Double_t lowlimit,Double_t uplimit,
-		    TCut user_cut){
+                             Double_t lowlimit,Double_t uplimit,
+                    TCut user_cut){
   LoadStyle();
   char* qwrootfile_path = getenv("QW_ROOTFILES");
   TString rf_name =Form("%s/prexPrompt_pass2_%d.000.root",
-			qwrootfile_path,run_num);
-  TFile *rootfile = TFile::Open(rf_name);  
+                        qwrootfile_path,run_num);
+  TFile *rootfile = TFile::Open(rf_name);
   if(rootfile ==NULL){
-    cout << rf_name 
-	 << " doesn't exist !!" << endl;
+    cout << rf_name
+         << " doesn't exist !!" << endl;
     return;
   }
   TTree *tree= (TTree*)rootfile->Get("evt");
@@ -32,16 +32,16 @@ void GetBCMPedestal_copy2769(int run_num=2769,
 
   TCanvas *c_bcm = new TCanvas("c_bcm","c_bcm",1000,500);
   c_bcm->Divide(2,1);
-  
+
   TF1 *f_zero = new TF1("f_zero","0",0,100);
   f_zero->SetLineWidth(2);
   f_zero->SetLineColor(kRed);
   f_zero->SetLineStyle(9);
-  
+
   TString branch_name;
   TString num_samples_name;
   // run 1404
-  // TString beam_evtcut[] ={ 
+  // TString beam_evtcut[] ={
   //   "Entry$>1e3 && Entry$<27e3",
   //   "Entry$>30e3 && Entry$<42e3",
   //   "Entry$>70e3 && Entry$<88e3"};
@@ -51,7 +51,7 @@ void GetBCMPedestal_copy2769(int run_num=2769,
   //   "Entry$>45e3 && Entry$<50e3" };
 
   // run 1329
-  // TString beam_evtcut[] ={ 
+  // TString beam_evtcut[] ={
   //   "Entry$>10 && Entry$<3e3",
   //   "Entry$>4e3 && Entry$<6e3",
   //   "Entry$>7.5e3 && Entry$<10e3"};
@@ -61,7 +61,7 @@ void GetBCMPedestal_copy2769(int run_num=2769,
   //   "Entry$>11e3 && Entry$<13e3"};
 
   //  run 1280
-  // TString beam_evtcut[] ={ 
+  // TString beam_evtcut[] ={
   //   "Entry$>10 && Entry$<2.5e3",
   //   "Entry$>8.5e3 && Entry$<10e3",
   //   "Entry$>15e3 && Entry$<17e3"};
@@ -71,7 +71,7 @@ void GetBCMPedestal_copy2769(int run_num=2769,
   //   "Entry$>18e3 && Entry$<20e3"};
 
   //  run 2769
-  TCut beam_evtcut[] ={ 
+  TCut beam_evtcut[] ={
     "cleandata && scandata1>0 && scandata2==1",
     "cleandata && scandata1>0 && scandata2==2",
     "cleandata && scandata1>0 && scandata2==3",
@@ -81,7 +81,7 @@ void GetBCMPedestal_copy2769(int run_num=2769,
     "cleandata && scandata1>0 && scandata2==7",
     "cleandata && scandata1>0 && scandata2==8"};
 
- TCut unser_evtcut[] ={ 
+ TCut unser_evtcut[] ={
     "cleandata && scandata1>0 && scandata2==1",
     "cleandata && scandata1>0 && scandata2==2",
     "cleandata && scandata1>0 && scandata2==3",
@@ -102,8 +102,8 @@ void GetBCMPedestal_copy2769(int run_num=2769,
   //   "cleandata && scandata1>0 && scandata2==8&&CodaEventNumber<172e3"
   // };
 
- 
-  
+
+
   //  TCut pedestal_evtcut[] ={
   //    "cleandata && scandata1==0 && (scandata2==1)&&CodaEventNumber<16200",
   //  "cleandata && scandata1==0 && (scandata2==2 || scandata2==1)&& (CodaEventNumber>23500 ||CodaEventNumber<48200)",
@@ -127,9 +127,9 @@ void GetBCMPedestal_copy2769(int run_num=2769,
 
 
   const int ndata = sizeof(beam_evtcut)/sizeof(*beam_evtcut);
-  double bcm_mean[ndata]; 
+  double bcm_mean[ndata];
   double bcm_error[ndata];
-  double unser_mean[ndata]; 
+  double unser_mean[ndata];
   double unser_error[ndata];
   double bcm_res[ndata]; // residual
 
@@ -141,7 +141,7 @@ void GetBCMPedestal_copy2769(int run_num=2769,
   double slope[nbcm];
 
   TGraphErrors *g_res;
-  TGraphErrors *g_fit;  
+  TGraphErrors *g_fit;
   TGraphErrors *g_res_ref;
   TGraphErrors *g_fit_ref;
   TMultiGraph *mg_res;
@@ -159,32 +159,32 @@ void GetBCMPedestal_copy2769(int run_num=2769,
   for(int i=0;i<ndata;i++){
     my_cut = unser_evtcut[i]+user_cut;
     tree->Draw("unser",
-	       my_cut,"goff");
+               my_cut,"goff");
     h_stat =(TH1D*)gDirectory->FindObject("htemp");
     unser_mean[i] = h_stat->GetMean();
     unser_error[i] = h_stat->GetRMS()/TMath::Sqrt(h_stat->GetEntries());
     my_cut = pedestal_evtcut[i];
     tree->Draw("unser",
-	       my_cut,"goff");
+               my_cut,"goff");
     h_stat =(TH1D*)gDirectory->FindObject("htemp");
     unser_mean[i]  = unser_mean[i] - h_stat->GetMean(); // pedestal subtraction
     cout << unser_mean[i]
-	 << "+/-"
-	 << unser_error[i]
-	 << endl;
+         << "+/-"
+         << unser_error[i]
+         << endl;
   }
 
   for(int ibcm=0;ibcm<nbcm;ibcm++){
     branch_name = Form("%s.hw_sum_raw/%s.num_samples",
-		       device_name[ibcm].Data(),device_name[ibcm].Data());
+                       device_name[ibcm].Data(),device_name[ibcm].Data());
 
       for(int i=0;i<ndata;i++){
-	my_cut = beam_evtcut[i];
-	tree->Draw(branch_name,
-		  my_cut,"goff");
-	h_stat =(TH1D*)gDirectory->FindObject("htemp");
-	bcm_mean[i] = h_stat->GetMean();
-	bcm_error[i] = h_stat->GetRMS()/TMath::Sqrt(h_stat->GetEntries());
+        my_cut = beam_evtcut[i];
+        tree->Draw(branch_name,
+                  my_cut,"goff");
+        h_stat =(TH1D*)gDirectory->FindObject("htemp");
+        bcm_mean[i] = h_stat->GetMean();
+        bcm_error[i] = h_stat->GetRMS()/TMath::Sqrt(h_stat->GetEntries());
       }
       c_bcm->cd(1);
 
@@ -196,19 +196,19 @@ void GetBCMPedestal_copy2769(int run_num=2769,
       f_fit->SetParameters(init_par);
       f_fit->SetLineColor(kRed);
       if(branch_name.Contains("ds10"))
-	 g_fit->Fit("f_fit","QR","",0,30);
+         g_fit->Fit("f_fit","QR","",0,30);
       else
-	g_fit->Fit("f_fit","QR","",fit_low,fit_up);
+        g_fit->Fit("f_fit","QR","",fit_low,fit_up);
 
       ped[ibcm] = f_fit->GetParameter(0);
       slope[ibcm] = f_fit->GetParameter(1);
       gain[ibcm]=1/slope[ibcm];
 
       for(int i=0;i<ndata;i++){
-	bcm_res[i] = (bcm_mean[i]-ped[ibcm])*gain[ibcm] - unser_mean[i];
-	bcm_error[i] = bcm_error[i] *gain[ibcm];
+        bcm_res[i] = (bcm_mean[i]-ped[ibcm])*gain[ibcm] - unser_mean[i];
+        bcm_error[i] = bcm_error[i] *gain[ibcm];
       }
-      
+
       c_bcm->cd(2);
       g_res = new TGraphErrors(ndata,unser_mean,bcm_res,unser_error,bcm_error);
       g_res->SetMarkerStyle(20);
@@ -224,9 +224,9 @@ void GetBCMPedestal_copy2769(int run_num=2769,
 
   for(int ibcm=0;ibcm<nbcm;ibcm++){
       printf("%s, %.2f, %f \n",
-	     device_name[ibcm].Data(),
-	     ped[ibcm],
-	     gain[ibcm]);
+             device_name[ibcm].Data(),
+             ped[ibcm],
+             gain[ibcm]);
   }
   rootfile->Close();
 }
@@ -235,14 +235,14 @@ void LoadStyle(){
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.2);
   gStyle->SetStatW(0.3);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(1011);
   gStyle->SetStatX(0.7);
   gStyle->SetStatY(0.9);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -251,5 +251,5 @@ void LoadStyle(){
   gStyle->SetLabelSize(0.035,"x");
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.06,"hxyz");
-  gROOT->ForceStyle();  
+  gROOT->ForceStyle();
 }

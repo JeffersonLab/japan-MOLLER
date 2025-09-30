@@ -20,7 +20,7 @@ void getRCDB(TTree * tree, Int_t runNumber, std::vector<Double_t> &singleEntries
     "energy_sig",     // = 1.4e-6
   };
   Int_t success = 0;
-  // Experimenting Function to Get slug number based on run number 
+  // Experimenting Function to Get slug number based on run number
   // Author : Tao Ye
 
   TSQLResult* res;
@@ -34,7 +34,7 @@ void getRCDB(TTree * tree, Int_t runNumber, std::vector<Double_t> &singleEntries
   TString select_q ="SELECT run_number,name,int_value ";  //int_value
   TString from_q =  "FROM `a-rcdb`.conditions,`a-rcdb`.condition_types ";
   TString where_q = Form("WHERE conditions.condition_type_id=condition_types.id and name='slug' and run_number='%d'",
-			 runNumber);
+                         runNumber);
   res = rcdb->Query(select_q + from_q + where_q);
   if(res==NULL){
     cout << " -- ERROR: Failed to Query " << endl;

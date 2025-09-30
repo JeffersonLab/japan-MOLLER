@@ -87,7 +87,7 @@ class QwIntegratedRasterChannel : public VQwDataElement{
   void PrintValue() const;
   void PrintInfo() const;
 
-  
+
   QwIntegratedRasterChannel& operator=  (const QwIntegratedRasterChannel &value);
   QwIntegratedRasterChannel& operator+= (const QwIntegratedRasterChannel &value);
   QwIntegratedRasterChannel& operator-= (const QwIntegratedRasterChannel &value);

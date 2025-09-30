@@ -148,7 +148,7 @@ Bool_t MQwPublishable<U,T>::PublishByRequest(TString device_name)
       // Report failure to publish
       if (! status) {
         QwDebug << "MQwPublishable::PublishByRequest: Failed to publish channel name: "
-		<< device_name << QwLog::endl;
+                << device_name << QwLog::endl;
       }
     }
   }
@@ -204,15 +204,15 @@ const VQwHardwareChannel* MQwPublishable_child<U,T>::RequestExternalPointer(cons
  */
 template<class U, class T>
 Bool_t MQwPublishable_child<U,T>::PublishInternalValue(
-						       const TString name,
-						       const TString desc,
-						       const VQwHardwareChannel* element) const{
+                                                       const TString name,
+                                                       const TString desc,
+                                                       const VQwHardwareChannel* element) const{
   // Get the parent and check for existence
   if (fParent != 0) {
     // Publish the variable with name in the parent
     if (fParent->PublishInternalValue(name, desc, fSelf, element) == kFALSE) {
       QwError << "Could not publish variable " << name
-	      << " in from object " << fSelf->GetName() << "!" << QwLog::endl;
+              << " in from object " << fSelf->GetName() << "!" << QwLog::endl;
       return kFALSE; // Error: variable could not be puslished
     }
   } else {

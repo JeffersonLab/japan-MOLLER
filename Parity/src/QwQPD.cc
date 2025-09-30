@@ -36,16 +36,16 @@ void  QwQPD::InitializeChannel(TString name)
 
   for(i=0;i<4;i++) {
     fPhotodiode[i].InitializeChannel(name+subelement[i],"raw");
-    
+
     if(localdebug)
       std::cout<<" photodiode ["<<i<<"]="<<fPhotodiode[i].GetElementName()<<"\n";
   }
-  
+
   for(i=kXAxis;i<kNumAxes;i++) {
     fRelPos[i].InitializeChannel(name+"Rel"+kAxisLabel[i],"derived");
     fAbsPos[i].InitializeChannel(name+kAxisLabel[i],"derived");
   }
-  
+
   bFullSave=kTRUE;
 
   return;
@@ -77,7 +77,7 @@ void QwQPD::GetCalibrationFactors(Double_t AlphaX, Double_t AlphaY)
 {
   // Read in the calibration factors from the injector_beamline_geometry.map
   // for the QPD, AlphaX and AlphaY gives the conversion from adc counts to mm.
- 
+
   Bool_t ldebug = kFALSE;
 
   fQwQPDCalibration[0]=1.0/AlphaX;
@@ -89,7 +89,7 @@ void QwQPD::GetCalibrationFactors(Double_t AlphaX, Double_t AlphaY)
     std::cout<<"\nfQwQPDCalibration[0]  = "<<fQwQPDCalibration[0]<<std::endl;
     std::cout<<"\nfQwQPDCalibration[1]  = "<<fQwQPDCalibration[1]<<std::endl;
     std::cout<<"AlphaX = "<<fRelativeGains[0]<<std::endl;
-    std::cout<<"AlphaY = "<<fRelativeGains[1]<<std::endl;    
+    std::cout<<"AlphaY = "<<fRelativeGains[1]<<std::endl;
   }
   return;
 }
@@ -104,7 +104,7 @@ void QwQPD::ClearEventData()
     fRelPos[i].ClearEventData();
     fAbsPos[i].ClearEventData();
   }
-  
+
   fEffectiveCharge.ClearEventData();
 
  return;
@@ -131,7 +131,7 @@ Bool_t QwQPD::ApplyHWChecks()
 void QwQPD::IncrementErrorCounters()
 {
   Short_t i=0;
-  for(i=0;i<4;i++) 
+  for(i=0;i<4;i++)
     fPhotodiode[i].IncrementErrorCounters();
   for(i=kXAxis;i<kNumAxes;i++) {
     fRelPos[i].IncrementErrorCounters();
@@ -143,7 +143,7 @@ void QwQPD::IncrementErrorCounters()
 void QwQPD::PrintErrorCounters() const
 {
   Short_t i=0;
-  for(i=0;i<4;i++) 
+  for(i=0;i<4;i++)
     fPhotodiode[i].PrintErrorCounters();
   for(i=kXAxis;i<kNumAxes;i++) {
     fRelPos[i].PrintErrorCounters();
@@ -156,7 +156,7 @@ UInt_t QwQPD::GetEventcutErrorFlag()
 {
   Short_t i=0;
   UInt_t error=0;
-  for(i=0;i<4;i++) 
+  for(i=0;i<4;i++)
     error|=fPhotodiode[i].GetEventcutErrorFlag();
 
   for(i=kXAxis;i<kNumAxes;i++) {
@@ -215,7 +215,7 @@ Bool_t QwQPD::ApplySingleEventCuts()
   }
   fEffectiveCharge.UpdateErrorFlag(error_code);// To update the eff-charge error code from the channels/wires event cut error codes
   status &= fEffectiveCharge.ApplySingleEventCuts();
-  
+
   return status;
 }
 
@@ -232,7 +232,7 @@ VQwHardwareChannel* QwQPD::GetSubelementByName(TString ch_name)
   }else if (ch_name=="bl"){
     tmpptr = &fPhotodiode[3];
   }else if (ch_name=="relx"){
-    tmpptr = &fRelPos[0];    
+    tmpptr = &fRelPos[0];
   }else if (ch_name=="rely"){
     tmpptr = &fRelPos[1];
   }else  if (ch_name=="absx" || ch_name=="x" ){
@@ -273,11 +273,11 @@ void QwQPD::SetSingleEventCuts(TString ch_name, Double_t minX, Double_t maxX)
   }else if (ch_name=="relx"){
     QwMessage<<"RelX LL " <<  minX <<" UL " << maxX <<QwLog::endl;
     fRelPos[0].SetSingleEventCuts(minX,maxX);
-    
+
   }else if (ch_name=="rely"){
     QwMessage<<"RelY LL " <<  minX <<" UL " << maxX <<QwLog::endl;
     fRelPos[1].SetSingleEventCuts(minX,maxX);
-    
+
   }else if (ch_name=="x" || ch_name=="y" || ch_name=="effectivecharge" ){
 
     VQwBPM::SetSingleEventCuts(ch_name, minX, maxX);
@@ -289,39 +289,39 @@ void QwQPD::SetSingleEventCuts(TString ch_name, UInt_t errorflag,Double_t minX, 
   errorflag|=kBPMErrorFlag;//update the device flag
   if (ch_name=="tl"){
     QwMessage<<"TL LL " <<  minX <<" UL " << maxX <<QwLog::endl;
-    fPhotodiode[0].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel); 
+    fPhotodiode[0].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel);
 
   }else if (ch_name=="tr"){
     QwMessage<<"TR LL " <<  minX <<" UL " << maxX <<QwLog::endl;
-    fPhotodiode[1].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel); 
+    fPhotodiode[1].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel);
 
   }else if (ch_name=="br"){
     QwMessage<<"BR LL " <<  minX <<" UL " << maxX <<QwLog::endl;
-    fPhotodiode[2].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel); 
+    fPhotodiode[2].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel);
 
   }else if (ch_name=="bl"){
     QwMessage<<"BL LL " <<  minX <<" UL " << maxX <<QwLog::endl;
-    fPhotodiode[3].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel); 
+    fPhotodiode[3].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel);
 
   }else if (ch_name=="relx"){
     QwMessage<<"RelX LL " <<  minX <<" UL " << maxX <<QwLog::endl;
-    fRelPos[0].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel); 
+    fRelPos[0].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel);
 
   }else if (ch_name=="rely"){
     QwMessage<<"RelY LL " <<  minX <<" UL " << maxX <<QwLog::endl;
-    fRelPos[1].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel); 
+    fRelPos[1].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel);
 
   }else if (ch_name=="absx"){
     QwMessage<<"AbsX LL " <<  minX <<" UL " << maxX <<QwLog::endl;
-    fAbsPos[0].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel); 
+    fAbsPos[0].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel);
 
   }else if (ch_name=="absy"){
     QwMessage<<"AbsY LL " <<  minX <<" UL " << maxX <<QwLog::endl;
-    fAbsPos[1].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel); 
-    
+    fAbsPos[1].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel);
+
   }else if (ch_name=="effectivecharge"){
     QwMessage<<"EffectveQ LL " <<  minX <<" UL " << maxX <<QwLog::endl;
-    fEffectiveCharge.SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel); 
+    fEffectiveCharge.SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel);
 
   }
 
@@ -340,9 +340,9 @@ Bool_t QwQPD::CheckForBurpFail(const VQwDataElement *ev_error){
         }
         for(i=kXAxis;i<kNumAxes;i++) {
           burpstatus |= fRelPos[i].CheckForBurpFail(&(value_qpd->fRelPos[i]));
-          burpstatus |= fAbsPos[i].CheckForBurpFail(&(value_qpd->fAbsPos[i])); 
+          burpstatus |= fAbsPos[i].CheckForBurpFail(&(value_qpd->fAbsPos[i]));
         }
-        burpstatus |= fEffectiveCharge.CheckForBurpFail(&(value_qpd->fEffectiveCharge)); 
+        burpstatus |= fEffectiveCharge.CheckForBurpFail(&(value_qpd->fEffectiveCharge));
       }
     } else {
       TString loc="Standard exception from QwQPD::CheckForBurpFail :"+
@@ -363,14 +363,14 @@ void QwQPD::UpdateErrorFlag(const VQwBPM *ev_error){
       // std::cout<<" Here in QwQPD::UpdateErrorFlag \n";
       if (this->GetElementName()!="") {
         const QwQPD* value_bpm = dynamic_cast<const QwQPD* >(ev_error);
-	for(i=0;i<4;i++){
-	  fPhotodiode[i].UpdateErrorFlag(value_bpm->fPhotodiode[i]);
-	}
-	for(i=kXAxis;i<kNumAxes;i++) {
-	  fRelPos[i].UpdateErrorFlag(value_bpm->fRelPos[i]);
-	  fAbsPos[i].UpdateErrorFlag(value_bpm->fAbsPos[i]);
-	}
-	fEffectiveCharge.UpdateErrorFlag(value_bpm->fEffectiveCharge);
+        for(i=0;i<4;i++){
+          fPhotodiode[i].UpdateErrorFlag(value_bpm->fPhotodiode[i]);
+        }
+        for(i=kXAxis;i<kNumAxes;i++) {
+          fRelPos[i].UpdateErrorFlag(value_bpm->fRelPos[i]);
+          fAbsPos[i].UpdateErrorFlag(value_bpm->fAbsPos[i]);
+        }
+        fEffectiveCharge.UpdateErrorFlag(value_bpm->fEffectiveCharge);
       }
     } else {
       TString loc="Standard exception from QwQPD::UpdateErrorFlag :"+
@@ -380,8 +380,8 @@ void QwQPD::UpdateErrorFlag(const VQwBPM *ev_error){
     }
   } catch (std::exception& e) {
     std::cerr<< e.what()<<std::endl;
-  }  
-  
+  }
+
 };
 
 
@@ -400,8 +400,8 @@ void  QwQPD::ProcessEvent()
   Short_t i = 0;
 
   ApplyHWChecks();
-  /* Frst apply HW checks and update HW  error flags. 
-     Calling this routine here and not in ApplySingleEventCuts  
+  /* Frst apply HW checks and update HW  error flags.
+     Calling this routine here and not in ApplySingleEventCuts
      makes a difference for a QPDs because they are derrived devices.
   */
 
@@ -411,9 +411,9 @@ void  QwQPD::ProcessEvent()
     fPhotodiode[i].ProcessEvent();
     fEffectiveCharge+=fPhotodiode[i];
   }
-  
+
   if (localdebug) fEffectiveCharge.PrintInfo();
-   
+
 
   /** The positions X and Y from a QPD are calculated using following equations,
 
@@ -477,7 +477,7 @@ void  QwQPD::ProcessEvent()
       std::cout<<" hw  fAbsPos["<<kAxisLabel[i]<<"]="<<fAbsPos[i].GetValue()<<"\n \n";
     }
   }
-  
+
   return;
 }
 
@@ -517,7 +517,7 @@ UInt_t QwQPD::GetSubElementIndex(TString subname)
 
   if(localindex>3)
     std::cerr << "QwQPD::GetSubElementIndex is unable to associate the string -"
-	      <<subname<<"- to any index"<<std::endl;
+              <<subname<<"- to any index"<<std::endl;
 
   return localindex;
 }
@@ -631,7 +631,7 @@ void QwQPD::AccumulateRunningSum(const QwQPD& value, Int_t count, Int_t ErrorMas
 {
   Short_t i = 0;
   for(i=0;i<4;i++) fPhotodiode[i].AccumulateRunningSum(value.fPhotodiode[i], count, ErrorMask);
-  for (i = 0; i < 2; i++){    
+  for (i = 0; i < 2; i++){
     fRelPos[i].AccumulateRunningSum(value.fRelPos[i], count, ErrorMask);
     fAbsPos[i].AccumulateRunningSum(value.fAbsPos[i], count, ErrorMask);
   }
@@ -651,7 +651,7 @@ void QwQPD::DeaccumulateRunningSum(QwQPD& value, Int_t ErrorMask)
 
   Short_t i = 0;
   for(i=0;i<4;i++) fPhotodiode[i].DeaccumulateRunningSum(value.fPhotodiode[i]);
-  for (i = 0; i < 2; i++){    
+  for (i = 0; i < 2; i++){
     fRelPos[i].DeaccumulateRunningSum(value.fRelPos[i], ErrorMask);
     fAbsPos[i].DeaccumulateRunningSum(value.fAbsPos[i], ErrorMask);
   }
@@ -743,7 +743,7 @@ void  QwQPD::ConstructBranch(TTree *tree, TString &prefix)
       thisprefix.ReplaceAll("asym_","diff_");
 
     SetRootSaveStatus(prefix);
-    
+
     fEffectiveCharge.ConstructBranch(tree,prefix);
     Short_t i = 0;
     if(bFullSave) {
@@ -769,23 +769,23 @@ void  QwQPD::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modu
   } else
     {
       if (modulelist.HasValue(devicename)){
-	TString thisprefix=prefix;
-	if(prefix.Contains("asym_"))
-	  thisprefix.ReplaceAll("asym_","diff_");
+        TString thisprefix=prefix;
+        if(prefix.Contains("asym_"))
+          thisprefix.ReplaceAll("asym_","diff_");
 
-	SetRootSaveStatus(prefix);
+        SetRootSaveStatus(prefix);
 
-	fEffectiveCharge.ConstructBranch(tree,prefix);
-	Short_t i = 0;
-	if(bFullSave) {
-	  for(i=0;i<4;i++) fPhotodiode[i].ConstructBranch(tree,thisprefix);
-	}
-	for(i=kXAxis;i<kNumAxes;i++) {
-	  fAbsPos[i].ConstructBranch(tree,thisprefix);
-	  fRelPos[i].ConstructBranch(tree,thisprefix);
-	}
+        fEffectiveCharge.ConstructBranch(tree,prefix);
+        Short_t i = 0;
+        if(bFullSave) {
+          for(i=0;i<4;i++) fPhotodiode[i].ConstructBranch(tree,thisprefix);
+        }
+        for(i=kXAxis;i<kNumAxes;i++) {
+          fAbsPos[i].ConstructBranch(tree,thisprefix);
+          fRelPos[i].ConstructBranch(tree,thisprefix);
+        }
 
-	QwMessage <<" Tree leaves added to "<<devicename<<" Corresponding channels"<<QwLog::endl;
+        QwMessage <<" Tree leaves added to "<<devicename<<" Corresponding channels"<<QwLog::endl;
       }
       // this functions doesn't do anything yet
     }
@@ -883,7 +883,7 @@ void QwQPD::SetEventCutMode(Int_t bcuts)
 void QwQPD::MakeQPDList()
 {
   for (size_t i = kXAxis; i < kNumAxes; i++) {
-	QwVQWK_Channel abspos(fAbsPos[i]);
+        QwVQWK_Channel abspos(fAbsPos[i]);
     abspos = fAbsPos[i];
     fQPDElementList.push_back(abspos);
   }
@@ -927,7 +927,7 @@ void  QwQPD::SetRandomEventParameters(Double_t meanX, Double_t sigmaX, Double_t 
   Double_t sumX = 1.1e8; // These are just guesses, but I made X and Y different
   Double_t sumY = 0.9e8; // to make it more interesting for the analyzer...
 
-  
+
   // Determine the asymmetry from the position
   Double_t meanXP = (1.0 + meanX / fQwQPDCalibration[0]) * sumX / 2.0;
   Double_t meanXM = (1.0 - meanX / fQwQPDCalibration[0]) * sumX / 2.0; // = sumX - meanXP;
@@ -992,4 +992,3 @@ void QwQPD::SetSubElementCalibrationFactor(Int_t j, Double_t value)
   fPhotodiode[j].SetCalibrationFactor(value);
   return;
 }
-

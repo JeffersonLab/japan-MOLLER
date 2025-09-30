@@ -18,7 +18,7 @@ VQwHardwareChannel::VQwHardwareChannel():
   fErrorConfigFlag = 0;
   fBurpHoldoff = 10;
   fBurpThreshold = -1.0;
-  
+
   ProcessOptions();
 }
 
@@ -117,7 +117,7 @@ void VQwHardwareChannel::AddEntriesToList(std::vector<QwDBInterface> &row_list)
   TString name    = GetElementName();
   UInt_t  entries = GetGoodEventCount();
   //  Loop over subelements and build the list.
-  for(UInt_t subelement=0; 
+  for(UInt_t subelement=0;
       subelement<GetNumberOfSubelements();
       subelement++) {
     row.Reset();

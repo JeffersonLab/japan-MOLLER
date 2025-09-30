@@ -1,11 +1,11 @@
 /**
- * \file	QwSIS3320_Samples.cc
+ * \file        QwSIS3320_Samples.cc
  *
- * \brief	Implementation of the SIS3320 sampling ADC samples
+ * \brief       Implementation of the SIS3320 sampling ADC samples
  *
- * \author	W. Deconinck
- * \date	2009-09-04 18:06:23
- * \ingroup	QwCompton
+ * \author      W. Deconinck
+ * \date        2009-09-04 18:06:23
+ * \ingroup     QwCompton
  *
  * The QwSIS3320_Samples should allow convenient access to the sampling data
  * collected with the SIS3320 for the Compton photon detector.  This class

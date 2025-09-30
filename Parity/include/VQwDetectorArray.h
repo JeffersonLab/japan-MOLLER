@@ -71,7 +71,7 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
  public:
 
     /// Constructor with name
-    VQwDetectorArray(const TString& name) 
+    VQwDetectorArray(const TString& name)
      :VQwSubsystem(name),VQwSubsystemParity(name),bNormalization(kFALSE) {
 
         fTargetCharge.InitializeChannel("q_targ","derived");
@@ -82,9 +82,9 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
         fTargetEnergy.InitializeChannel("e_targ","derived");
 
     };
-    
+
     /// Copy constructor
-  
+
     VQwDetectorArray(const VQwDetectorArray& source)
      :VQwSubsystem(source),VQwSubsystemParity(source),
      fIntegrationPMT(source.fIntegrationPMT),
@@ -224,15 +224,15 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
     std::vector <QwDetectorArrayID> fMainDetID;
 
 
-  
 
- /*	
+
+ /*
     Maybe have an array of QwIntegrationPMT to describe the Sector, Ring, Slice structure?  Maybe hold Ring 5 out and have it described as one list by Sector and slice?
-	Need a way to define the correlations to all beam parameters for each element.
-	Need a way to define asymmetries for each element.
-	Need a way to create the full event data buffers
-	Start with all channels and modules in a single ROC subbank:  make a mock_moller_adc.map with 28 8-channel modules with names like we discussed
-	Make a new RandomizeEventData which will take the helicity and beam current and beam params, and fill the detector elements as we discussed.
+        Need a way to define the correlations to all beam parameters for each element.
+        Need a way to define asymmetries for each element.
+        Need a way to create the full event data buffers
+        Start with all channels and modules in a single ROC subbank:  make a mock_moller_adc.map with 28 8-channel modules with names like we discussed
+        Make a new RandomizeEventData which will take the helicity and beam current and beam params, and fill the detector elements as we discussed.
  */
 
 

@@ -19,7 +19,7 @@ void drawPostPan(string rootFnm, string dataTitle, string inputList){
   std::fstream infile(inputList);
   string draw;
   ofile.open(Form("o_%s.txt",dataTitle.c_str()),std::ofstream::out);
-  while ( std::getline(infile,draw) ) 
+  while ( std::getline(infile,draw) )
   {
     c1->Clear();
     DrawOneChannel(draw,"",t,dataTitle,c1);
@@ -41,7 +41,7 @@ void DrawOneChannel(TString channelName, TCut userCut,TTree *t, string dataTitle
   double* run =new double[npt];
   for(int ipt=0;ipt<npt;ipt++)
     run[ipt] = *(dummy+ipt);
-  
+
   t->Draw("mini:Entry$",userCut,"goff");
   double* mini = new double[npt];
   dummy = t->GetV1();
@@ -54,8 +54,8 @@ void DrawOneChannel(TString channelName, TCut userCut,TTree *t, string dataTitle
   double* ent = new double[npt];
   dummy = t->GetV1();
   h = new TH1D(Form("h_%s",channelName.Data()),
-	       Form("%s: %s",dataTitle.c_str(),channelName.Data()),
-	       npt+2,0,npt+2);
+               Form("%s: %s",dataTitle.c_str(),channelName.Data()),
+               npt+2,0,npt+2);
   double min(99999999),max(-99999999);
   for(int ipt=0;ipt<npt;ipt++){
     h->SetBinContent(ipt+2,*(dummy+ipt));
@@ -68,14 +68,14 @@ void DrawOneChannel(TString channelName, TCut userCut,TTree *t, string dataTitle
   h->SetMarkerStyle(20);
   //h->GetXaxis()->SetTitle("Run.Mini");
   TH1D *hCorr = new TH1D(Form("hCorr_%s",channelName.Data()),
-			 Form("%s: 1D Corr %s",dataTitle.c_str(),channelName.Data()),
-			 40, 0,-1);//on the fly limits on the x axis
+                         Form("%s: 1D Corr %s",dataTitle.c_str(),channelName.Data()),
+                         40, 0,-1);//on the fly limits on the x axis
   for(int ipt=0;ipt<npt;ipt++){
     h->GetXaxis()->SetBinLabel(ipt+2,Form("%d.%d",(int)run[ipt],(int)mini[ipt]));
     hCorr -> Fill(*(dummy+ipt));
   }
 
-  TPaveText *pt = new TPaveText(0.6,0.8,0.89,0.89,"blNDC");  
+  TPaveText *pt = new TPaveText(0.6,0.8,0.89,0.89,"blNDC");
   pt->SetBorderSize(0);
   pt->SetFillColor(0);
   pt->SetFillStyle(3155);
@@ -116,7 +116,7 @@ void DrawOneChannel(TString channelName, TCut userCut,TTree *t, string dataTitle
 
     cout<<channelName<<":\t"<<fconst->GetParameter(0)<<"\t+\\-\t"<<hCorr->GetRMS()<<endl;
     ofile<<fconst->GetParameter(0)<<","<<hCorr->GetRMS()<<",";
-    
+
   }else if(channelName.Contains("mean")){
     TString channel_err = channelName;
     channel_err.ReplaceAll("mean","err");
@@ -128,9 +128,9 @@ void DrawOneChannel(TString channelName, TCut userCut,TTree *t, string dataTitle
       double val1 = h->GetBinContent(ipt+2) - *(dummy+ipt);
       double val2 = h->GetBinContent(ipt+2) + *(dummy+ipt);
       if(min > val1)
-	min = val1;
+        min = val1;
       if(max < val2 )
-	max = val2;
+        max = val2;
     }
 
     min -= 0.05*abs(min);
@@ -199,7 +199,7 @@ void Init(TTree *t){
       iv_name.ReplaceAll("diff_","");
       TString coeff_name = Form("slope[%d][%d]",idv,iiv);
       t->SetAlias(Form("%s_%s",dv_name.Data(),iv_name.Data()),
-		  coeff_name);
+                  coeff_name);
     }
   }
 }
@@ -229,7 +229,7 @@ void pullUtil(TH1 *h,TCanvas *c1){
   h->DrawCopy();
   p1->SetGridx(1);
   p1->SetGridy(1);
-  
+
   const int nBin = h->GetXaxis()->GetNbins();
   double xlow = h->GetBinCenter(1) - h->GetBinWidth(1)/2;
   double xhigh = h->GetBinCenter(nBin) + h->GetBinWidth(nBin)/2;

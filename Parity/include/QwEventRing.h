@@ -17,7 +17,7 @@ class QwEventRing {
 
 /******************************************************************
  *  Class: QwEventRing
- *  Description : The event buffer to reduce  beam trips effects on running 
+ *  Description : The event buffer to reduce  beam trips effects on running
  *  averages.
  *
  ******************************************************************/
@@ -74,14 +74,14 @@ class QwEventRing {
   Bool_t bEVENT_READY; //If kTRUE, the good events are added to the event ring. After a beam trip this is set to kFALSE
   //after discarding LEAVE_COUNT no.of good event this is set to kTRUE
 
-  Bool_t bRING_READY; //set to true after ring is filled with good events and time to process them. Set to kFALSE after processing 
+  Bool_t bRING_READY; //set to true after ring is filled with good events and time to process them. Set to kFALSE after processing
   //all the events in the ring
   std::vector<QwSubsystemArrayParity> fEvent_Ring;
   //to track all the rolling averages for stability checks
   QwSubsystemArrayParity fRollingAvg;
-  
+
   //for debugging purposes
-  FILE *out_file;   
+  FILE *out_file;
   static const Bool_t bDEBUG=kFALSE;//kTRUE;
   static const Bool_t bDEBUG_Write=kFALSE;
 

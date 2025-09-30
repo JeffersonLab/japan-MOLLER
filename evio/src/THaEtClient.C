@@ -67,16 +67,16 @@ THaEtClient::THaEtClient( const char* computer, const char* mysession, Int_t smo
 //______________________________________________________________________________
 THaEtClient::THaEtClient( const char* computer, const char* mysession, Int_t smode, std::string stationname)
 {
-	try{
-  	station = stationname;
-  	if(stationname.size() >= ET_STATNAME_LENGTH){
-    	throw std::invalid_argument(
-      	"THaEtClient: invalid session name");
-		}
-	} catch(...) {
-		cout << "Using Default  Station Name: japa_sta\n"; 
-		station = "japa_sta";
-	}
+        try{
+        station = stationname;
+        if(stationname.size() >= ET_STATNAME_LENGTH){
+        throw std::invalid_argument(
+        "THaEtClient: invalid session name");
+                }
+        } catch(...) {
+                cout << "Using Default  Station Name: japa_sta\n";
+                station = "japa_sta";
+        }
   if( THaEtClient::codaOpen(computer, mysession, smode) != CODA_OK )
     throw std::invalid_argument(
       "THaEtClient: invalid computer or session name");

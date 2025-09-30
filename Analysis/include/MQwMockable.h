@@ -29,7 +29,7 @@ class MQwMockable {
 public:
   MQwMockable(): fUseExternalRandomVariable(false),
                  fCalcMockDataAsDiff(false),
-		 fMockAsymmetry(0.0), fMockGaussianMean(0.0),
+                 fMockAsymmetry(0.0), fMockGaussianMean(0.0),
                  fMockGaussianSigma(0.0)
   {
     // Mock drifts
@@ -71,7 +71,7 @@ public:
 
   virtual void  SetRawEventData() = 0;
 
-  /// Encode the event data into a CODA buffer  
+  /// Encode the event data into a CODA buffer
   virtual void EncodeEventData(std::vector<UInt_t> &buffer) = 0;
 
   /// Set the flag to use an externally provided random variable

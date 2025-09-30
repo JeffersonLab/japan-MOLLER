@@ -23,7 +23,7 @@ if true ; then
 
     [ -e $QW_ROOTFILES/Qweak_$RUN.000.trees.root ] &&
     mv -f $QW_ROOTFILES/Qweak_$RUN.000.trees.root \
-	  $QW_ROOTFILES/Qweak_$RUN.000.root
+          $QW_ROOTFILES/Qweak_$RUN.000.root
 
 fi
 

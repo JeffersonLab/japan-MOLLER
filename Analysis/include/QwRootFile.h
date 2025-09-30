@@ -100,9 +100,9 @@ class QwRootTree {
     /// Construct the tree
     void ConstructNewTree() {
       QwMessage << "New tree: " << fName << ", " << fDesc << QwLog::endl;
-      
+
       fTree = new TTree(fName.c_str(), fDesc.c_str());
-            
+
       // Ensure tree is in the current directory
       if (gDirectory) {
         fTree->SetDirectory(gDirectory);
@@ -143,7 +143,7 @@ class QwRootTree {
         exit(-1);
       }
     }
-   
+
 
   public:
 
@@ -308,13 +308,13 @@ class QwRootNTuple {
       fCurrentEvent(0), fNumEventsCycle(0), fNumEventsToSave(0), fNumEventsToSkip(0) {
       // Create RNTuple model
       fModel = ROOT::RNTupleModel::Create();
-      
+
       // Construct fields and vector
       ConstructFieldsAndVector(object);
     }
 
     /// Destructor
-    virtual ~QwRootNTuple() { 
+    virtual ~QwRootNTuple() {
       Close();
     }
 
@@ -334,11 +334,11 @@ class QwRootNTuple {
     void ConstructFieldsAndVector(T& object) {
       // Reserve space for the field vector
       fVector.reserve(BRANCH_VECTOR_MAX_SIZE);
-      
+
       // Associate fields with vector - now using shared field pointers
       TString prefix = Form("%s", fPrefix.c_str());
       object.ConstructNTupleAndVector(fModel, prefix, fVector, fFieldPtrs);
-      
+
       // Store the type of object
       fType = typeid(object).name();
 
@@ -359,20 +359,20 @@ class QwRootNTuple {
         QwError << "RNTuple model not created for " << fName << QwLog::endl;
         return;
       }
-      
+
       // Before creating the writer, ensure all fields are added to the model
       if (fVector.empty()) {
         QwError << "No fields defined in RNTuple model for " << fName << QwLog::endl;
         return;
       }
-      
+
       try {
         // Create the writer with the model (transfers ownership)
         // Use Append to add RNTuple to existing TFile
         fWriter = ROOT::RNTupleWriter::Append(std::move(fModel), fName, *file);
-        
+
         QwMessage << "Created RNTuple '" << fName << "' in file " << file->GetName() << QwLog::endl;
-        
+
       } catch (const std::exception& e) {
         QwError << "Failed to create RNTuple writer for '" << fName << "': " << e.what() << QwLog::endl;
       }
@@ -384,7 +384,7 @@ class QwRootNTuple {
       if (typeid(object).name() == fType) {
         // Fill the field vector
         object.FillNTupleVector(fVector);
-        
+
         // Use the shared field pointers which remain valid
         if (fWriter) {
           for (size_t i = 0; i < fVector.size() && i < fFieldPtrs.size(); ++i) {
@@ -392,10 +392,10 @@ class QwRootNTuple {
               *(fFieldPtrs[i]) = fVector[i];
             }
           }
-          
+
           // CRITICAL: Actually commit the data to the RNTuple
           fWriter->Fill();
-          
+
           // Update event counter
           fCurrentEvent++;
           // RNTuple prescaling
@@ -447,7 +447,7 @@ class QwRootNTuple {
     /// RNTuple model and writer
     std::unique_ptr<ROOT::RNTupleModel> fModel;
     std::unique_ptr<ROOT::RNTupleWriter> fWriter;
-    
+
     /// Vector of values and shared field pointers (for RNTuple)
     std::vector<Double_t> fVector;
     std::vector<std::shared_ptr<Double_t>> fFieldPtrs;
@@ -572,11 +572,11 @@ class QwRootFile {
       static Int_t update_count = 0;
       update_count++;
       if ((fUpdateInterval > 0) && ( update_count % fUpdateInterval == 0)) Update();
-      
+
       // Debug directory registration
       std::string type = typeid(object).name();
       bool hasDir = HasDirByType(object);
-      
+
       if (! hasDir) return;
       // Fill histograms
       object.FillHistograms();
@@ -702,12 +702,12 @@ class QwRootFile {
                   << QwLog::endl;
         fMapFile->Update();
       }else{
-	// this option will allow for reading the tree during write
-	Long64_t nBytes(0);
-	for (auto iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++)
-	  nBytes += iter->second.front()->AutoSave("SaveSelf");
-        
-	QwMessage << "TFile saved: "
+        // this option will allow for reading the tree during write
+        Long64_t nBytes(0);
+        for (auto iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++)
+          nBytes += iter->second.front()->AutoSave("SaveSelf");
+
+        QwMessage << "TFile saved: "
                   << nBytes/1000000 << "MB (innacurate number)" //FIXME this calculation is innacurate
                   << QwLog::endl;
       }
@@ -717,7 +717,7 @@ class QwRootFile {
     void Map()    { if (fRootFile) fRootFile->Map(); }
     void Close()  {
 
-      
+
       // Debug: List trees before closing
 
       for (auto iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++) {
@@ -730,12 +730,12 @@ class QwRootFile {
           }
         }
       }
-      
+
       // Check if we should make the file permanent - restore original logic
       if (!fMakePermanent) fMakePermanent = HasAnyFilled();
-      
 
-#ifdef HAS_RNTUPLE_SUPPORT      
+
+#ifdef HAS_RNTUPLE_SUPPORT
       // Close all RNTuples before closing the file
       for (auto& pair : fNTupleByName) {
         for (auto& ntuple : pair.second) {
@@ -743,7 +743,7 @@ class QwRootFile {
         }
       }
 #endif // HAS_RNTUPLE_SUPPORT
-      
+
       // CRITICAL FIX: Explicitly write all trees before closing!
       if (fRootFile) {
 
@@ -757,17 +757,17 @@ class QwRootFile {
           }
         }
       }
-      
+
       // Close the file and handle renaming
       if (fRootFile) {
         TString rootfilename = fRootFile->GetName();
-        
-        fRootFile->Close();        
+
+        fRootFile->Close();
 
       }
-      
+
       if (fMapFile) fMapFile->Close();
-      
+
 
     }
 
@@ -833,7 +833,7 @@ class QwRootFile {
     Int_t fAutoFlush;
     Int_t fAutoSave;
 
-  
+
 
   private:
 
@@ -1212,9 +1212,9 @@ void QwRootFile::ConstructObjects(const std::string& name, T& object)
   // No support for directories in a map file
   if (fMapFile) {
     QwMessage << "QwRootFile::ConstructObjects::detectors address "
-	      << &object
-	      << " and its name " << name
-	      << QwLog::endl;
+              << &object
+              << " and its name " << name
+              << QwLog::endl;
 
     std::string type = typeid(object).name();
     fDirsByName[name] = fMapFile->GetDirectory()->mkdir(name.c_str());
@@ -1243,16 +1243,16 @@ void QwRootFile::ConstructHistograms(const std::string& name, T& object)
             fRootFile->GetDirectory(("/" + name).c_str()) :
             fRootFile->GetDirectory("/")->mkdir(name.c_str());
     fDirsByType[type].push_back(name);
-        
+
     object.ConstructHistograms(fDirsByName[name]);
   }
 
   // No support for directories in a map file
   if (fMapFile) {
     QwMessage << "QwRootFile::ConstructHistograms::detectors address "
-	      << &object  
-	      << " and its name " << name 
-	      << QwLog::endl;
+              << &object
+              << " and its name " << name
+              << QwLog::endl;
 
     std::string type = typeid(object).name();
     fDirsByName[name] = fMapFile->GetDirectory()->mkdir(name.c_str());

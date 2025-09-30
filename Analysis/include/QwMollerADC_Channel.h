@@ -65,7 +65,7 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
     InitializeChannel(name, datatosave);
     SetMollerADCSaturationLimt(8.5);//set the default saturation limit
   };
-  QwMollerADC_Channel(const QwMollerADC_Channel& value): 
+  QwMollerADC_Channel(const QwMollerADC_Channel& value):
     VQwHardwareChannel(value), MQwMockable(value),
     fBlocksPerEvent(value.fBlocksPerEvent),
     fNumberOfSamples_map(value.fNumberOfSamples_map),
@@ -90,7 +90,7 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
     fSaturationABSLimit = value.fSaturationABSLimit;
     *this = value;
   };
-  
+
 
   using VQwHardwareChannel::Clone;
 
@@ -111,7 +111,7 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
     // This will be checked against the no.of samples read by the module
     fNumberOfSamples_map = num_samples_map;
   };
-  
+
   void  ClearEventData();
 
   /// Internally generate random event data
@@ -207,7 +207,7 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   Int_t ApplyHWChecks(); //Check for harware errors in the devices. This will return the device error code.
 
   void IncrementErrorCounters();//update the error counters based on the internal fErrorFlag
-  
+
   /*End*/
 
   void  ConstructHistograms(TDirectory *folder, TString &prefix);
@@ -314,7 +314,7 @@ private:
   Int_t fBlock_raw[4];      ///< Array of the sub-block data as read from the module
   Int_t fHardwareBlockSum_raw; ///< Module-based sum of the four sub-blocks as read from the module
   Int_t fSoftwareBlockSum_raw; ///< Sum of the data in the four sub-blocks raw
-  Long64_t fBlockSumSq_raw[5]; 
+  Long64_t fBlockSumSq_raw[5];
   Int_t fBlock_min[5];
   Int_t fBlock_max[5];
   Short_t fBlock_numSamples[5];
@@ -342,17 +342,17 @@ private:
   size_t fNumberOfSamples;     ///< Number of samples  read through the module
   size_t fNumberOfSamples_map; ///< Number of samples in the expected to  read through the module. This value is set in the QwBeamline map file
 
- 
+
 
   // Set of error counters for each HW test.
-  Int_t fErrorCount_HWSat;    ///< check to see ADC channel is saturated 
-  Int_t fErrorCount_sample;   ///< for sample size check                 
+  Int_t fErrorCount_HWSat;    ///< check to see ADC channel is saturated
+  Int_t fErrorCount_sample;   ///< for sample size check
   Int_t fErrorCount_SW_HW;    ///< HW_sum==SW_sum check
   Int_t fErrorCount_Sequence; ///< sequence number check
   Int_t fErrorCount_SameHW;   ///< check to see ADC returning same HW value
   Int_t fErrorCount_ZeroHW;   ///< check to see ADC returning zero
 
-  Int_t fNumEvtsWithEventCutsRejected; ///< Counts the Event cut rejected events 
+  Int_t fNumEvtsWithEventCutsRejected; ///< Counts the Event cut rejected events
 
 
 
@@ -381,8 +381,8 @@ private:
   Bool_t bSequence_number;
 
 private:
-  
-  
+
+
 
 
 

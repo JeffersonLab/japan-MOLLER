@@ -478,8 +478,8 @@ class QwInterpolator {
  */
 template <class value_t, unsigned int value_n>
 inline bool QwInterpolator<value_t,value_n>::Linear(
-	const coord_t* coord,
-	value_t* value) const
+        const coord_t* coord,
+        value_t* value) const
 {
   // Get cell and local normalized coordinates
   Cell(coord, f_cell_index, f_cell_local);
@@ -508,8 +508,8 @@ inline bool QwInterpolator<value_t,value_n>::Linear(
  */
 template <class value_t, unsigned int value_n>
 inline bool QwInterpolator<value_t,value_n>::NearestNeighbor(
-	const coord_t* coord,
-	value_t* value) const
+        const coord_t* coord,
+        value_t* value) const
 {
   // Get nearest cell
   Nearest(coord, f_cell_index);
@@ -567,7 +567,7 @@ inline bool QwInterpolator<value_t,value_n>::Check(const unsigned int linear_ind
  */
 template <class value_t, unsigned int value_n>
 inline unsigned int QwInterpolator<value_t,value_n>::Index(
-	const unsigned int* cell_index) const
+        const unsigned int* cell_index) const
 {
   unsigned int linear_index = 0;
   // Loop over dimensions
@@ -585,8 +585,8 @@ inline unsigned int QwInterpolator<value_t,value_n>::Index(
  */
 template <class value_t, unsigned int value_n>
 inline unsigned int QwInterpolator<value_t,value_n>::Index(
-	const unsigned int* cell_index,
-	const unsigned int pattern) const
+        const unsigned int* cell_index,
+        const unsigned int pattern) const
 {
   unsigned int linear_index = 0;
   // Loop over dimensions
@@ -607,10 +607,10 @@ inline unsigned int QwInterpolator<value_t,value_n>::Index(
  */
 template <class value_t, unsigned int value_n>
 inline void QwInterpolator<value_t,value_n>::Cell(
-	const coord_t coord,
-	unsigned int &cell_index,
-	double &cell_local,
-	const unsigned int dim) const
+        const coord_t coord,
+        unsigned int &cell_index,
+        double &cell_local,
+        const unsigned int dim) const
 {
   // Normalize coordinate (positive, with integers on grid points)
   double norm_coord = (coord - fMin[dim]) / fStep[dim];
@@ -631,9 +631,9 @@ inline void QwInterpolator<value_t,value_n>::Cell(
  */
 template <class value_t, unsigned int value_n>
 inline void QwInterpolator<value_t,value_n>::Cell(
-	const coord_t* coord,
-	unsigned int* cell_index,
-	double* cell_local) const
+        const coord_t* coord,
+        unsigned int* cell_index,
+        double* cell_local) const
 {
   // Get cell index and local coordinates in each dimension
   for (unsigned int dim = 0; dim < fNDim; dim++)
@@ -647,8 +647,8 @@ inline void QwInterpolator<value_t,value_n>::Cell(
  */
 template <class value_t, unsigned int value_n>
 inline void QwInterpolator<value_t,value_n>::Cell(
-	const coord_t* coord,
-	unsigned int* cell_index) const
+        const coord_t* coord,
+        unsigned int* cell_index) const
 {
   // Get cell index and ignore local coordinates
   Cell(coord, cell_index, f_cell_local);
@@ -661,8 +661,8 @@ inline void QwInterpolator<value_t,value_n>::Cell(
  */
 template <class value_t, unsigned int value_n>
 inline void QwInterpolator<value_t,value_n>::Cell(
-	unsigned int linear_index,
-	unsigned int* cell_index) const
+        unsigned int linear_index,
+        unsigned int* cell_index) const
 {
   // This does not work with unsigned int, because that is always >= 0 and wraps
   for (int dim = fNDim-1; dim >= 0; dim--) {
@@ -678,8 +678,8 @@ inline void QwInterpolator<value_t,value_n>::Cell(
  */
 template <class value_t, unsigned int value_n>
 inline void QwInterpolator<value_t,value_n>::Coord(
-	const unsigned int* cell_index,
-	coord_t* coord) const
+        const unsigned int* cell_index,
+        coord_t* coord) const
 {
   for (unsigned int dim = 0; dim < fNDim; dim++)
     coord[dim] = fMin[dim] + cell_index[dim] * fStep[dim];
@@ -692,8 +692,8 @@ inline void QwInterpolator<value_t,value_n>::Coord(
  */
 template <class value_t, unsigned int value_n>
 inline void QwInterpolator<value_t,value_n>::Coord(
-	const unsigned int linear_index,
-	coord_t* coord) const
+        const unsigned int linear_index,
+        coord_t* coord) const
 {
   Cell(linear_index,f_cell_index);
   Coord(f_cell_index,coord);

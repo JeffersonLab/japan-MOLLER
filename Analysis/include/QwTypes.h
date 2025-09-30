@@ -100,12 +100,12 @@ static const QwPackageMap kQwPackageMap = CreatePackageMap();
 
 enum EQwDetectorType {
   kTypeNull = 0,
-  kTypeSciFiber,	// Scintillating Fiber detector
-  kTypeDriftHDC,	// HDC Drift chamber
-  kTypeDriftVDC,	// VDC Drift chamber
-  kTypeTrigscint,	// Trigger scintillator
-  kTypeCerenkov,	// Cerenkov detector
-  kTypeScanner,		// Focal plane scanner
+  kTypeSciFiber,        // Scintillating Fiber detector
+  kTypeDriftHDC,        // HDC Drift chamber
+  kTypeDriftVDC,        // VDC Drift chamber
+  kTypeTrigscint,       // Trigger scintillator
+  kTypeCerenkov,        // Cerenkov detector
+  kTypeScanner,         // Focal plane scanner
   kNumTypes
 };
 inline std::ostream& operator<< (std::ostream& stream, const EQwDetectorType& i) {
@@ -129,10 +129,10 @@ static const QwTypeMap kQwTypeMap = CreateTypeMap();
 // Enumerator type for the instrument type, used in subsystems that have to
 // distinguish between various detector types.
 enum EQwPMTInstrumentType {
-  kQwUnknownPMT = 0,	// Unknown PMT type
-  kQwIntegrationPMT,	// Integration PMT
-  kQwScalerPMT,	        // Scaler PMT
-  kQwCombinedPMT,	// Combined PMT
+  kQwUnknownPMT = 0,    // Unknown PMT type
+  kQwIntegrationPMT,    // Integration PMT
+  kQwScalerPMT,         // Scaler PMT
+  kQwCombinedPMT,       // Combined PMT
   kNumInstrumentTypes   // This should be the last enum; it provides the number of know types.
 };
 
@@ -177,7 +177,7 @@ static const UInt_t kBPMErrorFlag = 0x400; // in Decimal 1024 to identify the si
 static const UInt_t kPMTErrorFlag = 0x800; // in Decimal 2048 to identify the single event cut is failed for a PMT (Combined or regular)
 static const UInt_t kBModFFBErrorFlag = 0x1000; // in Decimal 4096 (2^12) to identify the FFB OFF periods for Energy modulation
 static const UInt_t kBModErrorFlag = 0x8000; // in Decimal 32768 (2^15) to identify the single event cut is failed for a BMod channel
-static const UInt_t kEventCutMode3 = 0x10000;  // in Decimal 65536 to identify the mode 3 where we only flag event cut failed events 
+static const UInt_t kEventCutMode3 = 0x10000;  // in Decimal 65536 to identify the mode 3 where we only flag event cut failed events
 static const UInt_t kErrorFlag_Helicity = 0x20000;  // Any type of helicity decoding problem
 
 
@@ -248,11 +248,11 @@ class QwDetectorID
   : fRegion(kRegionIDNull),fPackage(kPackageNull),fOctant(-1),
     fPlane(-1),fDirection(kDirectionNull),fElement(-1) { };
 
-  QwDetectorID(const EQwRegionID region, 
-               const EQwDetectorPackage package, 
+  QwDetectorID(const EQwRegionID region,
+               const EQwDetectorPackage package,
                const Int_t octant,
                const Int_t plane,
-               const EQwDirectionID direction, 
+               const EQwDirectionID direction,
                const Int_t wire)
   : fRegion(region),fPackage(package),fOctant(octant),
     fPlane(plane),fDirection(direction),fElement(wire) { };
@@ -264,7 +264,7 @@ class QwDetectorID
   Int_t              fPlane;     ///< R or theta index for R1; plane index for R2 & R3
   EQwDirectionID     fDirection; ///< direction of the wire plane X,Y,U,V etc - Rakitha (10/23/2008)
   Int_t              fElement;   ///< trace number for R1; wire number for R2 & R3; PMT number for others
-  
+
   friend std::ostream& operator<<(std::ostream& os, const QwDetectorID &detectorID) {
     os << " Region ";
     os <<  detectorID.fRegion;
@@ -315,7 +315,7 @@ class QwDelayLineID{
 enum EQwWienMode {
   kWienIndeterminate = 0,
   kWienForward,
-  kWienBackward, 
+  kWienBackward,
   kWienVertTrans,
   kWienHorizTrans
 };

@@ -29,7 +29,7 @@ class QwParityDB;
 #endif
 
 enum HelicityRootSavingType{kHelSaveMPS = 0,
-			    kHelSavePattern,
+                            kHelSavePattern,
                             kHelNoSave};
 // this emun vector needs to be coherent with the DetectorTypes declaration in the QwBeamLine constructor
 
@@ -80,7 +80,7 @@ class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHeli
   };
 
   Int_t  ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id,
-				   UInt_t* buffer, UInt_t num_words);
+                                   UInt_t* buffer, UInt_t num_words);
   Int_t  ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) {
     return ProcessEvBuffer(0x1,roc_id,bank_id,buffer,num_words);
   };
@@ -164,26 +164,26 @@ class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHeli
  protected:
   void CheckPatternNum(VQwSubsystem *value);
   void MergeCounters(VQwSubsystem *value);
-  
+
   Bool_t CheckIORegisterMask(const UInt_t& ioregister, const UInt_t& mask) const {
     return ((mask != 0)&&((ioregister & mask) == mask));
   };
 
  protected:
   enum HelicityRootSavingType{kHelSaveMPS = 0,
-			      kHelSavePattern,
-			      kHelNoSave};
+                              kHelSavePattern,
+                              kHelNoSave};
 
   enum HelicityEncodingType{kHelUserbitMode=0,
-			    kHelInputRegisterMode,
-			    kHelLocalyMadeUp,
-			    kHelInputMollerMode};
+                            kHelInputRegisterMode,
+                            kHelLocalyMadeUp,
+                            kHelInputMollerMode};
   // this values allow to switch the code between different helicity encoding mode.
 
   enum InputRegisterBits{kDefaultInputReg_HelPlus     = 0x1,
-			 kDefaultInputReg_HelMinus    = 0x2,
-			 kDefaultInputReg_PatternSync = 0x4,
-			 kDefaultInputReg_FakeMPS     = 0x8000};
+                         kDefaultInputReg_HelMinus    = 0x2,
+                         kDefaultInputReg_PatternSync = 0x4,
+                         kDefaultInputReg_FakeMPS     = 0x8000};
 
   UInt_t fInputReg_FakeMPS;
   UInt_t fInputReg_HelPlus;
@@ -329,5 +329,3 @@ class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHeli
 
 
 #endif
-
-

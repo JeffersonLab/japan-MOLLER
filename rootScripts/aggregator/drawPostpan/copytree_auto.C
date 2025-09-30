@@ -11,14 +11,14 @@ void copytree_auto(int slug = -1)
      TTree *oldtree;
      oldfile.GetObject("agg", oldtree);
      const auto nentries = oldtree->GetEntries();
-     
+
      TFile newfile("plots/grand_prototype.root", "recreate");
      auto newtree = oldtree->CloneTree(0);
      for (auto i : ROOT::TSeqI(nentries)) {
       if (i==slug) continue;
-     	oldtree->GetEntry(i);
+        oldtree->GetEntry(i);
       newtree->Fill();
      }
      newtree->Write("agg",TObject::kOverwrite);
      newfile.Close();
- }                                                                           
+ }

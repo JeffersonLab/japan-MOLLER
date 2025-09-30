@@ -23,11 +23,11 @@ class QwParameterFile;
  *
  */
 
-class QwCombinerSubsystem: public VQwSubsystemParity, 
+class QwCombinerSubsystem: public VQwSubsystemParity,
   public MQwSubsystemCloneable<QwCombinerSubsystem>,
   public QwCombiner
 {
-  
+
   public:
       // Constructors
       /// \brief Constructor with just name.
@@ -37,8 +37,8 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
       // Copy Constructor
       QwCombinerSubsystem(const QwCombinerSubsystem &source)
       : VQwSubsystem(source), VQwSubsystemParity(source), QwCombiner(source) { }
-	
-      // Destructor 
+
+      // Destructor
       ~QwCombinerSubsystem();
 
       std::shared_ptr<VQwSubsystem> GetSharedPointerToStaticObject();
@@ -94,7 +94,7 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
 
 
       /// \brief Derived functions
-      // not sure if there should be empty definition, no definition or defined 
+      // not sure if there should be empty definition, no definition or defined
       Int_t LoadChannelMap(TString);
       Int_t LoadInputParameters(TString);
       Int_t LoadEventCuts(TString);
@@ -114,13 +114,13 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
         */
       };
       Int_t ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
-	Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
+        Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
       void ProcessEvent(){};
 
       Bool_t ApplySingleEventCuts();
 
       Bool_t  CheckForBurpFail(const VQwSubsystem *ev_error){
-	      return kFALSE;
+              return kFALSE;
       };
 
       void IncrementErrorCounters();
@@ -128,19 +128,18 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
       UInt_t GetEventcutErrorFlag();
 
 
-  private: 
-       
-     /**
-      * Default Constructor 
-      * 
-      * Error: tries to call default constructors of base class, 
-      * 	QwCombiner() is private
-      */
-   //   QwCombinerSubsystem() {};     
+  private:
 
-      
+     /**
+      * Default Constructor
+      *
+      * Error: tries to call default constructors of base class,
+      *         QwCombiner() is private
+      */
+   //   QwCombinerSubsystem() {};
+
+
 }; // class QwCombinerSubsystem
 
 
 #endif // __QWCOMBINERSUBSYSTEM__
-
