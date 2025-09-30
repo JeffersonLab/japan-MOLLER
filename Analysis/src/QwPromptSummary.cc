@@ -358,8 +358,8 @@ QwPromptSummary::GetElementByName(TString name)
     }
     return an_element;
   } else {
-      std::cout << "System " << name
-                << " QwPromptSummary::GetElementByName not found" << std::endl;
+      QwDebug << "System " << name
+              << " QwPromptSummary::GetElementByName not found" << std::endl;
   }
   return NULL;
 };
