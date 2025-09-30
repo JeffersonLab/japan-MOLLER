@@ -51,7 +51,10 @@
 #include "QwBeamMod.h"
 #include "QwIntegratedRaster.h"
 
-
+// Valgrind headers
+#if __has_include(<valgrind/callgrind.h>)
+#include <valgrind/callgrind.h>
+#endif
 
 Int_t main(Int_t argc, Char_t* argv[])
 {
@@ -63,6 +66,8 @@ Int_t main(Int_t argc, Char_t* argv[])
   gQwOptions.AddOptions()("single-output-file", po::value<bool>()->default_bool_value(false), "Write a single output file");
   gQwOptions.AddOptions()("print-errorcounters", po::value<bool>()->default_bool_value(true), "Print summary of error counters");
   gQwOptions.AddOptions()("write-promptsummary", po::value<bool>()->default_bool_value(false), "Write PromptSummary");
+  gQwOptions.AddOptions()("callgrind-instr-start-event-loop", po::value<bool>()->default_bool_value(false), "Start callgrind instrumentation with main event loop (with --instr-atstart=no)");
+  gQwOptions.AddOptions()("callgrind-instr-stop-event-loop", po::value<bool>()->default_bool_value(false), "Stop callgrind instrumentation with main event loop (with --instr-atstart=no)");
 
   ///  Without anything, print usage
   if (argc == 1) {
@@ -299,6 +304,14 @@ Int_t main(Int_t argc, Char_t* argv[])
       eventbuffer.ReOpenStream();
     }
 
+    // Start event loop instrumentation
+#ifdef CALLGRIND_START_INSTRUMENTATION
+    if (gQwOptions.GetValue<bool>("callgrind-instr-start-event-loop")) {
+      QwMessage << "Starting callgrind instrumentation" << QwLog::endl;
+      CALLGRIND_START_INSTRUMENTATION;
+    }
+#endif
+
     ///  Start loop over events
     while (eventbuffer.GetNextEvent() == CODA_OK) {
 
@@ -524,6 +537,14 @@ Int_t main(Int_t argc, Char_t* argv[])
     // Unwind event ring
     QwMessage << "Unwinding event ring" << QwLog::endl;
     eventring.Unwind();
+
+    // Stop event loop instrumentation
+#ifdef CALLGRIND_START_INSTRUMENTATION
+    if (gQwOptions.GetValue<bool>("callgrind-instr-stop-event-loop")) {
+      CALLGRIND_STOP_INSTRUMENTATION;
+      QwMessage << "Stapped callgrind instrumentation" << QwLog::endl;
+    }
+#endif
 
     //  TODO Drain event run
 
