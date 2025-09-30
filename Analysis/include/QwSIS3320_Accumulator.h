@@ -41,7 +41,7 @@ class QwSIS3320_Accumulator: public VQwDataElement {
       fMinValue = 0; fMaxValue = 0;
       fMinTime = 0; fMaxTime = 0;
     };
-    virtual ~QwSIS3320_Accumulator() { };
+    ~QwSIS3320_Accumulator() override { };
 
     Int_t GetMinValue() const { return fMinValue; };
     Int_t GetMaxValue() const { return fMaxValue; };
@@ -56,8 +56,8 @@ class QwSIS3320_Accumulator: public VQwDataElement {
       else return 0.0;
     };
 
-    void  ClearEventData() { fAccumulatorSum = 0; fNumberOfSamples = 0; };
-    Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t subelement = 0);
+    void  ClearEventData() override { fAccumulatorSum = 0; fNumberOfSamples = 0; };
+    Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t subelement = 0) override;
     void  ProcessEvent() { };
 
     const QwSIS3320_Accumulator operator/ (const Double_t &value) const;
@@ -77,8 +77,8 @@ class QwSIS3320_Accumulator: public VQwDataElement {
     void Difference(const QwSIS3320_Accumulator &value1, const QwSIS3320_Accumulator &value2);
     void Ratio(const QwSIS3320_Accumulator &numer, const QwSIS3320_Accumulator &denom);
 
-    void  ConstructHistograms(TDirectory *folder, TString &prefix);
-    void  FillHistograms();
+    void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
+    void  FillHistograms() override;
 
     void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
     void  FillTreeVector(std::vector<Double_t> &values) const;

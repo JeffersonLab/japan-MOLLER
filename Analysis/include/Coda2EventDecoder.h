@@ -13,18 +13,18 @@ public:
 			fEvtClass(0),
 			fStatSum(0),
 			fIDBankNum(0) { }
-		~Coda2EventDecoder() { }
+		~Coda2EventDecoder() override { }
 public:
 	// Encoding Functions
-	virtual std::vector<UInt_t> EncodePHYSEventHeader(std::vector<ROCID_t> &ROCList);
-	virtual void EncodePrestartEventHeader(int* buffer, int runnumber, int runtype, int localtime);
-	virtual void EncodeGoEventHeader(int* buffer, int eventcount, int localtime);
-	virtual void EncodePauseEventHeader(int* buffer, int eventcount, int localtime);
-	virtual void EncodeEndEventHeader(int* buffer, int eventcount, int localtime);
+	std::vector<UInt_t> EncodePHYSEventHeader(std::vector<ROCID_t> &ROCList) override;
+	void EncodePrestartEventHeader(int* buffer, int runnumber, int runtype, int localtime) override;
+	void EncodeGoEventHeader(int* buffer, int eventcount, int localtime) override;
+	void EncodePauseEventHeader(int* buffer, int eventcount, int localtime) override;
+	void EncodeEndEventHeader(int* buffer, int eventcount, int localtime) override;
 public:
 	// Decoding Functions
-	virtual Int_t DecodeEventIDBank(UInt_t *buffer);
-	virtual void PrintDecoderInfo(QwLog& out);
+	Int_t DecodeEventIDBank(UInt_t *buffer) override;
+	void PrintDecoderInfo(QwLog& out) override;
 
 private:
 	// Event Information (CODA 2 Specific)
