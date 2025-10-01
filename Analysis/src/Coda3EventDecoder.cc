@@ -358,16 +358,18 @@ uint32_t Coda3EventDecoder::TBOBJ::Fill( const uint32_t* evbuffer,
 		uint32_t slen = *p & 0xffff;
 		if( slen != 2*(1 + (withRunInfo() ? 1 : 0) + (withTimeStamp() ? blkSize : 0)))
 			throw coda_format_error("Invalid length for Trigger Bank seg 1");
-		memcpy(&evtNum, p + 1, sizeof(evtNum)); // uint64_t
-		if (withRunInfo()) {
-			memcpy(&runInfo, p + 3, sizeof(runInfo)); // uint64_t
+        const uint32_t *q = (p+1);
+		memcpy(&evtNum, q++, sizeof(evtNum)); // uint64_t
+		if (withTimeStamp()) {
+			evTS = reinterpret_cast<const uint64_t*>(++q); // uint64_t[blkSize]
+			q += blksize-1;
+		} else {
+		    evTS = nullptr;
+		}
+	    if (withRunInfo()) {
+			memcpy(&runInfo, q+=2, sizeof(runInfo)); // uint64_t
 		} else {
 			runInfo = 0;
-		}
-		if (withTimeStamp()) {
-			evTS = reinterpret_cast<const uint64_t*>(p + 5); // uint64_t[blkSize]
-		} else {
-			evTS = nullptr;
 		}
 		p += slen + 1;
 	}
