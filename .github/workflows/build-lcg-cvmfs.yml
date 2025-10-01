@@ -237,10 +237,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - release: "LCG_106"
+          - release: "LCG_107"
             arch: "x86_64"
             os: "el9"
-            compiler: "gcc13"
+            compiler: "gcc14"
             opt: "opt"
             cxxflags: ""
     steps:
