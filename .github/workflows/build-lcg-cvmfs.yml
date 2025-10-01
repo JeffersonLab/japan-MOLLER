@@ -23,16 +23,19 @@ jobs:
             os: "el9"
             compiler: "gcc13"
             opt: "opt"
+            cxxflags: "-g -pg"
           - release: "LCG_107"
             arch: "x86_64"
             os: "el9"
             compiler: "clang16"
             opt: "opt"
+            cxxflags: ""
           - release: "LCG_107"
             arch: "x86_64"
             os: "el9"
             compiler: "gcc14"
             opt: "opt"
+            cxxflags: ""
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -82,7 +85,7 @@ jobs:
 
             echo "::group::Compilation"
             # Build the project with ccache
-            cmake -Bbuild -S. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS="-g -pg"
+            cmake -Bbuild -S. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS=${{ matrix.cxxflags }}
             cmake --build build -j$(nproc)
             echo "::endgroup::"
             
@@ -106,7 +109,9 @@ jobs:
             echo "::endgroup::"
 
             echo "::group:: Profile analysis"
-            gprof build/qwparity | tee qwparity.txt
+            if [ -f gmon.out ] ; then
+              gprof build/qwparity | tee qwparity.txt
+            fi
             echo "::endgroup::"
 
       - name: Compress build directory
@@ -126,7 +131,7 @@ jobs:
           path: |
             qwparity.txt
           retention-days: 7
-          if-no-files-found: error
+          if-no-files-found: ignore
 
       - name: Upload prompt summary
         uses: actions/upload-artifact@v4
@@ -237,6 +242,7 @@ jobs:
             os: "el9"
             compiler: "gcc13"
             opt: "opt"
+            cxxflags: ""
     steps:
       - uses: actions/checkout@v3
 
