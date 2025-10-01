@@ -85,7 +85,7 @@ jobs:
 
             echo "::group::Compilation"
             # Build the project with ccache
-            cmake -Bbuild -S. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS=${{ matrix.cxxflags }}
+            cmake -Bbuild -S. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS="${{ matrix.cxxflags }}"
             cmake --build build -j$(nproc)
             echo "::endgroup::"
             
