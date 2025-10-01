@@ -828,6 +828,7 @@ class QwRootFile {
     TMapFile* fMapFile;
     Bool_t fEnableMapFile;
     Int_t fUpdateInterval;
+    Int_t fCompressionAlgorithm;
     Int_t fCompressionLevel;
     Int_t fBasketSize;
     Int_t fAutoFlush;
