@@ -300,8 +300,6 @@ private:
   //@}
 
 
-  mutable QwRootTreeBranchVector branch_vector;
-
   /*! \name Channel information data members   */
 
   /*! \name Channel configuration data members */
