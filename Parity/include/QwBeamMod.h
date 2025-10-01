@@ -58,7 +58,7 @@ class QwModChannelID
 /*     fSubelement(999999),fmoduletype(""),fmodulename("") */
 /*     {}; */
 
-  Int_t fSubbankIndex;        //Generated from ROCID(readout CPU) & BankID(corespondes to internal headers to ID differnt types of data..ex. F1TDC)
+  Int_t fSubbankIndex;        //Generated from ROCID(readout CPU) & BankID(corespondes to internal headers to ID differnt types of data)
   Int_t fWordInSubbank;
   //first word reported for this channel in the subbank
   //(eg VQWK channel report 6 words for each event, scalers oly report one word per event)

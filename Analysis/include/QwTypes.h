@@ -151,16 +151,6 @@ enum EQwBeamInstrumentType {
   kBeamDevTypes  // This should be the last enum; it provides the number of know types.
 };
 
-// Enumerator type for the electronics module type
-enum EQwModuleType {
-  kUnknownModuleType = 0,
-  kV775_TDC,
-  kV792_ADC,
-  kF1TDC,
-  kSIS3801,
-  kNumModuleTypes
-};
-
 //Beamline device errorflags
 static const UInt_t kErrorFlag_VQWK_Sat   = 0x01; // in Decimal 1 to identify a VQWK is saturating
 static const UInt_t kErrorFlag_sample     = 0x2;  // in Decimal 2   for sample size check
@@ -281,21 +271,6 @@ class QwDetectorID
 
     return os;
   }
-};
-
-
-
-///
-/// \ingroup QwAnalysis
-class QwElectronicsID
-{
- public:
- QwElectronicsID():fModule(-1),fChannel(-1){};
- QwElectronicsID(const int slot,const int chan):fModule(slot),fChannel(chan){};
-
- public:
-  int fModule;       //F1TDC slot number or module number
-  int fChannel;      //channel number
 };
 
 

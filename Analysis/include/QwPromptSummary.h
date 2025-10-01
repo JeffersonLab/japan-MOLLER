@@ -137,8 +137,6 @@ class QwPromptSummary  :  public TObject
   QwPromptSummary(Int_t run_number, Int_t runlet_number);
   QwPromptSummary(Int_t run_number, Int_t runlet_number, const std::string& parameter_file);
   virtual ~QwPromptSummary();
-  //  friend std::ostream& operator<<(std::ostream& os, const QwF1TDC &f1tdc);
-
 
   std::map<TString, PromptSummaryElement*> fElementList;
   PromptSummaryElement* fReferenceElement{nullptr};
