@@ -19,6 +19,7 @@
 // Qweak headers
 #include "QwLog.h"
 #include "QwHistogramHelper.h"
+#include "QwRootFile.h"
 
 // Fields in accumulator data buffer
 const unsigned int QwSIS3320_Accumulator::INDEX_NUM = 0;
@@ -245,7 +246,7 @@ void QwSIS3320_Accumulator::Ratio(const QwSIS3320_Accumulator &numer, const QwSI
 }
 
 
-void  QwSIS3320_Accumulator::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwSIS3320_Accumulator::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (IsNameEmpty()) {
     //  This accumulator is not used, so skip setting up the tree.
@@ -253,17 +254,15 @@ void  QwSIS3320_Accumulator::ConstructBranchAndVector(TTree *tree, TString &pref
     TString basename = prefix + GetElementName();
     fTreeArrayIndex  = values.size();
 
-    values.push_back(0.0);
-    TString list = "hw_sum/D";
-    values.push_back(0.0);
-    list += ":num_samples/D";
+    values.push_back("hw_sum", 'D');
+    values.push_back("num_samples", 'D');
 
     fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
-    tree->Branch(basename, &(values[fTreeArrayIndex]), list);
+    tree->Branch(basename, &(values[fTreeArrayIndex]), values.LeafList(fTreeArrayIndex).c_str());
   }
 }
 
-void QwSIS3320_Accumulator::FillTreeVector(std::vector<Double_t> &values) const
+void QwSIS3320_Accumulator::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (IsNameEmpty()) {
     //  This accumulator is not used, so skip filling the tree vector.
@@ -278,8 +277,8 @@ void QwSIS3320_Accumulator::FillTreeVector(std::vector<Double_t> &values) const
             << QwLog::endl;
   } else {
     size_t index = fTreeArrayIndex;
-    values[index++] = GetAccumulatorSum();
-    values[index++] = GetNumberOfSamples();
+    values.SetValue(index++, GetAccumulatorSum());
+    values.SetValue(index++, GetNumberOfSamples());
   }
 }
 

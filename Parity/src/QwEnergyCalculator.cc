@@ -417,7 +417,7 @@ void  QwEnergyCalculator::FillHistograms(){
 }
 
 void  QwEnergyCalculator::ConstructBranchAndVector(TTree *tree, TString &prefix,
-						   std::vector<Double_t> &values){
+						   QwRootTreeBranchVector &values){
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
   }
@@ -470,7 +470,7 @@ void  QwEnergyCalculator::ConstructBranch(TTree *tree, TString &prefix, QwParame
   return;
 }
 
-void  QwEnergyCalculator::FillTreeVector(std::vector<Double_t> &values) const
+void  QwEnergyCalculator::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
@@ -481,7 +481,7 @@ void  QwEnergyCalculator::FillTreeVector(std::vector<Double_t> &values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void  QwEnergyCalculator::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void  QwEnergyCalculator::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip construction.
@@ -496,7 +496,7 @@ void  QwEnergyCalculator::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTuple
   return;
 }
 
-void  QwEnergyCalculator::FillNTupleVector(std::vector<Double_t>& values) const
+void  QwEnergyCalculator::FillNTupleVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip filling.

@@ -362,7 +362,7 @@ void QwClock<T>::FillHistograms()
 }
 
 template<typename T>
-void QwClock<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void QwClock<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip
@@ -409,7 +409,7 @@ void  QwClock<T>::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile&
 }
 
 template<typename T>
-void QwClock<T>::FillTreeVector(std::vector<Double_t> &values) const
+void QwClock<T>::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
@@ -423,7 +423,7 @@ void QwClock<T>::FillTreeVector(std::vector<Double_t> &values) const
 
 #ifdef HAS_RNTUPLE_SUPPORT
 template<typename T>
-void QwClock<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void QwClock<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip RNTuple construction
@@ -434,7 +434,7 @@ void QwClock<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& m
 }
 
 template<typename T>
-void QwClock<T>::FillNTupleVector(std::vector<Double_t>& values) const
+void QwClock<T>::FillNTupleVector(QwRootTreeBranchVector &values) const
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip filling the RNTuple.

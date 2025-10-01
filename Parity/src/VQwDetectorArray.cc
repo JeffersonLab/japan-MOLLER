@@ -1283,7 +1283,7 @@ void  VQwDetectorArray::FillHistograms() {
 }
 
 
-void VQwDetectorArray::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values) {
+void VQwDetectorArray::ConstructBranchAndVector(TTree *tree, TString & prefix, QwRootTreeBranchVector &values) {
 
     for (size_t i=0;i<fIntegrationPMT.size();i++)
      fIntegrationPMT[i].ConstructBranchAndVector(tree, prefix, values);
@@ -1338,7 +1338,7 @@ void VQwDetectorArray::ConstructBranch(TTree *tree, TString & prefix, QwParamete
     return;
 }
 
-void VQwDetectorArray::FillTreeVector(std::vector<Double_t> &values) const {
+void VQwDetectorArray::FillTreeVector(QwRootTreeBranchVector &values) const {
 
     for (size_t i=0;i<fIntegrationPMT.size();i++)
      fIntegrationPMT[i].FillTreeVector(values);
@@ -1351,7 +1351,7 @@ void VQwDetectorArray::FillTreeVector(std::vector<Double_t> &values) const {
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void VQwDetectorArray::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) {
+void VQwDetectorArray::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) {
 
     for (size_t i=0;i<fIntegrationPMT.size();i++)
      fIntegrationPMT[i].ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
@@ -1363,7 +1363,7 @@ void VQwDetectorArray::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleMod
 
 }
 
-void VQwDetectorArray::FillNTupleVector(std::vector<Double_t>& values) const {
+void VQwDetectorArray::FillNTupleVector(QwRootTreeBranchVector &values) const {
 
     for (size_t i=0;i<fIntegrationPMT.size();i++)
      fIntegrationPMT[i].FillNTupleVector(values);

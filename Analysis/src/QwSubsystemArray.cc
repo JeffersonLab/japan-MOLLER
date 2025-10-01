@@ -14,6 +14,7 @@
 #include "VQwHardwareChannel.h"
 #include "QwLog.h"
 #include "QwParameterFile.h"
+#include "QwRootFile.h"
 
 //*****************************************************************
 
@@ -570,21 +571,21 @@ void  QwSubsystemArray::PrintInfo() const
 void  QwSubsystemArray::ConstructBranchAndVector(
         TTree *tree,
         TString& prefix,
-        std::vector<Double_t>& values)
+        QwRootTreeBranchVector &values)
 {
   fTreeArrayIndex = values.size();
 
   // Each tree should only contain event number and type once, but will
   // still reserve space in the values vector, so we don't need to modify
   // FillTreeVector().
-  values.push_back(0.0);
-  values.push_back(0.0);
-  values.push_back(0.0);
-  values.push_back(0.0);
-  values.push_back(0.0);
+  values.push_back("CodaEventNumber", 'i');
+  values.push_back("CodaEventType", 'i');
+  values.push_back("Coda_CleanData", 'D');
+  values.push_back("Coda_ScanData1", 'D');
+  values.push_back("Coda_ScanData2", 'D');
   if (prefix == "" || prefix.Index("yield_") == 0) {
-    tree->Branch("CodaEventNumber",&(values[fTreeArrayIndex]),"CodaEventNumber/D");
-    tree->Branch("CodaEventType",&(values[fTreeArrayIndex+1]),"CodaEventType/D");
+    tree->Branch("CodaEventNumber",&(values[fTreeArrayIndex]),"CodaEventNumber/i");
+    tree->Branch("CodaEventType",&(values[fTreeArrayIndex+1]),"CodaEventType/i");
     tree->Branch("Coda_CleanData",&(values[fTreeArrayIndex+2]),"Coda_CleanData/D");
     tree->Branch("Coda_ScanData1",&(values[fTreeArrayIndex+3]),"Coda_ScanData1/D");
     tree->Branch("Coda_ScanData2",&(values[fTreeArrayIndex+4]),"Coda_ScanData2/D");
@@ -606,8 +607,8 @@ void QwSubsystemArray::ConstructBranch(TTree *tree, TString& prefix)
 {
   // Only MPS tree should contain event number and type
   if (prefix == "" || prefix == "yield_") {
-    tree->Branch("CodaEventNumber",&fCodaEventNumber,"CodaEventNumber/I");
-    tree->Branch("CodaEventType",&fCodaEventType,"CodaEventType/I");
+    tree->Branch("CodaEventNumber",&fCodaEventNumber,"CodaEventNumber/i");
+    tree->Branch("CodaEventType",&fCodaEventType,"CodaEventType/i");
   }
 
   for (iterator subsys = begin(); subsys != end(); ++subsys) {
@@ -639,8 +640,8 @@ void QwSubsystemArray::ConstructBranch(
   QwVerbose << *preamble << QwLog::endl;
 
   if (prefix == "" || prefix == "yield_") {
-    tree->Branch("CodaEventNumber",&fCodaEventNumber,"CodaEventNumber/I");
-    tree->Branch("CodaEventType",&fCodaEventType,"CodaEventType/I");
+    tree->Branch("CodaEventNumber",&fCodaEventNumber,"CodaEventNumber/i");
+    tree->Branch("CodaEventType",&fCodaEventType,"CodaEventType/i");
   }
 
   for (iterator subsys = begin(); subsys != end(); ++subsys) {
@@ -664,16 +665,15 @@ void QwSubsystemArray::ConstructBranch(
  * Fill the tree vector
  * @param values Vector of values
  */
-void QwSubsystemArray::FillTreeVector(std::vector<Double_t>& values) const
+void QwSubsystemArray::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   // Fill the event number and event type
   size_t index = fTreeArrayIndex;
-  values[index++] = this->GetCodaEventNumber();
-  values[index++] = this->GetCodaEventType();
-  values[index++] = this->fCleanParameter[0];
-  values[index++] = this->fCleanParameter[1];
-  values[index++] = this->fCleanParameter[2];
-
+  values.SetValue(index++, this->GetCodaEventNumber());
+  values.SetValue(index++, this->GetCodaEventType());
+  values.SetValue(index++, this->fCleanParameter[0]);
+  values.SetValue(index++, this->fCleanParameter[1]);
+  values.SetValue(index++, this->fCleanParameter[2]);
 
   // Fill the subsystem data
   for (const_iterator subsys = begin(); subsys != end(); ++subsys) {
@@ -692,7 +692,7 @@ void QwSubsystemArray::FillTreeVector(std::vector<Double_t>& values) const
 void QwSubsystemArray::ConstructNTupleAndVector(
     std::unique_ptr<ROOT::RNTupleModel>& model,
     TString& prefix,
-    std::vector<Double_t>& values,
+    QwRootTreeBranchVector &values,
     std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   fTreeArrayIndex = values.size();
@@ -740,7 +740,7 @@ void QwSubsystemArray::ConstructNTupleAndVector(
  * Fill the RNTuple vector
  * @param values Vector of values
  */
-void QwSubsystemArray::FillNTupleVector(std::vector<Double_t>& values) const
+void QwSubsystemArray::FillNTupleVector(QwRootTreeBranchVector &values) const
 {
   // Fill the event number and event type (same as TTree)
   size_t index = fTreeArrayIndex;
