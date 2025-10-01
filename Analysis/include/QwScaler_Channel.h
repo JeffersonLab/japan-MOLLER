@@ -189,12 +189,12 @@ public:
   void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
   void  FillHistograms() override;
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) override = 0;
-  void  FillTreeVector(std::vector<Double_t> &values) const override = 0;
+  virtual void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override = 0;
+  virtual void  FillTreeVector(QwRootTreeBranchVector &values) const override = 0;
   void  ConstructBranch(TTree *tree, TString &prefix) override;
 #ifdef HAS_RNTUPLE_SUPPORT
-  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override = 0;
-  void  FillNTupleVector(std::vector<Double_t>& values) const override = 0;
+  virtual void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override = 0;
+  virtual void  FillNTupleVector(QwRootTreeBranchVector &values) const override = 0;
 #endif // HAS_RNTUPLE_SUPPORT
 
 
@@ -284,11 +284,19 @@ class QwScaler_Channel: public VQwScaler_Channel
   void  EncodeEventData(std::vector<UInt_t> &buffer) override;
   Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t index = 0) override;
 
+<<<<<<< HEAD
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) override;
   void  FillTreeVector(std::vector<Double_t> &values) const override;
 #ifdef HAS_RNTUPLE_SUPPORT
   void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
   void  FillNTupleVector(std::vector<Double_t>& values) const override;
+=======
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values);
+  void  FillTreeVector(QwRootTreeBranchVector &values) const;
+#ifdef HAS_RNTUPLE_SUPPORT
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+  void  FillNTupleVector(QwRootTreeBranchVector &values) const;
+>>>>>>> 56a85e81 (Refactor <everything> to use QwRootTreeBranchVector instead of std::vector<Double_t> for tree branch and vector construction.)
 #endif // HAS_RNTUPLE_SUPPORT
 
 

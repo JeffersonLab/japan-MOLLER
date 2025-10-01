@@ -395,7 +395,7 @@ void  QwDataHandlerArray::FillNTupleFields(QwRootFile *treerootfile)
 
 //*****************************************************************
 
-void  QwDataHandlerArray::ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector <Double_t> &values)
+void  QwDataHandlerArray::ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values)
 {
   if (!empty()){
     for (iterator handler = begin(); handler != end(); ++handler) {
@@ -405,7 +405,7 @@ void  QwDataHandlerArray::ConstructBranchAndVector(TTree *tree, TString& prefix,
   }
 }
 
-void  QwDataHandlerArray::FillTreeVector(std::vector <Double_t> &values) const
+void  QwDataHandlerArray::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (!empty()){
     for (const_iterator handler = begin(); handler != end(); ++handler) {

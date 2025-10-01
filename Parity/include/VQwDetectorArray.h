@@ -172,14 +172,14 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
     void  FillHistograms() override;
 
     using VQwSubsystem::ConstructBranchAndVector;
-    void ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) override;
+    void ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override;
     void ConstructBranch(TTree *tree, TString &prefix) override;
     void ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file ) override;
 
-    void  FillTreeVector(std::vector<Double_t> &values) const override;
+    void  FillTreeVector(QwRootTreeBranchVector &values) const override;
 #ifdef HAS_RNTUPLE_SUPPORT
-    void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
-    void  FillNTupleVector(std::vector<Double_t>& values) const override;
+    void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
+    void  FillNTupleVector(QwRootTreeBranchVector &values) const override;
 #endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__

@@ -874,7 +874,7 @@ void  QwBPMStripline<T>::FillHistograms()
 }
 
 template<typename T>
-void  QwBPMStripline<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwBPMStripline<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing trees.
@@ -980,7 +980,7 @@ void  QwBPMStripline<T>::ConstructBranch(TTree *tree, TString &prefix, QwParamet
 
 
 template<typename T>
-void  QwBPMStripline<T>::FillTreeVector(std::vector<Double_t> &values) const
+void  QwBPMStripline<T>::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()=="") {
     //  This channel is not used, so skip filling the tree.
@@ -1003,7 +1003,7 @@ void  QwBPMStripline<T>::FillTreeVector(std::vector<Double_t> &values) const
 
 #ifdef HAS_RNTUPLE_SUPPORT
 template<typename T>
-void QwBPMStripline<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void QwBPMStripline<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing RNTuple.
@@ -1030,7 +1030,7 @@ void QwBPMStripline<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleMo
 }
 
 template<typename T>
-void QwBPMStripline<T>::FillNTupleVector(std::vector<Double_t>& values) const
+void QwBPMStripline<T>::FillNTupleVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()=="") {
     //  This channel is not used, so skip filling the RNTuple.

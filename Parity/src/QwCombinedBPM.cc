@@ -1094,7 +1094,7 @@ void  QwCombinedBPM<T>::FillHistograms()
 }
 
 template<typename T>
-void  QwCombinedBPM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwCombinedBPM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip constructing trees.
@@ -1179,7 +1179,7 @@ void  QwCombinedBPM<T>::ConstructBranch(TTree *tree, TString &prefix, QwParamete
 
 
 template<typename T>
-void  QwCombinedBPM<T>::FillTreeVector(std::vector<Double_t> &values) const
+void  QwCombinedBPM<T>::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip filling the tree.
@@ -1199,7 +1199,7 @@ void  QwCombinedBPM<T>::FillTreeVector(std::vector<Double_t> &values) const
 
 #ifdef HAS_RNTUPLE_SUPPORT
 template<typename T>
-void QwCombinedBPM<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void QwCombinedBPM<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip constructing RNTuple.
@@ -1222,7 +1222,7 @@ void QwCombinedBPM<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleMod
 }
 
 template<typename T>
-void QwCombinedBPM<T>::FillNTupleVector(std::vector<Double_t>& values) const
+void QwCombinedBPM<T>::FillNTupleVector(QwRootTreeBranchVector &values) const
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip filling the RNTuple.

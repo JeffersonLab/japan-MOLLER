@@ -4,7 +4,7 @@
  */
 
 #include "QwMollerADC_Channel.h"
- 
+
 // System headers
 #include <stdexcept>
 
@@ -678,7 +678,7 @@ void  QwMollerADC_Channel::FillHistograms()
     }
 }
 
-void  QwMollerADC_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwMollerADC_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   //  This channel is not used, so skip setting up the tree.
   if (IsNameEmpty()) return;
@@ -700,71 +700,53 @@ void  QwMollerADC_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix
   bSequence_number = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "sequence_number");
 
   if (bHw_sum) {
-    values.push_back(0.0);
-    list += "hw_sum/D";
+    values.push_back("hw_sum", 'D');
     if (fDataToSave == kMoments) {
-      values.push_back(0.0);
-      list += ":hw_sum_m2/D";
-      values.push_back(0.0);
-      list += ":hw_sum_err/D";
+      values.push_back("hw_sum_m2", 'D');
+      values.push_back("hw_sum_err", 'D');
     }
   }
 
   if (bBlock) {
-    values.push_back(0.0);
-    list += ":block0/D";
-    values.push_back(0.0);
-    list += ":block1/D";
-    values.push_back(0.0);
-    list += ":block2/D";
-    values.push_back(0.0);
-    list += ":block3/D";
+    values.push_back("block0", 'D');
+    values.push_back("block1", 'D');
+    values.push_back("block2", 'D');
+    values.push_back("block3", 'D');
   }
 
   if (bNum_samples) {
-    values.push_back(0.0);
-    list += ":num_samples/D";
+    values.push_back("num_samples", 'i');
   }
 
   if (bDevice_Error_Code) {
-    values.push_back(0.0);
-    list += ":Device_Error_Code/D";
+    values.push_back("Device_Error_Code", 'i');
   }
 
   if (fDataToSave == kRaw) {
     if (bHw_sum_raw) {
-      values.push_back(0.0);
-      list += ":hw_sum_raw/D";
+      values.push_back("hw_sum_raw", 'I');
     }
     if (bBlock_raw) {
-      values.push_back(0.0);
-      list += ":block0_raw/D";
-      values.push_back(0.0);
-      list += ":block1_raw/D";
-      values.push_back(0.0);
-      list += ":block2_raw/D";
-      values.push_back(0.0);
-      list += ":block3_raw/D";
+      values.push_back("block0_raw", 'I');
+      values.push_back("block1_raw", 'I');
+      values.push_back("block2_raw", 'I');
+      values.push_back("block3_raw", 'I');
     }
 
-    for(int i = 0; i < 4; i++){
-     if (bBlock_raw) {
-      values.push_back(0.0);
-      list += Form(":SumSq1_%d/D",i);
-      values.push_back(0.0);
-      list += Form(":SumSq2_%d/D",i);
-      values.push_back(0.0);
-      list += Form(":RawMin_%d/D",i);
-      values.push_back(0.0);
-      list += Form(":RawMax_%d/D",i);
-     }
+    for (int i = 0; i < 4; i++) {
+      if (bBlock_raw) {
+        values.push_back(Form("SumSq_%d", i), 'L');
+        values.push_back(Form("RawMin_%d", i), 'I');
+        values.push_back(Form("RawMax_%d", i), 'I');
+      }
     }
 
     if (bSequence_number) {
-      values.push_back(0.0);
-      list += ":sequence_number/D";
+      values.push_back("sequence_number", 'i');
     }
   }
+
+  std::string leaf_list = values.LeafList(fTreeArrayIndex);
 
   fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
 
@@ -773,20 +755,20 @@ void  QwMollerADC_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix
         bHw_sum_raw || bBlock_raw || bSequence_number)) {
 
     // This is for the RT mode
-    if (list == "hw_sum/D")
-      list = basename+"/D";
+    if (leaf_list == "hw_sum/D")
+      leaf_list = basename+"/D";
 
     if (kDEBUG)
-      QwMessage << "base name " << basename << " List " << list << QwLog::endl;
+      QwMessage << "base name " << basename << " List " << leaf_list << QwLog::endl;
 
-    tree->Branch(basename, &(values[fTreeArrayIndex]), list);
+    tree->Branch(basename, &(values[fTreeArrayIndex]), leaf_list.c_str());
   }
 
   if (kDEBUG) {
     std::cerr << "QwMollerADC_Channel::ConstructBranchAndVector: fTreeArrayIndex==" << fTreeArrayIndex
               << "; fTreeArrayNumEntries==" << fTreeArrayNumEntries
               << "; values.size()==" << values.size()
-              << "; list==" << list
+              << "; list==" << leaf_list
               << std::endl;
   }
 }
@@ -806,7 +788,7 @@ void  QwMollerADC_Channel::ConstructBranch(TTree *tree, TString &prefix)
 }
 
 
-void  QwMollerADC_Channel::FillTreeVector(std::vector<Double_t> &values) const
+void  QwMollerADC_Channel::FillTreeVector(QwRootTreeBranchVector& values) const
 {
   if (IsNameEmpty()) {
     //  This channel is not used, so skip filling the tree vector.
@@ -825,57 +807,60 @@ void  QwMollerADC_Channel::FillTreeVector(std::vector<Double_t> &values) const
 
     // hw_sum
     if (bHw_sum) {
-      values[index++] = this->GetHardwareSum();
+      values.SetValue(index++, this->GetHardwareSum());
       if (fDataToSave == kMoments) {
-        values[index++] = this->GetHardwareSumM2();
-        values[index++] = this->GetHardwareSumError();
+        values.SetValue(index++, this->GetHardwareSumM2());
+        values.SetValue(index++, this->GetHardwareSumError());
       }
     }
 
     if (bBlock) {
       for (Int_t i = 0; i < fBlocksPerEvent; i++) {
         // blocki
-        values[index++] = this->GetBlockValue(i);
+        values.SetValue(index++, this->GetBlockValue(i));
       }
     }
 
     // num_samples
     if (bNum_samples)
-      values[index++] =
-          (fDataToSave == kMoments)? this->fGoodEventCount: this->fNumberOfSamples;
-
+      values.SetValue(index++, (fDataToSave == kMoments)? this->fGoodEventCount: this->fNumberOfSamples);
     // Device_Error_Code
     if (bDevice_Error_Code)
-      values[index++] = this->fErrorFlag;
+      values.SetValue(index++, this->fErrorFlag);
 
     if (fDataToSave == kRaw)
       {
         // hw_sum_raw
         if (bHw_sum_raw)
-          values[index++] = this->GetRawHardwareSum();
+          values.SetValue(index++, this->GetRawHardwareSum());
 
         if (bBlock_raw) {
           for (Int_t i = 0; i < fBlocksPerEvent; i++) {
             // blocki_raw
-            values[index++] = this->GetRawBlockValue(i);
+            values.SetValue(index++, this->GetRawBlockValue(i));
           }
         }
 
-        for(int i = 0; i < 4; i++){
-        values[index++] = fBlockSumSq_raw[i] & 0xffffffff;
-        values[index++] = fBlockSumSq_raw[i] >> 32;
-        values[index++] = fBlock_min[i];
-        values[index++] = fBlock_max[i];
+        if (bBlock_raw) {
+          for (int i = 0; i < 4; i++) {
+            values.SetValue(index++, fBlockSumSq_raw[i]);
+            values.SetValue(index++, fBlock_min[i]);
+            values.SetValue(index++, fBlock_max[i]);
+          }
         }
         // sequence_number
         if (bSequence_number)
-          values[index++] = this->fSequenceNumber;
+          values.SetValue(index++, this->fSequenceNumber);
       }
+
+  }
+  if (GetElementName() == "la42") {
+    QwMessage << values.Dump(fTreeArrayIndex, fTreeArrayIndex+fTreeArrayNumEntries) << QwLog::endl;
   }
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   //For rntuple 
   if (IsNameEmpty()) {
@@ -1021,7 +1006,7 @@ void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupl
   }
 }
 
-void  QwMollerADC_Channel::FillNTupleVector(std::vector<Double_t>& values) const
+void  QwMollerADC_Channel::FillNTupleVector(QwRootTreeBranchVector &values) const
 {
   if (IsNameEmpty()) {
     //  This channel is not used, so skip filling.
