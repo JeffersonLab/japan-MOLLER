@@ -1059,12 +1059,9 @@ QwVQWK_Channel& QwVQWK_Channel::operator= (const QwVQWK_Channel &value)
   if (!IsNameEmpty()) {
     VQwHardwareChannel::operator=(value);
     for (Int_t i=0; i<fBlocksPerEvent; i++){
-      this->fBlock_raw[i] = value.fBlock_raw[i];
       this->fBlock[i]     = value.fBlock[i];
       this->fBlockM2[i]   = value.fBlockM2[i];
     }
-    this->fHardwareBlockSum_raw = value.fHardwareBlockSum_raw;
-    this->fSoftwareBlockSum_raw = value.fSoftwareBlockSum_raw;
     this->fHardwareBlockSum = value.fHardwareBlockSum;
     this->fHardwareBlockSumM2 = value.fHardwareBlockSumM2;
     this->fHardwareBlockSumError = value.fHardwareBlockSumError;
@@ -1083,12 +1080,9 @@ void QwVQWK_Channel::AssignScaledValue(const QwVQWK_Channel &value,
 
   if (!IsNameEmpty()) {
     for (Int_t i=0; i<fBlocksPerEvent; i++){
-      this->fBlock_raw[i] = value.fBlock_raw[i];   // Keep this?
       this->fBlock[i]   = value.fBlock[i]   * scale;
       this->fBlockM2[i] = value.fBlockM2[i] * scale * scale;
     }
-    this->fHardwareBlockSum_raw = value.fHardwareBlockSum_raw;  // Keep this?
-    this->fSoftwareBlockSum_raw = value.fSoftwareBlockSum_raw;  // Keep this?
     this->fHardwareBlockSum   = value.fHardwareBlockSum * scale;
     this->fHardwareBlockSumM2 = value.fHardwareBlockSumM2 * scale * scale;
     this->fHardwareBlockSumError = value.fHardwareBlockSumError;   // Keep this?
@@ -1174,11 +1168,8 @@ QwVQWK_Channel& QwVQWK_Channel::operator+= (const QwVQWK_Channel &value)
   if (!IsNameEmpty()) {
     for (Int_t i = 0; i < fBlocksPerEvent; i++) {
       this->fBlock[i] += value.fBlock[i];
-      this->fBlock_raw[i] += value.fBlock_raw[i];
       this->fBlockM2[i] = 0.0;
     }
-    this->fHardwareBlockSum_raw = value.fHardwareBlockSum_raw;
-    this->fSoftwareBlockSum_raw = value.fSoftwareBlockSum_raw;
     this->fHardwareBlockSum    += value.fHardwareBlockSum;
     this->fHardwareBlockSumM2   = 0.0;
     this->fNumberOfSamples     += value.fNumberOfSamples;
@@ -1202,11 +1193,8 @@ QwVQWK_Channel& QwVQWK_Channel::operator-= (const QwVQWK_Channel &value)
   if (!IsNameEmpty()){
     for (Int_t i=0; i<fBlocksPerEvent; i++){
       this->fBlock[i] -= value.fBlock[i];
-      this->fBlock_raw[i] = 0;
       this->fBlockM2[i] = 0.0;
     }
-    this->fHardwareBlockSum_raw = 0;
-    this->fSoftwareBlockSum_raw = 0;
     this->fHardwareBlockSum    -= value.fHardwareBlockSum;
     this->fHardwareBlockSumM2   = 0.0;
     this->fNumberOfSamples     += value.fNumberOfSamples;
@@ -1229,11 +1217,8 @@ QwVQWK_Channel& QwVQWK_Channel::operator*= (const QwVQWK_Channel &value)
   if (!IsNameEmpty()){
     for (Int_t i=0; i<fBlocksPerEvent; i++){
       this->fBlock[i] *= value.fBlock[i];
-      this->fBlock_raw[i] *= value.fBlock_raw[i];
       this->fBlockM2[i] = 0.0;
     }
-    this->fHardwareBlockSum_raw *= value.fHardwareBlockSum_raw;
-    this->fSoftwareBlockSum_raw *= value.fSoftwareBlockSum_raw;
     this->fHardwareBlockSum     *= value.fHardwareBlockSum;
     this->fHardwareBlockSumM2    = 0.0;
     this->fNumberOfSamples      *= value.fNumberOfSamples;
@@ -1320,10 +1305,6 @@ void QwVQWK_Channel::Ratio(const QwVQWK_Channel &numer, const QwVQWK_Channel &de
     *this  = numer;
     *this /= denom;
 
-    //  Set the raw values to zero.
-    for (Int_t i = 0; i < fBlocksPerEvent; i++) fBlock_raw[i] = 0;
-    fHardwareBlockSum_raw = 0;
-    fSoftwareBlockSum_raw = 0;
     // Remaining variables
     fNumberOfSamples      = denom.fNumberOfSamples;
     fSequenceNumber       = 0;
@@ -1412,7 +1393,6 @@ void QwVQWK_Channel::Product(const QwVQWK_Channel &value1, const QwVQWK_Channel 
   if (!IsNameEmpty()){
     for (Int_t i = 0; i < fBlocksPerEvent; i++) {
       this->fBlock[i] = (value1.fBlock[i]) * (value2.fBlock[i]);
-      this->fBlock_raw[i] = 0;
       // For a single event the second moment is still zero
       this->fBlockM2[i] = 0.0;
     }
@@ -1420,8 +1400,6 @@ void QwVQWK_Channel::Product(const QwVQWK_Channel &value1, const QwVQWK_Channel 
     // For a single event the second moment is still zero
     this->fHardwareBlockSumM2 = 0.0;
 
-    this->fSoftwareBlockSum_raw = 0;
-    this->fHardwareBlockSum_raw = value1.fHardwareBlockSum_raw * value2.fHardwareBlockSum_raw;
     this->fHardwareBlockSum = value1.fHardwareBlockSum * value2.fHardwareBlockSum;
     this->fNumberOfSamples = value1.fNumberOfSamples;
     this->fSequenceNumber  = 0;
@@ -1916,11 +1894,8 @@ void QwVQWK_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *value)
     //     input->PrintValue();
     for(Int_t i = 0; i < fBlocksPerEvent; i++){
       this -> fBlock[i] += scale * input->fBlock[i];
-      this->fBlock_raw[i] = 0;
       this -> fBlockM2[i] = 0.0;
     }
-    this->fHardwareBlockSum_raw = 0;
-    this->fSoftwareBlockSum_raw = 0;
     this -> fHardwareBlockSum += scale * input->fHardwareBlockSum;
     this -> fHardwareBlockSumM2 = 0.0;
     this -> fNumberOfSamples += input->fNumberOfSamples;
