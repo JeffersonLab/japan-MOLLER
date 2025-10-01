@@ -490,7 +490,7 @@ void QwBCM<T>::FillHistograms()
 }
 
 template<typename T>
-void QwBCM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void QwBCM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip
@@ -534,7 +534,7 @@ void  QwBCM<T>::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& m
 }
 
 template<typename T>
-void QwBCM<T>::FillTreeVector(std::vector<Double_t> &values) const
+void QwBCM<T>::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
@@ -547,7 +547,7 @@ void QwBCM<T>::FillTreeVector(std::vector<Double_t> &values) const
 
 #ifdef HAS_RNTUPLE_SUPPORT
 template<typename T>
-void QwBCM<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void QwBCM<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip
@@ -558,7 +558,7 @@ void QwBCM<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& mod
 }
 
 template<typename T>
-void QwBCM<T>::FillNTupleVector(std::vector<Double_t>& values) const
+void QwBCM<T>::FillNTupleVector(QwRootTreeBranchVector &values) const
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip filling.

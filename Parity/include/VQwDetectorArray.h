@@ -150,14 +150,14 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
     void  FillHistograms();
 
     using VQwSubsystem::ConstructBranchAndVector;
-    void ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
+    void ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values);
     void ConstructBranch(TTree *tree, TString &prefix);
     void ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file );
 
-    void  FillTreeVector(std::vector<Double_t> &values) const;
+    void  FillTreeVector(QwRootTreeBranchVector &values) const;
 #ifdef HAS_RNTUPLE_SUPPORT
-    void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
-    void  FillNTupleVector(std::vector<Double_t>& values) const;
+    void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+    void  FillNTupleVector(QwRootTreeBranchVector &values) const;
 #endif // HAS_RNTUPLE_SUPPORT
     //void  FillDB(QwParityDB *db, TString datatype);
     //void  FillErrDB(QwParityDB *db, TString datatype);

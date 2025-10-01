@@ -625,7 +625,7 @@ void  QwLinearDiodeArray::FillHistograms()
   return;
 }
 
-void  QwLinearDiodeArray::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwLinearDiodeArray::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing trees.
@@ -713,7 +713,7 @@ void  QwLinearDiodeArray::ConstructBranch(TTree *tree, TString &prefix, QwParame
   return;
 }
 
-void  QwLinearDiodeArray::FillTreeVector(std::vector<Double_t> &values) const
+void  QwLinearDiodeArray::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()=="") {
     //  This channel is not used, so skip filling the tree.
@@ -732,7 +732,7 @@ void  QwLinearDiodeArray::FillTreeVector(std::vector<Double_t> &values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void  QwLinearDiodeArray::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void  QwLinearDiodeArray::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing.
@@ -757,7 +757,7 @@ void  QwLinearDiodeArray::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTuple
   return;
 }
 
-void  QwLinearDiodeArray::FillNTupleVector(std::vector<Double_t>& values) const
+void  QwLinearDiodeArray::FillNTupleVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()=="") {
     //  This channel is not used, so skip filling.
