@@ -434,6 +434,7 @@ void  QwDataHandlerArray::FillHistograms()
 
 //*****************************************************************//
 
+#ifdef __USE_DATABASE__
 void  QwDataHandlerArray::FillDB(QwParityDB *db, TString type)
 {
   for (iterator handler = begin(); handler != end(); ++handler) {
@@ -445,14 +446,13 @@ void  QwDataHandlerArray::FillDB(QwParityDB *db, TString type)
 /*
 void  QwDataHandlerArray::FillErrDB(QwParityDB *db, TString type)
 {
-  //  for (const_iterator handler = dummy_source->begin(); handler != dummy_source->end(); ++handler) {
   for (iterator handler = begin(); handler != end(); ++handler) {
     VQwDataHandler* handler_parity = dynamic_cast<VQwDataHandler*>(handler->get());
     handler_parity->FillErrDB(db, type);
   }
-  return;
 }
 */
+#endif // __USE_DATABASE__
 
 void QwDataHandlerArray::WritePromptSummary(QwPromptSummary *ps, TString type)
 {

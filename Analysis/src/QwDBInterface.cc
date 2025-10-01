@@ -9,9 +9,9 @@
 #include "QwDBInterface.h"
 
 // Qweak headers
-//#define MYSQLPP_SSQLS_NO_STATICS
 #ifdef __USE_DATABASE__
-#include "QwParitySSQLS.h"
+#include "QwParitySchema.h"
+#include "QwParitySchemaRow.h"
 #include "QwParityDB.h"
 #endif // __USE_DATABASE__
 
@@ -86,40 +86,45 @@ T QwDBInterface::TypedDBClone()
 #ifdef __USE_DATABASE__
 /// Specifications of the templated function
 /// template \verbatim<class T>\endverbatim inline T QwDBInterface::TypedDBClone();
-template<> QwParitySSQLS::md_data
-QwDBInterface::TypedDBClone<QwParitySSQLS::md_data>() {
-  QwParitySSQLS::md_data row(0);
-  row.analysis_id         = fAnalysisId;
-  row.main_detector_id    = fDeviceId;
-  row.measurement_type_id = fMeasurementTypeId;
-  row.subblock            = fSubblock;
-  row.n                   = fN;
-  row.value               = fValue;
-  row.error               = fError;
+template<> QwParitySchema::md_data_row
+QwDBInterface::TypedDBClone<QwParitySchema::md_data_row>() {
+  QwParitySchema::md_data md_data;
+  QwParitySchema::md_data_row row;
+  row[md_data.analysis_id]         = fAnalysisId;
+  row[md_data.main_detector_id]    = fDeviceId;
+  row[md_data.measurement_type_id] = fMeasurementTypeId;
+  row[md_data.subblock]            = fSubblock;
+  row[md_data.n]                   = fN;
+  row[md_data.value]               = fValue;
+  row[md_data.error]               = fError;
   return row;
 }
-template<> QwParitySSQLS::lumi_data
-QwDBInterface::TypedDBClone<QwParitySSQLS::lumi_data>() {
-  QwParitySSQLS::lumi_data row(0);
-  row.analysis_id         = fAnalysisId;
-  row.lumi_detector_id    = fDeviceId;
-  row.measurement_type_id = fMeasurementTypeId;
-  row.subblock            = fSubblock;
-  row.n                   = fN;
-  row.value               = fValue;
-  row.error               = fError;
+
+template<> QwParitySchema::lumi_data_row
+QwDBInterface::TypedDBClone<QwParitySchema::lumi_data_row>() {
+  QwParitySchema::lumi_data lumi_data;
+  QwParitySchema::lumi_data_row row;
+  row[lumi_data.analysis_id]         = fAnalysisId;
+  row[lumi_data.lumi_detector_id]    = fDeviceId;
+  row[lumi_data.measurement_type_id] = fMeasurementTypeId;
+  row[lumi_data.subblock]            = fSubblock;
+  row[lumi_data.n]                   = fN;
+  row[lumi_data.value]               = fValue;
+  row[lumi_data.error]               = fError;
   return row;
 }
-template<> QwParitySSQLS::beam
-QwDBInterface::TypedDBClone<QwParitySSQLS::beam>() {
-  QwParitySSQLS::beam row(0);
-  row.analysis_id         = fAnalysisId;
-  row.monitor_id          = fDeviceId;
-  row.measurement_type_id = fMeasurementTypeId;
-  row.subblock            = fSubblock;
-  row.n                   = fN;
-  row.value               = fValue;
-  row.error               = fError;
+
+template<> QwParitySchema::beam_row
+QwDBInterface::TypedDBClone<QwParitySchema::beam_row>() {
+  QwParitySchema::beam beam;
+  QwParitySchema::beam_row row;
+  row[beam.analysis_id]         = fAnalysisId;
+  row[beam.monitor_id]          = fDeviceId;
+  row[beam.measurement_type_id] = fMeasurementTypeId;
+  row[beam.subblock]            = fSubblock;
+  row[beam.n]                   = fN;
+  row[beam.value]               = fValue;
+  row[beam.error]               = fError;
   return row;
 }
 #endif // __USE_DATABASE__
@@ -152,49 +157,49 @@ T QwErrDBInterface::TypedDBClone()
   return row;
 }
 #ifdef __USE_DATABASE__
-template<> QwParitySSQLS::md_errors
-QwErrDBInterface::TypedDBClone<QwParitySSQLS::md_errors>() {
-  QwParitySSQLS::md_errors row(0);
-  row.analysis_id         = fAnalysisId;
-  row.main_detector_id    = fDeviceId;
-  row.error_code_id       = fErrorCodeId;
-  row.n                   = fN;
+// Simplified error interface TypedDBClone implementations
+template<> QwParitySchema::md_errors_row
+QwErrDBInterface::TypedDBClone<QwParitySchema::md_errors_row>() {
+  QwParitySchema::md_errors_row row;
+  QwParitySchema::md_errors md_errors;
+  row[md_errors.analysis_id]         = fAnalysisId;
+  row[md_errors.main_detector_id]    = fDeviceId;
+  row[md_errors.error_code_id]       = fErrorCodeId;
+  row[md_errors.n]                   = fN;
   return row;
-};
+}
 
-
-template<> QwParitySSQLS::lumi_errors
-QwErrDBInterface::TypedDBClone<QwParitySSQLS::lumi_errors>() {
-  QwParitySSQLS::lumi_errors row(0);
-  row.analysis_id         = fAnalysisId;
-  row.lumi_detector_id    = fDeviceId;
-  row.error_code_id       = fErrorCodeId;
-  row.n                   = fN;
+template<> QwParitySchema::lumi_errors_row
+QwErrDBInterface::TypedDBClone<QwParitySchema::lumi_errors_row>() {
+  QwParitySchema::lumi_errors_row row;
+  QwParitySchema::lumi_errors lumi_errors;
+  row[lumi_errors.analysis_id]         = fAnalysisId;
+  row[lumi_errors.lumi_detector_id]    = fDeviceId;
+  row[lumi_errors.error_code_id]       = fErrorCodeId;
+  row[lumi_errors.n]                   = fN;
   return row;
-};
+}
 
-
-
-
-template<> QwParitySSQLS::beam_errors
-QwErrDBInterface::TypedDBClone<QwParitySSQLS::beam_errors>() {
-  QwParitySSQLS::beam_errors row(0);
-  row.analysis_id         = fAnalysisId;
-  row.monitor_id          = fDeviceId;
-  row.error_code_id       = fErrorCodeId;
-  row.n                   = fN;
+template<> QwParitySchema::beam_errors_row
+QwErrDBInterface::TypedDBClone<QwParitySchema::beam_errors_row>() {
+  QwParitySchema::beam_errors_row row;
+  QwParitySchema::beam_errors beam_errors;
+  row[beam_errors.analysis_id]         = fAnalysisId;
+  row[beam_errors.monitor_id]          = fDeviceId;
+  row[beam_errors.error_code_id]       = fErrorCodeId;
+  row[beam_errors.n]                   = fN;
   return row;
-};
+}
 
-
-template<> QwParitySSQLS::general_errors
-QwErrDBInterface::TypedDBClone<QwParitySSQLS::general_errors>() {
-  QwParitySSQLS::general_errors row(0);
-  row.analysis_id         = fAnalysisId;
-  row.error_code_id       = fErrorCodeId;
-  row.n                   = fN;
+template<> QwParitySchema::general_errors_row
+QwErrDBInterface::TypedDBClone<QwParitySchema::general_errors_row>() {
+  QwParitySchema::general_errors_row row;
+  QwParitySchema::general_errors general_errors;
+  row[general_errors.analysis_id]         = fAnalysisId;
+  row[general_errors.error_code_id]       = fErrorCodeId;
+  row[general_errors.n]                   = fN;
   return row;
-};
+}
 #endif // __USE_DATABASE__
 
 
