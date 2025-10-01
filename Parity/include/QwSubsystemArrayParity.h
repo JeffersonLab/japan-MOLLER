@@ -57,9 +57,9 @@ class QwSubsystemArrayParity: public QwSubsystemArray {
     /// \brief Get the subsystem with the specified name
     VQwSubsystemParity* GetSubsystemByName(const TString& name);
     /// \brief Construct a branch and vector for this subsystem with a prefix
-    void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector <Double_t> &values);
+    void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values);
     /// \brief Fill the vector for this subsystem
-    void FillTreeVector(std::vector<Double_t>& values) const;
+    void FillTreeVector(QwRootTreeBranchVector &values) const;
     /// \brief Fill the histograms for this subsystem
     void FillHistograms();
 

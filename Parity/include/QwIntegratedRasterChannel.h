@@ -105,10 +105,10 @@ class QwIntegratedRasterChannel : public VQwDataElement{
   void  ConstructHistograms(TDirectory *folder, TString &prefix);
   void  FillHistograms();
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values);
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const;
 
   std::vector<QwDBInterface>    GetDBEntry();
   std::vector<QwErrDBInterface> GetErrDBEntry();
