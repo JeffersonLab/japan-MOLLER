@@ -23,16 +23,19 @@ jobs:
             os: "el9"
             compiler: "gcc13"
             opt: "opt"
+            cxxflags: "-g -pg"
           - release: "LCG_107"
             arch: "x86_64"
             os: "el9"
             compiler: "clang16"
             opt: "opt"
+            cxxflags: ""
           - release: "LCG_107"
             arch: "x86_64"
             os: "el9"
             compiler: "gcc14"
             opt: "opt"
+            cxxflags: ""
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -82,7 +85,7 @@ jobs:
 
             echo "::group::Compilation"
             # Build the project with ccache
-            cmake -Bbuild -S. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS="-g -pg"
+            cmake -Bbuild -S. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS="${{ matrix.cxxflags }}"
             cmake --build build -j$(nproc)
             echo "::endgroup::"
             
@@ -106,8 +109,20 @@ jobs:
             echo "::endgroup::"
 
             echo "::group:: Profile analysis"
-            gprof build/qwparity | tee qwparity.txt
+            if [ -f gmon.out ] ; then
+              gprof build/qwparity | tee qwparity.txt
+            fi
             echo "::endgroup::"
+
+      - name: Compress build directory
+        run: tar -caf build.tar.zst build/
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: build.tar.zst
+          retention-days: 7
+          if-no-files-found: error
 
       - name: Upload profiling analysis
         uses: actions/upload-artifact@v4
@@ -116,7 +131,7 @@ jobs:
           path: |
             qwparity.txt
           retention-days: 7
-          if-no-files-found: error
+          if-no-files-found: ignore
 
       - name: Upload prompt summary
         uses: actions/upload-artifact@v4
@@ -212,3 +227,84 @@ jobs:
           else
             echo "✅ All artifacts match expected results (ignoring timestamps)."
           fi
+
+
+  valgrind:
+    runs-on: ubuntu-latest
+    needs: linux
+    if: github.event_name == 'pull_request'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc14"
+            opt: "opt"
+            cxxflags: ""
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: .
+      - name: Uncompress build artifact
+        run: tar -xaf build.tar.zst
+
+      - uses: cvmfs-contrib/github-action-cvmfs@v3
+        with:
+          cvmfs_repositories: 'sft.cern.ch,geant4.cern.ch'
+      - uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::Mock data generation"
+            build/qwmockdatagenerator -r 4 -e 1:20000 --config qwparity_simple.conf --detectors mock_newdets.map --data .
+            echo "::endgroup::"
+
+            echo "::group::Run callgrind on mock data analysis (no rntuples, no trees, no hists)"
+            valgrind --tool=callgrind --callgrind-out-file=callgrind.out.no-out --instr-atstart=no \
+              build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary --callgrind-instr-start-event-loop \
+                --disable-trees --disable-hists
+            echo "::endgroup::"
+
+            echo "::group::Annotate callgrind info on source code (no rntuples, no trees, no hists)"
+            callgrind_annotate \
+              -I=Parity/src/ -I=Parity/include -I=Analysis/src -I=Analysis/include \
+              callgrind.out.no-out Parity/main/QwParity.cc | tee -a callgrind-no-out.txt
+            echo "::endgroup::"
+
+            echo "::group::Run callgrind on mock data analysis (trees, hists)"
+            valgrind --tool=callgrind --callgrind-out-file=callgrind.out.trees --instr-atstart=no \
+              build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary --callgrind-instr-start-event-loop
+            echo "::endgroup::"
+
+            echo "::group::Annotate callgrind info on source code (trees, hists)"
+            callgrind_annotate \
+              -I=Parity/src/ -I=Parity/include -I=Analysis/src -I=Analysis/include \
+              callgrind.out.trees Parity/main/QwParity.cc | tee -a callgrind-trees.txt
+            echo "::endgroup::"
+
+            echo "::group::Run callgrind on mock data analysis (rntuples, hists)"
+            valgrind --tool=callgrind --callgrind-out-file=callgrind.out.rntuples --instr-atstart=no \
+              build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary --callgrind-instr-start-event-loop \
+                --enable-rntuples --disable-trees
+            echo "::endgroup::"
+
+            echo "::group::Annotate callgrind info on source code (rntuples, hists)"
+            callgrind_annotate \
+              -I=Parity/src/ -I=Parity/include -I=Analysis/src -I=Analysis/include \
+              callgrind.out.rntuples Parity/main/QwParity.cc | tee -a callgrind-rntuples.txt
+            echo "::endgroup::"
+
+      - name: Upload callgrind analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: callgrind-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: |
+            callgrind*.txt
+          retention-days: 7
+          if-no-files-found: error
