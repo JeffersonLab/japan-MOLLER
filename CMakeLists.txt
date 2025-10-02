@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
 
 # Name of this project
 project(QwAnalysis VERSION 2.0.0 LANGUAGES CXX)
@@ -164,10 +164,7 @@ foreach(file ${my_project_headers})
     # Add dictionary target with possible LinkDef file
     set(dict ${CMAKE_CURRENT_BINARY_DIR}/${file_name}Dict)
     set(linkdef ${file_path}/${file_name}LinkDef.h)
-    build_root_dictionary(${file_name} ${file}
-      TARGETS ${PROJECT_NAME}
-      LINKDEF ${linkdef}
-    )
+    ROOT_GENERATE_DICTIONARY(${dict} ${file} LINKDEF ${linkdef})
     # Add dictionary to project sources
     set(my_project_sources ${my_project_sources} ${dict}.cxx)
   endif()
@@ -205,7 +202,8 @@ target_link_libraries(${PROJECT_NAME}
   PRIVATE
     eviowrapper
   PUBLIC
-    ROOT::Libraries
+    ROOT::Core ROOT::Tree ROOT::Hist ROOT::Rint
+    $<TARGET_NAME_IF_EXISTS:ROOT::ROOTNTuple>
     ${MYSQLPP_LIBRARIES}
     ${Boost_LIBRARIES}
   )
