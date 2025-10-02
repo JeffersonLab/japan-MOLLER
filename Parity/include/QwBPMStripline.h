@@ -82,8 +82,6 @@ class QwBPMStripline : public VQwBPM {
   void    InitializeChannel(TString subsystem, TString name, TString type);
   void    ClearEventData();
 
-  void    SetMockDataAsDiff();
-
   void LoadChannelParameters(QwParameterFile &paramfile){
     for(Short_t i=0;i<4;i++){
       fWire[i].LoadChannelParameters(paramfile);
