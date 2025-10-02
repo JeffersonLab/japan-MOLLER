@@ -130,13 +130,15 @@ class VQwDataElement: public MQwHistograms {
     { std::cerr << "Operation -= not defined!" << std::endl; return *this; }
 
   /*! \brief Sum operator */
-  virtual void Sum(const VQwDataElement &value1, const VQwDataElement &value2)
+  template <typename T>
+  void Sum(const T &value1, const T &value2)
     { 
       *this =  value1;
       *this += value2;
     }
   /*! \brief Difference operator */
-  virtual void Difference(const VQwDataElement &value1, const VQwDataElement &value2)
+  template <typename T>
+  void Difference(const T &value1, const T &value2)
     { 
       *this =  value1;
       *this -= value2;
