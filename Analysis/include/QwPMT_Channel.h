@@ -63,6 +63,10 @@ class QwPMT_Channel: public VQwDataElement {
   void  ProcessEvent();
 
   QwPMT_Channel& operator=  (const QwPMT_Channel &value);
+  QwPMT_Channel& operator+= (const QwPMT_Channel &value);
+  QwPMT_Channel& operator-= (const QwPMT_Channel &value);
+  void Sum(const QwPMT_Channel &value1, const QwPMT_Channel &value2);
+  void Difference(const QwPMT_Channel &value1, const QwPMT_Channel &value2);
 
   void  ConstructHistograms(TDirectory *folder, TString &prefix);
   void  FillHistograms();
