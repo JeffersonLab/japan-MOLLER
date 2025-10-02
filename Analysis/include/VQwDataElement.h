@@ -12,6 +12,8 @@
 // System headers
 #include <vector>
 #include <iostream>
+#include <stdexcept>
+#include <string>
 
 // Root headers
 #include "Rtypes.h"
@@ -124,10 +126,10 @@ class VQwDataElement: public MQwHistograms {
 
   /*! \brief Addition-assignment operator */
   VQwDataElement& operator+= (const VQwDataElement & /*value*/)
-    { std::cerr << "Operation += not defined!" << std::endl; return *this; }
+    { throw std::runtime_error(std::string("VQwDataElement::operator+= not implemented for ") + GetElementName().Data()); }
   /*! \brief Subtraction-assignment operator */
   VQwDataElement& operator-= (const VQwDataElement & /*value*/)
-    { std::cerr << "Operation -= not defined!" << std::endl; return *this; }
+    { throw std::runtime_error(std::string("VQwDataElement::operator-= not implemented for ") + GetElementName().Data()); }
 
   /*! \brief Sum operator */
   virtual void Sum(const VQwDataElement &value1, const VQwDataElement &value2)

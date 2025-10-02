@@ -296,7 +296,7 @@ void Sum(const QwVQWK_Channel &value1, const QwVQWK_Channel &value2) {
 **Base Class Design Principles:**
 - Virtual operators should be **non-virtual** (serve as error handlers only)
 - Virtual `Sum()` and `Difference()` methods provide polymorphic interface
-- Base class provides fallback implementations that print error messages
+- Base class provides fallback implementations that throw runtime errors for unimplemented operations
 
 #### **Pattern 2: Container-Delegation Pattern (Array/System Level)**
 
