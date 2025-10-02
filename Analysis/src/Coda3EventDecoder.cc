@@ -362,7 +362,7 @@ uint32_t Coda3EventDecoder::TBOBJ::Fill( const uint32_t* evbuffer,
 		memcpy(&evtNum, q++, sizeof(evtNum)); // uint64_t
 		if (withTimeStamp()) {
 			evTS = reinterpret_cast<const uint64_t*>(++q); // uint64_t[blkSize]
-			q += blksize-1;
+			q += 2*(blksize-1);
 		} else {
 		    evTS = nullptr;
 		}
