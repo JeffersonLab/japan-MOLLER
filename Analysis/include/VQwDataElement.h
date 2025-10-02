@@ -123,23 +123,21 @@ class VQwDataElement: public MQwHistograms {
   };
 
   /*! \brief Addition-assignment operator */
-  virtual VQwDataElement& operator+= (const VQwDataElement & /*value*/)
+  VQwDataElement& operator+= (const VQwDataElement & /*value*/)
     { std::cerr << "Operation += not defined!" << std::endl; return *this; }
   /*! \brief Subtraction-assignment operator */
-  virtual VQwDataElement& operator-= (const VQwDataElement & /*value*/)
+  VQwDataElement& operator-= (const VQwDataElement & /*value*/)
     { std::cerr << "Operation -= not defined!" << std::endl; return *this; }
 
   /*! \brief Sum operator */
   virtual void Sum(const VQwDataElement &value1, const VQwDataElement &value2)
     { 
-      //std::cerr << "Sum not defined!" << std::endl; 
       *this =  value1;
       *this += value2;
     }
   /*! \brief Difference operator */
   virtual void Difference(const VQwDataElement &value1, const VQwDataElement &value2)
     { 
-      //std::cerr << "Difference not defined!" << std::endl; 
       *this =  value1;
       *this -= value2;
     }
