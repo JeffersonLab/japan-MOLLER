@@ -58,6 +58,9 @@
 
 Int_t main(Int_t argc, Char_t* argv[])
 {
+  ///  Enable implicit multi-threading in e.g. TTree::Fill
+  ROOT::EnableImplicitMT();
+
   ///  Define the command line options
   DefineOptionsParity(gQwOptions);
 
