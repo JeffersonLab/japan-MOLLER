@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <ctime>
+#include <cstring>
 
 #include "TError.h"
 
@@ -357,10 +358,19 @@ uint32_t Coda3EventDecoder::TBOBJ::Fill( const uint32_t* evbuffer,
 		uint32_t slen = *p & 0xffff;
 		if( slen != 2*(1 + (withRunInfo() ? 1 : 0) + (withTimeStamp() ? blkSize : 0)))
 			throw coda_format_error("Invalid length for Trigger Bank seg 1");
-		const auto* q = (const uint64_t*) (p + 1);
-		evtNum  = *q++;
-		runInfo = withRunInfo()   ? *q++ : 0;
-		evTS    = withTimeStamp() ? q    : nullptr;
+        const uint32_t *q = (p+1);
+		memcpy(&evtNum, q++, sizeof(evtNum)); // uint64_t
+		if (withTimeStamp()) {
+			evTS = reinterpret_cast<const uint64_t*>(++q); // uint64_t[blkSize]
+			q += 2*(blksize-1);
+		} else {
+		    evTS = nullptr;
+		}
+	    if (withRunInfo()) {
+			memcpy(&runInfo, q+=2, sizeof(runInfo)); // uint64_t
+		} else {
+			runInfo = 0;
+		}
 		p += slen + 1;
 	}
 	if( p-evbuffer >= len )
@@ -420,17 +430,26 @@ Int_t Coda3EventDecoder::LoadTrigBankInfo( UInt_t i )
 	if( i >= tbank.blksize )
 		return -1;
 	tsEvType = tbank.evType[i];      // event type (configuration-dependent)
-	if( tbank.evTS )
-		evt_time = tbank.evTS[i];      // event time (4ns clock, I think)
+	if( tbank.evTS ) {
+		// Use memcpy to safely read potentially unaligned 64-bit timestamp
+		uint64_t timestamp;
+		memcpy(&timestamp, &tbank.evTS[i], sizeof(timestamp));
+		evt_time = timestamp;        // event time (4ns clock, I think)
+	}
 	else if( tbank.TSROC ) {
 		UInt_t struct_size = tbank.withTriggerBits() ? 3 : 2;
-		evt_time = *(const uint64_t*) (tbank.TSROC + struct_size * i);
+		// Use memcpy to safely read potentially unaligned 64-bit value
+		uint64_t timestamp;
+		memcpy(&timestamp, tbank.TSROC + struct_size * i, sizeof(timestamp));
+		evt_time = timestamp;
 		// Only the lower 48 bits seem to contain the time
 		evt_time &= 0x0000FFFFFFFFFFFF;
 	}
 	if( tbank.withTriggerBits() ){
 		// Trigger bits. Only the lower 6 bits seem to contain the actual bits
-		trigger_bits = tbank.TSROC[2 + 3 * i] & 0x3F;
+		uint32_t trigger_word;
+		memcpy(&trigger_word, &tbank.TSROC[2 + 3 * i], sizeof(trigger_word));
+		trigger_bits = trigger_word & 0x3F;
 	}
 	return 0;
 }
