@@ -1169,12 +1169,6 @@ void QwBPMStripline<T>::RandomizeEventData(int helicity, double time)
 
 
 template<typename T>
-void QwBPMStripline<T>::SetMockDataAsDiff() {
-  this->SetMockDataAsDiff();
-}
-
-
-template<typename T>
 void QwBPMStripline<T>::LoadMockDataParameters(QwParameterFile &paramfile) {
 
   //Bool_t ldebug=kFALSE;
