@@ -10,7 +10,9 @@
 
 VQwHardwareChannel::VQwHardwareChannel():
   fNumberOfDataWords(0),
-  fNumberOfSubElements(0), fDataToSave(kRaw)
+  fNumberOfSubElements(0),
+  fDataToSave(kRaw),
+  fCalibrated(false)
 {
   fULimit = -1;
   fLLimit = 1;
@@ -29,6 +31,7 @@ VQwHardwareChannel::VQwHardwareChannel(const VQwHardwareChannel& value)
    fDataToSave(value.fDataToSave),
    fTreeArrayIndex(value.fTreeArrayIndex),
    fTreeArrayNumEntries(value.fTreeArrayNumEntries),
+   fCalibrated(value.fCalibrated),
    fPedestal(value.fPedestal),
    fCalibrationFactor(value.fCalibrationFactor),
    kFoundPedestal(value.kFoundPedestal),
@@ -50,6 +53,7 @@ VQwHardwareChannel::VQwHardwareChannel(const VQwHardwareChannel& value, VQwDataE
    fDataToSave(datatosave),
    fTreeArrayIndex(value.fTreeArrayIndex),
    fTreeArrayNumEntries(value.fTreeArrayNumEntries),
+   fCalibrated(value.fCalibrated),
    fPedestal(value.fPedestal),
    fCalibrationFactor(value.fCalibrationFactor),
    kFoundPedestal(value.kFoundPedestal),
@@ -72,6 +76,7 @@ void VQwHardwareChannel::CopyFrom(const VQwHardwareChannel& value)
   fDataToSave = value.fDataToSave;
   fTreeArrayIndex = value.fTreeArrayIndex;
   fTreeArrayNumEntries = value.fTreeArrayNumEntries;
+  fCalibrated = value.fCalibrated;
   fPedestal = value.fPedestal;
   fCalibrationFactor = value.fCalibrationFactor;
   kFoundPedestal = value.kFoundPedestal;

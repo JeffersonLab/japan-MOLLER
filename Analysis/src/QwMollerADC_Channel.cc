@@ -401,7 +401,7 @@ void QwMollerADC_Channel::SetRawEventData(){
 
   fSoftwareBlockSum_raw = fHardwareBlockSum_raw;
 
-  return;
+  fCalibrated = kFALSE;
 }
 
 void QwMollerADC_Channel::EncodeEventData(std::vector<UInt_t> &buffer)
@@ -525,7 +525,8 @@ void QwMollerADC_Channel::ProcessEvent()
     fHardwareBlockSum = fCalibrationFactor * ( (1.0 * fHardwareBlockSum_raw / fNumberOfSamples) - fPedestal );
     fHardwareBlockSumM2 = 0.0; // second moment is zero for single events
   }
-  return;
+
+  fCalibrated = kTRUE;
 }
 
 Double_t QwMollerADC_Channel::GetAverageVolts() const
@@ -548,6 +549,7 @@ void QwMollerADC_Channel::PrintInfo() const
   std::cout<<"fBlocksPerEvent= "<<fBlocksPerEvent<<"\n"<<"\n";
   std::cout<<"fSequenceNumber= "<<fSequenceNumber<<"\n";
   std::cout<<"fNumberOfSamples= "<<fNumberOfSamples<<"\n";
+  std::cout<<"fCalibrated= "<<fCalibrated<<"\n";
   std::cout<<"fBlock_raw ";
 
   for (Int_t i = 0; i < fBlocksPerEvent; i++)
@@ -1114,9 +1116,9 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator= (const QwMollerADC_Channel &
     this->fHardwareBlockSumM2 = value.fHardwareBlockSumM2;
     this->fHardwareBlockSumError = value.fHardwareBlockSumError;
     this->fNumberOfSamples = value.fNumberOfSamples;
-    this->fSequenceNumber  = value.fSequenceNumber;
-   
-
+    this->fSequenceNumber = value.fSequenceNumber;
+    this->fCalibrated = value.fCalibrated;
+    // Note: fErrorFlag is not assigned
   }
   return *this;
 }
@@ -1144,6 +1146,7 @@ void QwMollerADC_Channel::AssignScaledValue(const QwMollerADC_Channel &value,
     this->fGoodEventCount  = value.fGoodEventCount;
     this->fNumberOfSamples = value.fNumberOfSamples;
     this->fSequenceNumber  = value.fSequenceNumber;
+    this->fCalibrated      = value.fCalibrated;
     this->fErrorFlag       = value.fErrorFlag;
   }
 }
@@ -1219,25 +1222,35 @@ const QwMollerADC_Channel QwMollerADC_Channel::operator+ (const QwMollerADC_Chan
 
 QwMollerADC_Channel& QwMollerADC_Channel::operator+= (const QwMollerADC_Channel &value)
 {
-
   if (!IsNameEmpty()) {
-    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-      this->fBlock[i] += value.fBlock[i];
-      this->fBlock_raw[i] += value.fBlock_raw[i];
-
-      this->fBlock_min[i] = TMath::Min(fBlock_min[i],value.fBlock_min[i]);
-      this->fBlock_max[i] = TMath::Max(fBlock_max[i],value.fBlock_max[i]);    
-      this->fBlockSumSq_raw[i] += value.fBlockSumSq_raw[i];
-      this->fBlockM2[i] = 0.0;
+    if (fCalibrated ^ value.fCalibrated)  {
+      TString loc="Standard exception from QwMollerADC_Channel::operator+= "
+        +value.GetElementName()+" and "+this->GetElementName()
+        +" are not both calibrated or uncalibrated";
+      fCalibrated = value.fCalibrated;
+      QwWarning << loc << QwLog::endl;
     }
-    this->fHardwareBlockSum_raw = value.fHardwareBlockSum_raw;
-    this->fSoftwareBlockSum_raw = value.fSoftwareBlockSum_raw;
-    this->fHardwareBlockSum    += value.fHardwareBlockSum;
-    this->fHardwareBlockSumM2   = 0.0;
+    if (fCalibrated) {
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        this->fBlock[i] += value.fBlock[i];
+        this->fBlockM2[i] = 0.0;
+      }
+      this->fHardwareBlockSum    += value.fHardwareBlockSum;
+      this->fHardwareBlockSumM2   = 0.0;
+    } else {
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        this->fBlock_raw[i] += value.fBlock_raw[i];
+        this->fBlock_min[i] = TMath::Min(fBlock_min[i],value.fBlock_min[i]);
+        this->fBlock_max[i] = TMath::Max(fBlock_max[i],value.fBlock_max[i]);    
+        this->fBlockSumSq_raw[i] += value.fBlockSumSq_raw[i];
+      }
+      this->fHardwareBlockSum_raw = value.fHardwareBlockSum_raw;
+      this->fSoftwareBlockSum_raw = value.fSoftwareBlockSum_raw;
+    }
+    // Both for calibrated and uncalibrated data
     this->fNumberOfSamples     += value.fNumberOfSamples;
     this->fSequenceNumber       = 0;
     this->fErrorFlag            |= (value.fErrorFlag);
-
   }
 
   return *this;
@@ -1253,21 +1266,34 @@ const QwMollerADC_Channel QwMollerADC_Channel::operator- (const QwMollerADC_Chan
 QwMollerADC_Channel& QwMollerADC_Channel::operator-= (const QwMollerADC_Channel &value)
 {
   if (!IsNameEmpty()){
-    for (Int_t i=0; i<fBlocksPerEvent; i++){
-      this->fBlock[i] -= value.fBlock[i];
-      this->fBlock_raw[i] = 0;
-      this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
-      this->fBlock_min[i] = TMath::Min(fBlock_min[i],value.fBlock_min[i]);
-      this->fBlock_max[i] = TMath::Max(fBlock_max[i],value.fBlock_max[i]);  
-      this->fBlockM2[i] = 0.0;
+    if (fCalibrated ^ value.fCalibrated)  {
+      TString loc="Standard exception from QwMollerADC_Channel::operator-= "
+        +value.GetElementName()+" and "+this->GetElementName()
+        +" are not both calibrated or uncalibrated";
+      fCalibrated = value.fCalibrated;
+      QwWarning << loc << QwLog::endl;
     }
-    this->fHardwareBlockSum_raw = 0;
-    this->fSoftwareBlockSum_raw = 0;
-    this->fHardwareBlockSum    -= value.fHardwareBlockSum;
-    this->fHardwareBlockSumM2   = 0.0;
-    this->fNumberOfSamples     += value.fNumberOfSamples;
+    if (fCalibrated) {
+      for (Int_t i=0; i<fBlocksPerEvent; i++){
+        this->fBlock[i] -= value.fBlock[i];
+        this->fBlockM2[i] = 0.0;
+      }
+      this->fHardwareBlockSum    -= value.fHardwareBlockSum;
+      this->fHardwareBlockSumM2   = 0.0;
+    } else {
+      for (Int_t i=0; i<fBlocksPerEvent; i++){  
+        this->fBlock_raw[i] = 0;
+        this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
+        this->fBlock_min[i] = TMath::Min(fBlock_min[i],value.fBlock_min[i]);
+        this->fBlock_max[i] = TMath::Max(fBlock_max[i],value.fBlock_max[i]);    
+      }
+      this->fHardwareBlockSum_raw = 0;
+      this->fSoftwareBlockSum_raw = 0;
+    }
+    // Both for calibrated and uncalibrated data
+    this->fNumberOfSamples     += value.fNumberOfSamples; // Note: + since statistical power increases
     this->fSequenceNumber       = 0;
-    this->fErrorFlag           |= (value.fErrorFlag);
+    this->fErrorFlag            |= (value.fErrorFlag);
   }
 
   return *this;
@@ -1283,26 +1309,39 @@ const QwMollerADC_Channel QwMollerADC_Channel::operator* (const QwMollerADC_Chan
 QwMollerADC_Channel& QwMollerADC_Channel::operator*= (const QwMollerADC_Channel &value)
 {
   if (!IsNameEmpty()){
-    for (Int_t i=0; i<fBlocksPerEvent; i++){
-      this->fBlock[i] *= value.fBlock[i];
-      this->fBlock_raw[i] *= value.fBlock_raw[i];
-      if(fBlockSumSq_raw[i] != 0){
-        this->fBlockSumSq_raw[i] *= value.fBlockSumSq_raw[i];
-        this->fBlock_min[i] *= value.fBlock_min[i];
-        this->fBlock_max[i] *= value.fBlock_max[i];
-      } else {
-        this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
-        this->fBlock_min[i] = value.fBlock_min[i];
-        this->fBlock_max[i] = value.fBlock_max[i];
-      }
-      this->fBlockM2[i] = 0.0;
+    if (fCalibrated ^ value.fCalibrated)  {
+      TString loc="Standard exception from QwMollerADC_Channel::operator*= "
+        +value.GetElementName()+" and "+this->GetElementName()
+        +" are not both calibrated or uncalibrated";
+      fCalibrated = value.fCalibrated;
+      QwWarning << loc << QwLog::endl;
     }
-    this->fHardwareBlockSum_raw *= value.fHardwareBlockSum_raw;
-    this->fSoftwareBlockSum_raw *= value.fSoftwareBlockSum_raw;
-    this->fHardwareBlockSum     *= value.fHardwareBlockSum;
-    this->fHardwareBlockSumM2    = 0.0;
-    this->fNumberOfSamples      *= value.fNumberOfSamples;
-    this->fSequenceNumber        = 0;
+    if (fCalibrated) {
+      for (Int_t i=0; i<fBlocksPerEvent; i++){
+        this->fBlock[i] *= value.fBlock[i];
+        this->fBlockM2[i] = 0.0;
+      }
+      this->fHardwareBlockSum    *= value.fHardwareBlockSum;
+      this->fHardwareBlockSumM2   = 0.0;
+    } else {
+      for (Int_t i=0; i<fBlocksPerEvent; i++){
+        this->fBlock_raw[i] *= value.fBlock_raw[i];
+        if(fBlockSumSq_raw[i] != 0){
+          this->fBlockSumSq_raw[i] *= value.fBlockSumSq_raw[i];
+          this->fBlock_min[i] *= value.fBlock_min[i];
+          this->fBlock_max[i] *= value.fBlock_max[i];
+        } else {
+          this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
+          this->fBlock_min[i] = value.fBlock_min[i];
+          this->fBlock_max[i] = value.fBlock_max[i];
+          }
+        this->fHardwareBlockSum_raw *= value.fHardwareBlockSum_raw;
+        this->fSoftwareBlockSum_raw *= value.fSoftwareBlockSum_raw;
+      }
+    }
+    // Both for calibrated and uncalibrated data
+    this->fNumberOfSamples     *= value.fNumberOfSamples;
+    this->fSequenceNumber       = 0;
     this->fErrorFlag            |= (value.fErrorFlag);
   }
 
@@ -1499,6 +1538,7 @@ void QwMollerADC_Channel::Product(const QwMollerADC_Channel &value1, const QwMol
     this->fHardwareBlockSum = value1.fHardwareBlockSum * value2.fHardwareBlockSum;
     this->fNumberOfSamples = value1.fNumberOfSamples;
     this->fSequenceNumber  = 0;
+    this->fCalibrated      = value1.fCalibrated;
     this->fErrorFlag       = (value1.fErrorFlag|value2.fErrorFlag);
   }
   return;

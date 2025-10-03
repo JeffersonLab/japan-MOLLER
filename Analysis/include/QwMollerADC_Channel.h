@@ -310,14 +310,16 @@ private:
 
 
   /*! \name Event data members---Raw values */
-  // @{
-  Int_t fBlock_raw[4];      ///< Array of the sub-block data as read from the module
+  // @{ 
+  Int_t fBlock_raw[4];         ///< Array of the sub-block data as read from the module
   Int_t fHardwareBlockSum_raw; ///< Module-based sum of the four sub-blocks as read from the module
   Int_t fSoftwareBlockSum_raw; ///< Sum of the data in the four sub-blocks raw
   Long64_t fBlockSumSq_raw[5]; 
   Int_t fBlock_min[5];
   Int_t fBlock_max[5];
   Short_t fBlock_numSamples[5];
+  // @}
+
   /*! \name Event data members---Potentially calibrated values*/
   // @{
   // The following values potentially have pedestal removed  and calibration applied
