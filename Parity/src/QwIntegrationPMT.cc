@@ -351,6 +351,16 @@ QwIntegrationPMT& QwIntegrationPMT::operator-= (const QwIntegrationPMT &value)
   return *this;
 }
 
+void QwIntegrationPMT::Sum(const QwIntegrationPMT &value1, const QwIntegrationPMT &value2) {
+  *this = value1;
+  *this += value2;
+}
+
+void QwIntegrationPMT::Difference(const QwIntegrationPMT &value1, const QwIntegrationPMT &value2) {
+  *this = value1;
+  *this -= value2;
+}
+
 void QwIntegrationPMT::Ratio(QwIntegrationPMT &numer, QwIntegrationPMT &denom)
 {
   //  std::cout<<"QwIntegrationPMT::Ratio element name ="<<GetElementName()<<" \n";

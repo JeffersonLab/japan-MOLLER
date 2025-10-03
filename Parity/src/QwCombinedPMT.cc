@@ -299,6 +299,16 @@ QwCombinedPMT& QwCombinedPMT::operator-= (const QwCombinedPMT &value)
   return *this;
 }
 
+void QwCombinedPMT::Sum(const QwCombinedPMT &value1, const QwCombinedPMT &value2) {
+  *this = value1;
+  *this += value2;
+}
+
+void QwCombinedPMT::Difference(const QwCombinedPMT &value1, const QwCombinedPMT &value2) {
+  *this = value1;
+  *this -= value2;
+}
+
 void QwCombinedPMT::AccumulateRunningSum(const QwCombinedPMT& value, Int_t count, Int_t ErrorMask)
 {
   fSumADC.AccumulateRunningSum(value.fSumADC, count, ErrorMask);

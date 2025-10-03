@@ -104,9 +104,11 @@ class QwEnergyCalculator : public VQwDataElement{
     void    Ratio(QwEnergyCalculator &numer,QwEnergyCalculator &denom);
     void    Scale(Double_t factor);
 
-    virtual QwEnergyCalculator& operator=  (const QwEnergyCalculator &value);
-    virtual QwEnergyCalculator& operator+= (const QwEnergyCalculator &value);
-    virtual QwEnergyCalculator& operator-= (const QwEnergyCalculator &value);
+    QwEnergyCalculator& operator=  (const QwEnergyCalculator &value);
+    QwEnergyCalculator& operator+= (const QwEnergyCalculator &value);
+    QwEnergyCalculator& operator-= (const QwEnergyCalculator &value);
+    void Sum(const QwEnergyCalculator &value1, const QwEnergyCalculator &value2);
+    void Difference(const QwEnergyCalculator &value1, const QwEnergyCalculator &value2);
 
     void    AccumulateRunningSum(const QwEnergyCalculator& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
     void    DeaccumulateRunningSum(QwEnergyCalculator& value, Int_t ErrorMask=0xFFFFFFF);

@@ -142,6 +142,30 @@ QwPMT_Channel& QwPMT_Channel::operator= (const QwPMT_Channel &value){
   return *this;
 }
 
+QwPMT_Channel& QwPMT_Channel::operator+= (const QwPMT_Channel &value){
+  if (GetElementName()!=""){
+    this->fValue += value.fValue;
+  }
+  return *this;
+}
+
+QwPMT_Channel& QwPMT_Channel::operator-= (const QwPMT_Channel &value){
+  if (GetElementName()!=""){
+    this->fValue -= value.fValue;
+  }
+  return *this;
+}
+
+void QwPMT_Channel::Sum(const QwPMT_Channel &value1, const QwPMT_Channel &value2) {
+  *this = value1;
+  *this += value2;
+}
+
+void QwPMT_Channel::Difference(const QwPMT_Channel &value1, const QwPMT_Channel &value2) {
+  *this = value1;
+  *this -= value2;
+}
+
 void QwPMT_Channel::PrintValue() const
 {
   QwMessage << std::setprecision(4)

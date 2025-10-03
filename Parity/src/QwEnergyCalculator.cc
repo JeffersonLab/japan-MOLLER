@@ -321,6 +321,16 @@ QwEnergyCalculator& QwEnergyCalculator::operator-= (const QwEnergyCalculator &va
   return *this;
 }
 
+void QwEnergyCalculator::Sum(const QwEnergyCalculator &value1, const QwEnergyCalculator &value2) {
+  *this = value1;
+  *this += value2;
+}
+
+void QwEnergyCalculator::Difference(const QwEnergyCalculator &value1, const QwEnergyCalculator &value2) {
+  *this = value1;
+  *this -= value2;
+}
+
 
 void QwEnergyCalculator::Ratio(QwEnergyCalculator &numer, QwEnergyCalculator &denom){
   // this function is called when forming asymmetries. In this case what we actually want for the

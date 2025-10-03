@@ -250,3 +250,135 @@ ROOTSYS=/path/to/root                  # ROOT installation directory
 BOOST_INC_DIR=/usr/include             # Boost headers location
 BOOST_LIB_DIR=/usr/lib/x86_64-linux-gnu # Boost libraries location
 ```
+
+### Dual Design Pattern Architecture
+
+JAPAN-MOLLER implements **two distinct architectural patterns** for arithmetic operations, each optimized for different abstraction levels:
+
+#### **Pattern 1: Dual-Operator Pattern (Channel/Data Element Level)**
+
+**Used by**: `VQwDataElement`, `VQwHardwareChannel`, and all concrete channel classes (`QwVQWK_Channel`, `QwMollerADC_Channel`, etc.)
+
+**When to use**: For individual data elements requiring inheritance-based polymorphism
+
+**Key Characteristics:**
+- **Two operator versions**: Type-specific + polymorphic overloads
+- **Complex inheritance**: Requires virtual method overrides and dynamic_cast
+- **Runtime type safety**: Uses dynamic_cast with exception handling
+- **Dual dispatch**: Polymorphic operators delegate to type-specific ones
+
+**Implementation Pattern:**
+```cpp
+// Type-specific version (efficient, direct)
+QwVQWK_Channel& operator+= (const QwVQWK_Channel &value);
+
+// Polymorphic version (for inheritance compatibility)  
+VQwHardwareChannel& operator+=(const VQwHardwareChannel& input) override;
+
+// Polymorphic implementation delegates to type-specific
+VQwHardwareChannel& QwVQWK_Channel::operator+=(const VQwHardwareChannel &source) {
+  const QwVQWK_Channel* tmpptr = dynamic_cast<const QwVQWK_Channel*>(&source);
+  if (tmpptr != NULL) {
+    *this += *tmpptr;  // Calls type-specific version
+  } else {
+    throw std::invalid_argument("Type mismatch in operator+=");
+  }
+  return *this;
+}
+
+// Sum method uses assignment + operators pattern
+void Sum(const QwVQWK_Channel &value1, const QwVQWK_Channel &value2) {
+  *this = value1;      // Uses derived class assignment operator
+  *this += value2;     // Uses type-specific operator+=
+}
+```
+
+**Base Class Design Principles:**
+- Virtual operators should be **non-virtual** (serve as error handlers only)
+- Virtual `Sum()` and `Difference()` methods provide polymorphic interface
+- Base class provides fallback implementations that throw runtime errors for unimplemented operations
+
+#### **Pattern 2: Container-Delegation Pattern (Array/System Level)**
+
+**Used by**: `QwSubsystemArrayParity`, `QwSubsystemArray`, and other container classes
+
+**When to use**: For collections of heterogeneous objects requiring system-level operations
+
+**Key Characteristics:**
+- **Single operator version**: Only type-specific operators needed
+- **Container iteration**: Delegates to contained object operators
+- **Type checking via typeid**: Uses `typeid` comparison for safety
+- **No inheritance conflicts**: Avoids virtual operator issues
+
+**Implementation Pattern:**
+```cpp
+// Only one operator version needed
+QwSubsystemArrayParity& operator+= (const QwSubsystemArrayParity &value) {
+  for(size_t i=0; i<value.size(); i++){
+    VQwSubsystemParity *ptr1 = dynamic_cast<VQwSubsystemParity*>(this->at(i).get());
+    VQwSubsystem *ptr2 = value.at(i).get();
+    if (typeid(*ptr1)==typeid(*ptr2)){
+      *(ptr1) += ptr2;  // Delegates to subsystem operators
+    } else {
+      // Handle type mismatch
+    }
+  }
+  return *this;
+}
+
+// Sum method follows same assignment + operators pattern
+void Sum(const QwSubsystemArrayParity &value1, const QwSubsystemArrayParity &value2) {
+  *this = value1;
+  *this += value2;
+}
+```
+
+**Container Design Principles:**
+- **No virtual operators** in base container classes
+- **Composition over inheritance**: Use contained objects for polymorphism
+- **Delegation pattern**: Let individual elements handle their own arithmetic
+- **Type safety via runtime checks**: Use `typeid` and `dynamic_cast`
+
+#### **Pattern Selection Guidelines**
+
+**Use Dual-Operator Pattern when:**
+- Implementing individual data element classes
+- Need inheritance-based polymorphism
+- Working with channel-level operations
+- Extending `VQwDataElement` or `VQwHardwareChannel`
+- Require both type-safe and polymorphic operations
+
+**Use Container-Delegation Pattern when:**
+- Implementing collection/array classes
+- Managing heterogeneous object containers
+- Working with system-level operations
+- Extending `QwSubsystemArray` or similar containers
+- Want to avoid virtual operator inheritance issues
+
+#### **Compilation Warning Prevention**
+
+**For Dual-Operator Pattern:**
+- Remove `virtual` from base class operators that serve as defaults
+- Implement both type-specific and polymorphic operator versions
+- Use `override` keyword for virtual method overrides
+- Use `using` declarations when needed to bring base functions into scope
+
+**For Container-Delegation Pattern:**
+- Avoid virtual operators in container base classes
+- Use container iteration with type checking
+- Delegate arithmetic to contained objects
+- No special inheritance handling needed
+
+#### **Key Architectural Insight**
+
+The **two patterns complement each other**:
+- **Dual-Operator Pattern**: Handles complex inheritance at the individual object level
+- **Container-Delegation Pattern**: Manages collections without inheritance complexity
+
+This dual approach provides:
+- **Performance optimization**: Type-specific operations when possible
+- **Type safety**: Runtime checking with meaningful error messages
+- **Flexibility**: Support for both homogeneous and heterogeneous operations
+- **Maintainability**: Clear separation of concerns between object and container levels
+
+**Critical Understanding**: The choice of pattern depends on the **abstraction level** - use dual-operator for individual objects requiring inheritance polymorphism, and container-delegation for collections that can delegate to their elements.
