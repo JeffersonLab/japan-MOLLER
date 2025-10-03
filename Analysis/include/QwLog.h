@@ -52,12 +52,12 @@ class QwOptions;
 /*! \def QwVerbose
  *  \brief Predefined log drain for verbose messages
  */
-#define QwVerbose  gQwLog(QwLog::kVerbose,__PRETTY_FUNCTION__)
+#define QwVerbose  if (gQwLog.GetLogLevel() >= QwLog::kVerbose) gQwLog(QwLog::kVerbose,__PRETTY_FUNCTION__)
 
 /*! \def QwDebug
  *  \brief Predefined log drain for debugging output
  */
-#define QwDebug    gQwLog(QwLog::kDebug,__PRETTY_FUNCTION__)
+#define QwDebug    if (gQwLog.GetLogLevel() >= QwLog::kDebug) gQwLog(QwLog::kDebug,__PRETTY_FUNCTION__)
 
 
 /**
@@ -130,6 +130,12 @@ class QwLog : public std::ostream {
     /*! \brief Set the file log level
      */
     void                        SetFileThreshold(int thr);
+
+    /*! \brief Get highest log level 
+     */
+    QwLogLevel                  GetLogLevel() const {
+      return std::max(fScreenThreshold, fFileThreshold);
+    };
 
     /*! \brief Set the stream log level
      */
