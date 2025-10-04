@@ -37,8 +37,8 @@ jobs:
             opt: "opt"
             cxxflags: ""
     steps:
-      - uses: actions/checkout@v3
-      - uses: cvmfs-contrib/github-action-cvmfs@v3
+      - uses: actions/checkout@v5
+      - uses: cvmfs-contrib/github-action-cvmfs@v5
         with:
           cvmfs_repositories: 'sft.cern.ch,geant4.cern.ch'
       - name: Install ccache
