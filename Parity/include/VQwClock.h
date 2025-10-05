@@ -31,6 +31,20 @@ template<typename T> class QwClock;
 /**
  * \ingroup QwAnalysis_BeamLine
  */
+/**
+ * \class VQwClock
+ * \ingroup QwAnalysis_BeamLine
+ * \brief Abstract base for beam clocks used to normalize rates and yields
+ *
+ * VQwClock provides the interface for clock-like data elements that can be
+ * used to normalize other channels. Concrete clocks are provided by the
+ * templated QwClock<T> factory. The class exposes hooks for event decoding,
+ * tree/histogram output, accumulation, and single-event cuts.
+ *
+ * Specialized note: containers may hold pointers of type VQwClock* and invoke
+ * virtual hooks such as CheckForBurpFail; derived implementations must ensure
+ * proper overrides are provided to enable polymorphic dispatch.
+ */
 class VQwClock : public VQwDataElement {
   /***************************************************************
    *  Class:  VQwClock

@@ -35,6 +35,17 @@ class QwErrDBInterface;
 /// \ingroup QwAnalysis_ADC
 ///
 /// \ingroup QwAnalysis_BL
+/**
+ * \class QwVQWK_Channel
+ * \ingroup QwAnalysis_ADC
+ * \brief Concrete hardware channel for VQWK ADC modules (6x32-bit words)
+ *
+ * Decodes and processes the data for a single VQWK channel, providing access
+ * to sub-blocks and hardware sums, statistical moments, single-event cuts,
+ * and running statistics. Implements the dual-operator pattern by offering
+ * efficient type-specific operators and delegating polymorphic operators from
+ * the VQwHardwareChannel interface using dynamic_cast.
+ */
 class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
 /****************************************************************//**
  *  Class: QwVQWK_Channel

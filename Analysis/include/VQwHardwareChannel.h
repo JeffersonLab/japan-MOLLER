@@ -29,6 +29,27 @@ class QwDBInterface;
 class QwParameterFile;
 class QwErrDBInterface;
 
+/**
+ * \class VQwHardwareChannel
+ * \ingroup QwAnalysis
+ * \brief Abstract base for concrete hardware channels (single physical readout)
+ *
+ * This class provides common services for channel-like data elements that
+ * represent a single hardware readout (e.g., one ADC channel). It builds on
+ * VQwDataElement by adding channel-specific concepts such as subelements,
+ * calibration, per-event cuts, error flag handling, and running sums.
+ *
+ * Design notes:
+ * - Implements the dual-operator pattern described in the framework docs:
+ *   derived classes define type-specific operators (e.g., QwVQWK_Channel& +=)
+ *   and also override polymorphic variants (VQwHardwareChannel& +=) that
+ *   delegate via dynamic_cast to the type-specific implementation.
+ * - Provides utilities to manage histogram/tree/ntuple construction for
+ *   channel data, to accumulate running statistics, and to apply single-event
+ *   cuts and burp-failure checks.
+ * - Derived classes must implement the value accessors for subelements and
+ *   all arithmetic and processing hooks (ProcessEvent, ApplyHWChecks, etc.).
+ */
 class VQwHardwareChannel: public VQwDataElement {
 /****************************************************************//**
  *  Class: VQwHardwareChannel

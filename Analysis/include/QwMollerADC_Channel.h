@@ -30,6 +30,17 @@ class QwErrDBInterface;
 /// \ingroup QwAnalysis_ADC
 ///
 /// \ingroup QwAnalysis_BL
+/**
+ * \class QwMollerADC_Channel
+ * \ingroup QwAnalysis_ADC
+ * \brief Concrete hardware channel for Moller ADC modules (6x32-bit words)
+ *
+ * Decodes and processes the data for a single Moller ADC channel and exposes
+ * block-level values, sums, and statistical moments. Supports single-event
+ * cuts, error propagation, blinding, and running statistics. Follows the
+ * dual-operator pattern to provide both type-specific operators and
+ * polymorphic operator overrides via VQwHardwareChannel.
+ */
 class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
 /****************************************************************//**
  *  Class: QwMollerADC_Channel

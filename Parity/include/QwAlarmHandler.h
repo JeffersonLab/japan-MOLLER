@@ -11,6 +11,15 @@
 // Parent Class
 #include "VQwDataHandler.h"
 
+/**
+ * \class QwAlarmHandler
+ * \ingroup QwAnalysis
+ * \brief Data handler that evaluates alarm conditions and writes status outputs
+ *
+ * Connects to configured variables and checks them against user-defined alarm
+ * thresholds or patterns. Can periodically write a CSV status file for online
+ * monitoring and provides simple state tracking to avoid flapping.
+ */
 class QwAlarmHandler:public VQwDataHandler, public MQwDataHandlerCloneable<QwAlarmHandler>
 {
  public:
