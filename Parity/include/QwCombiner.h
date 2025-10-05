@@ -11,6 +11,16 @@
 // Parent Class
 #include "VQwDataHandler.h"
 
+/**
+ * \class QwCombiner
+ * \ingroup QwAnalysis
+ * \brief Data handler that forms linear combinations of channels
+ *
+ * QwCombiner connects to one or more input variables (yields/asymmetries/
+ * differences) and computes configured linear combinations using provided
+ * sensitivities. It is typically used to derive composite diagnostics or to
+ * prepare inputs for higher-level analyses.
+ */
 class QwCombiner:public VQwDataHandler, public MQwDataHandlerCloneable<QwCombiner>
 {
  public:

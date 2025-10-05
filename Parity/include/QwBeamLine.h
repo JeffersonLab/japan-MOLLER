@@ -30,9 +30,17 @@
 #include "QwBeamDetectorID.h"
 
 
-/*****************************************************************
-*  Class:
-******************************************************************/
+/**
+ * \class QwBeamLine
+ * \ingroup QwAnalysis_BeamLine
+ * \brief Subsystem aggregating beamline instruments (BPMs, BCMs, clocks, etc.)
+ *
+ * QwBeamLine owns and orchestrates multiple beam monitoring devices and
+ * provides a unified subsystem interface for map loading, event decoding,
+ * event processing, cuts, error propagation, histogram/tree output, and
+ * publishing. It supports combinations (e.g., combined BPM/BCM), mock-data
+ * generation, and stability/burp checks at the subsystem level.
+ */
 class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBeamLine> {
 
  private:

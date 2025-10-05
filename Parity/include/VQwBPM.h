@@ -40,6 +40,17 @@ class QwErrDBInterface;
 /// \ingroup QwAnalysis_BeamLine
 ///
 
+/**
+ * \class VQwBPM
+ * \ingroup QwAnalysis_BeamLine
+ * \brief Abstract base for beam position monitors (BPMs)
+ *
+ * Defines the common interface for BPM-like data elements, including decoding
+ * of position channels, per-event cuts, error propagation, and output. Concrete
+ * implementations such as QwBPMStripline<T> and QwCombinedBPM<T> inherit from
+ * this base to provide hardware-specific logic while sharing the higher-level
+ * processing contract.
+ */
 class VQwBPM : public VQwDataElement {
   /******************************************************************
    *  Class: VQwBPM

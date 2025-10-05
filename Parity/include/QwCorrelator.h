@@ -22,6 +22,15 @@ class TH1D;
 class TH2D;
 class QwRootFile;
 
+/**
+ * \class QwCorrelator
+ * \ingroup QwAnalysis
+ * \brief Data handler computing correlations and linear-regression coefficients
+ *
+ * Uses Bevington/Pebay algorithms to estimate correlations between independent
+ * and dependent variables selected from subsystem arrays. Produces summary
+ * histograms and optional output trees/files for further analysis.
+ */
 class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCorrelator>
 {
  public:
