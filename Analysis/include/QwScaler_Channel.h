@@ -168,7 +168,7 @@ public:
 
   Bool_t ApplySingleEventCuts() override;//check values read from modules are at desired level
 
-  Bool_t CheckForBurpFail(const VQwDataElement * /*ev_error*/) override{return kFALSE;};
+  Bool_t CheckForBurpFail(const VQwDataElement * /*ev_error*/) {return kFALSE;};
 
   void IncrementErrorCounters() override;
 
