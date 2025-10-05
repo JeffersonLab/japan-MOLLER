@@ -93,7 +93,7 @@ class  QwHaloMonitor : public VQwDataElement{
   void IncrementErrorCounters(){fHalo_Counter.IncrementErrorCounters();};
   UInt_t GetEventcutErrorFlag() override{return fHalo_Counter.GetEventcutErrorFlag();};
 
-  Bool_t CheckForBurpFail(const VQwDataElement *ev_error) override;
+  Bool_t CheckForBurpFail(const VQwDataElement *ev_error);
 
   UInt_t UpdateErrorFlag() override {return GetEventcutErrorFlag();};
   void UpdateErrorFlag(const QwHaloMonitor *ev_error){

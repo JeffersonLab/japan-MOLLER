@@ -90,7 +90,7 @@ class QwCombinedPMT : public VQwDataElement {
     fSumADC.IncrementErrorCounters();
   }
 
-  Bool_t CheckForBurpFail(const VQwDataElement *ev_error) override;
+  Bool_t CheckForBurpFail(const VQwDataElement *ev_error);
 
   UInt_t UpdateErrorFlag() override;
   void   UpdateErrorFlag(const QwCombinedPMT *ev_error);

@@ -88,7 +88,7 @@ class QwEnergyCalculator : public VQwDataElement{
       bEVENTCUTMODE=bcuts;
       fEnergyChange.SetEventCutMode(bcuts);
     }
-    Bool_t CheckForBurpFail(const VQwDataElement *ev_error) override;
+    Bool_t CheckForBurpFail(const VQwDataElement *ev_error);
 
     void    IncrementErrorCounters();
     void    PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
