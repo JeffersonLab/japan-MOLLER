@@ -86,7 +86,6 @@ Int_t QwADC18_Channel::GetBufferOffset(Int_t moduleindex, Int_t channelindex)
 /********************************************************/
 Int_t QwADC18_Channel::ApplyHWChecks()
 {
-  Bool_t fEventIsGood=kTRUE;
   Bool_t bStatus;
   if (bEVENTCUTMODE>0){//Global switch to ON/OFF event cuts set at the event cut file
 
@@ -106,7 +105,6 @@ Int_t QwADC18_Channel::ApplyHWChecks()
     }
 
     if (!MatchSequenceNumber(fSequenceNo_Prev)){//we have a sequence number error
-      fEventIsGood=kFALSE;
       fErrorFlag|=kErrorFlag_Sequence;
       if (bDEBUG)       QwWarning<<" QwQWVK_Channel "<<GetElementName()<<" Sequence number previous value = "<<fSequenceNo_Prev<<" Current value= "<< GetSequenceNumber()<<QwLog::endl;
     }
@@ -330,6 +328,7 @@ Int_t QwADC18_Channel::ProcessDataWord(UInt_t rawd)
 {
   // "Actual" values from data word
   UInt_t act_dtype  = (rawd & mask2422x) >> 22;
+  [[maybe_unused]]
   UInt_t act_chan   = (act_dtype != 4) ?
                       ((rawd & mask3029x) >> 29) : 0;
   UInt_t act_dvalue = (rawd & mask2625x) >> 25;

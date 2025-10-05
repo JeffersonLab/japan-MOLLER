@@ -126,14 +126,11 @@ void
 PromptSummaryElement::Set(TString type, const Double_t a, const Double_t a_err, const Double_t a_width)   
 {
   Double_t unit= 1;
-//REMOVE THIS:  Bool_t qtarg=fElementName.EqualTo("bcm_an_ds3"); //Estimator for good events
+
   Bool_t bcm= fElementName.Contains("bcm");
   Bool_t bpm= fElementName.Contains("bpm");
   Bool_t sam= fElementName.Contains("sam");
   Bool_t md= fElementName.Contains("md");
-  Bool_t dd=fElementName.Contains("_dd");
-  Bool_t da=fElementName.Contains("_da");
-  
 
   if (type.Contains("yield")){
     if (bcm) {
