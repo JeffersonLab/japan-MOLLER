@@ -1,3 +1,8 @@
+/*!
+ * \file   VQwSystem.h
+ * \brief  Virtual base class for all Qweak system objects
+ */
+
 #ifndef __VQwSystem_h__
 #define __VQwSystem_h__
 

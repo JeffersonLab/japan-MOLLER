@@ -1,15 +1,9 @@
-/**********************************************************\
-* File: QwBeamMod.h                                       *
-*                                                         *
-* Author: Joshua Hoskins                                  *
-* Time-stamp: 052510                                      *
-***********************************************************
-*                                                         *
-* Time-Stamp: 101910                                      *
-*                                                         *
-* Added support of QwWord                                 *
-*                                                         *
-\**********************************************************/
+/*!
+ * \file   QwBeamMod.h
+ * \brief  Beam modulation subsystem for parity analysis
+ * \author Joshua Hoskins
+ * \date   2010-05-25
+ */
 
 #ifndef __QwBEAMMOD__
 #define __QwBEAMMOD__

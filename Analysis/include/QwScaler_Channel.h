@@ -1,9 +1,10 @@
-/**********************************************************\
-* File: QwScaler_Channel.h                                 *
-*                                                          *
-* Author: J. Pan                                           *
-* Date:   Thu Sep 16 18:08:33 CDT 2009                     *
-\**********************************************************/
+/*!
+ * \file   QwScaler_Channel.h
+ * \brief  Base and derived classes for scaler channel data handling
+ *
+ * \author J. Pan
+ * \date   Thu Sep 16 18:08:33 CDT 2009
+ */
 
 #ifndef __QWSCALER_CHANNEL__
 #define __QWSCALER_CHANNEL__

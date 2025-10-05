@@ -1,9 +1,8 @@
-/*
- * QwExtractor.h
- *
- *  Created on: Nov 22, 2019
- *      Author: cameronc137
- *
+/*!
+ * \file   QwExtractor.h
+ * \brief  Data extraction handler for output processing
+ * \author cameronc137
+ * \date   2019-11-22
  */
 
 #ifndef QWEXTRACTOR_H_
@@ -24,6 +23,9 @@ class QwExtractor:public VQwDataHandler, public MQwDataHandlerCloneable<QwExtrac
     ~QwExtractor() override;
 
     Int_t LoadChannelMap(const std::string& mapfile) override;
+    /// \brief Connect to Channels (event-only extraction)
+    /// \param event Subsystem array with per-MPS yields
+    /// \return 0 on success, non-zero on failure
     Int_t ConnectChannels(QwSubsystemArrayParity& event) override;
     void ConstructTreeBranches(
         QwRootFile *treerootfile,

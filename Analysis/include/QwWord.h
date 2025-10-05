@@ -5,8 +5,13 @@
  *      Author: wdconinc
  */
 
-#ifndef QWWORD_H_
-#define QWWORD_H_
+/*!
+ * \file   QwWord.h
+ * \brief  Word-level data manipulation and bit operations
+ */
+
+#ifndef __QWWORD__
+#define __QWWORD__
 
 // ROOT headers
 #include "Rtypes.h"

@@ -1,14 +1,10 @@
+/*!
+ * \file   VEventDecoder.h
+ * \brief  Virtual base class for event decoders to encode and decode CODA data
+ */
+
 #ifndef VEVENTDECODER_H
 #define VEVENTDECODER_H
-
-/**********************************************************\
-* File: VEventDecoder.h                                    *
-*                                                          *
-* Author:                                                  *
-* Time-stamp:                                              *
-* Description: Contains the base functions needed to       *
-*              Encode and Decode CODA data and distribute  *
-*              to the subsystems
 \**********************************************************/
 
 #include <vector>

@@ -1,9 +1,8 @@
-/**********************************************************\
-* File: QwCombinedBPM.h                                   *
-*                                                         *
-* Author:B. Waidyawansa                                   *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwCombinedBPM.h
+ * \brief  Combined beam position monitor using weighted average
+ * \author B. Waidyawansa
+ */
 
 #ifndef __QwCOMBINEDBPM__
 #define __QwCOMBINEDBPM__

@@ -1,3 +1,8 @@
+/*!
+ * \file   VEventDecoder.cc
+ * \brief  Virtual base class implementation for event decoder functionality
+ */
+
 #include "VEventDecoder.h"
 #include "QwOptions.h"
 
@@ -66,8 +71,8 @@ Bool_t VEventDecoder::DecodeSubbankHeader(UInt_t *buffer){
 
 /**
  * @brief Prints internal decoder information
- * @param out Output buffer to use to dispay internal Decoder Information.\n Can be QwMessage, QwVerbose, QwWarning, or QwErrror.
- * @return okay
+ * @param out Output buffer to use to display internal decoder information.
+ *            Can be QwMessage, QwVerbose, QwWarning, or QwError.
  */
 void VEventDecoder::PrintDecoderInfo(QwLog& out)
 {

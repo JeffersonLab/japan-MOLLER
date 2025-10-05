@@ -1,3 +1,8 @@
+/*!
+ * \file   QwFactory.h
+ * \brief  Factory pattern implementation for creating analysis objects
+ */
+
 #ifndef __QWFACTORY__
 #define __QWFACTORY__
 

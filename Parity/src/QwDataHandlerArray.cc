@@ -1,9 +1,7 @@
-/**********************************************************\
-* File: QwDataHandlerArray.cc                         *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwDataHandlerArray.cc
+ * \brief  Implementation of array container for managing multiple data handlers
+ */
 
 #include "QwDataHandlerArray.h"
 
@@ -79,8 +77,11 @@ QwDataHandlerArray::~QwDataHandlerArray()
 }
 
 /**
- * Fill the handler array with the contents of a map file
- * @param detectors Map file
+ * Load data handlers from a map file into this array
+ * @tparam T Type of detector container (QwHelicityPattern or QwSubsystemArrayParity)
+ * @param mapfile Parameter file defining handlers
+ * @param detectors Detector container used to resolve channels
+ * @param run Run label used for handler configuration
  */
 template<class T>
 void QwDataHandlerArray::LoadDataHandlersFromParameterFile(

@@ -5,8 +5,13 @@
 * Time-stamp:                                             *
 \**********************************************************/
 
-#ifndef __QwHELICITY__
-#define __QwHELICITY__
+/*!
+ * \file   QwHelicity.h
+ * \brief  Helicity state management and pattern recognition
+ */
+
+#ifndef __QWHELICITY__
+#define __QWHELICITY__
 
 // System headers
 #include <vector>

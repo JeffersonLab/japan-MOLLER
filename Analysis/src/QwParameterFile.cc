@@ -1,4 +1,7 @@
-///  @file QwParameterFile.cc
+/*!
+ * \file   QwParameterFile.cc
+ * \brief  Implementation for parameter file parsing and management
+ */
 
 #include "QwParameterFile.h"
 

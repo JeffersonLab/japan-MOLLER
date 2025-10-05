@@ -1,3 +1,8 @@
+/*!
+ * \file   Coda2EventDecoder.cc
+ * \brief  CODA version 2 event decoder implementation
+ */
+
 #include "Coda2EventDecoder.h"
 #include "THaCodaFile.h"
 #include "QwOptions.h"
@@ -193,7 +198,7 @@ Int_t Coda2EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 
 /**
  * @brief Prints Internal Decoder Information
- * @param out Output buffer to use to dispay internal Decoder Information.\nCan be QwMessage, QwVerbose, QwWarning, or QwErrror.
+ * @param out Output buffer to use to dispay internal Decoder Information. Can be QwMessage, QwVerbose, QwWarning, or QwErrror.
  */
 void Coda2EventDecoder::PrintDecoderInfo(QwLog& out)
 {

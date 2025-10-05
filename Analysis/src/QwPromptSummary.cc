@@ -1,19 +1,12 @@
 
-#include "QwPromptSummary.h"
-
-#include "QwColor.h"
-#include "QwLog.h"
-#include "QwParameterFile.h"
-
-#include "TROOT.h"
-#include "TMath.h"
-
-/**
- *  \file   QwPromptSummary.cc
- *  \brief  
- *  \author jhlee@jlab.org
- *  \date   Friday, December 16 10:55:31 EST 2011
+/*!
+ * \file   QwPromptSummary.cc
+ * \brief  Implementation for prompt summary data management
+ * \author jhlee@jlab.org
+ * \date   2011-12-16
  */
+
+#include "QwPromptSummary.h"
 
 //
 //

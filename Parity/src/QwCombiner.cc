@@ -1,10 +1,8 @@
-/*
- * QwCombiner.cc
- *
- *  Created on: Oct 22, 2010
- *      Author: wdconinc
- *
- *  Last Modified: August 1, 2018 1:45 PM
+/*!
+ * \file   QwCombiner.cc
+ * \brief  Implementation of data combiner handler for channel operations
+ * \author wdconinc
+ * \date   2010-10-22
  */
 
 #include "QwCombiner.h"
@@ -172,12 +170,7 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
   return 0;
 }
 
-/** Connect to the dependent and independent channels
- *
- * @param asym Asymmetry event structure
- * @param diff Difference event structure
- * @return Zero on success
- */
+/** Connect to the dependent and independent channels */
 Int_t QwCombiner::ConnectChannels(
     QwSubsystemArrayParity& asym,
     QwSubsystemArrayParity& diff)
@@ -300,8 +293,8 @@ Int_t QwCombiner::ConnectChannels(
 
 /** Connect to the dependent and independent channels
  *
- * @param event Helicity event structure
- * @return Zero on success
+ * Parameters: event Helicity event structure
+ * Returns: Zero on success
  */
 Int_t QwCombiner::ConnectChannels(QwSubsystemArrayParity& event)
 {

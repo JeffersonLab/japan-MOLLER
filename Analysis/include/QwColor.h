@@ -1,3 +1,8 @@
+/*!
+ * \file   QwColor.h
+ * \brief  ANSI color codes and color management for terminal output
+ */
+
 #ifndef QWCOLOR_H
 #define QWCOLOR_H
 

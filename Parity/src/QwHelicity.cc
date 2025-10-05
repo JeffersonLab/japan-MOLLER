@@ -461,6 +461,45 @@ UInt_t QwHelicity::GetEventcutErrorFlag(){//return the error flag
   return fErrorFlag;
 }
 
+/*!
+ * \brief Process helicity information from userbit configuration data.
+ * 
+ * This is a complex function (~80 lines) that extracts helicity information
+ * from userbit data for injector tests and special configurations. It handles:
+ * 
+ * Userbit Decoding:
+ * - Extracts 3-bit userbit pattern from bits 28-30 of userbit word
+ * - Decodes quartet synchronization bit (bit 3) for pattern timing
+ * - Decodes helicity bit (bit 2) for spin state determination
+ * - Manages scaler offset calculations for event counting
+ * 
+ * Event Counting Logic:
+ * - Increments event numbers based on scaler counter ratios
+ * - Handles missed events when scaler offset > 1 (indicates DAQ issues)
+ * - Maintains pattern phase and pattern number synchronization
+ * - Resets quartet phase on quartet sync bit assertion
+ * 
+ * Helicity State Management:
+ * - Sets fHelicityBitPlus/fHelicityBitMinus based on userbit helicity bit
+ * - Updates fHelicityReported for downstream processing
+ * - Maintains helicity predictor state for data quality monitoring
+ * 
+ * Error Recovery:
+ * - Detects missed events through scaler offset analysis
+ * - Resets helicity predictor when event sequence is uncertain
+ * - Provides debug output for missed event scenarios
+ * 
+ * Pattern Synchronization:
+ * - Manages quartet boundaries using sync bits
+ * - Handles pattern phase wraparound at maximum phase
+ * - Maintains continuous event numbering across pattern boundaries
+ * 
+ * \note This mode is primarily used for injector testing and is not the
+ * standard helicity decoding method for production Qweak data analysis.
+ * 
+ * \warning Missed events (scaler offset > 1) will reset the helicity
+ * predictor and may affect downstream helicity-dependent analyses.
+ */
 void QwHelicity::ProcessEventUserbitMode()
 {
 

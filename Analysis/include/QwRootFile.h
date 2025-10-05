@@ -1,3 +1,8 @@
+/*!
+ * \file   QwRootFile.h
+ * \brief  ROOT file and tree management wrapper classes
+ */
+
 #ifndef __QWROOTFILE__
 #define __QWROOTFILE__
 

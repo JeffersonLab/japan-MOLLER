@@ -1,3 +1,8 @@
+/*!
+ * \file   QwMollerADC_Channel.cc
+ * \brief  Implementation for Moller ADC channel decoding and management
+ */
+
 #include "QwMollerADC_Channel.h"
  
 // System headers
@@ -1538,10 +1543,12 @@ void QwMollerADC_Channel::DivideBy(const QwMollerADC_Channel &denom)
  * We use the formulas provided there for the calculation of the first and
  * second moments (i.e. average and variance).
  */
+// Accumulate the running moments M1 and M2
 /**
- * Accumulate the running moments M1 and M2
- * @param value Object (single event or accumulated) to add to running moments
- * @param count Number of good events in value
+ * Accumulate running sum with optional error-mask filtering.
+ * @param value Source channel to accumulate from
+ * @param count Event count scaling
+ * @param ErrorMask Bit mask of error flags to exclude when accumulating
  */
 void QwMollerADC_Channel::AccumulateRunningSum(const QwMollerADC_Channel& value, Int_t count, Int_t ErrorMask)
 {

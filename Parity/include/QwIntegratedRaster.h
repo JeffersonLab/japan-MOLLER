@@ -1,9 +1,7 @@
-/**********************************************************\
-* File: QwIntegratedRaster.h                              *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwIntegratedRaster.h
+ * \brief  Integrated raster subsystem for beam position tracking
+ */
 
 #ifndef __QwIntegratedRaster__
 #define __QwIntegratedRaster__

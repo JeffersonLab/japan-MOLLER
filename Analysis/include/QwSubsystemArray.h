@@ -1,9 +1,9 @@
-/**********************************************************\
-* File: QwSubsystemArray.h                                 *
-*                                                          *
-* Author: P. M. King,  Rakitha Beminiwattha                *
-* Time-stamp: <2008-07-22 15:50>                           *
-\**********************************************************/
+/*!
+ * \file   QwSubsystemArray.h
+ * \brief  Array container for managing multiple subsystems
+ * \author P. M. King, Rakitha Beminiwattha
+ * \date   2008-07-22
+ */
 
 #ifndef __QWSUBSYSTEMARRAY__
 #define __QWSUBSYSTEMARRAY__

@@ -1,9 +1,10 @@
-/********************************************************\
-* File: QwClock.h                                        *
-*                                                        *
-* Author: Juan Carlos Cornejo <cornejo@jlab.org>         *
-* Time-stamp: <2011-06-16>                               *
-\********************************************************/
+/*!
+ * \file   QwClock.h
+ * \brief  Clock channel implementation for normalization and timing
+ *
+ * \author Juan Carlos Cornejo <cornejo@jlab.org>
+ * \date   2011-06-16
+ */
 
 #ifndef __QWCLOCK__
 #define __QWCLOCK__

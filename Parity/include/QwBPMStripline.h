@@ -1,9 +1,7 @@
-/**********************************************************\
-* File: QwBPMStripline.h                                  *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwBPMStripline.h
+ * \brief  Stripline beam position monitor implementation
+ */
 
 #ifndef __QwBPMSTRIPLINE__
 #define __QwBPMSTRIPLINE__

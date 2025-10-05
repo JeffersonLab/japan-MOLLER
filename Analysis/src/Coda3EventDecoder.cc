@@ -1,3 +1,8 @@
+/*!
+ * \file   Coda3EventDecoder.cc
+ * \brief  CODA version 3 event decoder implementation
+ */
+
 #include "Coda3EventDecoder.h"
 #include "THaCodaFile.h"
 #include "QwOptions.h"
@@ -293,7 +298,7 @@ void Coda3EventDecoder::printUserEvent(const UInt_t *buffer)
 
 /**
  * @brief Prints Internal Decoder Information
- * @param out Output buffer to use to dispay internal Decoder Information.\nCan be QwMessage, QwVerbose, QwWarning, or QwErrror.
+ * @param out Output buffer to use to dispay internal Decoder Information. Can be QwMessage, QwVerbose, QwWarning, or QwErrror.
  */
 void Coda3EventDecoder::PrintDecoderInfo(QwLog& out)
 {

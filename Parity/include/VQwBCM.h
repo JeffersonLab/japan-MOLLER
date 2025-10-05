@@ -5,6 +5,11 @@
 * Time-stamp: <2011-05-26>                                 *
 \**********************************************************/
 
+/*!
+ * \file   VQwBCM.h
+ * \brief  Virtual base class for beam current monitors
+ */
+
 #ifndef __VQWBCM__
 #define __VQWBCM__
 

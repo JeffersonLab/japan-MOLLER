@@ -8,6 +8,11 @@
 ///
 /// \ingroup QwAnalysis_ADC
 
+/*!
+ * \file   VQwDetectorArray.h
+ * \brief  Virtual base class for detector arrays (PMTs, etc.)
+ */
+
 #ifndef __VQWDETECTORARRAY__
 #define __VQWDETECTORARRAY__
 

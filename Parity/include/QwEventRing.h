@@ -5,6 +5,11 @@
 * Time-stamp: <2009-11-08 15:40>                           *
 \**********************************************************/
 
+/*!
+ * \file   QwEventRing.h
+ * \brief  Event ring buffer for burp detection and stability monitoring
+ */
+
 #ifndef __QwEventRing__
 #define __QwEventRing__
 

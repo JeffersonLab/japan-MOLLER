@@ -6,8 +6,13 @@
  * \date   2009-12-01
  */
 
-#ifndef QWOPTIONS_H
-#define QWOPTIONS_H
+/*!
+ * \file   QwOptions.h
+ * \brief  Command-line options processing using Boost.Program_options
+ */
+
+#ifndef __QWOPTIONS__
+#define __QWOPTIONS__
 
 // System headers
 #include <iostream>

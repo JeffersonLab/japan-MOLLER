@@ -1,3 +1,8 @@
+/*!
+ * \file   MQwCodaControlEvent.cc
+ * \brief  CODA control event data structure and management
+ */
+
 #include "MQwCodaControlEvent.h"
 
 #include "QwLog.h"

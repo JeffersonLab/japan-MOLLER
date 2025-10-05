@@ -1,9 +1,9 @@
-/**********************************************************\
-* File: QwParameterFile.h                                  *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2007-05-08 15:40>                           *
-\**********************************************************/
+/*!
+ * \file   QwParameterFile.h
+ * \brief  Parameter file parsing and management
+ * \author P. M. King
+ * \date   2007-05-08
+ */
 
 #ifndef __QWPARAMETERFILE__
 #define __QWPARAMETERFILE__

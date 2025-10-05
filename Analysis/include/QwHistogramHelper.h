@@ -1,3 +1,8 @@
+/*!
+ * \file   QwHistogramHelper.h
+ * \brief  Helper functions and utilities for ROOT histogram management
+ */
+
 ///  This class exists to encapsulate several helper functions to aid in
 ///  describing histograms.
 ///  There will be a global copy defined within the analysis framework.

@@ -219,7 +219,6 @@ QwBlinder::~QwBlinder()
 
 /**
  * Update the blinder status with new external information
- *
  * @param options Qweak option handler
  */
 void QwBlinder::ProcessOptions(QwOptions& options)
@@ -243,12 +242,12 @@ void QwBlinder::ProcessOptions(QwOptions& options)
   fBeamCurrentThreshold = options.GetValue<double>("blinder.beam-current-threshold");
 }
 
+#ifdef __USE_DATABASE__
 /**
  * Update the blinder status with new external information
  *
  * @param db Database connection
  */
-#ifdef __USE_DATABASE__
 void QwBlinder::Update(QwParityDB* db)
 {
   //  Update the seed ID then tell us if it has changed.
@@ -267,7 +266,6 @@ void QwBlinder::Update(QwParityDB* db)
 
 /**
  * Update the blinder status using a random number
- *
  */
 void QwBlinder::Update()
 {
@@ -1156,8 +1154,6 @@ void QwBlinder::PrintCountersValues(std::vector<Int_t> fCounters, TString counte
 
 /**
  * Write the blinding parameters to the database
- * @param db Database connection
- * @param datatype Datatype
  *
  * For each analyzed run the database contains a digest of the blinding parameters
  * and a number of blinded test entries.

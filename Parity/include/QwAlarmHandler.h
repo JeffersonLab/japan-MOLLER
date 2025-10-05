@@ -1,11 +1,8 @@
-/*
- * QwAlarmHandler.h
- *
- *  Created on: Oct 22, 2010
- *      Author: wdconinc
- *      Editor: cameronc
- *
- *  Last Modified: June 7, 2019 1:58 PM
+/*!
+ * \file   QwAlarmHandler.h
+ * \brief  Alarm handling data handler for monitoring system alerts
+ * \author wdconinc, cameronc
+ * \date   2010-10-22
  */
 
 #ifndef QWALARMHANDLER_H_
@@ -34,11 +31,21 @@ class QwAlarmHandler:public VQwDataHandler, public MQwDataHandlerCloneable<QwAla
 
     /// \brief Connect to Channels (event only)
     //Int_t ConnectChannels(QwSubsystemArrayParity& event);
-    /// \brief Connect to Channels (asymmetry/difference only)
+    /**
+     * \brief Connect to channels across subsystem arrays
+     *
+     * Establish pointers to input variables (yield/asym/diff) and prepare
+     * output channels for alarm evaluation.
+     *
+     * \param yield Subsystem array containing per-MPS yields
+     * \param asym  Subsystem array containing asymmetries
+     * \param diff  Subsystem array containing differences
+     * \return 0 on success, non-zero on failure
+     */
     Int_t ConnectChannels(
-        QwSubsystemArrayParity& yield,
-        QwSubsystemArrayParity& asym,
-			  QwSubsystemArrayParity& diff) override;
+      QwSubsystemArrayParity& yield,
+      QwSubsystemArrayParity& asym,
+      QwSubsystemArrayParity& diff) override;
     
 
     void ProcessData() override;

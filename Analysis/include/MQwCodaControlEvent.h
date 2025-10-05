@@ -1,3 +1,8 @@
+/*!
+ * \file   MQwCodaControlEvent.h
+ * \brief  CODA control event data structure and management
+ */
+
 #ifndef __MQWCODACONTROLEVENT__
 #define __MQWCODACONTROLEVENT__
 

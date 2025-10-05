@@ -1,10 +1,7 @@
-/**********************************************************\
-* File: QwCombinedBCM.h                                  *
-* File: QwBCM.h                                           *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwCombinedBCM.h
+ * \brief  Combined beam current monitor using weighted average of multiple BCMs
+ */
 
 #ifndef __Qw_COMBINEDBCM__
 #define __Qw_COMBINEDBCM__

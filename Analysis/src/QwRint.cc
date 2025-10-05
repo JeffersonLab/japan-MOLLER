@@ -1,3 +1,8 @@
+/*!
+ * \file   QwRint.cc
+ * \brief  Implementation for interactive ROOT interface with Qweak extensions
+ */
+
 #include "QwRint.h"
 
 // Standard C and C++ headers

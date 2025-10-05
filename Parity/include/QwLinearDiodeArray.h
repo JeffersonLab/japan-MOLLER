@@ -1,9 +1,9 @@
-/**********************************************************\
-* File: QwLinearDiodeArray.h                              *
-*                                                         *
-* Author: B.Waidyawansa                                   *
-* Time-stamp: 09-14-2010                                  *
-\**********************************************************/
+/*!
+ * \file   QwLinearDiodeArray.h
+ * \brief  Linear diode array beam position monitor implementation
+ * \author B.Waidyawansa
+ * \date   2010-09-14
+ */
 
 #ifndef __QwLinearDiodeArray__
 #define __QwLinearDiodeArray__

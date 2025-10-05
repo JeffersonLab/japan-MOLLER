@@ -1,3 +1,8 @@
+/*!
+ * \file   VQwAnalyzer.h
+ * \brief  Virtual base class for analyzer implementations
+ */
+
 #ifndef __VQwAnalyzer_h__
 #define __VQwAnalyzer_h__
 

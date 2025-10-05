@@ -53,7 +53,6 @@ class QwParameterFile;
  *   node [shape=box, fontname=Helvetica, fontsize=10];
  *   VQwSubsystem [ label="VQwSubsystem" URL="\ref VQwSubsystem"];
  *   VQwSubsystemParity [ label="VQwSubsystemParity" URL="\ref VQwSubsystemParity"];
- *   VQwSubsystemTracking [ label="VQwSubsystemTracking" URL="\ref VQwSubsystemTracking"];
  *   VQwSubsystem -> VQwSubsystemParity;
  *   VQwSubsystem -> VQwSubsystemTracking;
  * }

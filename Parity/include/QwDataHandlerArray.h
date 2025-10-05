@@ -1,9 +1,9 @@
-/**********************************************************\
-* File: QwDataHandlerArray.h                           *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2009-02-04 10:30>                           *
-\**********************************************************/
+/*!
+ * \file   QwDataHandlerArray.h
+ * \brief  Array container for managing multiple data handlers
+ * \author P. M. King
+ * \date   2009-02-04
+ */
 
 #ifndef __QWDATAHANDLERARRAY__
 #define __QWDATAHANDLERARRAY__

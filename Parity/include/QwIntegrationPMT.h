@@ -1,9 +1,7 @@
-/**********************************************************\
-* File: QwIntegrationPMT.h                                *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwIntegrationPMT.h
+ * \brief  Integration PMT detector for charge and asymmetry measurements
+ */
 
 #ifndef __QwMollerADC_IntegrationPMT__
 #define __QwMollerADC_IntegrationPMT__

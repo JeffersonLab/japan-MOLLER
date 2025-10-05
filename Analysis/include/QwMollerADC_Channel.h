@@ -1,9 +1,10 @@
-/**********************************************************\
-* File: QwMollerADC_Channel.h                                           *
-*                                                          *
-* Author: Kevin Ward (Original code by P.M. King)                                     *
-* Time-stamp: <20021-05-25 15:40>                           *
-\**********************************************************/
+
+/*!
+ * \file   QwMollerADC_Channel.h
+ * \brief  Decoding and management for Moller ADC channels (6x32-bit datawords)
+ * \author Kevin Ward (Original code by P.M. King)
+ * \date   20021-05-25
+ */
 
 #ifndef __QwMollerADC_CHANNEL__
 #define __QwMollerADC_CHANNEL__

@@ -1,3 +1,8 @@
+/*!
+ * \file   QwEventBuffer.cc
+ * \brief  Event buffer management for reading and processing CODA data files
+ */
+
 #include "QwEventBuffer.h"
 
 #include "QwOptions.h"

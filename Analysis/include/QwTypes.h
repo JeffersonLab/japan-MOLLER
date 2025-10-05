@@ -1,3 +1,8 @@
+/*!
+ * \file   QwTypes.h
+ * \brief  Basic data types and constants used throughout the Qweak analysis framework
+ */
+
 #ifndef QWTYPES_H
 #define QWTYPES_H
 

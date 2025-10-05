@@ -1,9 +1,10 @@
-/**********************************************************\
-* File: QwEventBuffer.h                                    *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2008-07-22 15:40>                           *
-\**********************************************************/
+
+/*!
+ * \file   QwEventBuffer.h
+ * \brief  Event buffer management for reading and processing CODA data
+ * \author P. M. King
+ * \date   2008-07-22
+ */
 
 #ifndef __QWEVENTBUFFER__
 #define __QWEVENTBUFFER__
