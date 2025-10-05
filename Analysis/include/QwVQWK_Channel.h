@@ -35,6 +35,7 @@ class QwErrDBInterface;
 /// \ingroup QwAnalysis_ADC
 ///
 /// \ingroup QwAnalysis_BL
+
 /**
  * \class QwVQWK_Channel
  * \ingroup QwAnalysis_ADC

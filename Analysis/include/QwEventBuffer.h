@@ -35,9 +35,16 @@ class QwSubsystemArray;
 //////////////////////////////////////////////////////////////////////
 
 
-///
-/// \ingroup QwAnalysis
-// class QwEventBuffer: public MQwCodaControlEvent{
+/**
+ * \class QwEventBuffer
+ * \ingroup QwAnalysis
+ * \brief Event buffer management for reading and processing CODA data
+ *
+ * Manages the reading of CODA event data files, including support for
+ * segmented files, run lists, and event stream processing. Handles
+ * event decoding via pluggable decoder classes and provides iteration
+ * over events and runs.
+ */
 class QwEventBuffer {
  public:
   static void DefineOptions(QwOptions &options);

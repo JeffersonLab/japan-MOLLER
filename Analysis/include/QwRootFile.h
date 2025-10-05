@@ -38,13 +38,12 @@ using std::type_info;
 /**
  *  \class QwRootTree
  *  \ingroup QwAnalysis
- *  \brief A wrapper class for a ROOT tree
+ *  \brief Wrapper class for ROOT tree management with vector-based data storage
  *
- * This class provides the functionality to write to ROOT trees using a vector
- * of doubles.  The vector is part of this object, as well as a pointer to the
- * tree that contains the branches.  One ROOT tree can have multiple QwRootTree
- * objects, for example in tracking mode both parity and tracking detectors
- * can be stored in the same tree.
+ * Provides functionality to write to ROOT trees using vectors of doubles,
+ * with support for branch construction, event filtering, and tree sharing.
+ * Handles both new tree creation and attachment to existing trees, enabling
+ * multiple subsystems to contribute data to a single ROOT tree.
  */
 class QwRootTree {
 

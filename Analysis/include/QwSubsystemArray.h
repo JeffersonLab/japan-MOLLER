@@ -29,8 +29,16 @@
 class VQwHardwareChannel;
 class QwParameterFile;
 
-///
-/// \ingroup QwAnalysis
+/**
+ * \class QwSubsystemArray
+ * \ingroup QwAnalysis
+ * \brief Container for managing multiple subsystems with common operations
+ *
+ * Extends std::vector to provide subsystem-level operations such as
+ * event processing, accumulation, tree/histogram construction, and
+ * publishing. Uses container-delegation pattern to forward arithmetic
+ * operations to individual subsystems while maintaining type safety.
+ */
 class QwSubsystemArray:
     public std::vector<std::shared_ptr<VQwSubsystem>>,
     public MQwPublishable<QwSubsystemArray, VQwSubsystem> {
