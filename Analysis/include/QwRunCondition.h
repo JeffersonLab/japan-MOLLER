@@ -5,9 +5,7 @@
  * \date   2010-09-09
  */
 
-#ifndef __QwRunCondition__
-#define __QwRunCondition__
-
+#pragma once
 
 #include <unistd.h>
 #include <iostream>
@@ -80,5 +78,3 @@ class QwRunCondition
 //         std::cout << list->At(i)->GetName() << std::endl;
 //    }
 //  }
-
-#endif

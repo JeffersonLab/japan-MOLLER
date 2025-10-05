@@ -11,8 +11,7 @@
  * \brief  Command-line options processing using Boost.Program_options
  */
 
-#ifndef __QWOPTIONS__
-#define __QWOPTIONS__
+#pragma once
 
 // System headers
 #include <iostream>
@@ -322,5 +321,3 @@ class QwOptions {
 
     bool fParsed;
 };
-
-#endif // QWOPTIONS_H

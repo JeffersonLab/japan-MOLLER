@@ -6,8 +6,7 @@
  * \date   2011-06-16
  */
 
-#ifndef __QWCLOCK__
-#define __QWCLOCK__
+#pragma once
 
 // System headers
 #include <vector>
@@ -183,5 +182,3 @@ class QwClock : public VQwClock {
   Double_t fNormalizationValue;
 
 };
-
-#endif // __QWCLOCK__

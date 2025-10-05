@@ -3,8 +3,7 @@
  * \brief  Mix-in class for histogram management functionality
  */
 
-#ifndef __MQWHISTOGRAMS__
-#define __MQWHISTOGRAMS__
+#pragma once
 
 // System headers
 #include <vector>
@@ -77,4 +76,3 @@ class MQwHistograms {
 
 }; // class MQwHistograms
 
-#endif // __MQWHISTOGRAMS__

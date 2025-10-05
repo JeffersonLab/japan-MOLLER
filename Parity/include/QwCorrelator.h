@@ -5,8 +5,7 @@
  * \date   2018-08-01
  */
 
-#ifndef QWCORRELATOR_H_
-#define QWCORRELATOR_H_
+#pragma once
 
 // Parent Class
 #include "VQwDataHandler.h"
@@ -139,6 +138,3 @@ class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCor
   QwCorrelator();
 
 };
-
-
-#endif //QWCORRELATOR_H_

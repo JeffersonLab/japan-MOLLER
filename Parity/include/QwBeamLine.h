@@ -3,8 +3,7 @@
  * \brief  Beamline subsystem containing BPMs, BCMs, and other beam monitoring devices
  */
 
-#ifndef __QwBEAMLINE__
-#define __QwBEAMLINE__
+#pragma once
 
 // System headers
 #include <vector>
@@ -217,5 +216,3 @@ private:
   
 
 };
-
-#endif

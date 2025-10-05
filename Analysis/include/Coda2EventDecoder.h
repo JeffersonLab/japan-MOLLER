@@ -3,8 +3,7 @@
  * \brief  CODA version 2 event decoder implementation
  */
 
-#ifndef CODA2EVENTDECODER_H
-#define CODA2EVENTDECODER_H
+#pragma once
 
 #include "VEventDecoder.h"
 #include "Rtypes.h"
@@ -78,4 +77,3 @@ private:
 	UInt_t fStatSum;  
 	UInt_t fIDBankNum;
 };
-#endif

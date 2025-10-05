@@ -11,8 +11,7 @@
  * \date   2009-12-10
  */
 
-#ifndef QWOPTIONSPARITY_H
-#define QWOPTIONSPARITY_H
+#pragma once
 
 // Qweak options header (should be first)
 #include "QwOptions.h"
@@ -46,5 +45,3 @@ void DefineOptionsParity(QwOptions& options)
   QwParityDB::DefineAdditionalOptions(options);
   #endif //__USE_DATABASE__
 }
-
-#endif // QWOPTIONSPARITY_H

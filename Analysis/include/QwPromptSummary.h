@@ -5,8 +5,7 @@
  * \date   2011-12-16
  */
 
-#ifndef __QwPromptSummary__
-#define __QwPromptSummary__
+#pragma once
 
 #include <iostream>
 #include <fstream>
@@ -195,6 +194,3 @@ private:
   ClassDefOverride(QwPromptSummary,0);
 
 };
-
-
-#endif

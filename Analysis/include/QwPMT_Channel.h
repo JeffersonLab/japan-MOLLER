@@ -5,8 +5,7 @@
  * \date   2007-05-08
  */
 
-#ifndef __QwPMT_CHANNEL__
-#define __QwPMT_CHANNEL__
+#pragma once
 
 #include <vector>
 #include "TTree.h"
@@ -108,7 +107,3 @@ class QwPMT_Channel: public VQwDataElement {
   Int_t fCrate;                      ///< ROC number
   Int_t fModule;                     ///< slot number
 };
-
-
-
-#endif

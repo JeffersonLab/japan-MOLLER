@@ -11,8 +11,7 @@
  * \brief  Data blinding utilities for parity violation analysis
  */
 
-#ifndef __QWBLINDER__
-#define __QWBLINDER__
+#pragma once
 
 // System headers
 #include <vector>
@@ -317,5 +316,3 @@ class QwBlinder {
     std::vector<Int_t> fPatternCounters; ///< Counts the number of events in each failure mode
     std::vector<Int_t> fPairCounters; ///< Counts the number of helicity pairs in each failure mode
 };
-
-#endif //__QWBLINDER__

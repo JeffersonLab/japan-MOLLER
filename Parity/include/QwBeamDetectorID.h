@@ -3,8 +3,7 @@
  * \brief  Beam detector identification and mapping class
  */
 
-#ifndef __QWBEAMDETECTORID__
-#define __QWBEAMDETECTORID__
+#pragma once
 
 // ROOT headers
 #include "Rtypes.h"
@@ -57,5 +56,3 @@ private:
   QwBeamDetectorID();
 
 };
-
-#endif

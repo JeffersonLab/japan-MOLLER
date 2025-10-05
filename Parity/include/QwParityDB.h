@@ -6,9 +6,9 @@
  * \date   2010-01-07
  */
 
+#pragma once
+
 #ifdef __USE_DATABASE__
-#ifndef QWPARITYDB_HH
-#define QWPARITYDB_HH
 
 // System headers
 #include <map>
@@ -117,8 +117,5 @@ class QwParityDB: public QwDatabase {
     friend class StoreSlowControlDetectorID;
     friend class StoreErrorCodeID;
 };
-
-
-#endif
 
 #endif // #ifdef __USE_DATABASE__                                                                                                         

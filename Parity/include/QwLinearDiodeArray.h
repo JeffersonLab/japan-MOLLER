@@ -5,8 +5,7 @@
  * \date   2010-09-14
  */
 
-#ifndef __QwLinearDiodeArray__
-#define __QwLinearDiodeArray__
+#pragma once
 
 // System headers
 #include <vector>
@@ -175,6 +174,3 @@ class QwLinearDiodeArray : public VQwBPM {
   std::vector<QwVQWK_Channel> fLinearArrayElementList;
 
 };
-
-
-#endif

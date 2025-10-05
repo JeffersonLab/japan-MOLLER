@@ -5,8 +5,7 @@
 * Date:   Tue Mar 29 13:08:12 EDT 2011                     *
 \**********************************************************/
 
-#ifndef __MQWMOCKABLE__
-#define __MQWMOCKABLE__
+#pragma once
 
 // Boost math library for random number generation
 #include "boost/random.hpp"
@@ -123,5 +122,3 @@ public:
   std::vector<Double_t> fMockDriftPhase;     ///< Harmonic drift phase
   // @}
 };
-
-#endif

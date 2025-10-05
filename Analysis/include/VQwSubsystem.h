@@ -6,8 +6,7 @@
  * \date   2007-05-08 15:40
  */
 
-#ifndef __VQWSUBSYSTEM__
-#define __VQWSUBSYSTEM__
+#pragma once
 
 // System headers
 #include <iostream>
@@ -514,6 +513,3 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   VQwSubsystem();
 
 }; // class VQwSubsystem
-
-
-#endif // __VQWSUBSYSTEM__

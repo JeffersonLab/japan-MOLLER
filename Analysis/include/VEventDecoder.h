@@ -3,8 +3,7 @@
  * \brief  Virtual base class for event decoders to encode and decode CODA data
  */
 
-#ifndef VEVENTDECODER_H
-#define VEVENTDECODER_H
+#pragma once
 
 #include <vector>
 
@@ -171,5 +170,3 @@ protected:
 	};
 
 };
-
-#endif

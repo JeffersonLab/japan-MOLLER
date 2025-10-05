@@ -5,14 +5,12 @@
 * Time-stamp: <2010-05-24>                                 *
 \**********************************************************/
 
-
 /*!
  * \file   VQwBPM.h
  * \brief  Virtual base class for beam position monitors
  */
 
-#ifndef __VQWBPM__
-#define __VQWBPM__
+#pragma once
 
 // ROOT headers
 #include <TTree.h>
@@ -354,7 +352,3 @@ public:
 };
 
 typedef std::shared_ptr<VQwBPM> VQwBPM_ptr;
-
-#endif
-
-

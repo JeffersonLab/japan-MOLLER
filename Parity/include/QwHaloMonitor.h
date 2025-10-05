@@ -5,8 +5,7 @@
  * \date   2010-06-24
  */
 
-#ifndef __QwHALO_MONITOR__
-#define __QwHALO_MONITOR__
+#pragma once
 
 // System headers
 #include <vector>
@@ -158,6 +157,3 @@ class  QwHaloMonitor : public VQwDataElement{
   Bool_t bEVENTCUTMODE;//If this set to kFALSE then Event cuts do not depend on HW ckecks. This is set externally through the qweak_beamline_eventcuts.map
 
 };
-
-
-#endif

@@ -5,8 +5,7 @@
  * \date   2008-07-22
  */
 
-#ifndef __QWSUBSYSTEMARRAY__
-#define __QWSUBSYSTEMARRAY__
+#pragma once
 
 #include <vector>
 #include <map>
@@ -318,6 +317,3 @@ protected:
   
 
 }; // class QwSubsystemArray
-
-
-#endif // __QWSUBSYSTEMARRAY__
