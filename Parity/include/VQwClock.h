@@ -100,6 +100,9 @@ public:
 
   virtual const VQwHardwareChannel* GetTime() const = 0;
 
+  // Polymorphic burp-failure check for clocks
+  virtual Bool_t CheckForBurpFail(const VQwClock* ev_error) = 0;
+
 };
 
 typedef std::shared_ptr<VQwClock> VQwClock_ptr;

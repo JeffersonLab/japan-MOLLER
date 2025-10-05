@@ -131,21 +131,15 @@ class VQwDataElement: public MQwHistograms {
   VQwDataElement& operator-= (const VQwDataElement & /*value*/)
     { throw std::runtime_error(std::string("VQwDataElement::operator-= not implemented for ") + GetElementName().Data()); }
 
-  /*! \brief Sum operator */
-  virtual void Sum(const VQwDataElement &value1, const VQwDataElement &value2)
-    { 
-      *this =  value1;
-      *this += value2;
-    }
-  /*! \brief Difference operator */
-  virtual void Difference(const VQwDataElement &value1, const VQwDataElement &value2)
-    { 
-      *this =  value1;
-      *this -= value2;
-    }
-  /*! \brief Ratio operator */
-  virtual void Ratio(const VQwDataElement & /*numer*/, const VQwDataElement & /*denom*/)
-  { std::cerr << "Ratio not defined for element"<< fElementName<< "!" << std::endl; }
+  /*! \brief Sum operator (base class fallback throws runtime error) */
+  void Sum(const VQwDataElement & /*value1*/, const VQwDataElement & /*value2*/)
+    { throw std::runtime_error("Sum not implemented for this data element type"); }
+  /*! \brief Difference operator (base class fallback throws runtime error) */
+  void Difference(const VQwDataElement & /*value1*/, const VQwDataElement & /*value2*/)
+    { throw std::runtime_error("Difference not implemented for this data element type"); }
+  /*! \brief Ratio operator (base class fallback throws runtime error) */
+  void Ratio(const VQwDataElement & /*numer*/, const VQwDataElement & /*denom*/)
+  { throw std::runtime_error("Ratio not implemented for this data element type"); }
 
   /*! \brief Construct the histograms for this data element */
   virtual void  ConstructHistograms(TDirectory *folder, TString &prefix) = 0;
@@ -159,12 +153,12 @@ class VQwDataElement: public MQwHistograms {
 
 
   /*! \brief set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
-  virtual void SetSingleEventCuts(UInt_t /*errorflag*/,Double_t /*min*/, Double_t /*max*/, Double_t /*stability*/){std::cerr << "SetSingleEventCuts not defined!" << std::endl; };
+  void SetSingleEventCuts(UInt_t /*errorflag*/,Double_t /*min*/, Double_t /*max*/, Double_t /*stability*/){throw std::runtime_error("SetSingleEventCuts not implemented for this data element type");};
   /*! \brief report number of events failed due to HW and event cut failure */
   virtual void PrintErrorCounters() const {};
 
-  virtual Bool_t  CheckForBurpFail(const VQwDataElement * /*ev_error*/){
-    return kFALSE;
+  Bool_t  CheckForBurpFail(const VQwDataElement * /*ev_error*/){
+    throw std::runtime_error(std::string("CheckForBurpFail not implemented for this data element type ") + typeid(*this).name());
   };
 
   /*! \brief return the error flag on this channel/device*/

@@ -191,6 +191,12 @@ public:
     std::cerr << "Ratio() is not defined for BPM named="<<GetElementName()<<"\n";
   }
 
+  // Ensure polymorphic dispatch of burp-failure checks when called via VQwBPM*
+  virtual Bool_t CheckForBurpFail(const VQwDataElement *ev_error) {
+    // Default: delegate to VQwDataElement (throws). Derived classes should override.
+    return VQwDataElement::CheckForBurpFail(ev_error);
+  }
+
   // Stuff required for QwBPMStripLine
 /*   virtual UInt_t  GetSubElementIndex(TString subname) { */
 /*     std::cerr << "GetSubElementIndex() is not implemented for BPM named=" */

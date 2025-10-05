@@ -324,6 +324,32 @@ UInt_t QwCombinedBPM<T>::UpdateErrorFlag()
   return error;
 }
 
+template<typename T>
+Bool_t QwCombinedBPM<T>::CheckForBurpFail(const VQwDataElement *ev_error){
+  Bool_t burpstatus = kFALSE;
+  try {
+    if (typeid(*ev_error) == typeid(*this)) {
+      if (this->GetElementName() != "") {
+        const QwCombinedBPM<T>* value_bpm = dynamic_cast<const QwCombinedBPM<T>*>(ev_error);
+        // Delegate to subelements
+        for (int i = 0; i < 2; ++i) {
+          burpstatus |= fAbsPos[i].CheckForBurpFail(&(value_bpm->fAbsPos[i]));
+          burpstatus |= fSlope[i].CheckForBurpFail(&(value_bpm->fSlope[i]));
+          burpstatus |= fIntercept[i].CheckForBurpFail(&(value_bpm->fIntercept[i]));
+          burpstatus |= fMinimumChiSquare[i].CheckForBurpFail(&(value_bpm->fMinimumChiSquare[i]));
+        }
+        burpstatus |= fEffectiveCharge.CheckForBurpFail(&(value_bpm->fEffectiveCharge));
+      }
+    } else {
+      TString loc = "Standard exception from QwCombinedBPM::CheckForBurpFail :" +
+        ev_error->GetElementName() + " " + this->GetElementName() + " are not of the same type";
+      throw std::invalid_argument(loc.Data());
+    }
+  } catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
+  return burpstatus;
+}
 
 template<typename T>
 VQwHardwareChannel* QwCombinedBPM<T>::GetSubelementByName(TString ch_name)
