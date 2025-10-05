@@ -371,7 +371,6 @@ void QwEnergyCalculator::SetSingleEventCuts(UInt_t errorflag, Double_t LL=0, Dou
 }
 
 Bool_t QwEnergyCalculator::CheckForBurpFail(const VQwDataElement *ev_error){
-  Short_t i=0;
   Bool_t burpstatus = kFALSE;
   try {
     if(typeid(*ev_error)==typeid(*this)) {

@@ -55,7 +55,6 @@ Int_t QwMollerDetector::LoadChannelMap(TString mapfile)
       // This is a declaration line.  Decode it.
       
       varname.ToLower();
-      UInt_t value = QwParameterFile::GetUInt(varvalue);
 
       RegisterRocBankMarker(mapstr);
       if(currentsubbankindex != GetSubbankIndex(fCurrentROC_ID,fCurrentBank_ID)){

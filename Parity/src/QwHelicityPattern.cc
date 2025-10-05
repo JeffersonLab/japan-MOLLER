@@ -369,6 +369,7 @@ void  QwHelicityPattern::CalculatePairAsymmetry()
 
   Int_t plushel  = 1;
   Int_t minushel = 0;
+  [[maybe_unused]]
   Int_t checkhel = 0;
 
   if (fNextPair<fPatternSize/2){
