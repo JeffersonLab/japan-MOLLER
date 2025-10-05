@@ -8,8 +8,7 @@
  *  Last Modified: June 7, 2019 1:58 PM
  */
 
-#ifndef QWALARMHANDLER_H_
-#define QWALARMHANDLER_H_
+#pragma once
 
 // Parent Class
 #include "VQwDataHandler.h"
@@ -101,5 +100,3 @@ inline std::ostream& operator<< (std::ostream& stream, const QwAlarmHandler::EQw
   }
   return stream;
 }
-
-#endif // QWALARMHANDLER_H_

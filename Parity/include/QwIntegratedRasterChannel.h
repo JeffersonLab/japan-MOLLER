@@ -5,8 +5,7 @@
 * Time-stamp:                                             *
 \**********************************************************/
 
-#ifndef __QwIntegratedRasterChannel__
-#define __QwIntegratedRasterChannel__
+#pragma once
 
 // System headers
 #include <vector>
@@ -141,5 +140,3 @@ class QwIntegratedRasterChannel : public VQwDataElement{
 
 
 };
-
-#endif

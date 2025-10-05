@@ -5,8 +5,7 @@
 * Time-stamp: <20021-05-25 15:40>                           *
 \**********************************************************/
 
-#ifndef __QwMollerADC_CHANNEL__
-#define __QwMollerADC_CHANNEL__
+#pragma once
 
 // System headers
 #include <vector>
@@ -388,7 +387,3 @@ private:
 
 
 };
-
-
-
-#endif

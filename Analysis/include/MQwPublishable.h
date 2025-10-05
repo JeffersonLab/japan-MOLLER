@@ -1,5 +1,4 @@
-#ifndef __MQWPUBLISHABLE__
-#define __MQWPUBLISHABLE__
+#pragma once
 
 // System headers
 #include <map>
@@ -93,5 +92,3 @@ class MQwPublishable {
     std::map<TString, TString>                   fPublishedValuesDescription;
  
 };
-
-#endif

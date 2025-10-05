@@ -6,9 +6,7 @@
  *  \date   Nov 12, 2010
  */
 
-#ifndef QWOBJECTCOUNTER_H_
-#define QWOBJECTCOUNTER_H_
-
+#pragma once
 
 /**
  *  \class QwObjectCounter
@@ -67,5 +65,3 @@ size_t QwObjectCounter<T>::fObjectsCreated = 0;
 /// Initialize objects still alive counter
 template<typename T>
 size_t QwObjectCounter<T>::fObjectsAlive = 0;
-
-#endif /* QWOBJECTCOUNTER_H_ */

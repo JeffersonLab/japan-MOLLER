@@ -1,5 +1,4 @@
-#ifndef QWUNITS_H
-#define QWUNITS_H
+#pragma once
 
 /**
  * \ingroup QwAnalysis
@@ -138,5 +137,3 @@ namespace Qw {
   //@}
 
 } // namespace Qw
-
-#endif // QWUNITS_H

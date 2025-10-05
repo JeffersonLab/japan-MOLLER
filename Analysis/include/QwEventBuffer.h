@@ -5,9 +5,7 @@
 * Time-stamp: <2008-07-22 15:40>                           *
 \**********************************************************/
 
-#ifndef __QWEVENTBUFFER__
-#define __QWEVENTBUFFER__
-
+#pragma once
 
 #include <string>
 #include <vector>
@@ -329,7 +327,3 @@ template < class T > Bool_t QwEventBuffer::FillObjectWithEventData(T &object){
   }
   return okay;
 }
-
-
-
-#endif

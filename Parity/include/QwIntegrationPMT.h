@@ -5,8 +5,7 @@
 * Time-stamp:                                             *
 \**********************************************************/
 
-#ifndef __QwMollerADC_IntegrationPMT__
-#define __QwMollerADC_IntegrationPMT__
+#pragma once
 
 // System headers
 #include <vector>
@@ -206,7 +205,3 @@ void RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeam
   const static  Bool_t bDEBUG=kFALSE;//debugging display purposes
   Bool_t bEVENTCUTMODE; //global switch to turn event cuts ON/OFF
 };
-
-
-
-#endif

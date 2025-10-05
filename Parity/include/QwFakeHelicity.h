@@ -10,9 +10,7 @@
   related calculations.
 */
 
-
-#ifndef __QwFAKEHELICITY__
-#define __QwFAKEHELICITY__
+#pragma once
 
 #include "QwHelicity.h"
 
@@ -41,5 +39,3 @@ class QwFakeHelicity: public QwHelicity {
     UInt_t GetRandbit(UInt_t& ranseed);
 
 };
-
-#endif

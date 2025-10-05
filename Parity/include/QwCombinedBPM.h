@@ -5,8 +5,7 @@
 * Time-stamp:                                             *
 \**********************************************************/
 
-#ifndef __QwCOMBINEDBPM__
-#define __QwCOMBINEDBPM__
+#pragma once
 
 // System headers
 #include <vector>
@@ -236,7 +235,3 @@ private:
   std::vector<T> fBPMComboElementList;
 
 };
-
-
-
-#endif

@@ -6,8 +6,7 @@
 * Time-stamp:                                             *
 \**********************************************************/
 
-#ifndef __Qw_COMBINEDBCM__
-#define __Qw_COMBINEDBCM__
+#pragma once
 
 // System headers
 #include <vector>
@@ -134,5 +133,3 @@ public:
   static void SetTripSeed(uint seedval);
   // @}
 };
-
-#endif

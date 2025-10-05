@@ -5,9 +5,7 @@
 * Time-stamp: <2010-05-24>                                 *
 \**********************************************************/
 
-
-#ifndef __VQWBPM__
-#define __VQWBPM__
+#pragma once
 
 // ROOT headers
 #include <TTree.h>
@@ -338,7 +336,3 @@ public:
 };
 
 typedef std::shared_ptr<VQwBPM> VQwBPM_ptr;
-
-#endif
-
-

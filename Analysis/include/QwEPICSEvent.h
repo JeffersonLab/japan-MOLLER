@@ -2,8 +2,7 @@
 Adopted from G0EPICSEvent class.
 */
 
-#ifndef __QWEPICSEVENT__
-#define __QWEPICSEVENT__
+#pragma once
 
 // System headers
 #include <map>
@@ -189,5 +188,3 @@ class QwEPICSEvent
 
   
 }; // class QwEPICSEvent
-
-#endif // __QWEPICSEVENT__

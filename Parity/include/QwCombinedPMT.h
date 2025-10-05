@@ -1,6 +1,5 @@
 
-#ifndef __QwMollerADC_COMBINEDPMT__
-#define __QwMollerADC_COMBINEDPMT__
+#pragma once
 
 // System headers
 #include <vector>
@@ -169,5 +168,3 @@ class QwCombinedPMT : public VQwDataElement {
   const static  Bool_t bDEBUG=kFALSE; /// debugging display purposes
 
 };
-
-#endif

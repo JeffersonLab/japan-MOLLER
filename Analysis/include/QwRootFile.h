@@ -1,5 +1,4 @@
-#ifndef __QWROOTFILE__
-#define __QWROOTFILE__
+#pragma once
 
 // System headers
 #include <typeindex>
@@ -1262,6 +1261,3 @@ Int_t QwRootFile::WriteParamFileList(const TString &name, T& object)
   }
   return retval;
 }
-
-
-#endif // __QWROOTFILE__

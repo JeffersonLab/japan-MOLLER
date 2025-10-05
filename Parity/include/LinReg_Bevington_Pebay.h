@@ -1,5 +1,5 @@
-#ifndef LINREGBEVPEB_h
-#define LINREGBEVPEB_h
+#pragma once
+
 /*********************************************************************
  * $Id: $
  * \author Jan Balewski, MIT, 2010
@@ -118,5 +118,3 @@ inline std::ostream& operator<< (std::ostream& stream, const LinRegBevPeb& h)
   stream << "LRB: " << h.fGoodEventNumber << " events";
   return stream;
 }
-
-#endif

@@ -5,8 +5,7 @@
 * Time-stamp: <2009-11-08 15:40>                           *
 \**********************************************************/
 
-#ifndef __QwEventRing__
-#define __QwEventRing__
+#pragma once
 
 #include <vector>
 
@@ -97,8 +96,3 @@ class QwEventRing {
   Int_t fBurpPrecut;
   QwSubsystemArrayParity fBurpAvg;
 };
-
-
-
-
-#endif

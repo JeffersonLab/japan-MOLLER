@@ -1,5 +1,4 @@
-#ifndef __MQWCODACONTROLEVENT__
-#define __MQWCODACONTROLEVENT__
+#pragma once
 
 #include <vector>
 #include <iostream>
@@ -81,6 +80,3 @@ class MQwCodaControlEvent
   TDatime fStartDatime;
   TDatime fEndDatime;
 };
-
-
-#endif

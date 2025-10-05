@@ -11,8 +11,7 @@ Description:  This is the header file to the VQwDataHandler class.  This
 Last Modified: August 1, 2018 1:39 PM
 *****************************************************************************/
 
-#ifndef VQWDATAHANDLER_H_
-#define VQWDATAHANDLER_H_
+#pragma once
 
 // Qweak headers
 #include "QwHelicityPattern.h"
@@ -195,5 +194,3 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
    Bool_t fRunningsumFillsTree;
    VQwDataHandler *fRunningsum;
 };
-
-#endif // VQWDATAHANDLER_H_
