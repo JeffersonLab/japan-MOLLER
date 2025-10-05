@@ -1252,12 +1252,6 @@ void QwCombinedBPM<T>::RandomizeEventData(int helicity, double time)
 
 
 template<typename T>
-void QwCombinedBPM<T>::SetMockDataAsDiff() {
-  this->SetMockDataAsDiff();
-}
-
-
-template<typename T>
 void QwCombinedBPM<T>::LoadMockDataParameters(QwParameterFile &paramfile){
 /*
   Bool_t   ldebug=kFALSE;

@@ -79,8 +79,6 @@ class QwCombinedBPM : public VQwBPM {
     InitializeChannel(subsystem, name);
   }
 
-  void    SetMockDataAsDiff();
-
   void    LoadChannelParameters(QwParameterFile &paramfile){};
   void    ClearEventData();
   Int_t   ProcessEvBuffer(UInt_t* buffer,

@@ -8,15 +8,11 @@
 #include <algorithm>
 #include <cctype>
 
-#ifndef BOOST_VERSION
-#include "boost/version.hpp"
-#endif
-
 // Qweak headers
 #include "QwLog.h"
 
 // Initialize the list of search paths
-std::vector<bfs::path> QwParameterFile::fSearchPaths;
+std::vector<fs::path> QwParameterFile::fSearchPaths;
 
 // Set current run number to zero
 UInt_t QwParameterFile::fCurrentRunNumber = 0;
@@ -34,12 +30,12 @@ const std::string QwParameterFile::kDefaultModuleChars = "<>";
  */
 void QwParameterFile::AppendToSearchPath(const TString& searchdir)
 {
-  bfs::path tmppath(searchdir.Data());
-  if( bfs::exists(tmppath) && bfs::is_directory(tmppath)) {
+  fs::path tmppath(searchdir.Data());
+  if( fs::exists(tmppath) && fs::is_directory(tmppath)) {
     std::cout << tmppath.string()
 	      << " is a directory; adding it to the search path\n";
     fSearchPaths.push_back(tmppath);
-  } else if( bfs::exists(tmppath)) {
+  } else if( fs::exists(tmppath)) {
     std::cout<<tmppath.string()<<" exists but is not a directory.\n";
   } else {
     std::cout<<tmppath.string()<<" doesn't exist.\n";
@@ -118,7 +114,7 @@ QwParameterFile::QwParameterFile(const std::string& name)
   fBeGreedy(kFALSE)
 {
   // Create a file from the name
-  bfs::path file(name);
+  fs::path file(name);
 
   // Immediately try to open absolute paths and return
   if (name.find("/") == 0) {
@@ -137,26 +133,16 @@ QwParameterFile::QwParameterFile(const std::string& name)
     // Else, loop through search path and files
   } else {
 
-#if BOOST_VERSION >= 104600
     // Separate file in stem and extension
     std::string file_stem = file.stem().string();
     std::string file_ext = file.extension().string();
-#elif BOOST_VERSION >= 103600
-    // Separate file in stem and extension
-    std::string file_stem = file.stem();
-    std::string file_ext = file.extension();
-#else
-    // Separate file in stem and extension
-    std::string file_stem = bfs::basename(file);
-    std::string file_ext = bfs::extension(file);
-#endif
 
     // Find the best match
     Int_t best_score = 0;
-    bfs::path best_path;
+    fs::path best_path;
     for (size_t i = 0; i < fSearchPaths.size(); i++) {
 
-      bfs::path path;
+      fs::path path;
       Int_t score = FindFile(fSearchPaths[i], file_stem, file_ext, path);
       if (score > best_score) {
         // Found file with better score
@@ -202,7 +188,7 @@ QwParameterFile::QwParameterFile(const std::string& name)
  * @param file Path to file to be opened
  * @return False if the file could not be opened
  */
-bool QwParameterFile::OpenFile(const bfs::path& file)
+bool QwParameterFile::OpenFile(const fs::path& file)
 {
   Bool_t local_debug = false;
 
@@ -211,13 +197,7 @@ bool QwParameterFile::OpenFile(const bfs::path& file)
   Bool_t check_whether_path_exists_and_is_a_regular_file = false;
   
   // Check whether path exists and is a regular file
-#if BOOST_VERSION >= 103600
-  check_whether_path_exists_and_is_a_regular_file = bfs::exists(file) && bfs::is_regular_file(file);
-#elif BOOST_VERSION >= 103400
-  check_whether_path_exists_and_is_a_regular_file = bfs::exists(file) && bfs::is_regular(file);
-#else
-  check_whether_path_exists_and_is_a_regular_file = bfs::exists(file); /* pray */
-#endif
+  check_whether_path_exists_and_is_a_regular_file = fs::exists(file) && fs::is_regular_file(file);
 
   if (check_whether_path_exists_and_is_a_regular_file) {
     
@@ -265,13 +245,13 @@ bool QwParameterFile::OpenFile(const bfs::path& file)
  * @return Score of file
  */
 int QwParameterFile::FindFile(
-	const bfs::path&   directory,
+	const fs::path&   directory,
 	const std::string& file_stem,
 	const std::string& file_ext,
-	bfs::path&         best_path)
+	fs::path&         best_path)
 {
   // Return false if the directory does not exist
-  if (! bfs::exists(directory)) return false;
+  if (! fs::exists(directory)) return false;
 
   // Default score indicates no match found
   int best_score = -1;
@@ -282,20 +262,14 @@ int QwParameterFile::FindFile(
 
   // Loop over all files in the directory
   // note: default iterator constructor yields past-the-end
-  bfs::directory_iterator end_iterator;
-  for (bfs::directory_iterator file_iterator(directory);
+  fs::directory_iterator end_iterator;
+  for (fs::directory_iterator file_iterator(directory);
        file_iterator != end_iterator;
        file_iterator++) {
 
     // Match the stem and extension
     // note: filename() returns only the file name, not the path
-#if BOOST_VERSION >= 104600
     std::string file_name = file_iterator->path().filename().string();
-#elif BOOST_VERSION >= 103600
-    std::string file_name = file_iterator->filename();
-#else
-    std::string file_name = file_iterator->leaf();
-#endif
     // stem
     size_t pos_stem = file_name.find(file_stem);
     if (pos_stem != 0) continue;

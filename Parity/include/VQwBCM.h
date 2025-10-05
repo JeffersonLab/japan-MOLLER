@@ -10,7 +10,6 @@
 
 // System headers
 #include <vector>
-#include <boost/shared_ptr.hpp>
 
 // ROOT headers
 #include <TTree.h>
@@ -163,6 +162,6 @@ protected:
 
 };
 
-typedef boost::shared_ptr<VQwBCM> VQwBCM_ptr;
+typedef std::shared_ptr<VQwBCM> VQwBCM_ptr;
 
 #endif // __VQWBCM__
