@@ -717,20 +717,6 @@ class QwRootFile {
     void Map()    { if (fRootFile) fRootFile->Map(); }
     void Close()  {
 
-      
-      // Debug: List trees before closing
-
-      for (auto iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++) {
-
-        if (!iter->second.empty() && iter->second.front()) {
-          TTree* tree = iter->second.front()->GetTree();
-          if (tree) {
-            Long64_t entries = tree->GetEntries();
-
-          }
-        }
-      }
-      
       // Check if we should make the file permanent - restore original logic
       if (!fMakePermanent) fMakePermanent = HasAnyFilled();
       
