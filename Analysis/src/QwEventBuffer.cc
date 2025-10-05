@@ -821,7 +821,7 @@ Bool_t QwEventBuffer::FillSubsystemData(QwSubsystemArray &subsystems)
     
     subsystems.SetCleanParameters(fCleanParameter);
 
-    Int_t nmarkers = CheckForMarkerWords(subsystems);
+    std::size_t nmarkers = CheckForMarkerWords(subsystems);
     if (nmarkers>0) {
       //  There are markerwords for this ROC/Bank
       for (size_t i=0; i<nmarkers; i++){
@@ -1224,7 +1224,7 @@ Int_t QwEventBuffer::CloseETStream()
 }
 
 //------------------------------------------------------------
-Int_t QwEventBuffer::CheckForMarkerWords(QwSubsystemArray &subsystems)
+std::size_t QwEventBuffer::CheckForMarkerWords(QwSubsystemArray &subsystems)
 {
   QwDebug << "QwEventBuffer::GetMarkerWordList:  start function" <<QwLog::endl;
   fThisRocBankLabel = decoder->GetROC();

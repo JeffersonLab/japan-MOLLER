@@ -268,7 +268,7 @@ class QwEventBuffer {
   std::unordered_map<RocBankLabel_t, std::vector<UInt_t> > fMarkerList;
   std::unordered_map<RocBankLabel_t, std::vector<UInt_t> > fOffsetList;
 
-  Int_t CheckForMarkerWords(QwSubsystemArray &subsystems);
+  std::size_t CheckForMarkerWords(QwSubsystemArray &subsystems);
   RocBankLabel_t fThisRocBankLabel;
   UInt_t FindMarkerWord(UInt_t markerID, UInt_t* buffer, UInt_t num_words);
   UInt_t GetMarkerWord(UInt_t markerID);
