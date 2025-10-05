@@ -121,6 +121,9 @@ class QwCombinedBPM : public VQwBPM {
   UInt_t  UpdateErrorFlag();
   void UpdateErrorFlag(const VQwBPM *ev_error);
 
+  // Polymorphic burp-failure check when called via VQwBPM*
+  Bool_t  CheckForBurpFail(const VQwDataElement *ev_error);
+
 
   void    SetBPMForCombo(const VQwBPM* bpm, Double_t charge_weight,  Double_t x_weight, Double_t y_weight,Double_t sumqw);
 

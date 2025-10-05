@@ -101,6 +101,8 @@ class QwCombinedPMT : public VQwDataElement {
   QwCombinedPMT& operator=  (const QwCombinedPMT &value);
   QwCombinedPMT& operator+= (const QwCombinedPMT &value);
   QwCombinedPMT& operator-= (const QwCombinedPMT &value);
+  void Sum(const QwCombinedPMT &value1, const QwCombinedPMT &value2);
+  void Difference(const QwCombinedPMT &value1, const QwCombinedPMT &value2);
   void Ratio(QwCombinedPMT &numer, QwCombinedPMT &denom);
   void Scale(Double_t factor);
   void Normalize(VQwDataElement* denom);

@@ -18,6 +18,7 @@
 #endif // HAS_RNTUPLE_SUPPORT
 
 #include "QwParameterFile.h"
+#include <stdexcept>
 #include "VQwDataElement.h"
 #include "VQwHardwareChannel.h"
 #include "VQwClock.h"
@@ -73,6 +74,24 @@ class QwClock : public VQwClock {
 
   Bool_t CheckForBurpFail(const QwClock *ev_error){
     return fClock.CheckForBurpFail(&(ev_error->fClock));
+  }
+
+  // Override the pure virtual from VQwClock to enable polymorphic dispatch via VQwClock*
+  Bool_t CheckForBurpFail(const VQwClock* ev_error) override {
+    auto rhs = dynamic_cast<const QwClock*>(ev_error);
+    if (!rhs) {
+      throw std::invalid_argument("Type mismatch in QwClock::CheckForBurpFail(VQwClock*)");
+    }
+    return CheckForBurpFail(rhs);
+  }
+
+  // Polymorphic delegator: match VQwDataElement signature so calls via VQwClock* hit this path
+  Bool_t CheckForBurpFail(const VQwDataElement* ev_error){
+    auto rhs = dynamic_cast<const QwClock*>(ev_error);
+    if (!rhs) {
+      throw std::invalid_argument("Type mismatch in QwClock::CheckForBurpFail");
+    }
+    return CheckForBurpFail(rhs);
   }
 
 

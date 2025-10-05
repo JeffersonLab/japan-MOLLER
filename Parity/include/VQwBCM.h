@@ -130,6 +130,11 @@ public:
     return const_cast<VQwBCM*>(this)->GetCharge();
   }
 
+  // Ensure polymorphic dispatch for burp-failure checks via VQwBCM*
+  virtual Bool_t CheckForBurpFail(const VQwDataElement* ev_error) {
+    return VQwDataElement::CheckForBurpFail(ev_error);
+  }
+
 protected:
   virtual VQwHardwareChannel* GetCharge() = 0;
   

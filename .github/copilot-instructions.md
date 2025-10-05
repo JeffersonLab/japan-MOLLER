@@ -250,3 +250,198 @@ ROOTSYS=/path/to/root                  # ROOT installation directory
 BOOST_INC_DIR=/usr/include             # Boost headers location
 BOOST_LIB_DIR=/usr/lib/x86_64-linux-gnu # Boost libraries location
 ```
+
+### Dual Design Pattern Architecture
+
+JAPAN-MOLLER implements **two distinct architectural patterns** for arithmetic operations, each optimized for different abstraction levels:
+
+
+#### **Pattern 1: Dual-Operator Pattern (Channel/Data Element Level)**
+
+**Used by**: `VQwDataElement`, `VQwHardwareChannel`, and all concrete channel classes (`QwVQWK_Channel`, `QwMollerADC_Channel`, etc.)
+
+**When to use**: For individual data elements requiring inheritance-based polymorphism
+
+**Key Characteristics:**
+- **Two operator versions**: Type-specific + polymorphic overloads
+- **Complex inheritance**: Requires virtual method overrides and dynamic_cast
+- **Runtime type safety**: Uses dynamic_cast with exception handling
+- **Dual dispatch**: Polymorphic operators delegate to type-specific ones
+
+
+**Required Methods for VQwDataElement-derived Classes:**
+
+| Method                | Where to define         | Type-specific? | Polymorphic? | Notes |
+|-----------------------|------------------------|----------------|--------------|-------|
+| operator+=            | Derived class          | Yes            | Yes          | Type-specific: `Derived& operator+=(const Derived&)`; Polymorphic: `Base& operator+=(const Base&)` delegates to type-specific |
+| operator-=            | Derived class          | Yes            | Yes          | Same pattern as operator+= |
+| Sum                   | Derived class          | Yes            | Yes          | Type-specific: `void Sum(const Derived&, const Derived&)`; Polymorphic: `void Sum(const Base&, const Base&)` delegates |
+| Difference            | Derived class          | Yes            | Yes          | Same pattern as Sum |
+| Ratio                 | Derived class          | Yes            | Yes          | Type-specific: `Derived& Ratio(const Derived&, const Derived&)`; Polymorphic: `Base& Ratio(const Base&, const Base&)` delegates |
+| SetSingleEventCuts    | Derived class          | Yes            | Yes          | Type-specific: `void SetSingleEventCuts(UInt_t, Double_t, Double_t, Double_t)`; Polymorphic: `void SetSingleEventCuts(...)` delegates |
+| CheckForBurpFail      | Derived class          | Yes            | Yes          | Type-specific: `Bool_t CheckForBurpFail(const Derived*)`; Polymorphic: `Bool_t CheckForBurpFail(const Base*)` delegates |
+| CheckForBurpFail      | Derived class          | Yes            | Yes          | Type-specific: `Bool_t CheckForBurpFail(const Derived*)`; Polymorphic: `Bool_t CheckForBurpFail(const Base*)` delegates |
+
+**Base Class Design Principles:**
+- In `VQwDataElement`, Operators, Sum, Difference, Ratio, SetSingleEventCuts, and CheckForBurpFail should be non-virtual and throw runtime errors (enforces correct usage and prevents silent fallbacks).
+- Only concrete derived classes should implement logic for these methods.
+- Base class fallback implementations throw runtime errors for unimplemented operations.
+
+**Implementation Pattern:**
+```cpp
+// Type-specific version (efficient, direct)
+QwVQWK_Channel& operator+= (const QwVQWK_Channel &value);
+
+// Polymorphic version (for inheritance compatibility)
+VQwHardwareChannel& operator+=(const VQwHardwareChannel& input) override;
+
+// Polymorphic implementation delegates to type-specific
+VQwHardwareChannel& QwVQWK_Channel::operator+=(const VQwHardwareChannel &source) {
+  const QwVQWK_Channel* tmpptr = dynamic_cast<const QwVQWK_Channel*>(&source);
+  if (tmpptr != NULL) {
+    *this += *tmpptr;  // Calls type-specific version
+  } else {
+    throw std::invalid_argument("Type mismatch in operator+=");
+  }
+  return *this;
+}
+
+// Sum method uses assignment + operators pattern
+void Sum(const QwVQWK_Channel &value1, const QwVQWK_Channel &value2) {
+  *this = value1;      // Uses derived class assignment operator
+  *this += value2;     // Uses type-specific operator+=
+}
+```
+
+**Warning Prevention:**
+- Remove `virtual` from base class operators and Ratio; use runtime errors for fallback
+- Always implement both type-specific and polymorphic versions in derived classes
+
+**Summary Table:**
+
+| Method             | Base Class | Derived Class |
+|--------------------|------------|--------------|
+| operator+=         | throws     | implements   |
+| operator-=         | throws     | implements   |
+| Sum                | throws     | implements   |
+| Difference         | throws     | implements   |
+| Ratio              | throws     | implements   |
+| SetSingleEventCuts | throws     | implements   |
+| CheckForBurpFail   | throws     | implements   |
+
+### Specialized abstract bases and polymorphic dispatch
+
+Some hierarchies introduce a specialized abstract base between `VQwDataElement` and the concrete class (for example `VQwClock`, `VQwBPM`, `VQwBCM`). These are used polymorphically by subsystem/container code (e.g., `QwBeamLine`) and must expose virtual hooks for functions that are invoked via those specialized base pointers.
+
+- Why: Container code holds `VQwClock*`, `VQwBPM*`, or `VQwBCM*` and calls methods like `CheckForBurpFail(...)`. Without a virtual defined at that specialized base, calls resolve to the `VQwDataElement` fallback which throws.
+
+- What to do:
+  - Declare a virtual (often pure virtual) in the specialized base for functions that are called through that base type.
+  - Implement the override in the concrete class and provide a delegator from the `VQwDataElement`-signature to the type-specific one using `dynamic_cast`.
+
+- Examples and guidance:
+  - Clocks:
+    - In `VQwClock`: declare `virtual Bool_t CheckForBurpFail(const VQwClock* ev_error) = 0;`
+    - In `QwClock<T>`: implement the above and also provide `Bool_t CheckForBurpFail(const VQwDataElement* ev_error)` delegator that casts to `const QwClock<T>*` and forwards to the type-specific overload. Internally delegate to the underlying channel (e.g., `fClock.CheckForBurpFail(...)`).
+  - BPMs and BCMs:
+    - In `VQwBPM` and `VQwBCM`: provide a virtual `Bool_t CheckForBurpFail(const VQwDataElement*)` to enable polymorphic dispatch through those bases (containers call via `VQwBPM*`/`VQwBCM*`).
+    - In concrete classes like `QwBPMStripline<T>` and `QwBCM<T>`: implement the polymorphic version and forward to type-specific operations on their subelements.
+
+- Do not make these specialized-base virtuals in `VQwDataElement` itself; keep `VQwDataElement` methods non-virtual and throwing to catch missed implementations early. Only the specialized abstract bases that are actually used for polymorphic calls should introduce virtuals.
+
+### Function strategy matrix (quick reference)
+
+- Arithmetic operators (+=, -=) and composition (Sum, Difference, Ratio):
+  - `VQwDataElement`: non-virtual throwing defaults.
+  - Concrete data elements: implement both type-specific and polymorphic versions; polymorphic delegates using `dynamic_cast`.
+  - Specialized bases: introduce virtuals only when containers call them via that base (rare for operators; common for helper methods).
+
+- Cuts and diagnostics (SetSingleEventCuts, CheckForBurpFail):
+  - `VQwDataElement`: non-virtual throwing defaults.
+  - Specialized bases used in containers (e.g., `VQwClock`, `VQwBPM`, `VQwBCM`): declare virtuals to allow polymorphic dispatch.
+  - Concrete classes: implement both the specialized-base signature (e.g., `const VQwClock*`) and a `const VQwDataElement*` delegator that casts and forwards.
+
+#### **Pattern 2: Container-Delegation Pattern (Array/System Level)**
+
+**Used by**: `QwSubsystemArrayParity`, `QwSubsystemArray`, and other container classes
+
+**When to use**: For collections of heterogeneous objects requiring system-level operations
+
+**Key Characteristics:**
+- **Single operator version**: Only type-specific operators needed
+- **Container iteration**: Delegates to contained object operators
+- **Type checking via typeid**: Uses `typeid` comparison for safety
+- **No inheritance conflicts**: Avoids virtual operator issues
+
+**Implementation Pattern:**
+```cpp
+// Only one operator version needed
+QwSubsystemArrayParity& operator+= (const QwSubsystemArrayParity &value) {
+  for(size_t i=0; i<value.size(); i++){
+    VQwSubsystemParity *ptr1 = dynamic_cast<VQwSubsystemParity*>(this->at(i).get());
+    VQwSubsystem *ptr2 = value.at(i).get();
+    if (typeid(*ptr1)==typeid(*ptr2)){
+      *(ptr1) += ptr2;  // Delegates to subsystem operators
+    } else {
+      // Handle type mismatch
+    }
+  }
+  return *this;
+}
+
+// Sum method follows same assignment + operators pattern
+void Sum(const QwSubsystemArrayParity &value1, const QwSubsystemArrayParity &value2) {
+  *this = value1;
+  *this += value2;
+}
+```
+
+**Container Design Principles:**
+- **No virtual operators** in base container classes
+- **Composition over inheritance**: Use contained objects for polymorphism
+- **Delegation pattern**: Let individual elements handle their own arithmetic
+- **Type safety via runtime checks**: Use `typeid` and `dynamic_cast`
+
+#### **Pattern Selection Guidelines**
+
+**Use Dual-Operator Pattern when:**
+- Implementing individual data element classes
+- Need inheritance-based polymorphism
+- Working with channel-level operations
+- Extending `VQwDataElement` or `VQwHardwareChannel`
+- Require both type-safe and polymorphic operations
+
+**Use Container-Delegation Pattern when:**
+- Implementing collection/array classes
+- Managing heterogeneous object containers
+- Working with system-level operations
+- Extending `QwSubsystemArray` or similar containers
+- Want to avoid virtual operator inheritance issues
+
+#### **Compilation Warning Prevention**
+
+**For Dual-Operator Pattern:**
+- Remove `virtual` from base class operators that serve as defaults
+- Implement both type-specific and polymorphic operator versions
+- Use `override` keyword for virtual method overrides
+- Use `using` declarations when needed to bring base functions into scope
+
+**For Container-Delegation Pattern:**
+- Avoid virtual operators in container base classes
+- Use container iteration with type checking
+- Delegate arithmetic to contained objects
+- No special inheritance handling needed
+
+#### **Key Architectural Insight**
+
+The **two patterns complement each other**:
+- **Dual-Operator Pattern**: Handles complex inheritance at the individual object level
+- **Container-Delegation Pattern**: Manages collections without inheritance complexity
+
+This dual approach provides:
+- **Performance optimization**: Type-specific operations when possible
+- **Type safety**: Runtime checking with meaningful error messages
+- **Flexibility**: Support for both homogeneous and heterogeneous operations
+- **Maintainability**: Clear separation of concerns between object and container levels
+
+**Critical Understanding**: The choice of pattern depends on the **abstraction level** - use dual-operator for individual objects requiring inheritance polymorphism, and container-delegation for collections that can delegate to their elements.
