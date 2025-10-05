@@ -62,7 +62,13 @@ inline const TString getenv_safe_TString (const char* name) {
 /**
  *  \class QwOptions
  *  \ingroup QwAnalysis
- *  \brief An options class
+ *  \brief Command-line and configuration file options processor
+ *
+ * QwOptions provides a unified interface for handling command-line arguments,
+ * configuration files, and environment variables using Boost.Program_options.
+ * It supports typed options with defaults, positional arguments, and
+ * hierarchical configuration loading. The global gQwOptions singleton
+ * is available throughout the framework.
  *
  * On instantiation of the global gQwOptions object the argc and argv are passed.
  * The filename is set to a default value, but on instantiation a check is done

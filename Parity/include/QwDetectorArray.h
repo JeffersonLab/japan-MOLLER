@@ -22,6 +22,16 @@
 // Forward declarations
 class QwDetectorArrayID;
 
+/**
+ * \class QwDetectorArray
+ * \ingroup QwAnalysis_ADC
+ * \brief Subsystem for managing arrays of PMT detectors with integration and combination
+ *
+ * Manages collections of integration PMTs and combined PMT channels,
+ * providing coordinated event processing, calibration, and output for
+ * detector array measurements. Supports various PMT configurations
+ * and combination schemes.
+ */
 class QwDetectorArray: 
  public VQwDetectorArray, 
  virtual public VQwSubsystemParity, 

@@ -24,11 +24,16 @@ class QwErrDBInterface;
 
 template<typename T> class QwCombinedBCM;
 
-/*****************************************************************
-*  Class:
-******************************************************************/
-///
-/// \ingroup QwAnalysis_BL
+/**
+ * \class QwBCM
+ * \ingroup QwAnalysis_BeamLine
+ * \brief Templated concrete beam current monitor implementation
+ *
+ * Template class that implements a beam current monitor using a specified
+ * hardware channel type T. Handles event decoding, calibration, single-event
+ * cuts, mock data generation, and database output. Supports external clock
+ * normalization and statistical analysis.
+ */
 template<typename T> class QwBCM : public VQwBCM {
 /////
   friend class QwCombinedBCM<T>;

@@ -28,12 +28,12 @@ struct QwException_TypeUnknown {
 /**
  *  \class VQwFactory
  *  \ingroup QwAnalysis
- *  \brief Pure virtual factory
+ *  \brief Abstract factory base for runtime object creation
  *
- * In order to enable the instantiation of types based on run-time
- * information, we generate a map of type factories by type name.
- * This map is filled automatically when the executable is loaded, and
- * contains concrete factories derived from this pure virtual base class.
+ * Enables instantiation of derived types based on runtime string identifiers.
+ * Maintains a registry of concrete factory instances that can create objects
+ * of specified types. Used throughout the framework to support configuration-
+ * driven object creation for subsystems, data handlers, and data elements.
  */
 template <class base_t>
 class VQwFactory {
@@ -101,11 +101,12 @@ class VQwFactory {
 /**
  *  \class QwFactory
  *  \ingroup QwAnalysis
- *  \brief Concrete templated type factory
+ *  \brief Concrete templated factory for creating specific object types
  *
- * This class represents concrete instances of the virtual VQwFactory
- * from which it inherits.  Each concrete factory can create types with
- * a given name.
+ * Template specialization that provides concrete object creation for a
+ * specific derived type. Automatically registers itself in the factory
+ * registry during static initialization. Used by RegisterSomethingFactory
+ * macros to enable runtime type creation.
  */
 template <class base_t, class type_t>
 class QwFactory: public VQwFactory<base_t> {

@@ -10,6 +10,15 @@
 // Qweak headers
 #include "VQwHardwareChannel.h"
 
+/**
+ * \class MQwPublishable_child
+ * \ingroup QwAnalysis
+ * \brief Mix-in for objects that can publish/request variables via a parent container
+ *
+ * Enables subsystems or data handlers to request external variables from
+ * sibling objects via a parent container, and to publish their own internal
+ * variables for external access. Part of the variable publishing framework.
+ */
 template<class U, class T>
 class MQwPublishable_child {
 
@@ -45,6 +54,15 @@ class MQwPublishable_child {
 };
 
 
+/**
+ * \class MQwPublishable
+ * \ingroup QwAnalysis
+ * \brief Mix-in for container classes that manage variable publishing
+ *
+ * Provides the container-side logic for the variable publishing system,
+ * including registering published variables, handling external requests,
+ * and maintaining mappings between variable names and data elements.
+ */
 template<class U, class T>
 class MQwPublishable {
 

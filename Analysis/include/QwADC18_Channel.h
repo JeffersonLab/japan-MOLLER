@@ -22,10 +22,16 @@ class QwParameterFile;
 class QwErrDBInterface;
 #endif
 
-///
-/// \ingroup QwAnalysis_ADC
-///
-/// \ingroup QwAnalysis_BL
+/**
+ * \class QwADC18_Channel
+ * \ingroup QwAnalysis_ADC
+ * \brief Concrete hardware channel for HAPPEX 18-bit ADC modules
+ *
+ * Decodes and processes data from HAPPEX 18-bit ADC channels, providing
+ * access to raw and calibrated values, statistical moments, single-event
+ * cuts, and running statistics. Implements the dual-operator pattern for
+ * both type-specific and polymorphic operations.
+ */
 class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
 /****************************************************************//**
  *  Class: QwADC18_Channel

@@ -15,6 +15,16 @@
 #include "QwOptions.h"
 
 
+/**
+ * \class VEventDecoder
+ * \ingroup QwAnalysis
+ * \brief Abstract base for CODA event encoding and decoding
+ *
+ * Provides the interface for encoding mock CODA events and decoding
+ * real CODA event streams. Concrete implementations handle version-specific
+ * differences (CODA 2 vs CODA 3) while exposing a common API for event
+ * type detection, bank decoding, and header processing.
+ */
 class VEventDecoder : public MQwCodaControlEvent {
 public:
 	VEventDecoder() : 
