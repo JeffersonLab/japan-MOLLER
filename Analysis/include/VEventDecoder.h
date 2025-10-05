@@ -5,7 +5,6 @@
 
 #ifndef VEVENTDECODER_H
 #define VEVENTDECODER_H
-\**********************************************************/
 
 #include <vector>
 
