@@ -1,8 +1,9 @@
-/*
- * QwDBInterface.h
- *
- *  Created on: Dec 14, 2010
- *      Author: jhlee
+
+/*!
+ * \file   QwDBInterface.h
+ * \brief  Database interface for QwIntegrationPMT and subsystems
+ * \author jhlee
+ * \date   2010-12-14
  */
 
 #ifndef QWDBINTERFACE_H_

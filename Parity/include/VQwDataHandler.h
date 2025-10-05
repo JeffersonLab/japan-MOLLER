@@ -1,15 +1,9 @@
-/*****************************************************************************
-File Name: VQwDataHandler.h
-
-Created by: Michael Vallee
-Email: mv836315@ohio.edu
-
-Description:  This is the header file to the VQwDataHandler class.  This
-              class acts as a base class to all classes which need
-              to access data from multiple subsystems
-
-Last Modified: August 1, 2018 1:39 PM
-*****************************************************************************/
+/*!
+ * \file   VQwDataHandler.h
+ * \brief  Virtual base class for data handlers accessing multiple subsystems
+ * \author Michael Vallee
+ * \date   2018-08-01
+ */
 
 #ifndef VQWDATAHANDLER_H_
 #define VQWDATAHANDLER_H_

@@ -1,3 +1,8 @@
+/*!
+ * \file   MQwHistograms.h
+ * \brief  Mix-in class for histogram management functionality
+ */
+
 #ifndef __MQWHISTOGRAMS__
 #define __MQWHISTOGRAMS__
 

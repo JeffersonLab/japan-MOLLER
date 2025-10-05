@@ -51,11 +51,7 @@ QwExtractor::~QwExtractor() {delete fSourceCopy;}
 
 Int_t QwExtractor::LoadChannelMap(const std::string& mapfile) {return 0;}
 
-/** Connect to the dependent and independent channels
- *
- * @param even Helicity event structure
- * @return Zero on success
- */
+/** Connect to the dependent and independent channels (implementation) */
 Int_t QwExtractor::ConnectChannels(QwSubsystemArrayParity& event)
 {
   // Keep a pointer to the source Detectors/RingOutput

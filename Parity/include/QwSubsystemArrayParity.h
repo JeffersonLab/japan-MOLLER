@@ -5,6 +5,11 @@
 * Time-stamp: <2009-02-04 10:30>                           *
 \**********************************************************/
 
+/*!
+ * \file   QwSubsystemArrayParity.h
+ * \brief  Subsystem array container for parity analysis with asymmetry calculations
+ */
+
 #ifndef __QWSUBSYSTEMARRAYPARITY__
 #define __QWSUBSYSTEMARRAYPARITY__
 

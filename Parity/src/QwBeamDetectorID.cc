@@ -1,9 +1,7 @@
-/**********************************************************\
-* File: QwBeamDetectorID.cc                               *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwBeamDetectorID.cc
+ * \brief  Beam detector identification and mapping implementation
+ */
 
 #include "QwBeamDetectorID.h"
 

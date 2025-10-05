@@ -1,3 +1,8 @@
+/*!
+ * \file   Coda3EventDecoder.h
+ * \brief  CODA version 3 event decoder implementation
+ */
+
 #ifndef	CODA3EVENTDECODER_H
 #define CODA3EVENTDECODER_H
 

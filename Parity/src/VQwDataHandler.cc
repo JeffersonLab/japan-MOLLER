@@ -1,15 +1,13 @@
-/*****************************************************************************
-File Name: VQwDataHandler.cc
-
-Created by: Michael Vallee
-Email: mv836315@ohio.edu
-
-Description:  This is the implemetation file to the VQwDataHandler class.
-              This class acts as a base class to all classes which need
-              to access data from multiple subsystems
-
-Last Modified: August 1, 2018 1:39 PM
-*****************************************************************************/
+/*!
+ * \file   VQwDataHandler.cc
+ * \brief  Virtual base class implementation for data handlers accessing multiple subsystems
+ *
+ * Base implementation for data handlers that process inputs from multiple
+ * subsystems, creating corrected output channels and managing tree/RNTuple
+ * construction, running sums, and variable publication. Used by concrete
+ * handlers like combiners and correctors. Documentation-only edits; runtime
+ * behavior unchanged.
+ */
 
 #include <iostream>
 
@@ -34,6 +32,7 @@ using namespace std;
 #endif // __USE_DATABASE__
 
 
+/** Constructor: initialize base data handler with name and defaults. */
 VQwDataHandler::VQwDataHandler(const TString& name)
 : fPriority(0),
   fBurstCounter(0),
@@ -48,6 +47,7 @@ VQwDataHandler::VQwDataHandler(const TString& name)
   fKeepRunningSum(kFALSE)
 { fRunningsum=NULL;}
 
+/** Copy constructor: deep-copy output variables and running sums. */
 VQwDataHandler::VQwDataHandler(const VQwDataHandler &source)
 : fPriority(source.fPriority),
   fBurstCounter(source.fBurstCounter),
@@ -80,6 +80,7 @@ VQwDataHandler::VQwDataHandler(const VQwDataHandler &source)
 }
 
 
+/** Destructor: clean up owned output variable clones. */
 VQwDataHandler::~VQwDataHandler() {
   
   for (size_t i = 0; i < fOutputVar.size(); ++i) {
@@ -91,6 +92,7 @@ VQwDataHandler::~VQwDataHandler() {
 
 }
 
+/** Parse configuration file for map file, priority, tree settings. */
 void VQwDataHandler::ParseConfigFile(QwParameterFile& file){
   file.RewindToFileStart();
   file.EnableGreediness();
@@ -106,6 +108,10 @@ void VQwDataHandler::ParseConfigFile(QwParameterFile& file){
 }
 
 
+/**
+ * Calculate one corrected output by copying the dependent variable and
+ * applying sensitivity-weighted corrections from independent variables.
+ */
 void VQwDataHandler::CalcOneOutput(const VQwHardwareChannel* dv, VQwHardwareChannel* output,
                                   vector< const VQwHardwareChannel* > &ivs,
                                   vector< Double_t > &sens) {
@@ -133,6 +139,7 @@ void VQwDataHandler::CalcOneOutput(const VQwHardwareChannel* dv, VQwHardwareChan
   
 }
 
+/** Copy dependent variables to output variables (default processing). */
 void VQwDataHandler::ProcessData() {
   
   for (size_t i = 0; i < fDependentVar.size(); ++i) {
@@ -145,6 +152,10 @@ void VQwDataHandler::ProcessData() {
 }
 
 
+/**
+ * Connect to external pointers for dependent variables from asym/diff
+ * subsystem arrays, creating corresponding output variables as clones.
+ */
 Int_t VQwDataHandler::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff) {
   SetEventcutErrorFlagPointer(asym.GetEventcutErrorFlagPointer());
 
@@ -219,6 +230,11 @@ Int_t VQwDataHandler::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemA
 }
 
 
+/**
+ * Parse a variable string to extract type (asym/diff/yield/mps) and name.
+ *
+ * @return Pair of handle type and variable name.
+ */
 pair<VQwDataHandler::EQwHandleType,string> VQwDataHandler::ParseHandledVariable(const string& variable) {
   
   pair<EQwHandleType,string> type_name;
@@ -247,6 +263,10 @@ pair<VQwDataHandler::EQwHandleType,string> VQwDataHandler::ParseHandledVariable(
   
 }
 
+/**
+ * Construct TTree branches for output variables, using running sum if
+ * configured for statistics trees.
+ */
 void VQwDataHandler::ConstructTreeBranches(
     QwRootFile *treerootfile,
     const std::string& treeprefix,
@@ -342,8 +362,7 @@ void VQwDataHandler::FillNTupleFields(QwRootFile *treerootfile)
 
 
 /**
- * Fill the tree vector
- * @param values Vector of values
+ * Fill tree vector with current output variable values.
  */
 void VQwDataHandler::FillTreeVector(std::vector<Double_t>& values) const
 {
@@ -372,6 +391,7 @@ void VQwDataHandler::FillNTupleVector(std::vector<Double_t>& values) const
 }
 #endif // HAS_RNTUPLE_SUPPORT
 
+/** Initialize running sum accumulator as a clone of this handler. */
 void VQwDataHandler::InitRunningSum()
 {
   if (fKeepRunningSum && fRunningsum == NULL){
@@ -381,6 +401,7 @@ void VQwDataHandler::InitRunningSum()
   }
 }
 
+/** Accumulate current event into running sum if no error flags are set. */
 void VQwDataHandler::AccumulateRunningSum()
 {
   if (fKeepRunningSum && fErrorFlagPtr!=NULL && (*fErrorFlagPtr)==0){

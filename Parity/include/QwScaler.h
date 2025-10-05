@@ -1,4 +1,10 @@
 
+
+/*!
+ * \file   QwScaler.h
+ * \brief  Scaler subsystem for counting and rate measurements
+ */
+
 #ifndef __QWSCALER__
 #define __QWSCALER__
 

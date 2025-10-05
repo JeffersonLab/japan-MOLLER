@@ -1,9 +1,7 @@
-/**********************************************************\
-* File: QwIntegratedRasterChannel.h                       *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwIntegratedRasterChannel.h
+ * \brief  Integrated raster channel template class for position data
+ */
 
 #ifndef __QwIntegratedRasterChannel__
 #define __QwIntegratedRasterChannel__

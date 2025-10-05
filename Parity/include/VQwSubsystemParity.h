@@ -1,9 +1,9 @@
-/**********************************************************\
-* File: VQwSubsystemParity.h                               *
-*                                                          *
-* Author: P. M. King, Rakitha Beminiwattha                 *
-* Time-stamp: <2007-05-08 15:40>                           *
-\**********************************************************/
+/*!
+ * \file   VQwSubsystemParity.h
+ * \brief  Virtual base class for parity analysis subsystems
+ * \author P. M. King, Rakitha Beminiwattha
+ * \date   2007-05-08
+ */
 
 
 #ifndef __VQWSUBSYSTEMPARITY__

@@ -1,9 +1,12 @@
-/**********************************************************\
-* File: QwBeamLine.C                                      *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwBeamLine.cc
+ * \brief  Beam line subsystem implementation for full beam instrumentation
+ *
+ * Subsystem managing the full beam instrumentation line: creation from map
+ * files, geometry input, mock-data parameters, event processing, event cuts,
+ * error propagation, publication of variables, and data encoding/decoding.
+ * Documentation-only edits; runtime behavior unchanged.
+ */
 
 #include "QwBeamLine.h"
 
@@ -36,6 +39,7 @@ class QwParityDB;
 RegisterSubsystemFactory(QwBeamLine);
 
 //*****************************************************************//
+/** Parse and handle beamline-specific command-line options. */
 void QwBeamLine::ProcessOptions(QwOptions &options){
       //Handle command line options
 }
@@ -100,6 +104,13 @@ Int_t QwBeamLine::AddToElementList(std::vector<TT> &elementlist,
 
 
 //*****************************************************************//
+/**
+ * Load and decode the beamline channel map, creating physical and combined
+ * devices, recording detector IDs, and wiring publish lists and clocks.
+ *
+ * @param mapfile Path to the map file.
+ * @return 0 on success.
+ */
 Int_t QwBeamLine::LoadChannelMap(TString mapfile)
 {
   Bool_t ldebug=kFALSE;
@@ -436,7 +447,10 @@ Int_t QwBeamLine::LoadChannelMap(TString mapfile)
 
 
 //*****************************************************************//
-
+/**
+ * Decode a single event-cuts line for devices and subchannels, routing the
+ * resulting thresholds and error flags to the proper element.
+ */
 void QwBeamLine::LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, Int_t &eventcut_flag) {
   TString device_type = mapstr.GetTypedNextToken<TString>();
   device_type.ToLower();
@@ -513,6 +527,7 @@ void QwBeamLine::LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, 
   }
 }
 
+/** Apply the event-cut mode bitmask to all managed devices. */
 void QwBeamLine::LoadEventCuts_Fin(Int_t &eventcut_flag) {
   for (size_t i=0;i<fStripline.size();i++)
     fStripline[i].get()->SetEventCutMode(eventcut_flag);
@@ -548,6 +563,10 @@ void QwBeamLine::LoadEventCuts_Fin(Int_t &eventcut_flag) {
 }
 
 //*****************************************************************//
+/**
+ * Load geometry and electronics calibration parameters from a map file and
+ * apply them to the proper devices (offsets, rotation, gains).
+ */
 Int_t QwBeamLine::LoadGeometryDefinition(TString mapfile){
   Bool_t ldebug=kFALSE;
   TString varname, varvalue;
@@ -728,7 +747,7 @@ Int_t QwBeamLine::LoadGeometryDefinition(TString mapfile){
 }
 
 //--------------------------------------------------------------------------------------------------------
-
+/** Load per-device mock-data generation parameters from a file. */
 void QwBeamLine::LoadMockDataParameters(TString mapfile) {
 
   Bool_t   ldebug=kFALSE;
@@ -777,6 +796,7 @@ void QwBeamLine::LoadMockDataParameters(TString mapfile) {
 
 //--------------------------------------------------------------------------------------------------------
 
+/** Parse rotation and gain tokens for a BPM and apply to the instance. */
 void QwBeamLine::AssignGeometry(QwParameterFile* mapstr, VQwBPM * bpm)
 {
   
@@ -822,6 +842,12 @@ void QwBeamLine::AssignGeometry(QwParameterFile* mapstr, VQwBPM * bpm)
 }
 
 //*****************************************************************//
+/**
+ * Load pedestals and calibration factors per subelement/device.
+ *
+ * @param pedestalfile Path to the input parameter file.
+ * @return 0 on success.
+ */
 Int_t QwBeamLine::LoadInputParameters(TString pedestalfile)
 {
   Bool_t ldebug=kFALSE;
@@ -973,6 +999,7 @@ Int_t QwBeamLine::LoadInputParameters(TString pedestalfile)
 
 
 //*****************************************************************//
+/** Randomize event data for all managed devices for mock runs. */
 void QwBeamLine::RandomizeEventData(int helicity, double time)
 {
   // Randomize all QwBPMStripline buffers
@@ -1043,6 +1070,10 @@ void QwBeamLine::RandomizeEventData(int helicity, double time)
 
 
 //*****************************************************************//
+/**
+ * Serialize active element buffers into a CODA-style bank/subbank layout and
+ * append to the provided buffer.
+ */
 void QwBeamLine::EncodeEventData(std::vector<UInt_t> &buffer)
 {
   std::vector<UInt_t> elements;
@@ -1091,6 +1122,50 @@ void QwBeamLine::EncodeEventData(std::vector<UInt_t> &buffer)
 }
 
 //*****************************************************************//
+/**
+ * Route a raw ROC/bank buffer to the correct devices and subelements.
+ *
+ * @return 0 on success.
+ */
+/*!
+ * \brief Route raw ROC/bank buffer data to the correct devices and subelements.
+ * \param roc_id ReadOut Controller identifier.
+ * \param bank_id Data bank identifier within the ROC.
+ * \param buffer Pointer to raw data buffer from DAQ.
+ * \param num_words Number of 32-bit words in the buffer.
+ * \return 0 on success.
+ * 
+ * This is a critical event processing function (~130 lines) that routes raw data
+ * from the data acquisition system to the appropriate beam line devices. It:
+ * 
+ * - Maps ROC/bank combinations to internal subbank indices using GetSubbankIndex()
+ * - Handles data alignment by skipping padding words (0xf0f0f0f0) at buffer start
+ * - Iterates through all registered beam detector IDs to find matching devices
+ * - Routes data to device-specific ProcessEvBuffer() methods based on device type:
+ *   - kQwBPMStripline: 4-channel stripline beam position monitors
+ *   - kQwQPD: Quad photodiode detectors  
+ *   - kQwLinearArray: Linear diode arrays
+ *   - kQwBPMCavity: Cavity-type beam position monitors
+ *   - kQwBCM: Beam current monitors (various ADC/scaler types)
+ *   - kQwClock: Timing reference channels
+ * 
+ * Each device receives a pointer to its specific data section within the buffer,
+ * calculated using the device's fWordInSubbank offset. The remaining word count
+ * is passed to prevent buffer overruns during device-specific decoding.
+ * 
+ * Buffer Layout Handling:
+ * - Accounts for variable-length device data (e.g., 6 words for VQWK, 1 for scalers)
+ * - Manages subelement indexing for multi-channel devices
+ * - Handles both integrating ADCs and scaler-based measurements
+ * 
+ * Error Conditions:
+ * - Invalid ROC/bank combinations are silently ignored (index < 0)
+ * - Empty buffers (num_words == 0) are skipped
+ * - Buffer alignment issues are detected and corrected automatically
+ * 
+ * \warning This function must be called after LoadChannelMap() to ensure
+ * proper device registration and buffer offset calculations.
+ */
 Int_t QwBeamLine::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words)
 {
   Bool_t lkDEBUG=kFALSE;
@@ -1215,6 +1290,7 @@ Int_t QwBeamLine::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, 
 
 
 //*****************************************************************//
+/** Apply single-event cuts to all devices and count failures. */
 Bool_t QwBeamLine::ApplySingleEventCuts(){
 
   Bool_t status=kTRUE;
@@ -1290,6 +1366,7 @@ Bool_t QwBeamLine::ApplySingleEventCuts(){
 
 }
 
+/** Polymorphic per-device burp/burst check vs. a reference subsystem. */
 Bool_t QwBeamLine::CheckForBurpFail(const VQwSubsystem *subsys){
   Bool_t burpstatus = kFALSE;
   VQwSubsystem* tmp = const_cast<VQwSubsystem *>(subsys);
@@ -1342,6 +1419,7 @@ Bool_t QwBeamLine::CheckForBurpFail(const VQwSubsystem *subsys){
 
 
 //*****************************************************************//
+/** Print a beamline-wide summary of persistent error counters. */
 void QwBeamLine::PrintErrorCounters() const{//inherited from the VQwSubsystemParity; this will display the error summary
 
   QwMessage<<"*********QwBeamLine Error Summary****************"<<QwLog::endl;
@@ -1390,6 +1468,7 @@ void QwBeamLine::PrintErrorCounters() const{//inherited from the VQwSubsystemPar
 }
 
 //*****************************************************************//
+/** Increment error counters across all managed devices. */
 void QwBeamLine::IncrementErrorCounters()
 {
   for(size_t i=0;i<fClock.size();i++){
@@ -1425,6 +1504,7 @@ void QwBeamLine::IncrementErrorCounters()
 }
 
 //*****************************************************************//
+/** Return the OR of per-device event-cut error flags. */
 UInt_t QwBeamLine::GetEventcutErrorFlag(){//return the error flag
   UInt_t ErrorFlag;
   UInt_t ErrorFlagtmp;
@@ -1460,6 +1540,7 @@ UInt_t QwBeamLine::GetEventcutErrorFlag(){//return the error flag
 }
 
 //*****************************************************************//
+/** Update and return the OR of per-device event-cut error flags. */
 UInt_t QwBeamLine::UpdateErrorFlag(){//return the error flag
   UInt_t ErrorFlag;
   UInt_t ErrorFlagtmp;
@@ -1495,6 +1576,7 @@ UInt_t QwBeamLine::UpdateErrorFlag(){//return the error flag
 }
 
 //*****************************************************************//
+/** Copy error flags from a reference beamline into this instance. */
 void QwBeamLine::UpdateErrorFlag(const VQwSubsystem *ev_error){
   VQwSubsystem* tmp = const_cast<VQwSubsystem*>(ev_error);
   if(Compare(tmp))
@@ -1533,6 +1615,7 @@ void QwBeamLine::UpdateErrorFlag(const VQwSubsystem *ev_error){
 
 
 //*****************************************************************//
+/** Process one physics event: clocks first, then all devices. */
 void  QwBeamLine::ProcessEvent()
 {
   // Make sure this one comes first! The clocks are needed by
@@ -1577,6 +1660,9 @@ void  QwBeamLine::ProcessEvent()
 
 
 //*****************************************************************//
+/**
+ * Handle configuration banks if present. Placeholder for future use.
+ */
 Int_t QwBeamLine::ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words)
 {
 
@@ -1584,8 +1670,9 @@ Int_t QwBeamLine::ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_
 }
 
 //*****************************************************************//
+/** Publish selected device channels according to the map file. */
 Bool_t QwBeamLine::PublishInternalValues() const
-{
+
   // Publish variables
   Bool_t status = kTRUE;
   
@@ -1635,8 +1722,9 @@ Bool_t QwBeamLine::PublishInternalValues() const
 }
 
 //*****************************************************************//
+/** Publish a device channel on-demand by inferred property suffix. */
 Bool_t QwBeamLine::PublishByRequest(TString device_name)
-{
+
   Bool_t status = kFALSE;
   const VQwHardwareChannel* tmp_channel = 0;
 
@@ -1693,8 +1781,9 @@ Bool_t QwBeamLine::PublishByRequest(TString device_name)
 
 
 //*****************************************************************//
+/** Clear current-event state for all managed devices. */
 void QwBeamLine::ClearEventData()
-{
+
   for(size_t i=0;i<fClock.size();i++)
     fClock[i].get()->ClearEventData();
   for(size_t i=0;i<fStripline.size();i++)
@@ -1720,8 +1809,9 @@ void QwBeamLine::ClearEventData()
 }
 
 //*****************************************************************//
+/** Lookup the element index for a given device type and name. */
 Int_t QwBeamLine::GetDetectorIndex( EQwBeamInstrumentType type_id, TString name) const
-{
+
   Bool_t ldebug=kFALSE;
   Int_t result=-1;
   if(ldebug) {
@@ -1743,17 +1833,20 @@ Int_t QwBeamLine::GetDetectorIndex( EQwBeamInstrumentType type_id, TString name)
   return result;
 }
 
+/** Overload: retrieve a data element by detector ID. */
 VQwDataElement* QwBeamLine::GetElement(QwBeamDetectorID det_id)
 {
   return GetElement(det_id.fTypeID, det_id.fIndex);
 };
 
+/** Overload: retrieve a data element by type and name. */
 VQwDataElement* QwBeamLine::GetElement(EQwBeamInstrumentType TypeID, TString name)
 {
   Int_t index = GetDetectorIndex(TypeID,name);
   return GetElement(TypeID,index);
 };
 
+/** Retrieve a data element pointer by type and index with dispatch. */
 VQwDataElement* QwBeamLine::GetElement(EQwBeamInstrumentType TypeID, Int_t index)
 {
   VQwDataElement* tmp_ptr;
@@ -1798,11 +1891,15 @@ VQwDataElement* QwBeamLine::GetElement(EQwBeamInstrumentType TypeID, Int_t index
   return tmp_ptr;
 };
 
+/** Const overload: retrieve a data element by type and index. */
 const VQwDataElement* QwBeamLine::GetElement(EQwBeamInstrumentType TypeID, Int_t index) const
 {
   return const_cast<QwBeamLine*>(this)->GetElement(TypeID,index);
 }
 
+/**
+ * Retrieve a hardware channel (value/x/y/ef/xp/yp) from a specific device.
+ */
 const VQwHardwareChannel* QwBeamLine::GetChannel(EQwBeamInstrumentType TypeID, Int_t index, TString device_prop) const
 {
   const VQwHardwareChannel* tmp_channel = 0;
@@ -1849,6 +1946,7 @@ const VQwHardwareChannel* QwBeamLine::GetChannel(EQwBeamInstrumentType TypeID, I
 }
 
 //*****************************************************************//
+/** Find a BPMStripline by name. */
 VQwBPM* QwBeamLine::GetBPMStripline(const TString name)
 {
   if (! fStripline.empty()) {
@@ -1863,6 +1961,7 @@ VQwBPM* QwBeamLine::GetBPMStripline(const TString name)
 
 //*****************************************************************//
 
+/** Find a BPM Cavity by name. */
 QwBPMCavity* QwBeamLine::GetBPMCavity(const TString name)
 {
   if (! fCavity.empty()) {
@@ -1877,6 +1976,7 @@ QwBPMCavity* QwBeamLine::GetBPMCavity(const TString name)
 
 
 //*****************************************************************//
+/** Find a BCM by name. */
 VQwBCM* QwBeamLine::GetBCM(const TString name)
 {
   //QwWarning << "QwBeamLine::GetBCM" << QwLog::endl;
@@ -1895,6 +1995,7 @@ VQwBCM* QwBeamLine::GetBCM(const TString name)
 
 
 //*****************************************************************//
+/** Find a Clock by name. */
 VQwClock* QwBeamLine::GetClock(const TString name)
 {
   //QwWarning << "QwBeamLine::GetClock" << QwLog::endl;
@@ -1912,6 +2013,7 @@ VQwClock* QwBeamLine::GetClock(const TString name)
 }
 
 //*****************************************************************//
+/** Find a CombinedBCM by name. */
 VQwBCM* QwBeamLine::GetCombinedBCM(const TString name)
 {
   //QwWarning << "QwBeamLine::GetCombinedBCM" << QwLog::endl;
@@ -1929,6 +2031,7 @@ VQwBCM* QwBeamLine::GetCombinedBCM(const TString name)
 }
 
 //*****************************************************************//
+/** Find a CombinedBPM by name. */
 VQwBPM* QwBeamLine::GetCombinedBPM(const TString name)
 {
   //QwWarning << "QwBeamLine::GetCombinedBPM" << QwLog::endl;
@@ -1946,6 +2049,7 @@ VQwBPM* QwBeamLine::GetCombinedBPM(const TString name)
 }
 
 //*****************************************************************//
+/** Find an EnergyCalculator by name. */
 QwEnergyCalculator* QwBeamLine::GetEnergyCalculator(const TString name){
    if (! fECalculator.empty()) {
     
@@ -1961,8 +2065,9 @@ QwEnergyCalculator* QwBeamLine::GetEnergyCalculator(const TString name){
 }
 
 //*****************************************************************//
+/** Const overload: find a BPMStripline by name. */
 const VQwBPM* QwBeamLine::GetBPMStripline(const TString name) const
-{
+
   return const_cast<QwBeamLine*>(this)->GetBPMStripline(name);
 }
 

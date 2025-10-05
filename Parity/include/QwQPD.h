@@ -1,9 +1,10 @@
-/**********************************************************\
-* File: QwQPD.h                                           *
-*                                                         *
-* Author: B.Waidyawansa                                   *
-* Time-stamp: 09-14-2010                                  *
-\**********************************************************/
+/*!
+ * \file   QwQPD.h
+ * \brief  Quadrant photodiode beam position monitor implementation
+ *
+ * \author B.Waidyawansa
+ * \date   09-14-2010
+ */
 
 #ifndef __QwQPD__
 #define __QwQPD__

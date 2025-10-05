@@ -1,9 +1,9 @@
-/**********************************************************\
-* File: QwPMT_Channel.h                                           *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2007-05-08 15:40>                           *
-\**********************************************************/
+/*!
+ * \file   QwPMT_Channel.h
+ * \brief  PMT channel data element for tracking subsystem
+ * \author P. M. King
+ * \date   2007-05-08
+ */
 
 #ifndef __QwPMT_CHANNEL__
 #define __QwPMT_CHANNEL__

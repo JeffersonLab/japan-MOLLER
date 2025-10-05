@@ -1,4 +1,9 @@
 
+/*!
+ * \file   QwCombinedPMT.h
+ * \brief  Combined PMT detector using Moller ADC channels
+ */
+
 #ifndef __QwMollerADC_COMBINEDPMT__
 #define __QwMollerADC_COMBINEDPMT__
 

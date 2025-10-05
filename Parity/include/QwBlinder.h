@@ -6,6 +6,11 @@
  * \date   2010-04-14
  */
 
+/*!
+ * \file   QwBlinder.h
+ * \brief  Data blinding utilities for parity violation analysis
+ */
+
 #ifndef __QWBLINDER__
 #define __QWBLINDER__
 

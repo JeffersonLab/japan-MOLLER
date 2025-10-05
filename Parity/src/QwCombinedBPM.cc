@@ -1,9 +1,12 @@
-/**********************************************************\
- * File: QwCombinedBPM.cc                                  *
- *                                                         *
- * Author: B. Waidyawansa                                  *
- * Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwCombinedBPM.cc
+ * \brief  Combined beam position monitor implementation using linear fitting
+ *
+ * Implementation of a combined BPM that fits transverse position as a
+ * charge-weighted linear combination of constituent BPMs. Provides per-axis
+ * slope/intercept, minimum chi-square, and an effective charge channel.
+ * Documentation-only edits; runtime behavior unchanged.
+ */
 
 #include "QwCombinedBPM.h"
 
@@ -25,6 +28,11 @@
 #include "QwParameterFile.h"
 #include "QwMollerADC_Channel.h"
 
+/**
+ * Initialize derived output channels using a simple detector name.
+ * Creates absolute position, slope, intercept, chi-square per axis, and
+ * an effective charge channel. Clears internal element/weight lists.
+ */
 template<typename T>
 void  QwCombinedBPM<T>::InitializeChannel(TString name)
 {
@@ -62,6 +70,10 @@ void  QwCombinedBPM<T>::InitializeChannel(TString name)
   return;
 }
 
+/**
+ * Initialize derived output channels with explicit subsystem scoping.
+ * Forwards subsystem/name/type information to child channels.
+ */
 template<typename T>
 void  QwCombinedBPM<T>::InitializeChannel(TString subsystem, TString name)
 {
@@ -100,6 +112,7 @@ void  QwCombinedBPM<T>::InitializeChannel(TString subsystem, TString name)
 }
 
 
+/** Clear event-time state for effective charge and per-axis outputs. */
 template<typename T>
 void QwCombinedBPM<T>::ClearEventData()
 {
@@ -115,9 +128,18 @@ void QwCombinedBPM<T>::ClearEventData()
 }
 
 
+/**
+ * Add a constituent BPM and associated weights to the combination.
+ *
+ * @param bpm            Pointer to a constituent BPM instance.
+ * @param charge_weight  Weight contributing to effective charge.
+ * @param x_weight       Weight contributing to X position fit.
+ * @param y_weight       Weight contributing to Y position fit.
+ * @param sumqw          Precomputed sum of absolute charge weights.
+ */
 template<typename T>
 void QwCombinedBPM<T>::SetBPMForCombo(const VQwBPM* bpm, Double_t charge_weight,  Double_t x_weight, Double_t y_weight,
-			Double_t sumqw)
+      Double_t sumqw)
 {
   fElement.push_back(bpm);
   fQWeights.push_back(charge_weight);
@@ -144,6 +166,11 @@ void QwCombinedBPM<T>::SetBPMForCombo(const VQwBPM* bpm, Double_t charge_weight,
 }
 
 
+/**
+ * Combined BPM does not add hardware checks beyond constituents.
+ *
+ * @return Always true; underlying BPMs manage their own HW checks.
+ */
 template<typename T>
 Bool_t QwCombinedBPM<T>::ApplyHWChecks()
 {
@@ -153,6 +180,7 @@ Bool_t QwCombinedBPM<T>::ApplyHWChecks()
 }
 
 
+/** Increment persistent error counters for all derived outputs. */
 template<typename T>
 void QwCombinedBPM<T>::IncrementErrorCounters()
 {
@@ -166,6 +194,7 @@ void QwCombinedBPM<T>::IncrementErrorCounters()
   fEffectiveCharge.IncrementErrorCounters();
 }
 
+/** Print persistent error counters for all derived outputs. */
 template<typename T>
 void QwCombinedBPM<T>::PrintErrorCounters() const
 {
@@ -179,6 +208,10 @@ void QwCombinedBPM<T>::PrintErrorCounters() const
   fEffectiveCharge.PrintErrorCounters();
 }
 
+/**
+ * Aggregate event-cut error flags across per-axis outputs and effective
+ * charge.
+ */
 template<typename T>
 UInt_t QwCombinedBPM<T>::GetEventcutErrorFlag()
 {
@@ -196,6 +229,12 @@ UInt_t QwCombinedBPM<T>::GetEventcutErrorFlag()
 
 
 
+/**
+ * Apply single-event cuts to slope/intercept outputs per axis, using error
+ * masks from constituent BPM positions to gate derived quantities.
+ *
+ * @return true if all derived outputs pass their cuts.
+ */
 template<typename T>
 Bool_t QwCombinedBPM<T>::ApplySingleEventCuts()
 {

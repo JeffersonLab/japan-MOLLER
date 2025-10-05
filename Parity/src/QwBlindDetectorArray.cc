@@ -1,9 +1,9 @@
-/**********************************************************\
-* File: QwBlindDetectorArray.cc                          *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2007-05-08 15:40>                           *
-\**********************************************************/
+/*!
+ * \file   QwBlindDetectorArray.cc
+ * \brief  Blinded detector array implementation for PMT analysis
+ * \author P. M. King
+ * \date   2007-05-08
+ */
 
 #include "QwBlindDetectorArray.h"
 

@@ -1,3 +1,8 @@
+/*!
+ * \file   VQwDataserver.h
+ * \brief  Virtual base class for data server implementations
+ */
+
 #ifndef __VQwDataserver_h__
 #define __VQwDataserver_h__
 

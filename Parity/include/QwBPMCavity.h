@@ -1,9 +1,7 @@
-/**********************************************************\
-* File: QwBPMStripline.h                                  *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwBPMCavity.h
+ * \brief  Cavity beam position monitor implementation
+ */
 
 #ifndef __QwVQWK_CAVITY__
 #define __QwVQWK_CAVITY__

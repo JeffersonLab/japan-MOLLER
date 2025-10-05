@@ -1,9 +1,9 @@
-/**********************************************************\
-* File: QwHelicityPattern.h                                *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2007-05-08 15:40>                           *
-\**********************************************************/
+/*!
+ * \file   QwHelicityPattern.h
+ * \brief  Helicity pattern analysis and management
+ * \author P. M. King
+ * \date   2007-05-08
+ */
 #ifndef __QwHelicityPattern__
 #define __QwHelicityPattern__
 

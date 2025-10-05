@@ -1,9 +1,9 @@
-/**********************************************************\
-* File: QwDetectorArray.h                          *
-*                                                          *
-* Author: Kevin Ward (Original Code by P. M. King)                                       *
-* Time-stamp: <2007-05-08 15:40>                           *
-\**********************************************************/
+/*!
+ * \file   QwDetectorArray.h
+ * \brief  Detector array for PMT analysis with integration and combination
+ * \author Kevin Ward (Original Code by P. M. King)
+ * \date   2007-05-08
+ */
 
 /// \ingroup QwAnalysis_ADC
 

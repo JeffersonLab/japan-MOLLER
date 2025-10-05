@@ -1,10 +1,8 @@
-/*
- * QwCombiner.h
- *
- *  Created on: Oct 22, 2010
- *      Author: wdconinc
- *
- *  Last Modified: August 1, 2018 1:45 PM
+/*!
+ * \file   QwCombiner.h
+ * \brief  Data combiner handler for channel operations
+ * \author wdconinc
+ * \date   2010-10-22
  */
 
 #ifndef QWCOMBINER_H_
@@ -31,10 +29,15 @@ class QwCombiner:public VQwDataHandler, public MQwDataHandlerCloneable<QwCombine
     /// \brief Load the channels and sensitivities
     Int_t LoadChannelMap(const std::string& mapfile);
 
-    /// \brief Connect to Channels (event only)
-    Int_t ConnectChannels(QwSubsystemArrayParity& event);
-    /// \brief Connect to Channels (asymmetry/difference only)
-    Int_t ConnectChannels(QwSubsystemArrayParity& asym,
+  /// \brief Connect to Channels (event only)
+  /// \param event Subsystem array with per-MPS yields
+  /// \return 0 on success, non-zero on failure
+  Int_t ConnectChannels(QwSubsystemArrayParity& event);
+  /// \brief Connect to Channels (asymmetry/difference only)
+  /// \param asym Subsystem array with asymmetries
+  /// \param diff Subsystem array with differences
+  /// \return 0 on success, non-zero on failure
+  Int_t ConnectChannels(QwSubsystemArrayParity& asym,
 			  QwSubsystemArrayParity& diff);
 
     void ProcessData();

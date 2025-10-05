@@ -1,9 +1,10 @@
-/**********************************************************\
-* File: QwVQWK_Channel.h                                           *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2007-05-08 15:40>                           *
-\**********************************************************/
+
+/*!
+ * \file   QwVQWK_Channel.h
+ * \brief  Decoding and management for VQWK ADC channels (6x32-bit datawords)
+ * \author P. M. King
+ * \date   2007-05-08
+ */
 
 #ifndef __QwVQWK_CHANNEL__
 #define __QwVQWK_CHANNEL__

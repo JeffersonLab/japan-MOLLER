@@ -1,9 +1,10 @@
-/**********************************************************\
-* File: QwEnergyCalculator.h                              *
-*                                                         *
-* Author:  B.Waidyawansa                                  *
-* Time-stamp: 05-24-2010                                  *
-\**********************************************************/
+/*!
+ * \file   QwEnergyCalculator.h
+ * \brief  Beam energy calculation from BPM position measurements
+ *
+ * \author B.Waidyawansa
+ * \date   05-24-2010
+ */
 
 #ifndef __QwVQWK_ENERGYCALCULATOR__
 #define __QwVQWK_ENERGYCALCULATOR__

@@ -1,12 +1,9 @@
-/**
- * \class QwMollerDetector  QwMollerDetector.h
- *
- * \brief Implementation of the analysis of Moller data (copied from QwComptonElectronDetector.h)
- *
- * \author  Andrew Kubera
- * \date  2010-06-07
+/*!
+ * \file   QwMollerDetector.h
+ * \brief  Moller detector analysis implementation
+ * \author Andrew Kubera
+ * \date   2010-06-07
  * \ingroup QwMoller
- *
  */
 
 

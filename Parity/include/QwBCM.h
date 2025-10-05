@@ -1,9 +1,7 @@
-/**********************************************************\
-* File: QwBCM.h                                            *
-*                                                          *
-* Author:                                                  *
-* Time-stamp:                                              *
-\**********************************************************/
+/*!
+ * \file   QwBCM.h
+ * \brief  Beam current monitor template class
+ */
 
 #ifndef __QWBCM__
 #define __QWBCM__

@@ -1,9 +1,9 @@
-/**********************************************************\
-* File: QwHaloMonitor.h                                   *
-*                                                         *
-* Author:B. Waidyawansa                                   *
-* Time-stamp:24-june-2010                                 *
-\**********************************************************/
+/*!
+ * \file   QwHaloMonitor.h
+ * \brief  Halo monitor using scaler channels for beam monitoring
+ * \author B. Waidyawansa
+ * \date   2010-06-24
+ */
 
 #ifndef __QwHALO_MONITOR__
 #define __QwHALO_MONITOR__

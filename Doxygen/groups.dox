@@ -1,0 +1,6 @@
+/*! \defgroup QwAnalysis_ADC ADC channels and digitizers */
+/*! \defgroup QwAnalysis_BL Beam line instrumentation */
+/*! \defgroup QwAnalysis_BeamLine Beam line subsystem helper classes */
+/*! \defgroup QwTracking Tracking and PMT-related elements */
+/*! \defgroup QwThreadSafe Thread-safety utilities */
+/*! \defgroup QwMoller MOLLER detector and related analysis */

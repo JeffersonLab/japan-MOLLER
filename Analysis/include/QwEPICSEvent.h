@@ -1,6 +1,9 @@
-/*
-Adopted from G0EPICSEvent class.
-*/
+/*!
+ * \file   QwEPICSEvent.h
+ * \brief  EPICS data event handling and storage
+ *
+ * Adopted from G0EPICSEvent class.
+ */
 
 #ifndef __QWEPICSEVENT__
 #define __QWEPICSEVENT__

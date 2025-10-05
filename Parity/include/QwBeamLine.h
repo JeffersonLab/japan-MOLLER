@@ -1,9 +1,7 @@
-/**********************************************************\
-* File: QwBeamLine.h                                      *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwBeamLine.h
+ * \brief  Beamline subsystem containing BPMs, BCMs, and other beam monitoring devices
+ */
 
 #ifndef __QwBEAMLINE__
 #define __QwBEAMLINE__

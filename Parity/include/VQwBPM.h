@@ -6,6 +6,11 @@
 \**********************************************************/
 
 
+/*!
+ * \file   VQwBPM.h
+ * \brief  Virtual base class for beam position monitors
+ */
+
 #ifndef __VQWBPM__
 #define __VQWBPM__
 

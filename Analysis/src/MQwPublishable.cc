@@ -1,3 +1,8 @@
+/*!
+ * \file   MQwPublishable.cc
+ * \brief  Mix-in class implementation for publishable data elements
+ */
+
 #include "MQwPublishable.h"
 
 #include "QwSubsystemArray.h"
@@ -199,7 +204,7 @@ const VQwHardwareChannel* MQwPublishable_child<U,T>::RequestExternalPointer(cons
  * Publish a variable name to the subsystem array
  * @param name Name of the variable
  * @param desc Description of the variable
- * @param value Channel to publish
+ * @param element Channel to publish
  * @return True if the variable could be published, false otherwise
  */
 template<class U, class T>

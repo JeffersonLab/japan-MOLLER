@@ -1,3 +1,7 @@
+/*!n * \file   QwInterpolator.h
+ * \brief  Multi-dimensional grid interpolation methods
+ */
+
 #ifndef _QWINTERPOLATOR_H_
 #define _QWINTERPOLATOR_H_
 

@@ -1,9 +1,11 @@
-/**********************************************************\
-* File: VQwBPM.cc                                         *
-*                                                         *
-* Author:B.Waidyawansa                                    *
-* Time-stamp:03-06-2010                                   *
-\**********************************************************/
+/*!
+ * \file   VQwBPM.cc
+ * \brief  Virtual base class implementation for beam position monitors
+ *
+ * Base helper implementations for BPMs (beam position monitors). Contains
+ * small utility methods shared by concrete BPM types plus factory helpers.
+ * Documentation-only edits; runtime behavior unchanged.
+ */
 
 #include "VQwBPM.h"
 
@@ -23,6 +25,13 @@
 const TString  VQwBPM::kAxisLabel[2]={"X","Y"};
 
 
+/*!
+ * \brief Initialize common BPM state and set the element name.
+ * \param name Element name to assign to this BPM.
+ * 
+ * Initializes position center array to zero and sets the element name.
+ * This is the base initialization common to all BPM types.
+ */
 void  VQwBPM::InitializeChannel(TString name)
 { 
   Short_t i = 0; 
@@ -34,6 +43,16 @@ void  VQwBPM::InitializeChannel(TString name)
   return;
 }
 
+/*!
+ * \brief Store geometry/survey offsets for absolute position calibration.
+ * \param Xoffset X-axis survey offset in mm.
+ * \param Yoffset Y-axis survey offset in mm.
+ * \param Zoffset Z-axis survey offset in mm.
+ * 
+ * Reads position offsets from geometry map file for absolute position
+ * calibration. These offsets correct for known mechanical installation
+ * differences from ideal positions.
+ */
 void VQwBPM::GetSurveyOffsets(Double_t Xoffset, Double_t Yoffset, Double_t Zoffset)
 {
   // Read in the position offsets from the geometry map file
@@ -45,6 +64,16 @@ void VQwBPM::GetSurveyOffsets(Double_t Xoffset, Double_t Yoffset, Double_t Zoffs
 }
 
 
+/*!
+ * \brief Apply per-detector electronic calibration and relative gains.
+ * \param BSENfactor Beam sensitivity factor for position calibration.
+ * \param AlphaX Relative gain correction factor for X position.
+ * \param AlphaY Relative gain correction factor for Y position.
+ * 
+ * Reads electronic factors from calibration file and applies stripline-specific
+ * calibrations. BSENfactor is scaled by 18.81 to convert to mm/V, and a
+ * correction factor of 0.250014 is applied for stripline geometry.
+ */
 void VQwBPM::GetElectronicFactors(Double_t BSENfactor, Double_t AlphaX, Double_t AlphaY)
 {
   // Read in the electronic factors from the file
@@ -68,6 +97,14 @@ void VQwBPM::GetElectronicFactors(Double_t BSENfactor, Double_t AlphaX, Double_t
   return;
 }
 
+/*!
+ * \brief Set detector rotation angle and update cached trigonometric values.
+ * \param rotation_angle Rotation angle in degrees (positive = clockwise from beam's perspective).
+ * 
+ * Sets the BPM rotation angle and pre-computes sin/cos values for efficient
+ * coordinate transformations. Rotation is applied to correct for mechanical
+ * installation angles that differ from ideal orientation.
+ */
 void VQwBPM::SetRotation(Double_t rotation_angle){
   // Read the rotation angle in degrees (to beam right)
   Bool_t ldebug = kFALSE;
@@ -85,6 +122,7 @@ void VQwBPM::SetRotation(Double_t rotation_angle){
   }
 }
 
+/** Disable rotation, restoring accelerator coordinates (0 degrees). */
 void VQwBPM::SetRotationOff(){
   // Turn off rotation. This object is already in accelerator coordinates.
   fRotationAngle = 0.0;
@@ -92,6 +130,7 @@ void VQwBPM::SetRotationOff(){
   bRotated=kFALSE;
 }
 
+/** Configure position-dependent gains (X or Y). */
 void VQwBPM::SetGains(TString pos, Double_t value){
   if(pos.Contains("X")) fGains[0] = value;
   if(pos.Contains("Y")) fGains[1] = value;
