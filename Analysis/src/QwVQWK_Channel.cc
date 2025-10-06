@@ -1068,7 +1068,13 @@ QwVQWK_Channel& QwVQWK_Channel::operator= (const QwVQWK_Channel &value)
     this->fNumberOfSamples = value.fNumberOfSamples;
     this->fSequenceNumber  = value.fSequenceNumber;
    
-
+    if (this->fDataToSave == kRaw){
+      for (Int_t i=0; i<fBlocksPerEvent; i++){
+       this->fBlock_raw[i] = value.fBlock_raw[i];
+      }
+      this->fHardwareBlockSum_raw = value.fHardwareBlockSum_raw;
+      this->fSoftwareBlockSum_raw = value.fSoftwareBlockSum_raw;
+    }
   }
   return *this;
 }

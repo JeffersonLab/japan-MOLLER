@@ -1110,7 +1110,16 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator= (const QwMollerADC_Channel &
     this->fNumberOfSamples = value.fNumberOfSamples;
     this->fSequenceNumber  = value.fSequenceNumber;
    
-
+    if (this->fDataToSave == kRaw){
+      for (Int_t i=0; i<fBlocksPerEvent; i++){
+       this->fBlock_raw[i] = value.fBlock_raw[i];
+       this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
+       this->fBlock_min[i]     = value.fBlock_min[i];
+       this->fBlock_max[i]     = value.fBlock_max[i];
+      }
+      this->fHardwareBlockSum_raw = value.fHardwareBlockSum_raw;
+      this->fSoftwareBlockSum_raw = value.fSoftwareBlockSum_raw;
+    }
   }
   return *this;
 }
