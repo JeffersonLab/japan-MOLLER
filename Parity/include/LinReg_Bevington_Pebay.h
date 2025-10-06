@@ -16,6 +16,11 @@
 #include <TMatrixD.h>
 
 //-----------------------------------------
+/**
+ * \class LinRegBevPeb
+ * \ingroup QwAnalysis_BL
+ * \brief Online linear regression with incremental covariance updates
+ */
 class LinRegBevPeb {
   int  nP; // number of independent variables
   int  nY; // number of   dependent variables

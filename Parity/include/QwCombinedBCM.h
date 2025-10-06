@@ -25,9 +25,15 @@
 class QwDBInterface;
 #endif // __USE_DATABASE__
 
-/*****************************************************************
-*  Class:
-******************************************************************/
+/**
+ * \class QwCombinedBCM
+ * \ingroup QwAnalysis_BL
+ * \brief Template for a combined beam current monitor using weighted inputs
+ *
+ * Aggregates multiple BCMs into a single effective current channel by
+ * applying user-provided weights. Provides event processing hooks and
+ * error propagation consistent with VQwBCM.
+ */
 
 template<typename T>
 class QwCombinedBCM : public QwBCM<T> {

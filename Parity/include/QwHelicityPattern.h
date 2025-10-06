@@ -31,6 +31,14 @@ class QwHelicity;
 /// \ingroup QwAnalysis_ADC
 ///
 /// \ingroup QwAnalysis_BL
+/**
+ * \class QwHelicityPattern
+ * \ingroup QwAnalysis_BL
+ * \brief Manages yields/differences/asymmetries for helicity patterns
+ *
+ * Aggregates per-window subsystem arrays into pairs and patterns, supports
+ * burst and running sums, and integrates with the blinder strategy.
+ */
 class QwHelicityPattern {
   /******************************************************************
    *  Class: QwHelicityPattern

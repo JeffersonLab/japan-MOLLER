@@ -11,6 +11,15 @@
 
 #include <vector>
 
+/**
+ * \class Coda2EventDecoder
+ * \ingroup QwAnalysis
+ * \brief CODA version 2 event decoder implementation
+ *
+ * Concrete decoder for CODA 2.x format event streams, handling the legacy
+ * data structures and bank formats. Maintains compatibility with older
+ * data files while providing the same encoding/decoding interface.
+ */
 class Coda2EventDecoder : public VEventDecoder
 {
 public:

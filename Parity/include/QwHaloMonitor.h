@@ -33,8 +33,11 @@ class QwDBInterface;
 *  Class: QwHaloMonitor handles the halo counters. This use
           QwSIS3801_Channel scaler channels.
 ******************************************************************/
-///
-/// \ingroup QwAnalysis_BL
+/**
+ * \class QwHaloMonitor
+ * \ingroup QwAnalysis_BL
+ * \brief Wrapper around a scaler channel to monitor beam halo rates
+ */
 class  QwHaloMonitor : public VQwDataElement{
 /////
 

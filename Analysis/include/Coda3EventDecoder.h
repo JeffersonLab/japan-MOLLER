@@ -11,6 +11,15 @@
 
 #include <vector>
 
+/**
+ * \class Coda3EventDecoder
+ * \ingroup QwAnalysis
+ * \brief CODA version 3 event decoder implementation
+ *
+ * Concrete decoder for CODA 3.x format event streams, handling the specific
+ * data structures, bank formats, and trigger information used in CODA 3.
+ * Provides encoding and decoding capabilities for both real and mock data.
+ */
 class Coda3EventDecoder : public VEventDecoder
 {
 public:

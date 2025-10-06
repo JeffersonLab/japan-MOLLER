@@ -20,11 +20,15 @@
 // Forward declarations
 class QwDBInterface;
 
-/*****************************************************************
-*  Class:
-******************************************************************/
-///
-/// \ingroup QwAnalysis_BL
+/**
+ * \class QwIntegratedRasterChannel
+ * \ingroup QwAnalysis_BL
+ * \brief Template for integrated raster readout channel
+ *
+ * Provides accumulation and processing of fast raster signals into
+ * per-window integrated values. The template parameter T is the
+ * underlying hardware channel type (e.g. QwVQWK_Channel).
+ */
 template<typename T>
 class QwIntegratedRasterChannel : public VQwDataElement{
 /////

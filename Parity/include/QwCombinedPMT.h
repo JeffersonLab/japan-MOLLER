@@ -25,6 +25,11 @@
 class QwBlinder;
 class QwDBInterface;
 
+/**
+ * \class QwCombinedPMT
+ * \ingroup QwAnalysis_ADC
+ * \brief Combines multiple integration PMTs into weighted sum/average
+ */
 class QwCombinedPMT : public VQwDataElement {
 /////
  public:

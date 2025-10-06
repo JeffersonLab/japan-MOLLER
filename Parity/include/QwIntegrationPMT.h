@@ -30,6 +30,11 @@ class QwDBInterface;
 ******************************************************************/
 ///
 /// \ingroup QwAnalysis_BL
+/**
+ * \class QwIntegrationPMT
+ * \ingroup QwAnalysis_BL
+ * \brief Integration PMT providing yield/diff/asym readout from Moller ADC
+ */
 class QwIntegrationPMT : public VQwDataElement{
 /////
  public:

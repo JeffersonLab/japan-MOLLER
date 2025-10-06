@@ -36,8 +36,17 @@ using boost::lexical_cast;
 // Qweak headers
 #include "QwLog.h"
 
-///
-/// \ingroup QwAnalysis
+/**
+ * \class QwParameterFile
+ * \ingroup QwAnalysis
+ * \brief Configuration file parser with flexible tokenization and search capabilities
+ *
+ * Provides parsing of configuration files with support for comments, section
+ * headers, variable substitution, file inclusion (append), and configurable
+ * token separators. Includes search path management and run-number-based
+ * parameter file selection. Used throughout the framework for loading
+ * detector maps, cut parameters, and subsystem configurations.
+ */
 class QwParameterFile {
 
   public:

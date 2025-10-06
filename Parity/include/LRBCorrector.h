@@ -12,6 +12,15 @@
 #include "VQwDataHandler.h"
 
 
+/**
+ * \class LRBCorrector
+ * \ingroup QwAnalysis_BL
+ * \brief Linear-regression corrector applying per-burst slopes to data
+ *
+ * Loads cycle-dependent sensitivities and applies linear regression
+ * corrections to monitored channels, selecting the appropriate set
+ * based on the current burst counter.
+ */
 class LRBCorrector : public VQwDataHandler, public MQwDataHandlerCloneable<LRBCorrector>{
  public:
     /// \brief Constructor with name

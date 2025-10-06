@@ -23,6 +23,11 @@
 #include "QwTypes.h"
 
 
+/**
+ * \class QwIntegratedRasterDetectorID
+ * \ingroup QwAnalysis_BL
+ * \brief Mapping info for integrated raster detectors
+ */
 class QwIntegratedRasterDetectorID{
 
  public:
@@ -54,6 +59,11 @@ class QwIntegratedRasterDetectorID{
 /*****************************************************************
 *  Class:
 ******************************************************************/
+/**
+ * \class QwIntegratedRaster
+ * \ingroup QwAnalysis_BL
+ * \brief Subsystem handling integrated raster X/Y channels
+ */
 class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneable<QwIntegratedRaster> {
   /////  
 
