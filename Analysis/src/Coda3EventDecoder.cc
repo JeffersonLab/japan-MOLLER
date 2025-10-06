@@ -181,7 +181,9 @@ Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 
 	fFragLength = fEvtLength - fWordsSoFar;	
 	QwDebug << Form("buffer[0-1] 0x%x 0x%x ; ", buffer[0], buffer[1]);
-	PrintDecoderInfo(QwDebug);
+	if (gQwLog.GetLogLevel() >= QwLog::kDebug) {
+  	  PrintDecoderInfo(gQwLog(QwLog::kDebug,__PRETTY_FUNCTION__));
+	}
 
 	return CODA_OK;
 }
