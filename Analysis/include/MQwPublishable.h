@@ -37,8 +37,14 @@ class MQwPublishable_child {
     Bool_t RequestExternalValue(const TString& name, VQwHardwareChannel* value) const;
     /// \brief Retrieve the variable name from other subsystem arrays
     const VQwHardwareChannel* RequestExternalPointer(const TString& name) const;
-    /// \brief Publish the value name with description from a subsystem in this array
-    Bool_t PublishInternalValue(const TString name, const TString desc, const VQwHardwareChannel* element) const;
+   /**
+    * \brief Publish a variable from this child into the parent container.
+    * @param name    Variable key to publish under.
+    * @param desc    Human-readable description of the variable.
+    * @param element Pointer to the data element representing this variable.
+    * @return kTRUE if the variable was published; kFALSE on duplicate key or no parent.
+    */
+   Bool_t PublishInternalValue(const TString name, const TString desc, const VQwHardwareChannel* element) const;
 
 
     /// The functions below should be specified in the fully derived classes.

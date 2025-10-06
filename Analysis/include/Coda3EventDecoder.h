@@ -32,23 +32,57 @@ public:
 	~Coda3EventDecoder() { }
 public:
 	// Encoding Functions
+	/** Create a PHYS event EVIO header.
+	 *  @param ROCList List of ROC IDs.
+	 *  @return Vector of 32-bit words containing the header.
+	 */
 	virtual std::vector<UInt_t> EncodePHYSEventHeader(std::vector<ROCID_t> &ROCList);
+	/** Create a PRESTART event EVIO header.
+	 *  @param buffer    Output buffer (>= 5 words).
+	 *  @param runnumber Run number.
+	 *  @param runtype   Run type.
+	 *  @param localtime Event time.
+	 */
 	virtual void EncodePrestartEventHeader(int* buffer, int runnumber, int runtype, int localtime);
+	/** Create a GO event EVIO header.
+	 *  @param buffer     Output buffer (>= 5 words).
+	 *  @param eventcount Number of events.
+	 *  @param localtime  Event time.
+	 */
 	virtual void EncodeGoEventHeader(int* buffer, int eventcount, int localtime);
+	/** Create a PAUSE event EVIO header.
+	 *  @param buffer     Output buffer (>= 5 words).
+	 *  @param eventcount Number of events.
+	 *  @param localtime  Event time.
+	 */
 	virtual void EncodePauseEventHeader(int* buffer, int eventcount, int localtime);
+	/** Create an END event EVIO header.
+	 *  @param buffer     Output buffer (>= 5 words).
+	 *  @param eventcount Number of events.
+	 *  @param localtime  Event time.
+	 */
 	virtual void EncodeEndEventHeader(int* buffer, int eventcount, int localtime);
 
 public:
 	// Decoding Functions
+	/** Determine if a buffer contains a PHYS, control, or other event.
+	 *  @param buffer Event buffer to decode.
+	 *  @return CODA_OK on success.
+	 */
 	virtual Int_t DecodeEventIDBank(UInt_t *buffer);
 private:
 	// Debugging Functions
+	/** Print non-PHYS, non-control "user" events. */
 	void printUserEvent(const UInt_t *buffer);
+	/** Print internal decoder state for diagnostics. */
 	virtual void PrintDecoderInfo(QwLog& out);
 protected:
 	// TI Decoding Functions
+	/** Determine event type and set control/physics flags based on bank tag. */
 	UInt_t InterpretBankTag(UInt_t tag);
+	/** Decode the TI trigger bank for PHYS events. */
 	Int_t trigBankDecode(UInt_t* buffer);
+	/** Display a warning and reset state for a given TI error flag. */
 	void trigBankErrorHandler( Int_t flag );
 
 	ULong64_t GetEvTime() const { return evt_time; }
@@ -91,6 +125,7 @@ public:
 	};
 
 protected:
+	/** Load TI trigger bank info for the i-th event in block. */
 	Int_t LoadTrigBankInfo( UInt_t index_buffer );
 	TBOBJ tbank;
 

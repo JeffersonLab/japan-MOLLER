@@ -54,10 +54,11 @@ class QwAlarmHandler:public VQwDataHandler, public MQwDataHandlerCloneable<QwAla
   Int_t ConnectChannels(
     QwSubsystemArrayParity& yield,
     QwSubsystemArrayParity& asym,
-		  QwSubsystemArrayParity& diff);
+    QwSubsystemArrayParity& diff);
     
 
-    void ProcessData();
+  /** Process one event: update alarm states and outputs. */
+  void ProcessData();
     void CheckAlarms();
     void UpdateAlarmFile();
     void ParseConfigFile(QwParameterFile&);

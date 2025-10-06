@@ -153,7 +153,7 @@ Int_t QwAlarmHandler::LoadChannelMap(const std::string& mapfile)
   return 0;
 }
 
-/** Connect to the dependent and independent channels (implementation) */
+// Connect to the dependent and independent channels (implementation). Parameters are documented in the header.
 Int_t QwAlarmHandler::ConnectChannels(
     QwSubsystemArrayParity& yield,
     QwSubsystemArrayParity& asym,

@@ -153,6 +153,12 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   Bool_t  HasDataLoaded() const  {return fIsDataLoaded;}
 
   /// \brief Get the sibling with specified name
+  /**
+   * Get a sibling subsystem by name from the parent array.
+   *
+   * @param name Name of the sibling subsystem.
+   * @return Pointer to the sibling, or NULL if not found.
+   */
   VQwSubsystem* GetSibling(const std::string& name) const;
 
 
@@ -178,6 +184,13 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
  public:
 
   /// \brief Parse parameter file to find the map files
+  /**
+   * Parse a parameter file and dispatch to the appropriate loaders
+   * based on key-value pairs (map, param, eventcut, geom, cross, mask).
+   *
+   * @param file Parameter file to read and parse.
+   * @return 0 on success; non-zero on error.
+   */
   virtual Int_t LoadDetectorMaps(QwParameterFile& file);
   /// Mandatory map file definition
   virtual Int_t LoadChannelMap(TString mapfile) = 0;
@@ -280,6 +293,12 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   /// as pure virtual.
   // @{
   /// \brief Construct the branch and tree vector
+  /**
+   * Construct the branch and fill the provided values vector.
+   * @param tree   Output ROOT tree to which branches are added.
+   * @param prefix Name prefix for all branch names.
+   * @param values Vector that will be filled by FillTreeVector.
+   */
   virtual void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values) = 0;
   /// \brief Construct the branch and tree vector
   virtual void ConstructBranchAndVector(TTree *tree, std::vector<Double_t>& values) {
@@ -287,14 +306,36 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
     ConstructBranchAndVector(tree,tmpstr,values);
   };
   /// \brief Construct the branch and tree vector
+  /**
+   * Construct the branches for this subsystem.
+   * @param tree   Output ROOT tree.
+   * @param prefix Name prefix for all branch names.
+   */
   virtual void ConstructBranch(TTree *tree, TString& prefix) = 0;
   /// \brief Construct the branch and tree vector based on the trim file
+  /**
+   * Construct the branches for this subsystem using a trim file.
+   * @param tree      Output ROOT tree.
+   * @param prefix    Name prefix for all branch names.
+   * @param trim_file Trim file describing which branches to construct.
+   */
   virtual void ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file) = 0;
   /// \brief Fill the tree vector
+  /**
+   * Fill the tree export vector with the current event values.
+   * @param values Output vector to be filled.
+   */
   virtual void FillTreeVector(std::vector<Double_t>& values) const = 0;
   
 #ifdef HAS_RNTUPLE_SUPPORT
   /// \brief Construct the RNTuple fields and vector
+  /**
+   * Construct the RNTuple fields and fill the export vector.
+   * @param model     Output RNTuple model.
+   * @param prefix    Name prefix for field names.
+   * @param values    Export values vector.
+   * @param fieldPtrs Shared pointers to field backing storage.
+   */
   virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
   /// \brief Construct the RNTuple fields and vector  
   virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) {
@@ -302,6 +343,10 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
     ConstructNTupleAndVector(model, tmpstr, values, fieldPtrs);
   };
   /// \brief Fill the RNTuple vector
+  /**
+   * Fill the RNTuple vector with the current event values.
+   * @param values Output vector to be filled.
+   */
   virtual void FillNTupleVector(std::vector<Double_t>& values) const = 0;
 #endif // HAS_RNTUPLE_SUPPORT
   // @}
@@ -337,6 +382,9 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   // @}
 
   /// \brief Print some information about the subsystem
+  /**
+   * Print some information about the subsystem (name, ROCs/banks, parent).
+   */
   virtual void  PrintInfo() const;
 
   /// \brief Assignment
@@ -351,21 +399,55 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
 
   /*! \brief Clear all registration of ROC and Bank IDs for this subsystem
    */
+  /**
+   * Clear all registration of ROC and Bank IDs for this subsystem and
+   * reset current ROC/bank IDs to null.
+   */
   void  ClearAllBankRegistrations();
 
   /*! \brief Tell the object that it will decode data from this ROC and sub-bank
+   */
+  /**
+   * Register that this subsystem will decode data from a specific ROC/bank.
+   * @param roc_id  ROC identifier.
+   * @param bank_id Subbank identifier within the ROC (default 0).
+   * @return 0 on success; ERROR if already registered.
    */
   virtual Int_t RegisterROCNumber(const ROCID_t roc_id, const BankID_t bank_id = 0);
 
   /*! \brief Tell the object that it will decode data from this sub-bank in the ROC currently open for registration
    */
+  /**
+   * Register a subbank under the current ROC registration.
+   * @param bank_id Subbank identifier to register.
+   * @return 0 on success; ERROR if no current ROC.
+   */
   Int_t RegisterSubbank(const BankID_t bank_id);
 
+  /**
+   * Register a marker word within the current ROC/bank context.
+   * @param markerword Marker word value.
+   * @return 0 on success; ERROR if no current ROC.
+   */
   Int_t RegisterMarkerWord(const UInt_t markerword);
 
+  /**
+   * Parse and register ROC/bank/marker entries from a map string.
+   * @param mapstr Parameter string positioned at a registration line.
+   */
   void RegisterRocBankMarker(QwParameterFile &mapstr);
 
+  /**
+   * Get the current flat subbank index (based on current ROC/bank).
+   * @return Subbank index, or -1 if not found.
+   */
   Int_t GetSubbankIndex() const { return GetSubbankIndex(fCurrentROC_ID, fCurrentBank_ID); }
+  /**
+   * Compute the flat subbank index from ROC and bank IDs.
+   * @param roc_id  ROC identifier.
+   * @param bank_id Subbank identifier within the ROC.
+   * @return Subbank index, or -1 if not found.
+   */
   Int_t GetSubbankIndex(const ROCID_t roc_id, const BankID_t bank_id) const;
   void  SetDataLoaded(Bool_t flag){fIsDataLoaded = flag;};
 
@@ -403,8 +485,8 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
 
   Bool_t   fIsDataLoaded; ///< Has this subsystem gotten data to be processed?
 
-  std::vector<TString> fDetectorMapsNames;
-  std::map<TString, TString> fDetectorMaps;
+  std::vector<TString> fDetectorMapsNames; ///< Names of loaded detector map files
+  std::map<TString, TString> fDetectorMaps; ///< Map of file name to full path or content
  protected:
 
   ROCID_t  fCurrentROC_ID; ///< ROC ID that is currently being processed

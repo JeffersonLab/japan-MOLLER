@@ -30,14 +30,46 @@ public:
 		~Coda2EventDecoder() { }
 public:
 	// Encoding Functions
+	/** Create a PHYS event EVIO header.
+	 *  @param ROCList List of ROC IDs (unused in CODA2 headers).
+	 *  @return Vector of 32-bit words containing the header.
+	 */
 	virtual std::vector<UInt_t> EncodePHYSEventHeader(std::vector<ROCID_t> &ROCList);
+	/** Create a PRESTART event EVIO header.
+	 *  @param buffer    Output buffer (>= 5 words).
+	 *  @param runnumber Run number.
+	 *  @param runtype   Run type.
+	 *  @param localtime Event time.
+	 */
 	virtual void EncodePrestartEventHeader(int* buffer, int runnumber, int runtype, int localtime);
+	/** Create a GO event EVIO header.
+	 *  @param buffer    Output buffer (>= 5 words).
+	 *  @param eventcount Number of events.
+	 *  @param localtime  Event time.
+	 */
 	virtual void EncodeGoEventHeader(int* buffer, int eventcount, int localtime);
+	/** Create a PAUSE event EVIO header.
+	 *  @param buffer    Output buffer (>= 5 words).
+	 *  @param eventcount Number of events.
+	 *  @param localtime  Event time.
+	 */
 	virtual void EncodePauseEventHeader(int* buffer, int eventcount, int localtime);
+	/** Create an END event EVIO header.
+	 *  @param buffer    Output buffer (>= 5 words).
+	 *  @param eventcount Number of events.
+	 *  @param localtime  Event time.
+	 */
 	virtual void EncodeEndEventHeader(int* buffer, int eventcount, int localtime);
 public:
 	// Decoding Functions
+	/** Determine whether a buffer contains a PHYS, control, or other event.
+	 *  @param buffer Event buffer to decode.
+	 *  @return CODA_OK on success.
+	 */
 	virtual Int_t DecodeEventIDBank(UInt_t *buffer);
+	/** Print internal decoder state for diagnostics.
+	 *  @param out Logging stream.
+	 */
 	virtual void PrintDecoderInfo(QwLog& out);
 
 private:
