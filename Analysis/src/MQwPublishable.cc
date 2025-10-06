@@ -11,12 +11,7 @@
 #include "QwDataHandlerArray.h"
 #include "VQwDataHandler.h"
 
-/**
- * Retrieve the variable name from other subsystem arrays
- * @param name Variable name to be retrieved
- * @param value (return) Data element with the variable name
- * @return True if the variable is found, false if not found
- */
+/* Retrieve the variable name from other subsystem arrays. See header for docs. */
 template<class U, class T>
 Bool_t MQwPublishable<U,T>::RequestExternalValue(const TString& name, VQwHardwareChannel* value) const
 {
@@ -34,11 +29,7 @@ const VQwHardwareChannel* MQwPublishable<U,T>::RequestExternalPointer(const TStr
 }
 
 
-/**
- * Retrieve the variable name from subsystems in this subsystem array
- * @param name Variable name to be retrieved
- * @return Data element with the variable name, null if not found
- */
+/* Retrieve the variable name from subsystems in this subsystem array. */
 template<class U, class T>
 const VQwHardwareChannel* MQwPublishable<U,T>::ReturnInternalValue(const TString& name) const
 {
@@ -72,12 +63,7 @@ const VQwHardwareChannel* MQwPublishable<U,T>::ReturnInternalValue(const TString
   return 0;
 }
 
-/**
- * Retrieve the variable name from subsystems in this subsystem array
- * @param name Variable name to be retrieved
- * @param value (return) Data element with the variable name
- * @return True if the variable was found, false if not found
- */
+/* Retrieve the variable into provided value pointer. */
 template<class U, class T>
 Bool_t MQwPublishable<U,T>::ReturnInternalValue(const TString& name, VQwHardwareChannel* value) const
 {
@@ -101,14 +87,7 @@ Bool_t MQwPublishable<U,T>::ReturnInternalValue(const TString& name, VQwHardware
   return foundit;
 }
 
-/**
- * Publish the value name with description from a subsystem in this array
- * @param name Name of the variable
- * @param desc Description of the variable
- * @param subsys Subsystem that contains the variable
- * @param element Data element that contains the variable
- * @return True if the variable could be published, false if not published
- */
+/* Publish the value name with description from a subsystem in this array. */
 template<class U, class T>
 Bool_t MQwPublishable<U,T>::PublishInternalValue(
     const TString name,
@@ -127,11 +106,7 @@ Bool_t MQwPublishable<U,T>::PublishInternalValue(
   return kTRUE;
 }
 
-/**
- * Try to publish an internal variable matching the submitted name
- * @param device_name Name of the desired published variable
- * @return True if the variable could be published, false if not published
- */
+/* Try to publish an internal variable matching the submitted name. */
 template<class U, class T>
 Bool_t MQwPublishable<U,T>::PublishByRequest(TString device_name)
 {
@@ -161,9 +136,7 @@ Bool_t MQwPublishable<U,T>::PublishByRequest(TString device_name)
 }
 
 
-/**
- * List the published values and description in this subsystem array
- */
+/* List the published values and description in this subsystem array. */
 template<class U, class T>
 void MQwPublishable<U,T>::ListPublishedValues() const
 {
@@ -177,13 +150,7 @@ void MQwPublishable<U,T>::ListPublishedValues() const
 
 
 
-/**
- * Get the value corresponding to some variable name from a different
- * data array.
- * @param name Name of the desired variable
- * @param value Pointer to the value to be filled by the call
- * @return True if the variable was found, false if not found
- */
+/* Get the value corresponding to a variable name from a different data array. */
 template<class U, class T>
 Bool_t MQwPublishable_child<U,T>::RequestExternalValue(const TString& name, VQwHardwareChannel* value) const  {
   if (fParent != 0) {
