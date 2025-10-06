@@ -1672,7 +1672,7 @@ Int_t QwBeamLine::ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_
 //*****************************************************************//
 /** Publish selected device channels according to the map file. */
 Bool_t QwBeamLine::PublishInternalValues() const
-
+{
   // Publish variables
   Bool_t status = kTRUE;
   
@@ -1724,7 +1724,7 @@ Bool_t QwBeamLine::PublishInternalValues() const
 //*****************************************************************//
 /** Publish a device channel on-demand by inferred property suffix. */
 Bool_t QwBeamLine::PublishByRequest(TString device_name)
-
+{
   Bool_t status = kFALSE;
   const VQwHardwareChannel* tmp_channel = 0;
 
@@ -1783,7 +1783,7 @@ Bool_t QwBeamLine::PublishByRequest(TString device_name)
 //*****************************************************************//
 /** Clear current-event state for all managed devices. */
 void QwBeamLine::ClearEventData()
-
+{
   for(size_t i=0;i<fClock.size();i++)
     fClock[i].get()->ClearEventData();
   for(size_t i=0;i<fStripline.size();i++)
@@ -1811,7 +1811,7 @@ void QwBeamLine::ClearEventData()
 //*****************************************************************//
 /** Lookup the element index for a given device type and name. */
 Int_t QwBeamLine::GetDetectorIndex( EQwBeamInstrumentType type_id, TString name) const
-
+{
   Bool_t ldebug=kFALSE;
   Int_t result=-1;
   if(ldebug) {
@@ -2067,7 +2067,7 @@ QwEnergyCalculator* QwBeamLine::GetEnergyCalculator(const TString name){
 //*****************************************************************//
 /** Const overload: find a BPMStripline by name. */
 const VQwBPM* QwBeamLine::GetBPMStripline(const TString name) const
-
+{
   return const_cast<QwBeamLine*>(this)->GetBPMStripline(name);
 }
 
