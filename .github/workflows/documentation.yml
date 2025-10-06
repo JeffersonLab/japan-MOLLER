@@ -76,6 +76,7 @@ jobs:
           echo "This may take several minutes for large codebases..."
           set -o pipefail
           doxygen Doxyfile 2>&1 | tee doxygen_output.log
+          set +o pipefail
           echo "Documentation generation completed!"
           echo "::endgroup::"
           
@@ -95,10 +96,6 @@ jobs:
             echo "✅ HTML documentation generated successfully"
             echo "Files generated: $(find Doxygen/html -name "*.html" | wc -l) HTML files"
             ls -la Doxygen/html/ | head -10
-          elif [ -d "html" ]; then
-            echo "✅ HTML documentation found in root html/ directory"
-            echo "Files generated: $(find html -name "*.html" | wc -l) HTML files"
-            ls -la html/ | head -10
           else
             echo "❌ HTML documentation not found"
             echo "Available directories:"
