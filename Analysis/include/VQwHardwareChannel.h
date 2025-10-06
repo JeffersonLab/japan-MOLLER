@@ -32,23 +32,63 @@ class QwErrDBInterface;
 /**
  * \class VQwHardwareChannel
  * \ingroup QwAnalysis
- * \brief Abstract base for concrete hardware channels (single physical readout)
+ * \brief Abstract base for concrete hardware channels implementing dual-operator pattern
  *
- * This class provides common services for channel-like data elements that
- * represent a single hardware readout (e.g., one ADC channel). It builds on
- * VQwDataElement by adding channel-specific concepts such as subelements,
- * calibration, per-event cuts, error flag handling, and running sums.
+ * This class extends VQwDataElement to provide common services for hardware
+ * channel implementations that represent single physical readouts (ADC channels,
+ * scalers, etc.). It enforces the dual-operator architectural pattern at the
+ * channel level and provides infrastructure for calibration, cuts, and statistics.
  *
- * Design notes:
- * - Implements the dual-operator pattern described in the framework docs:
- *   derived classes define type-specific operators (e.g., QwVQWK_Channel& +=)
- *   and also override polymorphic variants (VQwHardwareChannel& +=) that
- *   delegate via dynamic_cast to the type-specific implementation.
- * - Provides utilities to manage histogram/tree/ntuple construction for
- *   channel data, to accumulate running statistics, and to apply single-event
- *   cuts and burp-failure checks.
- * - Derived classes must implement the value accessors for subelements and
- *   all arithmetic and processing hooks (ProcessEvent, ApplyHWChecks, etc.).
+ * \par Dual-Operator Pattern Implementation:
+ * VQwHardwareChannel inherits the dual-operator requirement from VQwDataElement
+ * and adds channel-specific enforcement. Derived classes must implement:
+ *
+ * **Required Operator Pairs:**
+ * - `QwVQWK_Channel& operator+=(const QwVQWK_Channel&)` (type-specific)
+ * - `VQwHardwareChannel& operator+=(const VQwHardwareChannel&)` (polymorphic)
+ *
+ * **Polymorphic Delegation Pattern:**
+ * \code
+ * VQwHardwareChannel& QwVQWK_Channel::operator+=(const VQwHardwareChannel& source) {
+ *   const QwVQWK_Channel* tmpptr = dynamic_cast<const QwVQWK_Channel*>(&source);
+ *   if (tmpptr != NULL) {
+ *     *this += *tmpptr;  // Calls type-specific version
+ *   } else {
+ *     throw std::invalid_argument("Type mismatch in operator+=");
+ *   }
+ *   return *this;
+ * }
+ * \endcode
+ *
+ * \par Assignment + Operators Pattern:
+ * Sum/Difference methods follow the canonical pattern:
+ * \code
+ * void Sum(const QwVQWK_Channel& value1, const QwVQWK_Channel& value2) {
+ *   *this = value1;      // Uses derived class assignment operator
+ *   *this += value2;     // Uses type-specific operator+=
+ * }
+ * \endcode
+ *
+ * \par Channel Infrastructure:
+ * - **Calibration**: Pedestal subtraction and gain application
+ * - **Event Cuts**: Single-event limits with error flag propagation
+ * - **Statistics**: Running sums with error mask support
+ * - **Hardware Checks**: Burp detection and error counting
+ * - **Subelements**: Support for multi-element channels
+ *
+ * \par Representative Example:
+ * QwVQWK_Channel provides the canonical implementation demonstrating:
+ * - Complete dual-operator pattern with proper delegation
+ * - Six-word VQWK data processing (blocks 0-5)
+ * - Pedestal/calibration application
+ * - Single-event cuts and error propagation
+ * - Histogram and tree branch construction
+ *
+ * \par Error Handling Strategy:
+ * - Type mismatches in operators throw std::invalid_argument
+ * - Hardware errors set device-specific error codes
+ * - Event cuts use configurable upper/lower limits
+ * - Burp detection compares against reference channels
  */
 class VQwHardwareChannel: public VQwDataElement {
 /****************************************************************//**
