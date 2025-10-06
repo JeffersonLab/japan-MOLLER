@@ -66,11 +66,11 @@ class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneab
  public:
   /// Constructor with name
   QwIntegratedRaster(const TString& name)
-  : VQwSubsystem(name),VQwSubsystemParity(name)
+  : VQwSubsystemParity(name)
   { };
   /// Copy constructor
   QwIntegratedRaster(const QwIntegratedRaster& source)
-  : VQwSubsystem(source),VQwSubsystemParity(source),
+  : VQwSubsystemParity(source),
     fIntegratedRasterChannel(source.fIntegratedRasterChannel)
   { }
   /// Virtual destructor

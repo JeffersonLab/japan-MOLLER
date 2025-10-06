@@ -28,7 +28,7 @@ class QwScaler: public VQwSubsystemParity, public MQwSubsystemCloneable<QwScaler
     QwScaler(const TString& name);
     /// Copy constructor
     QwScaler(const QwScaler& source)
-    : VQwSubsystem(source),VQwSubsystemParity(source)
+    : VQwSubsystemParity(source)
     {
       fScaler.resize(source.fScaler.size());
       for (size_t i = 0; i < fScaler.size(); i++) {

@@ -75,11 +75,11 @@ class QwMollerDetector:
 
     /// Constructor with name
     QwMollerDetector(const TString& name)
-    : VQwSubsystem(name), VQwSubsystemParity(name)
+    : VQwSubsystemParity(name)
     { };
     /// Copy constructor
     QwMollerDetector(const QwMollerDetector& source)
-    : VQwSubsystem(source),VQwSubsystemParity(source),
+    : VQwSubsystemParity(source),
       fSTR7200_Channel(source.fSTR7200_Channel)
     { }
     /// Virtual destructor

@@ -53,7 +53,6 @@ class QwParameterFile;
  *   node [shape=box, fontname=Helvetica, fontsize=10];
  *   VQwSubsystem [ label="VQwSubsystem" URL="\ref VQwSubsystem"];
  *   VQwSubsystemParity [ label="VQwSubsystemParity" URL="\ref VQwSubsystemParity"];
- *   VQwSubsystemTracking [ label="VQwSubsystemTracking" URL="\ref VQwSubsystemTracking"];
  *   VQwSubsystem -> VQwSubsystemParity;
  *   VQwSubsystem -> VQwSubsystemTracking;
  * }
@@ -62,7 +61,7 @@ class QwParameterFile;
  * This will define the interfaces used in communicating with the
  * CODA routines.
  */
-class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, public MQwPublishable_child<QwSubsystemArray,VQwSubsystem> {
+class VQwSubsystem: public VQwSubsystemCloneable, public MQwHistograms, public MQwPublishable_child<QwSubsystemArray,VQwSubsystem> {
 
  public:
 

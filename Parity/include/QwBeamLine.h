@@ -44,11 +44,11 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
  public:
   /// Constructor with name
   QwBeamLine(const TString& name)
-  : VQwSubsystem(name),VQwSubsystemParity(name)
+  : VQwSubsystemParity(name)
   { };
   /// Copy constructor
   QwBeamLine(const QwBeamLine& source)
-  : VQwSubsystem(source),VQwSubsystemParity(source),
+  : VQwSubsystemParity(source),
     fQPD(source.fQPD),
     fLinearArray(source.fLinearArray),
     fCavity(source.fCavity),

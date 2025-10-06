@@ -33,7 +33,7 @@ void QwScaler::ProcessOptions(QwOptions &/*options*/)
  * Constructor
  */
 QwScaler::QwScaler(const TString& name)
-: VQwSubsystem(name),VQwSubsystemParity(name)
+: VQwSubsystemParity(name)
 {
   // Nothing, really
 }

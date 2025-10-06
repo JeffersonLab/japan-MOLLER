@@ -26,7 +26,7 @@ class QwRootFile;
 class QwPromptSummary;
 class QwDataHandlerArray;
 
-class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublishable_child<QwDataHandlerArray,VQwDataHandler> {
+class VQwDataHandler:  public VQwDataHandlerCloneable, public MQwPublishable_child<QwDataHandlerArray,VQwDataHandler> {
 
   public:
   

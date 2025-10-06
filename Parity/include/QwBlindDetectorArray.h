@@ -26,7 +26,6 @@ class QwBlindDetectorArrayID;
 
 class QwBlindDetectorArray: 
  public VQwDetectorArray, 
- virtual public VQwSubsystemParity,
  public MQwSubsystemCloneable<QwBlindDetectorArray>{
 
   /******************************************************************
@@ -46,12 +45,12 @@ class QwBlindDetectorArray:
   /// Constructor with name
 
   QwBlindDetectorArray(const TString& name)
-  : VQwSubsystem(name), VQwSubsystemParity(name), VQwDetectorArray(name) {};
+  : VQwDetectorArray(name) {};
 
 
   /// Copy constructor
   QwBlindDetectorArray(const QwBlindDetectorArray& source)
-  : VQwSubsystem(source),VQwSubsystemParity(source), VQwDetectorArray(source){};
+  : VQwDetectorArray(source){};
 
 
   /// Virtual destructor
