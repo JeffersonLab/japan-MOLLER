@@ -165,7 +165,7 @@ jobs:
               SANITIZER_OPTIONS="-DUSE_UBSAN=ON"
               echo "Building with UndefinedBehaviorSanitizer enabled"
             elif [[ "${{ matrix.sanitizer }}" == "asan+ubsan" ]]; then
-              CMAKE_OPTIONS="-DUSE_ASAN=ON -DUSE_UBSAN=ON"
+              SANITIZER_OPTIONS="-DUSE_ASAN=ON -DUSE_UBSAN=ON"
               echo "Building with both AddressSanitizer and UndefinedBehaviorSanitizer enabled"
             else
               echo "Building without sanitizers"
