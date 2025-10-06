@@ -11,6 +11,14 @@
 // Parent Class
 #include "VQwDataHandler.h"
 
+/**
+ * \class QwExtractor
+ * \ingroup QwAnalysis_BL
+ * \brief Data handler that extracts values into output trees/files
+ *
+ * Connects to a source subsystem array and publishes selected values
+ * (event-level) to ROOT trees for downstream analysis.
+ */
 class QwExtractor:public VQwDataHandler, public MQwDataHandlerCloneable<QwExtractor>
 {
  public:

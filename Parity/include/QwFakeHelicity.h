@@ -16,6 +16,14 @@
 
 #include "QwHelicity.h"
 
+/**
+ * \class QwFakeHelicity
+ * \ingroup QwAnalysis_BL
+ * \brief Helicity source that generates a reproducible sequence from seeds
+ *
+ * Used for testing and simulations when real helicity decoding is not
+ * available. Inherits the helicity interface and overrides event handling.
+ */
 class QwFakeHelicity: public QwHelicity {
  public:
   QwFakeHelicity(TString region_tmp):VQwSubsystem(region_tmp),QwHelicity(region_tmp),fMinPatternPhase(1)

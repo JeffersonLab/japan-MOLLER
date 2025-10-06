@@ -37,6 +37,11 @@ class QwBeamMod;
 /*****************************************************************
 *  Class:
 ******************************************************************/
+/**
+ * \class QwModChannelID
+ * \ingroup QwAnalysis_BL
+ * \brief Mapping information for beam modulation channels
+ */
 class QwModChannelID
 {
  public:
@@ -79,6 +84,14 @@ class QwModChannelID
 /*****************************************************************
 *  Class:
 ******************************************************************/
+/**
+ * \class QwBeamMod
+ * \ingroup QwAnalysis_BL
+ * \brief Subsystem for beam modulation studies and FFB handling
+ *
+ * Decodes modulation ramp and pattern words, maintains channels affected
+ * by modulation, and computes relevant summaries for regression.
+ */
 class QwBeamMod: public VQwSubsystemParity, public MQwSubsystemCloneable<QwBeamMod> {
 
  private:

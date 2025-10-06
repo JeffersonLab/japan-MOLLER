@@ -21,8 +21,15 @@
 
 #include "QwParameterFile.h"
 #include "QwOptions.h"
-///
-/// \ingroup QwAnalysis
+/**
+ * \class QwHistogramHelper
+ * \ingroup QwAnalysis
+ * \brief Utility class for histogram creation and management
+ *
+ * Provides helper functions for creating, configuring, and managing
+ * ROOT histograms with consistent naming and binning conventions
+ * throughout the analysis framework.
+ */
 class QwHistogramHelper{
  public:
   QwHistogramHelper(): fDEBUG(kFALSE) { fHistParams.clear(); };

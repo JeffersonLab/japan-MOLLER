@@ -10,6 +10,15 @@
 
 #include "VQwSystem.h"
 
+/**
+ * \class VQwAnalyzer
+ * \ingroup QwAnalysis
+ * \brief Abstract base class for analyzer implementations
+ *
+ * Provides the basic interface for analysis modules that process
+ * events or data structures. Derived classes implement specific
+ * analysis algorithms.
+ */
 class VQwAnalyzer : public VQwSystem {
 
   private:

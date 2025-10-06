@@ -29,6 +29,11 @@
 #include "QwVQWK_Channel.h"
 #include "QwScaler_Channel.h"
 
+/**
+ * \class QwMollerChannelID
+ * \ingroup QwMoller
+ * \brief Mapping info for Moller detector channels
+ */
 class QwMollerChannelID
 {
   public:
@@ -60,6 +65,11 @@ class QwMollerChannelID
 
 };
 
+/**
+ * \class QwMollerDetector
+ * \ingroup QwMoller
+ * \brief Subsystem for analyzing Moller detector readout
+ */
 class QwMollerDetector:
   public VQwSubsystemParity,
   public MQwSubsystemCloneable<QwMollerDetector> {

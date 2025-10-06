@@ -2,7 +2,7 @@
 
  \file QwMockDataGenerator.cc
 
- \brief Parity mock data generator, test code
+ \brief Parity mock data generator
 
 *//*-------------------------------------------------------------------------*/
 

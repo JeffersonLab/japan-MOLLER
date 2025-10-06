@@ -18,6 +18,14 @@
 #include <fstream>
 #include "QwSubsystemArrayParity.h"
 
+/**
+ * \class QwEventRing
+ * \ingroup QwAnalysis_BL
+ * \brief Ring buffer of subsystem snapshots for burp/stability handling
+ *
+ * Maintains a sliding window of events to compute running averages,
+ * handle beam trips with holdoff, and apply burp cuts over extents.
+ */
 class QwEventRing {
 
 /******************************************************************

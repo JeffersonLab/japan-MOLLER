@@ -29,15 +29,16 @@
 class QwDBInterface;
 #endif // __USE_DATABASE__
 
-/*****************************************************************
-*  Class:
-*  \brief QwClock is a standard clock with the calibration factor
-*  representing the frequency of this clock.
-*
-*  Other channels may use this clock to normalize their units with
-*  time. Initially designed for Scalers, but could be used by
-*  other hardware elements.
-******************************************************************/
+/**
+ * \class QwClock
+ * \ingroup QwAnalysis_BL
+ * \brief Standard clock channel with calibration representing frequency
+ *
+ * Provides timing and normalization support for subsystems that need an
+ * external clock. The calibration factor encodes the clock frequency.
+ * Implements specialized polymorphic dispatch for burp-failure checks
+ * via the VQwClock base as per the dual-operator pattern.
+ */
 template<typename T>
 class QwClock : public VQwClock {
 /////

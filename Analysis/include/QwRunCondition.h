@@ -19,6 +19,15 @@
 #include "TObjString.h"
 #include "TTimeStamp.h"
 
+/**
+ * \class QwRunCondition
+ * \ingroup QwAnalysis
+ * \brief Run condition and quality management
+ *
+ * Manages run-level conditions including run quality flags,
+ * beam conditions, and other run-specific parameters used
+ * for data quality assessment and analysis filtering.
+ */
 class QwRunCondition
 {
 

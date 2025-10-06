@@ -33,6 +33,14 @@
 class QwDBInterface;
 #endif // __USE_DATABASE__
 
+/**
+ * \class QwEnergyCalculator
+ * \ingroup QwAnalysis_BL
+ * \brief Computes beam energy change from BPM information
+ *
+ * Uses measured angles and dispersive positions to estimate relative
+ * beam energy variations; exposes a single hardware-like channel.
+ */
 class QwEnergyCalculator : public VQwDataElement{
   /******************************************************************
    *  Class:QwEnergyCalculator

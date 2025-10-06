@@ -31,9 +31,11 @@ class QwErrDBInterface;
 /*****************************************************************
 *  Class:
 ******************************************************************/
-///
-/// \ingroup QwAnalysis_BL
-
+/**
+ * \class QwQPD
+ * \ingroup QwAnalysis_BL
+ * \brief Quadrant photodiode BPM computing X/Y and effective charge
+ */
 class QwQPD : public VQwBPM {
 
  public:

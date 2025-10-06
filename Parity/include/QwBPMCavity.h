@@ -28,9 +28,14 @@ class QwErrDBInterface;
 /*****************************************************************
 *  Class:
 ******************************************************************/
-///
-/// \ingroup QwAnalysis_BL
-
+/**
+ * \class QwBPMCavity
+ * \ingroup QwAnalysis_BL
+ * \brief Cavity-style BPM using VQWK channels
+ *
+ * Provides X/Y position and effective charge from cavity readouts, with
+ * utilities for cuts, histograms, and tree/NTuple output.
+ */
 class QwBPMCavity : public VQwBPM {
   template <typename TT> friend class QwCombinedBPM;
   friend class QwEnergyCalculator;

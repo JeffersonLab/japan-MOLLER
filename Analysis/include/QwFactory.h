@@ -158,7 +158,14 @@ class QwDataElementFactory: public QwFactory<VQwDataElement,dataelement_t> { };
 
 
 
-/// Polymorphic copy constructor virtual base class
+/**
+ * \class VQwCloneable
+ * \ingroup QwAnalysis
+ * \brief Virtual base providing polymorphic copy construction
+ *
+ * Template base class that enables runtime cloning of derived objects
+ * through a common interface. Part of the factory pattern implementation.
+ */
 template <class base_t>
 class VQwCloneable {
 
@@ -192,8 +199,15 @@ class VQwCloneable {
 }; // class VQwCloneable
 
 
-/// Polymorphic copy construction by curiously recurring template pattern (mix-in)
-/// We have lost covariancy: clone will have the base type, not the derived type...
+/**
+ * \class MQwCloneable
+ * \ingroup QwAnalysis
+ * \brief Mix-in template for concrete cloneable types
+ *
+ * Implements the curiously recurring template pattern to provide
+ * concrete clone functionality for specific derived types.
+ * Enables factory-based object creation and copying.
+ */
 template <class base_t, class type_t>
 class MQwCloneable: virtual public VQwCloneable<base_t> {
 

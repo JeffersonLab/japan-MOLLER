@@ -24,12 +24,15 @@
 class QwDBInterface;
 class QwErrDBInterface;
 
-/*****************************************************************
-*  Class:
-******************************************************************/
-///
-/// \ingroup QwAnalysis_BL
-
+/**
+ * \class QwLinearDiodeArray
+ * \ingroup QwAnalysis_BL
+ * \brief Linear diode array beam position monitor implementation
+ *
+ * Implements beam position monitoring using a linear array of photodiodes.
+ * Provides position calculation from diode array readouts with calibration
+ * and error handling for linear array detectors.
+ */
 class QwLinearDiodeArray : public VQwBPM {
 
  public:

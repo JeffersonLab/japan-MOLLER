@@ -234,8 +234,15 @@ inline QwHelicityMap CreateHelicityMap()
 static const QwHelicityMap kMapHelicity = CreateHelicityMap();
 
 
-///
-/// \ingroup QwAnalysis
+/**
+ * \class QwDetectorID
+ * \ingroup QwAnalysis
+ * \brief Detector identification structure for tracking system components
+ *
+ * Encapsulates the complete identification of a detector element including
+ * region, package, octant, plane, direction, and element number. Used
+ * throughout the tracking system for detector mapping and data organization.
+ */
 class QwDetectorID
 {
  public:
@@ -279,8 +286,15 @@ class QwDetectorID
 };
 
 
-///
-/// \ingroup QwAnalysis
+/**
+ * \class QwDelayLineID
+ * \ingroup QwAnalysis
+ * \brief Identification structure for delay line detector components
+ *
+ * Specifies the location of delay line elements using backplane number,
+ * line number, and side identification. Used for delay line detector
+ * mapping and data processing.
+ */
 class QwDelayLineID{
  public:
  QwDelayLineID():fBackPlane(-1),fLineNumber(-1),fSide(-1){};

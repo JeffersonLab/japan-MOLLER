@@ -30,6 +30,15 @@ using std::string;
 class QwParityDB;
 
 
+/**
+ * \class QwEPICSEvent
+ * \ingroup QwAnalysis
+ * \brief EPICS slow controls data management
+ *
+ * Handles EPICS slow controls data including beam parameters, magnet
+ * settings, and other experimental conditions. Provides storage,
+ * retrieval, and database interface for slow controls information.
+ */
 class QwEPICSEvent
 {
  public:

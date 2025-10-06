@@ -19,8 +19,15 @@
 
 
 
-///
-/// \ingroup QwTracking
+/**
+ * \class QwPMT_Channel
+ * \ingroup QwTracking
+ * \brief PMT channel data element for photomultiplier tube readout
+ *
+ * Handles data from photomultiplier tube channels including raw values,
+ * calibration, and basic data element operations for PMT-based detectors
+ * in the tracking system.
+ */
 class QwPMT_Channel: public VQwDataElement {
   /******************************************************************
    *  Class: QwPMT_Channel
