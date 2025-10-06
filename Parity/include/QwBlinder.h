@@ -232,6 +232,7 @@ class QwBlinder {
     Int_t fIHWPPolarity_firstread;
     Int_t fIHWPPolarity;
     Bool_t fSpinDirectionForced;
+    /** \brief Set the current target blindability status. */
     void SetTargetBlindability(EQwBlinderStatus status);
     void SetWienState(EQwWienMode wienmode);
     void SetIHWPPolarity(Int_t ihwppolarity);
