@@ -33,7 +33,7 @@ jobs:
 
     - name: Build and push Docker image for releases
       if: github.event_name == 'release' && github.event.action == 'published'
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: .
         file: ./Dockerfile
@@ -45,7 +45,7 @@ jobs:
 
     - name: Build and push Docker image for nightly build
       if: github.event_name == 'schedule'
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: .
         file: ./Dockerfile
@@ -56,7 +56,7 @@ jobs:
 
     - name: Build and push Docker image for manual trigger on main branch
       if: github.event_name == 'workflow_dispatch'
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: .
         file: ./Dockerfile
