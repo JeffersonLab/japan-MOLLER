@@ -8,6 +8,7 @@
  * behavior unchanged.
  */
 
+#include "QwEventRing.h"
 
 /** Constructor: initialize ring buffer with specified size and options. */
 QwEventRing::QwEventRing(QwOptions &options, QwSubsystemArrayParity &event)
