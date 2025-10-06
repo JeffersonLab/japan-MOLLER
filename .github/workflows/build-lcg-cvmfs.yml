@@ -12,6 +12,7 @@ concurrency:
 
 jobs:
   linux:
+    name: ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.compiler }} (${{ matrix.sanitizer }})
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -24,18 +25,44 @@ jobs:
             compiler: "gcc13"
             opt: "opt"
             cxxflags: "-g -pg"
+            sanitizer: "none"
           - release: "LCG_107"
             arch: "x86_64"
             os: "el9"
             compiler: "clang16"
             opt: "opt"
             cxxflags: ""
+            sanitizer: "none"
           - release: "LCG_107"
             arch: "x86_64"
             os: "el9"
             compiler: "gcc14"
             opt: "opt"
             cxxflags: ""
+            sanitizer: "none"
+          # AddressSanitizer builds (using clang for better ASAN support)
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "clang16"
+            opt: "opt"
+            cxxflags: ""
+            sanitizer: "asan"
+          # UndefinedBehaviorSanitizer builds
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "clang16"
+            opt: "opt"
+            cxxflags: ""
+            sanitizer: "ubsan"
+          # Combined AddressSanitizer + UndefinedBehaviorSanitizer builds
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "clang16"
+            opt: "opt"
+            sanitizer: "asan+ubsan"
     steps:
       - uses: actions/checkout@v5
       - uses: cvmfs-contrib/github-action-cvmfs@v5
@@ -84,8 +111,23 @@ jobs:
             echo "::endgroup::"
 
             echo "::group::Compilation"
-            # Build the project with ccache
-            cmake -Bbuild -S. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS="${{ matrix.cxxflags }}"
+            # Build the project with ccache and optional sanitizers
+            CMAKE_OPTIONS=""
+            if [[ "${{ matrix.sanitizer }}" == "asan" ]]; then
+              CMAKE_OPTIONS="-DUSE_ASAN=ON"
+              echo "Building with AddressSanitizer enabled"
+            elif [[ "${{ matrix.sanitizer }}" == "ubsan" ]]; then
+              CMAKE_OPTIONS="-DUSE_UBSAN=ON"
+              echo "Building with UndefinedBehaviorSanitizer enabled"
+            elif [[ "${{ matrix.sanitizer }}" == "asan+ubsan" ]]; then
+              CMAKE_OPTIONS="-DUSE_ASAN=ON -DUSE_UBSAN=ON"
+              echo "Building with both AddressSanitizer and UndefinedBehaviorSanitizer enabled"
+            else
+              echo "Building without sanitizers"
+            fi
+            cmake -Bbuild -S. ${CMAKE_OPTIONS} \
+              -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+              -DCMAKE_CXX_FLAGS="${{ matrix.cxxflags }}"
             cmake --build build -j$(nproc)
             echo "::endgroup::"
             
@@ -96,6 +138,21 @@ jobs:
             echo "::group::Mock data generation"
             # Run the mock data generator and analysis as described in README
             source SetupFiles/SET_ME_UP.bash
+            
+            # Set up sanitizer environment if enabled
+            if [[ "${{ matrix.sanitizer }}" == "asan" ]]; then
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=0:malloc_context_size=20:detect_leaks=1:verify_asan_link_order=0:detect_stack_use_after_return=1:detect_odr_violation=1:new_delete_type_mismatch=0:intercept_tls_get_addr=0:log_path=./asan"
+              export LSAN_OPTIONS="suppressions=${{ github.workspace }}/.github/lsan.supp"
+              echo "AddressSanitizer configured with leak detection and suppressions"
+            elif [[ "${{ matrix.sanitizer }}" == "ubsan" ]]; then
+              export UBSAN_OPTIONS="abort_on_error=0:print_stacktrace=1:silence_unsigned_overflow=1:report_error_type=1:suppressions=${{ github.workspace }}/.github/ubsan.supp:log_path=./ubsan"
+              echo "UndefinedBehaviorSanitizer configured with suppressions"
+            elif [[ "${{ matrix.sanitizer }}" == "asan+ubsan" ]]; then
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=0:malloc_context_size=20:detect_leaks=1:verify_asan_link_order=0:detect_stack_use_after_return=1:detect_odr_violation=1:new_delete_type_mismatch=0:intercept_tls_get_addr=0:log_path=./asan"
+              export LSAN_OPTIONS="suppressions=${{ github.workspace }}/.github/lsan.supp"
+              export UBSAN_OPTIONS="abort_on_error=0:print_stacktrace=1:silence_unsigned_overflow=1:report_error_type=1:suppressions=${{ github.workspace }}/.github/ubsan.supp:log_path=./ubsan"
+              echo "Both AddressSanitizer and UndefinedBehaviorSanitizer configured with suppressions"
+            fi
             
             # Generate mock data
             /usr/bin/time -v \
@@ -119,7 +176,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
           path: build.tar.zst
           retention-days: 7
           if-no-files-found: error
@@ -127,7 +184,7 @@ jobs:
       - name: Upload profiling analysis
         uses: actions/upload-artifact@v4
         with:
-          name: gprof-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: gprof-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
           path: |
             qwparity.txt
           retention-days: 7
@@ -136,16 +193,34 @@ jobs:
       - name: Upload prompt summary
         uses: actions/upload-artifact@v4
         with:
-          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
           path: |
             summary_*.txt
           retention-days: 7
           if-no-files-found: error
 
+      - name: Ensure sanitizer logs are readable
+        if: always() && (matrix.sanitizer == 'asan' || matrix.sanitizer == 'ubsan' || matrix.sanitizer == 'asan+ubsan')
+        run: |
+          shopt -s nullglob
+          ls -al ./asan* ./ubsan* 2>/dev/null || echo "No sanitizer logs found"
+          sudo chmod +r ./asan* ./ubsan* 2>/dev/null || echo "No logs to change permissions for"
+          cat ./asan* ./ubsan*
+            
+      - name: Upload sanitizer logs
+        if: always() && (matrix.sanitizer == 'asan' || matrix.sanitizer == 'ubsan' || matrix.sanitizer == 'asan+ubsan')
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanitizer-logs-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
+          path: |
+            ./asan*
+            ./ubsan*
+          if-no-files-found: ignore
+
       - name: Upload regression alias definitions
         uses: actions/upload-artifact@v4
         with:
-          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
           path: |
             *regalias*.C
           retention-days: 7
@@ -157,7 +232,7 @@ jobs:
         with:
           workflow: build-lcg-cvmfs.yml
           branch: ${{ github.event.pull_request.base.ref }}
-          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
           path: ./target
           if_no_artifact_found: warn
 
@@ -167,14 +242,14 @@ jobs:
         with:
           workflow: build-lcg-cvmfs.yml
           branch: ${{ github.event.pull_request.base.ref }}
-          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
           path: ./target
           if_no_artifact_found: warn
 
       - name: Compare artifacts
         if: github.event_name == 'pull_request'
         run: |
-          echo "Comparing artifacts for ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}"
+          echo "Comparing artifacts for ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}"
 
           # Check if target artifacts exist
           if [ ! -d "./target" ] || [ -z "$(ls -A ./target)" ]; then
@@ -243,13 +318,14 @@ jobs:
             compiler: "gcc14"
             opt: "opt"
             cxxflags: ""
+            sanitizer: "none"
     steps:
       - uses: actions/checkout@v3
 
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
           path: .
       - name: Uncompress build artifact
         run: tar -xaf build.tar.zst
