@@ -44,7 +44,6 @@ jobs:
     - name: Clean up any existing documentation
       run: |
         rm -rf Doxygen/html/ || true
-        rm -rf html/ || true
         echo "Cleaned up existing documentation directories"
 
     - name: Generate documentation in LCG environment
