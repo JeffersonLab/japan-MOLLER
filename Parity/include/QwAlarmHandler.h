@@ -40,25 +40,31 @@ class QwAlarmHandler:public VQwDataHandler, public MQwDataHandlerCloneable<QwAla
 
     /// \brief Connect to Channels (event only)
     //Int_t ConnectChannels(QwSubsystemArrayParity& event);
-  /**
-   * \brief Connect to channels across subsystem arrays
-   *
-   * Establish pointers to input variables (yield/asym/diff) and prepare
-   * output channels for alarm evaluation.
-   *
-   * \param yield Subsystem array containing per-MPS yields
-   * \param asym  Subsystem array containing asymmetries
-   * \param diff  Subsystem array containing differences
-   * \return 0 on success, non-zero on failure
-   */
-  Int_t ConnectChannels(
-    QwSubsystemArrayParity& yield,
-    QwSubsystemArrayParity& asym,
-    QwSubsystemArrayParity& diff);
+    /**
+    * \brief Connect to channels across subsystem arrays
+    *
+    * Establish pointers to input variables (yield/asym/diff) and prepare
+    * output channels for alarm evaluation.
+    *
+    * \param yield Subsystem array containing per-MPS yields
+    * \param asym  Subsystem array containing asymmetries
+    * \param diff  Subsystem array containing differences
+    * \return 0 on success, non-zero on failure
+    */
+    Int_t ConnectChannels(
+      QwSubsystemArrayParity& yield,
+      QwSubsystemArrayParity& asym,
+      QwSubsystemArrayParity& diff);
     
 
-  /** Process one event: update alarm states and outputs. */
-  void ProcessData();
+    /**
+    * \brief Process a single event: update alarm states and outputs.
+    *
+    * Checks all configured alarm conditions against current inputs and updates
+    * any associated status channels. May periodically write an overview CSV
+    * if enabled by configuration.
+    */
+    void ProcessData();
     void CheckAlarms();
     void UpdateAlarmFile();
     void ParseConfigFile(QwParameterFile&);
