@@ -52,15 +52,9 @@ jobs:
       with:
         release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
         run: |
-          echo "::group::Install Documentation Dependencies"
-          # Install Doxygen and dependencies in LCG environment
-          PYTHONHOME="" PYTHONPATH="" dnf install -y doxygen graphviz plantuml texlive-latex-base texlive-latex-extra
-          echo "::endgroup::"
-          
           echo "::group::Verify Installation"
           doxygen --version
           dot -V
-          latex --version || echo "LaTeX installed for formula support"
           echo "::endgroup::"
           
           echo "::group::Update Doxygen Configuration"
