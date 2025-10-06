@@ -112,7 +112,7 @@ jobs:
 
             echo "::group::Compilation"
             # Build the project with ccache and optional sanitizers
-            CMAKE_OPTIONS="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS='${{ matrix.cxxflags }}'"
+            CMAKE_OPTIONS=""
             if [[ "${{ matrix.sanitizer }}" == "asan" ]]; then
               CMAKE_OPTIONS="-DUSE_ASAN=ON"
               echo "Building with AddressSanitizer enabled"
@@ -125,7 +125,9 @@ jobs:
             else
               echo "Building without sanitizers"
             fi
-            cmake -Bbuild -S. ${CMAKE_OPTIONS}
+            cmake -Bbuild -S. ${CMAKE_OPTIONS} \
+              -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+              -DCMAKE_CXX_FLAGS="${{ matrix.cxxflags }}"
             cmake --build build -j$(nproc)
             echo "::endgroup::"
             
