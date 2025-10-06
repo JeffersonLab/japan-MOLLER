@@ -922,10 +922,21 @@ void VQwScaler_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *valu
 }
 
 
+/**
+ * Clone the channel, saving the specified data.
+ * @param datatosave Data to save flag
+ * @return Pointer to the cloned hardware channel
+ */
 template<>
 VQwHardwareChannel* QwScaler_Channel<0x00ffffff,0>::Clone(VQwDataElement::EDataToSave datatosave) const{
   return new QwScaler_Channel(*this, datatosave);
 };
+
+/**
+ * Clone the channel, saving the specified data.
+ * @param datatosave Data to save flag
+ * @return Pointer to the cloned hardware channel
+ */
 template<>
 VQwHardwareChannel* QwScaler_Channel<0xffffffff,0>::Clone(VQwDataElement::EDataToSave datatosave) const{
   return new QwScaler_Channel(*this, datatosave);
