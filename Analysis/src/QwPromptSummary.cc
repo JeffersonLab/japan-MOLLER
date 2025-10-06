@@ -8,6 +8,13 @@
 
 #include "QwPromptSummary.h"
 
+// System headers
+#include <iostream>
+#include <fstream>
+
+// ROOT headers
+#include "TMath.h"
+
 //
 //
 //
