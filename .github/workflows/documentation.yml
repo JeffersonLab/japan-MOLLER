@@ -73,6 +73,7 @@ jobs:
       run: |
         echo "Generating Doxygen documentation..."
         echo "This may take several minutes for large codebases..."
+        set -o pipefail
         doxygen Doxyfile 2>&1 | tee doxygen_output.log
         echo "Documentation generation completed!"
         
