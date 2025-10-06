@@ -7,6 +7,8 @@
  * concrete channel types. Documentation-only edits; runtime behavior unchanged.
  */
 
+#include "VQwHardwareChannel.h"
+
 // Qweak database headers
 #include "QwLog.h"
 #ifdef __USE_DATABASE__
