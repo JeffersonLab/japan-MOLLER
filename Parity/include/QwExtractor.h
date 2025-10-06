@@ -31,9 +31,11 @@ class QwExtractor:public VQwDataHandler, public MQwDataHandlerCloneable<QwExtrac
     ~QwExtractor() override;
 
     Int_t LoadChannelMap(const std::string& mapfile) override;
-    /// \brief Connect to Channels (event-only extraction)
-    /// \param event Subsystem array with per-MPS yields
-    /// \return 0 on success, non-zero on failure
+    /**
+     * \brief Connect to channels (event-only extraction).
+     * @param event Subsystem array providing per-MPS yields to extract.
+     * @return 0 on success; non-zero on failure.
+     */
     Int_t ConnectChannels(QwSubsystemArrayParity& event) override;
     void ConstructTreeBranches(
         QwRootFile *treerootfile,

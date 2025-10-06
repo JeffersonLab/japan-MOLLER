@@ -76,12 +76,11 @@ QwDataHandlerArray::~QwDataHandlerArray()
   // nothing
 }
 
-/**
- * Load data handlers from a map file into this array
- * @tparam T Type of detector container (QwHelicityPattern or QwSubsystemArrayParity)
- * @param mapfile Parameter file defining handlers
- * @param detectors Detector container used to resolve channels
- * @param run Run label used for handler configuration
+/*
+ * Load data handlers from a map file into this array.
+ * Implementation note: detailed @tparam/@param documentation lives with the
+ * declaration in the header to avoid duplication in Doxygen. See
+ * QwDataHandlerArray::LoadDataHandlersFromParameterFile in the header file.
  */
 template<class T>
 void QwDataHandlerArray::LoadDataHandlersFromParameterFile(

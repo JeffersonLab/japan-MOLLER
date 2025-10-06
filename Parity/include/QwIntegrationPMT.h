@@ -60,6 +60,13 @@ class QwIntegrationPMT : public VQwDataElement{
 
   void    LoadChannelParameters(QwParameterFile &paramfile) override{};
 
+  /**
+   * Decode the Moller ADC block for this PMT from an event buffer.
+   * @param buffer                    Event buffer pointer.
+   * @param word_position_in_buffer   Current word index in buffer.
+   * @param subelement                Block index within the PMT (default 0).
+   * @return 0 on success; negative on error.
+   */
   Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0) override;
 
   void  InitializeChannel(TString name, TString datatosave);

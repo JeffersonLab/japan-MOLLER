@@ -35,7 +35,6 @@ class QwErrDBInterface;
 /// \ingroup QwAnalysis_ADC
 ///
 /// \ingroup QwAnalysis_BL
-
 /**
  * \class QwVQWK_Channel
  * \ingroup QwAnalysis_ADC
@@ -186,6 +185,12 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   void Scale(Double_t Offset) override;
 
 
+  /**
+   * Accumulate event values into the running sum with optional scaling.
+   * @param value     Source channel to accumulate from.
+   * @param count     Event count scaling (0 means use value.fGoodEventCount).
+   * @param ErrorMask Bit mask of error flags to exclude when accumulating.
+   */
   void AccumulateRunningSum(const QwVQWK_Channel& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
   void AccumulateRunningSum(const VQwHardwareChannel *value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override{
     const QwVQWK_Channel *tmp_ptr = dynamic_cast<const QwVQWK_Channel*>(value);

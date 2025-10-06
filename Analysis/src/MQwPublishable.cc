@@ -200,13 +200,7 @@ const VQwHardwareChannel* MQwPublishable_child<U,T>::RequestExternalPointer(cons
   return NULL;
 }
 
-/**
- * Publish a variable name to the subsystem array
- * @param name Name of the variable
- * @param desc Description of the variable
- * @param element Channel to publish
- * @return True if the variable could be published, false otherwise
- */
+// Publish a variable name to the subsystem array. See header for parameters.
 template<class U, class T>
 Bool_t MQwPublishable_child<U,T>::PublishInternalValue(
 						       const TString name,

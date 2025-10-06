@@ -57,6 +57,7 @@ class QwAlarmHandler:public VQwDataHandler, public MQwDataHandlerCloneable<QwAla
       QwSubsystemArrayParity& diff) override;
     
 
+    /** Process one event: update alarm states and outputs. */
     void ProcessData() override;
     void CheckAlarms();
     void UpdateAlarmFile();

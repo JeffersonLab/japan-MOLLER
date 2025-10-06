@@ -1543,13 +1543,8 @@ void QwVQWK_Channel::DivideBy(const QwVQWK_Channel &denom)
  * We use the formulas provided there for the calculation of the first and
  * second moments (i.e. average and variance).
  */
-// Accumulate the running moments M1 and M2
-/**
- * Accumulate running sum with optional error-mask filtering.
- * @param value Source channel to accumulate from
- * @param count Event count scaling
- * @param ErrorMask Bit mask of error flags to exclude when accumulating
- */
+// Accumulate the running moments M1 and M2.
+// See header for parameter and return documentation.
 void QwVQWK_Channel::AccumulateRunningSum(const QwVQWK_Channel& value, Int_t count, Int_t ErrorMask)
 {
   /*

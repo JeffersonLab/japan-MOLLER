@@ -13,11 +13,7 @@
 
 #include "TError.h"
 
-/**
- * @brief Creates PHYS Event EVIO Header
- * @param ROCList List of ROCS
- * @return PHYS Event Header
- */
+// Creates PHYS Event EVIO Header. See header for parameters and return value.
 std::vector<UInt_t> Coda3EventDecoder::EncodePHYSEventHeader(std::vector<ROCID_t> &ROCList)
 {
 	int localtime = (int) time(0);
@@ -51,13 +47,7 @@ std::vector<UInt_t> Coda3EventDecoder::EncodePHYSEventHeader(std::vector<ROCID_t
 }
 
 
-/**
- * @brief Creates Prestart Event EVIO Header
- * @param buffer Array of size 5 to store the Prestart Header
- * @param runnumber Number of the run
- * @param runtype Run type
- * @param localtime Event time
- */
+// Creates PRESTART Event EVIO Header. See header for parameters.
 void Coda3EventDecoder::EncodePrestartEventHeader(int* buffer, int runnumber, int runtype, int localtime)
 {
 	buffer[0] = 4; // Prestart event length
@@ -68,12 +58,7 @@ void Coda3EventDecoder::EncodePrestartEventHeader(int* buffer, int runnumber, in
   ProcessPrestart(localtime, runnumber, runtype);
 }
 
-/**
- * @brief Creates Go Event EVIO Header
- * @param buffer Array of size 5 to store the Go Header
- * @param eventcount Number of events 
- * @param localtime Event time
- */
+// Creates GO Event EVIO Header. See header for parameters.
 void Coda3EventDecoder::EncodeGoEventHeader(int* buffer, int eventcount, int localtime)
 {
 	buffer[0] = 4; // Go event length
@@ -84,12 +69,7 @@ void Coda3EventDecoder::EncodeGoEventHeader(int* buffer, int eventcount, int loc
   ProcessGo(localtime, eventcount);
 }
 
-/**
- * @brief Creates Pause Event EVIO Header
- * @param buffer Array of size 5 to store the Go Header
- * @param eventcount Number of events 
- * @param localtime Event time
- */
+// Creates PAUSE Event EVIO Header. See header for parameters.
 void Coda3EventDecoder::EncodePauseEventHeader(int* buffer, int eventcount, int localtime)
 {
 	buffer[0] = 4; // Pause event length
@@ -100,12 +80,7 @@ void Coda3EventDecoder::EncodePauseEventHeader(int* buffer, int eventcount, int 
   ProcessPause(localtime, eventcount);
 }
 
-/**
- * @brief Creates End Event EVIO Header
- * @param buffer Array of size 5 to store the End Header
- * @param eventcount Number of events 
- * @param localtime Event time
- */
+// Creates END Event EVIO Header. See header for parameters.
 void Coda3EventDecoder::EncodeEndEventHeader(int* buffer, int eventcount, int localtime)
 {
 	buffer[0] = 4; // End event length
@@ -116,11 +91,7 @@ void Coda3EventDecoder::EncodeEndEventHeader(int* buffer, int eventcount, int lo
   ProcessEnd(localtime, eventcount);
 }
 
-/**
- * @brief Determines if a buffer contains a PHYS event, Control Event, or some other event
- * @param buffer Event buffer to decode
- * @return CODA_OK
- */
+// Determine if a buffer contains a PHYS event, control event, or other event.
 Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 {
 	fPhysicsEventFlag = kFALSE;
@@ -193,13 +164,7 @@ Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 	return CODA_OK;
 }
 
-/**
- * @brief Determines the Event Type (PHYS, CONTROL, OTHER) 
- * @param tag Event Tag used to determine the Event Type
- * @return 1: PHYS Event
- * @return Control Keyword: Control Event
- * @return tag: Other (User) Event
- */
+// Determine the Event Type (PHYS, CONTROL, OTHER). See header for details.
 UInt_t Coda3EventDecoder::InterpretBankTag( UInt_t tag )
 {
 	UInt_t evtyp{};
@@ -238,10 +203,7 @@ UInt_t Coda3EventDecoder::InterpretBankTag( UInt_t tag )
 }
 
 
-/**
- * @brief Prints User events (non-PHYS and non-Control)
- * @param buffer Event buffer
- */
+// Print user events (non-PHYS and non-control). See header for details.
 void Coda3EventDecoder::printUserEvent(const UInt_t *buffer)
 {
 	// checks of ET-inserted data
@@ -296,10 +258,7 @@ void Coda3EventDecoder::printUserEvent(const UInt_t *buffer)
 	}
 }
 
-/**
- * @brief Prints Internal Decoder Information
- * @param out Output buffer to use to dispay internal Decoder Information. Can be QwMessage, QwVerbose, QwWarning, or QwErrror.
- */
+// Print internal decoder information. See header for details.
 void Coda3EventDecoder::PrintDecoderInfo(QwLog& out)
 {
 
@@ -310,12 +269,7 @@ void Coda3EventDecoder::PrintDecoderInfo(QwLog& out)
 		<< QwLog::endl;
 }
 
-/**
- * @brief Decodes the TI Trigger Bank for PHYS Events
- * @param buffer PHYS Event buffer
- * @return HED_OK: Success
- * @return HED_ERROR: Error
- */
+// Decode the TI Trigger Bank for PHYS events. See header for parameters and returns.
 Int_t Coda3EventDecoder::trigBankDecode( UInt_t* buffer)
 {
 	const char* const HERE = "Coda3EventDecoder::trigBankDecode";
@@ -338,13 +292,7 @@ Int_t Coda3EventDecoder::trigBankDecode( UInt_t* buffer)
 }
 
 
-/**
- * @brief Extracts TI Header information
- * @param evbuffer Event Buffer
- * @param blkSize Block Size (JAPAN expects a Block Size of 1)
- * @param tsroc Roc Number of the Trigger supervisor.
- * @return Total length of the trigger bank
- */
+// Extract TI header information. See header for parameters and returns.
 uint32_t Coda3EventDecoder::TBOBJ::Fill( const uint32_t* evbuffer,
 		uint32_t blkSize, uint32_t tsroc )
 {
@@ -422,12 +370,7 @@ uint32_t Coda3EventDecoder::TBOBJ::Fill( const uint32_t* evbuffer,
 	return len;
 }
 
-/**
- * @brief Loads the Trigger Bank information of an event
- * @param i Event whose information will be loaded
- * @return -1: Error
- * @return 1: Success
- */
+// Load trigger bank information of an event. See header for parameters and returns.
 Int_t Coda3EventDecoder::LoadTrigBankInfo( UInt_t i )
 {
 	// CODA3: Load tsEvType, evt_time, and trigger_bits for i-th event
@@ -462,10 +405,7 @@ Int_t Coda3EventDecoder::LoadTrigBankInfo( UInt_t i )
 }
 
 
-/**
- * @brief Displays warning given a trigBank Error flag
- * @param flag Trig Bank Error
- */
+// Display warning given a trigBank error flag. See header for details.
 void Coda3EventDecoder::trigBankErrorHandler( Int_t flag )
 {
 	switch(flag){
