@@ -439,6 +439,10 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db)
     fSeed   = "Default seed, No database specified";
     return 0;
   }
+  if (! db->AllowsReadAccess()){
+    QwDebug << "QwBlinder::ReadSeed(): Database access is turned off.  Don't update the blinder." << QwLog::endl;
+    return 0;
+  }
 
   // Try to connect to the database
   try {
