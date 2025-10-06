@@ -40,26 +40,77 @@ class QwParameterFile;
 /**
  *  \class   VQwSubsystem
  *  \ingroup QwAnalysis
- *  \brief   The pure virtual base class of all subsystems
+ *  \brief   Base class for subsystems implementing container-delegation pattern
  *
- * Virtual base class for the classes containing the event-based
- * information from each tracking subsystem and the parity analysis.
- * The subclasses VQwSubsystemTracking and VQwSubsystemParity are base
- * classes for the classes containing the event-based information
- * from each tracking subsystem and parity analysis, respectively.
+ * VQwSubsystem serves as the foundation for all analysis subsystems and
+ * implements the container-delegation architectural pattern. Unlike individual
+ * data elements that use the dual-operator pattern, subsystems delegate
+ * arithmetic operations to their contained elements and avoid virtual operators.
+ *
+ * \par Container-Delegation Pattern:
+ * VQwSubsystem uses a fundamentally different approach from VQwDataElement:
+ *
+ * **Key Design Principles:**
+ * - **No virtual operators** in subsystem base classes
+ * - **Single operator versions**: Only type-specific operators needed
+ * - **Delegation to elements**: Operators iterate over contained objects
+ * - **Type safety via typeid**: Runtime type checking without inheritance conflicts
+ *
+ * \par Implementation Pattern:
+ * \code
+ * VQwSubsystem& operator+=(const VQwSubsystem& value) {
+ *   // Iterate over contained elements
+ *   for(size_t i=0; i<fElements.size(); i++) {
+ *     VQwDataElement* elem1 = this->GetElement(i);
+ *     VQwDataElement* elem2 = value.GetElement(i);
+ *     if (typeid(*elem1) == typeid(*elem2)) {
+ *       *elem1 += *elem2;  // Delegates to element operators
+ *     } else {
+ *       // Handle type mismatch
+ *     }
+ *   }
+ *   return *this;
+ * }
+ * \endcode
+ *
+ * \par Subsystem Architecture:
+ * - **CODA Integration**: ProcessEvBuffer(), ProcessConfigurationBuffer()
+ * - **Event Processing**: ProcessEvent(), ClearEventData()
+ * - **Data Management**: LoadChannelMap(), LoadInputParameters()
+ * - **Output Generation**: ConstructHistograms(), ConstructBranch()
+ * - **Factory Registration**: MQwSubsystemCloneable integration
+ *
+ * \par Specialized Abstract Bases:
+ * Some hierarchies introduce specialized bases between VQwSubsystem and
+ * concrete implementations (e.g., VQwBPM, VQwBCM, VQwClock) to enable
+ * polymorphic dispatch for specific detector types while maintaining
+ * the container-delegation pattern.
+ *
+ * \par Representative Example:
+ * QwBeamLine demonstrates the complete subsystem implementation:
+ * - Container management for BPMs, BCMs, and other beam devices
+ * - Type-safe delegation to heterogeneous element collections
+ * - CODA buffer processing with ROC/Bank mapping
+ * - Event-level processing and running statistics
+ * - Integration with QwSubsystemArrayParity via factory pattern
+ *
+ * \par Composition over Inheritance:
+ * The container-delegation pattern provides:
+ * - **Type safety**: Runtime checks without virtual operator conflicts
+ * - **Flexibility**: Support for heterogeneous element collections
+ * - **Performance**: Direct delegation without virtual dispatch overhead
+ * - **Maintainability**: Clear separation between container and element concerns
  *
  * \dot
  * digraph example {
  *   node [shape=box, fontname=Helvetica, fontsize=10];
- *   VQwSubsystem [ label="VQwSubsystem" URL="\ref VQwSubsystem"];
+ *   VQwSubsystem [ label="VQwSubsystem\n(container-delegation)" URL="\ref VQwSubsystem"];
  *   VQwSubsystemParity [ label="VQwSubsystemParity" URL="\ref VQwSubsystemParity"];
+ *   QwBeamLine [ label="QwBeamLine\n(canonical example)" URL="\ref QwBeamLine"];
  *   VQwSubsystem -> VQwSubsystemParity;
- *   VQwSubsystem -> VQwSubsystemTracking;
+ *   VQwSubsystemParity -> QwBeamLine;
  * }
  * \enddot
- *
- * This will define the interfaces used in communicating with the
- * CODA routines.
  */
 class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, public MQwPublishable_child<QwSubsystemArray,VQwSubsystem> {
 
