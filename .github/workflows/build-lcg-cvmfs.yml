@@ -119,7 +119,7 @@ jobs:
             echo "::group::Compilation with ccache"
             # Build the project with ccache and optional sanitizers
             # Note that postgresql fails in v0.65; see rbock/sqlpp11#623
-            CMAKE_OPTIONS="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS='${{ matrix.cxxflags }}'"
+            CMAKE_OPTIONS=""
             if [[ "${{ matrix.sanitizer }}" == "asan" ]]; then
               CMAKE_OPTIONS="-DUSE_ASAN=ON"
               echo "Building with AddressSanitizer enabled"
@@ -137,7 +137,9 @@ jobs:
               -DBUILD_MYSQL_CONNECTOR=ON \
               -DBUILD_POSTGRESQL_CONNECTOR=OFF \
               -DBUILD_SQLITE3_CONNECTOR=ON \
-              -DCMAKE_INSTALL_PREFIX=install
+              -DCMAKE_INSTALL_PREFIX=install \
+              -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+              -DCMAKE_CXX_FLAGS="${{ matrix.cxxflags }}"
             cmake --build build -j$(nproc) --target install
             echo "::endgroup::"
             
