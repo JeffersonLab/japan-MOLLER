@@ -72,7 +72,6 @@ public:
   void clear() {
     m_entries.clear();
     m_buffer.clear();
-    m_index_by_name.clear();
   }
 
   size_type size() const noexcept { return m_entries.size(); }
@@ -120,16 +119,6 @@ public:
   const T& value(size_type index) const {
     const auto& entry = m_entries.at(index);
     return *reinterpret_cast<const T*>(m_buffer.data() + entry.offset);
-  }
-
-  template <typename T>
-  T& value(const std::string& name, size_type start_index = 0) {
-    return value<T>(index_of(name, start_index));
-  }
-
-  template <typename T>
-  const T& value(const std::string& name, size_type start_index = 0) const {
-    return value<T>(index_of(name, start_index));
   }
 
   // Explicit SetValue overloads with type checking to prevent automatic conversions
@@ -197,51 +186,6 @@ public:
       throw std::invalid_argument("Type mismatch: entry type '" + std::string(1, entry.type) + "' cannot store long long value '" + entry.name + "'");
     }
     this->value<ULong64_t>(index) = val;
-  }
-
-  // Name-based overloads
-  void SetValue(const std::string& name, Double_t val, size_type start_index = 0) {
-    SetValue(index_of(name, start_index), val);
-  }
-
-  void SetValue(const std::string& name, Float_t val, size_type start_index = 0) {
-    SetValue(index_of(name, start_index), val);
-  }
-
-  void SetValue(const std::string& name, Int_t val, size_type start_index = 0) {
-    SetValue(index_of(name, start_index), val);
-  }
-
-  void SetValue(const std::string& name, Long64_t val, size_type start_index = 0) {
-    SetValue(index_of(name, start_index), val);
-  }
-
-  void SetValue(const std::string& name, Short_t val, size_type start_index = 0) {
-    SetValue(index_of(name, start_index), val);
-  }
-
-  void SetValue(const std::string& name, UInt_t val, size_type start_index = 0) {
-    SetValue(index_of(name, start_index), val);
-  }
-
-  void SetValue(const std::string& name, UShort_t val, size_type start_index = 0) {
-    SetValue(index_of(name, start_index), val);
-  }
-
-  void SetValue(const std::string& name, ULong64_t val, size_type start_index = 0) {
-    SetValue(index_of(name, start_index), val);
-  }
-
-  // Convenience function for type-converting assignment (use with caution)
-  template <typename T>
-  void SetValueWithConversion(size_type index, T input) {
-    const auto& entry = m_entries.at(index);
-    AssignValueWithConversion(entry, index, input);
-  }
-
-  template <typename T>
-  void SetValueWithConversion(const std::string& name, T input, size_type start_index = 0) {
-    SetValueWithConversion(index_of(name, start_index), input);
   }
 
   void* data() noexcept { return m_buffer.data(); }
