@@ -66,6 +66,12 @@ public:
 
   void reserve(size_type count) {
     m_entries.reserve(count);
+    m_buffer.reserve(sizeof(double)*count);
+  }
+
+  void shrink_to_fit() {
+    m_entries.shrink_to_fit();
+    m_buffer.shrink_to_fit();
   }
 
   void clear() {
@@ -269,6 +275,9 @@ public:
     const std::size_t entry_size = GetTypeSize(type);
     const std::size_t offset = AlignOffset(m_buffer.size());
 
+    if (offset > m_buffer.capacity()) {
+      throw std::out_of_range("QwRootTreeBranchVector::push_back() requires buffer resize beyond reserved capacity");
+    }
     if (offset > m_buffer.size()) {
       m_buffer.resize(offset, 0u);
     }
@@ -278,6 +287,9 @@ public:
     m_index_by_name[entry.name].push_back(m_entries.size() - 1);
 
     const std::size_t required = offset + entry_size;
+    if (required > m_buffer.capacity()) {
+      throw std::out_of_range("QwRootTreeBranchVector::push_back() requires buffer resize beyond reserved capacity");
+    }
     if (required > m_buffer.size()) {
       m_buffer.resize(required, 0u);
     }
