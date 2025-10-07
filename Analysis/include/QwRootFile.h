@@ -50,9 +50,9 @@ class QwRootTreeBranchVector {
 public:
   struct Entry {
     std::string name;
-    char type;
     std::size_t offset;
     std::size_t size;
+    char type;
   };
 
   using size_type = std::size_t;
@@ -268,7 +268,7 @@ public:
       m_buffer.resize(offset, 0u);
     }
 
-    Entry entry{name, type, offset, entry_size};
+    Entry entry{name, offset, entry_size, type};
     m_entries.push_back(entry);
     m_index_by_name[entry.name].push_back(m_entries.size() - 1);
 
