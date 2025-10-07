@@ -852,10 +852,6 @@ void  QwMollerADC_Channel::FillTreeVector(QwRootTreeBranchVector& values) const
         if (bSequence_number)
           values.SetValue(index++, this->fSequenceNumber);
       }
-
-  }
-  if (GetElementName() == "la42") {
-    QwMessage << values.Dump(fTreeArrayIndex, fTreeArrayIndex+fTreeArrayNumEntries) << QwLog::endl;
   }
 }
 
