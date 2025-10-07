@@ -82,36 +82,14 @@ public:
   size_type size() const noexcept { return m_entries.size(); }
   bool empty() const noexcept { return m_entries.empty(); }
 
-  const Entry& operator[](size_type index) const { return m_entries.at(index); }
-  Entry& operator[](size_type index) { return m_entries.at(index); }
-
-  const Entry& at(size_type index) const { return m_entries.at(index); }
-  Entry& at(size_type index) { return m_entries.at(index); }
-
-  const Entry& at(const std::string& name, size_type start_index = 0) const {
-    return m_entries.at(index_of(name, start_index));
+  template <typename T = uint8_t>
+  const T& operator[](size_type index) const {
+    return value<T>(index);
   }
 
-  Entry& at(const std::string& name, size_type start_index = 0) {
-    return m_entries.at(index_of(name, start_index));
-  }
-
-  size_type index_of(const std::string& name, size_type start_index = 0) const {
-    const auto iter = m_index_by_name.find(name);
-    if (iter == m_index_by_name.end()) {
-      throw std::out_of_range("Unknown entry name: " + name);
-    }
-    
-    // Use binary search to find first occurrence at or after start_index
-    // Since indices are stored in sorted order, we can use lower_bound
-    const auto& indices = iter->second;
-    auto it = std::lower_bound(indices.begin(), indices.end(), start_index);
-    
-    if (it == indices.end()) {
-      throw std::out_of_range("No entry named '" + name + "' found at or after index " + std::to_string(start_index));
-    }
-    
-    return *it;
+  template <typename T = uint8_t>
+  T& operator[](size_type index) {
+    return value<T>(index);
   }
 
   template <typename T>
@@ -228,7 +206,6 @@ public:
 
     Entry entry{name, offset, entry_size, type};
     m_entries.push_back(entry);
-    m_index_by_name[entry.name].push_back(m_entries.size() - 1);
 
     const std::size_t required = offset + entry_size;
     if (required > m_buffer.capacity()) {
@@ -268,10 +245,34 @@ public:
     std::ostringstream stream;
     stream << "QwRootTreeBranchVector: " << m_entries.size() << " entries, "
            << m_buffer.size() << " bytes\n";
-    end_index = (end_index == 0 || end_index > m_entries.size()) ? m_entries.size() : end_index;
+    size_t end_offset = (end_index == 0 || end_index > m_entries.size()) ?
+      m_buffer.size()
+      : m_entries[end_index - 1].offset + m_entries[end_index - 1].size;
+    stream << "QwRootTreeBranchVector: buffer at 0x" << std::hex << (void*) &m_buffer[0] << '\n';
+    stream << "QwRootTreeBranchVector: entries at 0x" << std::hex << (void*) &m_entries[0] << '\n';
+    for (size_t offset = m_entries[start_index].offset; offset < end_offset; offset += 4) {
+      stream << std::dec
+             << "  [" << offset << "] "
+             << std::hex
+             << " offset=0x" << offset 
+             << " (0x" << std::setw(4) << std::setfill('0')
+                       << offset - m_entries[start_index].offset << ")"
+             << " buff=";
+      // Little-endian
+      for (std::size_t byte = 0; byte < 4; ++byte) {
+        stream << std::hex << std::setw(2) << std::setfill('0')
+               << static_cast<unsigned int>(m_buffer[offset + byte])
+               << " ";
+      }
+      stream << '\n';
+    }
+    end_index = (end_index == 0 || end_index > m_entries.size()) ?
+      m_entries.size()
+      : end_index;
     for (size_type index = start_index; index < end_index; ++index) {
       const auto& entry = m_entries[index];
-      stream << "  [" << index << "] "
+      stream << std::dec
+             << "  [" << index << "] "
              << std::hex
              << " offset=0x" << entry.offset 
              << " (0x" << std::setw(4) << std::setfill('0')
@@ -320,32 +321,8 @@ private:
     return (offset + (alignment - 1u)) & ~(alignment - 1u);
   }
 
-  template <typename T>
-  void AssignValueWithConversion(const Entry& entry, size_type index, T input) {
-    switch (entry.type) {
-      case 'D':
-        value<double>(index) = static_cast<double>(input);
-        break;
-      case 'F':
-        value<float>(index) = static_cast<float>(input);
-        break;
-      case 'L':
-        value<long long>(index) = static_cast<long long>(input);
-        break;
-      case 'I':
-        value<int>(index) = static_cast<int>(input);
-        break;
-      case 'S':
-        value<short>(index) = static_cast<short>(input);
-        break;
-      default:
-        throw std::logic_error("Unhandled branch entry type");
-    }
-  }
-
   std::vector<Entry> m_entries;
   std::vector<std::uint8_t> m_buffer;
-  std::unordered_map<std::string, std::vector<size_type>> m_index_by_name;
 
   std::string FormatValue(const Entry& entry, size_type index) const {
     switch (entry.type) {
@@ -696,6 +673,9 @@ class QwRootNTuple {
                 << QwLog::endl;
         exit(-1);
       }
+
+      // Shrink memory reservation
+      fVector.shrink_to_fit();
     }
 
   public:
