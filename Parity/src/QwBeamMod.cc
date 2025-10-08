@@ -26,6 +26,7 @@
 #include "QwLog.h"
 #include "QwParameterFile.h"
 #include "QwHistogramHelper.h"
+#include "QwRootFile.h"
 #ifdef __USE_DATABASE__
 #define MYSQLPP_SSQLS_NO_STATICS
 #include "QwParitySSQLS.h"
@@ -799,7 +800,7 @@ void  QwBeamMod::FillHistograms()
 }
 
 
-void QwBeamMod::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values)
+void QwBeamMod::ConstructBranchAndVector(TTree *tree, TString & prefix, QwRootTreeBranchVector &values)
 {
   TString basename;
   
@@ -813,12 +814,12 @@ void QwBeamMod::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vec
     // 	  basename = fWord[i].fWordName;
     basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length());
     basename += fWord[i].fWordName;
-    values.push_back(0.0);
-    tree->Branch(basename, &(values.back()), basename+"/D");
+    values.push_back(basename.Data(), 'D');
+    tree->Branch(basename, &(values[fTreeArrayIndex + i]), values.LeafList(fTreeArrayIndex + i).c_str());
   }
 }
 
-void QwBeamMod::FillTreeVector(std::vector<Double_t> &values) const
+void QwBeamMod::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   //std::cout << "inside FillTreeVector"<< std::endl; 
   //std::cout << "fTreeArrayIndex: " << fTreeArrayIndex << std::endl;
@@ -829,8 +830,7 @@ void QwBeamMod::FillTreeVector(std::vector<Double_t> &values) const
     // fModChannel[i]->PrintValue();
   }
   for (size_t i = 0; i < fWord.size(); i++){
-    values[index++] = fWord[i].fValue;
-    //std::cout << fWord[i].fValue<< std::endl;
+    values.SetValue(index++, fWord[i].fValue);
   }
   //for (size_t i=0; i<values.size(); i++){
   //  std::cout << values[i] << " ";
@@ -840,7 +840,7 @@ void QwBeamMod::FillTreeVector(std::vector<Double_t> &values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void QwBeamMod::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void QwBeamMod::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   TString basename;
   
@@ -857,7 +857,7 @@ void QwBeamMod::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& mo
   }
 }
 
-void QwBeamMod::FillNTupleVector(std::vector<Double_t>& values) const
+void QwBeamMod::FillNTupleVector(QwRootTreeBranchVector &values) const
 {
   size_t index = fTreeArrayIndex;
   

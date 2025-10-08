@@ -321,7 +321,7 @@ void VQwDataHandler::ConstructTreeBranches(
 void VQwDataHandler::ConstructBranchAndVector(
     TTree *tree,
     TString& prefix,
-    std::vector<Double_t>& values)
+    QwRootTreeBranchVector &values)
 {
   for (size_t i = 0; i < fOutputVar.size(); ++i) {
     fOutputVar.at(i)->ConstructBranchAndVector(tree, prefix, values);
@@ -388,7 +388,7 @@ void VQwDataHandler::FillNTupleFields(QwRootFile *treerootfile)
  * Fill the tree vector
  * @param values Vector of values
  */
-void VQwDataHandler::FillTreeVector(std::vector<Double_t>& values) const
+void VQwDataHandler::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   // Fill the data element
   for (size_t i = 0; i < fOutputVar.size(); ++i) {
@@ -398,14 +398,14 @@ void VQwDataHandler::FillTreeVector(std::vector<Double_t>& values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void VQwDataHandler::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void VQwDataHandler::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   for (size_t i = 0; i < fOutputVar.size(); ++i) {
     fOutputVar.at(i)->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
   }
 }
 
-void VQwDataHandler::FillNTupleVector(std::vector<Double_t>& values) const
+void VQwDataHandler::FillNTupleVector(QwRootTreeBranchVector &values) const
 {
   // Fill the data element
   for (size_t i = 0; i < fOutputVar.size(); ++i) {

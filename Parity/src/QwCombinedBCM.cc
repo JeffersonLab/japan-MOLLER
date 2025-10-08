@@ -373,7 +373,7 @@ void  QwCombinedBCM<T>::FillHistograms()
 }
 
 template<typename T>
-void  QwCombinedBCM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwCombinedBCM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
@@ -417,7 +417,7 @@ void  QwCombinedBCM<T>::ConstructBranch(TTree *tree, TString &prefix, QwParamete
 
 
 template<typename T>
-void  QwCombinedBCM<T>::FillTreeVector(std::vector<Double_t> &values) const
+void  QwCombinedBCM<T>::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.

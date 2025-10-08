@@ -127,15 +127,15 @@ class QwMollerDetector:
     };
 
     using VQwSubsystem::ConstructBranchAndVector;
-    void ConstructBranchAndVector(TTree*, TString&, std::vector<double, std::allocator<double> >&);
+    void ConstructBranchAndVector(TTree*, TString&, QwRootTreeBranchVector&);
     void ConstructBranch(TTree *tree, TString& prefix) { };
     void ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file) { };
-    void FillTreeVector(std::vector<Double_t> &values) const;
+    void FillTreeVector(QwRootTreeBranchVector &values) const;
 
     // RNTuple methods
 #ifdef HAS_RNTUPLE_SUPPORT
-    void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
-    void FillNTupleVector(std::vector<Double_t>& values) const;
+    void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+    void FillNTupleVector(QwRootTreeBranchVector &values) const;
 #endif // HAS_RNTUPLE_SUPPORT
 
     Bool_t Compare(VQwSubsystem *source);

@@ -706,7 +706,7 @@ void  QwQPD::FillHistograms()
   return;
 }
 
-void  QwQPD::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwQPD::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing trees.
@@ -797,7 +797,7 @@ void  QwQPD::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modu
   return;
 }
 
-void  QwQPD::FillTreeVector(std::vector<Double_t> &values) const
+void  QwQPD::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()=="") {
     //  This channel is not used, so skip filling the tree.
@@ -818,7 +818,7 @@ void  QwQPD::FillTreeVector(std::vector<Double_t> &values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void  QwQPD::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void  QwQPD::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing.
@@ -844,7 +844,7 @@ void  QwQPD::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model
   return;
 }
 
-void  QwQPD::FillNTupleVector(std::vector<Double_t>& values) const
+void  QwQPD::FillNTupleVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()=="") {
     //  This channel is not used, so skip filling.

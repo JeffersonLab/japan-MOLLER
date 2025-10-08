@@ -182,12 +182,12 @@ public:
   void  ConstructHistograms(TDirectory *folder, TString &prefix);
   void  FillHistograms();
 
-  virtual void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) = 0;
-  virtual void  FillTreeVector(std::vector<Double_t> &values) const = 0;
+  virtual void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) = 0;
+  virtual void  FillTreeVector(QwRootTreeBranchVector &values) const = 0;
   void  ConstructBranch(TTree *tree, TString &prefix);
 #ifdef HAS_RNTUPLE_SUPPORT
-  virtual void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
-  virtual void  FillNTupleVector(std::vector<Double_t>& values) const = 0;
+  virtual void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
+  virtual void  FillNTupleVector(QwRootTreeBranchVector &values) const = 0;
 #endif // HAS_RNTUPLE_SUPPORT
 
 
@@ -277,11 +277,11 @@ class QwScaler_Channel: public VQwScaler_Channel
   void  EncodeEventData(std::vector<UInt_t> &buffer);
   Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t index = 0);
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values);
+  void  FillTreeVector(QwRootTreeBranchVector &values) const;
 #ifdef HAS_RNTUPLE_SUPPORT
-  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
-  void  FillNTupleVector(std::vector<Double_t>& values) const;
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+  void  FillNTupleVector(QwRootTreeBranchVector &values) const;
 #endif // HAS_RNTUPLE_SUPPORT
 
 

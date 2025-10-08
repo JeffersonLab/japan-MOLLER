@@ -230,9 +230,9 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   /// as pure virtual.
   // @{
   /// \brief Construct the branch and tree vector
-  virtual void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values) = 0;
+  virtual void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values) = 0;
   /// \brief Construct the branch and tree vector
-  virtual void ConstructBranchAndVector(TTree *tree, std::vector<Double_t>& values) {
+  virtual void ConstructBranchAndVector(TTree *tree, QwRootTreeBranchVector &values) {
     TString tmpstr("");
     ConstructBranchAndVector(tree,tmpstr,values);
   };
@@ -241,18 +241,18 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   /// \brief Construct the branch and tree vector based on the trim file
   virtual void ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file) = 0;
   /// \brief Fill the tree vector
-  virtual void FillTreeVector(std::vector<Double_t>& values) const = 0;
+  virtual void FillTreeVector(QwRootTreeBranchVector &values) const = 0;
   
 #ifdef HAS_RNTUPLE_SUPPORT
   /// \brief Construct the RNTuple fields and vector
-  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
+  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
   /// \brief Construct the RNTuple fields and vector  
-  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) {
+  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) {
     TString tmpstr("");
     ConstructNTupleAndVector(model, tmpstr, values, fieldPtrs);
   };
   /// \brief Fill the RNTuple vector
-  virtual void FillNTupleVector(std::vector<Double_t>& values) const = 0;
+  virtual void FillNTupleVector(QwRootTreeBranchVector &values) const = 0;
 #endif // HAS_RNTUPLE_SUPPORT
   // @}
 
