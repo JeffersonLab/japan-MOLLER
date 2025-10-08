@@ -34,7 +34,8 @@ QwSubsystemArray::QwSubsystemArray(QwOptions& options, CanContainFn myCanContain
  * @param source Source subsystem array
  */
 QwSubsystemArray::QwSubsystemArray(const QwSubsystemArray& source)
-: MQwPublishable(source),
+: std::vector<std::shared_ptr<VQwSubsystem>>(),
+  MQwPublishable(source),
   fTreeArrayIndex(source.fTreeArrayIndex),
   fCodaRunNumber(source.fCodaRunNumber),
   fCodaSegmentNumber(source.fCodaSegmentNumber),
