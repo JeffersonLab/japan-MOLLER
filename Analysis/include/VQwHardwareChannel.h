@@ -256,8 +256,6 @@ public:
     }
   };
 
-
-
 protected:
   UInt_t  fNumberOfDataWords; ///< Number of raw data words in this data element
   UInt_t  fNumberOfSubElements; ///< Number of subelements in this data element
@@ -287,9 +285,19 @@ protected:
 
   Double_t fBurpThreshold;
   Int_t fBurpCountdown;
-  Int_t fBurpHoldoff;
-
   //@}
+
+
+public:
+  /*! \name Global event cuts */
+  static void SetBurpHoldoff(Int_t holdoff) {
+    fBurpHoldoff = holdoff;
+  }
+
+protected:
+  // @{
+  static Int_t fBurpHoldoff;
+  // @}
 
 };   // class VQwHardwareChannel
 
