@@ -257,6 +257,15 @@ class QwScaler_Channel: public VQwScaler_Channel
     : VQwScaler_Channel(name,datatosave) { };
   QwScaler_Channel(const QwScaler_Channel& source, VQwDataElement::EDataToSave datatosave)
     : VQwScaler_Channel(source,datatosave) { };
+  virtual ~QwScaler_Channel() { };
+
+  QwScaler_Channel& operator=  (const QwScaler_Channel &value)
+  {
+    if (this != &value) {
+      VQwScaler_Channel::operator=(value);
+    }
+    return *this;
+  };
 
   using VQwScaler_Channel::CopyFrom;
   using VQwHardwareChannel::Clone;

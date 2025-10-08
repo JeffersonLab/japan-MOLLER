@@ -50,6 +50,8 @@ protected:
   VQwBCM(VQwDataElement& beamcurrent): fBeamCurrent_ref(beamcurrent) { };
   VQwBCM(VQwDataElement& beamcurrent, TString /*name*/): fBeamCurrent_ref(beamcurrent) { };
 
+  VQwBCM(const VQwBCM& source): VQwDataElement(source), fBeamCurrent_ref(source.fBeamCurrent_ref) { };
+
 public:
   virtual ~VQwBCM() { };
 
