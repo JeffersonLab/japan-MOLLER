@@ -235,7 +235,7 @@ class QwOptions {
         return fVariablesMap[key].as<T>();
       } else {
         QwError << "Variable " << key << " unknown" << QwLog::endl;
-        return 0;
+        return {};
       }
     }
     /// \brief Get a list of templated values
