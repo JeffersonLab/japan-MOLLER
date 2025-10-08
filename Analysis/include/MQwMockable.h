@@ -8,12 +8,12 @@
 #ifndef __MQWMOCKABLE__
 #define __MQWMOCKABLE__
 
-// Boost math library for random number generation
-#include "boost/random.hpp"
+// System headers
+#include <functional>
+#include <random>
 
-//jpan: Mersenne Twistor: A 623-diminsionally equidistributed
-//uniform pseudorandom number generator
-#include "TRandom3.h"
+// ROOT headers
+#include <Rtypes.h>
 
 class QwParameterFile;
 
@@ -90,12 +90,11 @@ public:
   /// \name Parity mock data generation
   // @{
   /// Internal randomness generator
-  static boost::mt19937 fRandomnessGenerator;
+  static std::mt19937 fRandomnessGenerator;
   /// Internal normal probability distribution
-  static boost::normal_distribution<double> fNormalDistribution;
+  static std::normal_distribution<double> fNormalDistribution;
   /// Internal normal random variable
-  static boost::variate_generator
-    < boost::mt19937, boost::normal_distribution<double> > fNormalRandomVariable;
+  static std::function<double()> fNormalRandomVariable;
   /// Flag to use an externally provided normal random variable
   bool fUseExternalRandomVariable;
   /// Externally provided normal random variable
