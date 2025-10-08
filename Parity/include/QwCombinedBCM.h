@@ -6,10 +6,9 @@
 #pragma once
 
 // System headers
+#include <functional>
+#include <random>
 #include <vector>
-
-// Boost math library for random number generation
-#include "boost/random.hpp"
 
 // ROOT headers
 #include <TTree.h>
@@ -126,12 +125,11 @@ class QwCombinedBCM : public QwBCM<T> {
   /// \name Parity mock data generation
   // @{
   /// Internal randomness generator
-  static boost::mt19937 fRandomnessGenerator;
+  static std::mt19937 fRandomnessGenerator;
   /// Internal normal probability distribution
-  static boost::random::uniform_real_distribution<double> fDistribution;
+  static std::uniform_real_distribution<double> fDistribution;
   /// Internal normal random variable
-  static boost::variate_generator
-    < boost::mt19937, boost::random::uniform_real_distribution<double> > fRandomVariable;
+  static std::function<double()> fRandomVariable;
 public: 
   static void SetTripSeed(uint seedval);
   // @}
