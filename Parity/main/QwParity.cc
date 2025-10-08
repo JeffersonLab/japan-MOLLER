@@ -328,7 +328,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 	  helicitypattern.UpdateBlinder(epicsevent);
 	
 	  treerootfile->FillTreeBranches(epicsevent);
-	  treerootfile->FillTree("slow");
+	  treerootfile->FillTree("slow"_hash);
 	  
 	  // Fill RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
@@ -370,7 +370,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 
 	  // Fill mps tree branches
 	  treerootfile->FillTreeBranches(ringoutput);
-	  treerootfile->FillTree("evt");
+	  treerootfile->FillTree("evt"_hash);
 
 	  // Fill RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
@@ -402,7 +402,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 	    treerootfile->FillTreeBranches(helicitypattern.GetPairYield());
 	    treerootfile->FillTreeBranches(helicitypattern.GetPairAsymmetry());
 	    treerootfile->FillTreeBranches(helicitypattern.GetPairDifference());
-	    treerootfile->FillTree("pr");
+	    treerootfile->FillTree("pr"_hash);
 	    
 	    // Fill pair RNTuples if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
@@ -425,7 +425,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 
               // Fill helicity tree branches
               treerootfile->FillTreeBranches(helicitypattern);
-              treerootfile->FillTree("mul");
+              treerootfile->FillTree("mul"_hash);
 
               // Fill helicity RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
@@ -474,7 +474,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 
                 // Fill burst tree branches
                 burstrootfile->FillTreeBranches(patternsum_per_burst);
-                burstrootfile->FillTree("burst");
+                burstrootfile->FillTree("burst"_hash);
 
                 // Fill burst RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
@@ -548,7 +548,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 
       // Fill burst tree branches
       burstrootfile->FillTreeBranches(patternsum_per_burst);
-      burstrootfile->FillTree("burst");
+      burstrootfile->FillTree("burst"_hash);
     
       // Fill burst RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
@@ -596,7 +596,7 @@ Int_t main(Int_t argc, Char_t* argv[])
       eventsum.PrintValue();
     }
     treerootfile->FillTreeBranches(eventsum);
-    treerootfile->FillTree("evts");
+    treerootfile->FillTree("evts"_hash);
 
     // Fill running sum RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
@@ -610,7 +610,7 @@ Int_t main(Int_t argc, Char_t* argv[])
       patternsum.PrintValue();
     }
     treerootfile->FillTreeBranches(patternsum);
-    treerootfile->FillTree("muls");
+    treerootfile->FillTree("muls"_hash);
 
     // Fill pattern sum RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
@@ -624,7 +624,7 @@ Int_t main(Int_t argc, Char_t* argv[])
       burstsum.PrintValue();
     }
     burstrootfile->FillTreeBranches(burstsum);
-    burstrootfile->FillTree("bursts");
+    burstrootfile->FillTree("bursts"_hash);
 
     // Fill burst sum RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT

@@ -38,6 +38,71 @@ using std::type_info;
 #define BRANCH_VECTOR_MAX_SIZE 25000
 
 /**
+ * Compile-time string hash using FNV-1a algorithm
+ * Provides O(1) tree lookups instead of O(log n) or string hash overhead
+ */
+namespace QwTreeHash {
+  constexpr uint32_t FNV_OFFSET_BASIS = 2166136261u;
+  constexpr uint32_t FNV_PRIME = 16777619u;
+  
+  constexpr uint32_t hash_string(const char* str, uint32_t hash = FNV_OFFSET_BASIS) {
+    return (*str == '\0') ? hash : hash_string(str + 1, (hash ^ *str) * FNV_PRIME);
+  }
+}
+
+/**
+ * String-hash pair for efficient tree lookups while preserving string info
+ */
+struct QwTreeId {
+  const char* name;
+  uint32_t hash;
+  
+  constexpr QwTreeId(const char* str) 
+    : name(str), hash(QwTreeHash::hash_string(str)) {}
+  
+  // Allow implicit conversion to string for compatibility
+  operator std::string() const { return std::string(name); }
+  const char* c_str() const { return name; }
+  
+  // Hash-based comparison for fast lookups
+  bool operator==(const QwTreeId& other) const {
+    return hash == other.hash;
+  }
+  
+  bool operator==(uint32_t other_hash) const {
+    return hash == other_hash;
+  }
+};
+
+/**
+ * User-defined literal for compile-time tree ID creation
+ * Usage: auto tree_id = "evt"_tree;
+ */
+constexpr QwTreeId operator"" _tree(const char* str, std::size_t) {
+  return QwTreeId(str);
+}
+
+/**
+ * User-defined literal for compile-time hash creation
+ * Usage: uint32_t hash = "evt"_hash;
+ */
+constexpr uint32_t operator"" _hash(const char* str, std::size_t) {
+  return QwTreeHash::hash_string(str);
+}
+
+/**
+ * Hash specialization for QwTreeId to work with unordered_map
+ */
+namespace std {
+  template<>
+  struct hash<QwTreeId> {
+    constexpr size_t operator()(const QwTreeId& id) const noexcept {
+      return static_cast<size_t>(id.hash);
+    }
+  };
+}
+
+/**
  *  \class QwRootTreeBranchVector
  *  \ingroup QwAnalysis
  *  \brief A helper class to manage a vector of branch entries for ROOT trees
@@ -859,6 +924,9 @@ class QwRootFile {
     /// \brief Fill the tree branches of a generic object by tree name
     template < class T >
     void FillTreeBranches(const std::string& name, const T& object);
+    /// \brief Fill the tree branches of a generic object by compile-time hash (hot path optimization)
+    template < class T >
+    void FillTreeBranches(uint32_t hash, const T& object);
     /// \brief Fill the tree branches of a generic object by type only
     template < class T >
     void FillTreeBranches(const T& object);
@@ -947,12 +1015,19 @@ class QwRootFile {
       if (! HasTreeByName(name)) return 0;
       else return fTreeByName[name].front()->Fill();
     }
+    
+    /// Fill the tree with compile-time hash (hot path optimization)
+    Int_t FillTree(uint32_t hash) {
+      auto hash_it = fTreeByHash.find(hash);
+      if (hash_it == fTreeByHash.end()) return 0;
+      else return hash_it->second.front()->Fill();
+    }
 
     /// Fill all registered trees
     Int_t FillTrees() {
       // Loop over all registered tree names
       Int_t retval = 0;
-      std::map< const std::string, std::vector<QwRootTree*> >::iterator iter;
+      std::unordered_map< std::string, std::vector<QwRootTree*> >::iterator iter;
       for (iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++) {
         retval += iter->second.front()->Fill();
       }
@@ -972,7 +1047,7 @@ class QwRootFile {
     /// Fill all registered RNTuples
     void FillNTuples() {
       // Loop over all registered RNTuple names
-      std::map< const std::string, std::vector<QwRootNTuple*> >::iterator iter;
+      std::unordered_map< std::string, std::vector<QwRootNTuple*> >::iterator iter;
       for (iter = fNTupleByName.begin(); iter != fNTupleByName.end(); iter++) {
         iter->second.front()->Fill();
       }
@@ -983,7 +1058,7 @@ class QwRootFile {
     void PrintTrees() const {
       QwMessage << "Trees: " << QwLog::endl;
       // Loop over all registered tree names
-      std::map< const std::string, std::vector<QwRootTree*> >::const_iterator iter;
+      std::unordered_map< std::string, std::vector<QwRootTree*> >::const_iterator iter;
       for (iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++) {
         QwMessage << iter->first << ": " << iter->second.size()
                   << " objects registered" << QwLog::endl;
@@ -997,8 +1072,8 @@ class QwRootFile {
     /// Print registered histogram directories
     void PrintDirs() const {
       QwMessage << "Dirs: " << QwLog::endl;
-      // Loop ove rall registered directories
-      std::map< const std::string, TDirectory* >::const_iterator iter;
+      // Loop over all registered directories
+      std::unordered_map< std::string, TDirectory* >::const_iterator iter;
       for (iter = fDirsByName.begin(); iter != fDirsByName.end(); iter++) {
         QwMessage << iter->first << QwLog::endl;
       }
@@ -1175,16 +1250,17 @@ class QwRootFile {
   private:
 
     /// Tree names, addresses, and types
-    std::map< const std::string, std::vector<QwRootTree*> > fTreeByName;
-    std::map< const void*      , std::vector<QwRootTree*> > fTreeByAddr;
-    std::map< const std::type_index , std::vector<QwRootTree*> > fTreeByType;
+    std::unordered_map< std::string, std::vector<QwRootTree*> > fTreeByName;
+    std::unordered_map< uint32_t, std::vector<QwRootTree*> > fTreeByHash;  // Fast hash-based lookup
+    std::unordered_map< const void*      , std::vector<QwRootTree*> > fTreeByAddr;
+    std::unordered_map< std::type_index , std::vector<QwRootTree*> > fTreeByType;
     // ... Are type_index objects really unique? Let's hope so.
 
 #ifdef HAS_RNTUPLE_SUPPORT
     /// RNTuple names, addresses, and types
-    std::map< const std::string, std::vector<QwRootNTuple*> > fNTupleByName;
-    std::map< const void*      , std::vector<QwRootNTuple*> > fNTupleByAddr;
-    std::map< const std::type_index , std::vector<QwRootNTuple*> > fNTupleByType;
+    std::unordered_map< std::string, std::vector<QwRootNTuple*> > fNTupleByName;
+    std::unordered_map< const void*      , std::vector<QwRootNTuple*> > fNTupleByAddr;
+    std::unordered_map< std::type_index , std::vector<QwRootNTuple*> > fNTupleByType;
 
     /// RNTuple support flag
     Bool_t fEnableRNTuples;
@@ -1233,8 +1309,8 @@ class QwRootFile {
 #endif // HAS_RNTUPLE_SUPPORT
 
     /// Directories
-    std::map< const std::string, TDirectory* > fDirsByName;
-    std::map< const std::string, std::vector<std::string> > fDirsByType;
+    std::unordered_map< std::string, TDirectory* > fDirsByName;
+    std::unordered_map< std::string, std::vector<std::string> > fDirsByType;
 
     /// Is a tree registered for this name
     bool HasDirByName(const std::string& name) {
@@ -1347,6 +1423,10 @@ void QwRootFile::ConstructTreeBranches(
   fTreeByName[name].push_back(tree);
   fTreeByAddr[addr].push_back(tree);
   fTreeByType[type].push_back(tree);
+  
+  // Register hash mapping for fast FillTreeBranches lookup
+  uint32_t hash = QwTreeHash::hash_string(name.c_str());
+  fTreeByHash[hash].push_back(tree);
 }
 
 
@@ -1376,6 +1456,39 @@ void QwRootFile::FillTreeBranches(
   }
 }
 
+
+/**
+ * Fill the tree branches of a generic object by compile-time hash (hot path optimization)
+ * @param hash Compile-time computed hash of tree name
+ * @param object Subsystem array
+ */
+template < class T >
+void QwRootFile::FillTreeBranches(
+        uint32_t hash,
+        const T& object)
+{
+  // Fast O(1) hash-based lookup - check if hash exists in map
+  auto hash_it = fTreeByHash.find(hash);
+  if (hash_it == fTreeByHash.end()) return;
+  
+  // If this type has no registered trees
+  if (! HasTreeByType(object)) return;
+
+  // Get the address of the object
+  const void* addr = static_cast<const void*>(&object);
+  
+  // Fast lookup: only check trees registered for this hash
+  auto& trees_for_hash = hash_it->second;
+  for (size_t tree = 0; tree < trees_for_hash.size(); tree++) {
+    // Verify this tree is also registered for this object address
+    for (size_t addr_tree = 0; addr_tree < fTreeByAddr[addr].size(); addr_tree++) {
+      if (fTreeByAddr[addr].at(addr_tree) == trees_for_hash.at(tree)) {
+        fTreeByAddr[addr].at(addr_tree)->FillTreeBranches(object);
+        break;
+      }
+    }
+  }
+}
 
 /**
  * Fill the tree branches of a generic object by type only
