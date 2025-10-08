@@ -8,9 +8,7 @@
 
 // C and C++ headers
 #include <iostream>
-
-// Boost math library for random number generation
-#include <boost/random.hpp>
+#include <random>
 
 // Qweak headers
 #include "QwLog.h"
@@ -150,11 +148,9 @@ if(1==2){
 
 
   // Initialize randomness provider and distribution
-  boost::mt19937 randomnessGenerator(999); // Mersenne twister with seed (see below)
-  boost::normal_distribution<double> normalDistribution;
-  boost::variate_generator
-    < boost::mt19937, boost::normal_distribution<double> >
-      normal(randomnessGenerator, normalDistribution);
+  std::mt19937 randomnessGenerator(999); // Mersenne twister with seed (see below)
+  std::normal_distribution<double> normalDistribution;
+  auto normal = [&]() -> double { return normalDistribution(randomnessGenerator); };
   // WARNING: This variate_generator will return the SAME random values as the
   // variate_generator in QwVQWK_Channel when used with the same default seed!
   // Therefore you really should give an explicitly different seed for the
