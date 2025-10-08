@@ -36,6 +36,12 @@ jobs:
             compiler: "gcc14"
             opt: "opt"
             cxxflags: ""
+          - release: "LCG_108"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc15"
+            opt: "opt"
+            cxxflags: ""
     steps:
       - uses: actions/checkout@v5
       - uses: cvmfs-contrib/github-action-cvmfs@v5
