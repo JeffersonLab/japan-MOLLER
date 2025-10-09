@@ -26,4 +26,7 @@
 
 [QwCombiner]
   name = beamline_combiner
+  priority   = 1
   map  = mock_beamline_combiner.map
+  tree-name  = mulc_beam
+  tree-comment = Beamline combined values

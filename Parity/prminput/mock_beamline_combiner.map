@@ -1,16 +1,36 @@
+# Rules for this file
+# - no repeating dependent variables in the same section
+#   (probably also not in different sections, come to think of it)
+#
+# - Alias names start with "@" after the "asym" or "diff" prefix.
+#   Only use the "diff" if you really just want the difference; BCMs
+#   or detector signals should probably use "asym".
+#
+# - The device names should use the same case as the branch in the
+#   evt TTree, i.e. usually would be lower case, but BPM coordinate
+#   labels (for instance) are upper case:
+#      use "bpm1h04X" not "bpm1h04x"
+#
+# - The weights are applied directly; if you want to average two
+#   quantities, the weights should be 0.5 on both.
+#
+
 # Differences
-[diff:@diff_bcm1h02a_bcm1h15]
-diff:bcm1h02a, 1
-diff:bcm1h15, -1
+[asym:@diff_bcm1h02a_bcm1h15]
+asym:bcm1h02a, 1
+asym:bcm1h15, -1
 
-[diff:@diff_bcm_target_bcm1h15]
-diff:bcm_target, 1
-diff:bcm1h15, -1
+[asym:@diff_bcm_target_bcm1h15]
+asym:bcm_target, 1
+asym:bcm1h15, -1
 
-[diff:@diff_bpm1h04x_bpm1h14x]
+[asym:@diff_bpm1h04x_bpm1h14x]
+asym:bpm1h04X, 1
+asym:bpm1h14X, -1
+
+[asym:@diff_bpm1h04x_bpm1h14y]
+asym:bpm1h04X, 1
+asym:bpm1h14Y, -1
+
+[diff:@copy_diff_bpm1h04x]
 diff:bpm1h04X, 1
-diff:bpm1h14X, -1
-
-[diff:@diff_bpm1h04x_bpm1h14y]
-diff:bpm1h04X, 1
-diff:bpm1h14Y, -1
