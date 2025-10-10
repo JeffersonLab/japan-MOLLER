@@ -218,7 +218,7 @@ class QwHelicityPattern {
   std::vector<Int_t> fHelicity;// this is here up to when we code the Helicity decoding routine
   std::vector<Int_t> fEventNumber;
   Int_t fCurrentPatternNumber;
-  Int_t fPatternSize;
+  size_t fPatternSize;
   Int_t fQuartetNumber;
 
   // Blinding strategy
