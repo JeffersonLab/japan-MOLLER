@@ -252,21 +252,12 @@ void QwSubsystemArray::DefineOptions(QwOptions &options)
                        "map file with bad event ranges");
 
   // Versions of boost::program_options below 1.39.0 have a bug in multitoken processing
-#if BOOST_VERSION < 103900
-  options.AddOptions()("disable-by-type",
-                       po::value<std::vector <std::string> >(),
-                       "subsystem types to disable");
-  options.AddOptions()("disable-by-name",
-                       po::value<std::vector <std::string> >(),
-                       "subsystem names to disable");
-#else // BOOST_VERSION >= 103900
   options.AddOptions()("disable-by-type",
                        po::value<std::vector <std::string> >()->multitoken(),
                        "subsystem types to disable");
   options.AddOptions()("disable-by-name",
                        po::value<std::vector <std::string> >()->multitoken(),
                        "subsystem names to disable");
-#endif // BOOST_VERSION
 }
 
 
