@@ -1,3 +1,8 @@
+/*!
+ * \file   QwRootFile.cc
+ * \brief  Implementation for ROOT file and tree management wrapper classes
+ */
+
 #include "QwRootFile.h"
 #include "QwRunCondition.h"
 #include "TH1.h"

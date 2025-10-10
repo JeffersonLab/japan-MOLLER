@@ -1,3 +1,8 @@
+/*!
+ * \file   QwRint.h
+ * \brief  ROOT interactive interface for Qweak analysis
+ */
+
 #ifndef __QwRint_h__
 #define __QwRint_h__
 

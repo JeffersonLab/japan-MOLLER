@@ -1,12 +1,9 @@
-/**
- * \class QwMollerDetector  QwMollerDetector.h
- *
- * \brief Implementation of the analysis of Moller data (copied from QwComptonElectronDetector.h)
- *
- * \author  Andrew Kubera
- * \date  2010-06-07
+/*!
+ * \file   QwMollerDetector.h
+ * \brief  Moller detector analysis implementation
+ * \author Andrew Kubera
+ * \date   2010-06-07
  * \ingroup QwMoller
- *
  */
 
 
@@ -32,6 +29,11 @@
 #include "QwVQWK_Channel.h"
 #include "QwScaler_Channel.h"
 
+/**
+ * \class QwMollerChannelID
+ * \ingroup QwMoller
+ * \brief Mapping info for Moller detector channels
+ */
 class QwMollerChannelID
 {
   public:
@@ -63,6 +65,11 @@ class QwMollerChannelID
 
 };
 
+/**
+ * \class QwMollerDetector
+ * \ingroup QwMoller
+ * \brief Subsystem for analyzing Moller detector readout
+ */
 class QwMollerDetector:
   public VQwSubsystemParity,
   public MQwSubsystemCloneable<QwMollerDetector> {

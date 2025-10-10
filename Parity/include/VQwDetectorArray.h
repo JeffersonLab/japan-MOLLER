@@ -8,6 +8,11 @@
 ///
 /// \ingroup QwAnalysis_ADC
 
+/*!
+ * \file   VQwDetectorArray.h
+ * \brief  Virtual base class for detector arrays (PMTs, etc.)
+ */
+
 #ifndef __VQWDETECTORARRAY__
 #define __VQWDETECTORARRAY__
 
@@ -26,6 +31,14 @@
 
 
 class QwDetectorArrayID {
+    /**
+     * \class QwDetectorArrayID
+     * \ingroup QwAnalysis_ADC
+     * \brief Identifier and mapping information for detector-array channels
+     *
+     * Encapsulates mapping metadata for channels in a detector array,
+     * including subbank indexing, subelement, type, and naming.
+     */
 
  public:
 
@@ -55,6 +68,15 @@ class QwDetectorArrayID {
 };
 
 
+/**
+ * \class VQwDetectorArray
+ * \ingroup QwAnalysis_ADC
+ * \brief Abstract base for arrays of PMT-like detectors
+ *
+ * Provides common functionality for subsystems composed of multiple
+ * integration PMTs and combined PMTs, including normalization,
+ * histogram/NTuple construction, and running statistics.
+ */
 class VQwDetectorArray: virtual public VQwSubsystemParity {
 
  /******************************************************************

@@ -1,9 +1,9 @@
-/**********************************************************\
-* File: QwDataHandlerArray.h                           *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2009-02-04 10:30>                           *
-\**********************************************************/
+/*!
+ * \file   QwDataHandlerArray.h
+ * \brief  Array container for managing multiple data handlers
+ * \author P. M. King
+ * \date   2009-02-04
+ */
 
 #ifndef __QWDATAHANDLERARRAY__
 #define __QWDATAHANDLERARRAY__
@@ -76,9 +76,19 @@ class QwDataHandlerArray:
     /// \brief Process configuration options for the datahandler array itself
     void ProcessOptions(QwOptions &options);
 
-    /// \brief Load from mapfile with T = helicity pattern or subsystem array
-    template<class T>
-    void LoadDataHandlersFromParameterFile(QwParameterFile& mapfile, T& detectors, const TString &run);
+  /**
+   * \brief Load data handlers from a parameter file.
+   *
+   * Parses the map file and constructs/initializes handlers, connecting
+   * them to the provided source container.
+   *
+   * @tparam T           Source type (QwHelicityPattern or QwSubsystemArrayParity).
+   * @param mapfile      Parameter file describing handlers and settings.
+   * @param detectors    Source object to connect handlers to.
+   * @param run          Run label used for per-run configuration.
+   */
+  template<class T>
+  void LoadDataHandlersFromParameterFile(QwParameterFile& mapfile, T& detectors, const TString &run);
 
     /// \brief Add the datahandler to this array
     void push_back(VQwDataHandler* handler);

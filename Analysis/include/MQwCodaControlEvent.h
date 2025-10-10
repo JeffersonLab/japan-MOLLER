@@ -1,3 +1,8 @@
+/*!
+ * \file   MQwCodaControlEvent.h
+ * \brief  CODA control event data structure and management
+ */
+
 #ifndef __MQWCODACONTROLEVENT__
 #define __MQWCODACONTROLEVENT__
 
@@ -8,8 +13,15 @@
 #include "TDatime.h"
 #include "TString.h"
 
-///
-/// \ingroup QwAnalysis
+/**
+ * \class MQwCodaControlEvent
+ * \ingroup QwAnalysis
+ * \brief Mix-in class for handling CODA control event data and timing
+ *
+ * Provides functionality for processing and storing information from CODA
+ * control events including prestart, go, pause, and end events. Manages
+ * run timing, event counts, and run summary reporting.
+ */
 class MQwCodaControlEvent
 {
  public:

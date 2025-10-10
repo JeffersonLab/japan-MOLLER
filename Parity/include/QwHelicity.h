@@ -5,8 +5,13 @@
 * Time-stamp:                                             *
 \**********************************************************/
 
-#ifndef __QwHELICITY__
-#define __QwHELICITY__
+/*!
+ * \file   QwHelicity.h
+ * \brief  Helicity state management and pattern recognition
+ */
+
+#ifndef __QWHELICITY__
+#define __QWHELICITY__
 
 // System headers
 #include <vector>
@@ -35,13 +40,16 @@ enum HelicityRootSavingType{kHelSaveMPS = 0,
 
 
 
-/*****************************************************************
-*  Class:
-******************************************************************/
-///
-/// \ingroup QwAnalysis_ADC
-///
-/// \ingroup QwAnalysis_BL
+/**
+ * \class QwHelicity
+ * \ingroup QwAnalysis_BeamLine
+ * \brief Subsystem for helicity state management and pattern recognition
+ *
+ * Manages helicity information from the polarized electron beam, including
+ * helicity state determination, pattern recognition, delayed helicity decoding,
+ * and helicity-correlated systematic checks. Supports multiple helicity
+ * encoding modes and provides helicity information to other subsystems.
+ */
 class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHelicity> {
 
  private:

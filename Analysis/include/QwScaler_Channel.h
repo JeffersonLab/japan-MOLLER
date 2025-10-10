@@ -1,9 +1,10 @@
-/**********************************************************\
-* File: QwScaler_Channel.h                                 *
-*                                                          *
-* Author: J. Pan                                           *
-* Date:   Thu Sep 16 18:08:33 CDT 2009                     *
-\**********************************************************/
+/*!
+ * \file   QwScaler_Channel.h
+ * \brief  Base and derived classes for scaler channel data handling
+ *
+ * \author J. Pan
+ * \date   Thu Sep 16 18:08:33 CDT 2009
+ */
 
 #ifndef __QWSCALER_CHANNEL__
 #define __QWSCALER_CHANNEL__
@@ -21,10 +22,16 @@
 // Forward declarations
 class QwParameterFile;
 
-///
-/// \ingroup QwAnalysis_ADC
-///
-/// \ingroup QwAnalysis_BL
+/**
+ * \class VQwScaler_Channel
+ * \ingroup QwAnalysis_ADC
+ * \brief Abstract base class for scaler channels
+ *
+ * Provides common infrastructure for scaler-based hardware channels,
+ * including differential scaler support, external clock normalization,
+ * and mock data generation. Concrete implementations handle the
+ * hardware-specific details of scaler decoding.
+ */
 class VQwScaler_Channel: public VQwHardwareChannel, public MQwMockable {
 
 public:
@@ -244,6 +251,15 @@ protected:
 
 
 //  Derived templated class
+/**
+ * \class QwScaler_Channel
+ * \ingroup QwAnalysis_ADC
+ * \brief Templated concrete scaler channel with configurable data masking
+ *
+ * Template specialization of VQwScaler_Channel that applies data_mask
+ * and data_shift to the raw scaler values during processing. Commonly
+ * used to handle different scaler module types with varying data formats.
+ */
 template <UInt_t data_mask=0xffffffff, UInt_t data_shift=0 >
 class QwScaler_Channel: public VQwScaler_Channel
 {

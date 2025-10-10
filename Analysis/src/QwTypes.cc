@@ -1,3 +1,8 @@
+/*!
+ * \file   QwTypes.cc
+ * \brief  Implementation of type conversion and utility functions
+ */
+
 #include "QwTypes.h"
 #include "TString.h"
 

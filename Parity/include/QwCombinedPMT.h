@@ -1,4 +1,9 @@
 
+/*!
+ * \file   QwCombinedPMT.h
+ * \brief  Combined PMT detector using Moller ADC channels
+ */
+
 #ifndef __QwMollerADC_COMBINEDPMT__
 #define __QwMollerADC_COMBINEDPMT__
 
@@ -20,6 +25,11 @@
 class QwBlinder;
 class QwDBInterface;
 
+/**
+ * \class QwCombinedPMT
+ * \ingroup QwAnalysis_ADC
+ * \brief Combines multiple integration PMTs into weighted sum/average
+ */
 class QwCombinedPMT : public VQwDataElement {
 /////
  public:

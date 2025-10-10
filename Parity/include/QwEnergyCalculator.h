@@ -1,9 +1,10 @@
-/**********************************************************\
-* File: QwEnergyCalculator.h                              *
-*                                                         *
-* Author:  B.Waidyawansa                                  *
-* Time-stamp: 05-24-2010                                  *
-\**********************************************************/
+/*!
+ * \file   QwEnergyCalculator.h
+ * \brief  Beam energy calculation from BPM position measurements
+ *
+ * \author B.Waidyawansa
+ * \date   05-24-2010
+ */
 
 #ifndef __QwVQWK_ENERGYCALCULATOR__
 #define __QwVQWK_ENERGYCALCULATOR__
@@ -32,6 +33,14 @@
 class QwDBInterface;
 #endif // __USE_DATABASE__
 
+/**
+ * \class QwEnergyCalculator
+ * \ingroup QwAnalysis_BL
+ * \brief Computes beam energy change from BPM information
+ *
+ * Uses measured angles and dispersive positions to estimate relative
+ * beam energy variations; exposes a single hardware-like channel.
+ */
 class QwEnergyCalculator : public VQwDataElement{
   /******************************************************************
    *  Class:QwEnergyCalculator

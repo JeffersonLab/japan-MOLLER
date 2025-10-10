@@ -1,9 +1,10 @@
-/**********************************************************\
-* File: QwEventBuffer.h                                    *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2008-07-22 15:40>                           *
-\**********************************************************/
+
+/*!
+ * \file   QwEventBuffer.h
+ * \brief  Event buffer management for reading and processing CODA data
+ * \author P. M. King
+ * \date   2008-07-22
+ */
 
 #ifndef __QWEVENTBUFFER__
 #define __QWEVENTBUFFER__
@@ -34,9 +35,16 @@ class QwSubsystemArray;
 //////////////////////////////////////////////////////////////////////
 
 
-///
-/// \ingroup QwAnalysis
-// class QwEventBuffer: public MQwCodaControlEvent{
+/**
+ * \class QwEventBuffer
+ * \ingroup QwAnalysis
+ * \brief Event buffer management for reading and processing CODA data
+ *
+ * Manages the reading of CODA event data files, including support for
+ * segmented files, run lists, and event stream processing. Handles
+ * event decoding via pluggable decoder classes and provides iteration
+ * over events and runs.
+ */
 class QwEventBuffer {
  public:
   static void DefineOptions(QwOptions &options);

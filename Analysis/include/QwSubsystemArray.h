@@ -1,9 +1,9 @@
-/**********************************************************\
-* File: QwSubsystemArray.h                                 *
-*                                                          *
-* Author: P. M. King,  Rakitha Beminiwattha                *
-* Time-stamp: <2008-07-22 15:50>                           *
-\**********************************************************/
+/*!
+ * \file   QwSubsystemArray.h
+ * \brief  Array container for managing multiple subsystems
+ * \author P. M. King, Rakitha Beminiwattha
+ * \date   2008-07-22
+ */
 
 #ifndef __QWSUBSYSTEMARRAY__
 #define __QWSUBSYSTEMARRAY__
@@ -29,8 +29,16 @@
 class VQwHardwareChannel;
 class QwParameterFile;
 
-///
-/// \ingroup QwAnalysis
+/**
+ * \class QwSubsystemArray
+ * \ingroup QwAnalysis
+ * \brief Container for managing multiple subsystems with common operations
+ *
+ * Extends std::vector to provide subsystem-level operations such as
+ * event processing, accumulation, tree/histogram construction, and
+ * publishing. Uses container-delegation pattern to forward arithmetic
+ * operations to individual subsystems while maintaining type safety.
+ */
 class QwSubsystemArray:
     public std::vector<std::shared_ptr<VQwSubsystem>>,
     public MQwPublishable<QwSubsystemArray, VQwSubsystem> {

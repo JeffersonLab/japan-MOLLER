@@ -1,9 +1,12 @@
-/**********************************************************\
-* File: VQwDetectorArray.cc                          *
-*                                                          *
-* Author: Kevin Ward (Original Code by P. M. King)                                       *
-* Time-stamp: <2007-05-08 15:40>                           *
-\**********************************************************/
+/*!
+ * \file   VQwDetectorArray.cc
+ * \brief  Virtual base class implementation for detector arrays managing PMT collections
+ *
+ * Base detector array implementation managing PMT collections (integration
+ * and combined), including channel mapping, event cuts, normalization options,
+ * publishing, tree construction, and running sums. Derived classes implement
+ * specific detector systems. Documentation-only edits; runtime behavior unchanged.
+ */
 
 #include "VQwDetectorArray.h"
 
@@ -26,12 +29,10 @@
 #include "QwPromptSummary.h"
 
 /**
- * Defines configuration options for QwEventBuffer class using QwOptions
- * functionality.
+ * Define command-line options for detector array normalization.
  *
- * @param options Options object
+ * @param options Options object to configure.
  */
-
 void VQwDetectorArray::DefineOptions(QwOptions &options){
   // Define the execution options
   options.AddOptions()
@@ -45,13 +46,11 @@ void VQwDetectorArray::DefineOptions(QwOptions &options){
      "Normalize the detectors for currents above this value");
 }
 
-/*!
- * Loads the configuration options into this instance of
- * VQwDetectorArray from the QwOptions object.
+/**
+ * Load detector array configuration from parsed command-line options.
  *
- * @param options Options object
+ * @param options Options object.
  */
-
 void VQwDetectorArray::ProcessOptions(QwOptions &options) {
 
     bNormalization = options.GetValue<bool>("QwDetectorArray.normalize");
@@ -71,10 +70,11 @@ void VQwDetectorArray::ProcessOptions(QwOptions &options) {
 
 //*****************************************************************//
 /**
- * Publish internal values
- * @return
+ * Publish internal detector channels according to the configured
+ * publish list (integration and combined PMTs).
+ *
+ * @return true if all requested channels are successfully published.
  */
-
 Bool_t VQwDetectorArray::PublishInternalValues() const {
 
   // Publish variables
@@ -170,6 +170,12 @@ Bool_t VQwDetectorArray::PublishInternalValues() const {
 }
 
 
+/**
+ * Publish a specific device channel on-demand by name lookup.
+ *
+ * @param device_name Name of the detector channel to publish.
+ * @return true if the channel is found and published successfully.
+ */
 Bool_t VQwDetectorArray::PublishByRequest(TString device_name) {
 
     Bool_t status = kFALSE;
@@ -210,6 +216,13 @@ Bool_t VQwDetectorArray::PublishByRequest(TString device_name) {
 
 
 //*****************************************************************//
+/**
+ * Load detector channel map file, creating integration and combined PMTs
+ * and configuring buffer layout, saturation limits, and sample sizes.
+ *
+ * @param mapfile Path to the channel map file.
+ * @return 0 on success.
+ */
 Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
      
     Bool_t ldebug=kFALSE;

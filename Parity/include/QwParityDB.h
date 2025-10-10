@@ -42,6 +42,15 @@ class QwEventBuffer;
  *
  */
 
+/**
+ * \class QwParityDB
+ * \ingroup QwAnalysis_BL
+ * \brief Database interface specialized for parity analysis metadata
+ *
+ * Extends QwDatabase to provide convenience getters for detector IDs,
+ * run/runlet/analysis identifiers, and to populate parameter files
+ * for the parity analyzer subsystems.
+ */
 class QwParityDB: public QwDatabase {
   public:
 

@@ -1,15 +1,9 @@
-/*****************************************************************************
-File Name: VQwDataHandler.h
-
-Created by: Michael Vallee
-Email: mv836315@ohio.edu
-
-Description:  This is the header file to the VQwDataHandler class.  This
-              class acts as a base class to all classes which need
-              to access data from multiple subsystems
-
-Last Modified: August 1, 2018 1:39 PM
-*****************************************************************************/
+/*!
+ * \file   VQwDataHandler.h
+ * \brief  Virtual base class for data handlers accessing multiple subsystems
+ * \author Michael Vallee
+ * \date   2018-08-01
+ */
 
 #ifndef VQWDATAHANDLER_H_
 #define VQWDATAHANDLER_H_
@@ -26,6 +20,27 @@ class QwRootFile;
 class QwPromptSummary;
 class QwDataHandlerArray;
 
+/**
+ * \class VQwDataHandler
+ * \ingroup QwAnalysis
+ * \brief Abstract base for handlers that consume multiple subsystems and produce derived outputs
+ *
+ * A data handler observes one or more subsystem arrays (yields, asymmetries,
+ * differences) and computes derived channels or diagnostics. Typical examples
+ * include linear regression, correlation studies, and alarm/quality handlers.
+ *
+ * Key responsibilities:
+ * - Establish connections to required input channels via ConnectChannels.
+ * - ProcessData once per event to update derived quantities.
+ * - Maintain running sums/averages and optionally publish variables to trees,
+ *   histograms, or RNTuples.
+ *
+ * Design notes:
+ * - Uses container-delegation at the system level; underlying arithmetic is
+ *   performed by the concrete channel classes.
+ * - Handlers participate in the MQwPublishable pattern for on-demand output
+ *   publication, and in cloneable factories for configuration-driven creation.
+ */
 class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublishable_child<QwDataHandlerArray,VQwDataHandler> {
 
   public:

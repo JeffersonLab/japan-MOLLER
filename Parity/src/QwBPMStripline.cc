@@ -1,9 +1,7 @@
-/**********************************************************\
-* File: QwBPMStripline.cc                                 *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwBPMStripline.cc
+ * \brief  Stripline beam position monitor template implementation
+ */
 
 #include "QwBPMStripline.h"
 
@@ -28,6 +26,10 @@
 template<typename T>
 const TString QwBPMStripline<T>::subelement[4]={"XP","XM","YP","YM"};
 
+/**
+ * \brief Initialize this BPM stripline with a detector name.
+ * \param name Detector name used for subchannel naming.
+ */
 template<typename T>
 void  QwBPMStripline<T>::InitializeChannel(TString name)
 {
@@ -56,14 +58,25 @@ void  QwBPMStripline<T>::InitializeChannel(TString name)
   return;
 }
 
+/**
+ * \brief Initialize this BPM stripline with subsystem and module type.
+ * \param subsystem Subsystem identifier.
+ * \param name Detector name used for subchannel naming.
+ * \param type Module type tag used in ROOT foldering.
+ */
 template<typename T>
 void  QwBPMStripline<T>::InitializeChannel(TString subsystem, TString name,
-    TString type)
+  TString type)
 {
   SetModuleType(type);
   InitializeChannel(subsystem, name);
 }
 
+/**
+ * \brief Initialize this BPM stripline with subsystem and name.
+ * \param subsystem Subsystem identifier.
+ * \param name Detector name used for subchannel naming.
+ */
 template<typename T>
 void  QwBPMStripline<T>::InitializeChannel(TString subsystem, TString name)
 {
@@ -91,6 +104,7 @@ void  QwBPMStripline<T>::InitializeChannel(TString subsystem, TString name)
   return;
 }
 
+/** \brief Clear event-scoped data in all channels of this BPM. */
 template<typename T>
 void QwBPMStripline<T>::ClearEventData()
 {
@@ -109,6 +123,10 @@ void QwBPMStripline<T>::ClearEventData()
 }
 
 
+/**
+ * \brief Apply hardware checks across all wires and derived channels.
+ * \return kTRUE if no hardware error was detected; otherwise kFALSE.
+ */
 template<typename T>
 Bool_t QwBPMStripline<T>::ApplyHWChecks()
 {
@@ -128,6 +146,7 @@ Bool_t QwBPMStripline<T>::ApplyHWChecks()
 }
 
 
+/** \brief Increment error counters for all internal channels. */
 template<typename T>
 void QwBPMStripline<T>::IncrementErrorCounters()
 {
@@ -142,6 +161,7 @@ void QwBPMStripline<T>::IncrementErrorCounters()
   fEllipticity.IncrementErrorCounters();
 }
 
+/** \brief Print error counters for all internal channels. */
 template<typename T>
 void QwBPMStripline<T>::PrintErrorCounters() const
 {
@@ -156,6 +176,7 @@ void QwBPMStripline<T>::PrintErrorCounters() const
   fEllipticity.PrintErrorCounters();
 }
 
+/** \brief Aggregate and return the event-cut error flag for this BPM. */
 template<typename T>
 UInt_t QwBPMStripline<T>::GetEventcutErrorFlag(){
   Short_t i=0;
@@ -170,6 +191,7 @@ UInt_t QwBPMStripline<T>::GetEventcutErrorFlag(){
   return error;
 }
 
+/** \brief Update and return the aggregated event-cut error flag. */
 template<typename T>
 UInt_t QwBPMStripline<T>::UpdateErrorFlag()
 {
@@ -194,6 +216,11 @@ UInt_t QwBPMStripline<T>::UpdateErrorFlag()
 };
 
 
+/**
+ * \brief Check for burp failures against another BPM of the same type.
+ * \param ev_error Reference BPM to compare against.
+ * \return kTRUE if a burp failure was detected; otherwise kFALSE.
+ */
 template<typename T>
 Bool_t QwBPMStripline<T>::CheckForBurpFail(const VQwDataElement *ev_error){
   Short_t i=0;

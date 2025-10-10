@@ -1,16 +1,9 @@
-/********************************************************************
-File Name: QwCorrelator.cc
-
-Created by: Michael Vallee
-Email: mv836315@ohio.edu
-
-Description:  This is the implementation file of the QwCorrelator
-              class, which is a child of the VQwDataHandler class.
-              The functionality of this class is derived from
-              LinRegBlue.
-
-Last Modified: August 1, 2018 1:43 PM
-********************************************************************/
+/*!
+ * \file   QwCorrelator.cc
+ * \brief  Implementation of correlator data handler using LinRegBlue algorithms
+ * \author Michael Vallee
+ * \date   2018-08-01
+ */
 
 #include "QwCorrelator.h"
 

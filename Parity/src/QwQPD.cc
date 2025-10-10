@@ -1,9 +1,11 @@
-/**********************************************************\
-* File: QwQPD.cc                                          *
-*                                                         *
-* Author: B. Waidyawansa                                  *
-* Time-stamp:  09-14-2010                                 *
-\**********************************************************/
+/**
+ * \file QwQPD.cc
+ * \brief Quadrant photodiode (QPD) implementation
+ *
+ * Provides four photodiode channels; calculates X/Y from the standard QPD
+ * formula and an effective charge. Supports calibration, single-event cuts,
+ * hardware checks, burp detection, and all standard BPM operations.
+ */
 
 #include "QwQPD.h"
 
@@ -25,6 +27,7 @@
 const TString  QwQPD::subelement[4]={"BR","TR","BL","TL"};
 
 
+/** Initialize QPD with 4 photodiode raw channels and derived position/charge. */
 void  QwQPD::InitializeChannel(TString name)
 {
   Short_t i=0;
@@ -51,6 +54,7 @@ void  QwQPD::InitializeChannel(TString name)
   return;
 }
 
+/** Initialize QPD with subsystem scoping for proper tree/histogram naming. */
 void  QwQPD::InitializeChannel(TString subsystem, TString name)
 {
   Short_t i=0;
@@ -73,6 +77,10 @@ void  QwQPD::InitializeChannel(TString subsystem, TString name)
   return;
 }
 
+/**
+ * Apply QPD-specific calibration factors converting ADC counts to mm.
+ * These come from geometry/calibration files for each axis.
+ */
 void QwQPD::GetCalibrationFactors(Double_t AlphaX, Double_t AlphaY)
 {
   // Read in the calibration factors from the injector_beamline_geometry.map
@@ -94,6 +102,7 @@ void QwQPD::GetCalibrationFactors(Double_t AlphaX, Double_t AlphaY)
   return;
 }
 
+/** Clear event data for all photodiodes and derived position/charge channels. */
 void QwQPD::ClearEventData()
 {
   Short_t i=0;
@@ -111,6 +120,12 @@ void QwQPD::ClearEventData()
 }
 
 
+/**
+ * Apply hardware-level checks to all four photodiode channels and
+ * aggregate their status.
+ *
+ * @return true if all photodiodes pass hardware checks.
+ */
 Bool_t QwQPD::ApplyHWChecks()
 {
   Bool_t eventokay=kTRUE;
@@ -128,6 +143,7 @@ Bool_t QwQPD::ApplyHWChecks()
   return eventokay;
 }
 
+/** Increment persistent error counters for all channels. */
 void QwQPD::IncrementErrorCounters()
 {
   Short_t i=0;
@@ -140,6 +156,7 @@ void QwQPD::IncrementErrorCounters()
   fEffectiveCharge.IncrementErrorCounters();
 }
 
+/** Print error counter summaries for all channels. */
 void QwQPD::PrintErrorCounters() const
 {
   Short_t i=0;
@@ -152,6 +169,7 @@ void QwQPD::PrintErrorCounters() const
   fEffectiveCharge.PrintErrorCounters();
 }
 
+/** Return OR of event-cut error flags across all photodiodes and derived channels. */
 UInt_t QwQPD::GetEventcutErrorFlag()
 {
   Short_t i=0;
@@ -168,6 +186,10 @@ UInt_t QwQPD::GetEventcutErrorFlag()
   return error;
 }
 
+/**
+ * Update derived channel error flags based on photodiode error codes and
+ * return aggregated event-cut flags.
+ */
 UInt_t QwQPD::UpdateErrorFlag()
 {
   Short_t i=0;
@@ -188,6 +210,12 @@ UInt_t QwQPD::UpdateErrorFlag()
   return error2;
 }
 
+/**
+ * Apply single-event cuts to photodiodes and derived channels, propagating
+ * error codes to position and charge outputs.
+ *
+ * @return true if all channels pass their cuts.
+ */
 Bool_t QwQPD::ApplySingleEventCuts()
 {
   Bool_t status=kTRUE;
@@ -219,6 +247,13 @@ Bool_t QwQPD::ApplySingleEventCuts()
   return status;
 }
 
+/**
+ * Map a human-readable name to the corresponding channel pointer.
+ * Supports: tl/tr/br/bl (photodiodes), relx/rely, absx/x, absy/y,
+ * effectivecharge/charge.
+ *
+ * @throws std::invalid_argument on unrecognized names.
+ */
 VQwHardwareChannel* QwQPD::GetSubelementByName(TString ch_name)
 {
   VQwHardwareChannel* tmpptr = NULL;
@@ -285,6 +320,17 @@ void QwQPD::SetSingleEventCuts(TString ch_name, Double_t minX, Double_t maxX)
 
 }*/
 
+/**
+ * Configure single-event cuts for a specific subelement by name, including
+ * error flags, limits, stability, and burp detection parameters.
+ *
+ * @param ch_name Subelement name (tl,tr,bl,br,relx,rely,absx,absy,effectivecharge)
+ * @param errorflag Error flag mask to set when the cut fails
+ * @param minX Lower limit
+ * @param maxX Upper limit
+ * @param stability Stability cut width
+ * @param burplevel Burp detection threshold
+ */
 void QwQPD::SetSingleEventCuts(TString ch_name, UInt_t errorflag,Double_t minX, Double_t maxX, Double_t stability, Double_t burplevel){
   errorflag|=kBPMErrorFlag;//update the device flag
   if (ch_name=="tl"){
@@ -327,6 +373,13 @@ void QwQPD::SetSingleEventCuts(TString ch_name, UInt_t errorflag,Double_t minX, 
 
 }
 
+/**
+ * Polymorphic burp check against a reference QPD, delegating to all
+ * photodiodes, position, and charge channels.
+ *
+ * @return true if any subchannel reports a burp failure.
+ * @throws std::invalid_argument if ev_error is not a QwQPD.
+ */
 Bool_t QwQPD::CheckForBurpFail(const VQwDataElement *ev_error){
   Short_t i=0;
   Bool_t burpstatus = kFALSE;
@@ -356,6 +409,11 @@ Bool_t QwQPD::CheckForBurpFail(const VQwDataElement *ev_error){
   return burpstatus;
 };
 
+/**
+ * Copy error flags from a reference QPD to this instance.
+ *
+ * @throws std::invalid_argument if ev_error is not a QwQPD.
+ */
 void QwQPD::UpdateErrorFlag(const VQwBPM *ev_error){
   Short_t i=0;
   try {
@@ -386,6 +444,12 @@ void QwQPD::UpdateErrorFlag(const VQwBPM *ev_error){
 
 
 
+/**
+ * Process the current event: apply HW checks, sum photodiodes for effective
+ * charge, and calculate X/Y positions using the standard QPD formula:
+ * X = ((TL-TR) + (BL-BR)) / (TL+TR+BL+BR)
+ * Y = ((TL-BL) + (TR-BR)) / (TL+TR+BL+BR)
+ */
 void  QwQPD::ProcessEvent()
 {
   Bool_t localdebug = kFALSE;
@@ -482,6 +546,14 @@ void  QwQPD::ProcessEvent()
 }
 
 
+/**
+ * Route raw buffer data to the specified photodiode channel.
+ *
+ * @param buffer Raw event buffer
+ * @param word_position_in_buffer Position in buffer to read from
+ * @param index Target photodiode index (0-3)
+ * @return Original word_position_in_buffer
+ */
 Int_t QwQPD::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer,UInt_t index)
 {
   if(index<4)

@@ -1,7 +1,9 @@
-// Helper functions
-//
-// Created by Ole Hansen on 8/16/23.
-//
+/*!
+ * \file   QwUtil.h
+ * \brief  Helper functions and utilities for analysis operations
+ * \author Ole Hansen
+ * \date   2023-08-16
+ */
 
 #ifndef QWANALYSIS_QWUTIL_H
 #define QWANALYSIS_QWUTIL_H

@@ -1,9 +1,11 @@
-/**********************************************************\
-* File: VQwSubsystem.C                                     *
-*                                                          *
-* Author: P. M. King, Rakitha Beminiwattha                 *
-* Time-stamp: <2007-05-08 15:40>                           *
-\**********************************************************/
+/**
+ * VQwSubsystem.cc
+ *
+ * Base subsystem implementation providing map file loading, ROC/bank
+ * registration, detector map management, and parent/sibling access.
+ * Each analysis subsystem derives from this class. Documentation-only
+ * edits; runtime behavior unchanged.
+ */
 
 /*------------------------------------------------------------------------*//*!
 
@@ -34,6 +36,8 @@
 Int_t ERROR = -1;
 
 
+// Load detector maps from a parameter file, dispatching to specific
+// loaders based on key-value pairs (map, param, eventcut, geom, cross, mask).
 Int_t VQwSubsystem::LoadDetectorMaps(QwParameterFile& file)
 {
   Bool_t local_debug = false;
@@ -120,14 +124,8 @@ Int_t VQwSubsystem::LoadDetectorMaps(QwParameterFile& file)
   return 0;
 }
 
-/**
- * Get the sibling of this subsystem with the specified name.  If no parents is
- * defined, an error is printed by GetParent().  If no sibling with that name
- * exists, the null pointer is returned.
- *
- * @param name Name of the sibling subsystem
- * @return Pointer to the sibling subsystem
- */
+// Get a sibling subsystem by name from the parent array.
+// Parameters and return value are documented in the header.
 VQwSubsystem* VQwSubsystem::GetSibling(const std::string& name) const
 {
   // Get the parent and check for existence
@@ -141,6 +139,7 @@ VQwSubsystem* VQwSubsystem::GetSibling(const std::string& name) const
 
 
 
+// Clear all ROC and bank registrations and reset current IDs.
 void VQwSubsystem::ClearAllBankRegistrations()
 {
   fBank_IDs.clear();
@@ -149,6 +148,7 @@ void VQwSubsystem::ClearAllBankRegistrations()
   fCurrentBank_ID   = kNullBankID;
 }
 
+// Compute the flat subbank index from ROC and bank IDs.
 Int_t VQwSubsystem::GetSubbankIndex(const ROCID_t roc_id, const BankID_t bank_id) const
 {
   //  Bool_t lDEBUG=kTRUE;
@@ -175,6 +175,7 @@ Int_t VQwSubsystem::GetSubbankIndex(const ROCID_t roc_id, const BankID_t bank_id
   return index;
 }
 
+// Register a ROC and bank ID pair, creating entries if new.
 Int_t VQwSubsystem::RegisterROCNumber(const ROCID_t roc_id, const BankID_t bank_id)
 {
   Int_t stat      = 0;
@@ -214,6 +215,7 @@ Int_t VQwSubsystem::RegisterROCNumber(const ROCID_t roc_id, const BankID_t bank_
   return stat;
 }
 
+// Register a subbank under the current ROC.
 Int_t VQwSubsystem::RegisterSubbank(const BankID_t bank_id)
 {
   Int_t stat = 0;
@@ -235,6 +237,7 @@ Int_t VQwSubsystem::RegisterSubbank(const BankID_t bank_id)
 }
 
 
+// Register a marker word within the current ROC/bank context.
 Int_t VQwSubsystem::RegisterMarkerWord(const UInt_t markerword)
 {
   static BankID_t bankIDmask = 0xffffffff;
@@ -260,6 +263,7 @@ Int_t VQwSubsystem::RegisterMarkerWord(const UInt_t markerword)
   return stat;
 }
 
+// Parse and register ROC, bank, and marker word entries from a map file.
 void VQwSubsystem::RegisterRocBankMarker(QwParameterFile &mapstr){
   UInt_t value = 0;
   if (mapstr.PopValue("roc",value)) {
@@ -273,6 +277,7 @@ void VQwSubsystem::RegisterRocBankMarker(QwParameterFile &mapstr){
   }
 }
 
+// Print subsystem name, registered ROCs/banks, and parent information.
 void VQwSubsystem::PrintInfo() const
 {
   std::cout << "Name of this subsystem: " << fSystemName << std::endl;
@@ -286,6 +291,7 @@ void VQwSubsystem::PrintInfo() const
 }
 
 
+// Assignment operator: copy data-loaded status.
 VQwSubsystem& VQwSubsystem::operator=(VQwSubsystem *value)
 {
   this->fIsDataLoaded = value->fIsDataLoaded;
@@ -301,6 +307,7 @@ std::vector<TString> VQwSubsystem::GetParamFileNameList()
 
 
 
+// Return the map of detector map file names to contents.
 std::map<TString, TString> VQwSubsystem::GetDetectorMaps()
 {
   return fDetectorMaps;
@@ -308,6 +315,7 @@ std::map<TString, TString> VQwSubsystem::GetDetectorMaps()
 
 
 
+// Print loaded detector map file names for debugging.
 void VQwSubsystem::PrintDetectorMaps(Bool_t status) const
 {
   Bool_t local_debug = false;

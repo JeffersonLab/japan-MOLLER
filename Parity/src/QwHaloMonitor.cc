@@ -1,3 +1,7 @@
+/**
+ * \file QwHaloMonitor.cc
+ * \brief Implementation of the halo monitor data element.
+ */
 /**********************************************************\
 * File: QwHaloMonitor.cc                                  *
 *                                                         *
@@ -21,33 +25,46 @@
 #include "QwDBInterface.h"
 #endif // __USE_DATABASE__
 
+/**
+ * \brief Initialize the halo monitor with subsystem and name.
+ * \param subsystem Subsystem identifier.
+ * \param name Detector name used for branches and histograms.
+ */
 void  QwHaloMonitor::InitializeChannel(TString subsystem, TString name){
   fHalo_Counter.InitializeChannel(name);
   SetElementName(name);
 }
 
+/**
+ * \brief Initialize the halo monitor with a detector name.
+ * \param name Detector name used for branches and histograms.
+ */
 void  QwHaloMonitor::InitializeChannel(TString name){
   fHalo_Counter.InitializeChannel(name);
   SetElementName(name);
 }
 
+/** \brief Clear event-scoped data in the underlying counter. */
 void QwHaloMonitor::ClearEventData()
 {
   fHalo_Counter.ClearEventData();
 }
 
+/** \brief Process event (delegated to the underlying counter). */
 void QwHaloMonitor::ProcessEvent()
 {
   // no processing required for the halos as they are just counters(?).
   fHalo_Counter.ProcessEvent();
 }
 
+/** \brief Decode the raw event buffer into the underlying counter. */
 Int_t QwHaloMonitor::ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left,UInt_t index)
 {
   return fHalo_Counter.ProcessEvBuffer(buffer,num_words_left);
 }
 
 
+/** \brief Apply hardware checks (no hardware errors for simple counters). */
 Bool_t QwHaloMonitor::ApplyHWChecks()
 {
   Bool_t eventokay=kTRUE;
@@ -55,18 +72,21 @@ Bool_t QwHaloMonitor::ApplyHWChecks()
 }
 
 
+/** \brief Apply single-event cuts on the underlying counter. */
 Bool_t QwHaloMonitor::ApplySingleEventCuts()
 {
   return fHalo_Counter.ApplySingleEventCuts();
 }
 
 
+/** \brief Print accumulated error counters for this monitor. */
 void QwHaloMonitor::PrintErrorCounters() const
 {
   fHalo_Counter.PrintErrorCounters();
 }
 
 
+/** \brief Copy-assign from another halo monitor. */
 QwHaloMonitor& QwHaloMonitor::operator= (const QwHaloMonitor &value)
 {
   if (GetElementName()!=""){
@@ -75,6 +95,7 @@ QwHaloMonitor& QwHaloMonitor::operator= (const QwHaloMonitor &value)
   return *this;
 }
 
+/** \brief Add-assign from another halo monitor (sum counters). */
 QwHaloMonitor& QwHaloMonitor::operator+= (const QwHaloMonitor &value)
 {
   if (GetElementName()!=""){
@@ -83,6 +104,7 @@ QwHaloMonitor& QwHaloMonitor::operator+= (const QwHaloMonitor &value)
   return *this;
 }
 
+/** \brief Subtract-assign from another halo monitor (difference counters). */
 QwHaloMonitor& QwHaloMonitor::operator-= (const QwHaloMonitor &value)
 {
   if (GetElementName()!=""){
@@ -92,16 +114,19 @@ QwHaloMonitor& QwHaloMonitor::operator-= (const QwHaloMonitor &value)
 }
 
 
+/** \brief Sum two halo monitors into this instance. */
 void QwHaloMonitor::Sum(QwHaloMonitor &value1, QwHaloMonitor &value2){
   *this =  value1;
   *this += value2;
 }
 
+/** \brief Compute the difference of two halo monitors into this instance. */
 void QwHaloMonitor::Difference(QwHaloMonitor &value1, QwHaloMonitor &value2){
   *this =  value1;
   *this -= value2;
 }
 
+/** \brief Form the ratio of two halo monitors into this instance. */
 void QwHaloMonitor::Ratio(QwHaloMonitor &numer, QwHaloMonitor &denom)
 {
   if (GetElementName()!=""){
@@ -110,35 +135,46 @@ void QwHaloMonitor::Ratio(QwHaloMonitor &numer, QwHaloMonitor &denom)
   return;
 }
 
+/** \brief Scale the underlying counter by a constant factor. */
 void QwHaloMonitor::Scale(Double_t factor)
 {
   fHalo_Counter.Scale(factor);
 }
 
+/** \brief Accumulate running sums from another monitor into this one. */
 void QwHaloMonitor::AccumulateRunningSum(const QwHaloMonitor& value, Int_t count, Int_t ErrorMask) {
   fHalo_Counter.AccumulateRunningSum(value.fHalo_Counter, count, ErrorMask);
 }
 
+/** \brief Remove a single entry from the running sums using a source value. */
 void QwHaloMonitor::DeaccumulateRunningSum(QwHaloMonitor& value, Int_t ErrorMask) {
   fHalo_Counter.DeaccumulateRunningSum(value.fHalo_Counter, ErrorMask);
 }
 
+/** \brief Update running averages for the underlying counter. */
 void QwHaloMonitor::CalculateRunningAverage(){
   fHalo_Counter.CalculateRunningAverage();
 }
 
 
+/** \brief Print a compact value summary for this monitor. */
 void QwHaloMonitor::PrintValue() const
 {
   fHalo_Counter.PrintValue();
 }
 
+/** \brief Print detailed information for this monitor. */
 void QwHaloMonitor::PrintInfo() const
 {
   std::cout << "QwVQWK_Channel Info " << std::endl;
   fHalo_Counter.PrintInfo();
 }
 
+/**
+ * \brief Check for burp failures by delegating to the underlying counter.
+ * \param ev_error Reference halo monitor to compare against.
+ * \return kTRUE if a burp failure was detected; otherwise kFALSE.
+ */
 Bool_t QwHaloMonitor::CheckForBurpFail(const VQwDataElement *ev_error){
   Bool_t burpstatus = kFALSE;
   try {
@@ -160,6 +196,11 @@ Bool_t QwHaloMonitor::CheckForBurpFail(const VQwDataElement *ev_error){
   return burpstatus;
 }
 
+/**
+ * \brief Define histograms for this monitor (delegated to underlying counter).
+ * \param folder ROOT folder to contain histograms.
+ * \param prefix Histogram name prefix.
+ */
 void  QwHaloMonitor::ConstructHistograms(TDirectory *folder, TString &prefix)
 {
   if (GetElementName()==""){
@@ -170,6 +211,7 @@ void  QwHaloMonitor::ConstructHistograms(TDirectory *folder, TString &prefix)
   }
 }
 
+/** \brief Fill histograms for this monitor if enabled. */
 void  QwHaloMonitor::FillHistograms()
 {
   if (GetElementName()==""){
@@ -180,6 +222,12 @@ void  QwHaloMonitor::FillHistograms()
   }
 }
 
+/**
+ * \brief Construct ROOT branches and value vector entries.
+ * \param tree Output tree.
+ * \param prefix Branch name prefix.
+ * \param values Output value vector to be appended.
+ */
 void  QwHaloMonitor::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
   if (GetElementName()==""){

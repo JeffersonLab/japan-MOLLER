@@ -1,9 +1,9 @@
-/**********************************************************\
-* File: QwPMT_Channel.h                                           *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2007-05-08 15:40>                           *
-\**********************************************************/
+/*!
+ * \file   QwPMT_Channel.h
+ * \brief  PMT channel data element for tracking subsystem
+ * \author P. M. King
+ * \date   2007-05-08
+ */
 
 #ifndef __QwPMT_CHANNEL__
 #define __QwPMT_CHANNEL__
@@ -19,8 +19,15 @@
 
 
 
-///
-/// \ingroup QwTracking
+/**
+ * \class QwPMT_Channel
+ * \ingroup QwTracking
+ * \brief PMT channel data element for photomultiplier tube readout
+ *
+ * Handles data from photomultiplier tube channels including raw values,
+ * calibration, and basic data element operations for PMT-based detectors
+ * in the tracking system.
+ */
 class QwPMT_Channel: public VQwDataElement {
   /******************************************************************
    *  Class: QwPMT_Channel

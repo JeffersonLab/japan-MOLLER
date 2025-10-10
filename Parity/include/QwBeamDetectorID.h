@@ -1,9 +1,7 @@
-/**********************************************************\
-* File: QwBeamDetectorID.h                                *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwBeamDetectorID.h
+ * \brief  Beam detector identification and mapping class
+ */
 
 #ifndef __QWBEAMDETECTORID__
 #define __QWBEAMDETECTORID__
@@ -21,6 +19,11 @@ class QwParameterFile;
 /*****************************************************************
 *  Class:
 ******************************************************************/
+/**
+ * \class QwBeamDetectorID
+ * \ingroup QwAnalysis_BL
+ * \brief Beam detector mapping/ID decoded from map files
+ */
 class QwBeamDetectorID {
 public:
   QwBeamDetectorID(Int_t subbankid, Int_t offset,TString name, TString dettype,

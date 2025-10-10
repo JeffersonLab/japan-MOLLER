@@ -1,8 +1,8 @@
-/*
- * QwCombinerSubsystem.h
- *
- *  Created on: Aug 11, 2011
- *      Author: meeker
+/*!
+ * \file   QwCombinerSubsystem.h
+ * \brief  Combiner subsystem for parity analysis data handling
+ * \author meeker
+ * \date   2011-08-11
  */
 
 

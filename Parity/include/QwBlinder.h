@@ -6,6 +6,11 @@
  * \date   2010-04-14
  */
 
+/*!
+ * \file   QwBlinder.h
+ * \brief  Data blinding utilities for parity violation analysis
+ */
+
 #ifndef __QWBLINDER__
 #define __QWBLINDER__
 
@@ -42,27 +47,13 @@ typedef unsigned long long ULong64_t; // Portable unsigned long integer 8 bytes
 /**
  * \class QwBlinder
  * \ingroup QwAnalysis
+ * \brief Data blinding utilities for parity violation analysis
  *
- * \brief Class for blinding data, adapted from G0 blinder class
- *
- * 1. Asymmetry blinding scheme:
- * \f[
- *   Asym_{blinded} = (Asym_{actual} + fBlindingOffset) * fBlindingFactor
- * \f]
- * where \f$ fBlindingOffset = F \times sign(\lambda/2) \f$, F is an encrypted factor
- * with |F| < 0.06 ppm.
- * This offset fBlindingOffset will be applied on the block and blocksum of the asymmetry.
- *
- * 2. Difference blinding scheme:
- * For blinding the helicity correlated differences of the detectors, we'd have to do:
- * \f[
- *   Diff_{blinded} = (Diff_{raw} + Yield_{raw} * fBlindingOffset) * fBlindingFactor)
- * \f]
- * where \f$ Asym_{raw} = Diff_{raw} / Yield_{raw} \f$ is the unblinded asymmetry,
- * and \f$ Asym_{blinded} = Diff_{blinded} / Yield_{blinded} \f$ the blinded asymmetry.
- * Blinding the differences allows that the difference can be written to the output
- * ROOT files without compromising the blinding.
- *
+ * Implements cryptographic data blinding to prevent bias in parity violation
+ * measurements. Supports multiple blinding strategies (additive, multiplicative,
+ * or combined) with encrypted offsets and factors. Provides both asymmetry
+ * and difference blinding schemes to maintain analysis integrity while
+ * preserving statistical properties of the data.
  */
 class QwBlinder {
 
@@ -241,6 +232,7 @@ class QwBlinder {
     Int_t fIHWPPolarity_firstread;
     Int_t fIHWPPolarity;
     Bool_t fSpinDirectionForced;
+    /** \brief Set the current target blindability status. */
     void SetTargetBlindability(EQwBlinderStatus status);
     void SetWienState(EQwWienMode wienmode);
     void SetIHWPPolarity(Int_t ihwppolarity);

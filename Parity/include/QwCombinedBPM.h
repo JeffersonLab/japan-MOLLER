@@ -1,9 +1,8 @@
-/**********************************************************\
-* File: QwCombinedBPM.h                                   *
-*                                                         *
-* Author:B. Waidyawansa                                   *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwCombinedBPM.h
+ * \brief  Combined beam position monitor using weighted average
+ * \author B. Waidyawansa
+ */
 
 #ifndef __QwCOMBINEDBPM__
 #define __QwCOMBINEDBPM__
@@ -29,11 +28,15 @@ class QwDBInterface;
 #endif // __USE_DATABASE__
 class QwParameterFile;
 
-/*****************************************************************
-*  Class:
-******************************************************************/
-///
-/// \ingroup QwAnalysis_BL
+/**
+ * \class QwCombinedBPM
+ * \ingroup QwAnalysis_BL
+ * \brief Template for combined beam position monitor using multiple BPMs
+ *
+ * Maintains a weighted combination of individual BPMs to estimate
+ * position and angle at a virtual location, supporting fits and
+ * effective charge computation.
+ */
 template<typename T>
 class QwCombinedBPM : public VQwBPM {
   friend class QwEnergyCalculator;

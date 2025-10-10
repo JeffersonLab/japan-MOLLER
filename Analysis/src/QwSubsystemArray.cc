@@ -1,9 +1,7 @@
-/**********************************************************\
-* File: QwSubsystemArray.cc                               *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwSubsystemArray.cc
+ * \brief  Implementation for array container managing multiple subsystems
+ */
 
 #include "QwSubsystemArray.h"
 

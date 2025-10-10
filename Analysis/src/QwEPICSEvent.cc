@@ -1,3 +1,8 @@
+/*!
+ * \file   QwEPICSEvent.cc
+ * \brief  EPICS data event handling and storage implementation
+ */
+
 #include "QwEPICSEvent.h"
 
 // System headers

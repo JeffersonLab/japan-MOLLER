@@ -1,9 +1,14 @@
-/**********************************************************\
-* File: QwBPMCavity.cc                                 *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwBPMCavity.cc
+ * \brief  Cavity beam position monitor implementation
+ *
+ * Implementation of the cavity-style BPM (beam position monitor) wrapper.
+ * This class owns three hardware channels (XI, YI, Q) and derives relative
+ * and absolute positions from them. It also wires histogram/tree outputs,
+ * applies hardware checks and single-event cuts, and participates in running
+ * sum/average calculations. No physics behavior is changed by this file's
+ * documentation-only edits.
+ */
 
 #include "QwBPMCavity.h"
 
@@ -29,10 +34,20 @@ const Double_t QwBPMCavity::kQwCavityCalibration = 1.0;
 const TString QwBPMCavity::subelement[QwBPMCavity::kNumElements]={"XI","YI","Q"};
 
 
+/**
+ * Decode a fully qualified channel name into detector and subelement parts.
+ *
+ * @param channel     Full channel name (e.g. "bpm3iXI").
+ * @param detname     Out-parameter set to the detector base name.
+ * @param subname     Out-parameter set to the recognized subelement tag.
+ * @param localindex  Out-parameter set to the subelement enum index or
+ *                    kInvalidSubelementIndex on failure.
+ * @return true if a valid subelement suffix is recognized; false otherwise.
+ */
 Bool_t QwBPMCavity::ParseChannelName(const TString &channel,
-				     TString &detname,
-				     TString &subname,
-				     UInt_t &localindex)
+                                     TString &detname,
+                                     TString &subname,
+                                     UInt_t &localindex)
 {
   localindex=kInvalidSubelementIndex;
   //QwMessage << "Channel Name: " << channel << QwLog::endl;
@@ -59,6 +74,13 @@ Bool_t QwBPMCavity::ParseChannelName(const TString &channel,
 }
 
 
+/**
+ * Initialize channels and derived quantities using a simple name.
+ * Creates three raw hardware channels (XI, YI, Q) and two derived channels
+ * for relative and absolute positions along each transverse axis.
+ *
+ * @param name Detector base name.
+ */
 void  QwBPMCavity::InitializeChannel(TString name)
 {
   size_t i=0;
@@ -82,6 +104,14 @@ void  QwBPMCavity::InitializeChannel(TString name)
   return;
 }
 
+/**
+ * Initialize channels with explicit subsystem and detector name.
+ * This variant forwards subsystem information down to subelements so that
+ * output branches and histograms carry proper scoping.
+ *
+ * @param subsystem Subsystem name.
+ * @param name      Detector base name.
+ */
 void  QwBPMCavity::InitializeChannel(TString subsystem, TString name)
 {
   size_t i=0;
@@ -105,6 +135,7 @@ void  QwBPMCavity::InitializeChannel(TString subsystem, TString name)
   return;
 }
 
+/** Clear all owned subelement and derived channel state for the current event. */
 void QwBPMCavity::ClearEventData()
 {
   size_t i=0;
@@ -119,6 +150,11 @@ void QwBPMCavity::ClearEventData()
 }
 
 
+/**
+ * Apply hardware-level checks to each subelement and aggregate status.
+ *
+ * @return true if no hardware errors are detected across all subelements.
+ */
 Bool_t QwBPMCavity::ApplyHWChecks()
 {
   Bool_t eventokay=kTRUE;
@@ -135,6 +171,7 @@ Bool_t QwBPMCavity::ApplyHWChecks()
   return eventokay;
 }
 
+/** Increment persistent error counters across subelements and derived channels. */
 void QwBPMCavity::IncrementErrorCounters()
 {
   size_t i=0;
@@ -148,6 +185,7 @@ void QwBPMCavity::IncrementErrorCounters()
   }
 }
 
+/** Print persistent error counter summaries for diagnostics. */
 void QwBPMCavity::PrintErrorCounters() const
 {
   size_t i=0;
@@ -160,6 +198,10 @@ void QwBPMCavity::PrintErrorCounters() const
   }
 }
 
+/**
+ * Return the OR of per-channel event-cut error flags for this detector.
+ * This includes raw elements, relative and absolute positions.
+ */
 UInt_t QwBPMCavity::GetEventcutErrorFlag()
 {
   size_t i=0;
@@ -174,6 +216,10 @@ UInt_t QwBPMCavity::GetEventcutErrorFlag()
   return error;
 }
 
+/**
+ * Update derived channel error flags based on raw element error codes and
+ * return the aggregated event-cut error mask.
+ */
 UInt_t QwBPMCavity::UpdateErrorFlag()
 {
   size_t i=0;
@@ -192,6 +238,11 @@ UInt_t QwBPMCavity::UpdateErrorFlag()
   return error2;
 }
 
+/**
+ * Apply analysis-level single-event cuts to raw and derived quantities.
+ *
+ * @return true if all configured channels pass their single-event cuts.
+ */
 Bool_t QwBPMCavity::ApplySingleEventCuts()
 {
   Bool_t status=kTRUE;
@@ -233,6 +284,13 @@ Bool_t QwBPMCavity::ApplySingleEventCuts()
   return status;
 }
 
+/**
+ * Map a human-readable subelement name to the corresponding channel.
+ * Valid names include: relx, rely, absx/x, absy/y, effectivecharge/charge/q,
+ * as well as xi/yi to access raw elements.
+ *
+ * @throws std::invalid_argument on an unrecognized subelement request.
+ */
 VQwHardwareChannel* QwBPMCavity::GetSubelementByName(TString ch_name)
 {
   VQwHardwareChannel* tmpptr = NULL;
@@ -285,6 +343,16 @@ void QwBPMCavity::SetSingleEventCuts(TString ch_name, Double_t minX, Double_t ma
 
 }*/
 
+/**
+ * Configure single-event cuts for one subelement by name.
+ *
+ * @param ch_name     Subchannel selector (e.g. relx, rely, absx, absy, effectivecharge, xi, yi).
+ * @param errorflag   Error mask bit(s) to associate with failures.
+ * @param minX        Lower limit for the channel value.
+ * @param maxX        Upper limit for the channel value.
+ * @param stability   Allowed fractional stability (implementation-specific).
+ * @param burplevel   Threshold for burp/burst detection (implementation-specific).
+ */
 void QwBPMCavity::SetSingleEventCuts(TString ch_name, UInt_t errorflag,Double_t minX, Double_t maxX, Double_t stability, Double_t burplevel){
   errorflag|=kBPMErrorFlag;//update the device flag
   if (ch_name=="relx"){
@@ -319,6 +387,15 @@ void QwBPMCavity::SetSingleEventCuts(TString ch_name, UInt_t errorflag,Double_t 
 
 }
 
+/**
+ * Polymorphic burp/burst failure check against a reference element of the
+ * same concrete type. For each subelement and derived channel, delegate to
+ * its CheckForBurpFail implementation.
+ *
+ * @param ev_error Reference data element to compare against.
+ * @return true if any sub-channel reports a burp/burst failure.
+ * @throws std::invalid_argument if ev_error is not a QwBPMCavity.
+ */
 Bool_t QwBPMCavity::CheckForBurpFail(const VQwDataElement *ev_error){
   Short_t i=0;
   Bool_t burpstatus = kFALSE;
@@ -346,6 +423,13 @@ Bool_t QwBPMCavity::CheckForBurpFail(const VQwDataElement *ev_error){
   return burpstatus;
 }
 
+/**
+ * Update error flags by copying flags from a reference BPM of the same
+ * concrete type. This is used to propagate error state across containers.
+ *
+ * @param ev_error Reference BPM (must be QwBPMCavity).
+ * @throws std::invalid_argument if ev_error is not a QwBPMCavity.
+ */
 void QwBPMCavity::UpdateErrorFlag(const VQwBPM *ev_error){
   size_t i=0;
   try {
@@ -374,6 +458,10 @@ void QwBPMCavity::UpdateErrorFlag(const VQwBPM *ev_error){
 
 
 
+/**
+ * Process the current event by first applying hardware checks and then
+ * computing relative and absolute positions from raw subelements.
+ */
 void  QwBPMCavity::ProcessEvent()
 {
   size_t i = 0;
@@ -398,6 +486,14 @@ void  QwBPMCavity::ProcessEvent()
 }
 
 
+/**
+ * Decode and route a raw data buffer into the requested subelement.
+ *
+ * @param buffer                   CODA/raw buffer pointer.
+ * @param word_position_in_buffer  Starting word index to parse.
+ * @param index                    Target subelement index (0..kNumElements-1).
+ * @return The original word_position_in_buffer (legacy behavior).
+ */
 Int_t QwBPMCavity::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer,UInt_t index)
 {
   if(index<kNumElements) {
@@ -412,6 +508,7 @@ Int_t QwBPMCavity::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffe
 
 
 
+/** Print the current values of raw and absolute position channels. */
 void QwBPMCavity::PrintValue() const
 {
   for (size_t i = 0; i < kNumElements; i++) {
@@ -423,6 +520,7 @@ void QwBPMCavity::PrintValue() const
   }
 }
 
+/** Print a description of the raw and absolute position channels. */
 void QwBPMCavity::PrintInfo() const
 {
   size_t i = 0;
@@ -436,6 +534,12 @@ void QwBPMCavity::PrintInfo() const
 }
 
 
+/**
+ * Return the element name for a given raw subelement index.
+ *
+ * @param subindex Index into the raw elements array.
+ * @return Element name; logs an error and returns empty on invalid index.
+ */
 TString QwBPMCavity::GetSubElementName(Int_t subindex)
 {
   TString thisname;
@@ -447,6 +551,7 @@ TString QwBPMCavity::GetSubElementName(Int_t subindex)
   return thisname;
 }
 
+/** Convert a subelement tag (XI, YI, Q) into an enum index. */
 UInt_t QwBPMCavity::GetSubElementIndex(TString subname)
 {
   subname.ToUpper();
@@ -461,6 +566,10 @@ UInt_t QwBPMCavity::GetSubElementIndex(TString subname)
   return localindex;
 }
 
+/**
+ * Recompute absolute positions from raw elements and stored offsets.
+ * Intended for use after externally setting raw subelements.
+ */
 void  QwBPMCavity::GetAbsolutePosition()
 {
   for(size_t i=0;i<kNumAxes;i++){
@@ -474,6 +583,7 @@ void  QwBPMCavity::GetAbsolutePosition()
 }
 
 
+/** Type-erased assignment; forwards to the concrete operator=. */
 VQwBPM& QwBPMCavity::operator= (const VQwBPM &value)
 {
   *(dynamic_cast<QwBPMCavity*>(this)) =
@@ -481,6 +591,7 @@ VQwBPM& QwBPMCavity::operator= (const VQwBPM &value)
   return *this;
 }
 
+/** Concrete assignment; copies raw elements and derived channels. */
 QwBPMCavity& QwBPMCavity::operator= (const QwBPMCavity &value)
 {
   VQwBPM::operator= (value);
@@ -499,6 +610,7 @@ QwBPMCavity& QwBPMCavity::operator= (const QwBPMCavity &value)
 }
 
 
+/** Element-wise addition of raw and derived channels. */
 QwBPMCavity& QwBPMCavity::operator+= (const QwBPMCavity &value)
 {
 
@@ -515,6 +627,7 @@ QwBPMCavity& QwBPMCavity::operator+= (const QwBPMCavity &value)
   return *this;
 }
 
+/** Type-erased addition; forwards to the concrete operator+=. */
 VQwBPM& QwBPMCavity::operator+= (const VQwBPM &value)
 {
   *(dynamic_cast<QwBPMCavity*>(this)) +=
@@ -524,6 +637,7 @@ VQwBPM& QwBPMCavity::operator+= (const VQwBPM &value)
 
 
 
+/** Element-wise subtraction of raw and derived channels. */
 QwBPMCavity& QwBPMCavity::operator-= (const QwBPMCavity &value)
 {
 
@@ -540,6 +654,7 @@ QwBPMCavity& QwBPMCavity::operator-= (const QwBPMCavity &value)
   return *this;
 }
 
+/** Type-erased subtraction; forwards to the concrete operator-=. */
 VQwBPM& QwBPMCavity::operator-= (const VQwBPM &value)
 {
   *(dynamic_cast<QwBPMCavity*>(this)) -=
@@ -549,6 +664,11 @@ VQwBPM& QwBPMCavity::operator-= (const VQwBPM &value)
 
 
 
+/**
+ * Special ratio behavior for cavity BPMs when forming asymmetries.
+ * Only the effective charge channel participates; transverse positions are
+ * kept as differences (consistent with stripline BPM behavior).
+ */
 void QwBPMCavity::Ratio(QwBPMCavity &numer, QwBPMCavity &denom)
 {
   // this function is called when forming asymmetries. In this case what we actually want for the
@@ -561,6 +681,7 @@ void QwBPMCavity::Ratio(QwBPMCavity &numer, QwBPMCavity &denom)
 
 
 
+/** Scale all raw and derived channels by a common factor. */
 void QwBPMCavity::Scale(Double_t factor)
 {
   for(size_t i=0;i<kNumElements;i++){
@@ -574,6 +695,7 @@ void QwBPMCavity::Scale(Double_t factor)
 }
 
 
+/** Update per-channel running averages based on accumulated sums. */
 void QwBPMCavity::CalculateRunningAverage()
 {
   size_t i = 0;
@@ -586,10 +708,12 @@ void QwBPMCavity::CalculateRunningAverage()
   return;
 }
 
+/** Type-erased running-sum accumulate; forwards to concrete overload. */
 void QwBPMCavity::AccumulateRunningSum(const VQwBPM &value, Int_t count, Int_t ErrorMask){
   AccumulateRunningSum(*dynamic_cast<const QwBPMCavity* >(&value), count, ErrorMask);
 };
 
+/** Accumulate running sums for raw and derived channels. */
 void QwBPMCavity::AccumulateRunningSum(const QwBPMCavity& value, Int_t count, Int_t ErrorMask)
 {
 
@@ -603,10 +727,12 @@ void QwBPMCavity::AccumulateRunningSum(const QwBPMCavity& value, Int_t count, In
   return;
 }
 
+/** Type-erased running-sum deaccumulate; forwards to concrete overload. */
 void QwBPMCavity::DeaccumulateRunningSum(VQwBPM &value, Int_t ErrorMask){
   DeaccumulateRunningSum(*dynamic_cast<QwBPMCavity* >(&value), ErrorMask);
 };
 
+/** Deaccumulate running sums for raw and derived channels. */
 void QwBPMCavity::DeaccumulateRunningSum(QwBPMCavity& value, Int_t ErrorMask)
 {
   size_t i = 0;
@@ -622,6 +748,10 @@ void QwBPMCavity::DeaccumulateRunningSum(QwBPMCavity& value, Int_t ErrorMask)
 
 
 
+/**
+ * Define ROOT histograms for subelements and derived absolute positions.
+ * The prefix "asym_" is converted to "diff_" for positions.
+ */
 void  QwBPMCavity::ConstructHistograms(TDirectory *folder, TString &prefix)
 {
 
@@ -644,6 +774,7 @@ void  QwBPMCavity::ConstructHistograms(TDirectory *folder, TString &prefix)
   return;
 }
 
+/** Fill previously constructed ROOT histograms for this detector. */
 void  QwBPMCavity::FillHistograms()
 {
   if (GetElementName()=="") {
@@ -662,6 +793,10 @@ void  QwBPMCavity::FillHistograms()
   return;
 }
 
+/**
+ * Define TTree branches and attach backing vectors for output variables.
+ * The prefix "asym_" is converted to "diff_" for positions.
+ */
 void  QwBPMCavity::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
   if (GetElementName()==""){
@@ -685,6 +820,10 @@ void  QwBPMCavity::ConstructBranchAndVector(TTree *tree, TString &prefix, std::v
   return;
 }
 
+ /**
+  * Define TTree branches for output variables using the provided prefix.
+  * The prefix "asym_" is converted to "diff_" for positions.
+  */
  void  QwBPMCavity::ConstructBranch(TTree *tree, TString &prefix)
  {
    if (GetElementName()==""){
@@ -708,6 +847,10 @@ void  QwBPMCavity::ConstructBranchAndVector(TTree *tree, TString &prefix, std::v
    return;
  }
 
+ /**
+  * Conditionally define TTree branches based on a module list filter.
+  * Only branches present in the module list are created.
+  */
  void  QwBPMCavity::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist)
  {
    TString devicename;
@@ -754,6 +897,7 @@ void  QwBPMCavity::ConstructBranchAndVector(TTree *tree, TString &prefix, std::v
  }
 
 
+/** Append this detector's values to the provided output vector. */
 void  QwBPMCavity::FillTreeVector(std::vector<Double_t> &values) const
 {
   if (GetElementName()=="") {
@@ -772,6 +916,10 @@ void  QwBPMCavity::FillTreeVector(std::vector<Double_t> &values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
+/**
+ * Define RNTuple fields and attach backing vectors for output variables.
+ * The prefix "asym_" is converted to "diff_" for positions.
+ */
 void  QwBPMCavity::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (GetElementName()==""){
@@ -795,6 +943,7 @@ void  QwBPMCavity::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>&
   return;
 }
 
+/** Append this detector's values to the RNTuple output vector. */
 void  QwBPMCavity::FillNTupleVector(std::vector<Double_t>& values) const
 {
   if (GetElementName()=="") {
@@ -813,6 +962,7 @@ void  QwBPMCavity::FillNTupleVector(std::vector<Double_t>& values) const
 }
 #endif
 
+/** Propagate event-cut mode bitmask to all owned subchannels. */
 void QwBPMCavity::SetEventCutMode(Int_t bcuts)
 {
   size_t i = 0;
@@ -827,6 +977,7 @@ void QwBPMCavity::SetEventCutMode(Int_t bcuts)
 }
 
 
+/** Build a flat list of representative channels for legacy consumers. */
 void QwBPMCavity::MakeBPMCavityList()
 {
   for (size_t i = kXAxis; i < kNumAxes; i++) {
@@ -870,6 +1021,10 @@ std::vector<QwErrDBInterface> QwBPMCavity::GetErrDBEntry()
  * Mock data generation routines
  **********************************/
 
+/**
+ * Configure mock-data generation parameters for testing.
+ * Currently a placeholder for cavity-specific randomization strategies.
+ */
 void  QwBPMCavity::SetRandomEventParameters(Double_t meanX, Double_t sigmaX, Double_t meanY, Double_t sigmaY)
 {
   // Average values of the signals in the stripline ADCs
@@ -904,6 +1059,7 @@ void  QwBPMCavity::SetRandomEventParameters(Double_t meanX, Double_t sigmaX, Dou
 }
 
 
+/** Generate random event data in owned raw elements for mock runs. */
 void QwBPMCavity::RandomizeEventData(int helicity, double time)
 {
   for (size_t i=0; i<kNumElements; i++) fElement[i].RandomizeEventData(helicity, time);
@@ -912,6 +1068,7 @@ void QwBPMCavity::RandomizeEventData(int helicity, double time)
 }
 
 
+/** Set relative position hardware sums and sequence numbers directly. */
 void QwBPMCavity::SetEventData(Double_t* relpos, UInt_t sequencenumber)
 {
   for (size_t i=0; i<kNumElements; i++)
@@ -923,6 +1080,7 @@ void QwBPMCavity::SetEventData(Double_t* relpos, UInt_t sequencenumber)
 }
 
 
+/** Serialize raw element data into a CODA-like output buffer. */
 void QwBPMCavity::EncodeEventData(std::vector<UInt_t> &buffer)
 {
   for (size_t i=0; i<kNumElements; i++)
@@ -930,6 +1088,7 @@ void QwBPMCavity::EncodeEventData(std::vector<UInt_t> &buffer)
 }
 
 
+/** Set the default sample size for all raw subelements. */
 void QwBPMCavity::SetDefaultSampleSize(Int_t sample_size)
 {
   for(size_t i=0;i<kNumElements;i++)
@@ -937,11 +1096,13 @@ void QwBPMCavity::SetDefaultSampleSize(Int_t sample_size)
 }
 
 
+/** Set the pedestal for a specific raw subelement. */
 void QwBPMCavity::SetSubElementPedestal(Int_t j, Double_t value)
 {
   fElement[j].SetPedestal(value);
 }
 
+/** Set the calibration factor for a specific raw subelement. */
 void QwBPMCavity::SetSubElementCalibrationFactor(Int_t j, Double_t value)
 {
   fElement[j].SetCalibrationFactor(value);
