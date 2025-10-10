@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
 
 # Name of this project
 project(QwAnalysis VERSION 2.0.0 LANGUAGES CXX)
