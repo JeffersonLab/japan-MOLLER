@@ -194,7 +194,11 @@ public:
   void AccumulateRunningSum(const VQwScaler_Channel &value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
   void AccumulateRunningSum(const VQwHardwareChannel *value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF){
     const VQwScaler_Channel *tmp_ptr = dynamic_cast<const VQwScaler_Channel*>(value);
-    if (tmp_ptr != NULL) AccumulateRunningSum(*tmp_ptr, count, ErrorMask);
+    if (tmp_ptr != NULL) {
+      AccumulateRunningSum(*tmp_ptr, count, ErrorMask);
+    } else {
+      throw std::invalid_argument("Standard exception from VQwScaler_Channel::AccumulateRunningSum: incompatible hardware channel type");
+    }
   };
   inline void DeaccumulateRunningSum(const VQwScaler_Channel& value, Int_t ErrorMask){
     AccumulateRunningSum(value, -1, ErrorMask);

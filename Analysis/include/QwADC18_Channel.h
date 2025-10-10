@@ -156,7 +156,11 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   void AccumulateRunningSum(const QwADC18_Channel& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
   void AccumulateRunningSum(const VQwHardwareChannel *value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF){
     const QwADC18_Channel *tmp_ptr = dynamic_cast<const QwADC18_Channel*>(value);
-    if (tmp_ptr != NULL) AccumulateRunningSum(*tmp_ptr, count, ErrorMask);
+    if (tmp_ptr != NULL) {
+      AccumulateRunningSum(*tmp_ptr, count, ErrorMask);
+    } else {
+      throw std::invalid_argument("Standard exception from QwADC18_Channel::AccumulateRunningSum: incompatible hardware channel type");
+    }
   };
   ////deaccumulate one value from the running sum
   inline void DeaccumulateRunningSum(const QwADC18_Channel& value, Int_t ErrorMask=0xFFFFFFF){
@@ -165,7 +169,11 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   /*
   void DeaccumulateRunningSum(VQwHardwareChannel *value){
     const QwADC18_Channel *tmp_ptr = dynamic_cast<const QwADC18_Channel*>(value);
-    if (tmp_ptr != NULL) DeaccumulateRunningSum(*tmp_ptr);
+    if (tmp_ptr != NULL) {
+      DeaccumulateRunningSum(*tmp_ptr);
+    } else {
+      throw std::invalid_argument("Standard exception from QwADC18_Channel::DeaccumulateRunningSum: incompatible hardware channel type");
+    }
   };
   */
 
