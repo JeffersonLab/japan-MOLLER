@@ -24,7 +24,6 @@ class QwDetectorArrayID;
 
 class QwDetectorArray: 
  public VQwDetectorArray, 
- virtual public VQwSubsystemParity, 
  public MQwSubsystemCloneable<QwDetectorArray> {
 
 /******************************************************************
@@ -42,15 +41,13 @@ public:
 
 /// Constructor with name
 QwDetectorArray(const TString& name) 
- :VQwSubsystem(name), VQwSubsystemParity(name), VQwDetectorArray(name){};
-
+ : VQwDetectorArray(name){};
 
 /// Copy constructor
 QwDetectorArray(const QwDetectorArray& source)
-  :VQwSubsystem(source), VQwSubsystemParity(source), VQwDetectorArray(source){};
+ : VQwDetectorArray(source){};
 
-
-/// Virtual destructor
+  /// Virtual destructor
 ~QwDetectorArray() {};
 
 };

@@ -17,10 +17,12 @@ class QwOmnivore: public VQwSubsystem_t {
 
   public:
     /// Constructor with name
-    QwOmnivore(const TString& name): VQwSubsystem(name),VQwSubsystem_t(name) { };
+    QwOmnivore(const TString& name)
+    : VQwSubsystem_t(name)
+    { };
     /// Copy constructor
     QwOmnivore(const QwOmnivore& source)
-    : VQwSubsystem(source),VQwSubsystem_t(source)
+    : VQwSubsystem_t(source)
     { }
     /// Virtual destructor
     virtual ~QwOmnivore() { };

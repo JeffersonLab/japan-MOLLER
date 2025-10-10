@@ -55,7 +55,7 @@ class QwDetectorArrayID {
 };
 
 
-class VQwDetectorArray: virtual public VQwSubsystemParity {
+class VQwDetectorArray: public VQwSubsystemParity {
 
  /******************************************************************
  *  Class: QwDetectorArray
@@ -72,7 +72,9 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
 
     /// Constructor with name
     VQwDetectorArray(const TString& name) 
-     :VQwSubsystem(name),VQwSubsystemParity(name),bNormalization(kFALSE) {
+    : VQwSubsystemParity(name),
+      bNormalization(kFALSE)
+    {
 
         fTargetCharge.InitializeChannel("q_targ","derived");
         fTargetX.InitializeChannel("x_targ","derived");
@@ -86,7 +88,7 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
     /// Copy constructor
   
     VQwDetectorArray(const VQwDetectorArray& source)
-     :VQwSubsystem(source),VQwSubsystemParity(source),
+     :VQwSubsystemParity(source),
      fIntegrationPMT(source.fIntegrationPMT),
      fCombinedPMT(source.fCombinedPMT),
      fMainDetID(source.fMainDetID){}

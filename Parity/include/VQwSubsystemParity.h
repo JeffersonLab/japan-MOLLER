@@ -34,7 +34,7 @@ class QwPromptSummary;
  *   with the CODA routines.
  *
  */
-class VQwSubsystemParity: virtual public VQwSubsystem {
+class VQwSubsystemParity: public VQwSubsystem {
 
   private:
     /// Private default constructor (not implemented, will throw linker error on use)

@@ -94,7 +94,7 @@ class QwBeamMod: public VQwSubsystemParity, public MQwSubsystemCloneable<QwBeamM
  public:
   /// Constructor with name
   QwBeamMod(const TString& name)
-  : VQwSubsystem(name),VQwSubsystemParity(name)
+  : VQwSubsystemParity(name)
     {
       fFFB_holdoff_Counter=0;
       fFFB_Flag=kTRUE;
@@ -108,7 +108,7 @@ class QwBeamMod: public VQwSubsystemParity, public MQwSubsystemCloneable<QwBeamM
     };
   /// Copy constructor
   QwBeamMod(const QwBeamMod& source)
-  : VQwSubsystem(source),VQwSubsystemParity(source),
+  : VQwSubsystemParity(source),
     fWord(source.fWord)
   { 
     // std::cout<< "Here in the copy constructor" << std::endl;

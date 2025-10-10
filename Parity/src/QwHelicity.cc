@@ -42,8 +42,7 @@ const std::vector<UInt_t> QwHelicity::kDefaultHelicityBitPattern{0x69};
 //**************************************************//
 /// Constructor with name
 QwHelicity::QwHelicity(const TString& name)
-: VQwSubsystem(name),
-  VQwSubsystemParity(name),
+: VQwSubsystemParity(name),
   fInputReg_HelPlus(kDefaultInputReg_HelPlus),
   fInputReg_HelMinus(kDefaultInputReg_HelMinus),
   fInputReg_PatternSync(kDefaultInputReg_PatternSync),
@@ -87,8 +86,7 @@ QwHelicity::QwHelicity(const TString& name)
 // all of the copy protection built into the helicity subsystem.  I can't be
 // bothered to clean it up right now... (wdc)
 QwHelicity::QwHelicity(const QwHelicity& source)
-: VQwSubsystem(source.GetName()),
-  VQwSubsystemParity(source.GetName()),
+: VQwSubsystemParity(source.GetName()),
   fInputReg_HelPlus(source.fInputReg_HelPlus),
   fInputReg_HelMinus(source.fInputReg_HelMinus),
   fInputReg_PatternSync(source.fInputReg_PatternSync),

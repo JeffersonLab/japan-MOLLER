@@ -32,11 +32,11 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
       // Constructors
       /// \brief Constructor with just name.
       QwCombinerSubsystem(const TString name)
-      : VQwSubsystem(name), VQwSubsystemParity(name), QwCombiner(name) { }
+      : VQwSubsystemParity(name), QwCombiner(name) { }
 
       // Copy Constructor
       QwCombinerSubsystem(const QwCombinerSubsystem &source)
-      : VQwSubsystem(source), VQwSubsystemParity(source), QwCombiner(source) { }
+      : VQwSubsystemParity(source), QwCombiner(source) { }
 	
       // Destructor 
       ~QwCombinerSubsystem();
