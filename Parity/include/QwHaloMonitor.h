@@ -50,28 +50,28 @@ class  QwHaloMonitor : public VQwDataElement{
   : VQwDataElement(source),
     fHalo_Counter(source.fHalo_Counter)
   { }
-  virtual ~QwHaloMonitor() { };
+  ~QwHaloMonitor() override { };
 
   void  InitializeChannel(TString name);
   // new routine added to update necessary information for tree trimming
   void  InitializeChannel(TString subsystem, TString name);
-  void  ClearEventData();
+  void  ClearEventData() override;
 
-  void LoadChannelParameters(QwParameterFile &paramfile){
+  void LoadChannelParameters(QwParameterFile &paramfile) override{
     fHalo_Counter.LoadChannelParameters(paramfile);
   }
-  std::string GetExternalClockName() { return fHalo_Counter.GetExternalClockName(); };
-  Bool_t NeedsExternalClock() { return fHalo_Counter.NeedsExternalClock(); };
-  void SetExternalClockPtr( const VQwHardwareChannel* clock) {fHalo_Counter.SetExternalClockPtr(clock);};
-  void SetExternalClockName( const std::string name) { fHalo_Counter.SetExternalClockName(name);};
-  Double_t GetNormClockValue() { return fHalo_Counter.GetNormClockValue();}
+  std::string GetExternalClockName() override { return fHalo_Counter.GetExternalClockName(); };
+  Bool_t NeedsExternalClock() override { return fHalo_Counter.NeedsExternalClock(); };
+  void SetExternalClockPtr( const VQwHardwareChannel* clock) override {fHalo_Counter.SetExternalClockPtr(clock);};
+  void SetExternalClockName( const std::string name) override { fHalo_Counter.SetExternalClockName(name);};
+  Double_t GetNormClockValue() override { return fHalo_Counter.GetNormClockValue();}
 
 
 
   void  PrintErrorCounters();//This will display the error summary for each device
   void  UpdateHWErrorCount();//Update error counter for HW faliure
 
-  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left,UInt_t index=0);
+  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left,UInt_t index=0) override;
   void  ProcessEvent();
 
   QwHaloMonitor& operator=  (const QwHaloMonitor &value);
@@ -91,16 +91,16 @@ class  QwHaloMonitor : public VQwDataElement{
 
   Bool_t ApplySingleEventCuts();//check values read from modules are at desired level
   void IncrementErrorCounters(){fHalo_Counter.IncrementErrorCounters();};
-  UInt_t GetEventcutErrorFlag(){return fHalo_Counter.GetEventcutErrorFlag();};
+  UInt_t GetEventcutErrorFlag() override{return fHalo_Counter.GetEventcutErrorFlag();};
 
   Bool_t CheckForBurpFail(const VQwDataElement *ev_error);
 
-  UInt_t UpdateErrorFlag() {return GetEventcutErrorFlag();};
+  UInt_t UpdateErrorFlag() override {return GetEventcutErrorFlag();};
   void UpdateErrorFlag(const QwHaloMonitor *ev_error){
     fHalo_Counter.UpdateErrorFlag(ev_error->fHalo_Counter);
   };
 
-  void PrintErrorCounters() const;// report number of events failed due to HW and event cut faliure
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
   Bool_t ApplyHWChecks();
   void SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel){
     QwError<<"***************************"<<QwLog::endl;
@@ -111,8 +111,8 @@ class  QwHaloMonitor : public VQwDataElement{
   }
 
 
-  void  ConstructHistograms(TDirectory *folder, TString &prefix);
-  void  FillHistograms();
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
+  void  FillHistograms() override;
 
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
   void  ConstructBranch(TTree *tree, TString &prefix);
@@ -136,8 +136,8 @@ class  QwHaloMonitor : public VQwDataElement{
     return fHalo_Counter.GetValue();
   }
 
-  void  PrintValue() const;
-  void  PrintInfo() const;
+  void  PrintValue() const override;
+  void  PrintInfo() const override;
 
 #ifdef __USE_DATABASE__
   std::vector<QwDBInterface> GetDBEntry();

@@ -42,7 +42,7 @@ class QwCombinedPMT : public VQwDataElement {
     fWeights(source.fWeights),
     fSumADC(source.fSumADC)
   { }
-  virtual ~QwCombinedPMT() { };
+  ~QwCombinedPMT() override { };
 
   void  InitializeChannel(TString name, TString datatosave);
   // new routine added to update necessary information for tree trimming
@@ -56,8 +56,8 @@ class QwCombinedPMT : public VQwDataElement {
 
   void Add(QwIntegrationPMT* pmt, Double_t weight);
 
-  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0);
-  void  ClearEventData();
+  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0) override;
+  void  ClearEventData() override;
 
   void PrintErrorCounters();
 
@@ -73,7 +73,7 @@ class QwCombinedPMT : public VQwDataElement {
   void  ProcessEvent();
   Bool_t ApplyHWChecks();//Check for harware errors in the devices
   Bool_t ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
-  void PrintErrorCounters() const;// report number of events failed due to HW and event cut faliure
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   void SetSingleEventCuts(UInt_t errorflag, Double_t LL, Double_t UL, Double_t stability, Double_t burplevel);
 
@@ -82,7 +82,7 @@ class QwCombinedPMT : public VQwDataElement {
     bEVENTCUTMODE=bcuts;
     fSumADC.SetEventCutMode(bcuts);
   }
-  UInt_t GetEventcutErrorFlag(){//return the error flag
+  UInt_t GetEventcutErrorFlag() override{//return the error flag
     return fSumADC.GetEventcutErrorFlag();
   }
 
@@ -92,11 +92,11 @@ class QwCombinedPMT : public VQwDataElement {
 
   Bool_t CheckForBurpFail(const VQwDataElement *ev_error);
 
-  UInt_t UpdateErrorFlag();
+  UInt_t UpdateErrorFlag() override;
   void   UpdateErrorFlag(const QwCombinedPMT *ev_error);
 
-  void PrintInfo() const;
-  void PrintValue() const;
+  void PrintInfo() const override;
+  void PrintValue() const override;
 
   QwCombinedPMT& operator=  (const QwCombinedPMT &value);
   QwCombinedPMT& operator+= (const QwCombinedPMT &value);
@@ -121,8 +121,8 @@ class QwCombinedPMT : public VQwDataElement {
   void SetPedestal(Double_t ped);
   void SetCalibrationFactor(Double_t calib);
 
-  void  ConstructHistograms(TDirectory *folder, TString &prefix);
-  void  FillHistograms();
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
+  void  FillHistograms() override;
 
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
   void  ConstructBranch(TTree *tree, TString &prefix);

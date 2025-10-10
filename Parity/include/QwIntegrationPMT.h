@@ -53,11 +53,11 @@ class QwIntegrationPMT : public VQwDataElement{
     fIsBlindable(source.fIsBlindable),
     fIsNormalizable(source.fIsNormalizable)
   { }
-  virtual ~QwIntegrationPMT() { };
+  ~QwIntegrationPMT() override { };
 
-  void    LoadChannelParameters(QwParameterFile &paramfile){};
+  void    LoadChannelParameters(QwParameterFile &paramfile) override{};
 
-  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0);
+  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0) override;
 
   void  InitializeChannel(TString name, TString datatosave);
   // new routine added to update necessary information for tree trimming
@@ -73,7 +73,7 @@ class QwIntegrationPMT : public VQwDataElement{
 
 
 
-  void  ClearEventData();
+  void  ClearEventData() override;
   void PrintErrorCounters();
 /********************************************************/
 
@@ -100,19 +100,19 @@ void RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeam
   void IncrementErrorCounters(){
     fTriumf_ADC.IncrementErrorCounters();
   }
-  void PrintErrorCounters() const;// report number of events failed due to HW and event cut faliure
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
   Int_t SetSingleEventCuts(Double_t, Double_t);//set two limts
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   void SetSingleEventCuts(UInt_t errorflag, Double_t LL, Double_t UL, Double_t stability, Double_t burplevel);
   void SetDefaultSampleSize(Int_t sample_size);
   void SetSaturationLimit(Double_t saturation_volt );
-  UInt_t GetEventcutErrorFlag(){//return the error flag
+  UInt_t GetEventcutErrorFlag() override{//return the error flag
     return fTriumf_ADC.GetEventcutErrorFlag();
   }
 
   Bool_t CheckForBurpFail(const VQwDataElement *ev_error);
   
-  UInt_t UpdateErrorFlag() {return GetEventcutErrorFlag();};
+  UInt_t UpdateErrorFlag() override {return GetEventcutErrorFlag();};
   void UpdateErrorFlag(const QwIntegrationPMT *ev_error);
 
   void SetEventCutMode(Int_t bcuts){
@@ -128,8 +128,8 @@ void RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeam
   /// \brief Blind the difference using the yield
   void Blind(const QwBlinder *blinder, const QwIntegrationPMT& yield);
 
-  void PrintValue() const;
-  void PrintInfo() const;
+  void PrintValue() const override;
+  void PrintInfo() const override;
 
 /*   Double_t GetRawBlockValue(size_t blocknum) */
 /*            {return fTriumf_ADC.GetRawBlockValue(blocknum);}; */
@@ -161,8 +161,8 @@ void RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeam
   void SetCoefficientCyp(Double_t value){fCoeff_yp  = value;};
   void SetCoefficientCe(Double_t value) {fCoeff_e   = value;};
 
-  void  ConstructHistograms(TDirectory *folder, TString &prefix);
-  void  FillHistograms();
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
+  void  FillHistograms() override;
 
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
   void  ConstructBranch(TTree *tree, TString &prefix);

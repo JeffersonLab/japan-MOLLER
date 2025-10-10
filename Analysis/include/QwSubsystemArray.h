@@ -59,7 +59,7 @@ class QwSubsystemArray:
   /// \brief Copy constructor by reference
   QwSubsystemArray(const QwSubsystemArray& source);
   /// \brief Virtual destructor
-  virtual ~QwSubsystemArray() { };
+  ~QwSubsystemArray() override { };
 
   /// \brief Assignment operator
   QwSubsystemArray& operator=(const QwSubsystemArray& value);

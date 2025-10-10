@@ -73,7 +73,7 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
       CalculateRunningAverage();
     };
 
-    virtual ~VQwDataHandler();
+    ~VQwDataHandler() override;
 
     TString GetName(){return fName;}
 
@@ -126,9 +126,9 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
     virtual Int_t LoadChannelMap(const std::string& /*mapfile*/){return 0;};
 
     /// \brief Publish all variables of the subsystem
-    virtual Bool_t PublishInternalValues() const;
+    Bool_t PublishInternalValues() const override;
     /// \brief Try to publish an internal variable matching the submitted name
-    virtual Bool_t PublishByRequest(TString device_name);
+    Bool_t PublishByRequest(TString device_name) override;
 
   protected:
     

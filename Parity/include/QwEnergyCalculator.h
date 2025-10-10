@@ -54,13 +54,13 @@ class QwEnergyCalculator : public VQwDataElement{
   QwEnergyCalculator(const QwEnergyCalculator& source)
   : VQwDataElement(source),fEnergyChange(source.fEnergyChange)
   { }
-  virtual ~QwEnergyCalculator() { };
+  ~QwEnergyCalculator() override { };
 
     void    InitializeChannel(TString name,TString datatosave);
     // new routine added to update necessary information for tree trimming
     void    InitializeChannel(TString subsystem, TString name, TString datatosave);
 
-    void    LoadChannelParameters(QwParameterFile &paramfile){};
+    void    LoadChannelParameters(QwParameterFile &paramfile) override{};
 
 //------------------------------------------------------------------------------------
     void    SetRandomEventParameters(Double_t mean, Double_t sigma);
@@ -68,15 +68,15 @@ class QwEnergyCalculator : public VQwDataElement{
     void    GetProjectedPosition(VQwBPM *device);
     size_t  GetNumberOfElements() {return fDevice.size();};
     TString GetSubElementName(Int_t index) {return fDevice.at(index)->GetElementName();};
-    void    LoadMockDataParameters(QwParameterFile &paramfile);
+    void    LoadMockDataParameters(QwParameterFile &paramfile) override;
 //------------------------------------------------------------------------------------
     
-    void    ClearEventData();
+    void    ClearEventData() override;
     Int_t   ProcessEvBuffer(UInt_t* buffer,
-			    UInt_t word_position_in_buffer,UInt_t indexnumber);
+			    UInt_t word_position_in_buffer,UInt_t indexnumber) override;
     void    ProcessEvent();
-    void    PrintValue() const;
-    void    PrintInfo() const;
+    void    PrintValue() const override;
+    void    PrintInfo() const override;
     void    SetRootSaveStatus(TString &prefix);
 
     Bool_t  ApplyHWChecks();//Check for harware errors in the devices
@@ -91,11 +91,11 @@ class QwEnergyCalculator : public VQwDataElement{
     Bool_t CheckForBurpFail(const VQwDataElement *ev_error);
 
     void    IncrementErrorCounters();
-    void    PrintErrorCounters() const;// report number of events failed due to HW and event cut faliure
-    UInt_t   GetEventcutErrorFlag(){//return the error flag
+    void    PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
+    UInt_t   GetEventcutErrorFlag() override{//return the error flag
       return fEnergyChange.GetEventcutErrorFlag();
     }
-    UInt_t   UpdateErrorFlag();
+    UInt_t   UpdateErrorFlag() override;
 
     void    UpdateErrorFlag(const QwEnergyCalculator *ev_error);
   
@@ -114,8 +114,8 @@ class QwEnergyCalculator : public VQwDataElement{
     void    DeaccumulateRunningSum(QwEnergyCalculator& value, Int_t ErrorMask=0xFFFFFFF);
     void    CalculateRunningAverage();
 
-    void    ConstructHistograms(TDirectory *folder, TString &prefix);
-    void    FillHistograms();
+    void    ConstructHistograms(TDirectory *folder, TString &prefix) override;
+    void    FillHistograms() override;
 
     void    ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
     void    ConstructBranch(TTree *tree, TString &prefix);

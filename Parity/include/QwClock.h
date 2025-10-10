@@ -53,24 +53,24 @@ class QwClock : public VQwClock {
     fClock(source.fClock),
     fNormalizationValue(source.fNormalizationValue)
   { }
-  virtual ~QwClock() { };
+  ~QwClock() override { };
 
-  void LoadChannelParameters(QwParameterFile &paramfile){
+  void LoadChannelParameters(QwParameterFile &paramfile) override{
     fClock.LoadChannelParameters(paramfile);
   };
 
-  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0);
+  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0) override;
 
-  void  InitializeChannel(TString subsystem, TString name, TString datatosave, TString type = "");
-  void  ClearEventData();
+  void  InitializeChannel(TString subsystem, TString name, TString datatosave, TString type = "") override;
+  void  ClearEventData() override;
 
 
   void  EncodeEventData(std::vector<UInt_t> &buffer);
 
-  void  ProcessEvent();
+  void  ProcessEvent() override;
   Bool_t ApplyHWChecks();//Check for harware errors in the devices
-  Bool_t ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
-  void IncrementErrorCounters(){fClock.IncrementErrorCounters();}
+  Bool_t ApplySingleEventCuts() override;//Check for good events by stting limits on the devices readings
+  void IncrementErrorCounters() override{fClock.IncrementErrorCounters();}
 
   Bool_t CheckForBurpFail(const QwClock *ev_error){
     return fClock.CheckForBurpFail(&(ev_error->fClock));
@@ -95,57 +95,57 @@ class QwClock : public VQwClock {
   }
 
 
-  void PrintErrorCounters() const;// report number of events failed due to HW and event cut faliure
-  UInt_t GetEventcutErrorFlag(){//return the error flag
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
+  UInt_t GetEventcutErrorFlag() override{//return the error flag
     return fClock.GetEventcutErrorFlag();
   }
-  UInt_t UpdateErrorFlag() {return GetEventcutErrorFlag();};
+  UInt_t UpdateErrorFlag() override {return GetEventcutErrorFlag();};
   void UpdateErrorFlag(const QwClock *ev_error){
     fClock.UpdateErrorFlag(ev_error->fClock);
   }
 
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
-  void SetSingleEventCuts(UInt_t errorflag, Double_t min = 0, Double_t max = 0, Double_t stability = 0, Double_t burplevel = 0);
+  void SetSingleEventCuts(UInt_t errorflag, Double_t min = 0, Double_t max = 0, Double_t stability = 0, Double_t burplevel = 0) override;
 
   void SetDefaultSampleSize(Int_t sample_size);
-  void SetEventCutMode(Int_t bcuts){
+  void SetEventCutMode(Int_t bcuts) override{
     bEVENTCUTMODE=bcuts;
     fClock.SetEventCutMode(bcuts);
   }
 
-  void PrintValue() const;
-  void PrintInfo() const;
+  void PrintValue() const override;
+  void PrintInfo() const override;
 
   // Implementation of Parent class's virtual operators
-  VQwClock& operator=  (const VQwClock &value);
-  VQwClock& operator+= (const VQwClock &value);
-  VQwClock& operator-= (const VQwClock &value);
+  VQwClock& operator=  (const VQwClock &value) override;
+  VQwClock& operator+= (const VQwClock &value) override;
+  VQwClock& operator-= (const VQwClock &value) override;
 
   // This class specific operators
   QwClock& operator=  (const QwClock &value);
   QwClock& operator+= (const QwClock &value);
   QwClock& operator-= (const QwClock &value);
-  void Ratio(const VQwClock &numer, const VQwClock &denom);
+  void Ratio(const VQwClock &numer, const VQwClock &denom) override;
   void Ratio(const QwClock &numer, const QwClock &denom);
-  void Scale(Double_t factor);
+  void Scale(Double_t factor) override;
 
-  void AccumulateRunningSum(const VQwClock& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
-  void DeaccumulateRunningSum(VQwClock& value, Int_t ErrorMask=0xFFFFFFF);
-  void CalculateRunningAverage();
+  void AccumulateRunningSum(const VQwClock& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override;
+  void DeaccumulateRunningSum(VQwClock& value, Int_t ErrorMask=0xFFFFFFF) override;
+  void CalculateRunningAverage() override;
 
-  void SetPedestal(Double_t ped);
-  void SetCalibrationFactor(Double_t calib);
+  void SetPedestal(Double_t ped) override;
+  void SetCalibrationFactor(Double_t calib) override;
 
-  void  ConstructHistograms(TDirectory *folder, TString &prefix);
-  void  FillHistograms();
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
+  void  FillHistograms() override;
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
-  void  ConstructBranch(TTree *tree, TString &prefix);
-  void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) override;
+  void  ConstructBranch(TTree *tree, TString &prefix) override;
+  void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist) override;
+  void  FillTreeVector(std::vector<Double_t> &values) const override;
 #ifdef HAS_RNTUPLE_SUPPORT
-  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
-  void  FillNTupleVector(std::vector<Double_t>& values) const;
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
+  void  FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
@@ -154,10 +154,10 @@ class QwClock : public VQwClock {
 
   // These are related to those hardware channels that need to normalize
   // to an external clock
-  Double_t GetNormClockValue() { return fNormalizationValue;};
-  Double_t GetStandardClockValue() { return fCalibration; };
+  Double_t GetNormClockValue() override { return fNormalizationValue;};
+  Double_t GetStandardClockValue() override { return fCalibration; };
 
-  const VQwHardwareChannel* GetTime() const {
+  const VQwHardwareChannel* GetTime() const override {
     return &fClock;
   };
 

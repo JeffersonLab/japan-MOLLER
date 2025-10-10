@@ -79,7 +79,7 @@ public:
       fNeedsExternalClock(source.fNeedsExternalClock),
       fIsDifferentialScaler(source.fIsDifferentialScaler)
   { }
-  virtual ~VQwScaler_Channel() { };
+  ~VQwScaler_Channel() override { };
 
   void CopyFrom(const VQwScaler_Channel& value){
     VQwHardwareChannel::CopyFrom(value);
@@ -96,23 +96,23 @@ public:
 
 
   /// \brief Initialize the fields in this object
-  void  InitializeChannel(TString name, TString datatosave = "raw");
+  void  InitializeChannel(TString name, TString datatosave = "raw") override;
 
   /// \brief Initialize the fields in this object
-  void  InitializeChannel(TString subsystem, TString instrumenttype, TString name, TString datatosave);
+  void  InitializeChannel(TString subsystem, TString instrumenttype, TString name, TString datatosave) override;
 
   void SetDefaultSampleSize(size_t /*NumberOfSamples_map*/) {
     //std::cerr << "QwScaler_Channel SetDefaultSampleSize does nothing!"
     //    << std::endl;
   }
 
-  void LoadChannelParameters(QwParameterFile &paramfile);
+  void LoadChannelParameters(QwParameterFile &paramfile) override;
 
-  void  ClearEventData();
+  void  ClearEventData() override;
 
-  void  RandomizeEventData(int helicity = 0, double time = 0.0);
+  void  RandomizeEventData(int helicity = 0, double time = 0.0) override;
   void  SetEventData(Double_t value);
-  void  SetRawEventData(){
+  void  SetRawEventData() override{
      //fValue     = fCalibrationFactor * (Double_t(fValue_Raw) - Double_t(fValue_Raw_Old) - fPedestal);
 
      fValue_Raw = Int_t(fValue/fCalibrationFactor + fPedestal) + fValue_Raw_Old;
@@ -124,27 +124,27 @@ public:
 };
 
 
-  virtual void  EncodeEventData(std::vector<UInt_t> &buffer) = 0;
-  virtual Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t index = 0) = 0;
+  void  EncodeEventData(std::vector<UInt_t> &buffer) override = 0;
+  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t index = 0) override = 0;
 
 //-----------------------------------------------------------------------------------------------
-  virtual void SmearByResolution(double resolution);
+  void SmearByResolution(double resolution) override;
 //-----------------------------------------------------------------------------------------------
 
-  void  ProcessEvent();
+  void  ProcessEvent() override;
 
-  Int_t GetRawValue(size_t /*element*/) const      { return fValue_Raw; };
-  Double_t GetValue(size_t /*element*/) const      { return fValue; };
-  Double_t GetValueM2(size_t /*element*/) const    { return fValueM2; };
-  Double_t GetValueError(size_t /*element*/) const { return fValueError; };
+  Int_t GetRawValue(size_t /*element*/) const override      { return fValue_Raw; };
+  Double_t GetValue(size_t /*element*/) const override      { return fValue; };
+  Double_t GetValueM2(size_t /*element*/) const override    { return fValueM2; };
+  Double_t GetValueError(size_t /*element*/) const override { return fValueError; };
 
   VQwScaler_Channel& operator=  (const VQwScaler_Channel &value);
   void AssignScaledValue(const VQwScaler_Channel &value, Double_t scale);
-  void AssignValueFrom(const VQwDataElement* valueptr);
-  void AddValueFrom(const VQwHardwareChannel* valueptr);
-  void SubtractValueFrom(const VQwHardwareChannel* valueptr);
-  void MultiplyBy(const VQwHardwareChannel* valueptr);
-  void DivideBy(const VQwHardwareChannel* valueptr);
+  void AssignValueFrom(const VQwDataElement* valueptr) override;
+  void AddValueFrom(const VQwHardwareChannel* valueptr) override;
+  void SubtractValueFrom(const VQwHardwareChannel* valueptr) override;
+  void MultiplyBy(const VQwHardwareChannel* valueptr) override;
+  void DivideBy(const VQwHardwareChannel* valueptr) override;
 
   VQwScaler_Channel& operator+= (const VQwScaler_Channel &value);
   VQwScaler_Channel& operator-= (const VQwScaler_Channel &value);
@@ -160,39 +160,39 @@ public:
   void Ratio(const VQwScaler_Channel &numer, const VQwScaler_Channel &denom);
   void Product(VQwScaler_Channel &numer, VQwScaler_Channel &denom);
   void AddChannelOffset(Double_t Offset);
-  void Scale(Double_t Offset);
+  void Scale(Double_t Offset) override;
   void DivideBy(const VQwScaler_Channel &denom);
   
 
-  Int_t ApplyHWChecks(); //Check for harware errors in the devices. This will return the device error code.
+  Int_t ApplyHWChecks() override; //Check for harware errors in the devices. This will return the device error code.
 
-  Bool_t ApplySingleEventCuts();//check values read from modules are at desired level
+  Bool_t ApplySingleEventCuts() override;//check values read from modules are at desired level
 
-  Bool_t CheckForBurpFail(const VQwDataElement * /*ev_error*/){return kFALSE;};
+  Bool_t CheckForBurpFail(const VQwDataElement * /*ev_error*/) {return kFALSE;};
 
-  void IncrementErrorCounters();
+  void IncrementErrorCounters() override;
 
   /// report number of events failed due to HW and event cut failure
-  void PrintErrorCounters() const;
+  void PrintErrorCounters() const override;
 
 //   UInt_t GetDeviceErrorCode(){//return the device error code
 //     return fDeviceErrorCode;
 //   };
 
-  void  ConstructHistograms(TDirectory *folder, TString &prefix);
-  void  FillHistograms();
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
+  void  FillHistograms() override;
 
-  virtual void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) = 0;
-  virtual void  FillTreeVector(std::vector<Double_t> &values) const = 0;
-  void  ConstructBranch(TTree *tree, TString &prefix);
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) override = 0;
+  void  FillTreeVector(std::vector<Double_t> &values) const override = 0;
+  void  ConstructBranch(TTree *tree, TString &prefix) override;
 #ifdef HAS_RNTUPLE_SUPPORT
-  virtual void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
-  virtual void  FillNTupleVector(std::vector<Double_t>& values) const = 0;
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override = 0;
+  void  FillNTupleVector(std::vector<Double_t>& values) const override = 0;
 #endif // HAS_RNTUPLE_SUPPORT
 
 
   void AccumulateRunningSum(const VQwScaler_Channel &value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
-  void AccumulateRunningSum(const VQwHardwareChannel *value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF){
+  void AccumulateRunningSum(const VQwHardwareChannel *value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override{
     const VQwScaler_Channel *tmp_ptr = dynamic_cast<const VQwScaler_Channel*>(value);
     if (tmp_ptr != NULL) AccumulateRunningSum(*tmp_ptr, count, ErrorMask);
   };
@@ -200,23 +200,23 @@ public:
     AccumulateRunningSum(value, -1, ErrorMask);
   };
   
-  void PrintValue() const;
-  void PrintInfo() const;
-  void CalculateRunningAverage();
+  void PrintValue() const override;
+  void PrintInfo() const override;
+  void CalculateRunningAverage() override;
 
   // These are related to those hardware channels that need to normalize
   // to an external clock
-  virtual Bool_t NeedsExternalClock() { return fNeedsExternalClock; };
-  virtual void SetNeedsExternalClock(Bool_t needed) { fNeedsExternalClock = needed; };
-  virtual std::string GetExternalClockName() {  return fNormChannelName; };
-  virtual void SetExternalClockPtr( const VQwHardwareChannel* clock) { fNormChannelPtr = clock; };
-  virtual void SetExternalClockName( const std::string name) { fNormChannelName = name; };
+  Bool_t NeedsExternalClock() override { return fNeedsExternalClock; };
+  void SetNeedsExternalClock(Bool_t needed) override { fNeedsExternalClock = needed; };
+  std::string GetExternalClockName() override {  return fNormChannelName; };
+  void SetExternalClockPtr( const VQwHardwareChannel* clock) override { fNormChannelPtr = clock; };
+  void SetExternalClockName( const std::string name) override { fNormChannelName = name; };
 
   // Differential scalers automatically subtract the previous value
   virtual Bool_t IsDifferentialScaler() { return fIsDifferentialScaler; };
   virtual void SetDifferentialScaler(Bool_t diff) { fIsDifferentialScaler = diff; };
 
-  void ScaledAdd(Double_t scale, const VQwHardwareChannel *value);
+  void ScaledAdd(Double_t scale, const VQwHardwareChannel *value) override;
 
 protected:
   VQwScaler_Channel& operator/=(const VQwScaler_Channel&);
@@ -260,19 +260,19 @@ class QwScaler_Channel: public VQwScaler_Channel
 
   using VQwScaler_Channel::CopyFrom;
   using VQwHardwareChannel::Clone;
-  VQwHardwareChannel* Clone(VQwDataElement::EDataToSave datatosave) const;
+  VQwHardwareChannel* Clone(VQwDataElement::EDataToSave datatosave) const override;
 
   public:
 
   // Implement the templated methods
-  void  EncodeEventData(std::vector<UInt_t> &buffer);
-  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t index = 0);
+  void  EncodeEventData(std::vector<UInt_t> &buffer) override;
+  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t index = 0) override;
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) override;
+  void  FillTreeVector(std::vector<Double_t> &values) const override;
 #ifdef HAS_RNTUPLE_SUPPORT
-  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
-  void  FillNTupleVector(std::vector<Double_t>& values) const;
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
+  void  FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif // HAS_RNTUPLE_SUPPORT
 
 

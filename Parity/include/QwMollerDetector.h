@@ -83,64 +83,64 @@ class QwMollerDetector:
       fSTR7200_Channel(source.fSTR7200_Channel)
     { }
     /// Virtual destructor
-    virtual ~QwMollerDetector() { };
+    ~QwMollerDetector() override { };
 
     /* derived from VQwSubsystem */
-    void ProcessOptions(QwOptions &options); //Handle command line options
-    Int_t LoadChannelMap(TString mapfile);
-    Int_t LoadInputParameters(TString pedestalfile);
+    void ProcessOptions(QwOptions &options) override; //Handle command line options
+    Int_t LoadChannelMap(TString mapfile) override;
+    Int_t LoadInputParameters(TString pedestalfile) override;
     Int_t LoadEventCuts(TString & filename);
     Bool_t SingleEventCuts();
-    Int_t ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
+    Int_t ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override;
     Int_t ProcessConfigurationBuffer(UInt_t ev_type, const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
-    Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t *buffer, UInt_t num_words);
-    Int_t ProcessEvBuffer(UInt_t ev_type, const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
-    void  ClearEventData();
-    void  ProcessEvent();
+    Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t *buffer, UInt_t num_words) override;
+    Int_t ProcessEvBuffer(UInt_t ev_type, const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override;
+    void  ClearEventData() override;
+    void  ProcessEvent() override;
 
     using VQwSubsystem::ConstructHistograms;
-    void  ConstructHistograms(TDirectory *folder, TString &prefix);
-    void  FillHistograms();
+    void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
+    void  FillHistograms() override;
 
-    VQwSubsystem& operator=  (VQwSubsystem *value);
-    VQwSubsystem& operator+= (VQwSubsystem *value);
-    VQwSubsystem& operator-= (VQwSubsystem *value);
-    void  Ratio(VQwSubsystem  *value1, VQwSubsystem  *value2);
-    void  Scale(Double_t);
-    void  AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
+    VQwSubsystem& operator=  (VQwSubsystem *value) override;
+    VQwSubsystem& operator+= (VQwSubsystem *value) override;
+    VQwSubsystem& operator-= (VQwSubsystem *value) override;
+    void  Ratio(VQwSubsystem  *value1, VQwSubsystem  *value2) override;
+    void  Scale(Double_t) override;
+    void  AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override;
     //remove one entry from the running sums for devices
-    void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF){
+    void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF) override{
     };
-    void  CalculateRunningAverage();
-    Int_t LoadEventCuts(TString filename);
-    Bool_t  ApplySingleEventCuts();
-    void IncrementErrorCounters() {};
-    void PrintErrorCounters() const;
-    UInt_t GetEventcutErrorFlag();
+    void  CalculateRunningAverage() override;
+    Int_t LoadEventCuts(TString filename) override;
+    Bool_t  ApplySingleEventCuts() override;
+    void IncrementErrorCounters() override {};
+    void PrintErrorCounters() const override;
+    UInt_t GetEventcutErrorFlag() override;
 
-    Bool_t CheckForBurpFail(const VQwSubsystem *subsys){
+    Bool_t CheckForBurpFail(const VQwSubsystem *subsys) override{
       return kFALSE;
     };
 
     //update the error flag in the subsystem level from the top level routines related to stability checks. This will uniquely update the errorflag at each channel based on the error flag in the corresponding channel in the ev_error subsystem
-    void UpdateErrorFlag(const VQwSubsystem *ev_error){
+    void UpdateErrorFlag(const VQwSubsystem *ev_error) override{
     };
 
     using VQwSubsystem::ConstructBranchAndVector;
-    void ConstructBranchAndVector(TTree*, TString&, std::vector<double, std::allocator<double> >&);
-    void ConstructBranch(TTree *tree, TString& prefix) { };
-    void ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file) { };
-    void FillTreeVector(std::vector<Double_t> &values) const;
+    void ConstructBranchAndVector(TTree*, TString&, std::vector<double, std::allocator<double> >&) override;
+    void ConstructBranch(TTree *tree, TString& prefix) override { };
+    void ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file) override { };
+    void FillTreeVector(std::vector<Double_t> &values) const override;
 
     // RNTuple methods
 #ifdef HAS_RNTUPLE_SUPPORT
-    void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
-    void FillNTupleVector(std::vector<Double_t>& values) const;
+    void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
+    void FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif // HAS_RNTUPLE_SUPPORT
 
     Bool_t Compare(VQwSubsystem *source);
     void print();
-    void PrintValue() const;
+    void PrintValue() const override;
     float* GetRawChannelArray();
 
     Int_t GetChannelIndex(TString channelName, UInt_t module_number); 

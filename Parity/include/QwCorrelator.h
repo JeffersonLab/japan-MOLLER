@@ -35,7 +35,7 @@ class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCor
   /// \brief Constructor with name
   QwCorrelator(const TString& name);
   QwCorrelator(const QwCorrelator& name);
-  virtual ~QwCorrelator();
+  ~QwCorrelator() override;
 
  private:
   static bool fPrintCorrelations;
@@ -43,15 +43,15 @@ class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCor
   static void DefineOptions(QwOptions &options);
   void ProcessOptions(QwOptions &options);
 
-  void ParseConfigFile(QwParameterFile& file);
+  void ParseConfigFile(QwParameterFile& file) override;
 
-  Int_t LoadChannelMap(const std::string& mapfile);
+  Int_t LoadChannelMap(const std::string& mapfile) override;
 
   /// \brief Connect to Channels (asymmetry/difference only)
-  Int_t ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff);
+  Int_t ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff) override;
 
-  void ProcessData();
-  void FinishDataHandler(){
+  void ProcessData() override;
+  void FinishDataHandler() override{
     CalcCorrelations();
   }
   void CalcCorrelations();
@@ -60,17 +60,17 @@ class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCor
   void ConstructTreeBranches(
       QwRootFile *treerootfile,
       const std::string& treeprefix = "",
-      const std::string& branchprefix = "");
+      const std::string& branchprefix = "") override;
   /// \brief Fill the tree branches
-  void FillTreeBranches(QwRootFile *treerootfile) { };
+  void FillTreeBranches(QwRootFile *treerootfile) override { };
 
   /// \brief Construct the histograms in a folder with a prefix
-  void  ConstructHistograms(TDirectory *folder, TString &prefix);
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
   /// \brief Fill the histograms
-  void  FillHistograms();
+  void  FillHistograms() override;
 
-  void ClearEventData();
-  void AccumulateRunningSum(VQwDataHandler &value, Int_t count = 0, Int_t ErrorMask = 0xFFFFFFF);
+  void ClearEventData() override;
+  void AccumulateRunningSum(VQwDataHandler &value, Int_t count = 0, Int_t ErrorMask = 0xFFFFFFF) override;
 
  protected:
 
