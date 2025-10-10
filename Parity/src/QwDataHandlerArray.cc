@@ -49,7 +49,8 @@ QwDataHandlerArray::QwDataHandlerArray(QwOptions& options, QwSubsystemArrayParit
  * @param source Source handler array
  */
 QwDataHandlerArray::QwDataHandlerArray(const QwDataHandlerArray& source)
-: fHelicityPattern(source.fHelicityPattern),
+: std::vector<std::shared_ptr<VQwDataHandler>>(),
+  fHelicityPattern(source.fHelicityPattern),
   fSubsystemArray(source.fSubsystemArray),
   fDataHandlersMapFile(source.fDataHandlersMapFile),
   fDataHandlersDisabledByName(source.fDataHandlersDisabledByName),
