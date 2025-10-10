@@ -8,9 +8,12 @@
 #ifndef __QwEventRing__
 #define __QwEventRing__
 
+// System headers
+#include <fstream>
+#include <optional>
 #include <vector>
 
-#include <fstream>
+// Qweak headers
 #include "QwSubsystemArrayParity.h"
 
 class QwEventRing {
@@ -35,8 +38,16 @@ class QwEventRing {
 
   /// \brief Add the subsystem to the ring
   void push(QwSubsystemArrayParity &event);
+  /// \brief Add the subsystem to the ring (move semantics)
+  void push(QwSubsystemArrayParity &&event);
+  /// \brief Add the subsystem to the ring using swap when ring is full, preserving configuration
+  void push_swap(QwSubsystemArrayParity &event);
   /// \brief Return the last subsystem in the ring
   QwSubsystemArrayParity& pop();
+  /// \brief Return the last subsystem in the ring (move semantics)
+  QwSubsystemArrayParity pop_move();
+  /// \brief Return the last subsystem in the ring using swap, preserving configuration
+  void pop_swap(QwSubsystemArrayParity &outgoing_event);
 
   /// \brief Print value of rolling average
   void PrintRollingAverage() {
@@ -52,9 +63,9 @@ class QwEventRing {
   /// \brief Return the number of events in the ring
   Int_t GetNumberOfEvents() const { return fNumberOfEvents; }
 
-  /// \brief Unwind the ring until empty
+  /// \brief Unwind the ring until empty (two-phased approach)
   void Unwind() {
-    while (GetNumberOfEvents() > 0) pop();
+    while (GetNumberOfEvents() > 0) pop_move();
     if (fPrintAfterUnwind) {
       QwMessage << "Residual rolling average (should be zero)" << QwLog::endl;
       PrintRollingAverage();
@@ -96,6 +107,9 @@ class QwEventRing {
   Int_t fBurpExtent;
   Int_t fBurpPrecut;
   QwSubsystemArrayParity fBurpAvg;
+
+  // Helicity preservation for swap operations
+  std::optional<size_t> fHelicityIndex;  // Index of helicity subsystem for efficient access
 };
 
 

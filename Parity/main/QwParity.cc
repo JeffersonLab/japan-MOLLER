@@ -292,14 +292,14 @@ Int_t main(Int_t argc, Char_t* argv[])
     if (! eventbuffer.IsOnline() ){
       QwMessage << "Finding first EPICS event" << QwLog::endl;
       while (eventbuffer.GetNextEvent() == CODA_OK) {
-	if (eventbuffer.IsEPICSEvent()) {
-	  eventbuffer.FillEPICSData(epicsevent);
-	  if (epicsevent.HasDataLoaded()) {
-	    helicitypattern.UpdateBlinder(epicsevent);
-	    // and break out of this event loop
-	    break;
-	  }
-	}
+        if (eventbuffer.IsEPICSEvent()) {
+          eventbuffer.FillEPICSData(epicsevent);
+          if (epicsevent.HasDataLoaded()) {
+            helicitypattern.UpdateBlinder(epicsevent);
+            // and break out of this event loop
+            break;
+          }
+        }
       }
       epicsevent.ResetCounters();
       //  Rewind stream
@@ -329,21 +329,19 @@ Int_t main(Int_t argc, Char_t* argv[])
       //  double ET system.
       if (! eventbuffer.IsOnline() && eventbuffer.IsEPICSEvent()) {
         eventbuffer.FillEPICSData(epicsevent);
-	if (epicsevent.HasDataLoaded()){
-	  epicsevent.CalculateRunningValues();
-	  helicitypattern.UpdateBlinder(epicsevent);
-	
-	  treerootfile->FillTreeBranches(epicsevent);
-	  treerootfile->FillTree("slow");
-	  
-	  // Fill RNTuple if enabled
+        if (epicsevent.HasDataLoaded()){
+          epicsevent.CalculateRunningValues();
+          helicitypattern.UpdateBlinder(epicsevent);
+        
+          treerootfile->FillTreeBranches(epicsevent);
+          treerootfile->FillTree("slow");
+          
+          // Fill RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-	  if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-	    treerootfile->FillNTupleFields(epicsevent);
-	    treerootfile->FillNTuple("slow");
-	  }
+	  treerootfile->FillNTupleFields(epicsevent);
+	  treerootfile->FillNTuple("slow");
 #endif
-	}
+        }
       }
 
 
@@ -360,35 +358,37 @@ Int_t main(Int_t argc, Char_t* argv[])
 
       // The event pass the event cut constraints
       if (detectors.ApplySingleEventCuts()) {
-	
-        // Add event to the ring
-        eventring.push(detectors);
+        
+        // Add event to the ring using two-phased approach:
+        // - During filling: copy assignment preserves configuration
+        // - When full: swap preserves configuration in both directions
+        eventring.push_swap(detectors);
 
         // Check to see ring is ready
         if (eventring.IsReady()) {
-	  ringoutput = eventring.pop();
-	  ringoutput.IncrementErrorCounters();
+          // Use swap to get ring output
+          eventring.pop_swap(ringoutput);
 
+          // Increment error counters
+          ringoutput.IncrementErrorCounters();
 
-	  // Accumulate the running sum to calculate the event based running average
-	  eventsum.AccumulateRunningSum(ringoutput);
+          // Accumulate the running sum to calculate the event based running average
+          eventsum.AccumulateRunningSum(ringoutput);
 
-	  // Fill the histograms
-	  historootfile->FillHistograms(ringoutput);
+          // Fill the histograms
+          historootfile->FillHistograms(ringoutput);
 
-	  // Fill mps tree branches
-	  treerootfile->FillTreeBranches(ringoutput);
-	  treerootfile->FillTree("evt");
+          // Fill mps tree branches
+          treerootfile->FillTreeBranches(ringoutput);
+          treerootfile->FillTree("evt");
 
-	  // Fill RNTuple if enabled
+          // Fill RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-	  if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-	    treerootfile->FillNTupleFields(ringoutput);
-	    treerootfile->FillNTuple("evt");
-	  }
+          treerootfile->FillNTupleFields(ringoutput);
+          treerootfile->FillNTuple("evt");
 #endif
 
-	  // Process data handlers
+          // Process data handlers
           datahandlerarray_evt.ProcessDataHandlerEntry();
 
           // Fill data handler histograms
@@ -407,28 +407,26 @@ Int_t main(Int_t argc, Char_t* argv[])
           // Load the event into the helicity pattern
           helicitypattern.LoadEventData(ringoutput);
 
-	  if (helicitypattern.PairAsymmetryIsGood()) {
+          if (helicitypattern.PairAsymmetryIsGood()) {
             patternsum.AccumulatePairRunningSum(helicitypattern);
 
-	    // Fill pair tree branches
-	    treerootfile->FillTreeBranches(helicitypattern.GetPairYield());
-	    treerootfile->FillTreeBranches(helicitypattern.GetPairAsymmetry());
-	    treerootfile->FillTreeBranches(helicitypattern.GetPairDifference());
-	    treerootfile->FillTree("pr");
-	    
-	    // Fill pair RNTuples if enabled
+            // Fill pair tree branches
+            treerootfile->FillTreeBranches(helicitypattern.GetPairYield());
+            treerootfile->FillTreeBranches(helicitypattern.GetPairAsymmetry());
+            treerootfile->FillTreeBranches(helicitypattern.GetPairDifference());
+            treerootfile->FillTree("pr");
+            
+            // Fill pair RNTuples if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-	    if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-	      burstrootfile->FillNTupleFields("pr_yield", helicitypattern.GetPairYield());
-	      burstrootfile->FillNTupleFields("pr_asym", helicitypattern.GetPairAsymmetry());
-	      burstrootfile->FillNTuple("pr_yield");
-	      burstrootfile->FillNTuple("pr_asym");
-	    }
+            burstrootfile->FillNTupleFields("pr_yield", helicitypattern.GetPairYield());
+            burstrootfile->FillNTupleFields("pr_asym", helicitypattern.GetPairAsymmetry());
+            burstrootfile->FillNTuple("pr_yield");
+            burstrootfile->FillNTuple("pr_asym");
 #endif
-	    
-	    // Clear the data
-	    helicitypattern.ClearPairData();
-	  }
+            
+            // Clear the data
+            helicitypattern.ClearPairData();
+          }
 
           // Check to see if we can calculate helicity pattern asymmetry, do so, and report if it worked
           if (helicitypattern.IsGoodAsymmetry()) {
@@ -518,9 +516,9 @@ Int_t main(Int_t argc, Char_t* argv[])
                 }
 #endif
 
-		helicitypattern.IncrementBurstCounter();
-		datahandlerarray_mul.UpdateBurstCounter(helicitypattern.GetBurstCounter());
-		datahandlerarray_burst.UpdateBurstCounter(helicitypattern.GetBurstCounter());
+                helicitypattern.IncrementBurstCounter();
+                datahandlerarray_mul.UpdateBurstCounter(helicitypattern.GetBurstCounter());
+                datahandlerarray_burst.UpdateBurstCounter(helicitypattern.GetBurstCounter());
                 // Clear the data
                 patternsum_per_burst.ClearEventData();
                 datahandlerarray_burst.ClearEventData();
@@ -529,7 +527,7 @@ Int_t main(Int_t argc, Char_t* argv[])
               // Clear the data
               helicitypattern.ClearEventData();
 
-	  } // helicitypattern.IsGoodAsymmetry()
+          } // helicitypattern.IsGoodAsymmetry()
 
         } // eventring.IsReady()
 
@@ -560,9 +558,9 @@ Int_t main(Int_t argc, Char_t* argv[])
       burstsum.AccumulateRunningSum(patternsum_per_burst);
 
       if (gQwOptions.GetValue<bool>("print-burstsum")) {
-	QwMessage << " Running average of this burst" << QwLog::endl;
-	QwMessage << " =============================" << QwLog::endl;
-	patternsum_per_burst.PrintValue();
+        QwMessage << " Running average of this burst" << QwLog::endl;
+        QwMessage << " =============================" << QwLog::endl;
+        patternsum_per_burst.PrintValue();
       }
 
       // Fill histograms
