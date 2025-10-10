@@ -620,9 +620,6 @@ void  QwADC18_Channel::FillTreeVector(std::vector<Double_t> &values) const
 {
   if (IsNameEmpty()) {
     //  This channel is not used, so skip setting up the tree.
-  } else if (fTreeArrayNumEntries < 0) {
-    QwError << "QwADC18_Channel::FillTreeVector:  fTreeArrayNumEntries=="
-            << fTreeArrayNumEntries << QwLog::endl;
   } else if (fTreeArrayNumEntries == 0) {
     static bool warned = false;
     if (!warned) {

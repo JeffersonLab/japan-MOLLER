@@ -314,9 +314,6 @@ void QwScaler_Channel<data_mask,data_shift>::FillTreeVector(std::vector<Double_t
   //std::cout<<"inside QwScaler_Channel::FillTreeVector"<< std::endl;
   if (IsNameEmpty()) {
     //  This channel is not used, so skip setting up the tree.
-  } else if (fTreeArrayNumEntries < 0) {
-    QwError << "VQwScaler_Channel::FillTreeVector:  fTreeArrayNumEntries=="
-	    << fTreeArrayNumEntries << QwLog::endl;
   } else if (fTreeArrayNumEntries == 0) {
     static bool warned = false;
     if (!warned) {
