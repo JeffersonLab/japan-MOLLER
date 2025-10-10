@@ -39,7 +39,10 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
 
     VQwDataHandler(const TString& name);
     VQwDataHandler(const VQwDataHandler &source);
+    virtual ~VQwDataHandler();
 
+    VQwDataHandler& operator= (const VQwDataHandler &value);
+  
     virtual void ParseConfigFile(QwParameterFile& file);
 
     void SetPointer(QwHelicityPattern *ptr){
@@ -72,8 +75,6 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
     virtual void FinishDataHandler(){
       CalculateRunningAverage();
     };
-
-    virtual ~VQwDataHandler();
 
     TString GetName(){return fName;}
 
