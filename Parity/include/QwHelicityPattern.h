@@ -173,15 +173,15 @@ class QwHelicityPattern {
   void  ConstructHistograms(TDirectory *folder);
   void  FillHistograms();
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values);
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile &trim_tree);
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const;
 
 #ifdef HAS_RNTUPLE_SUPPORT
   // RNTuple methods
-  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
-  void  FillNTupleVector(std::vector<Double_t>& values) const;
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+  void  FillNTupleVector(QwRootTreeBranchVector &values) const;
 #endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
@@ -218,7 +218,7 @@ class QwHelicityPattern {
   std::vector<Int_t> fHelicity;// this is here up to when we code the Helicity decoding routine
   std::vector<Int_t> fEventNumber;
   Int_t fCurrentPatternNumber;
-  Int_t fPatternSize;
+  size_t fPatternSize;
   Int_t fQuartetNumber;
 
   // Blinding strategy

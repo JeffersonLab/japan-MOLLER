@@ -65,7 +65,7 @@ VQwDataHandler::VQwDataHandler(const VQwDataHandler &source)
   fDependentVar  = source.fDependentVar;
   fDependentType = source.fDependentType;
   fDependentName = source.fDependentName;
-  //  Create new objects for the the outputs.
+  //  Create new objects for the outputs.
   fOutputVar.resize(source.fOutputVar.size());
   for (size_t i = 0; i < this->fDependentVar.size(); i++) {
     //const QwVQWK_Channel* vqwk = dynamic_cast<const QwVQWK_Channel*>(source.fOutputVar[i]);
@@ -89,6 +89,45 @@ VQwDataHandler::~VQwDataHandler() {
   }
   fOutputVar.clear();
 
+}
+
+VQwDataHandler& VQwDataHandler::operator=(const VQwDataHandler& value)
+{
+  if (this != &value) {
+    //  Copy the base class parts
+    fPriority = value.fPriority;
+    fBurstCounter = value.fBurstCounter;
+    fName = value.fName;
+    fMapFile = value.fMapFile;
+    fTreeName = value.fTreeName;
+    fTreeComment = value.fTreeComment;
+    fPrefix = value.fPrefix;
+    fErrorFlagPtr = value.fErrorFlagPtr;
+    fSubsystemArray = value.fSubsystemArray;
+    fHelicityPattern = value.fHelicityPattern;
+    ParseSeparator = value.ParseSeparator;
+    fKeepRunningSum = value.fKeepRunningSum;
+
+    fDependentVar = value.fDependentVar;
+    fDependentType = value.fDependentType;
+    fDependentName = value.fDependentName;
+    fDependentFull = value.fDependentFull;
+    fDependentValues = value.fDependentValues;
+
+    //  Create new objects for the outputs.
+    fOutputVar.resize(value.fOutputVar.size());
+    for (size_t i = 0; i < value.fOutputVar.size(); i++) {
+      fOutputVar[i] = value.fOutputVar[i]->Clone(VQwDataElement::kDerived);
+    }
+    fOutputValues = value.fOutputValues;
+
+    if (value.fRunningsum!=NULL){
+      fRunningsum = value.fRunningsum->Clone();
+    } else {
+      fRunningsum = NULL;
+    }
+  }
+  return *this;
 }
 
 void VQwDataHandler::ParseConfigFile(QwParameterFile& file){
@@ -278,7 +317,7 @@ void VQwDataHandler::ConstructTreeBranches(
 void VQwDataHandler::ConstructBranchAndVector(
     TTree *tree,
     TString& prefix,
-    std::vector<Double_t>& values)
+    QwRootTreeBranchVector &values)
 {
   for (size_t i = 0; i < fOutputVar.size(); ++i) {
     fOutputVar.at(i)->ConstructBranchAndVector(tree, prefix, values);
@@ -345,7 +384,7 @@ void VQwDataHandler::FillNTupleFields(QwRootFile *treerootfile)
  * Fill the tree vector
  * @param values Vector of values
  */
-void VQwDataHandler::FillTreeVector(std::vector<Double_t>& values) const
+void VQwDataHandler::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   // Fill the data element
   for (size_t i = 0; i < fOutputVar.size(); ++i) {
@@ -355,14 +394,14 @@ void VQwDataHandler::FillTreeVector(std::vector<Double_t>& values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void VQwDataHandler::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void VQwDataHandler::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   for (size_t i = 0; i < fOutputVar.size(); ++i) {
     fOutputVar.at(i)->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
   }
 }
 
-void VQwDataHandler::FillNTupleVector(std::vector<Double_t>& values) const
+void VQwDataHandler::FillNTupleVector(QwRootTreeBranchVector &values) const
 {
   // Fill the data element
   for (size_t i = 0; i < fOutputVar.size(); ++i) {

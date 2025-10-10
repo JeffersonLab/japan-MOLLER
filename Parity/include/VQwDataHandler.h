@@ -39,7 +39,10 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
 
     VQwDataHandler(const TString& name);
     VQwDataHandler(const VQwDataHandler &source);
+    virtual ~VQwDataHandler();
 
+    VQwDataHandler& operator= (const VQwDataHandler &value);
+  
     virtual void ParseConfigFile(QwParameterFile& file);
 
     void SetPointer(QwHelicityPattern *ptr){
@@ -72,8 +75,6 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
     virtual void FinishDataHandler(){
       CalculateRunningAverage();
     };
-
-    virtual ~VQwDataHandler();
 
     TString GetName(){return fName;}
 
@@ -110,12 +111,12 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
     virtual void  FillHistograms() { };
 
     // Fill the vector for this subsystem
-    void FillTreeVector(std::vector<Double_t> &values) const;
+    void FillTreeVector(QwRootTreeBranchVector &values) const;
 
-    void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values);
+    void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values);
 #ifdef HAS_RNTUPLE_SUPPORT
-    void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
-    void FillNTupleVector(std::vector<Double_t>& values) const;
+    void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+    void FillNTupleVector(QwRootTreeBranchVector &values) const;
 #endif // HAS_RNTUPLE_SUPPORT
 
     void SetRunLabel(TString x) {

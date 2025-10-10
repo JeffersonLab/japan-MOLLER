@@ -64,17 +64,17 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
       void Ratio(VQwSubsystem* value1, VQwSubsystem* value2);
       void Scale(Double_t value);
 
-      void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector <Double_t> &values){
+      void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values){
         QwCombiner::ConstructBranchAndVector(tree,prefix,values);
       }
-      void FillTreeVector(std::vector<Double_t> &values) const{
+      void FillTreeVector(QwRootTreeBranchVector &values) const{
         QwCombiner::FillTreeVector(values);
       }
 #ifdef HAS_RNTUPLE_SUPPORT
-      void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs){
+      void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs){
         QwCombiner::ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
       }
-      void FillNTupleVector(std::vector<Double_t>& values) const{
+      void FillNTupleVector(QwRootTreeBranchVector &values) const{
         QwCombiner::FillNTupleVector(values);
       }
 #endif // HAS_RNTUPLE_SUPPORT

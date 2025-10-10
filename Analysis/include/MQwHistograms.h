@@ -52,6 +52,7 @@ class MQwHistograms {
     /// Register a histogram
     void AddHistogram(TH1* h) {
       fHistograms.push_back(TH1_ptr(h));
+	  fHistograms.back()->SetBuffer(1000);
     }
 
   public:

@@ -221,14 +221,12 @@ Int_t main(Int_t argc, Char_t* argv[])
 
     // Construct RNTuple fields if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-    if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-      treerootfile->ConstructNTupleFields("evt", "MPS event data RNTuple", ringoutput);
-      treerootfile->ConstructNTupleFields("mul", "Helicity event data RNTuple", helicitypattern);
-      burstrootfile->ConstructNTupleFields("pr_yield", "Pair yield RNTuple", helicitypattern.GetPairYield(),"yield_");
-      burstrootfile->ConstructNTupleFields("pr_asym", "Pair asymmetry RNTuple", helicitypattern.GetPairAsymmetry(),"asym_");
-      treerootfile->ConstructNTupleFields("slow", "EPICS and slow control RNTuple", epicsevent);
-      burstrootfile->ConstructNTupleFields("burst", "Burst level data RNTuple", patternsum_per_burst, "|stat");
-    }
+    treerootfile->ConstructNTupleFields("evt", "MPS event data RNTuple", ringoutput);
+    treerootfile->ConstructNTupleFields("mul", "Helicity event data RNTuple", helicitypattern);
+    burstrootfile->ConstructNTupleFields("pr_yield", "Pair yield RNTuple", helicitypattern.GetPairYield(),"yield_");
+    burstrootfile->ConstructNTupleFields("pr_asym", "Pair asymmetry RNTuple", helicitypattern.GetPairAsymmetry(),"asym_");
+    treerootfile->ConstructNTupleFields("slow", "EPICS and slow control RNTuple", epicsevent);
+    burstrootfile->ConstructNTupleFields("burst", "Burst level data RNTuple", patternsum_per_burst, "|stat");
 #endif
 
     historootfile->ConstructHistograms("evt_histo",   datahandlerarray_evt);
@@ -241,11 +239,9 @@ Int_t main(Int_t argc, Char_t* argv[])
 
     // Construct RNTuple fields for data handlers if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-    if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-      datahandlerarray_evt.ConstructNTupleFields(treerootfile, "evt_");
-      datahandlerarray_mul.ConstructNTupleFields(treerootfile);
-      datahandlerarray_burst.ConstructNTupleFields(burstrootfile, "burst_", "|stat");
-    }
+    datahandlerarray_evt.ConstructNTupleFields(treerootfile, "evt_");
+    datahandlerarray_mul.ConstructNTupleFields(treerootfile);
+    datahandlerarray_burst.ConstructNTupleFields(burstrootfile, "burst_", "|stat");
 #endif
 
     treerootfile->ConstructTreeBranches("evts", "Running sum tree", eventsum, "|stat");
@@ -254,11 +250,9 @@ Int_t main(Int_t argc, Char_t* argv[])
 
     // Construct RNTuple fields for additional data if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-    if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-      treerootfile->ConstructNTupleFields("evts", "Running sum RNTuple", eventsum, "|stat");
-      treerootfile->ConstructNTupleFields("muls", "Running sum RNTuple", patternsum, "|stat");
-      burstrootfile->ConstructNTupleFields("bursts", "Burst running sum RNTuple", burstsum, "|stat");
-    }
+    treerootfile->ConstructNTupleFields("evts", "Running sum RNTuple", eventsum, "|stat");
+    treerootfile->ConstructNTupleFields("muls", "Running sum RNTuple", patternsum, "|stat");
+    burstrootfile->ConstructNTupleFields("bursts", "Burst running sum RNTuple", burstsum, "|stat");
 #endif
 
     // Summarize the ROOT file structure
@@ -334,14 +328,12 @@ Int_t main(Int_t argc, Char_t* argv[])
 	  helicitypattern.UpdateBlinder(epicsevent);
 	
 	  treerootfile->FillTreeBranches(epicsevent);
-	  treerootfile->FillTree("slow");
+	  treerootfile->FillTree("slow"_hash);
 	  
 	  // Fill RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-	  if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-	    treerootfile->FillNTupleFields(epicsevent);
-	    treerootfile->FillNTuple("slow");
-	  }
+	  treerootfile->FillNTupleFields(epicsevent);
+	  treerootfile->FillNTuple("slow");
 #endif
 	}
       }
@@ -378,14 +370,12 @@ Int_t main(Int_t argc, Char_t* argv[])
 
 	  // Fill mps tree branches
 	  treerootfile->FillTreeBranches(ringoutput);
-	  treerootfile->FillTree("evt");
+	  treerootfile->FillTree("evt"_hash);
 
 	  // Fill RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-	  if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-	    treerootfile->FillNTupleFields(ringoutput);
-	    treerootfile->FillNTuple("evt");
-	  }
+	  treerootfile->FillNTupleFields(ringoutput);
+	  treerootfile->FillNTuple("evt");
 #endif
 
 	  // Process data handlers
@@ -399,9 +389,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 
           // Fill data handler RNTuple fields if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-          if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-            datahandlerarray_evt.FillNTupleFields(treerootfile);
-          }
+          datahandlerarray_evt.FillNTupleFields(treerootfile);
 #endif
 
           // Load the event into the helicity pattern
@@ -414,16 +402,14 @@ Int_t main(Int_t argc, Char_t* argv[])
 	    treerootfile->FillTreeBranches(helicitypattern.GetPairYield());
 	    treerootfile->FillTreeBranches(helicitypattern.GetPairAsymmetry());
 	    treerootfile->FillTreeBranches(helicitypattern.GetPairDifference());
-	    treerootfile->FillTree("pr");
+	    treerootfile->FillTree("pr"_hash);
 	    
 	    // Fill pair RNTuples if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-	    if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-	      burstrootfile->FillNTupleFields("pr_yield", helicitypattern.GetPairYield());
-	      burstrootfile->FillNTupleFields("pr_asym", helicitypattern.GetPairAsymmetry());
-	      burstrootfile->FillNTuple("pr_yield");
-	      burstrootfile->FillNTuple("pr_asym");
-	    }
+	    burstrootfile->FillNTupleFields("pr_yield", helicitypattern.GetPairYield());
+	    burstrootfile->FillNTupleFields("pr_asym", helicitypattern.GetPairAsymmetry());
+	    burstrootfile->FillNTuple("pr_yield");
+	    burstrootfile->FillNTuple("pr_asym");
 #endif
 	    
 	    // Clear the data
@@ -439,14 +425,12 @@ Int_t main(Int_t argc, Char_t* argv[])
 
               // Fill helicity tree branches
               treerootfile->FillTreeBranches(helicitypattern);
-              treerootfile->FillTree("mul");
+              treerootfile->FillTree("mul"_hash);
 
               // Fill helicity RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-              if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-                treerootfile->FillNTupleFields(helicitypattern);
-                treerootfile->FillNTuple("mul");
-              }
+              treerootfile->FillNTupleFields(helicitypattern);
+              treerootfile->FillNTuple("mul");
 #endif
 
               // Process data handlers
@@ -461,9 +445,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 
               // Fill data handler RNTuple fields if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-              if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-                datahandlerarray_mul.FillNTupleFields(treerootfile);
-              }
+              datahandlerarray_mul.FillNTupleFields(treerootfile);
 #endif
 
               // Fill the pattern into the sum for this burst
@@ -492,14 +474,12 @@ Int_t main(Int_t argc, Char_t* argv[])
 
                 // Fill burst tree branches
                 burstrootfile->FillTreeBranches(patternsum_per_burst);
-                burstrootfile->FillTree("burst");
+                burstrootfile->FillTree("burst"_hash);
 
                 // Fill burst RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-                if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-                  burstrootfile->FillNTupleFields(patternsum_per_burst);
-                  burstrootfile->FillNTuple("burst");
-                }
+                burstrootfile->FillNTupleFields(patternsum_per_burst);
+                burstrootfile->FillNTuple("burst");
 #endif
 
                 // Finish data handler for burst
@@ -513,9 +493,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 
                 // Fill data handler RNTuple fields if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-                if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-                  datahandlerarray_burst.FillNTupleFields(burstrootfile);
-                }
+                datahandlerarray_burst.FillNTupleFields(burstrootfile);
 #endif
 
 		helicitypattern.IncrementBurstCounter();
@@ -570,14 +548,12 @@ Int_t main(Int_t argc, Char_t* argv[])
 
       // Fill burst tree branches
       burstrootfile->FillTreeBranches(patternsum_per_burst);
-      burstrootfile->FillTree("burst");
+      burstrootfile->FillTree("burst"_hash);
     
       // Fill burst RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-      if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-        burstrootfile->FillNTupleFields(patternsum_per_burst);
-        burstrootfile->FillNTuple("burst");
-      }
+      burstrootfile->FillNTupleFields(patternsum_per_burst);
+      burstrootfile->FillNTuple("burst");
 #endif
     
       // Finish data handler for burst
@@ -591,9 +567,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 
       // Fill data handler RNTuple fields if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-      if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-        datahandlerarray_burst.FillNTupleFields(burstrootfile);
-      }
+      datahandlerarray_burst.FillNTupleFields(burstrootfile);
 #endif
       patternsum_per_burst.PrintIndexMapFile(run_number);
     }
@@ -622,14 +596,12 @@ Int_t main(Int_t argc, Char_t* argv[])
       eventsum.PrintValue();
     }
     treerootfile->FillTreeBranches(eventsum);
-    treerootfile->FillTree("evts");
+    treerootfile->FillTree("evts"_hash);
 
     // Fill running sum RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-    if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-      treerootfile->FillNTupleFields(eventsum);
-      treerootfile->FillNTuple("evts");
-    }
+    treerootfile->FillNTupleFields(eventsum);
+    treerootfile->FillNTuple("evts");
 #endif
 
     if (gQwOptions.GetValue<bool>("print-patternsum")) {
@@ -638,14 +610,12 @@ Int_t main(Int_t argc, Char_t* argv[])
       patternsum.PrintValue();
     }
     treerootfile->FillTreeBranches(patternsum);
-    treerootfile->FillTree("muls");
+    treerootfile->FillTree("muls"_hash);
 
     // Fill pattern sum RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-    if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-      treerootfile->FillNTupleFields(patternsum);
-      treerootfile->FillNTuple("muls");
-    }
+    treerootfile->FillNTupleFields(patternsum);
+    treerootfile->FillNTuple("muls");
 #endif
 
     if (gQwOptions.GetValue<bool>("print-burstsum")) {
@@ -654,14 +624,12 @@ Int_t main(Int_t argc, Char_t* argv[])
       burstsum.PrintValue();
     }
     burstrootfile->FillTreeBranches(burstsum);
-    burstrootfile->FillTree("bursts");
+    burstrootfile->FillTree("bursts"_hash);
 
     // Fill burst sum RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-    if (gQwOptions.GetValue<bool>("enable-rntuples")) {
-      burstrootfile->FillNTupleFields(burstsum);
-      burstrootfile->FillNTuple("bursts");
-    }
+    burstrootfile->FillNTupleFields(burstsum);
+    burstrootfile->FillNTuple("bursts");
 #endif
 
     //  Construct objects

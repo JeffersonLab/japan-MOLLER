@@ -28,6 +28,7 @@ class TTree;
 class QwDBInterface;
 class QwParameterFile;
 class QwErrDBInterface;
+class QwRootTreeBranchVector;
 
 class VQwHardwareChannel: public VQwDataElement {
 /****************************************************************//**
@@ -200,13 +201,13 @@ public:
   virtual void MultiplyBy(const VQwHardwareChannel* valueptr) = 0;
   virtual void DivideBy(const VQwHardwareChannel* valueptr) = 0;
 
-  virtual void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values) = 0;
+  virtual void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector& values) = 0;
   virtual void ConstructBranch(TTree *tree, TString &prefix) = 0;
   void ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
-  virtual void FillTreeVector(std::vector<Double_t>& values) const = 0;
+  virtual void FillTreeVector(QwRootTreeBranchVector& values) const = 0;
 #ifdef HAS_RNTUPLE_SUPPORT
-  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
-  virtual void FillNTupleVector(std::vector<Double_t>& values) const = 0;
+  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
+  virtual void FillNTupleVector(QwRootTreeBranchVector& values) const = 0;
 #endif // HAS_RNTUPLE_SUPPORT
 
   virtual void CopyParameters(const VQwHardwareChannel* /*valueptr*/){};
@@ -255,8 +256,6 @@ public:
     }
   };
 
-
-
 protected:
   UInt_t  fNumberOfDataWords; ///< Number of raw data words in this data element
   UInt_t  fNumberOfSubElements; ///< Number of subelements in this data element
@@ -286,9 +285,19 @@ protected:
 
   Double_t fBurpThreshold;
   Int_t fBurpCountdown;
-  Int_t fBurpHoldoff;
-
   //@}
+
+
+public:
+  /*! \name Global event cuts */
+  static void SetBurpHoldoff(Int_t holdoff) {
+    fBurpHoldoff = holdoff;
+  }
+
+protected:
+  // @{
+  static Int_t fBurpHoldoff;
+  // @}
 
 };   // class VQwHardwareChannel
 
