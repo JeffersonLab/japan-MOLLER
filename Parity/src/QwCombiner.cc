@@ -17,6 +17,7 @@
 #include "QwLog.h"
 #include "VQwDataElement.h"
 #include "QwVQWK_Channel.h"
+#include "QwMollerADC_Channel.h"
 #include "QwParameterFile.h"
 #include "QwHelicityPattern.h"
 #include "QwPromptSummary.h"
@@ -188,8 +189,8 @@ Int_t QwCombiner::ConnectChannels(
     // Get the dependent variables
 
     const VQwHardwareChannel* dv_ptr = 0;
-    QwVQWK_Channel* new_vqwk = NULL;
-    const QwVQWK_Channel* vqwk = NULL;
+    VQwHardwareChannel* new_chan = NULL;
+    const VQwHardwareChannel* chan = NULL;
     string name = "";
     string calc = "calc_";
     
@@ -217,19 +218,30 @@ Int_t QwCombiner::ConnectChannels(
 	}
       }
 
-      vqwk = dynamic_cast<const QwVQWK_Channel*>(dv_ptr);
-      name = vqwk->GetElementName().Data();
+      name = dv_ptr->GetElementName().Data();
       name.insert(0, calc);
-      new_vqwk = new QwVQWK_Channel(*vqwk, VQwDataElement::kDerived);
-      new_vqwk->SetElementName(name);
-      new_vqwk->SetSubsystemName(fName);
+
+      const QwVQWK_Channel* vqwk = dynamic_cast<const QwVQWK_Channel*>(dv_ptr);
+      const QwMollerADC_Channel* moll = dynamic_cast<const QwMollerADC_Channel*>(dv_ptr);
+      if (moll != nullptr) {
+        new_chan = new QwMollerADC_Channel(*moll, VQwDataElement::kDerived);
+        new_chan->SetElementName(name);
+        new_chan->SetSubsystemName(fName);
+      } else if (vqwk != nullptr) {
+        new_chan = new QwVQWK_Channel(*vqwk, VQwDataElement::kDerived);
+        new_chan->SetElementName(name);
+        new_chan->SetSubsystemName(fName);
+      } else {
+        QwWarning << "Dependent variable, " << fDependentName.at(dv) << ", for combiner is not a VQWK or Moller ADC channel." << QwLog::endl;
+        continue;
+      }
     }
 
     // alias
     if(fDependentName.at(dv).at(0) == '@'){
       //QwMessage << "dv: " << name << QwLog::endl;
-      new_vqwk = new QwVQWK_Channel(name, VQwDataElement::kDerived);
-      new_vqwk->SetSubsystemName(fName);
+      new_chan = new QwMollerADC_Channel(name, VQwDataElement::kDerived);
+      new_chan  ->SetSubsystemName(fName);
     }
     // defined type
     else if(dv_ptr!=NULL){
@@ -241,11 +253,11 @@ Int_t QwCombiner::ConnectChannels(
     }
 
     // pair creation
-    if(new_vqwk != NULL){
+    if(new_chan != NULL){
       fDependentType.push_back(fDependentType.at(dv));
-      fDependentVar.push_back(vqwk);
-      fOutputVar.push_back(new_vqwk);
-      //fDependentVar.push_back(std::make_pair(vqwk, new_vqwk));
+      fDependentVar.push_back(chan);
+      fOutputVar.push_back(new_chan);
+      //fDependentVar.push_back(std::make_pair(chan, new_chan));
     }
 
     // Add independent variables
@@ -300,8 +312,8 @@ Int_t QwCombiner::ConnectChannels(QwSubsystemArrayParity& event)
     // Get the dependent variables
 
     const VQwHardwareChannel* dv_ptr = 0;
-    QwVQWK_Channel* new_vqwk = NULL;
-    const QwVQWK_Channel* vqwk = NULL;
+    VQwHardwareChannel* new_chan = NULL;
+    const VQwHardwareChannel* chan = NULL;
     string name = " s";
     string calc = "calc_";
 
@@ -317,21 +329,32 @@ Int_t QwCombiner::ConnectChannels(QwSubsystemArrayParity& event)
     } else {
       if(fDependentName.at(dv).at(0) == '@' ){
         name = fDependentName.at(dv).substr(1,fDependentName.at(dv).length());
-        new_vqwk = new QwVQWK_Channel(name, VQwDataElement::kDerived);
+        new_chan = new QwVQWK_Channel(name, VQwDataElement::kDerived);
       } else {
         dv_ptr = event.RequestExternalPointer(fDependentName.at(dv));
 
-        vqwk = dynamic_cast<const QwVQWK_Channel*>(dv_ptr);
-        name = vqwk->GetElementName().Data();
+        name = dv_ptr->GetElementName().Data();
         name.insert(0,calc);
-        new_vqwk = new QwVQWK_Channel(*vqwk, VQwDataElement::kDerived);
-        new_vqwk->SetElementName(name);
+
+        const QwMollerADC_Channel* moll = dynamic_cast<const QwMollerADC_Channel*>(dv_ptr);
+        const QwVQWK_Channel* vqwk = dynamic_cast<const QwVQWK_Channel*>(dv_ptr);
+        if (moll != nullptr) {
+          new_chan = new QwMollerADC_Channel(*moll, VQwDataElement::kDerived);
+          new_chan->SetElementName(name);
+        } else if (vqwk != nullptr) {
+          new_chan = new QwVQWK_Channel(*vqwk, VQwDataElement::kDerived);
+          new_chan->SetElementName(name);
+        } else {
+          QwWarning << "Dependent variable " << fDependentName.at(dv) << " could not be found, "
+                    << "or is not a VQWK or MollerADC channel." << QwLog::endl;
+          continue; 
+        }
       }
-      new_vqwk->SetSubsystemName(fName);
+      new_chan->SetSubsystemName(fName);
     }
 
     // alias
-    if(new_vqwk==NULL){
+    if(new_chan==NULL){
       QwWarning << "Dependent variable " << fDependentName.at(dv) << " could not be found, "
                 << "or is not a VQWK channel." << QwLog::endl;
       continue; 
@@ -339,9 +362,9 @@ Int_t QwCombiner::ConnectChannels(QwSubsystemArrayParity& event)
       //QwMessage << "dv: " << new_vqwk->GetElementName() << QwLog::endl;
       // pair creation
       fDependentType.push_back(fDependentType.at(dv));
-      fDependentVar.push_back(vqwk);
-      fOutputVar.push_back(new_vqwk);
-      //fDependentVar.push_back(std::make_pair(vqwk, new_vqwk));
+      fDependentVar.push_back(chan);
+      fOutputVar.push_back(new_chan);
+      //fDependentVar.push_back(std::make_pair(chan, new_chan));
     }
 
     // Add independent variables
