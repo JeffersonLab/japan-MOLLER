@@ -5,8 +5,7 @@
  *      Author: jhlee
  */
 
-#ifndef QWDBINTERFACE_H_
-#define QWDBINTERFACE_H_
+#pragma once
 
 // System headers
 #include <iostream>
@@ -245,5 +244,3 @@ inline void QwErrDBInterface::AddThisEntryToList(std::vector<T> &list)
     PrintStatus(kTRUE);
   };
 }
-
-#endif /* QWDBINTERFACE_H_ */

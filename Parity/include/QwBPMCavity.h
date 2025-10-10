@@ -5,8 +5,7 @@
 * Time-stamp:                                             *
 \**********************************************************/
 
-#ifndef __QwVQWK_CAVITY__
-#define __QwVQWK_CAVITY__
+#pragma once
 
 // System headers
 #include <vector>
@@ -171,6 +170,3 @@ class QwBPMCavity : public VQwBPM {
   std::vector<QwVQWK_Channel> fBPMElementList;
 
 };
-
-
-#endif

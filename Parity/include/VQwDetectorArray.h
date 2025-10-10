@@ -8,8 +8,7 @@
 ///
 /// \ingroup QwAnalysis_ADC
 
-#ifndef __VQWDETECTORARRAY__
-#define __VQWDETECTORARRAY__
+#pragma once
 
 // System headers
 #include <vector>
@@ -259,6 +258,3 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
   Int_t fMainDetErrorCount;
 
 };
-
-
-#endif

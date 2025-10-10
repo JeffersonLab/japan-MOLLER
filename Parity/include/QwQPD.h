@@ -5,8 +5,7 @@
 * Time-stamp: 09-14-2010                                  *
 \**********************************************************/
 
-#ifndef __QwQPD__
-#define __QwQPD__
+#pragma once
 
 // System headers
 #include <vector>
@@ -173,6 +172,3 @@ class QwQPD : public VQwBPM {
   std::vector<QwVQWK_Channel> fQPDElementList;
 
 };
-
-
-#endif

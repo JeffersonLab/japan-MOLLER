@@ -1,12 +1,11 @@
-#ifndef __QwRunCondition__
-#define __QwRunCondition__
+#pragma once
+
 /**
  *  \file   QwRunCondition.h
  *  \brief  
  *  \author jhlee@jlab.org
  *  \date   Thursday, September  9 21:42:30 EDT 2010
  */
-
 
 #include <unistd.h>
 #include <iostream>
@@ -70,5 +69,3 @@ class QwRunCondition
 //         std::cout << list->At(i)->GetName() << std::endl;
 //    }
 //  }
-
-#endif

@@ -5,8 +5,7 @@
 * Time-stamp:                                             *
 \**********************************************************/
 
-#ifndef __QwIntegratedRaster__
-#define __QwIntegratedRaster__
+#pragma once
 
 // System headers
 #include <vector>
@@ -176,8 +175,3 @@ private:
   static const Bool_t bDEBUG=kFALSE;
 
 };
-
-
-
-
-#endif

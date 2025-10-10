@@ -5,8 +5,7 @@
 * Time-stamp:                                              *
 \**********************************************************/
 
-#ifndef __QWBCM__
-#define __QWBCM__
+#pragma once
 
 // System headers
 #include <vector>
@@ -189,6 +188,3 @@ public:
  Double_t fResolution;
 
 };
-
-
-#endif // __QWBCM__

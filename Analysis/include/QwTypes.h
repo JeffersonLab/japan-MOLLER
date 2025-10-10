@@ -1,5 +1,4 @@
-#ifndef QWTYPES_H
-#define QWTYPES_H
+#pragma once
 
 // C and C++ headers
 #include <map>
@@ -304,5 +303,3 @@ typedef class QwMollerADC_Channel QwBeamCharge;
 typedef class QwMollerADC_Channel QwBeamPosition;
 typedef class QwMollerADC_Channel QwBeamAngle;
 typedef class QwMollerADC_Channel QwBeamEnergy;
-
-#endif

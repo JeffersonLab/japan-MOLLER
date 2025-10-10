@@ -3,8 +3,7 @@
 // Created by Ole Hansen on 8/16/23.
 //
 
-#ifndef QWANALYSIS_QWUTIL_H
-#define QWANALYSIS_QWUTIL_H
+#pragma once
 
 #include <algorithm>
 #include <iterator>
@@ -16,5 +15,3 @@ void QwCopyArray( const T& a, T& b ) {
     b.at(i).CopyFrom(a.at(i));
   }
 }
-
-#endif //QWANALYSIS_QWUTIL_H

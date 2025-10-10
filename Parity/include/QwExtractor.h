@@ -6,8 +6,7 @@
  *
  */
 
-#ifndef QWEXTRACTOR_H_
-#define QWEXTRACTOR_H_
+#pragma once
 
 // Parent Class
 #include "VQwDataHandler.h"
@@ -50,6 +49,3 @@ class QwExtractor:public VQwDataHandler, public MQwDataHandlerCloneable<QwExtrac
     QwExtractor();
 
 }; // class QwExtractor
-
-#endif // QWEXTRACTOR_H_
-

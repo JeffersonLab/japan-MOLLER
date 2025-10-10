@@ -5,8 +5,7 @@
 * Time-stamp: <2008-07-22 15:50>                           *
 \**********************************************************/
 
-#ifndef __QWSUBSYSTEMARRAY__
-#define __QWSUBSYSTEMARRAY__
+#pragma once
 
 #include <vector>
 #include <map>
@@ -310,6 +309,3 @@ protected:
   
 
 }; // class QwSubsystemArray
-
-
-#endif // __QWSUBSYSTEMARRAY__

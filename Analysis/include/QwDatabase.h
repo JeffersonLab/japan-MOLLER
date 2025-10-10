@@ -6,8 +6,7 @@
  * \date   2010-01-07
  */
 
-#ifndef QWDATABASE_HH
-#define QWDATABASE_HH
+#pragma once
 
 // System headers
 #include <map>
@@ -422,5 +421,3 @@ class QwDatabase {
     Bool_t fDBInsertMissingKeys; //!< True if missing keys should be inserted into the database automatically
 
 };
-
-#endif

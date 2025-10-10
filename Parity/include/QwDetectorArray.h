@@ -7,8 +7,7 @@
 
 /// \ingroup QwAnalysis_ADC
 
-#ifndef __QWDETECTORARRAY__
-#define __QWDETECTORARRAY__
+#pragma once
 
 // System headers
 #include <vector>
@@ -54,5 +53,3 @@ QwDetectorArray(const QwDetectorArray& source)
 ~QwDetectorArray() {};
 
 };
-
-#endif

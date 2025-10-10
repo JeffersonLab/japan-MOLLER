@@ -4,8 +4,7 @@
 * Author: P. M. King, W. Deconinck, B. Michaels            *
 \**********************************************************/
 
-#ifndef __QwADC18_CHANNEL__
-#define __QwADC18_CHANNEL__
+#pragma once
 
 // System headers
 #include <vector>
@@ -331,5 +330,3 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   Bool_t bSequence_number;
 
 };
-
-#endif

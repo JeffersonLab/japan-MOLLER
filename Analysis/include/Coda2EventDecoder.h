@@ -1,5 +1,4 @@
-#ifndef CODA2EVENTDECODER_H
-#define CODA2EVENTDECODER_H
+#pragma one
 
 #include "VEventDecoder.h"
 #include "Rtypes.h"
@@ -32,4 +31,3 @@ private:
 	UInt_t fStatSum;  
 	UInt_t fIDBankNum;
 };
-#endif

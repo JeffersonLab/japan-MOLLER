@@ -1,5 +1,4 @@
-#ifndef __VQwSystem_h__
-#define __VQwSystem_h__
+#pragma once
 
 #include "TROOT.h"
 #include "TNamed.h"
@@ -11,5 +10,3 @@ class VQwSystem : public TNamed {
     virtual ~VQwSystem() { };
 
 };
-
-#endif // __VQwSystem_h__

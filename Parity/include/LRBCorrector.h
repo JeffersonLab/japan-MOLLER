@@ -12,8 +12,7 @@ Description:  This is the header file of the LRBCorrector class,
 Last Modified: August 1, 2018 1:41 PM
 ********************************************************************/
 
-#ifndef LRBCORRECTOR_H_
-#define LRBCORRECTOR_H_
+#pragma once
 
 // Parent Class
 #include "VQwDataHandler.h"
@@ -66,6 +65,3 @@ class LRBCorrector : public VQwDataHandler, public MQwDataHandlerCloneable<LRBCo
     std::map<Short_t,std::vector<std::vector<Double_t>>> fSensitivity;
     
 };
-
-
-#endif // LRBCORRECTOR_H_

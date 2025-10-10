@@ -1,5 +1,4 @@
-#ifndef VEVENTDECODER_H
-#define VEVENTDECODER_H
+#pragma once
 
 /**********************************************************\
 * File: VEventDecoder.h                                    *
@@ -114,5 +113,3 @@ protected:
 	};
 
 };
-
-#endif

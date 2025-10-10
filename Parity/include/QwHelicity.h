@@ -5,8 +5,7 @@
 * Time-stamp:                                             *
 \**********************************************************/
 
-#ifndef __QwHELICITY__
-#define __QwHELICITY__
+#pragma once
 
 // System headers
 #include <vector>
@@ -326,8 +325,3 @@ class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHeli
   }
 
 };
-
-
-#endif
-
-

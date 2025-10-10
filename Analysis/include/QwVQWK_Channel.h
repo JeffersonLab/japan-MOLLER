@@ -5,8 +5,7 @@
 * Time-stamp: <2007-05-08 15:40>                           *
 \**********************************************************/
 
-#ifndef __QwVQWK_CHANNEL__
-#define __QwVQWK_CHANNEL__
+#pragma once
 
 // System headers
 #include <vector>
@@ -388,7 +387,3 @@ private:
 
 
 };
-
-
-
-#endif

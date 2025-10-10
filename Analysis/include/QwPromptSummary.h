@@ -1,5 +1,5 @@
-#ifndef __QwPromptSummary__
-#define __QwPromptSummary__
+#pragma once
+
 /**
  *  \file   QwPromptSummary.h
  *  \brief  
@@ -194,6 +194,3 @@ private:
   ClassDef(QwPromptSummary,0);
 
 };
-
-
-#endif
