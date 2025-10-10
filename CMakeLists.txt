@@ -61,27 +61,96 @@ file(GLOB my_project_headers
 		 Parity/include/*.h
 		 )
 
+
 #----------------------------------------------------------------------------
-# MYSQLPP
+# sqlpp11
 #
-find_package(MYSQLPP)
-IF(MYSQLPP_FOUND)
-  config_add_dependency(MYSQLPP)
-  include_directories(${MYSQLPP_INCLUDE_DIR})
-  ## KLUDGE:  For now, do not define the __USE_DATABASE__ flag, because we're still missing some of the database support files. --- P.King, 05jun2018
-  message(STATUS "  The \"__USE_DATABASE__\" flag is commented out in CMakeLists.txt; database support is DISABLED.")
-  #  add_definitions(-D__USE_DATABASE__)
-ELSE(MYSQLPP_FOUND)
-  set(MYSQLPP_LIBRARIES "")
+list(APPEND SQLPP11_OPTIONAL_COMPONENTS SQLite3 MySQL MariaDB PostgreSQL)
+find_package(Sqlpp11 QUIET OPTIONAL_COMPONENTS ${SQLPP11_OPTIONAL_COMPONENTS})
+if(NOT Sqlpp11_FOUND)
+  if(EXISTS ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11/CMakeLists.txt)
+    message(STATUS "sqlpp11 included as subproject")
+    add_subdirectory(${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11)
+    list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11/cmake/modules)
+    set(Sqlpp11_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11/include)
+    # Treat date dependency of sqlpp11 as system headers
+    # to hide compiler warnings
+    include_directories(SYSTEM ${date_SOURCE_DIR}/include)
+  else()
+    message(WARNING "sqlpp11 not available in thirdparty directory. Use 'git clone --recurse-submodules` on new clone or 'git submodule update --init --recursive' on existing repository.")
+  endif()
+endif()
+if(TARGET sqlpp11::sqlpp11)
+  config_add_dependency(Sqlpp11)
+  include_directories(${Sqlpp11_INCLUDE_DIR})
+  add_definitions(-D__USE_DATABASE__)
+  list(APPEND Sqlpp11_LIBRARIES sqlpp11::sqlpp11)
+
+  # Identify found backend components
+  foreach(component ${SQLPP11_OPTIONAL_COMPONENTS})
+    string(TOUPPER ${component} component_upper)
+    string(TOLOWER ${component} component_lower)
+    if(TARGET sqlpp11::${component_lower})
+      add_definitions(-D__USE_DATABASE_${component_upper}__)
+      list(APPEND Sqlpp11_LIBRARIES sqlpp11::${component_lower})
+    endif()
+  endforeach()
+  message(STATUS "Found ${Sqlpp11_LIBRARIES}")
+
+  # When building sqlpp11::mysql connector, we need to ensure dependencies are found in parent scope
+  if(BUILD_MYSQL_CONNECTOR)
+    find_package(MySQL QUIET)
+    list(APPEND Sqlpp11_LIBRARIES MySQL::MySQL)
+  endif()
+
+  # Generate C++ headers from SQL schema at build time
+  set(SCHEMA_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Parity/include)
+  set(SCHEMA_OUTPUT_FILE ${SCHEMA_OUTPUT_DIR}/QwParitySchema.h)
+  set(SCHEMA_INPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Parity/prminput/qwparity_schema.sql)
+  
+  # Find sqlpp11-ddl2cpp executable
+  find_program(SQLPP11_DDL2CPP
+    NAMES ddl2cpp
+    PATHS thirdparty/sqlpp11/scripts
+    DOC "sqlpp11 DDL to C++ converter"
+    QUIET
+  )
+  if(TARGET sqlpp11::ddl2cpp)
+    set(SQLPP11_DDL2CPP sqlpp11::ddl2cpp)
+  endif()
+  if(SQLPP11_DDL2CPP)
+    add_custom_command(
+      OUTPUT ${SCHEMA_OUTPUT_FILE}
+      COMMAND ${SQLPP11_DDL2CPP}
+        -identity-naming -no-timestamp-warning
+        ${SCHEMA_INPUT_FILE}
+        ${SCHEMA_OUTPUT_DIR}/QwParitySchema
+        QwParitySchema
+      DEPENDS ${SCHEMA_INPUT_FILE}
+      COMMENT "Generating C++ headers from SQL schema"
+      VERBATIM
+    )
+    
+    # Add a custom target to ensure the schema is generated
+    add_custom_target(generate_schema DEPENDS ${SCHEMA_OUTPUT_FILE})
+  else()
+    message(WARNING "sqlpp11-ddl2cpp not found, SQL schema headers may not be generated")
+  endif()
+ELSE()
+  message(STATUS "Sqlpp11 not found; database functionally disabled")
+  set(Sqlpp11_LIBRARIES "")
   list(REMOVE_ITEM my_project_sources
     ${PROJECT_SOURCE_DIR}/Analysis/src/QwDatabase.cc
   )
-endif(MYSQLPP_FOUND)
+ENDIF()
 
 #----------------------------------------------------------------------------
 # Boost
 #
-find_package(Boost COMPONENTS program_options REQUIRED)
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
+find_package(Boost 1.70 COMPONENTS program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIR})
 
@@ -171,6 +240,11 @@ endforeach()
 add_library(${PROJECT_NAME} SHARED ${my_project_sources} ${my_project_headers})
 add_dependencies(${PROJECT_NAME} check_git_repository)
 
+# Add schema generation dependency if sqlpp11 is available
+if((Sqlpp11_FOUND OR TARGET sqlpp11::sqlpp11) AND TARGET generate_schema)
+  add_dependencies(${PROJECT_NAME} generate_schema)
+endif()
+
 target_include_directories(${PROJECT_NAME}
   PUBLIC
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
@@ -197,9 +271,20 @@ target_link_libraries(${PROJECT_NAME}
     eviowrapper
   PUBLIC
     ROOT::Libraries
-    ${MYSQLPP_LIBRARIES}
     ${Boost_LIBRARIES}
   )
+
+# Link sqlpp11 if enabled
+if((Sqlpp11_FOUND OR TARGET sqlpp11::sqlpp11) AND TARGET generate_schema)
+  target_link_libraries(${PROJECT_NAME}
+    PRIVATE
+      ${Sqlpp11_LIBRARIES}
+  )
+  target_include_directories(${PROJECT_NAME}
+    PRIVATE
+      ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/sqlpp11/install/include
+  )
+endif()
 
 install(TARGETS ${PROJECT_NAME}
   EXPORT ${MAIN_PROJECT_NAME_LC}-exports
@@ -225,6 +310,7 @@ foreach(file ${exefiles})
   target_link_libraries(${filelower}
     PRIVATE
       eviowrapper
+      ${Sqlpp11_LIBRARIES}
       ${PROJECT_NAME}
   )
   target_compile_options(${filelower}

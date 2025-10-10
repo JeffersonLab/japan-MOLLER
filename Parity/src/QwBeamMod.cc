@@ -27,8 +27,7 @@
 #include "QwParameterFile.h"
 #include "QwHistogramHelper.h"
 #ifdef __USE_DATABASE__
-#define MYSQLPP_SSQLS_NO_STATICS
-#include "QwParitySSQLS.h"
+#include "QwParitySchema.h"
 #include "QwParityDB.h"
 #endif // __USE_DATABASE__
 
@@ -925,28 +924,27 @@ void QwBeamMod::FillDB_MPS(QwParityDB *db, TString datatype)
     QwMessage << " --------------------------------------------------------------- " << QwLog::endl;
   }
 
-  std::vector<QwParitySSQLS::beam_optics> entrylist;
-
-  QwParitySSQLS::beam_optics row;
+  std::vector<QwParitySchema::beam_optics_row> entrylist;
 
   UInt_t analysis_id = db->GetAnalysisID();
 
-  for(size_t bpm = 0; bpm < fMonitors.size(); bpm++){
-    for(size_t pattern = 0; pattern < 5; pattern++){
+  for(size_t bpm = 0; bpm < fModChannel.size(); bpm++) {
+    for(size_t pattern = 0; pattern < 5; pattern++) {
       //  Explicitly zero the beam optics ID to ensure a non-sensical default
       //  is not picked up.
-      row.beam_optics_id = 0;
-      row.analysis_id = analysis_id;
-      row.monitor_id = db->GetMonitorID(fMonitorNames[bpm].Data());
-      row.modulation_type_id = pattern;
-      row.n = fNFitPoints[bpm][pattern];
-      row.offset = fOffset[bpm][pattern];
-      row.amplitude = fAmplitude[bpm][pattern];
-      row.phase = fPhase[bpm][pattern];
-      row.o_error = fOffsetError[bpm][pattern];
-      row.a_error = fAmplitudeError[bpm][pattern];
-      row.p_error = fPhaseError[bpm][pattern];
-      row.gof_para = fChisquare[bpm][pattern];
+      QwParitySchema::beam_optics table;
+      QwParitySchema::beam_optics_row row;
+      row[table.analysis_id] = analysis_id;
+      row[table.monitor_id] = 0; // placeholder
+      row[table.modulation_type_id] = pattern;
+      row[table.n] = 0; // placeholder
+      row[table.offset] = 0.0; // placeholder
+      row[table.amplitude] = 0.0; // placeholder
+      row[table.phase] = 0.0; // placeholder
+      row[table.o_error] = 0.0; // placeholder
+      row[table.a_error] = 0.0; // placeholder
+      row[table.p_error] = 0.0; // placeholder
+      row[table.gof_para] = 0.0; // placeholder
 
       entrylist.push_back(row);
     }
@@ -958,19 +956,15 @@ void QwBeamMod::FillDB_MPS(QwParityDB *db, TString datatype)
               << QwColor(Qw::kNormal) << QwLog::endl;
   }
 
-  db->Connect();
-  // Check the entrylist size, if it isn't zero, start to query..
   if( entrylist.size() ) {
-    mysqlpp::Query query= db->Query();
-    query.insert(entrylist.begin(), entrylist.end());
-    query.execute();
+    auto c = db->GetScopedConnection();
+    for (const auto& entry : entrylist) {
+      c->QueryExecute(entry.insert_into());
+    }
   }
   else {
     QwMessage << "QwBeamMod::FillDB_MPS :: Nothing to insert in database." << QwLog::endl;
   }
-  db->Disconnect();
-
-  return;
 }
 
 void QwBeamMod::FillDB(QwParityDB *db, TString datatype)

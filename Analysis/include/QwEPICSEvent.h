@@ -85,7 +85,7 @@ class QwEPICSEvent
 
   void FillDB(QwParityDB *db);
   void FillSlowControlsData(QwParityDB *db);
-  void FillSlowControlsStrigs(QwParityDB *db);
+  void FillSlowControlsStrings(QwParityDB *db);
   void FillSlowControlsSettings(QwParityDB *db);
 
 

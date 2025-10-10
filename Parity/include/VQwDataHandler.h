@@ -84,7 +84,10 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
     virtual void AccumulateRunningSum(VQwDataHandler &value, Int_t count = 0, Int_t ErrorMask = 0xFFFFFFF);
     void CalculateRunningAverage();
     void PrintValue() const;
-    void FillDB(QwParityDB * /*db*/, TString /*datatype*/){};
+
+#ifdef __USE_DATABASE__
+    void FillDB(QwParityDB *db, TString datatype);
+#endif // __USE_DATABASE__
 
     void WritePromptSummary(QwPromptSummary *ps, TString type);
 

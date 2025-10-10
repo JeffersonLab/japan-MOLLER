@@ -992,12 +992,10 @@ void QwHelicityPattern::FillDB(QwParityDB *db)
   }
 }
 
-
 void QwHelicityPattern::FillErrDB(QwParityDB *db)
 {
   fBlinder.FillErrDB(db,"");
   fAsymmetry.FillErrDB(db, "");
-  return;
 };
 #endif // __USE_DATABASE__
 

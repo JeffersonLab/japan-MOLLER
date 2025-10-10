@@ -159,8 +159,11 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
     void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
     void  FillNTupleVector(std::vector<Double_t>& values) const;
 #endif // HAS_RNTUPLE_SUPPORT
-    //void  FillDB(QwParityDB *db, TString datatype);
-    //void  FillErrDB(QwParityDB *db, TString datatype);
+
+#ifdef __USE_DATABASE__
+    void  FillDB(QwParityDB *db, TString datatype);
+    void  FillErrDB(QwParityDB *db, TString datatype);
+#endif // __USE_DATABASE__
 
     const QwIntegrationPMT* GetChannel(const TString name) const;
 
