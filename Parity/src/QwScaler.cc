@@ -361,14 +361,14 @@ void QwScaler::FillHistograms()
   }
 }
 
-void QwScaler::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values)
+void QwScaler::ConstructBranchAndVector(TTree *tree, TString & prefix, QwRootTreeBranchVector &values)
 {
   for (size_t i = 0; i < fScaler.size(); i++) {
     fScaler.at(i)->ConstructBranchAndVector(tree, prefix, values);
   }
 }
 
-void QwScaler::FillTreeVector(std::vector<Double_t> &values) const
+void QwScaler::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   for(size_t i = 0; i < fScaler.size(); i++) {
     fScaler.at(i)->FillTreeVector(values);
@@ -376,14 +376,14 @@ void QwScaler::FillTreeVector(std::vector<Double_t> &values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void QwScaler::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void QwScaler::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   for (size_t i = 0; i < fScaler.size(); i++) {
     fScaler.at(i)->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
   }
 }
 
-void QwScaler::FillNTupleVector(std::vector<Double_t>& values) const
+void QwScaler::FillNTupleVector(QwRootTreeBranchVector &values) const
 {
   for(size_t i = 0; i < fScaler.size(); i++) {
     fScaler.at(i)->FillNTupleVector(values);

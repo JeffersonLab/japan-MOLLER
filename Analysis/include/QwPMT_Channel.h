@@ -18,7 +18,6 @@
 #include "VQwDataElement.h"
 
 
-
 ///
 /// \ingroup QwTracking
 class QwPMT_Channel: public VQwDataElement {
@@ -71,8 +70,8 @@ class QwPMT_Channel: public VQwDataElement {
   void  ConstructHistograms(TDirectory *folder, TString &prefix);
   void  FillHistograms();
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values);
+  void  FillTreeVector(QwRootTreeBranchVector &values) const;
 
   void PrintValue() const;
   void PrintInfo() const;

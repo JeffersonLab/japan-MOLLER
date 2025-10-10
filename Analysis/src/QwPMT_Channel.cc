@@ -10,6 +10,7 @@
 // Qweak headers
 #include "QwLog.h"
 #include "QwHistogramHelper.h"
+#include "QwRootFile.h"
 
 const Bool_t QwPMT_Channel::kDEBUG = kFALSE;
 
@@ -95,7 +96,7 @@ void  QwPMT_Channel::FillHistograms()
   }
 }
 
-void  QwPMT_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwPMT_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (GetElementName() == "") {
     //  This channel is not used, so skip setting up the tree.
@@ -103,15 +104,14 @@ void  QwPMT_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, std:
     TString basename = prefix + GetElementName();
     fTreeArrayIndex  = values.size();
 
-    values.push_back(0.0);
-    TString list = basename + "/D";
+    values.push_back(basename.Data(), 'D');
 
     fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
-    tree->Branch(basename, &(values[fTreeArrayIndex]), list);
+    tree->Branch(basename, &(values[fTreeArrayIndex]), values.LeafList(fTreeArrayIndex).c_str());
   }
 }
 
-void  QwPMT_Channel::FillTreeVector(std::vector<Double_t> &values) const
+void  QwPMT_Channel::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the tree vector.
@@ -126,7 +126,7 @@ void  QwPMT_Channel::FillTreeVector(std::vector<Double_t> &values) const
 	      << std::endl;
   } else {
     size_t index=fTreeArrayIndex;
-    values[index++] = this->fValue;
+    values.SetValue(index++, this->fValue);
   }
 }
 

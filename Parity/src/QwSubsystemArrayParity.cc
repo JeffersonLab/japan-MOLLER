@@ -12,6 +12,7 @@
 
 // Qweak headers
 #include "VQwSubsystemParity.h"
+#include "QwRootFile.h"
 
 //*****************************************************************//
 
@@ -619,22 +620,22 @@ Bool_t QwSubsystemArrayParity::CheckBadEventRange(){
   return kFALSE;
 }
 
-void  QwSubsystemArrayParity::ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values){
+void  QwSubsystemArrayParity::ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values){
   QwSubsystemArray::ConstructBranchAndVector(tree, prefix, values);
   if (prefix.Contains("yield_") || prefix==""){
-    values.push_back(0.0);
+    values.push_back("ErrorFlag", 'D');
     fErrorFlagTreeIndex = values.size()-1;
-    tree->Branch("ErrorFlag",&(values[fErrorFlagTreeIndex]),"ErrorFlag/D");
+    tree->Branch("ErrorFlag", &(values.back<Double_t>()), "ErrorFlag/D");
   } else {
     fErrorFlagTreeIndex = -1;
   }
 }
 
-void QwSubsystemArrayParity::FillTreeVector(std::vector<Double_t>& values) const
+void QwSubsystemArrayParity::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   QwSubsystemArray::FillTreeVector(values);
   if (fErrorFlagTreeIndex>=0 && fErrorFlagTreeIndex<static_cast<int>(values.size())){
-    values.at(fErrorFlagTreeIndex) = fErrorFlag;
+    values.SetValue(fErrorFlagTreeIndex, static_cast<double>(fErrorFlag));
   }
 }
 

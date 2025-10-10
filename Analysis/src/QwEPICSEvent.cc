@@ -21,6 +21,7 @@
 // Qweak headers
 #include "QwLog.h"
 #include "QwParameterFile.h"
+#include "QwRootFile.h"
 #include "QwTypes.h"
 
 #ifdef __USE_DATABASE__
@@ -167,7 +168,7 @@ Int_t QwEPICSEvent::LoadChannelMap(TString mapfile)
 
 
 /// \brief Construct the branch and tree vector
-void QwEPICSEvent::ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values)
+void QwEPICSEvent::ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values)
 {
   fTreeArrayIndex = values.size();
   Int_t treeindex = fTreeArrayIndex;
@@ -176,16 +177,15 @@ void QwEPICSEvent::ConstructBranchAndVector(TTree *tree, TString& prefix, std::v
         fEPICSVariableType[tagindex] == kEPICSFloat ||
         fEPICSVariableType[tagindex] == kEPICSInt) {
 
-    	// Add element to vector
-    	values.push_back(0.0);
-
     	// Determine branch name
     	TString name = fEPICSVariableList[tagindex];
     	name.ReplaceAll(':','_'); // remove colons before creating branch
-    	TString name_type = name + "/D";
+
+    	// Add element to vector
+    	values.push_back(name.Data(), 'D');
 
     	// Create branch
-    	tree->Branch(name, &(values[treeindex]), name_type);
+    	tree->Branch(name, &(values[treeindex]), values.LeafList(treeindex).c_str());
         treeindex++;
 
     } else {
@@ -199,7 +199,7 @@ void QwEPICSEvent::ConstructBranchAndVector(TTree *tree, TString& prefix, std::v
 }
 
 /// \brief Fill the tree vector
-void QwEPICSEvent::FillTreeVector(std::vector<Double_t>& values) const
+void QwEPICSEvent::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   Int_t treeindex = fTreeArrayIndex;
   for (size_t tagindex = 0; tagindex < fEPICSVariableType.size(); tagindex++) {
@@ -207,13 +207,13 @@ void QwEPICSEvent::FillTreeVector(std::vector<Double_t>& values) const
       case kEPICSFloat:
       case kEPICSInt: {
         // Add value to vector
-        values[treeindex] = fEPICSDataEvent[tagindex].Value;
+        values.SetValue(treeindex, fEPICSDataEvent[tagindex].Value);
         treeindex++;
         break;
       }
       case kEPICSString: {
         // Add value to vector
-        values[treeindex] = static_cast<Double_t>(fEPICSDataEvent[tagindex].StringValue.Hash());
+        values.SetValue(treeindex, static_cast<Double_t>(fEPICSDataEvent[tagindex].StringValue.Hash()));
         treeindex++;
         break;
       }
@@ -227,7 +227,7 @@ void QwEPICSEvent::FillTreeVector(std::vector<Double_t>& values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void QwEPICSEvent::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void QwEPICSEvent::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   fTreeArrayIndex = values.size();
   for (size_t tagindex = 0; tagindex < fEPICSVariableType.size(); tagindex++) {
@@ -259,7 +259,7 @@ void QwEPICSEvent::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>&
   fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
 }
 
-void QwEPICSEvent::FillNTupleVector(std::vector<Double_t>& values) const
+void QwEPICSEvent::FillNTupleVector(QwRootTreeBranchVector &values) const
 {
   Int_t treeindex = fTreeArrayIndex;
   for (size_t tagindex = 0; tagindex < fEPICSVariableType.size(); tagindex++) {
