@@ -110,6 +110,7 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
         type_name = ParseHandledVariable(current_token);
         fDependentType.push_back(type_name.first);
         fDependentName.push_back(type_name.second);
+        fDependentFull.push_back(current_token);
         // Resize the vectors of sensitivities and independent variables
         fSensitivity.resize(fDependentName.size());
         fIndependentType.resize(fDependentName.size());
