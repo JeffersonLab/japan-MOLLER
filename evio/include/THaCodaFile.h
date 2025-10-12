@@ -30,17 +30,17 @@ public:
   explicit THaCodaFile(const char* filename, const char* rw="r");
   THaCodaFile(const THaCodaFile &fn) = delete;
   THaCodaFile& operator=(const THaCodaFile &fn) = delete;
-  ~THaCodaFile() override;
-  Int_t codaOpen(const char* filename, Int_t mode=1) override;
-  Int_t codaOpen(const char* filename, const char* rw, Int_t mode=1) override;
-  Int_t codaClose() override;
-  Int_t codaRead() override;
+  virtual ~THaCodaFile();
+  virtual Int_t codaOpen(const char* filename, Int_t mode=1);
+  virtual Int_t codaOpen(const char* filename, const char* rw, Int_t mode=1);
+  virtual Int_t codaClose();
+  virtual Int_t codaRead();
   Int_t codaWrite(const UInt_t* evbuffer);
   Int_t filterToFile(const char* output_file); // filter to an output file
   void  addEvTypeFilt(UInt_t evtype_to_filt);  // add an event type to list
   void  addEvListFilt(UInt_t event_to_filt);   // add an event num to list
   void  setMaxEvFilt(UInt_t max_event);        // max num events to filter
-  bool isOpen() const override;
+  virtual bool isOpen() const;
 
 private:
 
