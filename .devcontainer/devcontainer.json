@@ -18,7 +18,7 @@
   ],
 
   "postCreateCommand": ".devcontainer/setup-cvmfs.sh",
-  "postStartCommand": ".devcontainer/mount-cvmfs.sh",
+  "postAttachCommand": ".devcontainer/mount-cvmfs.sh",
 
   "customizations": {
     "vscode": {

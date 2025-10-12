@@ -1,11 +1,20 @@
 #!/bin/bash
 
-# CVMFS Mount Script for JAPAN-MOLLER Development Container
-# This script mounts CVMFS repositories on container start
+# CVMFS Auto-Mount Script for JAPAN-MOLLER Development Container
+# This script runs on every devcontainer attach to ensure CVMFS is mounted
 
 set -e
 
-echo "🗂️  Mounting CVMFS repositories..."
+# Log function with timestamps (only when not all mounts are present)
+log() {
+    echo "$(date '+%H:%M:%S') [CVMFS] $1"
+}
+
+# Function to check if a repository is mounted
+is_mounted() {
+    local repo=$1
+    mountpoint -q "/cvmfs/$repo" 2>/dev/null
+}
 
 # Function to mount CVMFS repository with retry logic
 mount_cvmfs() {
@@ -15,80 +24,62 @@ mount_cvmfs() {
     local attempt=1
 
     while [ $attempt -le $max_attempts ]; do
-        echo "📁 Mounting $repo (attempt $attempt/$max_attempts)..."
-        
         if sudo mount -t cvmfs "$repo" "$mount_point" 2>/dev/null; then
-            echo "✅ Successfully mounted $repo"
+            log "✅ Successfully mounted $repo"
             return 0
         else
-            echo "⚠️  Failed to mount $repo (attempt $attempt/$max_attempts)"
+            log "⚠️  Failed to mount $repo (attempt $attempt/$max_attempts)"
             attempt=$((attempt + 1))
-            sleep 2
+            sleep 1
         fi
     done
     
-    echo "❌ Failed to mount $repo after $max_attempts attempts"
+    log "❌ Failed to mount $repo after $max_attempts attempts"
     return 1
 }
 
+# Repositories to mount
+REPOSITORIES=("sft.cern.ch" "geant4.cern.ch" "singularity.opensciencegrid.org" "oasis.opensciencegrid.org")
+
+# Quick check - if all repositories are mounted, exit early
+all_mounted=true
+for repo in "${REPOSITORIES[@]}"; do
+    if ! is_mounted "$repo"; then
+        all_mounted=false
+        break
+    fi
+done
+
+if $all_mounted; then
+    # Silent success - all mounts are already available
+    exit 0
+fi
+
+# If we reach here, some mounts are missing
+log "🔍 Checking CVMFS mount status..."
+
 # Ensure mount points exist
-sudo mkdir -p /cvmfs/sft.cern.ch /cvmfs/geant4.cern.ch /cvmfs/singularity.opensciencegrid.org /cvmfs/oasis.opensciencegrid.org /cvmfs/sw.cern.ch
+for repo in "${REPOSITORIES[@]}"; do
+    sudo mkdir -p "/cvmfs/$repo"
+done
 
-# Mount CERN SFT repository (contains LCG software stacks)
-if ! mountpoint -q /cvmfs/sft.cern.ch; then
-    mount_cvmfs "sft.cern.ch"
-fi
+# Check and mount repositories
+mounted_count=0
+total_repos=${#REPOSITORIES[@]}
 
-# Mount Geant4 repository
-if ! mountpoint -q /cvmfs/geant4.cern.ch; then
-    mount_cvmfs "geant4.cern.ch"
-fi
+for repo in "${REPOSITORIES[@]}"; do
+    if is_mounted "$repo"; then
+        mounted_count=$((mounted_count + 1))
+    else
+        log "📁 Mounting $repo..."
+        if mount_cvmfs "$repo"; then
+            mounted_count=$((mounted_count + 1))
+        fi
+    fi
+done
 
-# Mount OpenScienceGrid Singularity repository
-if ! mountpoint -q /cvmfs/singularity.opensciencegrid.org; then
-    mount_cvmfs "singularity.opensciencegrid.org"
-fi
-
-# Mount OpenScienceGrid OASIS repository
-if ! mountpoint -q /cvmfs/oasis.opensciencegrid.org; then
-    mount_cvmfs "oasis.opensciencegrid.org"
-fi
-
-# Verify mounts and show available software
-echo "📋 Verifying CVMFS mounts..."
-
-if mountpoint -q /cvmfs/sft.cern.ch; then
-    echo "✅ sft.cern.ch mounted successfully"
-    echo "📊 Available LCG versions:"
-    ls /cvmfs/sft.cern.ch/lcg/views/ | grep -E "LCG_10[67]" | head -5
+if [ $mounted_count -eq $total_repos ]; then
+    log "🎉 All CVMFS repositories are now available!"
 else
-    echo "❌ sft.cern.ch not mounted"
+    log "⚠️  $mounted_count/$total_repos repositories mounted. Some may require manual intervention."
 fi
-
-if mountpoint -q /cvmfs/geant4.cern.ch; then
-    echo "✅ geant4.cern.ch mounted successfully"
-else
-    echo "❌ geant4.cern.ch not mounted"
-fi
-
-if mountpoint -q /cvmfs/singularity.opensciencegrid.org; then
-    echo "✅ singularity.opensciencegrid.org mounted successfully"
-    echo "🐳 Available Singularity containers:"
-    ls /cvmfs/singularity.opensciencegrid.org/ 2>/dev/null | head -3 || echo "   (will be populated on first access)"
-else
-    echo "❌ singularity.opensciencegrid.org not mounted"
-fi
-
-if mountpoint -q /cvmfs/oasis.opensciencegrid.org; then
-    echo "✅ oasis.opensciencegrid.org mounted successfully"
-    echo "📦 Available OSG software:"
-    ls /cvmfs/oasis.opensciencegrid.org/ 2>/dev/null | head -3 || echo "   (will be populated on first access)"
-else
-    echo "❌ oasis.opensciencegrid.org not mounted"
-fi
-
-echo "🎉 CVMFS setup complete!"
-echo "💡 Usage examples:"
-echo "   LCG environment: source /cvmfs/sft.cern.ch/lcg/views/LCG_XXX/x86_64-*-*-opt/setup.sh"
-echo "   Singularity: singularity exec /cvmfs/singularity.opensciencegrid.org/..."
-echo "   OSG software: ls /cvmfs/oasis.opensciencegrid.org/"

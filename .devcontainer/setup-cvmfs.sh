@@ -45,14 +45,16 @@ sudo mkdir -p /etc/cvmfs
 
 # Configure CVMFS for CERN and OpenScienceGrid repositories
 sudo tee /etc/cvmfs/default.local > /dev/null << EOF
-CVMFS_REPOSITORIES=sft.cern.ch,geant4.cern.ch,singularity.opensciencegrid.org,oasis.opensciencegrid.org,sw.cern.ch
+CVMFS_REPOSITORIES=sft.cern.ch,geant4.cern.ch,singularity.opensciencegrid.org,oasis.opensciencegrid.org
 CVMFS_HTTP_PROXY=DIRECT
 CVMFS_QUOTA_LIMIT=8000
 CVMFS_CACHE_BASE=/tmp/cvmfs-cache
+CVMFS_TIMEOUT_DIRECT=15
+CVMFS_TIMEOUT=15
 EOF
 
 # Create CVMFS mount points
-sudo mkdir -p /cvmfs/sft.cern.ch /cvmfs/geant4.cern.ch /cvmfs/singularity.opensciencegrid.org /cvmfs/oasis.opensciencegrid.org /cvmfs/sw.cern.ch
+sudo mkdir -p /cvmfs/sft.cern.ch /cvmfs/geant4.cern.ch /cvmfs/singularity.opensciencegrid.org /cvmfs/oasis.opensciencegrid.org
 
 # Create CVMFS cache directory
 sudo mkdir -p /tmp/cvmfs-cache
@@ -79,6 +81,5 @@ echo "✅ Setup complete! CVMFS will be mounted on container start."
 echo "📖 Available repositories:"
 echo "   - LCG software stacks: /cvmfs/sft.cern.ch/lcg/views/"
 echo "   - Geant4 toolkit: /cvmfs/geant4.cern.ch/"
-echo "   - CERN software: /cvmfs/sw.cern.ch/"
 echo "   - OSG Singularity containers: /cvmfs/singularity.opensciencegrid.org/"
 echo "   - OSG OASIS software: /cvmfs/oasis.opensciencegrid.org/"
