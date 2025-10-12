@@ -26,6 +26,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
       with:
+        submodules: true  # Fetch sqlpp submodules for database schema docs
         fetch-depth: 0  # Full history for proper documentation generation
 
     - name: Clean up any existing documentation
@@ -55,6 +56,12 @@ jobs:
         dot -V
         latex --version || echo "LaTeX installed for formula support"
         
+    - name: Create database schema diagram
+      run: |
+        ${GITHUB_WORKSPACE}/.github/scripts/generate_schema_diagram.py > schema_diagram.dot
+        dot -Tpng schema_diagram.dot -o schema_diagram.png
+        dot -Tsvg schema_diagram.dot -o schema_diagram.svg
+
     - name: Update Doxygen configuration (remove obsolete tags)
       run: |
         echo "Updating Doxyfile to remove obsolete tags..."
