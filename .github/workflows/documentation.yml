@@ -26,6 +26,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
       with:
+        submodules: true  # Check out sqlpp as well
         fetch-depth: 0  # Full history for proper documentation generation
 
     - name: Clean up any existing documentation
@@ -43,6 +44,18 @@ jobs:
         key: ${{ runner.os }}-apt-${{ hashFiles('**/.github/workflows/documentation.yml') }}
         restore-keys: |
           ${{ runner.os }}-apt-
+
+    - name: Install sqlite3 and dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libsqlite3-dev
+
+    - name: Generate SQL schema support header
+      run: |
+        thirdparty/sqlpp11/scripts/ddl2cpp -identity-naming -no-timestamp-warning \
+          Parity/prminput/qwparity_schema.sql \
+          Parity/include/QwParitySchema \
+          QwParitySchema
 
     - name: Install Doxygen and dependencies
       run: |
