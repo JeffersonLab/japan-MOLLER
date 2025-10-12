@@ -30,7 +30,7 @@ mount_cvmfs() {
         else
             log "⚠️  Failed to mount $repo (attempt $attempt/$max_attempts)"
             attempt=$((attempt + 1))
-            sleep 1
+            sleep 2
         fi
     done
     
