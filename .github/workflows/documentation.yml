@@ -58,9 +58,15 @@ jobs:
         
     - name: Create database schema diagram
       run: |
-        ${GITHUB_WORKSPACE}/.github/scripts/generate_schema_diagram.py > schema_diagram.dot
-        dot -Tpng schema_diagram.dot -o schema_diagram.png
-        dot -Tsvg schema_diagram.dot -o schema_diagram.svg
+        # Create Doxygen images directory if it doesn't exist
+        mkdir -p Doxygen/images
+
+        # Generate the schema diagram directly in Doxygen/images
+        python3 ${GITHUB_WORKSPACE}/.github/scripts/generate_schema_diagram.py > Doxygen/images/schema_diagram.dot
+        fdp -Tpng Doxygen/images/schema_diagram.dot -o Doxygen/images/schema_diagram.png
+        fdp -Tsvg Doxygen/images/schema_diagram.dot -o Doxygen/images/schema_diagram.svg
+
+        echo "✅ Database schema diagrams generated in Doxygen/images/"
 
     - name: Update Doxygen configuration (remove obsolete tags)
       run: |

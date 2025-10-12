@@ -223,25 +223,32 @@ def generate_dot_output(tables, relationships, table_categories):
     
     print('}')
 
-def generate_table_node(table_name, table):
-    """Generate a single table node definition."""
-    # This function is no longer used in neato layout
-    pass
 
 def main():
     """Main function to generate the schema diagram."""
-    
-    schema_file = Path(__file__).parent / "Parity" / "prminput" / "qwparity_schema.sql"
-    
+
+    import argparse
+
+    default_schema_path = Path(__file__).parent.parent.parent / "Parity" / "prminput" / "qwparity_schema.sql"
+    parser = argparse.ArgumentParser(description="Generate Graphviz DOT diagram from JAPAN-MOLLER schema.")
+    parser.add_argument(
+        "--schema",
+        type=str,
+        default=str(default_schema_path),
+        help="Path to qwparity_schema.sql (default: %(default)s)"
+    )
+    args = parser.parse_args()
+    schema_file = Path(args.schema)
+
     if not schema_file.exists():
         print(f"Error: Schema file not found at {schema_file}", file=sys.stderr)
         sys.exit(1)
-    
+
     try:
         tables, relationships = parse_schema_file(schema_file)
         table_categories = categorize_tables(tables)
         generate_dot_output(tables, relationships, table_categories)
-        
+
         # Print usage instructions to stderr
         print("", file=sys.stderr)
         print("Generated Graphviz DOT output. To create images:", file=sys.stderr)
@@ -250,7 +257,7 @@ def main():
         print("  dot -Tpdf schema_diagram.dot -o schema_diagram.pdf", file=sys.stderr)
         print("", file=sys.stderr)
         print(f"Found {len(tables)} tables and {len(relationships)} relationships.", file=sys.stderr)
-        
+
     except Exception as e:
         print(f"Error processing schema file: {e}", file=sys.stderr)
         sys.exit(1)

@@ -12,7 +12,7 @@
  * 
  * The following diagram illustrates the complete database schema with table relationships:
  * 
- * @image html schema_diagram.svg "JAPAN-MOLLER Database Schema" width=100%
+ * @image html ../schema_diagram.svg "JAPAN-MOLLER Database Schema" width=100%
  * 
  * @section table_categories Table Categories
  * 
