@@ -35,6 +35,7 @@ echo "🗂️  Installing CVMFS..."
 # Install CVMFS repository configuration
 wget -q https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb
 sudo dpkg -i cvmfs-release-latest_all.deb
+rm -f cvmfs-release-latest_all.deb
 sudo apt-get update
 
 # Install CVMFS
@@ -66,19 +67,8 @@ if systemctl is-active --quiet autofs 2>/dev/null; then
     sudo systemctl reload autofs
 fi
 
-echo "🔧 Installing additional development tools..."
-
-# Install act for running GitHub Actions locally
-curl -q https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
-sudo mv ./bin/act /usr/local/bin/ 2>/dev/null || true
-
-# Clean up
-rm -f cvmfs-release-latest_all.deb
-sudo apt-get clean
-sudo rm -rf /var/lib/apt/lists/*
-
 echo "✅ Setup complete! CVMFS will be mounted on container start."
-echo "📖 Available repositories:"
+echo " Available repositories:"
 echo "   - LCG software stacks: /cvmfs/sft.cern.ch/lcg/views/"
 echo "   - Geant4 toolkit: /cvmfs/geant4.cern.ch/"
 echo "   - OSG Singularity containers: /cvmfs/singularity.opensciencegrid.org/"
