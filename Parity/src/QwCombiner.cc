@@ -21,7 +21,7 @@
 #include "QwPromptSummary.h"
 
 // Register this handler with the factory
-RegisterHandlerFactory(QwCombiner);
+REGISTER_HANDLER_FACTORY(QwCombiner);
 
 
 /// \brief Constructor with name

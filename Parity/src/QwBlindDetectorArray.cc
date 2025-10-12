@@ -8,7 +8,7 @@
 #include "QwBlindDetectorArray.h"
 
 // Register this subsystem with the factory
-RegisterSubsystemFactory(QwBlindDetectorArray);
+REGISTER_SUBSYSTEM_FACTORY(QwBlindDetectorArray);
 
 
 /**

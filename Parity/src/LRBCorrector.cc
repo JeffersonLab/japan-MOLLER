@@ -27,7 +27,7 @@
 #include <TMatrixD.h>
 
 // Register this handler with the factory
-RegisterHandlerFactory(LRBCorrector);
+REGISTER_HANDLER_FACTORY(LRBCorrector);
 
 /// \brief Constructor with name
 LRBCorrector::LRBCorrector(const TString& name):VQwDataHandler(name),
