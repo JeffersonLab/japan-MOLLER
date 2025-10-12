@@ -375,13 +375,13 @@ Some hierarchies introduce a specialized abstract base between `VQwDataElement` 
 
 **Implementation Pattern:**
 ```cpp
-// Only one operator version needed
+// Only one operator version needed - type-specific container operators
 QwSubsystemArrayParity& operator+= (const QwSubsystemArrayParity &value) {
   for(size_t i=0; i<value.size(); i++){
     VQwSubsystemParity *ptr1 = dynamic_cast<VQwSubsystemParity*>(this->at(i).get());
     VQwSubsystem *ptr2 = value.at(i).get();
     if (typeid(*ptr1)==typeid(*ptr2)){
-      *(ptr1) += ptr2;  // Delegates to subsystem operators
+      *(ptr1) += ptr2;  // Delegates to subsystem operators (NOT VQwDataElement)
     } else {
       // Handle type mismatch
     }
@@ -395,6 +395,11 @@ void Sum(const QwSubsystemArrayParity &value1, const QwSubsystemArrayParity &val
   *this += value2;
 }
 ```
+
+**Critical Distinction:**
+- **Container classes** (like `QwSubsystemArrayParity`) use **type-specific operators** with the same type
+- **Contained objects** use **VQwSubsystem operators** (for subsystem containers) or **VQwDataElement operators** (for data element containers)
+- **Never use VQwDataElement operators in container classes** - delegation happens at the appropriate abstraction level
 
 **Container Design Principles:**
 - **No virtual operators** in base container classes

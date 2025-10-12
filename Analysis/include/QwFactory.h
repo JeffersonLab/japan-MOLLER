@@ -257,24 +257,24 @@ template <class dataelement_t>
 class MQwDataElementCloneable: public MQwCloneable<VQwDataElement,dataelement_t> { };
 
 
-/// Macros to create and register the subsystem factory of type A
+/// Macros to create and register the data handler factory of type A
 /// Note: a call to this macro should be followed by a semi-colon!
 /// Includes automatic architectural validation for VQwDataHandler derivatives
-#define REGISTER_HANDLER_FACTORY(A) \
-  VALIDATE_DUAL_OPERATOR_PATTERN(A); \
+#define REGISTER_DATA_HANDLER_FACTORY(A) \
+  VALIDATE_DATA_HANDLER_PATTERN(A); \
   template<> const VQwDataHandlerFactory* MQwCloneable<VQwDataHandler,A>::fFactory = new QwFactory<VQwDataHandler,A>(#A)
 
 /// Macros to create and register the subsystem factory of type A
 /// Note: a call to this macro should be followed by a semi-colon!
 /// Includes automatic architectural validation for VQwSubsystem derivatives
 #define REGISTER_SUBSYSTEM_FACTORY(A) \
-  VALIDATE_CONTAINER_DELEGATION_PATTERN(A); \
+  VALIDATE_SUBSYSTEM_PATTERN(A); \
   template<> const VQwSubsystemFactory* MQwCloneable<VQwSubsystem,A>::fFactory = new QwFactory<VQwSubsystem,A>(#A)
 
 /// Macros to create and register the data element factory of type A
 /// Note: a call to this macro should be followed by a semi-colon!
 /// Includes automatic architectural validation for VQwDataElement derivatives
 #define REGISTER_DATA_ELEMENT_FACTORY(A) \
-  VALIDATE_DUAL_OPERATOR_PATTERN(A); \
+  VALIDATE_DATA_ELEMENT_PATTERN(A); \
   template<> const VQwDataElementFactory* MQwCloneable<VQwDataElement,A>::fFactory = new QwFactory<VQwDataElement,A>(#A)
 

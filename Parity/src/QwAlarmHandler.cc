@@ -14,7 +14,7 @@
 #include "QwHelicityPattern.h"
 
 // Register this handler with the factory
-REGISTER_HANDLER_FACTORY(QwAlarmHandler);
+REGISTER_DATA_HANDLER_FACTORY(QwAlarmHandler);
 
 
 /// \brief Constructor with name

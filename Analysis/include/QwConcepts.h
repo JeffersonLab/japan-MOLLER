@@ -18,6 +18,14 @@
 // System headers
 #include <type_traits>
 
+// Forward declarations for classes used in concepts
+class VQwDataElement;
+class VQwHardwareChannel;
+class VQwSubsystem;
+class VQwDataHandler;
+class QwSubsystemArray;
+class QwSubsystemArrayParity;
+
 // Check for C++20 concept support - can be overridden externally
 // External override: Define QW_CONCEPTS_AVAILABLE=0 to disable concepts even in C++20
 // External override: Define QW_CONCEPTS_AVAILABLE=1 to enable (requires C++20 support)
@@ -213,6 +221,16 @@ concept ImplementsSpecializedBasePattern =
  * 
  * Container classes should use single operator versions and delegate to
  * contained objects, avoiding virtual operator inheritance issues.
+ * This applies to subsystem arrays and similar collection classes.
+ * 
+ * The pattern requires:
+ * 1. Type-specific operators that return the container type
+ * 2. Should NOT have virtual operators with VQwDataElement base signatures
+ * 
+ * Critical distinction from Dual-Operator Pattern:
+ * - Container classes use type-specific operators (e.g., QwSubsystemArrayParity += QwSubsystemArrayParity)
+ * - Contained objects use VQwSubsystem operators (for subsystem containers) or VQwDataElement operators (for data element containers)
+ * - Container classes should NEVER use VQwDataElement operators directly
  */
 template<typename T>
 concept ImplementsContainerDelegationPattern = requires(T& obj, const T& other) {
@@ -220,9 +238,43 @@ concept ImplementsContainerDelegationPattern = requires(T& obj, const T& other) 
     { obj += other } -> std::same_as<T&>;
     { obj -= other } -> std::same_as<T&>;
     { obj.Sum(other, other) } -> std::same_as<void>;
-    // Should NOT have virtual operators with base class signatures
-} && !requires(T& obj, const VQwDataElement& base) {
-    { obj += base } -> std::same_as<VQwDataElement&>;
+};
+
+/**
+ * @brief Concept for polymorphic subsystem pattern
+ * 
+ * Regular subsystems (non-container) should implement VQwSubsystem polymorphic operators
+ * for integration with the framework's polymorphic dispatch system.
+ * This applies to classes like QwOmnivore that act as subsystem implementations.
+ */
+template<typename T>
+concept ImplementsPolymorphicSubsystemPattern = requires(T& obj, VQwSubsystem* other) {
+    // Subsystem should have polymorphic operators with VQwSubsystem base
+    { obj += other } -> std::same_as<VQwSubsystem&>;
+    { obj -= other } -> std::same_as<VQwSubsystem&>;
+    { obj.Sum(other, other) } -> std::same_as<void>;
+};
+
+/**
+ * @brief Helper to determine if a class name suggests it's a container
+ * 
+ * Uses compile-time template matching to identify container classes.
+ * Container classes typically have "Array" in their name.
+ */
+template<typename T>
+struct IsContainerClass {
+    static constexpr bool value = false;
+};
+
+// Specialization for QwSubsystemArrayParity and similar array classes
+template<>
+struct IsContainerClass<QwSubsystemArrayParity> {
+    static constexpr bool value = true;
+};
+
+template<>
+struct IsContainerClass<QwSubsystemArray> {
+    static constexpr bool value = true;
 };
 
 //==============================================================================
@@ -270,67 +322,34 @@ concept ValidSpecializedBase =
 
 /**
  * @brief Master concept for container classes
+ * 
+ * Container classes should use the Container-Delegation Pattern
  */
 template<typename T>
 concept ValidContainerClass = 
     ImplementsContainerDelegationPattern<T>;
 
-#else
-//==============================================================================
-// C++17 FALLBACK: EMPTY CONCEPTS (ALWAYS TRUE)
-//==============================================================================
-
-// For pre-C++20 compilers, define concept-like templates that always evaluate to true
+/**
+ * @brief Master concept for polymorphic subsystem classes
+ * 
+ * Regular subsystem classes should use polymorphic VQwSubsystem operators
+ */
 template<typename T>
-constexpr bool HasTypeSpecificUpdateErrorFlag = true;
+concept ValidPolymorphicSubsystem = 
+    std::is_base_of_v<VQwSubsystem, T> &&
+    !std::is_abstract_v<T> &&
+    ImplementsPolymorphicSubsystemPattern<T>;
 
+/**
+ * @brief Unified subsystem validation concept
+ * 
+ * Validates subsystems using appropriate pattern based on class characteristics
+ * Container classes use Container-Delegation Pattern, others use Polymorphic Subsystem Pattern
+ */
 template<typename T>
-constexpr bool HasPolymorphicUpdateErrorFlag = true;
-
-template<typename T>
-constexpr bool ImplementsDualOperatorUpdateErrorFlag = true;
-
-template<typename T>
-constexpr bool HasTypeSpecificArithmetic = true;
-
-template<typename T>
-constexpr bool HasPolymorphicArithmetic = true;
-
-template<typename T>
-constexpr bool ImplementsDualOperatorArithmetic = true;
-
-template<typename T>
-constexpr bool HasTypeSpecificEventCutsAndDiagnostics = true;
-
-template<typename T>
-constexpr bool HasPolymorphicEventCutsAndDiagnostics = true;
-
-template<typename T>
-constexpr bool ImplementsDualOperatorEventCutsAndDiagnostics = true;
-
-template<typename T>
-constexpr bool SpecializedBaseWithPolymorphicUpdateErrorFlag = true;
-
-template<typename T>
-constexpr bool SpecializedBaseWithPolymorphicCheckForBurpFail = true;
-
-template<typename T>
-constexpr bool ImplementsSpecializedBasePattern = true;
-
-template<typename T>
-constexpr bool ImplementsContainerDelegationPattern = true;
-
-template<typename T>
-constexpr bool ValidVQwDataElementDerivative = true;
-
-template<typename T>
-constexpr bool ValidVQwHardwareChannelDerivative = true;
-
-template<typename T>
-constexpr bool ValidSpecializedBase = true;
-
-template<typename T>
-constexpr bool ValidContainerClass = true;
+concept ValidSubsystemClass = 
+    (IsContainerClass<T>::value && ValidContainerClass<T>) ||
+    (!IsContainerClass<T>::value && ValidPolymorphicSubsystem<T>);
 
 #endif // QW_CONCEPTS_AVAILABLE
 
@@ -341,13 +360,13 @@ constexpr bool ValidContainerClass = true;
 /**
  * @brief Helper macro to validate architectural compliance in concrete classes
  * 
- * Usage: VALIDATE_DUAL_OPERATOR_PATTERN(MyConcreteClass);
+ * Usage: VALIDATE_DATA_ELEMENT_PATTERN(MyConcreteClass);
  * 
  * In C++20: Performs full concept validation for all required methods
  * In C++17: Always passes but documents architectural requirements
  */
 #if QW_CONCEPTS_AVAILABLE
-#define VALIDATE_DUAL_OPERATOR_PATTERN(ClassName) \
+#define VALIDATE_DATA_ELEMENT_PATTERN(ClassName) \
     static_assert(QwArchitecture::ValidVQwDataElementDerivative<ClassName>, \
         #ClassName " must implement complete Dual-Operator Pattern for all required methods. " \
         "See copilot-instructions.md for implementation requirements. " \
@@ -368,146 +387,43 @@ constexpr bool ValidContainerClass = true;
         #ClassName " must implement SetSingleEventCuts and CheckForBurpFail patterns " \
         "(C++20 concept validation active)");
 #else
-#define VALIDATE_DUAL_OPERATOR_PATTERN(ClassName) \
+#define VALIDATE_DATA_ELEMENT_PATTERN(ClassName) \
     /* C++17 mode: Architectural patterns documented but validation disabled */ \
     static_assert(true, #ClassName " architectural requirements documented (upgrade to C++20 for validation)");
 #endif
 
 /**
- * @brief Helper macro to validate hardware channel compliance
- */
-#if QW_CONCEPTS_AVAILABLE
-#define VALIDATE_HARDWARE_CHANNEL_PATTERN(ClassName) \
-    VALIDATE_DUAL_OPERATOR_PATTERN(ClassName) \
-    static_assert(QwArchitecture::ValidVQwHardwareChannelDerivative<ClassName>, \
-        #ClassName " must properly inherit from VQwHardwareChannel and implement required patterns. " \
-        "(C++20 concept validation active)");
-#else
-#define VALIDATE_HARDWARE_CHANNEL_PATTERN(ClassName) \
-    VALIDATE_DUAL_OPERATOR_PATTERN(ClassName)
-#endif
-
-/**
- * @brief Helper macro to validate container delegation pattern
- */
-#if QW_CONCEPTS_AVAILABLE
-#define VALIDATE_CONTAINER_DELEGATION_PATTERN(ClassName) \
-    static_assert(QwArchitecture::ValidContainerClass<ClassName>, \
-        #ClassName " must implement Container-Delegation Pattern. Use type-specific operators only " \
-        "and delegate to contained objects. Avoid virtual operators with base signatures. " \
-        "(C++20 concept validation active)");
-#else
-#define VALIDATE_CONTAINER_DELEGATION_PATTERN(ClassName) \
-    /* C++17 mode: Container patterns documented but validation disabled */ \
-    static_assert(true, #ClassName " container requirements documented (upgrade to C++20 for validation)");
-#endif
-
-/**
- * @brief Helper macro for specialized abstract bases
- */
-#if QW_CONCEPTS_AVAILABLE
-#define VALIDATE_SPECIALIZED_BASE_PATTERN(ClassName) \
-    static_assert(QwArchitecture::ValidSpecializedBase<ClassName>, \
-        #ClassName " specialized abstract base must provide virtual hooks for polymorphic dispatch. " \
-        "Must implement UpdateErrorFlag and CheckForBurpFail virtual methods. " \
-        "(C++20 concept validation active)");
-#else
-#define VALIDATE_SPECIALIZED_BASE_PATTERN(ClassName) \
-    /* C++17 mode: Specialized base patterns documented but validation disabled */ \
-    static_assert(true, #ClassName " specialized base requirements documented (upgrade to C++20 for validation)");
-#endif
-
-/**
- * @brief Helper macro for validating individual method groups
- */
-#if QW_CONCEPTS_AVAILABLE
-#define VALIDATE_ARITHMETIC_PATTERN(ClassName) \
-    static_assert(QwArchitecture::ImplementsDualOperatorArithmetic<ClassName>, \
-        #ClassName " must implement complete arithmetic Dual-Operator Pattern " \
-        "(+=, -=, Sum, Difference, Ratio with both type-specific and polymorphic versions) " \
-        "(C++20 concept validation active)");
-
-#define VALIDATE_DIAGNOSTICS_PATTERN(ClassName) \
-    static_assert(QwArchitecture::ImplementsDualOperatorEventCutsAndDiagnostics<ClassName>, \
-        #ClassName " must implement complete event cuts and diagnostics Dual-Operator Pattern " \
-        "(SetSingleEventCuts, CheckForBurpFail with both type-specific and polymorphic versions) " \
-        "(C++20 concept validation active)");
-
-#define VALIDATE_UPDATE_ERROR_FLAG_PATTERN(ClassName) \
-    static_assert(QwArchitecture::ImplementsDualOperatorUpdateErrorFlag<ClassName>, \
-        #ClassName " must implement complete UpdateErrorFlag Dual-Operator Pattern " \
-        "(type-specific and polymorphic delegator versions) " \
-        "(C++20 concept validation active)");
-#else
-#define VALIDATE_ARITHMETIC_PATTERN(ClassName) \
-    static_assert(true, #ClassName " arithmetic requirements documented (upgrade to C++20 for validation)");
-
-#define VALIDATE_DIAGNOSTICS_PATTERN(ClassName) \
-    static_assert(true, #ClassName " diagnostics requirements documented (upgrade to C++20 for validation)");
-
-#define VALIDATE_UPDATE_ERROR_FLAG_PATTERN(ClassName) \
-    static_assert(true, #ClassName " UpdateErrorFlag requirements documented (upgrade to C++20 for validation)");
-#endif
-
-//==============================================================================
-// COMPILE-TIME VALIDATION FUNCTIONS
-//==============================================================================
-
-/**
- * @brief Compile-time validation function for any VQwDataElement derivative
+ * @brief Helper macro to validate data handler compliance
  * 
- * This function will trigger concept evaluation and provide detailed error
- * messages if the architectural requirements are not met.
- * 
- * For C++17: Always returns true but documents expected patterns
- * For C++20: Performs full validation
+ * Data handlers have different architectural requirements than data elements.
+ * They don't need the Dual-Operator Pattern since they handle data processing
+ * rather than data storage and arithmetic operations.
  */
-template<typename T>
-constexpr bool validate_architectural_compliance() {
 #if QW_CONCEPTS_AVAILABLE
-    if constexpr (std::is_base_of_v<VQwDataElement, T> && !std::is_abstract_v<T>) {
-        static_assert(ValidVQwDataElementDerivative<T>, 
-            "Class must implement Dual-Operator Pattern for VQwDataElement derivatives");
-        
-        if constexpr (std::is_base_of_v<VQwHardwareChannel, T>) {
-            static_assert(ValidVQwHardwareChannelDerivative<T>,
-                "VQwHardwareChannel derivatives must implement additional requirements");
-        }
-        
-        return true;
-    }
-    
-    // For container classes (not derived from VQwDataElement)
-    if constexpr (!std::is_base_of_v<VQwDataElement, T>) {
-        // Check if it looks like a container class
-        if constexpr (requires(T t, const T& other) { t += other; }) {
-            static_assert(ValidContainerClass<T>,
-                "Container classes must implement Container-Delegation Pattern");
-        }
-        return true;
-    }
-#endif // QW_CONCEPTS_AVAILABLE
-    
-    return true;
-}
-
-/**
- * @brief Information function to check if concepts are active
- */
-constexpr bool concepts_available() {
-    return QW_CONCEPTS_AVAILABLE;
-}
-
-/**
- * @brief Get a string describing the current validation mode
- */
-constexpr const char* validation_mode() {
-#if QW_CONCEPTS_AVAILABLE
-    return "C++20 concepts: Full architectural validation active";
+#define VALIDATE_DATA_HANDLER_PATTERN(ClassName) \
+    static_assert(std::is_base_of_v<VQwDataHandler, ClassName>, \
+        #ClassName " must inherit from VQwDataHandler for factory registration. " \
+        "(C++20 concept validation active)");
 #else
-    return "C++17 compatibility: Architectural validation disabled (patterns documented only)";
+#define VALIDATE_DATA_HANDLER_PATTERN(ClassName) \
+    /* C++17 mode: Data handler patterns documented but validation disabled */ \
+    static_assert(true, #ClassName " data handler requirements documented (upgrade to C++20 for validation)");
 #endif
-}
+
+/**
+ * @brief Helper macro to validate unified subsystem compliance
+ */
+#if QW_CONCEPTS_AVAILABLE
+#define VALIDATE_SUBSYSTEM_PATTERN(ClassName) \
+    static_assert(QwArchitecture::ValidSubsystemClass<ClassName>, \
+        #ClassName " must implement appropriate subsystem pattern. Containers use Container-Delegation, " \
+        "regular subsystems use Polymorphic Subsystem patterns. " \
+        "(C++20 concept validation active)");
+#else
+#define VALIDATE_SUBSYSTEM_PATTERN(ClassName) \
+    /* C++17 mode: Subsystem patterns documented but validation disabled */ \
+    static_assert(true, #ClassName " subsystem requirements documented (upgrade to C++20 for validation)");
+#endif
 
 } // namespace QwArchitecture
 
