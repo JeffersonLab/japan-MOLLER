@@ -124,7 +124,7 @@ class PromptSummaryElement :  public TObject
   /* Double_t fAsymmetryWidthError; */
   /* TString  fAsymmetryWidthUnit; */
 
-  ClassDef(PromptSummaryElement,0);
+  ClassDefOverride(PromptSummaryElement,0);
 
 };
 
@@ -191,7 +191,7 @@ private:
 
   Bool_t  fLocalDebug;
 
-  ClassDef(QwPromptSummary,0);
+  ClassDefOverride(QwPromptSummary,0);
 
 };
 
