@@ -893,7 +893,6 @@ void QwEPICSEvent::FillSlowControlsData(QwParityDB *db)
     QwDebug << "QwEPICSEvent::FillSlowControlsData::Writing to database now" << QwLog::endl;
     
     // Convert to sqlpp11 bulk insert
-    QwParitySchema::slow_controls_data slow_controls_data;
     try {
       for (const auto& entry : entrylist) {
         c->QueryExecute(entry.insert_into());
@@ -956,7 +955,6 @@ void QwEPICSEvent::FillSlowControlsStrings(QwParityDB *db)
     QwDebug << "QwEPICSEvent::FillSlowControlsStrigs Writing to database now" << QwLog::endl;
     
     // Convert to sqlpp11 bulk insert
-    QwParitySchema::slow_controls_strings slow_controls_strings;
     try {
       for (const auto& entry : entrylist) {
         c->QueryExecute(entry.insert_into());
