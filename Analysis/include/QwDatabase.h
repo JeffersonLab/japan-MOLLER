@@ -41,6 +41,13 @@
 #ifdef __USE_DATABASE_POSTGRESQL__
 #include <sqlpp23/postgresql/postgresql.h>
 #endif // __USE_DATABASE_POSTGRESQL__
+
+// Compatibility shims for sqlpp23 to support sqlpp11 syntax
+namespace sqlpp {
+  // Make std::nullopt available as sqlpp::null for compatibility  
+  static constexpr auto null = std::nullopt;
+}
+
 #endif // __USE_SQLPP23__
 #endif // __USE_DATABASE__
 
