@@ -55,15 +55,15 @@ class QwBlindDetectorArray:
 
 
   /// Virtual destructor
-  ~QwBlindDetectorArray(){};
+  ~QwBlindDetectorArray() override{};
 
   public:
 
   /// \brief Blind the asymmetry
-  void Blind(const QwBlinder *blinder);
+  void Blind(const QwBlinder *blinder) override;
   
   /// \brief Blind the difference using the yield
-  void Blind(const QwBlinder *blinder, const VQwSubsystemParity* subsys);
+  void Blind(const QwBlinder *blinder, const VQwSubsystemParity* subsys) override;
 
 #ifdef HAS_RNTUPLE_SUPPORT
   // Inherit RNTuple methods from VQwDetectorArray - no need to redeclare

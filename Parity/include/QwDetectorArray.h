@@ -51,7 +51,7 @@ QwDetectorArray(const QwDetectorArray& source)
 
 
 /// Virtual destructor
-~QwDetectorArray() {};
+~QwDetectorArray() override {};
 
 };
 

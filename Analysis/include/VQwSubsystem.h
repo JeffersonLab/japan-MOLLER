@@ -90,7 +90,7 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   }
 
   /// Default destructor
-  virtual ~VQwSubsystem() { }
+  ~VQwSubsystem() override { }
 
 
   /// \brief Define options function (note: no virtual static functions in C++)
@@ -112,12 +112,12 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   virtual std::map<TString, TString> GetDetectorMaps();
 
   /// \brief Try to publish an internal variable matching the submitted name
-  virtual Bool_t PublishByRequest(TString /*device_name*/){
+  Bool_t PublishByRequest(TString /*device_name*/) override{
     return kFALSE; // when not implemented, this returns failure
   };
 
   /// \brief Publish all variables of the subsystem
-  virtual Bool_t PublishInternalValues() const {
+  Bool_t PublishInternalValues() const override {
     return kTRUE; // when not implemented, this returns success
   };
 

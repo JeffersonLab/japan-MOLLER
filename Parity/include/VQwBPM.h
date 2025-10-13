@@ -69,13 +69,13 @@ class VQwBPM : public VQwDataElement {
     for (size_t i = 0; i < 3; i++)
       fPositionCenter[i] = source.fPositionCenter[i];
   }
-  virtual ~VQwBPM() { };
+  ~VQwBPM() override { };
 
 
   void   InitializeChannel(TString name);
   //  virtual void   ClearEventData() = 0;
 
-  virtual void LoadChannelParameters(QwParameterFile &paramfile) = 0;
+  void LoadChannelParameters(QwParameterFile &paramfile) override = 0;
 
 //-------------------------------------------------------------------------------------
 
@@ -93,7 +93,7 @@ class VQwBPM : public VQwDataElement {
 
   void    SetSingleEventCuts(TString, Double_t, Double_t);
   void    SetSingleEventCuts(TString, UInt_t, Double_t, Double_t, Double_t, Double_t);
-  virtual UInt_t UpdateErrorFlag() = 0;
+  UInt_t UpdateErrorFlag() override = 0;
   virtual void UpdateErrorFlag(const VQwBPM *ev_error) = 0;
 
   virtual void Scale(Double_t /*factor*/) {
@@ -167,8 +167,8 @@ public:
   };
   virtual void DeaccumulateRunningSum(VQwBPM& value, Int_t ErrorMask=0xFFFFFFF) = 0;
 
-  virtual void ConstructHistograms(TDirectory *folder, TString &prefix) = 0;
-  virtual void FillHistograms() = 0;
+  void ConstructHistograms(TDirectory *folder, TString &prefix) override = 0;
+  void FillHistograms() override = 0;
 
   virtual void ConstructBranchAndVector(TTree *tree, TString &prefix,
       std::vector<Double_t> &values) = 0;
@@ -211,7 +211,7 @@ public:
     std::cerr << "GetAbsolutePosition() is not implemented!!\n";
   }
   virtual void SetEventCutMode(Int_t bcuts) = 0;
-  virtual void PrintErrorCounters() const {// report number of events failed due to HW and event cut faliure
+  void PrintErrorCounters() const override {// report number of events failed due to HW and event cut faliure
     std::cerr << "PrintErrorCounters() is not implemented!!\n";
   }
   virtual Bool_t ApplySingleEventCuts() = 0;//Check for good events by stting limits on the devices readings
@@ -271,7 +271,7 @@ public:
   virtual void SetSubElementCalibrationFactor(Int_t /*j*/, Double_t /*value*/) {
     std::cerr << "SetSubElementCalibrationFactor is undefined!!!\n";
   }
-  virtual void PrintInfo() const { 
+  void PrintInfo() const override { 
     std::cout<<"PrintInfo() for VQwBPM not impletemented\n";
   };
 

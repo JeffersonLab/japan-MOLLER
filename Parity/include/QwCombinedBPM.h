@@ -42,8 +42,8 @@ class QwCombinedBPM : public VQwBPM {
  public:
 
 //-------------------------------------------------------------------------
-  size_t GetNumberOfElements() {return fElement.size();};
-  TString GetSubElementName(Int_t index) {return fElement.at(index)->GetElementName();};
+  size_t GetNumberOfElements() override {return fElement.size();};
+  TString GetSubElementName(Int_t index) override {return fElement.at(index)->GetElementName();};
 //-------------------------------------------------------------------------
 
   QwCombinedBPM(){
@@ -67,7 +67,7 @@ class QwCombinedBPM : public VQwBPM {
     QwCopyArray(source.fMinimumChiSquare, fMinimumChiSquare);
     QwCopyArray(source.fAbsPos, fAbsPos);
   }
-  virtual ~QwCombinedBPM() { };
+  ~QwCombinedBPM() override { };
 
   using VQwBPM::EBeamPositionMonitorAxis;
 
@@ -79,15 +79,15 @@ class QwCombinedBPM : public VQwBPM {
     InitializeChannel(subsystem, name);
   }
 
-  void    LoadChannelParameters(QwParameterFile &paramfile){};
-  void    ClearEventData();
+  void    LoadChannelParameters(QwParameterFile &paramfile) override{};
+  void    ClearEventData() override;
   Int_t   ProcessEvBuffer(UInt_t* buffer,
-			UInt_t word_position_in_buffer,UInt_t indexnumber);
-  void    ProcessEvent();
-  void    PrintValue() const;
-  void    PrintInfo() const;
+			UInt_t word_position_in_buffer,UInt_t indexnumber) override;
+  void    ProcessEvent() override;
+  void    PrintValue() const override;
+  void    PrintInfo() const override;
 
-  const VQwHardwareChannel* GetPosition(EBeamPositionMonitorAxis axis) const {
+  const VQwHardwareChannel* GetPosition(EBeamPositionMonitorAxis axis) const override {
     if (axis<0 || axis>2){
       TString loc="QwLinearDiodeArray::GetPosition for "
         +this->GetElementName()+" failed for axis value "+Form("%d",axis);
@@ -104,74 +104,74 @@ class QwCombinedBPM : public VQwBPM {
     }
     return &fSlope[axis];
   }
-  const VQwHardwareChannel* GetEffectiveCharge() const {
+  const VQwHardwareChannel* GetEffectiveCharge() const override {
     return &fEffectiveCharge;
   }
 
 
   Bool_t  ApplyHWChecks();//Check for harware errors in the devices
-  Bool_t  ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
+  Bool_t  ApplySingleEventCuts() override;//Check for good events by stting limits on the devices readings
   //void    SetSingleEventCuts(TString ch_name, Double_t minX, Double_t maxX);
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   //void    SetSingleEventCuts(TString ch_name, UInt_t errorflag,Double_t min, Double_t max, Double_t stability);
-  void    SetEventCutMode(Int_t bcuts);
-  void IncrementErrorCounters();
-  void PrintErrorCounters() const;// report number of events failed due to HW and event cut faliure
-  UInt_t  GetEventcutErrorFlag();
-  UInt_t  UpdateErrorFlag();
-  void UpdateErrorFlag(const VQwBPM *ev_error);
+  void    SetEventCutMode(Int_t bcuts) override;
+  void IncrementErrorCounters() override;
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
+  UInt_t  GetEventcutErrorFlag() override;
+  UInt_t  UpdateErrorFlag() override;
+  void UpdateErrorFlag(const VQwBPM *ev_error) override;
 
   // Polymorphic burp-failure check when called via VQwBPM*
   Bool_t  CheckForBurpFail(const VQwDataElement *ev_error);
 
 
-  void    SetBPMForCombo(const VQwBPM* bpm, Double_t charge_weight,  Double_t x_weight, Double_t y_weight,Double_t sumqw);
+  void    SetBPMForCombo(const VQwBPM* bpm, Double_t charge_weight,  Double_t x_weight, Double_t y_weight,Double_t sumqw) override;
 
   void    Ratio(QwCombinedBPM &numer, QwCombinedBPM &denom);
-  void    Ratio(VQwBPM &numer, VQwBPM &denom);
-  void    Scale(Double_t factor);
+  void    Ratio(VQwBPM &numer, VQwBPM &denom) override;
+  void    Scale(Double_t factor) override;
 
-  VQwBPM& operator=  (const VQwBPM &value);
-  VQwBPM& operator+= (const VQwBPM &value);
-  VQwBPM& operator-= (const VQwBPM &value);
+  VQwBPM& operator=  (const VQwBPM &value) override;
+  VQwBPM& operator+= (const VQwBPM &value) override;
+  VQwBPM& operator-= (const VQwBPM &value) override;
 
   virtual QwCombinedBPM& operator=  (const QwCombinedBPM &value);
   virtual QwCombinedBPM& operator+= (const QwCombinedBPM &value);
   virtual QwCombinedBPM& operator-= (const QwCombinedBPM &value);
 
-  void    AccumulateRunningSum(const VQwBPM& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
+  void    AccumulateRunningSum(const VQwBPM& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override;
   void    AccumulateRunningSum(const QwCombinedBPM& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
-  void    DeaccumulateRunningSum(VQwBPM& value, Int_t ErrorMask=0xFFFFFFF);
+  void    DeaccumulateRunningSum(VQwBPM& value, Int_t ErrorMask=0xFFFFFFF) override;
   void    DeaccumulateRunningSum(QwCombinedBPM& value, Int_t ErrorMask=0xFFFFFFF);
-  void    CalculateRunningAverage();
+  void    CalculateRunningAverage() override;
 
-  void    ConstructHistograms(TDirectory *folder, TString &prefix);
-  void    FillHistograms();
+  void    ConstructHistograms(TDirectory *folder, TString &prefix) override;
+  void    FillHistograms() override;
 
-  void    ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
-  void    ConstructBranch(TTree *tree, TString &prefix);
-  void    ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
-  void    FillTreeVector(std::vector<Double_t> &values) const;
+  void    ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) override;
+  void    ConstructBranch(TTree *tree, TString &prefix) override;
+  void    ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist) override;
+  void    FillTreeVector(std::vector<Double_t> &values) const override;
 
 #ifdef HAS_RNTUPLE_SUPPORT
   // RNTuple methods
-  void    ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
-  void    FillNTupleVector(std::vector<Double_t>& values) const;
+  void    ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
+  void    FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif // HAS_RNTUPLE_SUPPORT
 
 //------------------------------------------------------------------------------------------------
-  void    RandomizeEventData(int helicity = 0, double time = 0.0);
+  void    RandomizeEventData(int helicity = 0, double time = 0.0) override;
   void    SetRandomEventParameters(Double_t meanX, Double_t sigmaX, Double_t meanY, Double_t sigmaY,
-                                   Double_t meanXslope, Double_t sigmaXslope, Double_t meanYslope, Double_t sigmaYslope);
-  void    GetProjectedPosition(VQwBPM *device);
-  void    LoadMockDataParameters(QwParameterFile &paramfile);
+                                   Double_t meanXslope, Double_t sigmaXslope, Double_t meanYslope, Double_t sigmaYslope) override;
+  void    GetProjectedPosition(VQwBPM *device) override;
+  void    LoadMockDataParameters(QwParameterFile &paramfile) override;
 //------------------------------------------------------------------------------------------------
 
   VQwHardwareChannel* GetAngleX(){ //At present this returns the slope not the angle
     return &fSlope[0];
   };
 
-  const VQwHardwareChannel* GetAngleX() const { //At present this returns the slope not the angle
+  const VQwHardwareChannel* GetAngleX() const override { //At present this returns the slope not the angle
     return const_cast<QwCombinedBPM*>(this)->GetAngleX();
   };
 
@@ -179,7 +179,7 @@ class QwCombinedBPM : public VQwBPM {
     return &fSlope[1];
   };
 
-  const VQwHardwareChannel* GetAngleY() const { //At present this returns the slope not the angle
+  const VQwHardwareChannel* GetAngleY() const override { //At present this returns the slope not the angle
     return const_cast<QwCombinedBPM*>(this)->GetAngleY();
   };
 
@@ -190,7 +190,7 @@ class QwCombinedBPM : public VQwBPM {
 #endif // __USE_DATABASE__
 
  protected:
-  VQwHardwareChannel* GetSubelementByName(TString ch_name);
+  VQwHardwareChannel* GetSubelementByName(TString ch_name) override;
 
   /* Functions for least square fit */
   void     CalculateFixedParameter(std::vector<Double_t> fWeights, Int_t pos);

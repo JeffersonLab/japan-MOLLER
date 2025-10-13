@@ -69,7 +69,7 @@ class QwDataHandlerArray:
     /// Copy constructor by reference
     QwDataHandlerArray(const QwDataHandlerArray& source);
     /// Default destructor
-    virtual ~QwDataHandlerArray();
+    ~QwDataHandlerArray() override;
 
     /// \brief Define configuration options for global array
     static void DefineOptions(QwOptions &options);

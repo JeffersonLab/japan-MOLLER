@@ -41,17 +41,17 @@ class QwPMT_Channel: public VQwDataElement {
     InitializeChannel(name);
   };
   /// Virtual destructor
-  virtual ~QwPMT_Channel() { };
+  ~QwPMT_Channel() override { };
 
   void  InitializeChannel(TString name){
     SetElementName(name);
     ClearEventData();
   };
 
-  void  ClearEventData();
+  void  ClearEventData() override;
   void  RandomizeEventData(int helicity, int SlotNum, int ChanNum);
   void  EncodeEventData(std::vector<UInt_t> &TrigBuffer);
-  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t subelement=0){return 0;};
+  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t subelement=0) override{return 0;};
 
   void     SetValue(Double_t data) { fValue = data; };
   Double_t GetValue() const        { return fValue; };
@@ -68,15 +68,15 @@ class QwPMT_Channel: public VQwDataElement {
   void Sum(const QwPMT_Channel &value1, const QwPMT_Channel &value2);
   void Difference(const QwPMT_Channel &value1, const QwPMT_Channel &value2);
 
-  void  ConstructHistograms(TDirectory *folder, TString &prefix);
-  void  FillHistograms();
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
+  void  FillHistograms() override;
 
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
   void  FillTreeVector(std::vector<Double_t> &values) const;
 
-  void PrintValue() const;
-  void PrintInfo() const;
-  void PrintErrorCounters() const {};
+  void PrintValue() const override;
+  void PrintInfo() const override;
+  void PrintErrorCounters() const override {};
 
 
  protected:

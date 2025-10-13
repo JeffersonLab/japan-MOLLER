@@ -42,7 +42,7 @@ public:
   VQwHardwareChannel();
   VQwHardwareChannel(const VQwHardwareChannel& value);
   VQwHardwareChannel(const VQwHardwareChannel& value, VQwDataElement::EDataToSave datatosave);
-  virtual ~VQwHardwareChannel() { };
+  ~VQwHardwareChannel() override { };
 
   virtual void CopyFrom(const VQwHardwareChannel& value);
 
@@ -81,7 +81,7 @@ public:
     return width;
   };
 
-  virtual void  ClearEventData(){
+  void  ClearEventData() override{
     VQwDataElement::ClearEventData();
   };
 
@@ -133,7 +133,7 @@ public:
 
   Double_t GetStabilityLimit() const { return fStability;};
 
-  UInt_t UpdateErrorFlag() {return GetEventcutErrorFlag();};
+  UInt_t UpdateErrorFlag() override {return GetEventcutErrorFlag();};
   void UpdateErrorFlag(const VQwHardwareChannel& elem){fErrorFlag |= elem.fErrorFlag;};
   virtual UInt_t GetErrorCode() const {return (fErrorFlag);}; 
 
@@ -166,7 +166,7 @@ public:
      }
   }
 
-  void AssignValueFrom(const VQwDataElement* valueptr) = 0;
+  void AssignValueFrom(const VQwDataElement* valueptr) override = 0;
   virtual VQwHardwareChannel& operator+=(const VQwHardwareChannel& input) = 0;
   virtual VQwHardwareChannel& operator-=(const VQwHardwareChannel& input) = 0;
   virtual VQwHardwareChannel& operator*=(const VQwHardwareChannel& input) = 0;

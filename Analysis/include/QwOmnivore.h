@@ -23,31 +23,31 @@ class QwOmnivore: public VQwSubsystem_t {
     : VQwSubsystem(source),VQwSubsystem_t(source)
     { }
     /// Virtual destructor
-    virtual ~QwOmnivore() { };
+    ~QwOmnivore() override { };
 
     /// Map file definition
-    Int_t LoadChannelMap(TString mapfile) { return 0; };
+    Int_t LoadChannelMap(TString mapfile) override { return 0; };
     /// Parameter file definition
-    Int_t LoadInputParameters(TString mapfile) { return 0; };
+    Int_t LoadInputParameters(TString mapfile) override { return 0; };
     /// Geometry definition for tracking subsystems
-    Int_t LoadGeometryDefinition(TString mapfile) { return 0; };
+    Int_t LoadGeometryDefinition(TString mapfile) override { return 0; };
 
     /// Load the event cuts file
-    Int_t LoadEventCuts(TString filename) { return 0; };
+    Int_t LoadEventCuts(TString filename) override { return 0; };
     /// Apply the single event cuts
-    Bool_t ApplySingleEventCuts() { return kTRUE; };
+    Bool_t ApplySingleEventCuts() override { return kTRUE; };
 
-    Bool_t CheckForBurpFail(const VQwSubsystem *subsys){return kFALSE;};
+    Bool_t CheckForBurpFail(const VQwSubsystem *subsys) override{return kFALSE;};
 
     /// Report the number of events failed due to HW and event cut failures
-    void PrintErrorCounters() const { };
+    void PrintErrorCounters() const override { };
     /// Return the error flag to the main routine
-    UInt_t GetEventcutErrorFlag() { return 0; };
+    UInt_t GetEventcutErrorFlag() override { return 0; };
 
     /// Increment error counters
-    void IncrementErrorCounters() { };
+    void IncrementErrorCounters() override { };
     /// Update error flag
-    void UpdateErrorFlag(const VQwSubsystem*) { };
+    void UpdateErrorFlag(const VQwSubsystem*) override { };
 
     /// Get the hit list
     //void  GetHitList(QwHitContainer& grandHitContainer) { };
@@ -56,10 +56,10 @@ class QwOmnivore: public VQwSubsystem_t {
 
 
     /// Clear event data
-    void  ClearEventData() { };
+    void  ClearEventData() override { };
 
     /// Process the configuration events
-    Int_t ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) {
+    Int_t ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override {
       /// Om nom nom nom
       // TODO (wdc) configuration events seem to have num_words = 0xffffffff
       //UInt_t cheeseburger;
@@ -69,13 +69,13 @@ class QwOmnivore: public VQwSubsystem_t {
     };
 
     /// Process the event buffer
-    Int_t ProcessEvBuffer(const UInt_t event_type, const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) {
+    Int_t ProcessEvBuffer(const UInt_t event_type, const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override {
       /// TODO:  Subsystems should be changing their ProcessEvBuffer routines to take the event_type as the first
       ///  arguement.  But in the meantime, default to just calling the non-event-type-aware ProcessEvBuffer routine.
       return this->ProcessEvBuffer(roc_id, bank_id, buffer, num_words);
     };
     /// TODO:  The non-event-type-aware ProcessEvBuffer routine should be replaced with the event-type-aware version.
-    Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) {
+    Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override {
       /// Om nom nom nom
       UInt_t cheeseburger;
       for (UInt_t word = 0; word < num_words; word++)
@@ -84,43 +84,43 @@ class QwOmnivore: public VQwSubsystem_t {
     };
 
     /// Process the event
-    void  ProcessEvent() { };
+    void  ProcessEvent() override { };
 
     /// Assignment/addition/subtraction operators
-    VQwSubsystem& operator=  (VQwSubsystem *value) { return *this; };
-    VQwSubsystem& operator+= (VQwSubsystem *value) { return *this; };
-    VQwSubsystem& operator-= (VQwSubsystem *value) { return *this; };
+    VQwSubsystem& operator=  (VQwSubsystem *value) override { return *this; };
+    VQwSubsystem& operator+= (VQwSubsystem *value) override { return *this; };
+    VQwSubsystem& operator-= (VQwSubsystem *value) override { return *this; };
     /// Sum/difference/ratio/scale operations
-    void Sum(VQwSubsystem *value1, VQwSubsystem *value2) { };
-    void Difference(VQwSubsystem *value1, VQwSubsystem *value2) { };
-    void Ratio(VQwSubsystem *numer, VQwSubsystem *denom) { };
-    void Scale(Double_t factor) { };
+    void Sum(VQwSubsystem *value1, VQwSubsystem *value2) override { };
+    void Difference(VQwSubsystem *value1, VQwSubsystem *value2) override { };
+    void Ratio(VQwSubsystem *numer, VQwSubsystem *denom) override { };
+    void Scale(Double_t factor) override { };
 
     /// Construct the histograms for this subsystem in a folder with a prefix
-    void  ConstructHistograms(TDirectory *folder, TString &prefix) { };
+    void  ConstructHistograms(TDirectory *folder, TString &prefix) override { };
     /// Fill the histograms for this subsystem
-    void  FillHistograms() { };
+    void  FillHistograms() override { };
 
     /// Construct the branch and tree vector
-    void ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values) { };
+    void ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values) override { };
     /// Fill the tree vector
-    void FillTreeVector(std::vector<Double_t> &values) const { };
+    void FillTreeVector(std::vector<Double_t> &values) const override { };
 #ifdef HAS_RNTUPLE_SUPPORT
     /// Construct the RNTuple fields and vector
-    void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) { };
+    void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override { };
     /// Fill the RNTuple vector
-    void FillNTupleVector(std::vector<Double_t>& values) const { };
+    void FillNTupleVector(std::vector<Double_t>& values) const override { };
 #endif // HAS_RNTUPLE_SUPPORT
     /// Construct branch
-    void ConstructBranch(TTree*, TString&) { };
+    void ConstructBranch(TTree*, TString&) override { };
     /// Construct branch
-    void ConstructBranch(TTree*, TString&, QwParameterFile&) { };
+    void ConstructBranch(TTree*, TString&, QwParameterFile&) override { };
 
     /// \brief Update the running sums for devices
-    void AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) { };
-    void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF) { };
+    void AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override { };
+    void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF) override { };
     /// \brief Calculate the average for all good events
-    void CalculateRunningAverage() { };
+    void CalculateRunningAverage() override { };
 };
 
 #endif

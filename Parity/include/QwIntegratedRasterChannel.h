@@ -39,14 +39,14 @@ class QwIntegratedRasterChannel : public VQwDataElement{
     SetSubsystemName(subsystemname);
     InitializeChannel(subsystemname, name,"raw");
   };
-  virtual ~QwIntegratedRasterChannel() { };
+  ~QwIntegratedRasterChannel() override { };
 
-  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0);
+  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0) override;
 
   void  InitializeChannel(TString name, TString datatosave);
   // new routine added to update necessary information for tree trimming
   void  InitializeChannel(TString subsystem, TString name, TString datatosave);
-  void  ClearEventData();
+  void  ClearEventData() override;
 
 
   void  SetRandomEventDriftParameters(Double_t amplitude, Double_t phase, Double_t frequency);
@@ -65,11 +65,11 @@ class QwIntegratedRasterChannel : public VQwDataElement{
   Bool_t ApplyHWChecks();//Check for harware errors in the devices
   Bool_t ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
   void IncrementErrorCounters(){fTriumf_ADC.IncrementErrorCounters();};
-  void PrintErrorCounters() const;// report number of events failed due to HW and event cut faliure
-  UInt_t GetEventcutErrorFlag(){//return the error flag
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
+  UInt_t GetEventcutErrorFlag() override{//return the error flag
     return fTriumf_ADC.GetEventcutErrorFlag();
   }
-  UInt_t UpdateErrorFlag() {return GetEventcutErrorFlag();};
+  UInt_t UpdateErrorFlag() override {return GetEventcutErrorFlag();};
   void UpdateErrorFlag(const QwIntegratedRasterChannel *ev_error){
     return fTriumf_ADC.UpdateErrorFlag(ev_error->fTriumf_ADC);
   }
@@ -84,8 +84,8 @@ class QwIntegratedRasterChannel : public VQwDataElement{
     fTriumf_ADC.SetEventCutMode(bcuts);
   }
 
-  void PrintValue() const;
-  void PrintInfo() const;
+  void PrintValue() const override;
+  void PrintInfo() const override;
 
   
   QwIntegratedRasterChannel& operator=  (const QwIntegratedRasterChannel &value);
@@ -102,8 +102,8 @@ class QwIntegratedRasterChannel : public VQwDataElement{
   void SetPedestal(Double_t ped);
   void SetCalibrationFactor(Double_t calib);
 
-  void  ConstructHistograms(TDirectory *folder, TString &prefix);
-  void  FillHistograms();
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
+  void  FillHistograms() override;
 
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
   void  ConstructBranch(TTree *tree, TString &prefix);

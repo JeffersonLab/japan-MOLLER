@@ -74,7 +74,7 @@ class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneab
     fIntegratedRasterChannel(source.fIntegratedRasterChannel)
   { }
   /// Virtual destructor
-  virtual ~QwIntegratedRaster() { };
+  ~QwIntegratedRaster() override { };
 
 
   /* derived from VQwSubsystem */
@@ -83,79 +83,79 @@ class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneab
   static void DefineOptions(QwOptions &options);
 
 
-  void ProcessOptions(QwOptions &options);//Handle command line options
-  Int_t LoadChannelMap(TString mapfile);
-  Int_t LoadInputParameters(TString pedestalfile);
-  Int_t LoadEventCuts(TString filename);//derived from VQwSubsystemParity
-  void IncrementErrorCounters();
-  Bool_t ApplySingleEventCuts();//derived from VQwSubsystemParity
-  void PrintErrorCounters() const;// report number of events failed due to HW and event cut faliures
-  UInt_t GetEventcutErrorFlag();//return the error flag
+  void ProcessOptions(QwOptions &options) override;//Handle command line options
+  Int_t LoadChannelMap(TString mapfile) override;
+  Int_t LoadInputParameters(TString pedestalfile) override;
+  Int_t LoadEventCuts(TString filename) override;//derived from VQwSubsystemParity
+  void IncrementErrorCounters() override;
+  Bool_t ApplySingleEventCuts() override;//derived from VQwSubsystemParity
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliures
+  UInt_t GetEventcutErrorFlag() override;//return the error flag
 
-  Bool_t CheckForBurpFail(const VQwSubsystem *subsys){
+  Bool_t CheckForBurpFail(const VQwSubsystem *subsys) override{
     return kFALSE;
   };
 
   //update the error flag in the subsystem level from the top level routines related to stability checks. This will uniquely update the errorflag at each channel based on the error flag in the corresponding channel in the ev_error subsystem
-  void UpdateErrorFlag(const VQwSubsystem *ev_error){
+  void UpdateErrorFlag(const VQwSubsystem *ev_error) override{
   };
 
-  void AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
+  void AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override;
   //remove one entry from the running sums for devices
-  void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF){
+  void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF) override{
   };
-  void CalculateRunningAverage();
+  void CalculateRunningAverage() override;
 
-  Int_t ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
-  Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
+  Int_t ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override;
+  Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override;
   void  PrintDetectorID() const;
 
-  void  ClearEventData();
+  void  ClearEventData() override;
   Bool_t IsGoodEvent();
 
-  void  ProcessEvent();
-  void  ExchangeProcessedData(){};
-  void  ProcessEvent_2(){};
+  void  ProcessEvent() override;
+  void  ExchangeProcessedData() override{};
+  void  ProcessEvent_2() override{};
 
   void  SetRandomEventParameters(Double_t mean, Double_t sigma);
   void  SetRandomEventAsymmetry(Double_t asymmetry);
-  void RandomizeEventData(int helicity = 0, double time = 0.0);
-  void EncodeEventData(std::vector<UInt_t> &buffer);
+  void RandomizeEventData(int helicity = 0, double time = 0.0) override;
+  void EncodeEventData(std::vector<UInt_t> &buffer) override;
 
-  VQwSubsystem&  operator=  (VQwSubsystem *value);
-  VQwSubsystem&  operator+= (VQwSubsystem *value);
-  VQwSubsystem&  operator-= (VQwSubsystem *value);
-  void Sum(VQwSubsystem  *value1, VQwSubsystem  *value2);
-  void Difference(VQwSubsystem  *value1, VQwSubsystem  *value2);
-  void Ratio(VQwSubsystem *numer, VQwSubsystem *denom);
-  void Scale(Double_t factor);
+  VQwSubsystem&  operator=  (VQwSubsystem *value) override;
+  VQwSubsystem&  operator+= (VQwSubsystem *value) override;
+  VQwSubsystem&  operator-= (VQwSubsystem *value) override;
+  void Sum(VQwSubsystem  *value1, VQwSubsystem  *value2) override;
+  void Difference(VQwSubsystem  *value1, VQwSubsystem  *value2) override;
+  void Ratio(VQwSubsystem *numer, VQwSubsystem *denom) override;
+  void Scale(Double_t factor) override;
 
   using VQwSubsystem::ConstructHistograms;
-  void  ConstructHistograms(TDirectory *folder, TString &prefix);
-  void  FillHistograms();
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
+  void  FillHistograms() override;
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
-  void  ConstructBranch(TTree *tree, TString &prefix);
-  void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file);
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) override;
+  void  ConstructBranch(TTree *tree, TString &prefix) override;
+  void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file) override;
+  void  FillTreeVector(std::vector<Double_t> &values) const override;
 
 #ifdef HAS_RNTUPLE_SUPPORT
   // RNTuple methods  
-  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
-  void  FillNTupleVector(std::vector<Double_t>& values) const;
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
+  void  FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif
 #ifdef __USE_DATABASE__
   void  FillDB(QwParityDB *db, TString datatype);
   void  FillErrDB(QwParityDB *db, TString datatype);
 #endif // __USE_DATABASE__
-  void  WritePromptSummary(QwPromptSummary *ps, TString type);
+  void  WritePromptSummary(QwPromptSummary *ps, TString type) override;
 
   const VQwDataElement* GetChannel(const TString name) const;
 
   Bool_t Compare(VQwSubsystem *source);
 
-  void PrintValue() const;
-  void PrintInfo() const;
+  void PrintValue() const override;
+  void PrintInfo() const override;
 
 /////
 protected: 

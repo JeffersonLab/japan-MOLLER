@@ -57,80 +57,80 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
     fBeamDetectorID(source.fBeamDetectorID)
   { this->CopyTemplatedDataElements(&source); }
   /// Virtual destructor
-  virtual ~QwBeamLine() { };
+  ~QwBeamLine() override { };
 
   void   CopyTemplatedDataElements(const VQwSubsystem *source);
 
   /* derived from VQwSubsystem */
   
-  void   ProcessOptions(QwOptions &options);//Handle command line options
-  Int_t  LoadChannelMap(TString mapfile);
-  Int_t  LoadInputParameters(TString pedestalfile);
-  void LoadEventCuts_Init() {};
-  void LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, Int_t &eventcut_flag);
-  void LoadEventCuts_Fin(Int_t &eventcut_flag);
-  Int_t  LoadGeometryDefinition(TString mapfile);
-  void  LoadMockDataParameters(TString mapfile);
+  void   ProcessOptions(QwOptions &options) override;//Handle command line options
+  Int_t  LoadChannelMap(TString mapfile) override;
+  Int_t  LoadInputParameters(TString pedestalfile) override;
+  void LoadEventCuts_Init() override {};
+  void LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, Int_t &eventcut_flag) override;
+  void LoadEventCuts_Fin(Int_t &eventcut_flag) override;
+  Int_t  LoadGeometryDefinition(TString mapfile) override;
+  void  LoadMockDataParameters(TString mapfile) override;
   void   AssignGeometry(QwParameterFile* mapstr, VQwBPM * bpm);
 
-  Bool_t ApplySingleEventCuts();//derived from VQwSubsystemParity
-  void   IncrementErrorCounters();
+  Bool_t ApplySingleEventCuts() override;//derived from VQwSubsystemParity
+  void   IncrementErrorCounters() override;
 
-  Bool_t CheckForBurpFail(const VQwSubsystem *subsys);
+  Bool_t CheckForBurpFail(const VQwSubsystem *subsys) override;
 
-  void   PrintErrorCounters() const;// report number of events failed due to HW and event cut faliures
-  UInt_t GetEventcutErrorFlag();//return the error flag
+  void   PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliures
+  UInt_t GetEventcutErrorFlag() override;//return the error flag
 
-  UInt_t UpdateErrorFlag();//Update and return the error flags
+  UInt_t UpdateErrorFlag() override;//Update and return the error flags
 
   //update the error flag in the subsystem level from the top level routines related to stability checks. This will uniquely update the errorflag at each channel based on the error flag in the corresponding channel in the ev_error subsystem
-  void UpdateErrorFlag(const VQwSubsystem *ev_error);
+  void UpdateErrorFlag(const VQwSubsystem *ev_error) override;
 
-  Int_t  ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
-  Int_t  ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
+  Int_t  ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override;
+  Int_t  ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override;
   void   PrintDetectorID() const;
 
-  void   ClearEventData();
-  void   ProcessEvent();
+  void   ClearEventData() override;
+  void   ProcessEvent() override;
 
-  Bool_t PublishInternalValues() const;
-  Bool_t PublishByRequest(TString device_name);
+  Bool_t PublishInternalValues() const override;
+  Bool_t PublishByRequest(TString device_name) override;
 
 
  public:
   size_t GetNumberOfElements();
-  void   RandomizeEventData(int helicity = 0, double time = 0.0);
+  void   RandomizeEventData(int helicity = 0, double time = 0.0) override;
   void   SetRandomEventAsymmetry(Double_t asymmetry);
-  void   EncodeEventData(std::vector<UInt_t> &buffer);
+  void   EncodeEventData(std::vector<UInt_t> &buffer) override;
 
-  VQwSubsystem&  operator=  (VQwSubsystem *value);
-  VQwSubsystem&  operator+= (VQwSubsystem *value);
-  VQwSubsystem&  operator-= (VQwSubsystem *value);
-  void   Ratio(VQwSubsystem *numer, VQwSubsystem *denom);
+  VQwSubsystem&  operator=  (VQwSubsystem *value) override;
+  VQwSubsystem&  operator+= (VQwSubsystem *value) override;
+  VQwSubsystem&  operator-= (VQwSubsystem *value) override;
+  void   Ratio(VQwSubsystem *numer, VQwSubsystem *denom) override;
 
-  void   Scale(Double_t factor);
+  void   Scale(Double_t factor) override;
 
-  void   AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
+  void   AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override;
   //remove one entry from the running sums for devices
-  void   DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF);
+  void   DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF) override;
 
 
-  void   CalculateRunningAverage();
+  void   CalculateRunningAverage() override;
 
   using  VQwSubsystem::ConstructHistograms;
-  void   ConstructHistograms(TDirectory *folder, TString &prefix);
-  void   FillHistograms();
+  void   ConstructHistograms(TDirectory *folder, TString &prefix) override;
+  void   FillHistograms() override;
 
   using  VQwSubsystem::ConstructBranchAndVector;
-  void   ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
-  void   ConstructBranch(TTree *tree, TString &prefix);
-  void   ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file );
-  void   FillTreeVector(std::vector<Double_t> &values) const;
+  void   ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) override;
+  void   ConstructBranch(TTree *tree, TString &prefix) override;
+  void   ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file ) override;
+  void   FillTreeVector(std::vector<Double_t> &values) const override;
 
 #ifdef HAS_RNTUPLE_SUPPORT
   using  VQwSubsystem::ConstructNTupleAndVector;
-  void   ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
-  void   FillNTupleVector(std::vector<Double_t>& values) const;
+  void   ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
+  void   FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif
 
 #ifdef __USE_DATABASE__
@@ -140,9 +140,9 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
 
   Bool_t Compare(VQwSubsystem *source);
 
-  void   PrintValue() const;
-  void   PrintInfo() const;
-  void   WritePromptSummary(QwPromptSummary *ps, TString type);
+  void   PrintValue() const override;
+  void   PrintInfo() const override;
+  void   WritePromptSummary(QwPromptSummary *ps, TString type) override;
 
   VQwDataElement* GetElement(QwBeamDetectorID det_id);
   VQwDataElement* GetElement(EQwBeamInstrumentType TypeID, TString name);

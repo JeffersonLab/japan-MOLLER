@@ -15,22 +15,22 @@ public:
 		evt_time(0),
 		trigger_bits(0),
 		TSROCNumber(0) { }
-	~Coda3EventDecoder() { }
+	~Coda3EventDecoder() override { }
 public:
 	// Encoding Functions
-	virtual std::vector<UInt_t> EncodePHYSEventHeader(std::vector<ROCID_t> &ROCList);
-	virtual void EncodePrestartEventHeader(int* buffer, int runnumber, int runtype, int localtime);
-	virtual void EncodeGoEventHeader(int* buffer, int eventcount, int localtime);
-	virtual void EncodePauseEventHeader(int* buffer, int eventcount, int localtime);
-	virtual void EncodeEndEventHeader(int* buffer, int eventcount, int localtime);
+	std::vector<UInt_t> EncodePHYSEventHeader(std::vector<ROCID_t> &ROCList) override;
+	void EncodePrestartEventHeader(int* buffer, int runnumber, int runtype, int localtime) override;
+	void EncodeGoEventHeader(int* buffer, int eventcount, int localtime) override;
+	void EncodePauseEventHeader(int* buffer, int eventcount, int localtime) override;
+	void EncodeEndEventHeader(int* buffer, int eventcount, int localtime) override;
 
 public:
 	// Decoding Functions
-	virtual Int_t DecodeEventIDBank(UInt_t *buffer);
+	Int_t DecodeEventIDBank(UInt_t *buffer) override;
 private:
 	// Debugging Functions
 	void printUserEvent(const UInt_t *buffer);
-	virtual void PrintDecoderInfo(QwLog& out);
+	void PrintDecoderInfo(QwLog& out) override;
 protected:
 	// TI Decoding Functions
 	UInt_t InterpretBankTag(UInt_t tag);

@@ -31,7 +31,7 @@ class PromptSummaryElement :  public TObject
  public:
   PromptSummaryElement();
   PromptSummaryElement(TString name);
-  virtual ~PromptSummaryElement();
+  ~PromptSummaryElement() override;
   //  friend std::ostream& operator<<(std::ostream& os, const PromptSummaryElement &ps_element);
 
   void FillData(Double_t yield, Double_t yield_err, Double_t yield_width, TString yield_unit, 
@@ -124,7 +124,7 @@ class PromptSummaryElement :  public TObject
   /* Double_t fAsymmetryWidthError; */
   /* TString  fAsymmetryWidthUnit; */
 
-  ClassDef(PromptSummaryElement,0);
+  ClassDefOverride(PromptSummaryElement,0);
 
 };
 
@@ -191,7 +191,7 @@ private:
 
   Bool_t  fLocalDebug;
 
-  ClassDef(QwPromptSummary,0);
+  ClassDefOverride(QwPromptSummary,0);
 
 };
 

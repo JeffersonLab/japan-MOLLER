@@ -21,17 +21,17 @@ class QwExtractor:public VQwDataHandler, public MQwDataHandlerCloneable<QwExtrac
     /// \brief Copy constructor
     QwExtractor(const QwExtractor &source);
     /// Virtual destructor
-    virtual ~QwExtractor();
+    ~QwExtractor() override;
 
-    Int_t LoadChannelMap(const std::string& mapfile);
-    Int_t ConnectChannels(QwSubsystemArrayParity& event);
+    Int_t LoadChannelMap(const std::string& mapfile) override;
+    Int_t ConnectChannels(QwSubsystemArrayParity& event) override;
     void ConstructTreeBranches(
         QwRootFile *treerootfile,
         const std::string& treeprefix = "",
-        const std::string& branchprefix = "");
-    void ProcessData();
+        const std::string& branchprefix = "") override;
+    void ProcessData() override;
     void SetPointer(QwSubsystemArrayParity *ptr){fSourcePointer = ptr;};
-    void FillTreeBranches(QwRootFile *treerootfile);
+    void FillTreeBranches(QwRootFile *treerootfile) override;
   
   protected:
     /// Default constructor (Protected for child class access)
