@@ -134,7 +134,7 @@ Bool_t VQwDetectorArray::PublishInternalValues() const {
         device_type.ToLower();
         device_prop.ToLower();
 
-        const VQwHardwareChannel* tmp_channel;
+        const VQwHardwareChannel* tmp_channel = NULL;
 
         if (device_type == "integrationpmt") {
 

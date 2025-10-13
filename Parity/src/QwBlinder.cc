@@ -796,7 +796,7 @@ void QwBlinder::InitTestValues(const int n)
 Int_t QwBlinder::UseStringManip(const TString& barestring)
 {
   std::vector<UInt_t> choppedwords;
-  UInt_t tmpword;
+  UInt_t tmpword = 0;
   Int_t finalseed = 0;
 
   for (Int_t i = 0; i < barestring.Length(); i++)
