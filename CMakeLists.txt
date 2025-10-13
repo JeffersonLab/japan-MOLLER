@@ -85,50 +85,63 @@ endif()
 
 
 #----------------------------------------------------------------------------
-# sqlpp11
+# sqlpp11 / sqlpp23
+# - sqlpp23 is used when ROOT_CXX_STANDARD is 23 or higher
+# - sqlpp11 is used otherwise
 #
-list(APPEND SQLPP11_OPTIONAL_COMPONENTS SQLite3 MySQL MariaDB PostgreSQL)
-find_package(Sqlpp11 QUIET OPTIONAL_COMPONENTS ${SQLPP11_OPTIONAL_COMPONENTS})
-if(NOT Sqlpp11_FOUND)
+list(APPEND SQLPP_OPTIONAL_COMPONENTS SQLite3 MySQL MariaDB PostgreSQL)
+if(ROOT_CXX_STANDARD GREATER_EQUAL 23)
+  set(SQLPP "SQLPP23")
+  set(Sqlpp "Sqlpp23")
+  set(sqlpp "sqlpp23")
+else()
+  set(SQLPP "SQLPP11")
+  set(Sqlpp "Sqlpp11")
+  set(sqlpp "sqlpp11")
+endif()
+find_package(${Sqlpp} QUIET OPTIONAL_COMPONENTS ${SQLPP_OPTIONAL_COMPONENTS})
+if(NOT ${Sqlpp}_FOUND)
   find_package(Git QUIET)
   set(Sqlpp11_MIN_COMMIT 3b8f409)
+  set(Sqlpp23_MIN_COMMIT 3176bef)
   execute_process(
-      COMMAND ${GIT_EXECUTABLE} -C ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11 merge-base --is-ancestor ${Sqlpp11_MIN_COMMIT} HEAD
+      COMMAND ${GIT_EXECUTABLE} -C ${PROJECT_SOURCE_DIR}/thirdparty/${sqlpp} merge-base --is-ancestor ${${Sqlpp}_MIN_COMMIT} HEAD
       OUTPUT_QUIET ERROR_QUIET
       RESULT_VARIABLE GIT_IS_ANCESTOR)
-  if(EXISTS ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11/CMakeLists.txt AND GIT_IS_ANCESTOR EQUAL "0")
-    message(STATUS "sqlpp11 included as subproject")
-    add_subdirectory(${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11)
-    list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11/cmake/modules)
-    set(Sqlpp11_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11/include)
-    # Treat date dependency of sqlpp11 as system headers
+  if(EXISTS ${PROJECT_SOURCE_DIR}/thirdparty/${sqlpp}/CMakeLists.txt AND GIT_IS_ANCESTOR EQUAL "0")
+    message(STATUS "${sqlpp} included as subproject")
+    add_subdirectory(${PROJECT_SOURCE_DIR}/thirdparty/${sqlpp})
+    list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/thirdparty/${sqlpp}/cmake/modules)
+    set(${sqlpp}_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/thirdparty/${sqlpp}/include)
+    # Treat date dependency of sqlpp as system headers
     # to hide compiler warnings
     include_directories(SYSTEM ${date_SOURCE_DIR}/include)
   else()
-    message(WARNING "sqlpp11 not available or outdated in thirdparty directory. Use 'git clone --recurse-submodules` on new clone or 'git submodule update --init --recursive' on existing repository.")
+    message(WARNING "${sqlpp} not available or outdated in thirdparty directory. Use 'git clone --recurse-submodules` on new clone or 'git submodule update --init --recursive' on existing repository.")
   endif()
 endif()
-if(TARGET sqlpp11::sqlpp11)
+if(TARGET ${sqlpp}::${sqlpp})
   config_add_dependency(Sqlpp11)
   include_directories(${Sqlpp11_INCLUDE_DIR})
   add_definitions(-D__USE_DATABASE__)
-  list(APPEND Sqlpp11_LIBRARIES sqlpp11::sqlpp11)
+  add_definitions(-D__USE_${SQLPP}__)
+  list(APPEND Sqlpp11_LIBRARIES ${sqlpp}::${sqlpp})
 
   # Identify found backend components
-  foreach(component ${SQLPP11_OPTIONAL_COMPONENTS})
+  foreach(component ${SQLPP_OPTIONAL_COMPONENTS})
     string(TOUPPER ${component} component_upper)
     string(TOLOWER ${component} component_lower)
-    if(TARGET sqlpp11::${component_lower})
+    if(TARGET ${sqlpp}::${component_lower})
       add_definitions(-D__USE_DATABASE_${component_upper}__)
-      list(APPEND Sqlpp11_LIBRARIES sqlpp11::${component_lower})
+      list(APPEND ${Sqlpp}_LIBRARIES ${sqlpp}::${component_lower})
     endif()
   endforeach()
-  message(STATUS "Found ${Sqlpp11_LIBRARIES}")
+  message(STATUS "Found ${Sqlpp}_LIBRARIES")
 
   # When building sqlpp11::mysql connector, we need to ensure dependencies are found in parent scope
   if(BUILD_MYSQL_CONNECTOR)
     find_package(MySQL QUIET)
-    list(APPEND Sqlpp11_LIBRARIES MySQL::MySQL)
+    list(APPEND ${Sqlpp}_LIBRARIES MySQL::MySQL)
   endif()
 
   # Generate C++ headers from SQL schema at build time
@@ -136,36 +149,52 @@ if(TARGET sqlpp11::sqlpp11)
   set(SCHEMA_OUTPUT_FILE ${SCHEMA_OUTPUT_DIR}/QwParitySchema.h)
   set(SCHEMA_INPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Parity/prminput/qwparity_schema.sql)
   
-  # Find sqlpp11-ddl2cpp executable
-  find_program(SQLPP11_DDL2CPP
-    NAMES ddl2cpp
-    PATHS thirdparty/sqlpp11/scripts
-    DOC "sqlpp11 DDL to C++ converter"
+  # Find sqlpp ddl2cpp executable
+  find_program(SQLPP_DDL2CPP
+    NAMES ddl2cpp ${sqlpp}-ddl2cpp
+    PATHS thirdparty/${sqlpp}/scripts
+    DOC "${sqlpp} DDL to C++ converter"
     QUIET
   )
-  if(TARGET sqlpp11::ddl2cpp)
-    set(SQLPP11_DDL2CPP sqlpp11::ddl2cpp)
+  if(TARGET ${sqlpp}::ddl2cpp)
+    set(SQLPP_DDL2CPP ${sqlpp}::ddl2cpp)
   endif()
-  if(SQLPP11_DDL2CPP)
-    add_custom_command(
-      OUTPUT ${SCHEMA_OUTPUT_FILE}
-      COMMAND ${SQLPP11_DDL2CPP}
-        -identity-naming -no-timestamp-warning
-        ${SCHEMA_INPUT_FILE}
-        ${SCHEMA_OUTPUT_DIR}/QwParitySchema
-        QwParitySchema
-      DEPENDS ${SCHEMA_INPUT_FILE}
-      COMMENT "Generating C++ headers from SQL schema"
-      VERBATIM
-    )
+  if(SQLPP_DDL2CPP)
+    if(${SQLPP} EQUAL "SQLPP11")
+      add_custom_command(
+        OUTPUT ${SCHEMA_OUTPUT_FILE}
+        COMMAND ${SQLPP_DDL2CPP}
+          -identity-naming
+          -no-timestamp-warning
+          ${SCHEMA_INPUT_FILE}
+          ${SCHEMA_OUTPUT_DIR}/QwParitySchema
+          QwParitySchema
+        DEPENDS ${SCHEMA_INPUT_FILE}
+        COMMENT "Generating C++ headers from SQL schema"
+        VERBATIM
+      )
+    else()
+      add_custom_command(
+        OUTPUT ${SCHEMA_OUTPUT_FILE}
+        COMMAND ${SQLPP_DDL2CPP}
+          --naming-style identity
+          --suppress-timestamp-warning
+          --path-to-ddl ${SCHEMA_INPUT_FILE}
+          --path-to-header ${SCHEMA_OUTPUT_DIR}/QwParitySchema.h
+          --namespace QwParitySchema
+        DEPENDS ${SCHEMA_INPUT_FILE}
+        COMMENT "Generating C++ headers from SQL schema"
+        VERBATIM
+      )
+    endif()
     
     # Add a custom target to ensure the schema is generated
     add_custom_target(generate_schema DEPENDS ${SCHEMA_OUTPUT_FILE})
   else()
-    message(WARNING "sqlpp11-ddl2cpp not found, SQL schema headers may not be generated")
+    message(WARNING "${sqlpp}-ddl2cpp not found, SQL schema headers may not be generated")
   endif()
 ELSE()
-  message(STATUS "Sqlpp11 not found; database functionally disabled")
+  message(STATUS "${sqlpp} not found; database functionally disabled")
   set(Sqlpp11_LIBRARIES "")
   list(REMOVE_ITEM my_project_sources
     ${PROJECT_SOURCE_DIR}/Analysis/src/QwDatabase.cc
@@ -248,8 +277,8 @@ endforeach()
 add_library(${PROJECT_NAME} SHARED ${my_project_sources} ${my_project_headers})
 add_dependencies(${PROJECT_NAME} check_git_repository)
 
-# Add schema generation dependency if sqlpp11 is available
-if((Sqlpp11_FOUND OR TARGET sqlpp11::sqlpp11) AND TARGET generate_schema)
+# Add schema generation dependency if sqlpp is available
+if((${sqlpp}_FOUND OR TARGET ${sqlpp}::${sqlpp}) AND TARGET generate_schema)
   add_dependencies(${PROJECT_NAME} generate_schema)
 endif()
 
@@ -284,10 +313,10 @@ target_link_libraries(${PROJECT_NAME}
   )
 
 # Link sqlpp11 if enabled
-if((Sqlpp11_FOUND OR TARGET sqlpp11::sqlpp11) AND TARGET generate_schema)
+if((${Sqlpp}_FOUND OR TARGET ${sqlpp}::${sqlpp}) AND TARGET generate_schema)
   target_link_libraries(${PROJECT_NAME}
     PRIVATE
-      ${Sqlpp11_LIBRARIES}
+      ${${Sqlpp}_LIBRARIES}
   )
   target_include_directories(${PROJECT_NAME}
     PRIVATE
