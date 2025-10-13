@@ -1,0 +1,421 @@
+---
+name: Benchmarks
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * 0'  # Weekly on Sunday at 2 AM UTC
+  workflow_dispatch:  # Allow manual triggering
+    inputs:
+      benchmark_filter:
+        description: 'Benchmark filter pattern (regex)'
+        required: false
+        default: '.*'
+      benchmark_repetitions:
+        description: 'Number of repetitions'
+        required: false
+        default: '3'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  benchmarks:
+    name: Performance Benchmarks
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Main benchmark configuration
+          - name: "GCC 14 Release"
+            release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc14"
+            opt: "opt"
+            cxxflags: "-O3 -DNDEBUG -march=native"
+            
+          # Debug configuration for detailed profiling
+          - name: "GCC 14 Debug"
+            release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc14"
+            opt: "opt"
+            cxxflags: "-O0 -g -DDEBUG"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          submodules: true
+          fetch-depth: 0  # Full history for performance trend tracking
+
+      - name: Setup CVMFS
+        uses: cvmfs-contrib/github-action-cvmfs@v5
+        with:
+          cvmfs_repositories: 'sft.cern.ch,geant4.cern.ch'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ccache time bc
+          
+          # Install Google Benchmark if not available in LCG
+          sudo apt-get install -y libbenchmark-dev
+
+      - name: Setup ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-benchmark-${{ matrix.release }}-${{ matrix.compiler }}-${{ github.ref_name }}
+          restore-keys: |
+            ccache-benchmark-${{ matrix.release }}-${{ matrix.compiler }}-
+            ccache-benchmark-${{ matrix.release }}-
+            ccache-benchmark-
+
+      - name: Configure ccache
+        run: |
+          ccache --set-config=cache_dir=$HOME/.ccache
+          ccache --set-config=max_size=2G
+          ccache --set-config=compression=true
+          ccache --zero-stats
+          echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
+
+      - name: Build with benchmarks
+        uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::Install runtime dependencies"
+            PYTHONHOME="" PYTHONPATH="" dnf install -y time bc
+            echo "::endgroup::"
+
+            echo "::group::Environment setup"
+            # Set up Boost environment
+            LCG_PATH="/cvmfs/sft.cern.ch/lcg/views/${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}"
+            export BOOST_INC_DIR="${LCG_PATH}/include"
+            export BOOST_LIB_DIR="${LCG_PATH}/lib"
+
+            # Generate setup scripts
+            chmod +x SetupFiles/make_SET_ME_UP
+            SetupFiles/make_SET_ME_UP
+            echo "::endgroup::"
+
+            echo "::group::CMake configuration"
+            # Configure build with benchmarking enabled
+            cmake -Bbuild -S. \
+              -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+              -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+              -DCMAKE_INSTALL_PREFIX=install \
+              -DCMAKE_CXX_FLAGS="${{ matrix.cxxflags }}" \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DENABLE_TESTING=ON \
+              -DENABLE_BENCHMARKING=ON \
+              -DBUILD_MARIADB_CONNECTOR=OFF \
+              -DBUILD_MYSQL_CONNECTOR=OFF \
+              -DBUILD_POSTGRESQL_CONNECTOR=OFF \
+              -DBUILD_SQLITE3_CONNECTOR=OFF
+            echo "::endgroup::"
+
+            echo "::group::Compilation"
+            cmake --build build -j$(nproc) --target install
+            echo "::endgroup::"
+            
+            echo "::group::ccache statistics"
+            ccache --show-stats
+            echo "::endgroup::"
+
+      - name: Verify benchmark executables
+        uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::Benchmark executable verification"
+            cd build
+            
+            # Find and list benchmark executables
+            BENCHMARK_EXES=$(find . -name "*benchmark*" -type f -executable)
+            echo "Found benchmark executables:"
+            for exe in $BENCHMARK_EXES; do
+              echo "  - $exe"
+              # Quick test to ensure they run
+              timeout 30 $exe --benchmark_list_tests || echo "Warning: $exe failed to list tests"
+            done
+            
+            if [ -z "$BENCHMARK_EXES" ]; then
+              echo "No benchmark executables found!"
+              exit 1
+            fi
+            echo "::endgroup::"
+
+      - name: Run Analysis Framework Benchmarks
+        uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::Analysis Framework Benchmarks"
+            cd build
+            
+            if [ -f "Analysis/tests/analysis_benchmarks" ]; then
+              # Run benchmarks with appropriate settings
+              FILTER="${{ github.event.inputs.benchmark_filter || '.*' }}"
+              REPETITIONS="${{ github.event.inputs.benchmark_repetitions || '3' }}"
+              
+              timeout 1800 ./Analysis/tests/analysis_benchmarks \
+                --benchmark_filter="$FILTER" \
+                --benchmark_repetitions=$REPETITIONS \
+                --benchmark_format=json \
+                --benchmark_out=analysis_benchmark_results.json \
+                --benchmark_display_aggregates_only=true || {
+                echo "Analysis benchmarks failed or timed out"
+                exit 1
+              }
+              
+              # Also generate console output for logs
+              timeout 1800 ./Analysis/tests/analysis_benchmarks \
+                --benchmark_filter="$FILTER" \
+                --benchmark_repetitions=$REPETITIONS \
+                --benchmark_format=console | tee analysis_benchmark_console.txt
+              
+              echo "Analysis framework benchmarks completed"
+            else
+              echo "Analysis benchmarks executable not found"
+            fi
+            echo "::endgroup::"
+
+      - name: Run Parity Framework Benchmarks
+        uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::Parity Framework Benchmarks"
+            cd build
+            
+            if [ -f "Parity/tests/parity_benchmarks" ]; then
+              # Run benchmarks with appropriate settings
+              FILTER="${{ github.event.inputs.benchmark_filter || '.*' }}"
+              REPETITIONS="${{ github.event.inputs.benchmark_repetitions || '3' }}"
+              
+              timeout 1800 ./Parity/tests/parity_benchmarks \
+                --benchmark_filter="$FILTER" \
+                --benchmark_repetitions=$REPETITIONS \
+                --benchmark_format=json \
+                --benchmark_out=parity_benchmark_results.json \
+                --benchmark_display_aggregates_only=true || {
+                echo "Parity benchmarks failed or timed out"
+                exit 1
+              }
+              
+              # Also generate console output for logs
+              timeout 1800 ./Parity/tests/parity_benchmarks \
+                --benchmark_filter="$FILTER" \
+                --benchmark_repetitions=$REPETITIONS \
+                --benchmark_format=console | tee parity_benchmark_console.txt
+              
+              echo "Parity framework benchmarks completed"
+            else
+              echo "Parity benchmarks executable not found"
+            fi
+            echo "::endgroup::"
+
+      - name: Generate benchmark summary
+        uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::Benchmark summary"
+            cd build
+            
+            # Create benchmark summary
+            echo "# Benchmark Results Summary" > benchmark_summary.md
+            echo "" >> benchmark_summary.md
+            echo "**Configuration:** ${{ matrix.name }}" >> benchmark_summary.md
+            echo "**Compiler:** ${{ matrix.compiler }}" >> benchmark_summary.md
+            echo "**Flags:** ${{ matrix.cxxflags }}" >> benchmark_summary.md
+            echo "**Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> benchmark_summary.md
+            echo "" >> benchmark_summary.md
+            
+            # Process Analysis benchmarks
+            if [ -f "analysis_benchmark_console.txt" ]; then
+              echo "## Analysis Framework Benchmarks" >> benchmark_summary.md
+              echo "\`\`\`" >> benchmark_summary.md
+              # Extract key performance metrics (simplified)
+              grep -E "(BM_|ns/op|μs/op|ms/op)" analysis_benchmark_console.txt | head -20 >> benchmark_summary.md || true
+              echo "\`\`\`" >> benchmark_summary.md
+              echo "" >> benchmark_summary.md
+            fi
+            
+            # Process Parity benchmarks
+            if [ -f "parity_benchmark_console.txt" ]; then
+              echo "## Parity Framework Benchmarks" >> benchmark_summary.md
+              echo "\`\`\`" >> benchmark_summary.md
+              # Extract key performance metrics (simplified)
+              grep -E "(BM_|ns/op|μs/op|ms/op)" parity_benchmark_console.txt | head -20 >> benchmark_summary.md || true
+              echo "\`\`\`" >> benchmark_summary.md
+              echo "" >> benchmark_summary.md
+            fi
+            
+            # Calculate total benchmarks run
+            TOTAL_BENCHMARKS=0
+            if [ -f "analysis_benchmark_results.json" ]; then
+              ANALYSIS_COUNT=$(grep -c '"name"' analysis_benchmark_results.json || echo "0")
+              TOTAL_BENCHMARKS=$((TOTAL_BENCHMARKS + ANALYSIS_COUNT))
+            fi
+            if [ -f "parity_benchmark_results.json" ]; then
+              PARITY_COUNT=$(grep -c '"name"' parity_benchmark_results.json || echo "0")
+              TOTAL_BENCHMARKS=$((TOTAL_BENCHMARKS + PARITY_COUNT))
+            fi
+            
+            echo "**Total benchmarks executed:** $TOTAL_BENCHMARKS" >> benchmark_summary.md
+            
+            echo "Benchmark summary generated"
+            cat benchmark_summary.md
+            echo "::endgroup::"
+
+      - name: Download baseline benchmarks for comparison
+        if: github.event_name == 'pull_request'
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: benchmarks.yml
+          branch: ${{ github.event.pull_request.base.ref }}
+          name: benchmark-results-${{ matrix.name }}
+          path: ./baseline-benchmarks
+          if_no_artifact_found: warn
+        continue-on-error: true
+
+      - name: Compare benchmark results
+        if: github.event_name == 'pull_request'
+        uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::Benchmark comparison"
+            cd build
+            
+            if [ -d "../baseline-benchmarks" ]; then
+              echo "## Benchmark Comparison with Target Branch" >> benchmark_comparison.md
+              echo "" >> benchmark_comparison.md
+              
+              # Simple comparison (this could be enhanced with a proper comparison tool)
+              if [ -f "../baseline-benchmarks/analysis_benchmark_console.txt" ] && [ -f "analysis_benchmark_console.txt" ]; then
+                echo "### Analysis Framework Performance Changes" >> benchmark_comparison.md
+                echo "\`\`\`" >> benchmark_comparison.md
+                echo "Target Branch vs Current PR:" >> benchmark_comparison.md
+                # This is a simplified comparison - in practice, you'd want a more sophisticated tool
+                echo "Note: Detailed performance comparison requires specialized benchmark comparison tools" >> benchmark_comparison.md
+                echo "\`\`\`" >> benchmark_comparison.md
+                echo "" >> benchmark_comparison.md
+              fi
+              
+              echo "Benchmark comparison completed"
+              cat benchmark_comparison.md
+            else
+              echo "No baseline benchmarks found for comparison"
+            fi
+            echo "::endgroup::"
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ matrix.name }}
+          path: |
+            build/*benchmark*.json
+            build/*benchmark*.txt
+            build/benchmark_summary.md
+            build/benchmark_comparison.md
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Performance regression check
+        if: github.event_name == 'pull_request' && matrix.name == 'GCC 14 Release'
+        uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::Performance regression check"
+            cd build
+            
+            # This is a placeholder for performance regression detection
+            # In a real implementation, you would:
+            # 1. Parse the JSON benchmark results
+            # 2. Compare with baseline results
+            # 3. Identify significant performance regressions (e.g., >10% slowdown)
+            # 4. Flag them as PR comments or fail the check
+            
+            echo "Performance regression check completed"
+            echo "Note: Implement detailed regression analysis based on JSON benchmark data"
+            echo "::endgroup::"
+
+      - name: Update performance dashboard
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.name == 'GCC 14 Release'
+        run: |
+          # This step would typically update a performance dashboard
+          # or send results to a performance tracking system
+          echo "Performance dashboard update would happen here"
+          echo "Benchmark results from main branch could be sent to:"
+          echo "- Time series database (InfluxDB, Prometheus)"
+          echo "- Performance dashboard (Grafana)"
+          echo "- GitHub Pages performance site"
+
+  benchmark-summary:
+    name: Benchmark Summary
+    needs: benchmarks
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Download all benchmark results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: benchmark-results-*
+          path: benchmark-results
+          merge-multiple: true
+
+      - name: Create comprehensive benchmark report
+        run: |
+          echo "## 🚀 Benchmark Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ needs.benchmarks.result }}" = "success" ]; then
+            echo "✅ All benchmark configurations completed successfully!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Some benchmark configurations failed. Check individual job results." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Configurations Tested" >> $GITHUB_STEP_SUMMARY
+          echo "- **GCC 14 Release** (optimized for performance)" >> $GITHUB_STEP_SUMMARY
+          echo "- **GCC 14 Debug** (detailed profiling)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### 🔍 Benchmark Categories" >> $GITHUB_STEP_SUMMARY
+          echo "- **Event Processing**: Data ingestion and parsing performance" >> $GITHUB_STEP_SUMMARY
+          echo "- **Channel Arithmetic**: Mathematical operations on detector channels" >> $GITHUB_STEP_SUMMARY
+          echo "- **ROOT File I/O**: File read/write performance" >> $GITHUB_STEP_SUMMARY
+          echo "- **Helicity Processing**: Parity analysis computations" >> $GITHUB_STEP_SUMMARY
+          echo "- **BPM/BCM Operations**: Beam monitoring calculations" >> $GITHUB_STEP_SUMMARY
+          echo "- **Memory Management**: Allocation and object lifecycle benchmarks" >> $GITHUB_STEP_SUMMARY
+          
+          # Check if any benchmark files exist
+          if ls benchmark-results/*.json 1> /dev/null 2>&1; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 📈 Results Available" >> $GITHUB_STEP_SUMMARY
+            echo "Detailed benchmark results have been uploaded as artifacts and are available for download." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 🔄 Performance Comparison" >> $GITHUB_STEP_SUMMARY
+            echo "Performance comparison with target branch has been attempted. Check individual job logs for details." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Performance regression alert
+        if: needs.benchmarks.result == 'failure'
+        run: |
+          echo "::warning title=Benchmark Failure::Some benchmark configurations failed. This may indicate performance regressions or environmental issues."

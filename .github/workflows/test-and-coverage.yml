@@ -1,0 +1,472 @@
+---
+name: Test and Coverage
+
+on:
+  push:
+    branches: [ main, tests-and-benchmarks ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual triggering
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  # Coverage thresholds
+  COVERAGE_THRESHOLD_LINE: 70
+  COVERAGE_THRESHOLD_FUNCTION: 65
+  COVERAGE_THRESHOLD_BRANCH: 60
+
+jobs:
+  test-matrix:
+    name: Test Suite (${{ matrix.name }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Main test configuration with coverage
+          - name: "GCC 14 + Coverage"
+            release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc14"
+            opt: "opt"
+            coverage: true
+            cxxflags: "-g -O0 --coverage"
+            
+          # Additional test configurations without coverage
+          - name: "GCC 13"
+            release: "LCG_106"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc13"
+            opt: "opt"
+            coverage: false
+            cxxflags: "-g -O2"
+            
+          - name: "GCC 15"
+            release: "LCG_108"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc15"
+            opt: "opt"
+            coverage: false
+            cxxflags: "-g -O2"
+            
+          - name: "Clang 19"
+            release: "LCG_108"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "clang19"
+            opt: "opt"
+            coverage: false
+            cxxflags: "-g -O2"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          submodules: true
+          fetch-depth: 0  # Full history for coverage tracking
+
+      - name: Setup CVMFS
+        uses: cvmfs-contrib/github-action-cvmfs@v5
+        with:
+          cvmfs_repositories: 'sft.cern.ch,geant4.cern.ch'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ccache time
+          
+          # Install coverage tools for coverage builds
+          if [ "${{ matrix.coverage }}" = "true" ]; then
+            sudo apt-get install -y lcov genhtml
+          fi
+
+      - name: Setup ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-test-${{ matrix.release }}-${{ matrix.compiler }}-${{ github.ref_name }}
+          restore-keys: |
+            ccache-test-${{ matrix.release }}-${{ matrix.compiler }}-
+            ccache-test-${{ matrix.release }}-
+            ccache-test-
+
+      - name: Configure ccache
+        run: |
+          ccache --set-config=cache_dir=$HOME/.ccache
+          ccache --set-config=max_size=2G
+          ccache --set-config=compression=true
+          ccache --zero-stats
+          echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
+
+      - name: Build with tests and coverage
+        uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::Install runtime dependencies"
+            PYTHONHOME="" PYTHONPATH="" dnf install -y time
+            echo "::endgroup::"
+
+            echo "::group::Environment setup"
+            # Set up Boost environment
+            LCG_PATH="/cvmfs/sft.cern.ch/lcg/views/${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}"
+            export BOOST_INC_DIR="${LCG_PATH}/include"
+            export BOOST_LIB_DIR="${LCG_PATH}/lib"
+
+            # Generate setup scripts
+            chmod +x SetupFiles/make_SET_ME_UP
+            SetupFiles/make_SET_ME_UP
+            echo "::endgroup::"
+
+            echo "::group::CMake configuration"
+            # Configure build with testing enabled
+            CMAKE_ARGS=(
+              -Bbuild -S.
+              -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+              -DCMAKE_C_COMPILER_LAUNCHER=ccache
+              -DCMAKE_INSTALL_PREFIX=install
+              -DCMAKE_CXX_FLAGS="${{ matrix.cxxflags }}"
+              -DENABLE_TESTING=ON
+              -DENABLE_BENCHMARKING=ON
+              -DBUILD_MARIADB_CONNECTOR=ON
+              -DBUILD_MYSQL_CONNECTOR=ON
+              -DBUILD_POSTGRESQL_CONNECTOR=OFF
+              -DBUILD_SQLITE3_CONNECTOR=ON
+            )
+            
+            # Add coverage flags for coverage builds
+            if [ "${{ matrix.coverage }}" = "true" ]; then
+              CMAKE_ARGS+=(
+                -DENABLE_COVERAGE=ON
+                -DCMAKE_BUILD_TYPE=Debug
+              )
+            else
+              CMAKE_ARGS+=(-DCMAKE_BUILD_TYPE=RelWithDebInfo)
+            fi
+            
+            cmake "${CMAKE_ARGS[@]}"
+            echo "::endgroup::"
+
+            echo "::group::Compilation"
+            cmake --build build -j$(nproc) --target install
+            echo "::endgroup::"
+            
+            echo "::group::ccache statistics"
+            ccache --show-stats
+            echo "::endgroup::"
+
+      - name: Run unit tests
+        uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::Unit tests"
+            cd build
+            
+            # Run unit tests with timeout
+            timeout 600 ctest -L unit --output-on-failure --parallel $(nproc) || {
+              echo "Unit tests failed or timed out"
+              exit 1
+            }
+            echo "::endgroup::"
+
+      - name: Run integration tests
+        uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::Integration tests"
+            cd build
+            
+            # Run integration tests with timeout
+            timeout 900 ctest -L integration --output-on-failure --parallel $(nproc) || {
+              echo "Integration tests failed or timed out"
+              exit 1
+            }
+            echo "::endgroup::"
+
+      - name: Generate mock data for system tests
+        uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::Mock data generation"
+            source SetupFiles/SET_ME_UP.bash
+            
+            # Generate mock data for system-level testing
+            timeout 300 build/qwmockdatagenerator -r 4 -e 1:1000 \
+              --config qwparity_simple.conf \
+              --detectors mock_newdets.map \
+              --data .
+            echo "::endgroup::"
+
+      - name: System integration test
+        uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::System integration test"
+            source SetupFiles/SET_ME_UP.bash
+            
+            # Create minimal database for testing
+            echo "CREATE TABLE IF NOT EXISTS db_schema (id INTEGER PRIMARY KEY, major TEXT, minor TEXT, point TEXT, timestamp TEXT, note TEXT);" | sqlite3 test.db
+            echo "INSERT OR REPLACE INTO db_schema VALUES(0, '01','04','0000','1970-01-01 00:00:00.000','test-ci');" | sqlite3 test.db
+            echo "CREATE TABLE IF NOT EXISTS seeds (id INTEGER PRIMARY KEY, run_number INTEGER, seed INTEGER, host TEXT, user TEXT);" | sqlite3 test.db
+            echo "INSERT OR REPLACE INTO seeds VALUES(0, 4, 10, 'ci-host', 'ci-user');" | sqlite3 test.db
+            
+            # Run system-level analysis test
+            timeout 600 build/qwparity -r 4 \
+              --config qwparity_simple.conf \
+              --detectors mock_newdets.map \
+              --datahandlers mock_datahandlers.map \
+              --data . \
+              --rootfiles . \
+              --write-promptsummary \
+              --QwDatabase.accesslevel RW \
+              --QwDatabase.dbtype sqlite3 \
+              --QwDatabase.dbname test.db || {
+              echo "System test failed"
+              exit 1
+            }
+            echo "::endgroup::"
+
+      - name: Generate coverage report
+        if: matrix.coverage == true
+        uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::Coverage analysis"
+            cd build
+            
+            # Generate coverage report
+            if make coverage 2>&1; then
+              echo "Coverage report generated successfully"
+              
+              # Check if coverage files exist
+              if [ -f "coverage_filtered.info" ]; then
+                echo "Coverage info file found"
+                lcov --summary coverage_filtered.info
+              fi
+              
+              if [ -d "coverage/html" ]; then
+                echo "HTML coverage report generated"
+                ls -la coverage/html/ | head -5
+              fi
+            else
+              echo "Coverage generation failed"
+              exit 1
+            fi
+            echo "::endgroup::"
+
+      - name: Check coverage thresholds
+        if: matrix.coverage == true
+        uses: aidasoft/run-lcg-view@v1
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::Coverage threshold check"
+            cd build
+            
+            if [ -f "coverage_filtered.info" ]; then
+              # Extract coverage percentages
+              COVERAGE_OUTPUT=$(lcov --summary coverage_filtered.info 2>/dev/null | grep -E "lines|functions|branches")
+              
+              echo "Coverage Summary:"
+              echo "$COVERAGE_OUTPUT"
+              
+              # Extract line coverage percentage
+              LINE_COV=$(echo "$COVERAGE_OUTPUT" | grep "lines" | sed -n 's/.*(\([0-9.]*\)%).*/\1/p')
+              FUNC_COV=$(echo "$COVERAGE_OUTPUT" | grep "functions" | sed -n 's/.*(\([0-9.]*\)%).*/\1/p')
+              BRANCH_COV=$(echo "$COVERAGE_OUTPUT" | grep "branches" | sed -n 's/.*(\([0-9.]*\)%).*/\1/p' || echo "0")
+              
+              echo "Line Coverage: ${LINE_COV}%"
+              echo "Function Coverage: ${FUNC_COV}%"
+              echo "Branch Coverage: ${BRANCH_COV}%"
+              
+              # Check thresholds
+              THRESHOLD_FAILED=false
+              
+              if [ -n "$LINE_COV" ] && [ $(echo "$LINE_COV < ${{ env.COVERAGE_THRESHOLD_LINE }}" | bc -l || echo "0") -eq 1 ]; then
+                echo "❌ Line coverage ${LINE_COV}% is below threshold ${{ env.COVERAGE_THRESHOLD_LINE }}%"
+                THRESHOLD_FAILED=true
+              else
+                echo "✅ Line coverage ${LINE_COV}% meets threshold ${{ env.COVERAGE_THRESHOLD_LINE }}%"
+              fi
+              
+              if [ -n "$FUNC_COV" ] && [ $(echo "$FUNC_COV < ${{ env.COVERAGE_THRESHOLD_FUNCTION }}" | bc -l || echo "0") -eq 1 ]; then
+                echo "❌ Function coverage ${FUNC_COV}% is below threshold ${{ env.COVERAGE_THRESHOLD_FUNCTION }}%"
+                THRESHOLD_FAILED=true
+              else
+                echo "✅ Function coverage ${FUNC_COV}% meets threshold ${{ env.COVERAGE_THRESHOLD_FUNCTION }}%"
+              fi
+              
+              if [ -n "$BRANCH_COV" ] && [ $(echo "$BRANCH_COV < ${{ env.COVERAGE_THRESHOLD_BRANCH }}" | bc -l || echo "0") -eq 1 ]; then
+                echo "⚠️  Branch coverage ${BRANCH_COV}% is below threshold ${{ env.COVERAGE_THRESHOLD_BRANCH }}% (informational)"
+              else
+                echo "✅ Branch coverage ${BRANCH_COV}% meets threshold ${{ env.COVERAGE_THRESHOLD_BRANCH }}%"
+              fi
+              
+              # Set coverage as environment variables for badge generation
+              echo "COVERAGE_LINE=${LINE_COV}" >> $GITHUB_ENV
+              echo "COVERAGE_FUNCTION=${FUNC_COV}" >> $GITHUB_ENV
+              echo "COVERAGE_BRANCH=${BRANCH_COV}" >> $GITHUB_ENV
+              
+              if [ "$THRESHOLD_FAILED" = "true" ]; then
+                echo "Coverage thresholds not met"
+                exit 1
+              fi
+            else
+              echo "No coverage data found"
+              exit 1
+            fi
+            echo "::endgroup::"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.name }}
+          path: |
+            build/Testing/
+            summary_*.txt
+            test.db
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Upload coverage report
+        if: matrix.coverage == true
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            build/coverage/
+            build/coverage_filtered.info
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Generate coverage badges
+        if: matrix.coverage == true && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          # Create coverage badges directory
+          mkdir -p badges
+          
+          # Generate coverage badge URLs
+          LINE_COLOR="red"
+          if [ $(echo "${COVERAGE_LINE:-0} >= 80" | bc -l) -eq 1 ]; then
+            LINE_COLOR="brightgreen"
+          elif [ $(echo "${COVERAGE_LINE:-0} >= 70" | bc -l) -eq 1 ]; then
+            LINE_COLOR="yellow"
+          elif [ $(echo "${COVERAGE_LINE:-0} >= 60" | bc -l) -eq 1 ]; then
+            LINE_COLOR="orange"
+          fi
+          
+          # Create coverage badge
+          curl -o badges/coverage.svg "https://img.shields.io/badge/coverage-${COVERAGE_LINE:-0}%25-${LINE_COLOR}?style=flat-square"
+          
+          echo "Coverage badge generated: ${COVERAGE_LINE:-0}% (${LINE_COLOR})"
+
+      - name: Compare coverage with target branch
+        if: matrix.coverage == true && github.event_name == 'pull_request'
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: test-and-coverage.yml
+          branch: ${{ github.event.pull_request.base.ref }}
+          name: coverage-report
+          path: ./target-coverage
+          if_no_artifact_found: warn
+        continue-on-error: true
+
+      - name: Coverage comparison report
+        if: matrix.coverage == true && github.event_name == 'pull_request'
+        run: |
+          echo "## Coverage Comparison" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f "./target-coverage/coverage_filtered.info" ] && [ -f "build/coverage_filtered.info" ]; then
+            echo "| Metric | Target Branch | Current PR | Change |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|---------------|------------|--------|" >> $GITHUB_STEP_SUMMARY
+            
+            # Compare line coverage
+            TARGET_LINE=$(lcov --summary ./target-coverage/coverage_filtered.info 2>/dev/null | grep "lines" | sed -n 's/.*(\([0-9.]*\)%).*/\1/p' || echo "0")
+            CURRENT_LINE=${COVERAGE_LINE:-0}
+            LINE_DIFF=$(echo "$CURRENT_LINE - $TARGET_LINE" | bc -l || echo "0")
+            
+            if [ $(echo "$LINE_DIFF > 0" | bc -l) -eq 1 ]; then
+              LINE_EMOJI="📈"
+            elif [ $(echo "$LINE_DIFF < 0" | bc -l) -eq 1 ]; then
+              LINE_EMOJI="📉"
+            else
+              LINE_EMOJI="➡️"
+            fi
+            
+            echo "| Lines | ${TARGET_LINE}% | ${CURRENT_LINE}% | ${LINE_EMOJI} ${LINE_DIFF}% |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No target branch coverage data available for comparison." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  publish-coverage:
+    name: Publish Coverage
+    needs: test-matrix
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Download coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload coverage to GitHub Pages
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: coverage/html
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+  test-summary:
+    name: Test Summary
+    needs: test-matrix
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Test Results Summary
+        run: |
+          echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check if all test jobs succeeded
+          if [ "${{ needs.test-matrix.result }}" = "success" ]; then
+            echo "✅ All test configurations passed successfully!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Some test configurations failed. Check the individual job results above." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Configurations" >> $GITHUB_STEP_SUMMARY
+          echo "- GCC 14 + Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "- GCC 13" >> $GITHUB_STEP_SUMMARY 
+          echo "- GCC 15" >> $GITHUB_STEP_SUMMARY
+          echo "- Clang 19" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Types Run" >> $GITHUB_STEP_SUMMARY
+          echo "- Unit tests" >> $GITHUB_STEP_SUMMARY
+          echo "- Integration tests" >> $GITHUB_STEP_SUMMARY
+          echo "- System integration tests" >> $GITHUB_STEP_SUMMARY
+          echo "- Coverage analysis (GCC 14 configuration)" >> $GITHUB_STEP_SUMMARY
