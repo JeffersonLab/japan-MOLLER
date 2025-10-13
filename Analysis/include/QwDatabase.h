@@ -18,6 +18,7 @@
 
 // Third Party Headers
 #ifdef __USE_DATABASE__
+#ifdef __USE_SQLPP11__
 #include <sqlpp11/sqlpp11.h>
 #ifdef __USE_DATABASE_MYSQL__
 #include <sqlpp11/mysql/mysql.h>
@@ -28,6 +29,19 @@
 #ifdef __USE_DATABASE_POSTGRESQL__
 #include <sqlpp11/postgresql/postgresql.h>
 #endif // __USE_DATABASE_POSTGRESQL__
+#endif // __USE_SQLPP11__
+#ifdef __USE_SQLPP23__
+#include <sqlpp23/sqlpp23.h>
+#ifdef __USE_DATABASE_MYSQL__
+#include <sqlpp23/mysql/mysql.h>
+#endif // __USE_DATABASE_MYSQL__
+#ifdef __USE_DATABASE_SQLITE3__
+#include <sqlpp23/sqlite3/sqlite3.h>
+#endif // __USE_DATABASE_SQLITE3__
+#ifdef __USE_DATABASE_POSTGRESQL__
+#include <sqlpp23/postgresql/postgresql.h>
+#endif // __USE_DATABASE_POSTGRESQL__
+#endif // __USE_SQLPP23__
 #endif // __USE_DATABASE__
 
 // ROOT headers

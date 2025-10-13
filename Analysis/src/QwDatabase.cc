@@ -12,8 +12,14 @@
 // System headers
 
 // Third-party headers
+#ifdef __USE_SQLPP11__
 #include <sqlpp11/select.h>
 #include <sqlpp11/functions.h>
+#endif // __USE_SQLPP11__
+#ifdef __USE_SQLPP23__
+#include <sqlpp23/select.h>
+#include <sqlpp23/functions.h>
+#endif // __USE_SQLPP23__
 
 // Qweak headers
 #include "QwParitySchema.h"

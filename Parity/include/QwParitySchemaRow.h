@@ -39,7 +39,12 @@
 // Qweak headers
 #ifdef __USE_DATABASE__
 #include "QwParitySchema.h"
+#ifdef __USE_SQLPP11__
 #include <sqlpp11/sqlpp11.h>
+#endif // __USE_SQLPP11__
+#ifdef __USE_SQLPP23__
+#include <sqlpp23/sqlpp23.h>
+#endif // __USE_SQLPP23__
 #endif // __USE_DATABASE__
 
 #ifdef __USE_DATABASE__
