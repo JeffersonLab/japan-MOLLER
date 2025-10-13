@@ -1,0 +1,51 @@
+# Coverage Configuration for JAPAN-MOLLER
+# This file defines coverage settings and utilities
+
+# Coverage tool paths (configured at build time)
+set(LCOV_EXECUTABLE "@LCOV_EXECUTABLE@")
+set(GENHTML_EXECUTABLE "@GENHTML_EXECUTABLE@")
+set(GCOV_EXECUTABLE "@GCOV_EXECUTABLE@")
+
+# Coverage output directories
+set(COVERAGE_OUTPUT_DIR "@COVERAGE_OUTPUT_DIR@")
+set(COVERAGE_HTML_DIR "@COVERAGE_HTML_DIR@")
+
+# Coverage thresholds
+set(COVERAGE_LINE_THRESHOLD 70)
+set(COVERAGE_FUNCTION_THRESHOLD 60)
+set(COVERAGE_BRANCH_THRESHOLD 50)
+
+# Coverage exclusion patterns
+set(COVERAGE_EXCLUDE_PATTERNS
+    '/usr/*'
+    '*/thirdparty/*'
+    '*/evio/*'
+    '*Dict.cxx'
+    '*/tests/*'
+    '*/Test*'
+    '*test*'
+    '*benchmark*'
+)
+
+# Function to add coverage to a target
+function(add_coverage_to_target target_name)
+    if(@ENABLE_COVERAGE@)
+        target_compile_options(${target_name} PRIVATE --coverage)
+        target_link_libraries(${target_name} PRIVATE --coverage)
+    endif()
+endfunction()
+
+# Function to create coverage report for specific directory
+function(create_coverage_report report_name source_pattern)
+    if(@ENABLE_COVERAGE@)
+        add_custom_target(coverage_${report_name}
+            COMMAND ${LCOV_EXECUTABLE} --directory . --zerocounters
+            COMMAND ${CMAKE_CTEST_COMMAND} -L "${report_name}" --output-on-failure
+            COMMAND ${LCOV_EXECUTABLE} --directory . --capture --output-file coverage_${report_name}.info
+            COMMAND ${LCOV_EXECUTABLE} --extract coverage_${report_name}.info '${source_pattern}' --output-file coverage_${report_name}_filtered.info
+            COMMAND ${GENHTML_EXECUTABLE} coverage_${report_name}_filtered.info --output-directory ${COVERAGE_OUTPUT_DIR}/${report_name}_html
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+            COMMENT "Generating coverage report for ${report_name}"
+        )
+    endif()
+endfunction()
