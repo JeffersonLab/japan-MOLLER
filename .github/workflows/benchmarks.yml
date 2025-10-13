@@ -66,9 +66,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ccache time bc
           
-          # Install Google Benchmark if not available in LCG
-          sudo apt-get install -y libbenchmark-dev
-
       - name: Setup ccache
         uses: actions/cache@v4
         with:
