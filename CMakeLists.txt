@@ -145,7 +145,7 @@ if(TARGET ${sqlpp}::${sqlpp})
   endif()
 
   # Generate C++ headers from SQL schema at build time
-  set(SCHEMA_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Parity/include)
+  set(SCHEMA_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
   set(SCHEMA_OUTPUT_FILE ${SCHEMA_OUTPUT_DIR}/QwParitySchema.h)
   set(SCHEMA_INPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Parity/prminput/qwparity_schema.sql)
   
@@ -161,6 +161,8 @@ if(TARGET ${sqlpp}::${sqlpp})
   endif()
   if(SQLPP_DDL2CPP)
     if(${SQLPP} EQUAL "SQLPP11")
+      # Ensure output directory exists
+      file(MAKE_DIRECTORY ${SCHEMA_OUTPUT_DIR})
       add_custom_command(
         OUTPUT ${SCHEMA_OUTPUT_FILE}
         COMMAND ${SQLPP_DDL2CPP}
@@ -174,13 +176,15 @@ if(TARGET ${sqlpp}::${sqlpp})
         VERBATIM
       )
     else()
+      # Ensure output directory exists  
+      file(MAKE_DIRECTORY ${SCHEMA_OUTPUT_DIR})
       add_custom_command(
         OUTPUT ${SCHEMA_OUTPUT_FILE}
         COMMAND ${SQLPP_DDL2CPP}
           --naming-style identity
           --suppress-timestamp-warning
           --path-to-ddl ${SCHEMA_INPUT_FILE}
-          --path-to-header ${SCHEMA_OUTPUT_DIR}/QwParitySchema.h
+          --path-to-header ${SCHEMA_OUTPUT_FILE}
           --namespace QwParitySchema
         DEPENDS ${SCHEMA_INPUT_FILE}
         COMMENT "Generating C++ headers from SQL schema"
@@ -331,6 +335,11 @@ install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   )
 install(FILES ${my_project_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+# Install generated schema header 
+if((${sqlpp}_FOUND OR TARGET ${sqlpp}::${sqlpp}) AND SQLPP_DDL2CPP)
+  install(FILES ${SCHEMA_OUTPUT_FILE} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+endif()
 
 #----------------------------------------------------------------------------
 # executables
