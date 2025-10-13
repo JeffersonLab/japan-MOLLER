@@ -93,7 +93,8 @@ jobs:
           release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           run: |
             echo "::group::Install runtime dependencies"
-            PYTHONHOME="" PYTHONPATH="" dnf install -y time bc
+            PYTHONHOME="" PYTHONPATH="" dnf install -y epel-release
+            PYTHONHOME="" PYTHONPATH="" dnf install -y time bc google-benchmark
             echo "::endgroup::"
 
             echo "::group::Environment setup"
