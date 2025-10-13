@@ -63,6 +63,28 @@ file(GLOB my_project_headers
 
 
 #----------------------------------------------------------------------------
+# ROOT
+#
+set(minimum_root_version 6.8)
+find_package(ROOT ${minimum_root_version} REQUIRED New Gui)
+config_add_dependency(ROOT ${minimum_root_version})
+
+# Check ROOT version for RNTuple support (available in ROOT 6.36+)
+if(${ROOT_VERSION} VERSION_GREATER_EQUAL "6.36.0")
+    message(STATUS "ROOT version ${ROOT_VERSION} supports RNTuple - enabling RNTuple functionality")
+    add_definitions(-DHAS_RNTUPLE_SUPPORT)
+else()
+    message(STATUS "ROOT version ${ROOT_VERSION} does not support RNTuple - disabling RNTuple functionality")
+    message(STATUS "RNTuple support requires ROOT 6.36 or higher")
+endif()
+
+if(DEFINED ROOT_CXX_STANDARD)
+    # ROOT_CXX_STANDARD was introduced in ROOT 6.32
+    set(CMAKE_CXX_STANDARD ${ROOT_CXX_STANDARD})
+endif()
+
+
+#----------------------------------------------------------------------------
 # sqlpp11
 #
 list(APPEND SQLPP11_OPTIONAL_COMPONENTS SQLite3 MySQL MariaDB PostgreSQL)
@@ -159,23 +181,6 @@ endif()
 find_package(Boost 1.70 COMPONENTS program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIR})
-
-#----------------------------------------------------------------------------
-# ROOT
-#
-set(minimum_root_version 6.8)
-find_package(ROOT ${minimum_root_version} REQUIRED New Gui)
-config_add_dependency(ROOT ${minimum_root_version})
-
-# Check ROOT version for RNTuple support (available in ROOT 6.36+)
-if(${ROOT_VERSION} VERSION_GREATER_EQUAL "6.36.0")
-    message(STATUS "ROOT version ${ROOT_VERSION} supports RNTuple - enabling RNTuple functionality")
-    add_definitions(-DHAS_RNTUPLE_SUPPORT)
-else()
-    message(STATUS "ROOT version ${ROOT_VERSION} does not support RNTuple - disabling RNTuple functionality")
-    message(STATUS "RNTuple support requires ROOT 6.36 or higher")
-endif()
-
 
 #----------------------------------------------------------------------------
 # gitinfo.cc
