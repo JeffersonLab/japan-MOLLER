@@ -160,9 +160,9 @@ if(TARGET ${sqlpp}::${sqlpp})
     set(SQLPP_DDL2CPP ${sqlpp}::ddl2cpp)
   endif()
   if(SQLPP_DDL2CPP)
-    if(${SQLPP} EQUAL "SQLPP11")
-      # Ensure output directory exists
-      file(MAKE_DIRECTORY ${SCHEMA_OUTPUT_DIR})
+    # Ensure output directory exists
+    file(MAKE_DIRECTORY ${SCHEMA_OUTPUT_DIR})
+    if(${SQLPP} STREQUAL "SQLPP11")
       add_custom_command(
         OUTPUT ${SCHEMA_OUTPUT_FILE}
         COMMAND ${SQLPP_DDL2CPP}
@@ -172,12 +172,10 @@ if(TARGET ${sqlpp}::${sqlpp})
           ${SCHEMA_OUTPUT_DIR}/QwParitySchema
           QwParitySchema
         DEPENDS ${SCHEMA_INPUT_FILE}
-        COMMENT "Generating C++ headers from SQL schema"
+        COMMENT "Generating C++ headers from SQL schema using sqlpp11"
         VERBATIM
       )
     else()
-      # Ensure output directory exists  
-      file(MAKE_DIRECTORY ${SCHEMA_OUTPUT_DIR})
       add_custom_command(
         OUTPUT ${SCHEMA_OUTPUT_FILE}
         COMMAND ${SQLPP_DDL2CPP}
@@ -187,7 +185,7 @@ if(TARGET ${sqlpp}::${sqlpp})
           --path-to-header ${SCHEMA_OUTPUT_FILE}
           --namespace QwParitySchema
         DEPENDS ${SCHEMA_INPUT_FILE}
-        COMMENT "Generating C++ headers from SQL schema"
+        COMMENT "Generating C++ headers from SQL schema using sqlpp23"
         VERBATIM
       )
     endif()
