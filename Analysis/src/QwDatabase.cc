@@ -201,7 +201,7 @@ Bool_t QwDatabase::ValidateConnection()
           config.host = fDBServer;
           config.user = fDBUsername;
           config.password = fDBPassword;
-          config.database = fDatabase;
+          config.dbname = fDatabase;
           config.port = fDBPortNumber;
           config.debug = fDBDebug;
           fDBConnection = std::make_shared<sqlpp::postgresql::connection>(config);
@@ -323,7 +323,7 @@ bool QwDatabase::Connect()
           config.host = fDBServer;
           config.user = fDBUsername;
           config.password = fDBPassword;
-          config.database = fDatabase;
+          config.dbname = fDatabase;
           config.port = fDBPortNumber;
           fDBConnection = std::make_shared<sqlpp::postgresql::connection>(config);
           break;
