@@ -83,7 +83,7 @@ jobs:
           
           # Install coverage tools for coverage builds
           if [ "${{ matrix.coverage }}" = "true" ]; then
-            sudo apt-get install -y lcov genhtml
+            sudo apt-get install -y lcov
           fi
 
       - name: Setup ccache
