@@ -526,7 +526,7 @@ bool QwDatabase::StoreDBVersion()
       size_t record_count = QueryCount(
           sqlpp::select(sqlpp::all_of(db_schema))
           .from(db_schema)
-          .unconditionally()
+          .where(sqlpp::value(true))
       );
       QwDebug << "QwDatabase::StoreDBVersion => Number of rows returned:  " << record_count << QwLog::endl;
 
@@ -546,7 +546,7 @@ bool QwDatabase::StoreDBVersion()
         auto results = QuerySelect(
             sqlpp::select(sqlpp::all_of(db_schema))
             .from(db_schema)
-            .unconditionally()
+            .where(sqlpp::value(true))
         );
         ForFirstResult(
           results,

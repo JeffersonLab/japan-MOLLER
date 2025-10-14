@@ -610,7 +610,7 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db, const UInt_t seed_id)
                    .from(seeds)
                    .order_by(seeds.seed_id.desc())
                    .limit(1u)
-                   .unconditionally();
+                   .where(sqlpp::value(true));
       auto results = db->QuerySelect(query);
       
       // Process results using database-agnostic interface  
