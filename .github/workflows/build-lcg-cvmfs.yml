@@ -307,7 +307,7 @@ jobs:
       - name: Uncompress build artifact
         run: tar -xaf build.tar.zst
 
-      - uses: cvmfs-contrib/github-action-cvmfs@v3
+      - uses: cvmfs-contrib/github-action-cvmfs@v5
         with:
           cvmfs_repositories: 'sft.cern.ch,geant4.cern.ch'
       - uses: aidasoft/run-lcg-view@v5
