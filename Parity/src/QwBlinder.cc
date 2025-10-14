@@ -26,8 +26,14 @@
 ///  Run table aliases for seed query
 ///  (these types must be defined outside function scope)
 #ifdef __USE_DATABASE__
+#ifdef __USE_SQLPP11__
 SQLPP_ALIAS_PROVIDER(run_first);
 SQLPP_ALIAS_PROVIDER(run_last);
+#endif // __USE_SQLPP11__
+#ifdef __USE_SQLPP23__
+SQLPP_CREATE_NAME_TAG(run_first);
+SQLPP_CREATE_NAME_TAG(run_last);
+#endif // __USE_SQLPP23__
 #endif // __USE_DATABASE__
 
 ///  Blinder event counter indices
