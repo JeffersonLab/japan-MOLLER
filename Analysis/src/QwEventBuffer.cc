@@ -5,6 +5,9 @@
 
 #include "QwEventBuffer.h"
 
+#include <chrono>
+#include <thread>
+
 #include "QwOptions.h"
 #include "QwEPICSEvent.h"
 #include "VQwSubsystem.h"
@@ -141,6 +144,9 @@ void QwEventBuffer::DefineOptions(QwOptions &options)
   options.AddOptions("CodaVersion")
     ("coda-version", po::value<int>()->default_value(3),
      "Sets the Coda Version. Allowed values = {2,3}. \nThis is needed for writing and reading mock data. Mock data needs to be written and read with the same Coda Version.");
+  options.AddOptions("Event rate limiting")
+    ("max-event-rate", po::value<double>()->default_value(0.0),
+     "Maximum event write rate in Hz (0 = disabled, no rate limiting)");
 }
 
 void QwEventBuffer::ProcessOptions(QwOptions &options)
@@ -223,6 +229,19 @@ void QwEventBuffer::ProcessOptions(QwOptions &options)
 	}
 	
 	decoder->SetAllowLowSubbankIDs( options.GetValue<bool>("allow-low-subbank-ids") );
+
+  // Process event rate limiting option
+  fMaxEventRate = options.GetValue<double>("max-event-rate");
+  if (fMaxEventRate > 0.0) {
+    fEventRateLimitEnabled = true;
+    fMinEventInterval = std::chrono::duration<double>(1.0 / fMaxEventRate);
+    QwMessage << "Event rate limiting enabled: " << fMaxEventRate << " Hz "
+              << "(minimum interval: " << (1000.0 / fMaxEventRate) << " ms)" 
+              << QwLog::endl;
+  } else {
+    fEventRateLimitEnabled = false;
+  }
+  fLastEventTime = std::chrono::steady_clock::now();
 
   // Open run list file
   /* runlist file format example:
@@ -585,6 +604,18 @@ Int_t QwEventBuffer::WriteEvent(int* buffer)
 {
   Int_t status = kFileHandleNotConfigured;
   ResetFlags();
+  
+  // Rate limiting: sleep until minimum interval has elapsed
+  if (fEventRateLimitEnabled) {
+    auto now = std::chrono::steady_clock::now();
+    auto elapsed = now - fLastEventTime;
+    if (elapsed < fMinEventInterval) {
+      auto sleep_until_time = fLastEventTime + fMinEventInterval;
+      std::this_thread::sleep_until(sleep_until_time);
+    }
+    fLastEventTime = std::chrono::steady_clock::now();
+  }
+  
   if (fEvStreamMode==fEvStreamFile){
     status = WriteFileEvent(buffer);
   } else if (fEvStreamMode==fEvStreamET) {
