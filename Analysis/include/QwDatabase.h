@@ -395,12 +395,11 @@ class QwDatabase {
         using T = std::decay_t<decltype(connection)>;
         if constexpr (!std::is_same_v<T, std::monostate>) {
           auto result = (*connection)(statement);
-          // For INSERT operations, some databases return the ID directly as uint64_t
-          // while others return it as a result object with insert_id() method
+          // For INSERT operations, most databases return the ID directly as uint64_t
           if constexpr (std::is_integral_v<decltype(result)>) {
             return static_cast<uint64_t>(result);
           } else {
-            return result.insert_id();
+            throw std::runtime_error("Unexpected result type from INSERT operation - expected integral type");
           }
         }
         // This should never be reached due to VisitConnection logic
