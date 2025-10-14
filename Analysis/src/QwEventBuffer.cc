@@ -605,13 +605,36 @@ Int_t QwEventBuffer::WriteEvent(int* buffer)
   Int_t status = kFileHandleNotConfigured;
   ResetFlags();
   
-  // Rate limiting: sleep until minimum interval has elapsed
+  // Rate limiting: sleep until minimum interval has elapsed, accounting for accumulated delays
   if (fEventRateLimitEnabled) {
     auto now = std::chrono::steady_clock::now();
     auto elapsed = now - fLastEventTime;
+
     if (elapsed < fMinEventInterval) {
-      auto sleep_until_time = fLastEventTime + fMinEventInterval;
-      std::this_thread::sleep_until(sleep_until_time);
+      // We're ahead of schedule - need to wait
+      auto target_sleep = fMinEventInterval - elapsed;
+      
+      // Reduce sleep time by accumulated delay (time we're behind)
+      auto actual_sleep = target_sleep - fAccumulatedDelay;
+      
+      if (actual_sleep > std::chrono::duration<double>(0)) {
+        // Still need to sleep after compensation
+        auto sleep_until_time = now + actual_sleep;
+        std::this_thread::sleep_until(sleep_until_time);
+        
+        // We've compensated for some or all of the accumulated delay
+        fAccumulatedDelay -= (target_sleep - actual_sleep);
+        if (fAccumulatedDelay < std::chrono::duration<double>(0)) {
+          fAccumulatedDelay = std::chrono::duration<double>(0);
+        }
+      } else {
+        // Accumulated delay is larger than needed sleep - don't sleep at all
+        fAccumulatedDelay -= target_sleep;
+      }
+    } else {
+      // We're behind schedule - accumulate the delay
+      auto delay = elapsed - fMinEventInterval;
+      fAccumulatedDelay += delay;
     }
     fLastEventTime = std::chrono::steady_clock::now();
   }
