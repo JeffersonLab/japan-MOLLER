@@ -121,11 +121,11 @@ if(NOT ${Sqlpp}_FOUND)
   endif()
 endif()
 if(TARGET ${sqlpp}::${sqlpp})
-  config_add_dependency(Sqlpp11)
-  include_directories(${Sqlpp11_INCLUDE_DIR})
+  config_add_dependency(${Sqlpp})
+  include_directories(${${Sqlpp}_INCLUDE_DIR})
   add_definitions(-D__USE_DATABASE__)
   add_definitions(-D__USE_${SQLPP}__)
-  list(APPEND Sqlpp11_LIBRARIES ${sqlpp}::${sqlpp})
+  list(APPEND ${Sqlpp}_LIBRARIES ${sqlpp}::${sqlpp})
 
   # Identify found backend components
   foreach(component ${SQLPP_OPTIONAL_COMPONENTS})
@@ -138,7 +138,7 @@ if(TARGET ${sqlpp}::${sqlpp})
   endforeach()
   message(STATUS "Found ${Sqlpp}_LIBRARIES")
 
-  # When building sqlpp11::mysql connector, we need to ensure dependencies are found in parent scope
+  # When building sqlpp::mysql connector, we need to ensure dependencies are found in parent scope
   if(BUILD_MYSQL_CONNECTOR)
     find_package(MySQL QUIET)
     list(APPEND ${Sqlpp}_LIBRARIES MySQL::MySQL)
@@ -197,7 +197,7 @@ if(TARGET ${sqlpp}::${sqlpp})
   endif()
 ELSE()
   message(STATUS "${sqlpp} not found; database functionally disabled")
-  set(Sqlpp11_LIBRARIES "")
+  set(${Sqlpp}_LIBRARIES "")
   list(REMOVE_ITEM my_project_sources
     ${PROJECT_SOURCE_DIR}/Analysis/src/QwDatabase.cc
   )
@@ -314,7 +314,7 @@ target_link_libraries(${PROJECT_NAME}
     ${Boost_LIBRARIES}
   )
 
-# Link sqlpp11 if enabled
+# Link sqlpp if enabled
 if((${Sqlpp}_FOUND OR TARGET ${sqlpp}::${sqlpp}) AND TARGET generate_schema)
   target_link_libraries(${PROJECT_NAME}
     PRIVATE
@@ -322,7 +322,7 @@ if((${Sqlpp}_FOUND OR TARGET ${sqlpp}::${sqlpp}) AND TARGET generate_schema)
   )
   target_include_directories(${PROJECT_NAME}
     PRIVATE
-      ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/sqlpp11/install/include
+      ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/${sqlpp}/install/include
   )
 endif()
 
@@ -355,7 +355,7 @@ foreach(file ${exefiles})
   target_link_libraries(${filelower}
     PRIVATE
       eviowrapper
-      ${Sqlpp11_LIBRARIES}
+      ${${Sqlpp}_LIBRARIES}
       ${PROJECT_NAME}
   )
   target_compile_options(${filelower}
