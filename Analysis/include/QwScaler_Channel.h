@@ -189,12 +189,12 @@ public:
   void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
   void  FillHistograms() override;
 
-  virtual void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override = 0;
-  virtual void  FillTreeVector(QwRootTreeBranchVector &values) const override = 0;
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override = 0;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const override = 0;
   void  ConstructBranch(TTree *tree, TString &prefix) override;
 #ifdef HAS_RNTUPLE_SUPPORT
-  virtual void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override = 0;
-  virtual void  FillNTupleVector(QwRootTreeBranchVector &values) const override = 0;
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override = 0;
+  void  FillNTupleVector(QwRootTreeBranchVector &values) const override = 0;
 #endif // HAS_RNTUPLE_SUPPORT
 
 
