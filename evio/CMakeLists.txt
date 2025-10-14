@@ -46,6 +46,7 @@ if(ET_FOUND)
   )
 	set(my_evio_sources ${my_evio_sources} ${my_et_sources})
 	set(my_evio_headers ${my_evio_headers} ${my_et_headers})
+	set(ET_DEPENDENCY ET::ET)
 endif()
 
 
@@ -63,7 +64,7 @@ foreach(file ${my_evio_headers})
     # Add dictionary target with possible LinkDef file
     set(dict ${CMAKE_CURRENT_BINARY_DIR}/${file_name}Dict)
     set(linkdef ${file_path}/${file_name}LinkDef.h)
-    ROOT_GENERATE_DICTIONARY(${dict} ${file} LINKDEF ${linkdef} DEPENDENCIES ET::ET)
+    ROOT_GENERATE_DICTIONARY(${dict} ${file} LINKDEF ${linkdef} DEPENDENCIES ${ET_DEPENDENCY})
     # Add dictionary to evio sources
     set(my_evio_sources ${my_evio_sources} ${file_name}Dict.cxx)
   endif()
