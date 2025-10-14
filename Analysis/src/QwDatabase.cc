@@ -182,7 +182,16 @@ Bool_t QwDatabase::ValidateConnection()
           config.password = fDBPassword;
           config.database = fDatabase;
           config.port = fDBPortNumber;
+#ifdef __USE_SQLPP11__
           config.debug = fDBDebug;
+#endif
+#ifdef __USE_SQLPP23__
+          if (fDBDebug) {
+            config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
+              std::cerr << "SQL Debug: " << msg << std::endl;
+            });
+          }
+#endif
           fDBConnection = std::make_shared<sqlpp::mysql::connection>(config);
           break;
         }
@@ -195,7 +204,16 @@ Bool_t QwDatabase::ValidateConnection()
           config.password = fDBPassword;
           // FIXME (wdconinc) use proper access flags
           config.flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+#ifdef __USE_SQLPP11__
           config.debug = fDBDebug;
+#endif
+#ifdef __USE_SQLPP23__
+          if (fDBDebug) {
+            config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
+              std::cerr << "SQL Debug: " << msg << std::endl;
+            });
+          }
+#endif
           fDBConnection = std::make_shared<sqlpp::sqlite3::connection>(config);
           break;
         }
@@ -209,7 +227,16 @@ Bool_t QwDatabase::ValidateConnection()
           config.password = fDBPassword;
           config.dbname = fDatabase;
           config.port = fDBPortNumber;
+#ifdef __USE_SQLPP11__
           config.debug = fDBDebug;
+#endif
+#ifdef __USE_SQLPP23__
+          if (fDBDebug) {
+            config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
+              std::cerr << "SQL Debug: " << msg << std::endl;
+            });
+          }
+#endif
           fDBConnection = std::make_shared<sqlpp::postgresql::connection>(config);
           break;
         }
@@ -305,6 +332,16 @@ bool QwDatabase::Connect()
           config.password = fDBPassword;
           config.database = fDatabase;
           config.port = fDBPortNumber;
+#ifdef __USE_SQLPP11__
+          config.debug = fDBDebug;
+#endif
+#ifdef __USE_SQLPP23__
+          if (fDBDebug) {
+            config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
+              std::cerr << "SQL Debug: " << msg << std::endl;
+            });
+          }
+#endif
           fDBConnection = std::make_shared<sqlpp::mysql::connection>(config);
           break;
         }
@@ -317,7 +354,16 @@ bool QwDatabase::Connect()
           config.password = fDBPassword;
           // FIXME (wdconinc) use proper access flags
           config.flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+#ifdef __USE_SQLPP11__
           config.debug = fDBDebug;
+#endif
+#ifdef __USE_SQLPP23__
+          if (fDBDebug) {
+            config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
+              std::cerr << "SQL Debug: " << msg << std::endl;
+            });
+          }
+#endif
           fDBConnection = std::make_shared<sqlpp::sqlite3::connection>(config);
           break;
         }
