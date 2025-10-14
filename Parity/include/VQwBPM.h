@@ -319,7 +319,7 @@ public:
   static const TString axis[3];
 
   // Rotation related paramters
-  Bool_t   bRotated;
+  Bool_t   bRotated{kFALSE};
   Double_t fRotationAngle;
   Double_t fCosRotation;
   Double_t fSinRotation;
@@ -328,10 +328,10 @@ public:
   Double_t fResolution[2];
 
   // Data quality checks related flags
-  Bool_t   fGoodEvent;
+  Bool_t   fGoodEvent{kFALSE};
   //  Bool_t   bEVENTCUTMODE;//If this set to kFALSE then Event cuts are OFF
   //  Int_t    fDeviceErrorCode;//keep the device HW status using a unique code from the QwVQWK_Channel::fDeviceErrorCode
-  Bool_t   bFullSave; // used to restrict the amount of data histogramed
+  Bool_t   bFullSave{kFALSE}; // used to restrict the amount of data histogramed
 
   const static Bool_t bDEBUG=kFALSE;//debugging display purposes
 

@@ -76,6 +76,7 @@ QwHelicity::QwHelicity(const TString& name)
   n_ranbits = 0;
   fGoodHelicity=kFALSE;
   fGoodPattern=kFALSE;
+  fHelicityInfoOK=kFALSE;
   fHelicityDecodingMode=-1;
 
   fInputReg_FakeMPS = kDefaultInputReg_FakeMPS;
