@@ -200,6 +200,7 @@ class QwEventBuffer {
   Bool_t fEventRateLimitEnabled{false};
   Double_t fMaxEventRate{0.0};
   std::chrono::duration<double> fMinEventInterval;
+  std::chrono::duration<double> fAccumulatedDelay{0.0};
   std::chrono::steady_clock::time_point fLastEventTime;
 
   Bool_t fChainDataFiles;
