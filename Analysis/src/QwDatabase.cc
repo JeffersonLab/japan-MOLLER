@@ -17,8 +17,8 @@
 #include <sqlpp11/functions.h>
 #endif // __USE_SQLPP11__
 #ifdef __USE_SQLPP23__
-#include <sqlpp23/select.h>
-#include <sqlpp23/functions.h>
+#include <sqlpp23/core/clause/select.h>
+#include <sqlpp23/core/function.h>
 #endif // __USE_SQLPP23__
 
 // Qweak headers
