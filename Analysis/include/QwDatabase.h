@@ -48,6 +48,14 @@ namespace sqlpp {
   static constexpr auto null = std::nullopt;
 }
 
+// Compatibility helper for result field null checking
+// For sqlpp11: use free function is_null() to call the member function .is_null()
+// For sqlpp23: result fields are std::optional<T>, provide is_null() via ADL
+template<typename T>
+constexpr bool is_null(const std::optional<T>& opt) {
+  return !opt.has_value();
+}
+
 #endif // __USE_SQLPP23__
 #endif // __USE_DATABASE__
 

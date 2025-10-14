@@ -481,7 +481,7 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db)
       c->ForFirstResult(results, [this](const auto& row) {
         // Process first (and only) row
         fSeedID = row.seed_id;
-        if (!row.seed.is_null()) {
+        if (!is_null(row.seed)) {
           fSeed = row.seed.value();
         } else {
           QwError << "QwBlinder::ReadSeed(): Seed value came back NULL from the database." << QwLog::endl;
@@ -588,7 +588,7 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db, const UInt_t seed_id)
       
       db->ForFirstResult(results, [&](const auto& row) {
         found_seed_id = row.seed_id;
-        if (!row.seed.is_null()) {
+        if (!is_null(row.seed)) {
           found_seed = row.seed.value();
         } else {
           QwError << "QwBlinder::ReadSeed(): Seed value came back NULL from the database." << QwLog::endl;
@@ -627,7 +627,7 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db, const UInt_t seed_id)
 
       db->ForFirstResult(results, [&](const auto& row) {
         found_seed_id2 = row.seed_id;
-        if (!row.seed.is_null()) {
+        if (!is_null(row.seed)) {
           found_seed2 = row.seed.value();
         } else {
           QwError << "QwBlinder::ReadSeed(): Seed value came back NULL from the database." << QwLog::endl;
