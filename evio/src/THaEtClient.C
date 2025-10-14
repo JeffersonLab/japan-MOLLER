@@ -169,8 +169,15 @@ Int_t THaEtClient::codaClose()
 {
   if( !opened )
     return CODA_OK;  // If not successfully opened, close() is a no-op
+    
+  // Flush any pending writes
+  int status = flushWrite();
+  if( status != CODA_OK ) {
+    return status;
+  }
+  
   auto* id = evh.etSysId;  // this gets zeroed out in evh.close();
-  int status = et_station_detach(id, evh.etAttId);
+  status = et_station_detach(id, evh.etAttId);
   if( status != ET_OK ) {
     cerr << "WARNING: codaClose: error detaching from ET: "
          << et_perror(status) << endl;
@@ -238,6 +245,81 @@ Int_t THaEtClient::codaRead()
     }
   }
   return status;
+}
+
+//______________________________________________________________________________
+Int_t THaEtClient::codaWrite( const UInt_t* buffer, UInt_t buffer_length )
+{
+  if( !opened ) {
+    Int_t status = init(station.c_str());
+    if( status != CODA_OK ) {
+      cout << "THaEtClient: ERROR: codaWrite, cannot connect to CODA" << endl;
+      return CODA_FATAL;
+    }
+  }
+
+  // Get a new chunk of ET events if we've used all current ones
+  if( evh.currentChunkID >= evh.etChunkSize || evh.currentChunkID < 0 ) {
+    // Get new events from ET system
+    int num_obtained = 0;
+    int status = et_events_new(evh.etSysId, evh.etAttId, evh.etChunk.get(),
+                               ET_SLEEP, nullptr, 
+                               buffer_length * sizeof(UInt_t),
+                               evh.etChunkSize, &num_obtained);
+    if( status != ET_OK ) {
+      cerr << "THaEtClient: ERROR: et_events_new failed: " 
+           << et_perror(status) << endl;
+      return CODA_ERROR;
+    }
+    evh.currentChunkID = 0;  // Reset to beginning of new chunk
+  }
+
+  // Copy data into the current ET event
+  et_event* event = evh.etChunk[evh.currentChunkID];
+  char* pdata = nullptr;
+  et_event_getdata(event, (void**)&pdata);
+  
+  if( pdata == nullptr ) {
+    cerr << "THaEtClient: ERROR: null data pointer from ET event" << endl;
+    return CODA_ERROR;
+  }
+  
+  // Copy the buffer data
+  size_t bytes = buffer_length * sizeof(UInt_t);
+  memcpy(pdata, buffer, bytes);
+  et_event_setlength(event, bytes);
+  
+  // Move to next slot
+  evh.currentChunkID++;
+  
+  // If buffer is full, flush it
+  if( evh.currentChunkID >= evh.etChunkSize ) {
+    return flushWrite();
+  }
+  
+  return CODA_OK;
+}
+
+//______________________________________________________________________________
+Int_t THaEtClient::flushWrite()
+{
+  if( !opened || evh.currentChunkID <= 0 ) {
+    return CODA_OK;  // Nothing to flush
+  }
+  
+  // Put the events we've written back to ET
+  int status = et_events_put(evh.etSysId, evh.etAttId, 
+                            evh.etChunk.get(), evh.currentChunkID);
+  if( status != ET_OK ) {
+    cerr << "THaEtClient: ERROR: et_events_put failed: "
+         << et_perror(status) << endl;
+    return CODA_ERROR;
+  }
+  
+  // Reset write buffer - mark as needing new events
+  evh.currentChunkID = evh.etChunkSize;
+  
+  return CODA_OK;
 }
 
 //______________________________________________________________________________

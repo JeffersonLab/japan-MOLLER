@@ -619,8 +619,7 @@ Int_t QwEventBuffer::WriteEvent(int* buffer)
   if (fEvStreamMode==fEvStreamFile){
     status = WriteFileEvent(buffer);
   } else if (fEvStreamMode==fEvStreamET) {
-    QwMessage << "No support for writing to ET streams" << QwLog::endl;
-    status = CODA_ERROR;
+    status = WriteEtEvent(buffer);
   }
   return status;
 }
@@ -631,6 +630,32 @@ Int_t QwEventBuffer::WriteFileEvent(int* buffer)
   //  fEvStream is of inherited type THaCodaData,
   //  but codaWrite is only defined for THaCodaFile.
   status = ((THaCodaFile*)fEvStream)->codaWrite((UInt_t*) buffer);
+  return status;
+}
+
+Int_t QwEventBuffer::WriteEtEvent(int* buffer)
+{
+  Int_t status = CODA_OK;
+  //  fEvStream is of inherited type THaCodaData,
+  //  but codaWrite for ET is defined in THaEtClient.
+#ifdef __CODA_ET
+  // Get the buffer length from the first word (CODA event header)
+  UInt_t* ubuffer = (UInt_t*)buffer;
+  UInt_t event_length = ubuffer[0];  // First word is event length in words
+  
+  if( event_length == 0 || event_length > MAXEVLEN ) {
+    QwError << "WriteEtEvent: Invalid event length: " << event_length << QwLog::endl;
+    return CODA_ERROR;
+  }
+  
+  status = ((THaEtClient*)fEvStream)->codaWrite(ubuffer, event_length);
+  if( status != CODA_OK ) {
+    QwError << "WriteEtEvent: codaWrite failed with status " << status << QwLog::endl;
+  }
+#else
+  QwError << "WriteEtEvent: ET support not compiled in" << QwLog::endl;
+  status = CODA_ERROR;
+#endif
   return status;
 }
 
