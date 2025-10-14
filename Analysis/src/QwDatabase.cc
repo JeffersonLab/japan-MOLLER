@@ -188,7 +188,7 @@ Bool_t QwDatabase::ValidateConnection()
 #ifdef __USE_SQLPP23__
           if (fDBDebug) {
             config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
-              std::cerr << "SQL Debug: " << msg << std::endl;
+              QwMessage << "SQL Debug: " << msg << QwLog::endl;
             });
           }
 #endif
@@ -210,7 +210,7 @@ Bool_t QwDatabase::ValidateConnection()
 #ifdef __USE_SQLPP23__
           if (fDBDebug) {
             config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
-              std::cerr << "SQL Debug: " << msg << std::endl;
+              QwMessage << "SQL Debug: " << msg << QwLog::endl;
             });
           }
 #endif
@@ -233,7 +233,7 @@ Bool_t QwDatabase::ValidateConnection()
 #ifdef __USE_SQLPP23__
           if (fDBDebug) {
             config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
-              std::cerr << "SQL Debug: " << msg << std::endl;
+              QwMessage << "SQL Debug: " << msg << QwLog::endl;
             });
           }
 #endif
@@ -338,7 +338,7 @@ bool QwDatabase::Connect()
 #ifdef __USE_SQLPP23__
           if (fDBDebug) {
             config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
-              std::cerr << "SQL Debug: " << msg << std::endl;
+              QwMessage << "SQL Debug: " << msg << QwLog::endl;
             });
           }
 #endif
@@ -360,7 +360,7 @@ bool QwDatabase::Connect()
 #ifdef __USE_SQLPP23__
           if (fDBDebug) {
             config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
-              std::cerr << "SQL Debug: " << msg << std::endl;
+              QwMessage << "SQL Debug: " << msg << QwLog::endl;
             });
           }
 #endif
