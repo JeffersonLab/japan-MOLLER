@@ -235,6 +235,7 @@ class QwEventBuffer {
   Int_t  GetEtEvent();
 
   Int_t WriteFileEvent(int* buffer);
+  Int_t WriteEtEvent(int* buffer);
 
   Bool_t DataFileIsSegmented();
 
