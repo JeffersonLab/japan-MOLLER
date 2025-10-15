@@ -215,9 +215,9 @@ Int_t THaEtClient::codaRead()
   uint32_t len{};
   int status = evh.read_no_copy(&readBuffer, &len);
   if( status == ET_OK ) {
-    if( !evbuffer.grow(len / bpi + 1) )
+    if( !evbuffer.grow(len + 1) )
       throw runtime_error("THaEtClient: Maximum event buffer size reached");
-    assert(bpi * evbuffer.size() >= (size_t)len);
+    assert(evbuffer.size() >= (size_t)len);
     memcpy(evbuffer.get(), readBuffer, bpi * len);
   }
 
