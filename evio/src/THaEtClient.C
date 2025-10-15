@@ -170,10 +170,13 @@ Int_t THaEtClient::codaClose()
   if( !opened )
     return CODA_OK;  // If not successfully opened, close() is a no-op
     
-  // Flush any pending writes
-  int status = flushWrite();
-  if( status != CODA_OK ) {
-    return status;
+  // Flush any pending writes (only in write mode: etChunkNumRead == -1)
+  int status = CODA_OK;
+  if( evh.etChunkNumRead == -1 ) {
+    status = flushWrite();
+    if( status != CODA_OK ) {
+      return status;
+    }
   }
   
   auto* id = evh.etSysId;  // this gets zeroed out in evh.close();
