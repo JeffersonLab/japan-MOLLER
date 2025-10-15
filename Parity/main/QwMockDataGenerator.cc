@@ -178,9 +178,16 @@ if(1==2){
   
     
     TString filename = Form("%sQwMock_%u.log", eventbuffer.GetDataDirectory().Data(), run);
-    if (eventbuffer.OpenDataFile(filename,"W") != CODA_OK) {
-      std::cout << "Error: could not open file!" << std::endl;
-      return 0;
+    if (eventbuffer.IsOnline()) {
+      if (eventbuffer.ReOpenStream() != CODA_OK) {
+        std::cout << "Error: could not open ET stream!" << std::endl;
+        return 0;
+      }
+    } else {
+      if (eventbuffer.OpenDataFile(filename,"W") != CODA_OK) {
+        std::cout << "Error: could not open file!" << std::endl;
+        return 0;
+      }
     }
     eventbuffer.ResetControlParameters();
     eventbuffer.EncodePrestartEvent(run, 0); // prestart: runnumber, runtype
@@ -317,7 +324,11 @@ if(1==2){
     eventbuffer.CloseDataFile();
     eventbuffer.ReportRunSummary();
 
-    QwMessage << "Wrote mock data run " << filename << " successfully." << QwLog::endl;
+    if (eventbuffer.IsOnline()) {
+      QwMessage << "Wrote mock data run to ET stream successfully." << QwLog::endl;
+    } else {
+      QwMessage << "Wrote mock data run " << filename << " successfully." << QwLog::endl;
+    }
 
   } // end of run loop
 
