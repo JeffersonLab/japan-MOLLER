@@ -268,12 +268,12 @@ Int_t THaEtClient::codaWrite( const UInt_t* buffer, UInt_t buffer_length )
     // EVIO v6 block header = 56 bytes (EV_HDSIZ_BYTES_V6)
     // See evio/src/libsrc/evio.h for EV_HDSIZ_BYTES(_V6) definitions
 #ifdef EV_HDSIZ_V6
-    constexpr size_t EV_HDSIZ_BYTES = st::max(4 * EV_HDSIZ, 4 * EV_HDSIZ_V6);
+    constexpr size_t event_header_size_bytes = st::max(4 * EV_HDSIZ, 4 * EV_HDSIZ_V6);
 #else
-    constexpr size_t EV_HDSIZ_BYTES = 4 * EV_HDSIZ;
+    constexpr size_t event_header_size_bytes = 4 * EV_HDSIZ;
 #endif
     // May need 2 headers (current + ending empty block header)
-    size_t needed_bytes = buffer_length * sizeof(UInt_t) + 2 * EV_HDSIZ_BYTES;
+    size_t needed_bytes = buffer_length * sizeof(UInt_t) + 2 * event_header_size_bytes;
 
     // Get new events from ET system
     int num_obtained = 0;
