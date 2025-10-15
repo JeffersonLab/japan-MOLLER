@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
 cmake_policy(SET CMP0079 NEW)
 
 #----------------------------------------------------------------------------
@@ -31,12 +31,14 @@ endif()
 #----------------------------------------------------------------------------
 # CODA ET
 #
-find_package(ET CONFIG QUIET)
-if(NOT ET_FOUND)
-  find_package(ET MODULE)
+if(NOT TARGET et)
+  find_package(ET CONFIG QUIET)
+  if(NOT ET_FOUND)
+    find_package(ET MODULE)
+  endif()
 endif()
-if(ET_FOUND)
-  	add_definitions(-D__CODA_ET)
+if(ET_FOUND OR TARGET et)
+  add_definitions(-D__CODA_ET)
 	# Sources and headers
 	file(GLOB my_et_headers
 		include/THaEtClient.h
@@ -90,22 +92,14 @@ target_compile_options(eviowrapper
     ${${PROJECT_NAME_UC}_DIAG_FLAGS_LIST}
   )
 
-if(ET_FOUND)
 target_link_libraries(eviowrapper
   PUBLIC
-    ET::ET
+    $<TARGET_NAME_IF_EXISTS:ET::ET>
+    $<TARGET_NAME_IF_EXISTS:et>
     ROOT::Core
   PRIVATE
     EVIO::EVIO
   )
-else()
-target_link_libraries(eviowrapper
-  PUBLIC
-    ROOT::Core
-  PRIVATE
-    EVIO::EVIO
-  )
-endif()
 
 install(TARGETS eviowrapper
   EXPORT ${MAIN_PROJECT_NAME_LC}-exports
