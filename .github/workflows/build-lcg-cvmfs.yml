@@ -132,20 +132,41 @@ jobs:
             sqlite3 qwparity.db "INSERT INTO seeds VALUES(0, 0, 10, 'foo', 'bar');"
             echo "::endgroup::"
 
-            echo "::group::Mock data analysis (sqlite3)"
+            echo "::group::Mock data analysis (sqlite3, trees)"
             # Analyze the generated mock data
+            mkdir -p trees
             /usr/bin/time -v \
             build/qwparity -r 4 \
               --config qwparity_simple.conf \
               --detectors mock_newdets.map \
               --datahandlers mock_datahandlers.map \
               --data . \
-              --rootfiles . \
+              --rootfiles trees/. \
               --write-promptsummary \
               --QwDatabase.accesslevel RW \
               --QwDatabase.dbtype sqlite3 \
               --QwDatabase.dbname qwparity.db
             echo "::endgroup::"
+
+            if printf "%s\n%s" 6.36.00 $(root-config --version) | sort -V -C ; then
+              echo "::group::Mock data analysis (sqlite3, rntuples)"
+              # Analyze the generated mock data
+              mkdir -p rntuples
+              /usr/bin/time -v \
+              build/qwparity -r 4 \
+                --config qwparity_simple.conf \
+                --detectors mock_newdets.map \
+                --datahandlers mock_datahandlers.map \
+                --data . \
+                --rootfiles rntuples/. \
+                --write-promptsummary \
+                --QwDatabase.accesslevel RW \
+                --QwDatabase.dbtype sqlite3 \
+                --QwDatabase.dbname qwparity.db \
+                --enable-rntuples \
+                --disable-trees
+              echo "::endgroup::"
+            fi
 
             echo "::group::Print database contents (sqlite3)"
             # Print the database contents
