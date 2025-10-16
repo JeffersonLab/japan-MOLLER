@@ -616,10 +616,10 @@ Bool_t QwParameterFile::FileHasModuleHeader(const std::string& secname)
  * Read from current position until next section header
  * @return Pointer to the parameter stream until next section
  */
-QwParameterFile* QwParameterFile::ReadUntilNextSection(const bool add_current_line)
+std::unique_ptr<QwParameterFile> QwParameterFile::ReadUntilNextSection(const bool add_current_line)
 {
   std::string nextheader; // dummy
-  QwParameterFile* section = new QwParameterFile();
+  std::unique_ptr<QwParameterFile> section(new QwParameterFile());
   if (add_current_line) section->AddLine(GetLine()); // add current line
   while (ReadNextLine() && ! LineHasSectionHeader(nextheader)) {
     section->AddLine(GetLine());
@@ -631,10 +631,10 @@ QwParameterFile* QwParameterFile::ReadUntilNextSection(const bool add_current_li
  * Read from current position until next module header
  * @return Pointer to the parameter stream until next module
  */
-QwParameterFile* QwParameterFile::ReadUntilNextModule(const bool add_current_line)
+std::unique_ptr<QwParameterFile> QwParameterFile::ReadUntilNextModule(const bool add_current_line)
 {
   std::string nextheader; // dummy
-  QwParameterFile* section = new QwParameterFile();
+  std::unique_ptr<QwParameterFile> section(new QwParameterFile()); // std::make_unique requires public c'tor
   if (add_current_line) section->AddLine(GetLine()); // add current line
   while (ReadNextLine() && ! LineHasModuleHeader(nextheader)) {
     section->AddLine(GetLine());
@@ -676,7 +676,7 @@ Bool_t QwParameterFile::SkipSection(std::string secname)
  * Read the lines until the first header
  * @return Pointer to the parameter stream until first section
  */
-QwParameterFile* QwParameterFile::ReadSectionPreamble()
+std::unique_ptr<QwParameterFile> QwParameterFile::ReadSectionPreamble()
 {
   RewindToFileStart();
   return ReadUntilNextSection();
@@ -688,16 +688,16 @@ QwParameterFile* QwParameterFile::ReadSectionPreamble()
  * @param keep_header Keep the header inside the section
  * @return Pointer to the parameter stream of the next section
  */
-QwParameterFile* QwParameterFile::ReadNextSection(std::string &secname, const bool keep_header)
+std::unique_ptr<QwParameterFile> QwParameterFile::ReadNextSection(std::string &secname, const bool keep_header)
 {
-  if (IsEOF()) return 0;
+  if (IsEOF()) return nullptr;
   while (! LineHasSectionHeader(secname) && ReadNextLine()); // skip until header
   return ReadUntilNextSection(keep_header);
 }
 
-QwParameterFile* QwParameterFile::ReadNextSection(TString &secname, const bool keep_header)
+std::unique_ptr<QwParameterFile> QwParameterFile::ReadNextSection(TString &secname, const bool keep_header)
 {
-  if (IsEOF()) return 0;
+  if (IsEOF()) return nullptr;
   while (! LineHasSectionHeader(secname) && ReadNextLine()); // skip until header
   return ReadUntilNextSection(keep_header);
 }
@@ -707,7 +707,7 @@ QwParameterFile* QwParameterFile::ReadNextSection(TString &secname, const bool k
  * Read the lines until the first header
  * @return Pointer to the parameter stream until first module
  */
-QwParameterFile* QwParameterFile::ReadModulePreamble()
+std::unique_ptr<QwParameterFile> QwParameterFile::ReadModulePreamble()
 {
   RewindToFileStart();
   return ReadUntilNextModule();
@@ -719,16 +719,16 @@ QwParameterFile* QwParameterFile::ReadModulePreamble()
  * @param keep_header Flag to keep header of module
  * @return Pointer to the parameter stream of the next module
  */
-QwParameterFile* QwParameterFile::ReadNextModule(std::string &secname, const bool keep_header)
+std::unique_ptr<QwParameterFile> QwParameterFile::ReadNextModule(std::string &secname, const bool keep_header)
 {
-  if (IsEOF()) return 0;
+  if (IsEOF()) return nullptr;
   while (! LineHasModuleHeader(secname) && ReadNextLine()); // skip until header
   return ReadUntilNextModule(keep_header);
 }
 
-QwParameterFile* QwParameterFile::ReadNextModule(TString &secname, const bool keep_header)
+std::unique_ptr<QwParameterFile> QwParameterFile::ReadNextModule(TString &secname, const bool keep_header)
 {
-  if (IsEOF()) return 0;
+  if (IsEOF()) return nullptr;
   while (! LineHasModuleHeader(secname) && ReadNextLine()); // skip until header
   return ReadUntilNextModule(keep_header);
 }
