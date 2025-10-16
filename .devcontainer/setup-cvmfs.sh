@@ -23,6 +23,7 @@ sudo apt-get install -y \
     clang-tidy \
     clang-format \
     libboost-all-dev \
+    libwebpmux3 \
     libxcb-shm0 \
     libxcb-render0 \
     libxpm4 \
