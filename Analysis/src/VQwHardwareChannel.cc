@@ -12,7 +12,8 @@ Int_t VQwHardwareChannel::fBurpHoldoff = 10;
 
 VQwHardwareChannel::VQwHardwareChannel():
   fNumberOfDataWords(0),
-  fNumberOfSubElements(0), fDataToSave(kRaw)
+  fNumberOfSubElements(0),
+  fDataToSave(kRaw)
 {
   fULimit = -1;
   fLLimit = 1;

@@ -318,6 +318,8 @@ private:
   Int_t fBlock_min[5];
   Int_t fBlock_max[5];
   Short_t fBlock_numSamples[5];
+  // @}
+
   /*! \name Event data members---Potentially calibrated values*/
   // @{
   // The following values potentially have pedestal removed  and calibration applied
