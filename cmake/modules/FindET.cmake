@@ -27,9 +27,9 @@ elseif( DEFINED ENV{CODA} )
     DOC "Event Transport (ET) header include directory"
     )
 endif()
-if(NOT TARGET EVIO::ET AND ET_LIBRARY AND ET_INCLUDE_DIR)
-  add_library(EVIO::ET SHARED IMPORTED)
-  set_target_properties(EVIO::ET PROPERTIES
+if(NOT TARGET ET::ET AND ET_LIBRARY AND ET_INCLUDE_DIR)
+  add_library(ET::ET SHARED IMPORTED)
+  set_target_properties(ET::ET PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${ET_INCLUDE_DIR}"
     IMPORTED_LOCATION "${ET_LIBRARY}"
     )

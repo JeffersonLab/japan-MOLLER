@@ -46,6 +46,7 @@ if(ET_FOUND)
   )
 	set(my_evio_sources ${my_evio_sources} ${my_et_sources})
 	set(my_evio_headers ${my_evio_headers} ${my_et_headers})
+	set(ET_DEPENDENCY ET::ET)
 endif()
 
 
@@ -63,10 +64,7 @@ foreach(file ${my_evio_headers})
     # Add dictionary target with possible LinkDef file
     set(dict ${CMAKE_CURRENT_BINARY_DIR}/${file_name}Dict)
     set(linkdef ${file_path}/${file_name}LinkDef.h)
-    build_root_dictionary(${file_name} ${file}
-      TARGETS eviowrapper
-      LINKDEF ${linkdef}
-    )
+    ROOT_GENERATE_DICTIONARY(${dict} ${file} LINKDEF ${linkdef} DEPENDENCIES ${ET_DEPENDENCY})
     # Add dictionary to evio sources
     set(my_evio_sources ${my_evio_sources} ${file_name}Dict.cxx)
   endif()
@@ -82,7 +80,7 @@ target_include_directories(${LIBNAME}
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-		$<BUILD_INTERFACE:${ET_INCLUDE_DIR}>
+	$<BUILD_INTERFACE:${ET_INCLUDE_DIR}>
   )
 
 target_compile_options(eviowrapper
@@ -95,15 +93,15 @@ target_compile_options(eviowrapper
 if(ET_FOUND)
 target_link_libraries(eviowrapper
   PUBLIC
-    EVIO::ET
-    ROOT::Libraries
+    ET::ET
+    ROOT::Core
   PRIVATE
     EVIO::EVIO
   )
 else()
 target_link_libraries(eviowrapper
   PUBLIC
-    ROOT::Libraries
+    ROOT::Core
   PRIVATE
     EVIO::EVIO
   )
