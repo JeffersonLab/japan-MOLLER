@@ -203,7 +203,8 @@ jobs:
         with:
           name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
           path: |
-            summary_*.txt
+            trees/summary_*.txt
+            rntuples/summary_*.txt
           retention-days: 7
           if-no-files-found: error
 
