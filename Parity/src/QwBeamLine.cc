@@ -364,7 +364,7 @@ Int_t QwBeamLine::LoadChannelMap(TString mapfile)
 
   // Now load the variables to publish
   mapstr.RewindToFileStart();
-  QwParameterFile *section;
+  std::unique_ptr<QwParameterFile> section;
   std::vector<TString> publishinfo;
   while ((section=mapstr.ReadNextSection(varvalue))) {
     if (varvalue == "PUBLISH") {
@@ -383,7 +383,6 @@ Int_t QwBeamLine::LoadChannelMap(TString mapfile)
         publishinfo.clear();
       }
     }
-    delete section;
   }
   // Print list of variables to publish
   if (fPublishList.size()>0){
@@ -2486,7 +2485,7 @@ void QwBeamLine::ConstructBranch(TTree *tree, TString & prefix, QwParameterFile&
 {
   TString tmp,varname,varvalue;
   tmp="QwBCM";
-  QwParameterFile* nextmodule;
+  std::unique_ptr<QwParameterFile> nextmodule;
   trim_file.RewindToFileStart();
 
 

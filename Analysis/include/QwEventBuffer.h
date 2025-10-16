@@ -67,11 +67,6 @@ class QwEventBuffer {
       delete fEvStream;
       fEvStream = NULL;
     }
-    // Delete run list file
-    if (fRunListFile != NULL) {
-      delete fRunListFile;
-      fRunListFile = NULL;
-    }
 	  // Delete Decoder
 	  if(decoder != NULL) {
 			delete decoder;
@@ -198,12 +193,12 @@ class QwEventBuffer {
   Bool_t fChainDataFiles;
   std::pair<Int_t, Int_t> fRunRange;
   std::string fRunListFileName;
-  QwParameterFile* fRunListFile;
+  std::unique_ptr<QwParameterFile> fRunListFile;
   std::vector<Int_t> fRunRangeMinList, fRunRangeMaxList;
 
   std::pair<UInt_t, UInt_t> fEventRange;
   std::string fEventListFileName;
-  QwParameterFile* fEventListFile;
+  std::unique_ptr<QwParameterFile> fEventListFile;
   std::vector<UInt_t> fEventList;
 
   std::pair<Int_t, Int_t> fSegmentRange;
