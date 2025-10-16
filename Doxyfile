@@ -796,6 +796,7 @@ INPUT                  = Feedback \
                          Parity \
                          cmake \
                          evio \
+                         Doxygen \
                          README.md
 
 # This tag can be used to specify the character encoding of the source files

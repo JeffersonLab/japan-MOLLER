@@ -1,0 +1,99 @@
+/**
+ * @page database_schema Database Schema Documentation
+ * 
+ * @section overview Schema Overview
+ * 
+ * The JAPAN-MOLLER analysis framework employs a comprehensive relational database schema 
+ * designed to store and organize parity analysis data, experimental measurements, and 
+ * associated metadata. The schema supports the complete analysis workflow from raw data 
+ * ingestion through final physics results.
+ * 
+ * @section schema_diagram Schema Diagram
+ * 
+ * The following diagram illustrates the complete database schema with table relationships:
+ * 
+ * @image html ../schema_diagram.svg "JAPAN-MOLLER Database Schema" width=100%
+ * 
+ * @section table_categories Table Categories
+ * 
+ * The database tables are organized into six functional categories:
+ * 
+ * @subsection core_tables Core Tables (Blue)
+ * These tables form the backbone of the analysis workflow:
+ * - **run**: Stores run metadata, including run numbers, timestamps, and basic statistics
+ * - **runlet**: Represents analysis segments within runs, supporting partial run analysis
+ * - **analysis**: Contains analysis-specific parameters, checksums, and processing metadata
+ * 
+ * @subsection data_tables Data Tables (Orange)  
+ * These tables store the actual measurement data:
+ * - **beam**: Beam monitor measurements (position, current, energy)
+ * - **md_data**: Main detector data (asymmetries, yields)
+ * - **lumi_data**: Luminosity detector measurements
+ * - **md_slope**: Main detector slope corrections
+ * - **lumi_slope**: Luminosity detector slope corrections
+ * 
+ * @subsection reference_tables Reference Tables (Green)
+ * Lookup tables that define detector configurations and measurement types:
+ * - **measurement_type**: Defines types of measurements (asymmetry, yield, etc.)
+ * - **main_detector**: Main detector definitions and configurations
+ * - **lumi_detector**: Luminosity detector definitions
+ * - **monitor**: Beam monitor definitions
+ * - **slope_type**: Types of slope corrections
+ * - **error_code**: Standardized error classifications
+ * 
+ * @subsection error_tables Error Tables (Red)
+ * Tables for tracking various types of analysis errors:
+ * - **general_errors**: Run-level error summaries
+ * - **beam_errors**: Beam monitor specific errors
+ * - **md_errors**: Main detector error tracking
+ * - **lumi_errors**: Luminosity detector error tracking
+ * 
+ * @subsection slow_controls Slow Controls Tables (Purple)
+ * Operational and environmental data:
+ * - **slow_controls_settings**: Hardware configuration parameters
+ * - **slow_controls_data**: Time-series operational measurements
+ * - **slow_controls_strings**: Text-based configuration data
+ * - **sc_detector**: Slow controls detector definitions
+ * 
+ * @subsection misc_tables Supporting Tables (Teal)
+ * Additional tables supporting the analysis framework:
+ * - **seeds**: Random number seeds for reproducible analysis
+ * - **parameter_files**: Analysis parameter file tracking
+ * - **bf_test**: Beam feedback test results
+ * - **beam_optics**: Beam optics analysis results
+ * - **db_schema**: Database schema version tracking
+ * 
+ * @section relationships Table Relationships
+ * 
+ * The schema implements a hierarchical relationship structure:
+ * 
+ * 1. **Run → Runlet → Analysis**: Core workflow progression
+ * 2. **Analysis → Data Tables**: One-to-many relationships for measurement storage
+ * 3. **Data Tables → Reference Tables**: Foreign key relationships for detector/measurement type lookups
+ * 4. **Analysis → Error Tables**: Error tracking linked to specific analyses
+ * 5. **Runlet → Slow Controls**: Operational data linked to analysis segments
+ * 
+ * @section usage Usage Patterns
+ * 
+ * Typical data flow through the schema:
+ * 
+ * 1. **Run Creation**: New experimental runs are registered in the `run` table
+ * 2. **Segmentation**: Runs are divided into `runlet` segments for parallel processing
+ * 3. **Analysis Registration**: Each analysis pass creates an `analysis` record with parameters
+ * 4. **Data Storage**: Measurement data flows into appropriate data tables (`beam`, `md_data`, etc.)
+ * 5. **Error Tracking**: Any processing errors are recorded in corresponding error tables
+ * 6. **Results**: Final results can be queried by joining data tables with their reference tables
+ * 
+ * @section schema_file Schema Definition
+ * 
+ * The complete schema definition is maintained in `Parity/prminput/qwparity_schema.sql`.
+ * This file contains the authoritative table definitions, including:
+ * - Column specifications with proper data types
+ * - Primary key definitions  
+ * - Foreign key relationships
+ * - Index definitions for query optimization
+ * - Default values and constraints
+ * 
+ * @note The schema supports both MySQL and compatible database systems, with careful
+ * attention to data type compatibility and performance optimization for large datasets.
+ */
