@@ -856,7 +856,7 @@ void  QwMollerADC_Channel::FillTreeVector(QwRootTreeBranchVector& values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   //For rntuple 
   if (IsNameEmpty()) {
@@ -1002,7 +1002,7 @@ void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupl
   }
 }
 
-void  QwMollerADC_Channel::FillNTupleVector(QwRootTreeBranchVector &values) const
+void  QwMollerADC_Channel::FillNTupleVector(std::vector<Double_t>& values) const
 {
   if (IsNameEmpty()) {
     //  This channel is not used, so skip filling.
@@ -1025,12 +1025,6 @@ void  QwMollerADC_Channel::FillNTupleVector(QwRootTreeBranchVector &values) cons
       return;
     }
 
-    // For moments data (stat prefix), delegate to TTree behavior for exact match
-    if (fDataToSave == kMoments) {
-      // Use the existing TTree fill logic to ensure exact matching
-      FillTreeVector(values);
-      return;
-    }
 
     // For raw data, use the full detailed format
     // hw_sum
@@ -1047,7 +1041,7 @@ void  QwMollerADC_Channel::FillNTupleVector(QwRootTreeBranchVector &values) cons
 
     // num_samples
     if (bNum_samples)
-      values[index++] = this->fNumberOfSamples;
+      values[index++] = fDataToSave == kMoments ? this->fGoodEventCount : this->fNumberOfSamples;
 
     // Device_Error_Code
     if (bDevice_Error_Code)

@@ -232,7 +232,7 @@ void QwEPICSEvent::FillTreeVector(QwRootTreeBranchVector &values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void QwEPICSEvent::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void QwEPICSEvent::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   fTreeArrayIndex = values.size();
   for (size_t tagindex = 0; tagindex < fEPICSVariableType.size(); tagindex++) {
@@ -264,7 +264,7 @@ void QwEPICSEvent::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>&
   fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
 }
 
-void QwEPICSEvent::FillNTupleVector(QwRootTreeBranchVector &values) const
+void QwEPICSEvent::FillNTupleVector(std::vector<Double_t>& values) const
 {
   Int_t treeindex = fTreeArrayIndex;
   for (size_t tagindex = 0; tagindex < fEPICSVariableType.size(); tagindex++) {

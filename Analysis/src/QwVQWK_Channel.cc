@@ -901,7 +901,7 @@ void  QwVQWK_Channel::FillTreeVector(QwRootTreeBranchVector &values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void  QwVQWK_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>> &fieldPtrs)
+void  QwVQWK_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>> &fieldPtrs)
 {
   //  This channel is not used, so skip setting up the RNTuple.
   if (IsNameEmpty()) return;
@@ -1031,7 +1031,7 @@ void  QwVQWK_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleMode
   }
 }
 
-void  QwVQWK_Channel::FillNTupleVector(QwRootTreeBranchVector &values) const
+void  QwVQWK_Channel::FillNTupleVector(std::vector<Double_t>& values) const
 {
   if (IsNameEmpty()) {
     //  This channel is not used, so skip filling.
@@ -1046,14 +1046,49 @@ void  QwVQWK_Channel::FillNTupleVector(QwRootTreeBranchVector &values) const
               << std::endl;
   } else {
     
-    // For derived data (yield_, asym_, diff_), only fill the main value to match TTree format
-    if (fDataToSave == kDerived) {
-      values[fTreeArrayIndex] = this->GetHardwareSum();
-      return;
+    UInt_t index = fTreeArrayIndex;
+
+    // hw_sum
+    if (bHw_sum) {
+      values[index++] = this->GetHardwareSum();
+      if (fDataToSave == kMoments) {
+        values[index++] = this->GetHardwareSumM2();
+        values[index++] = this->GetHardwareSumError();
+      }
     }
-    
-    // For raw data and moments, use the same filling logic as FillTreeVector
-    FillTreeVector(values);
+
+    if (bBlock) {
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        // blocki
+        values[index++] = this->GetBlockValue(i);
+      }
+    }
+
+    // num_samples
+    if (bNum_samples)
+      values[index++] =
+          (fDataToSave == kMoments)? this->fGoodEventCount: this->fNumberOfSamples;
+
+    // Device_Error_Code
+    if (bDevice_Error_Code)
+      values[index++] = this->fErrorFlag;
+
+    if (fDataToSave == kRaw) {
+      // hw_sum_raw
+      if (bHw_sum_raw)
+        values[index++] = this->GetRawHardwareSum();
+
+      if (bBlock_raw) {
+        for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+          // blocki_raw
+          values[index++] = this->GetRawBlockValue(i);
+        }
+      }
+
+      // sequence_number
+      if (bSequence_number)
+        values[index++] = this->fSequenceNumber;
+    }
   }
 }
 #endif // HAS_RNTUPLE_SUPPORT

@@ -171,8 +171,8 @@ public:
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist) override;
   void  FillTreeVector(QwRootTreeBranchVector &values) const override;
 #ifdef HAS_RNTUPLE_SUPPORT
-  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
-  void  FillNTupleVector(QwRootTreeBranchVector &values) const override;
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
+  void  FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif
 
   std::vector<QwDBInterface> GetDBEntry();

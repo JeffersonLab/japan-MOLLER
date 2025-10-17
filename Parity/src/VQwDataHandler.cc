@@ -374,14 +374,14 @@ void VQwDataHandler::FillTreeVector(QwRootTreeBranchVector &values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void VQwDataHandler::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void VQwDataHandler::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   for (size_t i = 0; i < fOutputVar.size(); ++i) {
     fOutputVar.at(i)->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
   }
 }
 
-void VQwDataHandler::FillNTupleVector(QwRootTreeBranchVector &values) const
+void VQwDataHandler::FillNTupleVector(std::vector<Double_t>& values) const
 {
   // Fill the data element
   for (size_t i = 0; i < fOutputVar.size(); ++i) {

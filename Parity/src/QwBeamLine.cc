@@ -2710,7 +2710,7 @@ void QwBeamLine::FillTreeVector(QwRootTreeBranchVector &values) const
 
 #ifdef HAS_RNTUPLE_SUPPORT
 //*****************************************************************//
-void QwBeamLine::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void QwBeamLine::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   for(size_t i = 0; i < fClock.size(); i++)
     fClock[i].get()->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
@@ -2737,7 +2737,7 @@ void QwBeamLine::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& m
 }
 
 //*****************************************************************//
-void QwBeamLine::FillNTupleVector(QwRootTreeBranchVector &values) const
+void QwBeamLine::FillNTupleVector(std::vector<Double_t>& values) const
 {
   for(size_t i = 0; i < fClock.size(); i++)
     fClock[i].get()->FillNTupleVector(values);

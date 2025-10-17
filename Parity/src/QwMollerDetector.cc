@@ -237,7 +237,7 @@ void QwMollerDetector::FillTreeVector(QwRootTreeBranchVector &values) const {
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void QwMollerDetector::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void QwMollerDetector::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
     for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
@@ -246,7 +246,7 @@ void QwMollerDetector::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleMod
   }
 }
 
-void QwMollerDetector::FillNTupleVector(QwRootTreeBranchVector &values) const
+void QwMollerDetector::FillNTupleVector(std::vector<Double_t>& values) const
 {
   for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
     for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){

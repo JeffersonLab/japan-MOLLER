@@ -773,7 +773,7 @@ void  QwLinearDiodeArray::FillTreeVector(QwRootTreeBranchVector &values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void  QwLinearDiodeArray::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void  QwLinearDiodeArray::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing.
@@ -798,7 +798,7 @@ void  QwLinearDiodeArray::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTuple
   return;
 }
 
-void  QwLinearDiodeArray::FillNTupleVector(QwRootTreeBranchVector &values) const
+void  QwLinearDiodeArray::FillNTupleVector(std::vector<Double_t>& values) const
 {
   if (GetElementName()=="") {
     //  This channel is not used, so skip filling.

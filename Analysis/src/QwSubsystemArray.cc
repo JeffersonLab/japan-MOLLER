@@ -691,7 +691,7 @@ void QwSubsystemArray::FillTreeVector(QwRootTreeBranchVector &values) const
 void QwSubsystemArray::ConstructNTupleAndVector(
     std::unique_ptr<ROOT::RNTupleModel>& model,
     TString& prefix,
-    QwRootTreeBranchVector &values,
+    std::vector<Double_t>& values,
     std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   fTreeArrayIndex = values.size();
@@ -739,7 +739,7 @@ void QwSubsystemArray::ConstructNTupleAndVector(
  * Fill the RNTuple vector
  * @param values Vector of values
  */
-void QwSubsystemArray::FillNTupleVector(QwRootTreeBranchVector &values) const
+void QwSubsystemArray::FillNTupleVector(std::vector<Double_t>& values) const
 {
   // Fill the event number and event type (same as TTree)
   size_t index = fTreeArrayIndex;

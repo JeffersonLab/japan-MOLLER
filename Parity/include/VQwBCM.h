@@ -110,8 +110,8 @@ public:
   virtual void FillTreeVector(QwRootTreeBranchVector &values) const = 0;
 
 #ifdef HAS_RNTUPLE_SUPPORT
-  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
-  virtual void FillNTupleVector(QwRootTreeBranchVector &values) const = 0;
+  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
+  virtual void FillNTupleVector(std::vector<Double_t>& values) const = 0;
 #endif // HAS_RNTUPLE_SUPPORT
 
 //----------------------------------------------------------------------------------------------------------------

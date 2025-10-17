@@ -616,7 +616,7 @@ void  QwIntegrationPMT::FillTreeVector(QwRootTreeBranchVector &values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void QwIntegrationPMT::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void QwIntegrationPMT::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip RNTuple construction.
@@ -626,7 +626,7 @@ void QwIntegrationPMT::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleMod
     }
 }
 
-void QwIntegrationPMT::FillNTupleVector(QwRootTreeBranchVector &values) const
+void QwIntegrationPMT::FillNTupleVector(std::vector<Double_t>& values) const
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the RNTuple.

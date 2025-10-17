@@ -834,7 +834,7 @@ void QwBeamMod::FillTreeVector(QwRootTreeBranchVector &values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void QwBeamMod::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void QwBeamMod::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   TString basename;
   
@@ -851,7 +851,7 @@ void QwBeamMod::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& mo
   }
 }
 
-void QwBeamMod::FillNTupleVector(QwRootTreeBranchVector &values) const
+void QwBeamMod::FillNTupleVector(std::vector<Double_t>& values) const
 {
   size_t index = fTreeArrayIndex;
   

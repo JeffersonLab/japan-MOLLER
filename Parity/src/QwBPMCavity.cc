@@ -920,7 +920,7 @@ void  QwBPMCavity::FillTreeVector(QwRootTreeBranchVector &values) const
  * Define RNTuple fields and attach backing vectors for output variables.
  * The prefix "asym_" is converted to "diff_" for positions.
  */
-void  QwBPMCavity::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, QwRootTreeBranchVector &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void  QwBPMCavity::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing.
@@ -944,7 +944,7 @@ void  QwBPMCavity::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>&
 }
 
 /** Append this detector's values to the RNTuple output vector. */
-void  QwBPMCavity::FillNTupleVector(QwRootTreeBranchVector &values) const
+void  QwBPMCavity::FillNTupleVector(std::vector<Double_t>& values) const
 {
   if (GetElementName()=="") {
     //  This channel is not used, so skip filling.
