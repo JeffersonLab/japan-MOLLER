@@ -259,7 +259,7 @@ jobs:
           fi
 
           # Find summary files in both directories
-          current_files=$(find ./ -maxdepth 1 -name "summary_*.txt" -o -name "*regalias*.C" | sort)
+          current_files=$(find ./ ./trees ./rntuples -maxdepth 1 -name "summary_*.txt" -o -name "*regalias*.C" | sort)
           target_files=$(find ./target -name "summary_*.txt" -o -name "*regalias*.C" | sort)
 
           echo "Current files found:"
