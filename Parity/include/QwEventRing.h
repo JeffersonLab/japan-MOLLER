@@ -10,8 +10,7 @@
  * \brief  Event ring buffer for burp detection and stability monitoring
  */
 
-#ifndef __QwEventRing__
-#define __QwEventRing__
+#pragma once
 
 #include <vector>
 
@@ -110,8 +109,3 @@ class QwEventRing {
   Int_t fBurpPrecut;
   QwSubsystemArrayParity fBurpAvg;
 };
-
-
-
-
-#endif

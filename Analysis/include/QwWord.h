@@ -10,8 +10,7 @@
  * \brief  Word-level data manipulation and bit operations
  */
 
-#ifndef __QWWORD__
-#define __QWWORD__
+#pragma once
 
 // ROOT headers
 #include "Rtypes.h"
@@ -67,7 +66,3 @@ class QwWord
    
 
 };
-
-
-
-#endif /* QWWORD_H_ */

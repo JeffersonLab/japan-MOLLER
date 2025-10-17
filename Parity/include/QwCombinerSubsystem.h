@@ -5,9 +5,7 @@
  * \date   2011-08-11
  */
 
-
-#ifndef __QWCOMBINERSUBSYSTEM__
-#define __QWCOMBINERSUBSYSTEM__
+#pragma once
 
 // headers
 #include "VQwSubsystemParity.h"
@@ -140,7 +138,3 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
 
       
 }; // class QwCombinerSubsystem
-
-
-#endif // __QWCOMBINERSUBSYSTEM__
-

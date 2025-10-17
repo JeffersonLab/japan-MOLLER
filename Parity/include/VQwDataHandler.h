@@ -5,8 +5,7 @@
  * \date   2018-08-01
  */
 
-#ifndef VQWDATAHANDLER_H_
-#define VQWDATAHANDLER_H_
+#pragma once
 
 // Qweak headers
 #include "QwHelicityPattern.h"
@@ -210,5 +209,3 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
    Bool_t fRunningsumFillsTree;
    VQwDataHandler *fRunningsum;
 };
-
-#endif // VQWDATAHANDLER_H_

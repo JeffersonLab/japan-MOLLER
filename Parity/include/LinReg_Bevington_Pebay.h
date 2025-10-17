@@ -3,10 +3,16 @@
  * \brief  Linear regression utility class based on Bevington and Pebay algorithms
  * \author Jan Balewski, MIT
  * \date   2010
+ *
+ * References:
+ *  "Data reduction and error analysis for the physical sciences"
+ *   Philip R. Bevington, D. Keith Robinson. Bevington, Philip R., 1933- Boston : McGraw-Hill, c2003.
+ *
+ *  "Formulas for Robust, One-Pass Parallel Computation of Covariances and Arbitrary-Order Statistical Moments"
+ *  Philippe Pebay, SANDIA REPORT SAND2008-6212, Unlimited Release, Printed September 2008
  */
 
-#ifndef LINREGBEVPEB_h
-#define LINREGBEVPEB_h
+#pragma once
 
 // System headers
 #include <utility>
@@ -121,5 +127,3 @@ inline std::ostream& operator<< (std::ostream& stream, const LinRegBevPeb& h)
   stream << "LRB: " << h.fGoodEventNumber << " events";
   return stream;
 }
-
-#endif

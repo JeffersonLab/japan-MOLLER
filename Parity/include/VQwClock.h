@@ -5,8 +5,7 @@
 * Time-stamp: <2011-06-16>                               *
 \********************************************************/
 
-#ifndef __VQWCLOCK__
-#define __VQWCLOCK__
+#pragma once
 
 // System headers
 #include <vector>
@@ -120,5 +119,3 @@ public:
 };
 
 typedef std::shared_ptr<VQwClock> VQwClock_ptr;
-
-#endif // __VQWCLOCK__

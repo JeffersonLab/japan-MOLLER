@@ -3,8 +3,7 @@
  * \brief  An omnivorous subsystem template class
  */
 
-#ifndef QWOMNIVORE_H
-#define QWOMNIVORE_H
+#pragma once
 
 #include "VQwSubsystemParity.h"
 
@@ -127,5 +126,3 @@ class QwOmnivore: public VQwSubsystem_t {
     /// \brief Calculate the average for all good events
     void CalculateRunningAverage() override { };
 };
-
-#endif

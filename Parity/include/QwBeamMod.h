@@ -5,8 +5,7 @@
  * \date   2010-05-25
  */
 
-#ifndef __QwBEAMMOD__
-#define __QwBEAMMOD__
+#pragma once
 
 // System headers
 #include <vector>
@@ -230,5 +229,3 @@ class QwBeamMod: public VQwSubsystemParity, public MQwSubsystemCloneable<QwBeamM
  UInt_t fBmwObj_ErrorFlag;
 
 };
-
-#endif

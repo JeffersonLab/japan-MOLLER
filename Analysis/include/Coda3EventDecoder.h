@@ -3,8 +3,7 @@
  * \brief  CODA version 3 event decoder implementation
  */
 
-#ifndef	CODA3EVENTDECODER_H
-#define CODA3EVENTDECODER_H
+#pragma once
 
 #include "VEventDecoder.h"
 #include "Rtypes.h"
@@ -151,4 +150,3 @@ protected:
 	// Currently implemented as 0
 	uint32_t TSROCNumber;
 };
-#endif

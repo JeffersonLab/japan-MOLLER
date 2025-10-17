@@ -6,9 +6,7 @@
  * \ingroup QwMoller
  */
 
-
-#ifndef __QwMollerDetector__
-#define __QwMollerDetector__
+#pragma once
 
 // System headers
 #include <vector>
@@ -173,5 +171,3 @@ class QwMollerDetector:
     UInt_t fNumberOfEvents; //! Number of triggered events
 
 };
-
-#endif // __QwMollerDetector__

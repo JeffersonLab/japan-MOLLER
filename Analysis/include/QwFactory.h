@@ -3,8 +3,7 @@
  * \brief  Factory pattern implementation for creating analysis objects
  */
 
-#ifndef __QWFACTORY__
-#define __QWFACTORY__
+#pragma once
 
 // System headers
 #include <cxxabi.h>
@@ -268,6 +267,3 @@ class MQwDataElementCloneable: public MQwCloneable<VQwDataElement,dataelement_t>
 /// Macros to create and register the data element factory of type A
 /// Note: a call to this macro should be followed by a semi-colon!
 #define RegisterDataElementFactory(A) template<> const VQwDataElementFactory* MQwCloneable<VQwDataElement,A>::fFactory = new QwFactory<VQwDataElement,A>(#A)
-
-
-#endif // __QWFACTORY__

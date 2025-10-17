@@ -3,8 +3,7 @@
  * \brief  ROOT interactive interface for Qweak analysis
  */
 
-#ifndef __QwRint_h__
-#define __QwRint_h__
+#pragma once
 
 // ROOT headers
 #include <TRint.h>
@@ -42,5 +41,3 @@ class QwRint : public TRint {
     ~QwRint() override;
 
 }; // class QwRint
-
-#endif // __QwRint_h__

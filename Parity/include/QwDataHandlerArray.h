@@ -5,8 +5,7 @@
  * \date   2009-02-04
  */
 
-#ifndef __QWDATAHANDLERARRAY__
-#define __QWDATAHANDLERARRAY__
+#pragma once
 
 #include <vector>
 #include <map>
@@ -226,5 +225,3 @@ class QwDataHandlerArray:
     };
 
 }; // class QwDataHandlerArray
-
-#endif // __QWDATAHANDLERARRAY__

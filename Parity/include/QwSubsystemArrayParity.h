@@ -10,8 +10,7 @@
  * \brief  Subsystem array container for parity analysis with asymmetry calculations
  */
 
-#ifndef __QWSUBSYSTEMARRAYPARITY__
-#define __QWSUBSYSTEMARRAYPARITY__
+#pragma once
 
 #include <vector>
 #include <TTree.h>
@@ -157,5 +156,3 @@ class QwSubsystemArrayParity: public QwSubsystemArray {
     Int_t  fErrorFlagTreeIndex;
 
 }; // class QwSubsystemArrayParity
-
-#endif // __QWSUBSYSTEMARRAYPARITY__

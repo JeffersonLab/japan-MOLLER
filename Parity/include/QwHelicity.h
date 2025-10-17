@@ -10,8 +10,7 @@
  * \brief  Helicity state management and pattern recognition
  */
 
-#ifndef __QWHELICITY__
-#define __QWHELICITY__
+#pragma once
 
 // System headers
 #include <vector>
@@ -334,8 +333,3 @@ class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHeli
   }
 
 };
-
-
-#endif
-
-

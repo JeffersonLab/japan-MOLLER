@@ -7,8 +7,7 @@
 
 /// \ingroup QwAnalysis_ADC
 
-#ifndef __QWBLINDDETECTORARRAY__
-#define __QWBLINDDETECTORARRAY__
+#pragma once
 
 // System headers
 #include <vector>
@@ -81,6 +80,3 @@ class QwBlindDetectorArray:
 #endif // HAS_RNTUPLE_SUPPORT
 
 };
-
-
-#endif

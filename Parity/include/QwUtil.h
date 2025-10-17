@@ -5,8 +5,7 @@
  * \date   2023-08-16
  */
 
-#ifndef QWANALYSIS_QWUTIL_H
-#define QWANALYSIS_QWUTIL_H
+#pragma once
 
 #include <algorithm>
 #include <iterator>
@@ -18,5 +17,3 @@ void QwCopyArray( const T& a, T& b ) {
     b.at(i).CopyFrom(a.at(i));
   }
 }
-
-#endif //QWANALYSIS_QWUTIL_H

@@ -6,8 +6,7 @@
  * \date   2007-05-08 15:40
  */
 
-#ifndef __VQWDATAELEMENT__
-#define __VQWDATAELEMENT__
+#pragma once
 
 // System headers
 #include <vector>
@@ -270,5 +269,3 @@ class VQwDataElement: public MQwHistograms {
   UInt_t fErrorConfigFlag; ///<contains the global/local/stability flags
 //@}
 }; // class VQwDataElement
-
-#endif // __VQWDATAELEMENT__

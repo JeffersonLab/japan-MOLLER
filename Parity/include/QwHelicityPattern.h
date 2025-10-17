@@ -4,8 +4,8 @@
  * \author P. M. King
  * \date   2007-05-08
  */
-#ifndef __QwHelicityPattern__
-#define __QwHelicityPattern__
+
+#pragma once
 
 // System headers
 #include <vector>
@@ -290,6 +290,3 @@ class QwHelicityPattern {
 
   friend class QwDataHandlerArray;
 };
-
-
-#endif

@@ -10,8 +10,7 @@
  * \brief  Virtual base class for beam current monitors
  */
 
-#ifndef __VQWBCM__
-#define __VQWBCM__
+#pragma once
 
 // System headers
 #include <vector>
@@ -183,5 +182,3 @@ protected:
 };
 
 typedef std::shared_ptr<VQwBCM> VQwBCM_ptr;
-
-#endif // __VQWBCM__

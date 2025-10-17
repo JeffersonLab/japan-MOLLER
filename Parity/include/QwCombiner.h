@@ -5,8 +5,7 @@
  * \date   2010-10-22
  */
 
-#ifndef QWCOMBINER_H_
-#define QWCOMBINER_H_
+#pragma once
 
 // Parent Class
 #include "VQwDataHandler.h"
@@ -79,6 +78,3 @@ inline std::ostream& operator<< (std::ostream& stream, const QwCombiner::EQwHand
   }
   return stream;
 }
-
-
-#endif // QWCOMBINER_H_
