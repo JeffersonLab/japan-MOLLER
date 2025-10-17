@@ -1,14 +1,9 @@
-/**********************************************************\
-* File: QwBeamMod.cc                                      *
-*                                                         *
-* Author: Joshua Hoskins                                  *
-* Time-stamp: 052510                                      *
-*                                                         *
-* Updated for PREX by Ezekiel Wertz and Paul King         *
-* Time-Stamp: 06/17/19                                    *
-*                                                         *
-*                                                         *
-\**********************************************************/
+/*!
+ * \file   QwBeamMod.cc
+ * \brief  Beam modulation subsystem implementation
+ * \author Joshua Hoskins, Ezekiel Wertz, Paul King
+ * \date   2010-05-25
+ */
 
 #include "QwBeamMod.h"
 

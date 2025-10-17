@@ -1,9 +1,9 @@
-/**********************************************************\
-* File: QwEnergyCalculator.cc                             *
-*                                                         *
-* Author: B.Waidyawansa                                   *
-* Time-stamp: 05-24-2010                                  *
-\**********************************************************/
+/*!
+ * \file   QwEnergyCalculator.cc
+ * \brief  Implementation of energy calculator for beam energy determination
+ * \author B.Waidyawansa
+ * \date   2010-05-24
+ */
 
 #include "QwEnergyCalculator.h"
 
@@ -26,6 +26,11 @@
 // static QwVQWK_Channel  targetbeamx;
 // static QwVQWK_Channel  beamx;
 
+/**
+ * \brief Initialize this energy calculator with a name and data-saving mode.
+ * \param name        Element name used for histogram and branch prefixes.
+ * \param datatosave  Storage mode (e.g., "raw" or "derived").
+ */
 void QwEnergyCalculator::InitializeChannel(TString name,TString datatosave )
 {
   SetElementName(name);
@@ -34,6 +39,12 @@ void QwEnergyCalculator::InitializeChannel(TString name,TString datatosave )
   return;
 }
 
+/**
+ * \brief Initialize this energy calculator with subsystem and name.
+ * \param subsystem   Subsystem identifier for tree/hist foldering.
+ * \param name        Element name used for histogram and branch prefixes.
+ * \param datatosave  Storage mode (e.g., "raw" or "derived").
+ */
 void QwEnergyCalculator::InitializeChannel(TString subsystem, TString name,TString datatosave )
 {
   SetElementName(name);
@@ -42,6 +53,13 @@ void QwEnergyCalculator::InitializeChannel(TString subsystem, TString name,TStri
   return;
 }
 
+/**
+ * \brief Register a BPM-based device contributing to the energy calculation.
+ * \param device         Pointer to contributing BPM object.
+ * \param type           Device type string (e.g., BPM, ComboBPM).
+ * \param property       Property descriptor (e.g., targetbeamangle).
+ * \param tmatrix_ratio  Transport matrix ratio coefficient for contribution.
+ */
 void QwEnergyCalculator::Set(const VQwBPM* device, TString type, TString property,Double_t tmatrix_ratio)
 {
   Bool_t ldebug = kFALSE;
@@ -57,6 +75,10 @@ void QwEnergyCalculator::Set(const VQwBPM* device, TString type, TString propert
   return;
 }
 
+/**
+ * \brief Determine whether to save full ROOT output based on the prefix.
+ * \param prefix  Branch/histogram prefix (may toggle full save for asym/diff).
+ */
 void QwEnergyCalculator::SetRootSaveStatus(TString &prefix)
 {
   if(prefix.Contains("diff_")||prefix.Contains("yield_")|| prefix.Contains("asym_"))
@@ -65,6 +87,9 @@ void QwEnergyCalculator::SetRootSaveStatus(TString &prefix)
   return;
 }
 
+/**
+ * \brief Clear event-scoped data of this calculator and underlying channel.
+ */
 void QwEnergyCalculator::ClearEventData(){
   fEnergyChange.ClearEventData();
   return;
@@ -72,6 +97,9 @@ void QwEnergyCalculator::ClearEventData(){
 
 
 
+/**
+ * \brief Compute per-event energy change by summing configured device terms.
+ */
 void QwEnergyCalculator::ProcessEvent()
 {
   //Bool_t ldebug = kFALSE;
@@ -115,6 +143,11 @@ void QwEnergyCalculator::ProcessEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------
 
+/**
+ * \brief Generate mock event data for testing.
+ * \param helicity  Helicity state indicator.
+ * \param time      Event time or timestamp proxy.
+ */
 void QwEnergyCalculator::RandomizeEventData(int helicity, double time)
 {
   fEnergyChange.RandomizeEventData(helicity, time);
@@ -122,6 +155,11 @@ void QwEnergyCalculator::RandomizeEventData(int helicity, double time)
 }
 
 
+/**
+ * \brief Configure Gaussian mock data parameters for the underlying channel.
+ * \param mean   Mean value for the distribution.
+ * \param sigma  Standard deviation for the distribution.
+ */
 void QwEnergyCalculator::SetRandomEventParameters(Double_t mean, Double_t sigma)
 {
   fEnergyChange.SetRandomEventParameters(mean, sigma);
@@ -129,6 +167,10 @@ void QwEnergyCalculator::SetRandomEventParameters(Double_t mean, Double_t sigma)
 }
 
 
+/**
+ * \brief Back-project a BPM position from the current dp/p estimate.
+ * \param device  BPM device whose X position is solved from energy and other terms.
+ */
 void QwEnergyCalculator::GetProjectedPosition(VQwBPM *device)
 {
   UInt_t idevice = fProperty.size()+1; /** fProperty.size()=3, idevice=4 **/
@@ -196,6 +238,10 @@ void QwEnergyCalculator::GetProjectedPosition(VQwBPM *device)
 }
 
 
+/**
+ * \brief Load mock-data configuration for the underlying channel from a file.
+ * \param paramfile  Parameter file reader positioned at channel section.
+ */
 void QwEnergyCalculator::LoadMockDataParameters(QwParameterFile &paramfile){
 
   //std::cout << "In QwEnergyCalculator: ChannelName = " << GetElementName() << std::endl;
@@ -220,6 +266,10 @@ void QwEnergyCalculator::LoadMockDataParameters(QwParameterFile &paramfile){
 }
 //------------------------------------------------------------------------------------------------------------------------------------
 
+/**
+ * \brief Apply single-event cuts to the energy channel and contributing devices.
+ * \return kTRUE if the event passes cuts; otherwise kFALSE.
+ */
 Bool_t QwEnergyCalculator::ApplySingleEventCuts(){
   Bool_t status=kTRUE;
 
@@ -242,12 +292,18 @@ Bool_t QwEnergyCalculator::ApplySingleEventCuts(){
   return status;
 }
 
+/**
+ * \brief Increment error counters in the underlying energy channel.
+ */
 void QwEnergyCalculator::IncrementErrorCounters()
 {
   fEnergyChange.IncrementErrorCounters();
 }
 
 
+/**
+ * \brief Print accumulated error counters for diagnostic purposes.
+ */
 void QwEnergyCalculator::PrintErrorCounters() const{
   // report number of events failed due to HW and event cut faliure
   fEnergyChange.PrintErrorCounters();
@@ -257,6 +313,10 @@ void QwEnergyCalculator::PrintRandomEventParameters(){
   
 }
 */
+/**
+ * \brief Update and return the composite event-cut error flag.
+ * \return The updated event-cut error flag for this calculator.
+ */
 UInt_t QwEnergyCalculator::UpdateErrorFlag()
 {
   UInt_t error_code = 0;
@@ -272,32 +332,55 @@ UInt_t QwEnergyCalculator::UpdateErrorFlag()
 }
 
 
+/**
+ * \brief Propagate error flags from a reference calculator into this one.
+ * \param ev_error  Reference energy calculator containing error flags to merge.
+ */
 void QwEnergyCalculator::UpdateErrorFlag(const QwEnergyCalculator *ev_error){
   fEnergyChange.UpdateErrorFlag(ev_error->fEnergyChange);
 };
 
 
+/**
+ * \brief Update running averages for the underlying energy channel.
+ */
 void QwEnergyCalculator::CalculateRunningAverage(){
   fEnergyChange.CalculateRunningAverage();
 }
 
 
 
+/**
+ * \brief Accumulate running sums from another calculator into this one.
+ * \param value      Source calculator to accumulate from.
+ * \param count      Weight/count for accumulation; 0 implies use source count.
+ * \param ErrorMask  Mask to control error propagation behavior.
+ */
 void QwEnergyCalculator::AccumulateRunningSum(const QwEnergyCalculator& value, Int_t count, Int_t ErrorMask){
   fEnergyChange.AccumulateRunningSum(value.fEnergyChange, count, ErrorMask);
 }
 
+/**
+ * \brief Remove a single entry from the running sums using a source value.
+ * \param value      Source calculator to subtract.
+ * \param ErrorMask  Mask to control error propagation behavior.
+ */
 void QwEnergyCalculator::DeaccumulateRunningSum(QwEnergyCalculator& value, Int_t ErrorMask){
   fEnergyChange.DeaccumulateRunningSum(value.fEnergyChange, ErrorMask);
 }
 
 
 
+/**
+ * \brief Process a configuration/event buffer (no-op for this calculator).
+ * \return The updated buffer word position (unchanged here).
+ */
 Int_t QwEnergyCalculator::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer,UInt_t subelement){
   return 0;
 }
 
 
+/** \brief Copy-assign from another calculator (event-scoped data). */
 QwEnergyCalculator& QwEnergyCalculator::operator= (const QwEnergyCalculator &value){
   if (this != &value) {
     if (GetElementName()!="")
@@ -306,6 +389,7 @@ QwEnergyCalculator& QwEnergyCalculator::operator= (const QwEnergyCalculator &val
   return *this;
 }
 
+/** \brief Add-assign from another calculator (sum energy change). */
 QwEnergyCalculator& QwEnergyCalculator::operator+= (const QwEnergyCalculator &value){
 
   if (GetElementName()!="")
@@ -314,6 +398,7 @@ QwEnergyCalculator& QwEnergyCalculator::operator+= (const QwEnergyCalculator &va
   return *this;
 }
 
+/** \brief Subtract-assign from another calculator (difference energy change). */
 QwEnergyCalculator& QwEnergyCalculator::operator-= (const QwEnergyCalculator &value){
   if (GetElementName()!="")
     this->fEnergyChange-=value.fEnergyChange;
@@ -332,6 +417,11 @@ void QwEnergyCalculator::Difference(const QwEnergyCalculator &value1, const QwEn
 }
 
 
+/**
+ * \brief Define the ratio for asymmetry formation (here acts as pass-through).
+ * \param numer  Numerator calculator.
+ * \param denom  Denominator calculator.
+ */
 void QwEnergyCalculator::Ratio(QwEnergyCalculator &numer, QwEnergyCalculator &denom){
   // this function is called when forming asymmetries. In this case what we actually want for the
   // qwk_energy/(dp/p) is the difference only not the asymmetries
@@ -341,23 +431,33 @@ void QwEnergyCalculator::Ratio(QwEnergyCalculator &numer, QwEnergyCalculator &de
 }
 
 
+/**
+ * \brief Scale the underlying energy channel by a constant factor.
+ * \param factor  Multiplicative scale factor.
+ */
 void QwEnergyCalculator::Scale(Double_t factor){
   fEnergyChange.Scale(factor);
   return;
 }
 
 
+/** \brief Print detailed information for this calculator. */
 void QwEnergyCalculator::PrintInfo() const{
   fEnergyChange.PrintInfo();
   return;
 }
 
 
+/** \brief Print a compact value summary for this calculator. */
 void QwEnergyCalculator::PrintValue() const{
   fEnergyChange.PrintValue();
   return;
 }
 
+/**
+ * \brief Apply hardware checks (delegated to contributing channels if any).
+ * \return Always kTRUE; no direct hardware channels in this calculator.
+ */
 Bool_t QwEnergyCalculator::ApplyHWChecks(){
   // For the energy calculator there are no physical channels that we can relate to because it is being
   // derived from combinations of physical channels. Therefore, this is not exactly a "HW Check"
@@ -368,11 +468,25 @@ Bool_t QwEnergyCalculator::ApplyHWChecks(){
 }
 
 
+/**
+ * \brief Set single-event cut limits on the underlying energy channel.
+ * \param minX  Lower limit.
+ * \param maxX  Upper limit.
+ * \return 1 on success.
+ */
 Int_t QwEnergyCalculator::SetSingleEventCuts(Double_t minX, Double_t maxX){
   fEnergyChange.SetSingleEventCuts(minX,maxX);
   return 1;
 }
 
+/**
+ * \brief Configure detailed single-event cuts for the underlying channel.
+ * \param errorflag  Device-specific error flag mask to set.
+ * \param LL         Lower limit.
+ * \param UL         Upper limit.
+ * \param stability  Stability threshold.
+ * \param burplevel  Burp detection threshold.
+ */
 void QwEnergyCalculator::SetSingleEventCuts(UInt_t errorflag, Double_t LL=0, Double_t UL=0, Double_t stability=0, Double_t burplevel=0){
   //set the unique tag to identify device type (bcm,bpm & etc)
   errorflag|=kBCMErrorFlag;//currently I use the same flag for bcm
@@ -380,6 +494,11 @@ void QwEnergyCalculator::SetSingleEventCuts(UInt_t errorflag, Double_t LL=0, Dou
   fEnergyChange.SetSingleEventCuts(errorflag,LL,UL,stability,burplevel);
 }
 
+/**
+ * \brief Check for burp failures by delegating to the energy channel.
+ * \param ev_error  Reference energy calculator to compare against.
+ * \return kTRUE if a burp failure was detected; otherwise kFALSE.
+ */
 Bool_t QwEnergyCalculator::CheckForBurpFail(const VQwDataElement *ev_error){
   Bool_t burpstatus = kFALSE;
   try {
@@ -401,6 +520,11 @@ Bool_t QwEnergyCalculator::CheckForBurpFail(const VQwDataElement *ev_error){
   return burpstatus;
 }
 
+/**
+ * \brief Define histograms for this calculator (delegated to energy channel).
+ * \param folder  ROOT folder to contain histograms.
+ * \param prefix  Histogram name prefix.
+ */
 void  QwEnergyCalculator::ConstructHistograms(TDirectory *folder, TString &prefix){
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
@@ -415,6 +539,7 @@ void  QwEnergyCalculator::ConstructHistograms(TDirectory *folder, TString &prefi
   return;
 }
 
+/** \brief Fill histograms for this calculator if enabled. */
 void  QwEnergyCalculator::FillHistograms(){
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
@@ -425,6 +550,12 @@ void  QwEnergyCalculator::FillHistograms(){
   return;
 }
 
+/**
+ * \brief Construct ROOT branches and value vector entries.
+ * \param tree    Output tree.
+ * \param prefix  Branch name prefix.
+ * \param values  Output value vector to be appended.
+ */
 void  QwEnergyCalculator::ConstructBranchAndVector(TTree *tree, TString &prefix,
 						   std::vector<Double_t> &values){
   if (GetElementName()==""){
@@ -444,6 +575,11 @@ void  QwEnergyCalculator::ConstructBranchAndVector(TTree *tree, TString &prefix,
 
 
 
+/**
+ * \brief Construct ROOT branches for this calculator (if enabled).
+ * \param tree    Output tree.
+ * \param prefix  Branch name prefix.
+ */
 void  QwEnergyCalculator::ConstructBranch(TTree *tree, TString &prefix){
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.

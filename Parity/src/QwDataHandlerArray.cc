@@ -1,9 +1,7 @@
-/**********************************************************\
-* File: QwDataHandlerArray.cc                         *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwDataHandlerArray.cc
+ * \brief  Implementation of array container for managing multiple data handlers
+ */
 
 #include "QwDataHandlerArray.h"
 
@@ -78,9 +76,11 @@ QwDataHandlerArray::~QwDataHandlerArray()
   // nothing
 }
 
-/**
- * Fill the handler array with the contents of a map file
- * @param detectors Map file
+/*
+ * Load data handlers from a map file into this array.
+ * Implementation note: detailed @tparam/@param documentation lives with the
+ * declaration in the header to avoid duplication in Doxygen. See
+ * QwDataHandlerArray::LoadDataHandlersFromParameterFile in the header file.
  */
 template<class T>
 void QwDataHandlerArray::LoadDataHandlersFromParameterFile(

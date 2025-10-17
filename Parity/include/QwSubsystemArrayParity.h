@@ -5,6 +5,11 @@
 * Time-stamp: <2009-02-04 10:30>                           *
 \**********************************************************/
 
+/*!
+ * \file   QwSubsystemArrayParity.h
+ * \brief  Subsystem array container for parity analysis with asymmetry calculations
+ */
+
 #ifndef __QWSUBSYSTEMARRAYPARITY__
 #define __QWSUBSYSTEMARRAYPARITY__
 
@@ -22,14 +27,12 @@ class QwPromptSummary;
 /**
  * \class QwSubsystemArrayParity
  * \ingroup QwAnalysis
+ * \brief Subsystem array container specialized for parity analysis with asymmetry calculations
  *
- * \brief Virtual base class for the parity subsystems
- *
- *   Virtual base class for the classes containing the
- *   event-based information from each parity subsystem.
- *   This will define the interfaces used in communicating
- *   with the CODA routines.
- *
+ * Extends QwSubsystemArray to provide parity-specific operations such as
+ * asymmetry formation, helicity-based accumulation, blinding support, and
+ * database output for parity measurements. Manages collections of
+ * VQwSubsystemParity objects with coordinated event processing.
  */
 class QwSubsystemArrayParity: public QwSubsystemArray {
 

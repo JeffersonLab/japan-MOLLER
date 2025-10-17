@@ -1,9 +1,8 @@
-/*
- * QwDBInterface.cc
- *
- *  Created on: Dec 14, 2010
- *      Author: wdconinc
- *      Author: jhlee
+/*!
+ * \file   QwDBInterface.cc
+ * \brief  Database interface implementation for QwIntegrationPMT and subsystems
+ * \author wdconinc, jhlee
+ * \date   2010-12-14
  */
 
 #include "QwDBInterface.h"

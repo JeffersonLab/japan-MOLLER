@@ -1,3 +1,8 @@
+/*!
+ * \file   MQwMockable.cc
+ * \brief  Mix-in class implementation for mock data generation
+ */
+
 #include "MQwMockable.h"
 #include "QwParameterFile.h"
 

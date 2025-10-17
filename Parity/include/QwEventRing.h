@@ -5,6 +5,11 @@
 * Time-stamp: <2009-11-08 15:40>                           *
 \**********************************************************/
 
+/*!
+ * \file   QwEventRing.h
+ * \brief  Event ring buffer for burp detection and stability monitoring
+ */
+
 #ifndef __QwEventRing__
 #define __QwEventRing__
 
@@ -13,6 +18,14 @@
 #include <fstream>
 #include "QwSubsystemArrayParity.h"
 
+/**
+ * \class QwEventRing
+ * \ingroup QwAnalysis_BL
+ * \brief Ring buffer of subsystem snapshots for burp/stability handling
+ *
+ * Maintains a sliding window of events to compute running averages,
+ * handle beam trips with holdoff, and apply burp cuts over extents.
+ */
 class QwEventRing {
 
 /******************************************************************

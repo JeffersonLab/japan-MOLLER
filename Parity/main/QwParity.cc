@@ -2,7 +2,7 @@
 
  \file QwParity.cc
 
- \brief main(...) function for the qwanalysis executable
+ \brief main(...) function for the qwparity executable
 
 *//*-------------------------------------------------------------------------*/
 

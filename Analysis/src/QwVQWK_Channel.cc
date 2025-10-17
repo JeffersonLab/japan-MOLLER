@@ -1,3 +1,8 @@
+/*!
+ * \file   QwVQWK_Channel.cc
+ * \brief  Implementation for VQWK ADC channel decoding and management
+ */
+
 #include "QwVQWK_Channel.h"
  
 // System headers
@@ -460,6 +465,50 @@ void QwVQWK_Channel::EncodeEventData(std::vector<UInt_t> &buffer)
 
 
 
+/*!
+ * \brief Process raw event buffer data for a VQWK ADC channel.
+ * \param buffer Pointer to raw data buffer from DAQ system.
+ * \param num_words_left Number of words remaining in the buffer.
+ * \param index Channel index within the ADC module (0-7).
+ * \return Number of words consumed from the buffer.
+ * 
+ * This is a critical data processing function that decodes the 6-word VQWK
+ * ADC data format used throughout the Qweak/MOLLER analysis framework:
+ * 
+ * VQWK Data Format (6 words per channel):
+ * - Words 0-3: Individual block sums for 4 integration periods
+ * - Word 4: Hardware-calculated sum of all 4 blocks  
+ * - Word 5: Combined sequence number (bits 8-15) and sample count (bits 16-31)
+ * 
+ * Data Processing Steps:
+ * 1. Validates sufficient buffer space (6 words minimum)
+ * 2. Copies raw data to local buffer with sign conversion (UInt_t -> Int_t)
+ * 3. Extracts individual block sums and hardware sum
+ * 4. Decodes sequence number for event ordering verification
+ * 5. Extracts sample count for integration time normalization
+ * 6. Calculates software block sum for hardware validation
+ * 
+ * Channel State Handling:
+ * - Empty channel names are skipped but consume buffer space
+ * - Insufficient buffer words trigger error messages
+ * - Raw data is stored for subsequent ProcessEvent() calibration
+ * 
+ * Error Detection:
+ * - Hardware vs software sum comparison (done in ProcessEvent())
+ * - Sequence number continuity checking
+ * - Sample count validation for proper integration
+ * 
+ * Buffer Management:
+ * - Always consumes exactly kWordsPerChannel (6) words when successful
+ * - Returns 0 on buffer underrun to indicate processing failure
+ * - Thread-safe local buffer prevents data corruption
+ * 
+ * \note This function only processes raw data extraction. Calibration,
+ * pedestal subtraction, and physics calculations are performed in ProcessEvent().
+ * 
+ * \warning Buffer underrun conditions will print error messages but may
+ * not halt processing, potentially causing downstream data corruption.
+ */
 Int_t QwVQWK_Channel::ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t index)
 {
   UInt_t words_read = 0;
@@ -1494,11 +1543,8 @@ void QwVQWK_Channel::DivideBy(const QwVQWK_Channel &denom)
  * We use the formulas provided there for the calculation of the first and
  * second moments (i.e. average and variance).
  */
-/**
- * Accumulate the running moments M1 and M2
- * @param value Object (single event or accumulated) to add to running moments
- * @param count Number of good events in value
- */
+// Accumulate the running moments M1 and M2.
+// See header for parameter and return documentation.
 void QwVQWK_Channel::AccumulateRunningSum(const QwVQWK_Channel& value, Int_t count, Int_t ErrorMask)
 {
   /*

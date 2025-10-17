@@ -17,6 +17,17 @@
 
 class QwParameterFile;
 
+/**
+ * \class MQwMockable
+ * \ingroup QwAnalysis
+ * \brief Mix-in class enabling mock data generation for hardware channels
+ *
+ * Provides infrastructure for generating simulated data with configurable
+ * asymmetries, noise characteristics, and harmonic drifts. Supports both
+ * internal random number generation and external random variables.
+ * Used by hardware channel classes to enable Monte Carlo studies and
+ * testing without real data acquisition hardware.
+ */
 class MQwMockable {
 /****************************************************************//**
  *  Class: MQwMockable

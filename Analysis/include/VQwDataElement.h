@@ -33,20 +33,46 @@ class VQwHardwareChannel;
  *  \ingroup QwAnalysis
  *  \brief   The pure virtual base class of all data elements
  *
- * Each stream of data inherits from this virtual base class, which requires
- * some standard operations on it such as ratios, summing, subtraction.  The
- * specific implementation of those operation is left to be implemented by the
- * implemented inherited classes, but this class sets up the structure.
+ * This abstract base defines the fundamental interface for all data-carrying
+ * objects in the JAPAN-MOLLER framework. It establishes the dual-operator
+ * architectural pattern where derived classes must implement both type-specific
+ * and polymorphic versions of arithmetic operations.
  *
- * As an example, all individual VQWK channels inherit from this class and
- * implement the pure virtual functions of VQwDataElement.
+ * \par Architectural Design - Dual-Operator Pattern:
+ * VQwDataElement enforces a specific design where operators, Sum, Difference,
+ * Ratio, SetSingleEventCuts, and CheckForBurpFail are **non-virtual and throw
+ * runtime errors** in the base class. This forces derived classes to implement
+ * the complete dual-operator pattern:
+ *
+ * - **Type-specific operators**: `Derived& operator+=(const Derived&)`
+ * - **Polymorphic operators**: `Base& operator+=(const Base&)` that delegate
+ *   via dynamic_cast to the type-specific version
+ *
+ * \par Implementation Requirements:
+ * Derived classes must override:
+ * - `operator+=`, `operator-=` (both type-specific and polymorphic versions)
+ * - `Sum()`, `Difference()`, `Ratio()` (both versions)
+ * - `SetSingleEventCuts()`, `CheckForBurpFail()` (both versions)
+ * - `UpdateErrorFlag()` (with appropriate delegation)
+ *
+ * \par Representative Example:
+ * See QwVQWK_Channel for the canonical implementation of this pattern.
+ * It demonstrates the complete dual-operator approach with proper
+ * dynamic_cast delegation and error handling.
+ *
+ * \par Error Handling Strategy:
+ * Base class methods throw std::runtime_error to catch implementation
+ * gaps early during development. This prevents silent fallbacks and
+ * ensures all derived classes implement the required functionality.
  *
  * \dot
  * digraph example {
  *   node [shape=box, fontname=Helvetica, fontsize=10];
- *   VQwDataElement [ label="VQwDataElement" URL="\ref VQwDataElement"];
- *   QwVQWK_Channel [ label="QwVQWK_Channel" URL="\ref QwVQWK_Channel"];
+ *   VQwDataElement [ label="VQwDataElement\n(throws on operators)" URL="\ref VQwDataElement"];
+ *   QwVQWK_Channel [ label="QwVQWK_Channel\n(canonical example)" URL="\ref QwVQWK_Channel"];
+ *   QwMollerADC_Channel [ label="QwMollerADC_Channel" URL="\ref QwMollerADC_Channel"];
  *   VQwDataElement -> QwVQWK_Channel;
+ *   VQwDataElement -> QwMollerADC_Channel;
  * }
  * \enddot
  */

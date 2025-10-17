@@ -1,4 +1,10 @@
 
+
+/*!
+ * \file   QwScaler.h
+ * \brief  Scaler subsystem for counting and rate measurements
+ */
+
 #ifndef __QWSCALER__
 #define __QWSCALER__
 
@@ -16,6 +22,14 @@
 #include "QwScaler_Channel.h"
 
 
+/**
+ * \class QwScaler
+ * \ingroup QwAnalysis_BL
+ * \brief Subsystem managing scaler modules and derived rates
+ *
+ * Wraps hardware scaler channels, provides per-MPS processing, histogram
+ * and tree output, and utilities for normalization and cuts.
+ */
 class QwScaler: public VQwSubsystemParity, public MQwSubsystemCloneable<QwScaler>
 {
   private:

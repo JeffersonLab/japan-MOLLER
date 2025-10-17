@@ -1,9 +1,7 @@
-/**********************************************************\
-* File: QwBPMStripline.h                                  *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwBPMStripline.h
+ * \brief  Stripline beam position monitor implementation
+ */
 
 #ifndef __QwBPMSTRIPLINE__
 #define __QwBPMSTRIPLINE__
@@ -30,12 +28,16 @@ class QwErrDBInterface;
 #endif // __USE_DATABASE__
 class QwPromptSummary;
 
-/*****************************************************************
-*  Class:
-******************************************************************/
-///
-/// \ingroup QwAnalysis_BL
-
+/**
+ * \class QwBPMStripline
+ * \ingroup QwAnalysis_BeamLine
+ * \brief Templated concrete stripline beam position monitor implementation
+ *
+ * Template class for stripline BPMs using hardware channel type T.
+ * Implements position calculation from four stripline signals (XP, XM, YP, YM),
+ * coordinate transformations, effective charge calculation, and calibration.
+ * Supports rotation corrections and geometry-based position calculations.
+ */
 template<typename T>
 class QwBPMStripline : public VQwBPM {
   template <typename TT> friend class QwCombinedBPM;

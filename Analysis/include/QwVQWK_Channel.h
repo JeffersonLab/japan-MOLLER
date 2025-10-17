@@ -1,9 +1,10 @@
-/**********************************************************\
-* File: QwVQWK_Channel.h                                           *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2007-05-08 15:40>                           *
-\**********************************************************/
+
+/*!
+ * \file   QwVQWK_Channel.h
+ * \brief  Decoding and management for VQWK ADC channels (6x32-bit datawords)
+ * \author P. M. King
+ * \date   2007-05-08
+ */
 
 #ifndef __QwVQWK_CHANNEL__
 #define __QwVQWK_CHANNEL__
@@ -34,6 +35,17 @@ class QwErrDBInterface;
 /// \ingroup QwAnalysis_ADC
 ///
 /// \ingroup QwAnalysis_BL
+/**
+ * \class QwVQWK_Channel
+ * \ingroup QwAnalysis_ADC
+ * \brief Concrete hardware channel for VQWK ADC modules (6x32-bit words)
+ *
+ * Decodes and processes the data for a single VQWK channel, providing access
+ * to sub-blocks and hardware sums, statistical moments, single-event cuts,
+ * and running statistics. Implements the dual-operator pattern by offering
+ * efficient type-specific operators and delegating polymorphic operators from
+ * the VQwHardwareChannel interface using dynamic_cast.
+ */
 class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
 /****************************************************************//**
  *  Class: QwVQWK_Channel
@@ -173,6 +185,12 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   void Scale(Double_t Offset) override;
 
 
+  /**
+   * Accumulate event values into the running sum with optional scaling.
+   * @param value     Source channel to accumulate from.
+   * @param count     Event count scaling (0 means use value.fGoodEventCount).
+   * @param ErrorMask Bit mask of error flags to exclude when accumulating.
+   */
   void AccumulateRunningSum(const QwVQWK_Channel& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
   void AccumulateRunningSum(const VQwHardwareChannel *value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override{
     const QwVQWK_Channel *tmp_ptr = dynamic_cast<const QwVQWK_Channel*>(value);

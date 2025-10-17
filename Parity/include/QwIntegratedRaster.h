@@ -1,9 +1,7 @@
-/**********************************************************\
-* File: QwIntegratedRaster.h                              *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwIntegratedRaster.h
+ * \brief  Integrated raster subsystem for beam position tracking
+ */
 
 #ifndef __QwIntegratedRaster__
 #define __QwIntegratedRaster__
@@ -25,6 +23,11 @@
 #include "QwTypes.h"
 
 
+/**
+ * \class QwIntegratedRasterDetectorID
+ * \ingroup QwAnalysis_BL
+ * \brief Mapping info for integrated raster detectors
+ */
 class QwIntegratedRasterDetectorID{
 
  public:
@@ -56,6 +59,11 @@ class QwIntegratedRasterDetectorID{
 /*****************************************************************
 *  Class:
 ******************************************************************/
+/**
+ * \class QwIntegratedRaster
+ * \ingroup QwAnalysis_BL
+ * \brief Subsystem handling integrated raster X/Y channels
+ */
 class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneable<QwIntegratedRaster> {
   /////  
 

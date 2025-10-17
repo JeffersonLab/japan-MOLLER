@@ -1,7 +1,11 @@
-//
-// C++ Implementation: QwScaler
-//
-// Description: used to collect and process the information from the scaler channel
+/**
+ * QwScaler.cc
+ *
+ * Scaler subsystem managing collections of scaler channels with optional
+ * normalization, differential operation, and module/channel mapping.
+ * Supports SIS3801, STR7200 modules with configurable headers and buffers.
+ * Documentation-only edits; runtime behavior unchanged.
+ */
 
 #include "QwScaler.h"
 
@@ -18,11 +22,13 @@
 RegisterSubsystemFactory(QwScaler);
 
 
+/** Define command-line options for scaler subsystem (placeholder). */
 void QwScaler::DefineOptions(QwOptions &options)
 {
   // Define command line options
 }
 
+/** Process command-line options for scaler subsystem (placeholder). */
 void QwScaler::ProcessOptions(QwOptions &/*options*/)
 {
   // Handle command line options
@@ -30,7 +36,7 @@ void QwScaler::ProcessOptions(QwOptions &/*options*/)
 
 
 /**
- * Constructor
+ * Constructor: initialize scaler subsystem with name.
  */
 QwScaler::QwScaler(const TString& name)
 : VQwSubsystem(name),VQwSubsystemParity(name)
@@ -39,9 +45,7 @@ QwScaler::QwScaler(const TString& name)
 }
 
 /**
- * Destructor
- *
- * Delete histograms and clean up scaler channel objects
+ * Destructor: clean up all owned scaler channel objects.
  */
 QwScaler::~QwScaler()
 {
@@ -54,9 +58,11 @@ QwScaler::~QwScaler()
 
 
 /**
- * Load the channel map
- * @param mapfile Map file
- * @return Zero if successful
+ * Load scaler channel map from file, creating channels and configuring
+ * normalization, headers, differential mode, and buffer offsets.
+ *
+ * @param mapfile Path to the channel map file.
+ * @return 0 on success.
  */
 Int_t QwScaler::LoadChannelMap(TString mapfile)
 {
@@ -232,6 +238,11 @@ Int_t QwScaler::LoadChannelMap(TString mapfile)
   return 0;
 }
 
+/**
+ * Load pedestals and calibration factors for scaler channels.
+ *
+ * @return 0 on success.
+ */
 Int_t QwScaler::LoadInputParameters(TString mapfile)
 {
   // Open the file
@@ -265,7 +276,7 @@ Int_t QwScaler::LoadInputParameters(TString mapfile)
 }
 
 /**
- * Clear the event data in this subsystem
+ * Clear event data for all scaler channels and reset good event count.
  */
 void QwScaler::ClearEventData()
 {
@@ -291,12 +302,9 @@ Int_t QwScaler::ProcessConfigurationBuffer(const ROCID_t /*roc_id*/, const BankI
 }
 
 /**
- * Process the event buffer for this subsystem
- * @param roc_id ROC ID
- * @param bank_id Subbank ID
- * @param buffer Buffer to read from
- * @param num_words Number of words left in buffer
- * @return Number of words read
+ * Process raw buffer data, routing to registered scaler channels.
+ *
+ * @return Number of words consumed from the buffer.
  */
 Int_t QwScaler::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words)
 {
@@ -331,6 +339,7 @@ Int_t QwScaler::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UI
   return words_read;
 }
 
+/** Process all scaler channels and apply normalization if configured. */
 void QwScaler::ProcessEvent()
 {
   // Process the event
@@ -347,6 +356,7 @@ void QwScaler::ProcessEvent()
   }
 }
 
+/** Construct histograms for all scaler channels. */
 void QwScaler::ConstructHistograms(TDirectory* folder, TString& prefix)
 {
   for(size_t i = 0; i < fScaler.size(); i++) {
@@ -354,6 +364,7 @@ void QwScaler::ConstructHistograms(TDirectory* folder, TString& prefix)
   }
 }
 
+/** Fill histograms for all scaler channels. */
 void QwScaler::FillHistograms()
 {
   for(size_t i = 0; i < fScaler.size(); i++) {
@@ -361,6 +372,7 @@ void QwScaler::FillHistograms()
   }
 }
 
+/** Construct TTree branches and backing vectors for all scaler channels. */
 void QwScaler::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values)
 {
   for (size_t i = 0; i < fScaler.size(); i++) {
@@ -368,6 +380,7 @@ void QwScaler::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vect
   }
 }
 
+/** Fill tree vector with current scaler channel values. */
 void QwScaler::FillTreeVector(std::vector<Double_t> &values) const
 {
   for(size_t i = 0; i < fScaler.size(); i++) {
@@ -392,9 +405,7 @@ void QwScaler::FillNTupleVector(std::vector<Double_t>& values) const
 #endif // HAS_RNTUPLE_SUPPORT
 
 /**
- * Assignment operator
- * @param value Right-hand side
- * @return Left-hand side
+ * Assignment operator: copy all scaler channel values.
  */
 VQwSubsystem& QwScaler::operator=(VQwSubsystem *value)
 {
@@ -409,9 +420,7 @@ VQwSubsystem& QwScaler::operator=(VQwSubsystem *value)
 }
 
 /**
- * Addition-assignment operator
- * @param value Right-hand side
- * @return Left-hand side
+ * Addition-assignment: element-wise addition of scaler channels.
  */
 VQwSubsystem& QwScaler::operator+=(VQwSubsystem *value)
 {
@@ -425,9 +434,7 @@ VQwSubsystem& QwScaler::operator+=(VQwSubsystem *value)
 }
 
 /**
- * Subtraction-assignment operator
- * @param value Right-hand side
- * @return Left-hand side
+ * Subtraction-assignment: element-wise subtraction of scaler channels.
  */
 VQwSubsystem& QwScaler::operator-=(VQwSubsystem *value)
 {
@@ -442,9 +449,7 @@ VQwSubsystem& QwScaler::operator-=(VQwSubsystem *value)
 
 
 /**
- * Determine the ratio of two photon detectors
- * @param numer Numerator
- * @param denom Denominator
+ * Compute element-wise ratios of scaler channels.
  */
 void QwScaler::Ratio(VQwSubsystem *numer, VQwSubsystem *denom)
 {
@@ -458,8 +463,7 @@ void QwScaler::Ratio(VQwSubsystem *numer, VQwSubsystem *denom)
 }
 
 /**
- * Scale the photon detector
- * @param factor Scale factor
+ * Scale all scaler channels by a common factor.
  */
 void QwScaler::Scale(Double_t factor)
 {
@@ -469,7 +473,7 @@ void QwScaler::Scale(Double_t factor)
 }
 
 /**
- * Accumulate the running sum
+ * Accumulate running sums for all scaler channels.
  */
 void QwScaler::AccumulateRunningSum(VQwSubsystem* value, Int_t count, Int_t ErrorMask)
 {
@@ -482,7 +486,7 @@ void QwScaler::AccumulateRunningSum(VQwSubsystem* value, Int_t count, Int_t Erro
 }
 
 /**
- * Deaccumulate the running sum
+ * Deaccumulate running sums for all scaler channels.
  */
 void QwScaler::DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask)
 {
@@ -495,7 +499,7 @@ void QwScaler::DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask)
 }
 
 /**
- * Normalize the running sum
+ * Calculate running averages for all scaler channels.
  */
 void QwScaler::CalculateRunningAverage()
 {

@@ -1,11 +1,12 @@
+/*!
+ * \file   QwPromptSummary.h
+ * \brief  Prompt summary data management
+ * \author jhlee@jlab.org
+ * \date   2011-12-16
+ */
+
 #ifndef __QwPromptSummary__
 #define __QwPromptSummary__
-/**
- *  \file   QwPromptSummary.h
- *  \brief  
- *  \author jhlee@jlab.org
- *  \date   Friday, December 16 10:29:10 EST 2011
- */
 
 #include <iostream>
 #include <fstream>

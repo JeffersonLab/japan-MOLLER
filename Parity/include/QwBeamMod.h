@@ -1,15 +1,9 @@
-/**********************************************************\
-* File: QwBeamMod.h                                       *
-*                                                         *
-* Author: Joshua Hoskins                                  *
-* Time-stamp: 052510                                      *
-***********************************************************
-*                                                         *
-* Time-Stamp: 101910                                      *
-*                                                         *
-* Added support of QwWord                                 *
-*                                                         *
-\**********************************************************/
+/*!
+ * \file   QwBeamMod.h
+ * \brief  Beam modulation subsystem for parity analysis
+ * \author Joshua Hoskins
+ * \date   2010-05-25
+ */
 
 #ifndef __QwBEAMMOD__
 #define __QwBEAMMOD__
@@ -43,6 +37,11 @@ class QwBeamMod;
 /*****************************************************************
 *  Class:
 ******************************************************************/
+/**
+ * \class QwModChannelID
+ * \ingroup QwAnalysis_BL
+ * \brief Mapping information for beam modulation channels
+ */
 class QwModChannelID
 {
  public:
@@ -85,6 +84,14 @@ class QwModChannelID
 /*****************************************************************
 *  Class:
 ******************************************************************/
+/**
+ * \class QwBeamMod
+ * \ingroup QwAnalysis_BL
+ * \brief Subsystem for beam modulation studies and FFB handling
+ *
+ * Decodes modulation ramp and pattern words, maintains channels affected
+ * by modulation, and computes relevant summaries for regression.
+ */
 class QwBeamMod: public VQwSubsystemParity, public MQwSubsystemCloneable<QwBeamMod> {
 
  private:

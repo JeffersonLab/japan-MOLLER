@@ -1,9 +1,9 @@
-/**********************************************************\
-* File: QwBlindDetectorArray.h                           *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2007-05-08 15:40>                           *
-\**********************************************************/
+/*!
+ * \file   QwBlindDetectorArray.h
+ * \brief  Blinded detector array for PMT analysis
+ * \author P. M. King
+ * \date   2007-05-08
+ */
 
 /// \ingroup QwAnalysis_ADC
 
@@ -24,6 +24,15 @@ class QwBlinder;
 class QwBlindDetectorArrayID;
 
 
+/**
+ * \class QwBlindDetectorArray
+ * \ingroup QwAnalysis_ADC
+ * \brief Detector array wrapper that applies blinding to asymmetries
+ *
+ * Aggregates multiple PMT-like detectors and provides methods to
+ * apply blinding strategies consistently to yields, differences,
+ * and asymmetries. Used for parity-violating detector analysis.
+ */
 class QwBlindDetectorArray: 
  public VQwDetectorArray, 
  virtual public VQwSubsystemParity,

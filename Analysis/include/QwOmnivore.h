@@ -1,3 +1,8 @@
+/*!
+ * \file   QwOmnivore.h
+ * \brief  An omnivorous subsystem template class
+ */
+
 #ifndef QWOMNIVORE_H
 #define QWOMNIVORE_H
 

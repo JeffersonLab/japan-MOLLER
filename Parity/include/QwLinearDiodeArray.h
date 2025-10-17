@@ -1,9 +1,9 @@
-/**********************************************************\
-* File: QwLinearDiodeArray.h                              *
-*                                                         *
-* Author: B.Waidyawansa                                   *
-* Time-stamp: 09-14-2010                                  *
-\**********************************************************/
+/*!
+ * \file   QwLinearDiodeArray.h
+ * \brief  Linear diode array beam position monitor implementation
+ * \author B.Waidyawansa
+ * \date   2010-09-14
+ */
 
 #ifndef __QwLinearDiodeArray__
 #define __QwLinearDiodeArray__
@@ -24,12 +24,15 @@
 class QwDBInterface;
 class QwErrDBInterface;
 
-/*****************************************************************
-*  Class:
-******************************************************************/
-///
-/// \ingroup QwAnalysis_BL
-
+/**
+ * \class QwLinearDiodeArray
+ * \ingroup QwAnalysis_BL
+ * \brief Linear diode array beam position monitor implementation
+ *
+ * Implements beam position monitoring using a linear array of photodiodes.
+ * Provides position calculation from diode array readouts with calibration
+ * and error handling for linear array detectors.
+ */
 class QwLinearDiodeArray : public VQwBPM {
 
  public:

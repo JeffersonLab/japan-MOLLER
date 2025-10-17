@@ -1,16 +1,9 @@
-/********************************************************************
-File Name: LRBCorrector.h
-
-Created by: Michael Vallee
-Email: mv836315@ohio.edu
-
-Description:  This is the header file of the LRBCorrector class,
-              which is a child of the VQwDataHandler class.  The
-              functionality of this class is derived from
-              LinRegBlue.
-
-Last Modified: August 1, 2018 1:41 PM
-********************************************************************/
+/*!
+ * \file   LRBCorrector.h
+ * \brief  Linear regression blue corrector data handler class
+ * \author Michael Vallee
+ * \date   2018-08-01
+ */
 
 #ifndef LRBCORRECTOR_H_
 #define LRBCORRECTOR_H_
@@ -19,6 +12,15 @@ Last Modified: August 1, 2018 1:41 PM
 #include "VQwDataHandler.h"
 
 
+/**
+ * \class LRBCorrector
+ * \ingroup QwAnalysis_BL
+ * \brief Linear-regression corrector applying per-burst slopes to data
+ *
+ * Loads cycle-dependent sensitivities and applies linear regression
+ * corrections to monitored channels, selecting the appropriate set
+ * based on the current burst counter.
+ */
 class LRBCorrector : public VQwDataHandler, public MQwDataHandlerCloneable<LRBCorrector>{
  public:
     /// \brief Constructor with name

@@ -1,9 +1,10 @@
-/**********************************************************\
-* File: QwMollerADC_Channel.h                                           *
-*                                                          *
-* Author: Kevin Ward (Original code by P.M. King)                                     *
-* Time-stamp: <20021-05-25 15:40>                           *
-\**********************************************************/
+
+/*!
+ * \file   QwMollerADC_Channel.h
+ * \brief  Decoding and management for Moller ADC channels (6x32-bit datawords)
+ * \author Kevin Ward (Original code by P.M. King)
+ * \date   20021-05-25
+ */
 
 #ifndef __QwMollerADC_CHANNEL__
 #define __QwMollerADC_CHANNEL__
@@ -29,6 +30,17 @@ class QwErrDBInterface;
 /// \ingroup QwAnalysis_ADC
 ///
 /// \ingroup QwAnalysis_BL
+/**
+ * \class QwMollerADC_Channel
+ * \ingroup QwAnalysis_ADC
+ * \brief Concrete hardware channel for Moller ADC modules (6x32-bit words)
+ *
+ * Decodes and processes the data for a single Moller ADC channel and exposes
+ * block-level values, sums, and statistical moments. Supports single-event
+ * cuts, error propagation, blinding, and running statistics. Follows the
+ * dual-operator pattern to provide both type-specific operators and
+ * polymorphic operator overrides via VQwHardwareChannel.
+ */
 class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
 /****************************************************************//**
  *  Class: QwMollerADC_Channel
@@ -169,6 +181,12 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   void Scale(Double_t Offset) override;
 
 
+  /**
+   * Accumulate event values into the running sum with optional scaling.
+   * @param value     Source channel to accumulate from.
+   * @param count     Event count scaling (0 means use value.fGoodEventCount).
+   * @param ErrorMask Bit mask of error flags to exclude when accumulating.
+   */
   void AccumulateRunningSum(const QwMollerADC_Channel& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
   void AccumulateRunningSum(const VQwHardwareChannel *value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override{
     const QwMollerADC_Channel *tmp_ptr = dynamic_cast<const QwMollerADC_Channel*>(value);

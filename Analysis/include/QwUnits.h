@@ -1,3 +1,8 @@
+/*!
+ * \file   QwUnits.h
+ * \brief  Physical units and constants for Qweak analysis
+ */
+
 #ifndef QWUNITS_H
 #define QWUNITS_H
 

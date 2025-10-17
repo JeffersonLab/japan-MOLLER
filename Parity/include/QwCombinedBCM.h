@@ -1,10 +1,7 @@
-/**********************************************************\
-* File: QwCombinedBCM.h                                  *
-* File: QwBCM.h                                           *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwCombinedBCM.h
+ * \brief  Combined beam current monitor using weighted average of multiple BCMs
+ */
 
 #ifndef __Qw_COMBINEDBCM__
 #define __Qw_COMBINEDBCM__
@@ -28,9 +25,15 @@
 class QwDBInterface;
 #endif // __USE_DATABASE__
 
-/*****************************************************************
-*  Class:
-******************************************************************/
+/**
+ * \class QwCombinedBCM
+ * \ingroup QwAnalysis_BL
+ * \brief Template for a combined beam current monitor using weighted inputs
+ *
+ * Aggregates multiple BCMs into a single effective current channel by
+ * applying user-provided weights. Provides event processing hooks and
+ * error propagation consistent with VQwBCM.
+ */
 
 template<typename T>
 class QwCombinedBCM : public QwBCM<T> {

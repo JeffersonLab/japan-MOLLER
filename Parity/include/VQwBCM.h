@@ -5,6 +5,11 @@
 * Time-stamp: <2011-05-26>                                 *
 \**********************************************************/
 
+/*!
+ * \file   VQwBCM.h
+ * \brief  Virtual base class for beam current monitors
+ */
+
 #ifndef __VQWBCM__
 #define __VQWBCM__
 
@@ -34,6 +39,16 @@ template<typename T> class QwBCM;
 
 /**
  * \ingroup QwAnalysis_BeamLine
+ */
+/**
+ * \class VQwBCM
+ * \ingroup QwAnalysis_BeamLine
+ * \brief Abstract base for beam current monitors (BCMs)
+ *
+ * Provides the interface for current-like data elements used for normalization
+ * and beam quality monitoring. Concrete implementations (e.g., QwBCM<T>,
+ * QwCombinedBCM<T>) implement hardware decoding, event processing, and error
+ * handling, while this base exposes common hooks for the analysis framework.
  */
 class VQwBCM : public VQwDataElement {
   /***************************************************************

@@ -1,3 +1,8 @@
+/*!
+ * \file   QwADC18_Channel.cc
+ * \brief  Implementation for HAPPEX 18-bit ADC channel decoding
+ */
+
 #include "QwADC18_Channel.h"
 
 // System headers
@@ -1109,11 +1114,8 @@ void QwADC18_Channel::DivideBy(const QwADC18_Channel &denom)
  * We use the formulas provided there for the calculation of the first and
  * second moments (i.e. average and variance).
  */
-/**
- * Accumulate the running moments M1 and M2
- * @param value Object (single event or accumulated) to add to running moments
- * @param count Number of good events in value
- */
+// Accumulate the running moments M1 and M2.
+// See header for parameter and return documentation.
 void QwADC18_Channel::AccumulateRunningSum(const QwADC18_Channel& value, Int_t count, Int_t ErrorMask)
 {
 

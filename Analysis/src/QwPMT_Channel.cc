@@ -1,9 +1,9 @@
-/**********************************************************\
-* File: QwPMT_Channel.cc                                   *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2009-03-07 12:00>                           *
-\**********************************************************/
+/*!
+ * \file   QwPMT_Channel.cc
+ * \brief  Implementation for PMT channel data element
+ * \author P. M. King
+ * \date   2009-03-07
+ */
 
 #include "QwPMT_Channel.h"
 
@@ -23,10 +23,17 @@ const Bool_t QwPMT_Channel::kDEBUG = kFALSE;
 const Double_t QwPMT_Channel::kPMT_VoltsPerBit = (20./(1<<18));
 
 
+/** \brief Clear the event-scoped ADC word value. */
 void QwPMT_Channel::ClearEventData(){
   fValue   = 0;
 }
 
+/**
+ * \brief Generate a mock ADC word for testing.
+ * \param helicity Helicity state indicator (unused).
+ * \param SlotNum V775 slot number to encode in the word.
+ * \param ChanNum V775 channel number to encode in the word.
+ */
 void QwPMT_Channel::RandomizeEventData(int helicity, int SlotNum, int ChanNum){
 
   Double_t mean = 1500.0;
@@ -42,6 +49,7 @@ void QwPMT_Channel::RandomizeEventData(int helicity, int SlotNum, int ChanNum){
   fValue = word;
 }
 
+/** \brief Encode this channel's word into the trigger buffer. */
 void  QwPMT_Channel::EncodeEventData(std::vector<UInt_t> &TrigBuffer)
 {
 //  std::cout<<"QwPMT_Channel::EncodeEventData() not fully implemented yet."<<std::endl;
@@ -58,12 +66,18 @@ void  QwPMT_Channel::EncodeEventData(std::vector<UInt_t> &TrigBuffer)
 
 }
 
+/** \brief Process the event (no-op for simple PMT channel). */
 void  QwPMT_Channel::ProcessEvent()
 {
 
 }
 
 
+/**
+ * \brief Create histograms for this channel within an optional folder.
+ * \param folder Optional ROOT folder to cd() into.
+ * \param prefix Histogram name prefix.
+ */
 void  QwPMT_Channel::ConstructHistograms(TDirectory *folder, TString &prefix)
 {
   //  If we have defined a subdirectory in the ROOT file, then change into it.
@@ -83,6 +97,7 @@ void  QwPMT_Channel::ConstructHistograms(TDirectory *folder, TString &prefix)
   }
 }
 
+/** \brief Fill histograms for this channel if present. */
 void  QwPMT_Channel::FillHistograms()
 {
   size_t index = 0;
@@ -95,6 +110,12 @@ void  QwPMT_Channel::FillHistograms()
   }
 }
 
+/**
+ * \brief Construct a ROOT branch and append a value slot to the vector.
+ * \param tree Output tree.
+ * \param prefix Branch name prefix.
+ * \param values Output value vector to be appended.
+ */
 void  QwPMT_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
 {
   if (GetElementName() == "") {
@@ -111,6 +132,7 @@ void  QwPMT_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, std:
   }
 }
 
+/** \brief Write this channel's value into the tree vector slot. */
 void  QwPMT_Channel::FillTreeVector(std::vector<Double_t> &values) const
 {
   if (GetElementName()==""){
@@ -132,6 +154,7 @@ void  QwPMT_Channel::FillTreeVector(std::vector<Double_t> &values) const
 
 
 
+/** \brief Copy-assign from another PMT channel (event-scoped data). */
 QwPMT_Channel& QwPMT_Channel::operator= (const QwPMT_Channel &value){
   if (this != &value) {
     if (GetElementName()!=""){
@@ -166,6 +189,7 @@ void QwPMT_Channel::Difference(const QwPMT_Channel &value1, const QwPMT_Channel 
   *this -= value2;
 }
 
+/** \brief Print a compact value summary for this PMT channel. */
 void QwPMT_Channel::PrintValue() const
 {
   QwMessage << std::setprecision(4)
@@ -174,6 +198,7 @@ void QwPMT_Channel::PrintValue() const
             << QwLog::endl;
 }
 
+/** \brief Print a placeholder info line for this PMT channel. */
 void QwPMT_Channel::PrintInfo() const
 {
   std::cout << "QwPMT_Channel::Print() not implemented yet." << std::endl;

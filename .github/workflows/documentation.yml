@@ -21,6 +21,14 @@ concurrency:
 jobs:
   generate-docs:
     runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc14"
+            opt: "opt"
     
     steps:
     - name: Checkout repository
@@ -28,87 +36,78 @@ jobs:
       with:
         fetch-depth: 0  # Full history for proper documentation generation
 
+    - name: Setup CVMFS
+      uses: cvmfs-contrib/github-action-cvmfs@v5
+      with:
+        cvmfs_repositories: 'sft.cern.ch,geant4.cern.ch'
+
     - name: Clean up any existing documentation
       run: |
         rm -rf Doxygen/html/ || true
-        rm -rf html/ || true
         echo "Cleaned up existing documentation directories"
 
-    - name: Cache apt packages
-      uses: actions/cache@v4
+    - name: Generate documentation in LCG environment
+      uses: aidasoft/run-lcg-view@v1
       with:
-        path: |
-          /var/cache/apt/archives
-          /var/lib/apt/lists
-        key: ${{ runner.os }}-apt-${{ hashFiles('**/.github/workflows/documentation.yml') }}
-        restore-keys: |
-          ${{ runner.os }}-apt-
-
-    - name: Install Doxygen and dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y doxygen graphviz plantuml texlive-latex-base texlive-latex-extra
-        
-    - name: Verify Doxygen installation
-      run: |
-        doxygen --version
-        dot -V
-        latex --version || echo "LaTeX installed for formula support"
-        
-    - name: Update Doxygen configuration (remove obsolete tags)
-      run: |
-        echo "Updating Doxyfile to remove obsolete tags..."
-        doxygen -u Doxyfile || true
-        
-    - name: Generate Doxygen configuration info
-      run: |
-        echo "Doxygen configuration summary:"
-        echo "PROJECT_NAME: $(grep '^PROJECT_NAME' Doxyfile | cut -d'=' -f2- | xargs)"
-        echo "PROJECT_VERSION: $(grep '^PROJECT_VERSION' Doxyfile | cut -d'=' -f2- | xargs)"  
-        echo "OUTPUT_DIRECTORY: $(grep '^OUTPUT_DIRECTORY' Doxyfile | cut -d'=' -f2- | xargs)"
-        echo "GENERATE_HTML: $(grep '^GENERATE_HTML' Doxyfile | cut -d'=' -f2- | xargs)"
-        echo "HTML_OUTPUT: $(grep '^HTML_OUTPUT' Doxyfile | cut -d'=' -f2- | xargs)"
-        
-    - name: Generate Doxygen documentation
-      run: |
-        echo "Generating Doxygen documentation..."
-        echo "This may take several minutes for large codebases..."
-        doxygen Doxyfile 2>&1 | tee doxygen_output.log
-        echo "Documentation generation completed!"
-        
-    - name: Check for critical errors
-      run: |
-        if grep -q "error.*Problems running" doxygen_output.log; then
-          echo "⚠️  Some non-critical errors occurred (LaTeX formulas), but HTML documentation should still be generated"
-        fi
-        if grep -q "^Error:" doxygen_output.log; then
-          echo "❌ Critical errors found in Doxygen output"
-          exit 1
-        fi
-        
-    - name: Check generated documentation
-      run: |
-        echo "Documentation generation completed. Checking output..."
-        if [ -d "Doxygen/html" ]; then
-          echo "✅ HTML documentation generated successfully"
-          echo "Files generated: $(find Doxygen/html -name "*.html" | wc -l) HTML files"
-          ls -la Doxygen/html/ | head -10
-        elif [ -d "html" ]; then
-          echo "✅ HTML documentation found in root html/ directory"
-          echo "Files generated: $(find html -name "*.html" | wc -l) HTML files"
-          ls -la html/ | head -10
-        else
-          echo "❌ HTML documentation not found"
-          echo "Available directories:"
-          find . -maxdepth 2 -type d -name "*html*" -o -name "*Doxygen*" || echo "No html/Doxygen directories found"
-          ls -la Doxygen/ 2>/dev/null || echo "Doxygen/ directory not found"
-          exit 1
-        fi
+        release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+        run: |
+          echo "::group::Verify Installation"
+          doxygen --version
+          dot -V
+          echo "::endgroup::"
+          
+          echo "::group::Update Doxygen Configuration"
+          echo "Updating Doxyfile to remove obsolete tags..."
+          doxygen -u Doxyfile || true
+          echo "::endgroup::"
+          
+          echo "::group::Generate Doxygen Configuration Info"
+          echo "Doxygen configuration summary:"
+          echo "PROJECT_NAME: $(grep '^PROJECT_NAME' Doxyfile | cut -d'=' -f2- | xargs)"
+          echo "PROJECT_VERSION: $(grep '^PROJECT_VERSION' Doxyfile | cut -d'=' -f2- | xargs)"  
+          echo "OUTPUT_DIRECTORY: $(grep '^OUTPUT_DIRECTORY' Doxyfile | cut -d'=' -f2- | xargs)"
+          echo "GENERATE_HTML: $(grep '^GENERATE_HTML' Doxyfile | cut -d'=' -f2- | xargs)"
+          echo "HTML_OUTPUT: $(grep '^HTML_OUTPUT' Doxyfile | cut -d'=' -f2- | xargs)"
+          echo "::endgroup::"
+          
+          echo "::group::Generate Doxygen Documentation"
+          echo "Generating Doxygen documentation..."
+          echo "This may take several minutes for large codebases..."
+          set -o pipefail
+          doxygen Doxyfile 2>&1 | tee doxygen_output.log
+          set +o pipefail
+          echo "Documentation generation completed!"
+          echo "::endgroup::"
+          
+          echo "::group::Check for Critical Errors"
+          if grep -q "error.*Problems running" doxygen_output.log; then
+            echo "⚠️  Some non-critical errors occurred (LaTeX formulas), but HTML documentation should still be generated"
+          fi
+          if grep -q "^Error:" doxygen_output.log; then
+            echo "❌ Critical errors found in Doxygen output"
+            exit 1
+          fi
+          echo "::endgroup::"
+          
+          echo "::group::Check Generated Documentation"
+          echo "Documentation generation completed. Checking output..."
+          if [ -d "Doxygen/html" ]; then
+            echo "✅ HTML documentation generated successfully"
+            echo "Files generated: $(find Doxygen/html -name "*.html" | wc -l) HTML files"
+            ls -la Doxygen/html/ | head -10
+          else
+            echo "❌ HTML documentation not found"
+            echo "Available directories:"
+            find . -maxdepth 2 -type d -name "*html*" -o -name "*Doxygen*" || echo "No html/Doxygen directories found"
+            ls -la Doxygen/ 2>/dev/null || echo "Doxygen/ directory not found"
+            exit 1
+          fi
+          echo "::endgroup::"
         
     - name: Upload documentation artifacts (for PR preview)
       uses: actions/upload-artifact@v4
       with:
-        name: doxygen-documentation
+        name: doxygen-documentation-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
         path: Doxygen/html/
         retention-days: 30
         
