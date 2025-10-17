@@ -274,18 +274,18 @@ jobs:
             target_file="./target/$filename"
 
             if [ ! -f "$target_file" ]; then
-              echo "❌ Target file $filename not found"
+              echo "❌ Target file $current_file not found"
               comparison_failed=true
               continue
             fi
 
-            echo "Comparing $filename..."
+            echo "Comparing $current_file..."
 
             # Skip lines containing timestamps and metadata that can vary
             if diff -q <(grep -v "Start Time:\|End Time:" "$current_file") <(grep -v "Start Time:\|End Time:" "$target_file") > /dev/null; then
-              echo "✅ $filename: No meaningful differences found"
+              echo "✅ $current_file: No meaningful differences found"
             else
-              echo "❌ $filename: Differences found beyond timestamps"
+              echo "❌ $current_file: Differences found beyond timestamps"
               echo "--- Expected (target branch) ---"
               grep -v "Start Time:\|End Time:" "$target_file" | head -20
               echo "--- Actual (current PR) ---"
