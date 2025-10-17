@@ -228,124 +228,126 @@ void QwCorrelator::CalcCorrelations()
   }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-  // Helper lambdas to flatten matrix and vector to std::vector
-  // Note: these rely on RVO with copy elision to avoid unnecessary copies
-  auto flattenMatrix = [](const TMatrixD& m) -> std::vector<Double_t> {
-    const Double_t* data = m.GetMatrixArray();
-    return std::vector<Double_t>(data, data + m.GetNrows() * m.GetNcols());
-  };  
-  auto flattenVector = [](const TVectorD& v) -> std::vector<Double_t> {
-    const Double_t* data = v.GetMatrixArray();
-    return std::vector<Double_t>(data, data + v.GetNrows());
-  };
+  // Fill RNTuple field pointers
+  if (fNTupleWriter) {
+    // Helper lambdas to flatten matrix and vector to std::vector
+    // Note: these rely on RVO with copy elision to avoid unnecessary copies
+    auto flattenMatrix = [](const TMatrixD& m) -> std::vector<Double_t> {
+      const Double_t* data = m.GetMatrixArray();
+      return std::vector<Double_t>(data, data + m.GetNrows() * m.GetNcols());
+    };  
+    auto flattenVector = [](const TVectorD& v) -> std::vector<Double_t> {
+      const Double_t* data = v.GetMatrixArray();
+      return std::vector<Double_t>(data, data + v.GetNrows());
+    };
 
-  // Copy local variables to RNTuple fields - scalar values
-  *fIntFieldPtrs[0] = fTotalCount;
-  *fIntFieldPtrs[1] = fGoodCount;
-  *fIntFieldPtrs[2] = linReg.fErrorFlag;
-  *fLongFieldPtrs[0] = linReg.fGoodEventNumber;
+    // Copy local variables to RNTuple fields - scalar values
+    *fIntFieldPtrs[0] = fTotalCount;
+    *fIntFieldPtrs[1] = fGoodCount;
+    *fIntFieldPtrs[2] = linReg.fErrorFlag;
+    *fLongFieldPtrs[0] = linReg.fGoodEventNumber;
 
-  // Fill matrix fields with flattened data
-  int matIdx = 0;
-  *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.Axy);
-  *fMatrixRowsPtrs[matIdx] = linReg.Axy.GetNrows();
-  *fMatrixColsPtrs[matIdx] = linReg.Axy.GetNcols();
-  matIdx++;
-  
-  *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.dAxy);
-  *fMatrixRowsPtrs[matIdx] = linReg.dAxy.GetNrows();
-  *fMatrixColsPtrs[matIdx] = linReg.dAxy.GetNcols();
-  matIdx++;
+    // Fill matrix fields with flattened data
+    int matIdx = 0;
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.Axy);
+    *fMatrixRowsPtrs[matIdx] = linReg.Axy.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.Axy.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.dAxy);
+    *fMatrixRowsPtrs[matIdx] = linReg.dAxy.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.dAxy.GetNcols();
+    matIdx++;
 
-  *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mVPP);
-  *fMatrixRowsPtrs[matIdx] = linReg.mVPP.GetNrows();
-  *fMatrixColsPtrs[matIdx] = linReg.mVPP.GetNcols();
-  matIdx++;
-  
-  *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mVPY);
-  *fMatrixRowsPtrs[matIdx] = linReg.mVPY.GetNrows();
-  *fMatrixColsPtrs[matIdx] = linReg.mVPY.GetNcols();
-  matIdx++;
-  
-  *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mVYP);
-  *fMatrixRowsPtrs[matIdx] = linReg.mVYP.GetNrows();
-  *fMatrixColsPtrs[matIdx] = linReg.mVYP.GetNcols();
-  matIdx++;
-  
-  *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mVYY);
-  *fMatrixRowsPtrs[matIdx] = linReg.mVYY.GetNrows();
-  *fMatrixColsPtrs[matIdx] = linReg.mVYY.GetNcols();
-  matIdx++;
-  
-  *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mVYYp);
-  *fMatrixRowsPtrs[matIdx] = linReg.mVYYp.GetNrows();
-  *fMatrixColsPtrs[matIdx] = linReg.mVYYp.GetNcols();
-  matIdx++;
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mVPP);
+    *fMatrixRowsPtrs[matIdx] = linReg.mVPP.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mVPP.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mVPY);
+    *fMatrixRowsPtrs[matIdx] = linReg.mVPY.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mVPY.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mVYP);
+    *fMatrixRowsPtrs[matIdx] = linReg.mVYP.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mVYP.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mVYY);
+    *fMatrixRowsPtrs[matIdx] = linReg.mVYY.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mVYY.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mVYYp);
+    *fMatrixRowsPtrs[matIdx] = linReg.mVYYp.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mVYYp.GetNcols();
+    matIdx++;
 
-  *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mSPP);
-  *fMatrixRowsPtrs[matIdx] = linReg.mSPP.GetNrows();
-  *fMatrixColsPtrs[matIdx] = linReg.mSPP.GetNcols();
-  matIdx++;
-  
-  *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mSPY);
-  *fMatrixRowsPtrs[matIdx] = linReg.mSPY.GetNrows();
-  *fMatrixColsPtrs[matIdx] = linReg.mSPY.GetNcols();
-  matIdx++;
-  
-  *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mSYP);
-  *fMatrixRowsPtrs[matIdx] = linReg.mSYP.GetNrows();
-  *fMatrixColsPtrs[matIdx] = linReg.mSYP.GetNcols();
-  matIdx++;
-  
-  *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mSYY);
-  *fMatrixRowsPtrs[matIdx] = linReg.mSYY.GetNrows();
-  *fMatrixColsPtrs[matIdx] = linReg.mSYY.GetNcols();
-  matIdx++;
-  
-  *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mSYYp);
-  *fMatrixRowsPtrs[matIdx] = linReg.mSYYp.GetNrows();
-  *fMatrixColsPtrs[matIdx] = linReg.mSYYp.GetNcols();
-  matIdx++;
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mSPP);
+    *fMatrixRowsPtrs[matIdx] = linReg.mSPP.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mSPP.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mSPY);
+    *fMatrixRowsPtrs[matIdx] = linReg.mSPY.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mSPY.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mSYP);
+    *fMatrixRowsPtrs[matIdx] = linReg.mSYP.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mSYP.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mSYY);
+    *fMatrixRowsPtrs[matIdx] = linReg.mSYY.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mSYY.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mSYYp);
+    *fMatrixRowsPtrs[matIdx] = linReg.mSYYp.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mSYYp.GetNcols();
+    matIdx++;
 
-  *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mRPP);
-  *fMatrixRowsPtrs[matIdx] = linReg.mRPP.GetNrows();
-  *fMatrixColsPtrs[matIdx] = linReg.mRPP.GetNcols();
-  matIdx++;
-  
-  *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mRPY);
-  *fMatrixRowsPtrs[matIdx] = linReg.mRPY.GetNrows();
-  *fMatrixColsPtrs[matIdx] = linReg.mRPY.GetNcols();
-  matIdx++;
-  
-  *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mRYP);
-  *fMatrixRowsPtrs[matIdx] = linReg.mRYP.GetNrows();
-  *fMatrixColsPtrs[matIdx] = linReg.mRYP.GetNcols();
-  matIdx++;
-  
-  *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mRYY);
-  *fMatrixRowsPtrs[matIdx] = linReg.mRYY.GetNrows();
-  *fMatrixColsPtrs[matIdx] = linReg.mRYY.GetNcols();
-  matIdx++;
-  
-  *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mRYYp);
-  *fMatrixRowsPtrs[matIdx] = linReg.mRYYp.GetNrows();
-  *fMatrixColsPtrs[matIdx] = linReg.mRYYp.GetNcols();
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mRPP);
+    *fMatrixRowsPtrs[matIdx] = linReg.mRPP.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mRPP.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mRPY);
+    *fMatrixRowsPtrs[matIdx] = linReg.mRPY.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mRPY.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mRYP);
+    *fMatrixRowsPtrs[matIdx] = linReg.mRYP.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mRYP.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mRYY);
+    *fMatrixRowsPtrs[matIdx] = linReg.mRYY.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mRYY.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mRYYp);
+    *fMatrixRowsPtrs[matIdx] = linReg.mRYYp.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mRYYp.GetNcols();
 
-  // Fill vector fields with flattened data
-  *fVectorFieldPtrs[0] = flattenVector(linReg.mMP);
-  *fVectorFieldPtrs[1] = flattenVector(linReg.mMY);
-  *fVectorFieldPtrs[2] = flattenVector(linReg.mMYp);
+    // Fill vector fields with flattened data
+    *fVectorFieldPtrs[0] = flattenVector(linReg.mMP);
+    *fVectorFieldPtrs[1] = flattenVector(linReg.mMY);
+    *fVectorFieldPtrs[2] = flattenVector(linReg.mMYp);
 
-  *fVectorFieldPtrs[3] = flattenVector(linReg.mSP);
-  *fVectorFieldPtrs[4] = flattenVector(linReg.mSY);
-  *fVectorFieldPtrs[5] = flattenVector(linReg.mSYp);
+    *fVectorFieldPtrs[3] = flattenVector(linReg.mSP);
+    *fVectorFieldPtrs[4] = flattenVector(linReg.mSY);
+    *fVectorFieldPtrs[5] = flattenVector(linReg.mSYp);
+
+    fNTupleWriter->Fill();
+  }
 #endif
 
   // Fill tree
   if (fTree) fTree->Fill();
-#ifdef HAS_RNTUPLE_SUPPORT
-  else if (fNTupleWriter) fNTupleWriter->Fill();
-#endif
   else QwWarning << "No tree" << QwLog::endl;
 
   // Write alpha and alias file
