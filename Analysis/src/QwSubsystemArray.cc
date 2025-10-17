@@ -107,14 +107,14 @@ QwSubsystemArray& QwSubsystemArray::operator=(const QwSubsystemArray& source)
 void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detectors)
 {
   // This is how this should work
-  QwParameterFile* preamble;
+  std::unique_ptr<QwParameterFile> preamble;
   preamble = detectors.ReadSectionPreamble();
   // Process preamble
   QwVerbose << "Preamble:" << QwLog::endl;
   QwVerbose << *preamble << QwLog::endl;
-  if (preamble) delete preamble;
+  if (preamble) preamble.reset();
 
-  QwParameterFile* section;
+  std::unique_ptr<QwParameterFile> section;
   std::string section_name;
   while ((section = detectors.ReadNextSection(section_name))) {
 
@@ -127,7 +127,6 @@ void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detector
     std::string subsys_name;
     if (! section->FileHasVariablePair("=","name",subsys_name)) {
       QwError << "No name defined in section for subsystem " << subsys_type << "." << QwLog::endl;
-      delete section; section = 0;
       continue;
     }
 
@@ -138,7 +137,6 @@ void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detector
         disabled_by_type = true;
     if (disabled_by_type) {
       QwWarning << "Subsystem of type " << subsys_type << " disabled." << QwLog::endl;
-      delete section; section = 0;
       continue;
     }
 
@@ -149,7 +147,6 @@ void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detector
         disabled_by_name = true;
     if (disabled_by_name) {
       QwWarning << "Subsystem with name " << subsys_name << " disabled." << QwLog::endl;
-      delete section; section = 0;
       continue;
     }
 
@@ -166,7 +163,6 @@ void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detector
     }
     if (! subsys) {
       QwError << "Could not create subsystem " << subsys_type << "." << QwLog::endl;
-      delete section; section = 0;
       continue;
     }
 
@@ -175,7 +171,6 @@ void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detector
       QwMessage << "Subsystem " << subsys_name << " cannot be stored in this "
                 << "subsystem array." << QwLog::endl;
       QwMessage << "Deleting subsystem " << subsys_name << " again" << QwLog::endl;
-      delete section; section = 0;
       delete subsys; subsys = 0;
       continue;
     }
@@ -190,9 +185,6 @@ void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detector
       QwError << "Not all variables for " << subsys->GetName()
               << " could be published!" << QwLog::endl;
     }
-
-    // Delete parameter file section
-    delete section; section = 0;
   }
 }
 
@@ -620,8 +612,8 @@ void QwSubsystemArray::ConstructBranch(
 {
   QwMessage << " QwSubsystemArray::ConstructBranch " << QwLog::endl;
 
-  QwParameterFile* preamble;
-  QwParameterFile* nextsection;
+  std::unique_ptr<QwParameterFile> preamble;
+  std::unique_ptr<QwParameterFile> nextsection;
   preamble = trim_file.ReadSectionPreamble();
 
   // Process preamble

@@ -92,14 +92,14 @@ void QwDataHandlerArray::LoadDataHandlersFromParameterFile(
   SetPointer(detectors);
 
   // This is how this should work
-  QwParameterFile* preamble;
+  std::unique_ptr<QwParameterFile> preamble;
   preamble = mapfile.ReadSectionPreamble();
   // Process preamble
   QwVerbose << "Preamble:" << QwLog::endl;
   QwVerbose << *preamble << QwLog::endl;
-  if (preamble) delete preamble;
+  if (preamble) preamble.reset();
 
-  QwParameterFile* section;
+  std::unique_ptr<QwParameterFile> section;
   std::string section_name;
   while ((section = mapfile.ReadNextSection(section_name))) {
 
@@ -113,7 +113,6 @@ void QwDataHandlerArray::LoadDataHandlersFromParameterFile(
     std::string handler_scope;
     if (! section->FileHasVariablePair("=","name",handler_name)) {
       QwError << "No name defined in section for handler " << handler_type << "." << QwLog::endl;
-      delete section; section = 0;
       continue;
     }
     if (section->FileHasVariablePair("=","scope",handler_scope)) {
@@ -131,7 +130,6 @@ void QwDataHandlerArray::LoadDataHandlersFromParameterFile(
         disabled_by_type = true;
     if (disabled_by_type) {
       QwWarning << "DataHandler of type " << handler_type << " disabled." << QwLog::endl;
-      delete section; section = 0;
       continue;
     }
 
@@ -142,7 +140,6 @@ void QwDataHandlerArray::LoadDataHandlersFromParameterFile(
         disabled_by_name = true;
     if (disabled_by_name) {
       QwWarning << "DataHandler with name " << handler_name << " disabled." << QwLog::endl;
-      delete section; section = 0;
       continue;
     }
 
@@ -160,7 +157,6 @@ void QwDataHandlerArray::LoadDataHandlersFromParameterFile(
     }
     if (! handler) {
       QwError << "Could not create handler " << handler_type << "." << QwLog::endl;
-      delete section; section = 0;
       continue;
     }
 
@@ -169,7 +165,6 @@ void QwDataHandlerArray::LoadDataHandlersFromParameterFile(
       QwMessage << "DataHandler " << handler_name << " cannot be stored in this "
                 << "handler array." << QwLog::endl;
       QwMessage << "Deleting handler " << handler_name << " again" << QwLog::endl;
-      delete section; section = 0;
       delete handler; handler = 0;
       continue;
     }
@@ -192,8 +187,6 @@ void QwDataHandlerArray::LoadDataHandlersFromParameterFile(
               << " could be published!" << QwLog::endl;
     }
     */
-    // Delete parameter file section
-    delete section; section = 0;
   }
 }
 //*****************************************************************

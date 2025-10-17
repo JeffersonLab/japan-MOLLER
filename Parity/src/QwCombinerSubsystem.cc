@@ -158,7 +158,7 @@ void QwCombinerSubsystem::ConstructBranch(TTree *tree, TString & prefix)
 void QwCombinerSubsystem::ConstructBranch(TTree *tree, TString & prefix, QwParameterFile& trim_file)
 {
   TString tmp;
-  QwParameterFile* nextmodule;
+  std::unique_ptr<QwParameterFile> nextmodule;
   trim_file.RewindToFileStart();
   tmp="Combiner";
   trim_file.RewindToFileStart();

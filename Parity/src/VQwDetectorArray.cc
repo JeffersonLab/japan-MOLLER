@@ -503,7 +503,7 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
 
      // Now load the variables to publish
     mapstr.RewindToFileStart();
-    QwParameterFile *section;
+    std::unique_ptr<QwParameterFile> section;
     std::vector<TString> publishinfo;
     while ((section = mapstr.ReadNextSection(varvalue))) {
 
@@ -1322,7 +1322,7 @@ void VQwDetectorArray::ConstructBranch(TTree *tree, TString & prefix) {
 void VQwDetectorArray::ConstructBranch(TTree *tree, TString & prefix, QwParameterFile& trim_file) {
 
     TString tmp;
-    QwParameterFile* nextmodule;
+    std::unique_ptr<QwParameterFile> nextmodule;
     trim_file.RewindToFileStart();
     tmp="QwIntegrationPMT";
     trim_file.RewindToFileStart();

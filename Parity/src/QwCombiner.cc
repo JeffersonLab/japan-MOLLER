@@ -74,7 +74,7 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
   QwParameterFile map(mapfile);
 
   // Read the preamble
-  QwParameterFile* preamble = map.ReadSectionPreamble();
+  std::unique_ptr<QwParameterFile> preamble = map.ReadSectionPreamble();
   TString mask;
   if (preamble->FileHasVariablePair("=", "mask", mask)) {
     fErrorFlagMask = QwParameterFile::GetUInt(mask);
@@ -84,7 +84,7 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
   // Read the sections of dependent variables
   bool keep_header = true;
   std::string section_name;
-  QwParameterFile* section = 0;
+  std::unique_ptr<QwParameterFile> section = nullptr;
   std::pair<EQwHandleType,std::string> type_name;
   while ((section = map.ReadNextSection(section_name,keep_header))) {
     if(section_name=="PUBLISH") continue;
@@ -139,7 +139,7 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
   // Now load the variables to publish
   std::vector<std::vector<TString> > fPublishList;
   map.RewindToFileStart();
-  QwParameterFile *section2;
+  std::unique_ptr<QwParameterFile> section2;
   std::vector<TString> publishinfo;
   while ((section2=map.ReadNextSection(varvalue))) {
     if (varvalue == "PUBLISH") {
@@ -158,7 +158,6 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
         publishinfo.clear();
       }
     }
-    delete section2;
   }
   // Print list of variables to publish
   if (fPublishList.size()>0){

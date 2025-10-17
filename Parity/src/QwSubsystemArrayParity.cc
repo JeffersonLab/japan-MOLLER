@@ -655,7 +655,7 @@ void QwSubsystemArrayParity::LoadMockDataParameters(std::string mapfile)
   // }
   QwParameterFile detectors(mapfile);
     // This is how this should work
-  QwParameterFile* preamble = nullptr;
+  std::unique_ptr<QwParameterFile> preamble = nullptr;
   preamble = detectors.ReadSectionPreamble();
   // Process preamble
   QwVerbose << "Preamble:" << QwLog::endl;
@@ -669,10 +669,7 @@ void QwSubsystemArrayParity::LoadMockDataParameters(std::string mapfile)
 
   QwMessage << "fWindowPeriod = " << fWindowPeriod << QwLog::endl;
 
-    
-  if (preamble) delete preamble;
-
-  QwParameterFile* section = nullptr;
+  std::unique_ptr<QwParameterFile> section = nullptr;
   std::string section_name;
   while ((section = detectors.ReadNextSection(section_name))) {
 
@@ -685,13 +682,11 @@ void QwSubsystemArrayParity::LoadMockDataParameters(std::string mapfile)
     std::string subsys_name;
     if (! section->FileHasVariablePair("=","name",subsys_name)) {
       QwError << "No name defined in section for subsystem " << subsys_type << "." << QwLog::endl;
-      delete section; section = 0;
       continue;
     }
     std::string mock_param_name;
     if (! section->FileHasVariablePair("=","mock_param",mock_param_name)) {
      QwError << "No mock data parameter defined for " << subsys_name << "." << QwLog::endl;
-     delete section; section = 0;
      continue;
     }
     VQwSubsystemParity* subsys_parity = dynamic_cast<VQwSubsystemParity*>(GetSubsystemByName(subsys_name));
@@ -700,6 +695,5 @@ void QwSubsystemArrayParity::LoadMockDataParameters(std::string mapfile)
     } else {
       subsys_parity->LoadMockDataParameters(mock_param_name);
     }
-    delete section; section = 0;
   }
 }
