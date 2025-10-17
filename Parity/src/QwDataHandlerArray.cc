@@ -276,6 +276,9 @@ void QwDataHandlerArray::ProcessOptions(QwOptions &options)
 
   //  Get the globally defined print running sum flag
   fPrintRunningSum = options.GetValue<bool>("print-runningsum");
+
+  //  Get the RNTuple enable flag (defined in QwRootFile)
+  fEnableRNTuples = options.GetValue<bool>("enable-rntuples");
 }
 
 /**
@@ -374,20 +377,26 @@ void  QwDataHandlerArray::ConstructNTupleFields(
     const std::string& treeprefix,
     const std::string& branchprefix)
 {
+#ifdef HAS_RNTUPLE_SUPPORT
+  if (!fEnableRNTuples) return;
   if (!empty()){
     for (iterator handler = begin(); handler != end(); ++handler) {
       handler->get()->ConstructNTupleFields(treerootfile, treeprefix, branchprefix);
     }
   }
+#endif // HAS_RNTUPLE_SUPPORT
 }
 
 void  QwDataHandlerArray::FillNTupleFields(QwRootFile *treerootfile)
 {
+#ifdef HAS_RNTUPLE_SUPPORT
+  if (!fEnableRNTuples) return;
   if (!empty()){
     for (iterator handler = begin(); handler != end(); ++handler) {
       handler->get()->FillNTupleFields(treerootfile);
     }
   }
+#endif // HAS_RNTUPLE_SUPPORT
 }
 
 
