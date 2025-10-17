@@ -68,7 +68,13 @@ file(GLOB my_project_headers
 list(APPEND SQLPP11_OPTIONAL_COMPONENTS SQLite3 MySQL MariaDB PostgreSQL)
 find_package(Sqlpp11 QUIET OPTIONAL_COMPONENTS ${SQLPP11_OPTIONAL_COMPONENTS})
 if(NOT Sqlpp11_FOUND)
-  if(EXISTS ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11/CMakeLists.txt)
+  find_package(Git QUIET)
+  set(Sqlpp11_MIN_COMMIT 3b8f409)
+  execute_process(
+      COMMAND ${GIT_EXECUTABLE} -C ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11 merge-base --is-ancestor ${Sqlpp11_MIN_COMMIT} HEAD
+      OUTPUT_QUIET ERROR_QUIET
+      RESULT_VARIABLE GIT_IS_ANCESTOR)
+  if(EXISTS ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11/CMakeLists.txt AND GIT_IS_ANCESTOR EQUAL "0")
     message(STATUS "sqlpp11 included as subproject")
     add_subdirectory(${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11)
     list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11/cmake/modules)
@@ -77,7 +83,7 @@ if(NOT Sqlpp11_FOUND)
     # to hide compiler warnings
     include_directories(SYSTEM ${date_SOURCE_DIR}/include)
   else()
-    message(WARNING "sqlpp11 not available in thirdparty directory. Use 'git clone --recurse-submodules` on new clone or 'git submodule update --init --recursive' on existing repository.")
+    message(WARNING "sqlpp11 not available or outdated in thirdparty directory. Use 'git clone --recurse-submodules` on new clone or 'git submodule update --init --recursive' on existing repository.")
   endif()
 endif()
 if(TARGET sqlpp11::sqlpp11)
