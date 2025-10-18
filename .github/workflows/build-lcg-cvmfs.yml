@@ -271,7 +271,11 @@ jobs:
           comparison_failed=false
           for current_file in $current_files; do
             filename=$(basename "$current_file")
-            target_file="./target/$filename"
+            if [ -f ./target/$current_file ]; then
+              target_file="./target/$current_file"
+            else
+              target_file="./target/$filename"
+            fi
 
             if [ ! -f "$target_file" ]; then
               echo "❌ Target file $current_file not found"
