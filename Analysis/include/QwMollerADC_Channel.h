@@ -80,7 +80,6 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   };
   QwMollerADC_Channel(const QwMollerADC_Channel& value): 
     VQwHardwareChannel(value), MQwMockable(value),
-    fBlocksPerEvent(value.fBlocksPerEvent),
     fNumberOfSamples_map(value.fNumberOfSamples_map),
     fSaturationABSLimit(value.fSaturationABSLimit)
   {
@@ -88,7 +87,6 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   };
   QwMollerADC_Channel(const QwMollerADC_Channel& value, VQwDataElement::EDataToSave datatosave):
     VQwHardwareChannel(value,datatosave), MQwMockable(value),
-    fBlocksPerEvent(value.fBlocksPerEvent),
     fNumberOfSamples_map(value.fNumberOfSamples_map),
     fSaturationABSLimit(value.fSaturationABSLimit)
   {
@@ -98,7 +96,6 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
 
   void CopyFrom(const QwMollerADC_Channel& value){
     VQwHardwareChannel::CopyFrom(value);
-    fBlocksPerEvent = value.fBlocksPerEvent;
     fNumberOfSamples_map = value.fNumberOfSamples_map;
     fSaturationABSLimit = value.fSaturationABSLimit;
     *this = value;
@@ -330,39 +327,37 @@ private:
 
   /*! \name Channel configuration data members */
   // @{
-
-  //UInt_t  fBlocksPerEvent;
-  Short_t fBlocksPerEvent;
+  static constexpr size_t fBlocksPerEvent = 4;
   // @}
 
 
   /*! \name Event data members---Raw values */
   // @{
-  std::valarray<Int_t> fBlock_raw;      ///< Array of the sub-block data as read from the module
-  Int_t fHardwareBlockSum_raw; ///< Module-based sum of the four sub-blocks as read from the module
-  Int_t fSoftwareBlockSum_raw; ///< Sum of the data in the four sub-blocks raw
-  std::valarray<Long64_t> fBlockSumSq_raw;
-  std::valarray<Int_t> fBlock_min;
-  std::valarray<Int_t> fBlock_max;
-  std::valarray<Short_t> fBlock_numSamples;
+  std::valarray<Int_t> fBlock_raw = std::valarray<Int_t>(fBlocksPerEvent);      ///< Array of the sub-block data as read from the module
+  Int_t fHardwareBlockSum_raw = 0; ///< Module-based sum of the four sub-blocks as read from the module
+  Int_t fSoftwareBlockSum_raw = 0; ///< Sum of the data in the four sub-blocks raw
+  std::valarray<Long64_t> fBlockSumSq_raw = std::valarray<Long64_t>(fBlocksPerEvent + 1);
+  std::valarray<Int_t> fBlock_min = std::valarray<Int_t>(fBlocksPerEvent + 1);
+  std::valarray<Int_t> fBlock_max = std::valarray<Int_t>(fBlocksPerEvent + 1);
+  std::valarray<Short_t> fBlock_numSamples = std::valarray<Short_t>(fBlocksPerEvent + 1);
   // @}
 
   /*! \name Event data members---Potentially calibrated values*/
   // @{
   // The following values potentially have pedestal removed  and calibration applied
-  std::valarray<Double_t> fBlock;          ///< Array of the sub-block data
-  Double_t fHardwareBlockSum;  ///< Module-based sum of the four sub-blocks
+  std::valarray<Double_t> fBlock = std::valarray<Double_t>(fBlocksPerEvent);          ///< Array of the sub-block data
+  Double_t fHardwareBlockSum = 0;  ///< Module-based sum of the four sub-blocks
   // @}
 
 
   /// \name Calculation of the statistical moments
   // @{
   // Moments of the separate blocks
-  std::valarray<Double_t> fBlockM2;        ///< Second moment of the sub-block
-  std::valarray<Double_t> fBlockError;     ///< Uncertainty on the sub-block
+  std::valarray<Double_t> fBlockM2 = std::valarray<Double_t>(fBlocksPerEvent);        ///< Second moment of the sub-block
+  std::valarray<Double_t> fBlockError = std::valarray<Double_t>(fBlocksPerEvent);     ///< Uncertainty on the sub-block
   // Moments of the hardware sum
-  Double_t fHardwareBlockSumM2;    ///< Second moment of the hardware sum
-  Double_t fHardwareBlockSumError; ///< Uncertainty on the hardware sum
+  Double_t fHardwareBlockSumM2 = 0;    ///< Second moment of the hardware sum
+  Double_t fHardwareBlockSumError = 0; ///< Uncertainty on the hardware sum
   // @}
 
 
