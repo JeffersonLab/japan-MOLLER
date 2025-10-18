@@ -284,7 +284,6 @@ jobs:
   valgrind:
     runs-on: ubuntu-latest
     needs: linux
-    if: github.event_name == 'pull_request'
     strategy:
       fail-fast: false
       matrix:
