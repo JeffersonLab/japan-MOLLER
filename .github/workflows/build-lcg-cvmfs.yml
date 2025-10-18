@@ -320,7 +320,7 @@ jobs:
             echo "::group::Run callgrind on mock data analysis (no rntuples, no trees, no hists)"
             valgrind --tool=callgrind --callgrind-out-file=callgrind.out.no-out --instr-atstart=no \
               build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary --callgrind-instr-start-event-loop \
-                --disable-trees --disable-hists
+                --disable-trees --disable-histos
             echo "::endgroup::"
 
             echo "::group::Annotate callgrind info on source code (no rntuples, no trees, no hists)"
