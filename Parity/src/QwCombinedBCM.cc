@@ -33,7 +33,7 @@
 
 template<typename T> std::mt19937 QwCombinedBCM<T>::fRandomnessGenerator;
 template<typename T> std::uniform_real_distribution<double> QwCombinedBCM<T>::fDistribution;
-template<typename T> std::function<double()> QwCombinedBCM<T>::fRandomVariable = []() -> double { return fDistribution(fRandomnessGenerator); };
+template<typename T> std::function<double()> QwCombinedBCM<T>::fRandomVariable = []() -> double { return QwCombinedBCM<T>::fDistribution(QwCombinedBCM<T>::fRandomnessGenerator); };
 
 /** Set random number generator seed for beam trip simulation. */
 template<typename T>
