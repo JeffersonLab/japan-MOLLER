@@ -13,7 +13,7 @@
 // random numbers...
 std::mt19937 MQwMockable::fRandomnessGenerator;
 std::normal_distribution<double> MQwMockable::fNormalDistribution;
-std::function<double()> MQwMockable::fNormalRandomVariable = []() -> double { return fNormalDistribution(fRandomnessGenerator); };
+std::function<double()> MQwMockable::fNormalRandomVariable = []() -> double { return MQwMockable::fNormalDistribution(MQwMockable::fRandomnessGenerator); };
 
 
 void MQwMockable::LoadMockDataParameters(QwParameterFile &paramfile){
