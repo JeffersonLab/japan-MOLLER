@@ -126,7 +126,7 @@ class QwCombinedBCM : public QwBCM<T> {
   // @{
   /// Internal randomness generator
   static std::mt19937 fRandomnessGenerator;
-  /// Internal normal probability distribution
+  /// Internal uniform probability distribution
   static std::uniform_real_distribution<double> fDistribution;
   /// Internal normal random variable
   static std::function<double()> fRandomVariable;
