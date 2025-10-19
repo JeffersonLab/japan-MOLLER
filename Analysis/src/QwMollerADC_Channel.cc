@@ -1412,12 +1412,8 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator/= (const QwMollerADC_Channel 
 void QwMollerADC_Channel::ArcTan(const QwMollerADC_Channel &value)
 {
   if (!IsNameEmpty()) {
-    this->fHardwareBlockSum = 0.0;
-    for (size_t i=0; i<fBlocksPerEvent; i++) {
-      this->fBlock[i] = atan(value.fBlock[i]);
-      this->fHardwareBlockSum += this->fBlock[i];
-    }
-    this->fHardwareBlockSum /= fBlocksPerEvent;
+    this->fBlock = atan(value.fBlock);
+    this->fHardwareBlockSum = this->fBlock.sum() / fBlocksPerEvent;
   }
 
   return;
@@ -1427,12 +1423,9 @@ void QwMollerADC_Channel::ArcTan(const QwMollerADC_Channel &value)
 void QwMollerADC_Channel::Product(const QwMollerADC_Channel &value1, const QwMollerADC_Channel &value2)
 {
   if (!IsNameEmpty()){
-    for (size_t i = 0; i < fBlocksPerEvent; i++) {
-      this->fBlock[i] = (value1.fBlock[i]) * (value2.fBlock[i]);
-      // For a single event the second moment is still zero
-      this->fBlockM2[i] = 0.0;
-    }
-
+    this->fBlock = value1.fBlock * value2.fBlock;
+    // For a single event the second moment is still zero
+    this->fBlockM2 = 0.0;
     // For a single event the second moment is still zero
     this->fHardwareBlockSumM2 = 0.0;
     this->fHardwareBlockSum = value1.fHardwareBlockSum * value2.fHardwareBlockSum;
@@ -1903,10 +1896,8 @@ void QwMollerADC_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *va
     //               << QwLog::endl;
     //     PrintValue();
     //     input->PrintValue();
-    for (size_t i = 0; i < fBlocksPerEvent; i++) {
-      this -> fBlock[i] += scale * input->fBlock[i];
-      this -> fBlockM2[i] = 0.0;
-    }
+    this -> fBlock += scale * input->fBlock;
+    this -> fBlockM2 = 0.0;
     this -> fHardwareBlockSum += scale * input->fHardwareBlockSum;
     this -> fHardwareBlockSumM2 = 0.0;
     this -> fNumberOfSamples += input->fNumberOfSamples;
