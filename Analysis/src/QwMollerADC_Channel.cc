@@ -1353,24 +1353,32 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator/= (const QwMollerADC_Channel 
     //
     // This requires that both the numerator and denominator are non-zero!
     //
-    for (Int_t i = 0; i < 4; i++) {
-      if (this->fBlock[i] != 0.0 && denom.fBlock[i] != 0.0){
-        ratio    = (this->fBlock[i]) / (denom.fBlock[i]);
-        variance =  ratio * ratio *
-           (this->fBlockM2[i] / this->fBlock[i] / this->fBlock[i]
-          + denom.fBlockM2[i] / denom.fBlock[i] / denom.fBlock[i]);
-        fBlock[i]   = ratio;
-        fBlockM2[i] = variance;
-      } else if (this->fBlock[i] == 0.0) {
-        this->fBlock[i]   = 0.0;
-        this->fBlockM2[i] = 0.0;
-      } else {
-        QwVerbose << "Attempting to divide by zero block in " 
-                  << GetElementName() << QwLog::endl;
-        fBlock[i]   = 0.0;
-        fBlockM2[i] = 0.0;
-      }
+    // Create masks for valid operations (both numerator and denominator non-zero)
+    std::valarray<bool> valid_mask = (this->fBlock != 0.0) && (denom.fBlock != 0.0);
+    std::valarray<bool> zero_denom_mask = (denom.fBlock == 0.0) && (this->fBlock != 0.0);
+    
+    // Check for division by zero and warn
+    if (zero_denom_mask.sum() > 0) {
+      QwVerbose << "Attempting to divide by zero block in " 
+                << GetElementName() << QwLog::endl;
     }
+    
+    // Calculate variance terms before modifying fBlock and fBlockM2
+    // Var[ratio] = ratio^2 * (Var[numer]/numer^2 + Var[denom]/denom^2)
+    std::valarray<Double_t> variance_terms = this->fBlockM2 / (this->fBlock * this->fBlock) + 
+                                            denom.fBlockM2 / (denom.fBlock * denom.fBlock);
+    
+    // In-place division for ratios
+    this->fBlock /= denom.fBlock;
+    
+    // Calculate variances in-place: variance = ratio^2 * variance_terms
+    this->fBlockM2 = this->fBlock * this->fBlock;
+    this->fBlockM2 *= variance_terms;
+    
+    // Apply masks to zero out invalid results using mask subscripting
+    this->fBlock[!valid_mask] = 0.0;
+    this->fBlockM2[!valid_mask] = 0.0;
+  
     if (this->fHardwareBlockSum != 0.0 && denom.fHardwareBlockSum != 0.0){
       ratio    =  (this->fHardwareBlockSum) / (denom.fHardwareBlockSum);
       variance =  ratio * ratio *
