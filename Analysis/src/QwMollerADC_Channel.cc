@@ -1569,12 +1569,14 @@ void QwMollerADC_Channel::AccumulateRunningSum(const QwMollerADC_Channel& value,
   // New total number of good events
   Int_t n = n1 + n2;
 
-  // Set up variables
+  // Set up variables and references
   Double_t M11 = fHardwareBlockSum;
   Double_t M12 = value.fHardwareBlockSum;
   Double_t M22 = value.fHardwareBlockSumM2;
+  std::valarray<Double_t>& M11b = fBlock;
+  std::valarray<Double_t>& M12b = value.fBlock;
+  std::valarray<Double_t>& M22b = value.fBlockM2;
 
-  //if(this->GetElementName() == "bcm_an_ds3" && ErrorMask == kPreserveError){QwError << "count=" << fGoodEventCount << "  n=" << n << QwLog::endl;    }
   if (n2 == 0) {
     // no good events for addition
     return;
@@ -1585,14 +1587,9 @@ void QwMollerADC_Channel::AccumulateRunningSum(const QwMollerADC_Channel& value,
       fHardwareBlockSum -= (M12 - M11) / n;
       fHardwareBlockSumM2 -= (M12 - M11)
         * (M12 - fHardwareBlockSum); // note: using updated mean
-      // and for individual blocks
-      for (size_t i = 0; i < fBlocksPerEvent; i++) {
-        M11 = fBlock[i];
-        M12 = value.fBlock[i];
-        M22 = value.fBlockM2[i];
-        fBlock[i] -= (M12 - M11) / n;
-        fBlockM2[i] -= (M12 - M11) * (M12 - fBlock[i]); // note: using updated mean
-      }
+      // and for individual blocks  
+	  fBlock -= (M12b - M11b) / n;
+      fBlockM2 -= (M12b - M11b) * (M12b - fBlock); // note: using updated mean
     } else if (n == 1) {
       fHardwareBlockSum -= (M12 - M11) / n;
       fHardwareBlockSumM2 -= (M12 - M11)
@@ -1600,13 +1597,10 @@ void QwMollerADC_Channel::AccumulateRunningSum(const QwMollerADC_Channel& value,
       if (fabs(fHardwareBlockSumM2) < 10.*std::numeric_limits<double>::epsilon())
         fHardwareBlockSumM2 = 0; // rounding
       // and for individual blocks
-      for (Int_t i = 0; i < 4; i++) {
-        M11 = fBlock[i];
-        M12 = value.fBlock[i];
-        M22 = value.fBlockM2[i];
-        fBlock[i] -= (M12 - M11) / n;
-        fBlockM2[i] -= (M12 - M11) * (M12 - fBlock[i]); // note: using updated mean
-        if (fabs(fBlockM2[i]) < 10.*std::numeric_limits<double>::epsilon())
+	  fBlock -= (M12b - M11b) / n;
+      fBlockM2 -= (M12b - M11b) * (M12b - fBlock); // note: using updated mean
+      for (Int_t i = 0; i < 4; i++) { 
+		if (fabs(fBlockM2[i]) < 10.*std::numeric_limits<double>::epsilon())
           fBlockM2[i] = 0; // rounding
       }
     } else if (n == 0) {
@@ -1617,13 +1611,10 @@ void QwMollerADC_Channel::AccumulateRunningSum(const QwMollerADC_Channel& value,
       if (fabs(fHardwareBlockSumM2) < 10.*std::numeric_limits<double>::epsilon())
         fHardwareBlockSumM2 = 0; // rounding
       // and for individual blocks
-      for (Int_t i = 0; i < 4; i++) {
-        M11 = fBlock[i];
-        M12 = value.fBlock[i];
-        M22 = value.fBlockM2[i];
-        fBlock[i] -= M12;
-        fBlockM2[i] -= M22;
-        if (fabs(fBlock[i]) < 10.*std::numeric_limits<double>::epsilon())
+	  fBlock -= M12b;
+	  fBlockM2 -= M22b;
+	  for (Int_t i = 0; i < 4; i++) {
+		if (fabs(fBlock[i]) < 10.*std::numeric_limits<double>::epsilon())
           fBlock[i] = 0; // rounding
         if (fabs(fBlockM2[i]) < 10.*std::numeric_limits<double>::epsilon())
           fBlockM2[i] = 0; // rounding
@@ -1637,27 +1628,17 @@ void QwMollerADC_Channel::AccumulateRunningSum(const QwMollerADC_Channel& value,
     fHardwareBlockSum += (M12 - M11) / n;
     fHardwareBlockSumM2 += (M12 - M11)
          * (M12 - fHardwareBlockSum); // note: using updated mean
-    // and for individual blocks
-    for (size_t i = 0; i < fBlocksPerEvent; i++) {
-      M11 = fBlock[i];
-      M12 = value.fBlock[i];
-      M22 = value.fBlockM2[i];
-      fBlock[i] += (M12 - M11) / n;
-      fBlockM2[i] += (M12 - M11) * (M12 - fBlock[i]); // note: using updated mean
-    }
+    // and for individual blocks 
+    fBlock -= (M12b - M11b) / n;
+    fBlockM2 -= (M12b - M11b) * (M12b - fBlock); // note: using updated mean mean
   } else if (n2 > 1) {
     // general version for addition of multi-event sets
     fGoodEventCount += n2;
     fHardwareBlockSum += n2 * (M12 - M11) / n;
     fHardwareBlockSumM2 += M22 + n1 * n2 * (M12 - M11) * (M12 - M11) / n;
     // and for individual blocks
-    for (size_t i = 0; i < fBlocksPerEvent; i++) {
-      M11 = fBlock[i];
-      M12 = value.fBlock[i];
-      M22 = value.fBlockM2[i];
-      fBlock[i] += n2 * (M12 - M11) / n;
-      fBlockM2[i] += M22 + n1 * n2 * (M12 - M11) * (M12 - M11) / n;
-    }
+    fBlock += n2 * (M12b - M11b) / n;
+    fBlockM2 += M22b + n1 * n2 * (M12b - M11b) * (M12b - M11b) / n;
   }
 
   // Nanny
