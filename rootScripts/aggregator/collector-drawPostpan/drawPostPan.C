@@ -19,7 +19,7 @@ void drawPostPan(string rootFnm, string dataTitle, string inputList){
   std::fstream infile(inputList);
   string draw;
   ofile.open(Form("o_%s.txt",dataTitle.c_str()),std::ofstream::out);
-  while ( std::getline(infile,draw) ) 
+  while ( std::getline(infile,draw) )
   {
     c1->Clear();
     DrawOneChannel(draw,"",t,dataTitle,c1);
@@ -41,7 +41,7 @@ void DrawOneChannel(TString channelName, TCut userCut,TTree *t, string dataTitle
   double* run =new double[npt];
   for(int ipt=0;ipt<npt;ipt++)
     run[ipt] = *(dummy+ipt);
-  
+
   t->Draw("mini:Entry$",userCut,"goff");
   double* mini = new double[npt];
   dummy = t->GetV1();
@@ -76,7 +76,7 @@ void DrawOneChannel(TString channelName, TCut userCut,TTree *t, string dataTitle
     hCorr -> Fill(*(dummy+ipt));
   }
 
-  TPaveText *pt = new TPaveText(0.6,0.8,0.89,0.89,"blNDC");  
+  TPaveText *pt = new TPaveText(0.6,0.8,0.89,0.89,"blNDC");
   pt->SetBorderSize(0);
   pt->SetFillColor(0);
   pt->SetFillStyle(3155);
@@ -117,7 +117,7 @@ void DrawOneChannel(TString channelName, TCut userCut,TTree *t, string dataTitle
 
     cout<<channelName<<":\t"<<fconst->GetParameter(0)<<"\t+\\-\t"<<hCorr->GetRMS()<<endl;
     ofile<<fconst->GetParameter(0)<<","<<hCorr->GetRMS()<<",";
-    
+
   }else if(channelName.Contains("mean")){
     TString channel_err = channelName;
     channel_err.ReplaceAll("mean","err");
@@ -230,7 +230,7 @@ void pullUtil(TH1 *h,TCanvas *c1){
   h->DrawCopy();
   p1->SetGridx(1);
   p1->SetGridy(1);
-  
+
   const int nBin = h->GetXaxis()->GetNbins();
   double xlow = h->GetBinCenter(1) - h->GetBinWidth(1)/2;
   double xhigh = h->GetBinCenter(nBin) + h->GetBinWidth(nBin)/2;

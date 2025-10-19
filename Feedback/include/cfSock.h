@@ -23,7 +23,7 @@
 /* structure for requests from clients to server */
 
 struct request
-{ 
+{
    long  magic_cookie;
    long  command_type;
    long  command;
@@ -33,5 +33,3 @@ struct request
    char  message[REQUEST_MSG_SIZE];    /* message buffer */
    long  msgLen;                       // length of message text
 };
-
-

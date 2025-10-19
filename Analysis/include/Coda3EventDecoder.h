@@ -97,7 +97,7 @@ public:
 		explicit coda_format_error( const std::string& what_arg ) : std::runtime_error(what_arg) {}
 		explicit coda_format_error( const char* what_arg )        : std::runtime_error(what_arg) {}
 	};
-	
+
 	// Trigger Bank OBJect
 	class TBOBJ {
 	public:

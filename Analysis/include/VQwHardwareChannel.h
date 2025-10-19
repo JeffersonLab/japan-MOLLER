@@ -121,7 +121,7 @@ public:
 
   /*! \brief Get the number of subelements in this data element */
   size_t GetNumberOfSubelements() {return fNumberOfSubElements;};
-  
+
   Int_t GetRawValue() const       {return this->GetRawValue(0);};
   Double_t GetValue() const       {return this->GetValue(0);};
   Double_t GetValueM2() const     {return this->GetValueM2(0);};
@@ -135,10 +135,10 @@ public:
     RangeCheck(element);
     Double_t width;
     if (fGoodEventCount>0){
-      width = (GetValueError(element)*std::sqrt(Double_t(fGoodEventCount))); 
+      width = (GetValueError(element)*std::sqrt(Double_t(fGoodEventCount)));
     } else {
       width = 0.0;
-    } 
+    }
     return width;
   };
 
@@ -154,7 +154,7 @@ public:
   void  InitializeChannel(TString name){InitializeChannel(name, "raw");};
   virtual void  InitializeChannel(TString name, TString datatosave) = 0;
   virtual void  InitializeChannel(TString subsystem, TString instrumenttype, TString name, TString datatosave) = 0;
-  
+
   //Check for hardware errors in the devices. This will return the device error code.
   virtual Int_t ApplyHWChecks() = 0;
 
@@ -177,15 +177,15 @@ public:
     if (foundburp){
       fErrorFlag |= kErrorFlag_BurpCut;
     }
-    
+
     return foundburp;
   }
-  
-  /*! \brief Set the upper and lower limits (fULimit and fLLimit) 
+
+  /*! \brief Set the upper and lower limits (fULimit and fLLimit)
    *         for this channel */
   void SetSingleEventCuts(Double_t min, Double_t max);
-  /*! \brief Inherited from VQwDataElement to set the upper and lower 
-   *         limits (fULimit and fLLimit), stability % and the 
+  /*! \brief Inherited from VQwDataElement to set the upper and lower
+   *         limits (fULimit and fLLimit), stability % and the
    *         error flag on this channel */
   void SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability=-1.0, Double_t BurpLevel=-1.0);
 
@@ -196,12 +196,12 @@ public:
 
   UInt_t UpdateErrorFlag() override {return GetEventcutErrorFlag();};
   void UpdateErrorFlag(const VQwHardwareChannel& elem){fErrorFlag |= elem.fErrorFlag;};
-  virtual UInt_t GetErrorCode() const {return (fErrorFlag);}; 
+  virtual UInt_t GetErrorCode() const {return (fErrorFlag);};
 
   virtual  void IncrementErrorCounters()=0;
   virtual  void  ProcessEvent()=0;
- 
-  
+
+
   virtual void CalculateRunningAverage() = 0;
 //   virtual void AccumulateRunningSum(const VQwHardwareChannel *value) = 0;
 
@@ -218,12 +218,12 @@ public:
   };
     virtual void Ratio(const VQwHardwareChannel* numer, const VQwHardwareChannel* denom){
     if (!IsNameEmpty()){
-      this->AssignValueFrom(numer); 
+      this->AssignValueFrom(numer);
       this->operator/=(*denom);
-       
+
         // Remaining variables
     fGoodEventCount  = denom->fGoodEventCount;
-    fErrorFlag = (numer->fErrorFlag|denom->fErrorFlag);//error code is ORed.  
+    fErrorFlag = (numer->fErrorFlag|denom->fErrorFlag);//error code is ORed.
      }
   }
 
@@ -244,7 +244,7 @@ public:
   void AddEntriesToList(std::vector<QwDBInterface> &row_list);
   virtual void AddErrEntriesToList(std::vector<QwErrDBInterface> & /*row_list*/) {};
 
-  
+
   virtual void AccumulateRunningSum(const VQwHardwareChannel *value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF){
     if(count==0){
       count = value->fGoodEventCount;

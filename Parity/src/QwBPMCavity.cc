@@ -116,22 +116,22 @@ void  QwBPMCavity::InitializeChannel(TString subsystem, TString name)
 {
   size_t i=0;
   Bool_t localdebug = kFALSE;
-  
+
   VQwBPM::InitializeChannel(name);
-  
+
   for(i=0;i<kNumElements;i++) {
     fElement[i].InitializeChannel(subsystem, "QwBPMCavity", name+subelement[i],"raw");
     if(localdebug)
       std::cout<<" Wire ["<<i<<"]="<<fElement[i].GetElementName()<<"\n";
   }
-  
+
   for(i=kXAxis;i<kNumAxes;i++){
     fRelPos[i].InitializeChannel(subsystem, "QwBPMCavity", name+"Rel"+subelement[i],"derived");
     fAbsPos[i].InitializeChannel(subsystem, "QwBPMCavity", name+kAxisLabel[i],"derived");
   }
-  
+
   bFullSave=kTRUE;
-  
+
   return;
 }
 
@@ -224,7 +224,7 @@ UInt_t QwBPMCavity::UpdateErrorFlag()
 {
   size_t i=0;
   UInt_t error1=0;
-  UInt_t error2=0;  
+  UInt_t error2=0;
   for(i=0;i<kNumElements;i++) {
     error1|=fElement[i].GetErrorCode();
     error2|=fElement[i].GetEventcutErrorFlag();
@@ -357,15 +357,15 @@ void QwBPMCavity::SetSingleEventCuts(TString ch_name, UInt_t errorflag,Double_t 
   errorflag|=kBPMErrorFlag;//update the device flag
   if (ch_name=="relx"){
     QwMessage<<"RelX LL " <<  minX <<" UL " << maxX <<QwLog::endl;
-     fRelPos[0].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel); 
+     fRelPos[0].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel);
 
   }else if (ch_name=="rely"){
     QwMessage<<"RelY LL " <<  minX <<" UL " << maxX <<QwLog::endl;
-    fRelPos[1].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel); 
+    fRelPos[1].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel);
 
   } else  if (ch_name=="absx"){
     QwMessage<<"AbsX LL " <<  minX <<" UL " << maxX <<QwLog::endl;
-    fAbsPos[0].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel); 
+    fAbsPos[0].SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel);
 
   }else if (ch_name=="absy"){
     QwMessage<<"AbsY LL " <<  minX <<" UL " << maxX <<QwLog::endl;
@@ -453,7 +453,7 @@ void QwBPMCavity::UpdateErrorFlag(const VQwBPM *ev_error){
     }
   } catch (std::exception& e) {
     std::cerr<< e.what()<<std::endl;
-  }   
+  }
 };
 
 
@@ -467,8 +467,8 @@ void  QwBPMCavity::ProcessEvent()
   size_t i = 0;
 
   ApplyHWChecks();
-  /**First apply HW checks and update HW  error flags. 
-     Calling this routine here and not in ApplySingleEventCuts  
+  /**First apply HW checks and update HW  error flags.
+     Calling this routine here and not in ApplySingleEventCuts
      makes a difference for a BPMs because they have derived devices.
   */
   for(i=0;i<kNumElements;i++) {
@@ -1107,4 +1107,3 @@ void QwBPMCavity::SetSubElementCalibrationFactor(Int_t j, Double_t value)
 {
   fElement[j].SetCalibrationFactor(value);
 }
-

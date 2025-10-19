@@ -68,7 +68,7 @@ function first_existing_directory() {
 	echo "None of the paths"
 	for dir ; do [[ -n $dir ]] && echo "  " "$dir" ; done
 	echo "is a directory"
-    } >&2 
+    } >&2
 }
 function first_path_with_file() {
     file=$1 ; shift
@@ -82,7 +82,7 @@ function first_path_with_file() {
 	echo "None of the paths"
 	for dir ; do [[ -n $dir ]] && echo "  " "$dir" ; done
 	echo "contains the file $file"
-    } >&2 
+    } >&2
 }
 function report_status() {
     ## If bash had any sort of references or pointers this would be a
@@ -165,7 +165,7 @@ report_status BOOST_LIB_DIR ${BOOST_LIB_DIR}
 ###  Set up ROOT if it isn't done yet.
 ###  Expect to use /apps/root/PRO
 
-###  This section could in principle use the first_existing_directory() 
+###  This section could in principle use the first_existing_directory()
 ###  pattern, but so far root-config is doing its job
 
 #  Verify the existence of the ROOTSYS directory

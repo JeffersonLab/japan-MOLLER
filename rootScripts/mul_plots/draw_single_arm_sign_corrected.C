@@ -31,7 +31,7 @@ void draw_single_arm_sign_corrected(const char * name, const int slugs[], const 
         exit(2);
       }
       if (ihwp == "OUT") {
-        if (flip == "RIGHT") 
+        if (flip == "RIGHT")
           signs[slug_number] = 1;
         else if (flip == "LEFT")
           signs[slug_number] = -1;
@@ -40,7 +40,7 @@ void draw_single_arm_sign_corrected(const char * name, const int slugs[], const 
           exit(2);
         }
       } else if (ihwp == "IN") {
-        if (flip == "RIGHT") 
+        if (flip == "RIGHT")
           signs[slug_number] = -1;
         else if (flip == "LEFT")
           signs[slug_number] = 1;
@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
         case 'n':
           name = optarg;
           break;
-      }   
+      }
     }
 
     if (argc == optind) {

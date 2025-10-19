@@ -668,7 +668,7 @@ void QwSubsystemArray::FillTreeVector(QwRootTreeBranchVector &values) const
 /**
  * Construct the RNTuple fields and ve
  * @param prefix Prefix
- * @param values Vector of values  
+ * @param values Vector of values
  * @param fieldPtrs Vector of shared field pointers
  */
 void QwSubsystemArray::ConstructNTupleAndVector(
@@ -686,7 +686,7 @@ void QwSubsystemArray::ConstructNTupleAndVector(
   values.push_back(0.0);
   values.push_back(0.0);
   values.push_back(0.0);
-  
+
   // Add corresponding field pointers and create fields
   if (prefix == "" || prefix.Index("yield_") == 0) {
     auto eventNumField = model->MakeField<Double_t>("CodaEventNumber");
@@ -694,7 +694,7 @@ void QwSubsystemArray::ConstructNTupleAndVector(
     auto cleanDataField = model->MakeField<Double_t>("Coda_CleanData");
     auto scanData1Field = model->MakeField<Double_t>("Coda_ScanData1");
     auto scanData2Field = model->MakeField<Double_t>("Coda_ScanData2");
-    
+
     fieldPtrs.push_back(eventNumField);
     fieldPtrs.push_back(eventTypeField);
     fieldPtrs.push_back(cleanDataField);
@@ -708,7 +708,7 @@ void QwSubsystemArray::ConstructNTupleAndVector(
     fieldPtrs.push_back(nullptr);
     fieldPtrs.push_back(nullptr);
   }
-  
+
   // Process subsystems
   for (iterator subsys = begin(); subsys != end(); ++subsys) {
     VQwSubsystem* subsys_ptr = dynamic_cast<VQwSubsystem*>(subsys->get());
@@ -750,22 +750,22 @@ void QwSubsystemArray::FillNTupleVector(std::vector<Double_t>& values) const
 //     TList* return_maps_TList = new TList;
 //     return_maps_TList->SetOwner(true);
 //     return_maps_TList->SetName(name);
-    
+
 //     std::vector<TString> mapfiles_vector_subsystem;
 
 //     Int_t num_of_mapfiles_subsystem = 0;
 
-//     for (const_iterator subsys = begin(); subsys != end(); ++subsys) 
+//     for (const_iterator subsys = begin(); subsys != end(); ++subsys)
 //       {
 // 	(*subsys)->PrintDetectorMaps(true);
 // 	mapfiles_vector_subsystem = (*subsys)->GetParamFileNameList();
 // 	num_of_mapfiles_subsystem = (Int_t) mapfiles_vector_subsystem.size();
-	
-// 	for (Int_t i=0; i<num_of_mapfiles_subsystem; i++) 
+
+// 	for (Int_t i=0; i<num_of_mapfiles_subsystem; i++)
 // 	  {
 // 	    return_maps_TList -> AddLast(new TObjString(mapfiles_vector_subsystem[i]));
 // 	  }
-	
+
 // 	mapfiles_vector_subsystem.clear();
 //       }
 //     return return_maps_TList;
@@ -795,11 +795,11 @@ TList* QwSubsystemArray::GetParamFileNameList(TString name) const
 
     std::map<TString, TString> mapfiles_subsystem;
 
-    for (const_iterator subsys = begin(); subsys != end(); ++subsys) 
+    for (const_iterator subsys = begin(); subsys != end(); ++subsys)
       {
 	mapfiles_subsystem = (*subsys)->GetDetectorMaps();
 	for( std::map<TString, TString>::iterator ii= mapfiles_subsystem.begin(); ii!= mapfiles_subsystem.end(); ++ii)
-	  {	
+	  {
 	    TList *test = new TList;
 	    test->SetName((*ii).first);
 	    test->AddLast(new TObjString((*ii).second));
@@ -823,7 +823,7 @@ TList* QwSubsystemArray::GetParamFileNameList(TString name) const
  */
 void QwSubsystemArray::push_back(std::shared_ptr<VQwSubsystem> subsys)
 {
-  
+
  if (subsys.get() == NULL) {
    QwError << "QwSubsystemArray::push_back(): NULL subsys"
            << QwLog::endl;
@@ -858,8 +858,3 @@ void QwSubsystemArray::push_back(std::shared_ptr<VQwSubsystem> subsys)
    }
  }
 }
-  
-  
-  
-  
-  

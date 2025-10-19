@@ -135,8 +135,8 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
       }
     }
   }
- 
-  TString varvalue; 
+
+  TString varvalue;
   // Now load the variables to publish
   std::vector<std::vector<TString> > fPublishList;
   map.RewindToFileStart();
@@ -181,7 +181,7 @@ Int_t QwCombiner::ConnectChannels(
   fIndependentVar.resize(fDependentName.size());
   fDependentVar.resize(fDependentName.size());
   fOutputVar.resize(fDependentName.size());
-  
+
   for (size_t dv = 0; dv < fDependentName.size(); dv++) {
     // Add independent variables
     for (size_t iv = 0; iv < fIndependentName.at(dv).size(); iv++) {
@@ -217,7 +217,7 @@ Int_t QwCombiner::ConnectChannels(
     const VQwHardwareChannel* chan = NULL;
     string name = "";
     string calc = "calc_";
-    
+
     if (fDependentType.at(dv)==kHandleTypeMps){
       //  Quietly ignore the MPS type when we're connecting the asym & diff
       continue;
@@ -255,8 +255,8 @@ Int_t QwCombiner::ConnectChannels(
       //QwMessage << "dv: " << name << QwLog::endl;
       if (fIndependentVar.at(dv).empty()) {
         // Throw exception: alias cannot be created without independent variables
-        throw std::runtime_error("Cannot create alias '" + name + 
-              "' for dependent variable '" + fDependentName.at(dv) + 
+        throw std::runtime_error("Cannot create alias '" + name +
+              "' for dependent variable '" + fDependentName.at(dv) +
               "': no independent variables found to determine channel type");
       } else {
         // Preferred: use Clone() from first independent variable to preserve channel type
@@ -271,7 +271,7 @@ Int_t QwCombiner::ConnectChannels(
     } else {
       QwWarning << "Dependent variable " << fDependentName.at(dv) << " could not be found, "
                 << "or is not a known channel type." << QwLog::endl;
-      continue; 
+      continue;
     }
 
     // pair creation
@@ -280,7 +280,7 @@ Int_t QwCombiner::ConnectChannels(
       fOutputVar[dv] = new_chan;
     }
   }
-  
+
   // Store error flag pointer
   QwMessage << "Using asymmetry error flag" << QwLog::endl;
   fErrorFlagPointer = asym.GetEventcutErrorFlagPointer();
@@ -301,7 +301,7 @@ Int_t QwCombiner::ConnectChannels(QwSubsystemArrayParity& event)
   fIndependentVar.resize(fDependentName.size());
   fDependentVar.resize(fDependentName.size());
   fOutputVar.resize(fDependentName.size());
-  
+
   for (size_t dv = 0; dv < fDependentName.size(); dv++) {
 
     // Add independent variables
@@ -361,14 +361,14 @@ Int_t QwCombiner::ConnectChannels(QwSubsystemArrayParity& event)
     if(new_chan==NULL){
       QwWarning << "Dependent variable " << fDependentName.at(dv) << " could not be found, "
                 << "or is not a known channel type." << QwLog::endl;
-      continue; 
+      continue;
     } else {
       // pair creation
       fDependentVar[dv] = chan;
       fOutputVar[dv] = new_chan;
     }
   }
-  
+
   // Store error flag pointer
   QwMessage << "Using event error flag" << QwLog::endl;
   fErrorFlagPointer = event.GetEventcutErrorFlagPointer();

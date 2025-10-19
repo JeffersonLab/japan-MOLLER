@@ -7,20 +7,20 @@ using namespace ROOT;
 /******* Channel class for storing information regarding a particular device *******/
 
 // Class initialization
-class Channel{ 
-    public: 
+class Channel{
+    public:
     TString name;                           // Name of channel. Ends with _mean, _rms, or _slope according to aggregator convention.
     double value;                           // value for the slug
-    double value_err;                       // error for the slug 
+    double value_err;                       // error for the slug
     double pull;                            // pull mean for the value
     double pull_err;                        // pull error for the value
-  
+
     Channel (TString a): name (a)  {};
     void draw(TTree *, TString);
     TGraphErrors drawReg(Int_t, Double_t *, Double_t *, Double_t *, Double_t *, Double_t *);
     std::vector<TH1F> drawPull(Int_t, Double_t *, Double_t *, Double_t *, Double_t *, Double_t *);
     void printInfo() { std::cout << "Plotting "<< name<<" graph" << endl;}
-};  
+};
 
 
 void Channel::draw(TTree* tree,TString output){
@@ -29,7 +29,7 @@ auto chan_t=tree;
 TString unit="";
 if (chan_name.Contains("slope")){
   unit="*nm/ppb";
-} else { 
+} else {
 if (chan_name.Contains("epics_")||chan_name.Contains("slow_")){
   if (chan_name.Contains("_mean")) {unit="/1";} else{unit="/1";}
 }
@@ -41,16 +41,16 @@ if (chan_name.Contains("bcm_") && (chan_name.Contains("_avg")||chan_name.Contain
 }
 if (chan_name.Contains("diff_")){
   if (chan_name.Contains("_mean")) {unit="/nm";} else{unit="/nm";}
-}  
+}
 if (chan_name.Contains("bpm_") && (chan_name.Contains("_avg")||chan_name.Contains("_da") || chan_name.Contains("_dd"))){
   if (chan_name.Contains("_mean")) {unit="/nm";} else {unit="/nm";}
-}  
+}
 
 if (chan_name.Contains("yield_")){
   if (chan_name.Contains("bpm")) {unit="/mm";}
   if (chan_name.Contains("usl")||chan_name.Contains("dsl") || chan_name.Contains("usr") || chan_name.Contains("dsr")|| chan_name.Contains("sam")) {unit="/mV_uA";}
 }
-}  
+}
 
 TTreeFormula f("name",chan_name, chan_t);
 
@@ -88,7 +88,7 @@ p3->Draw();
 p3->UseCurrentStyle();
 p1->cd();
 g=this->drawReg(nEntries, index, chan_t->GetV1(), chan_t->GetV2(), chan_t->GetV3(), chan_t->GetV4());
-g.Draw("ap"); 
+g.Draw("ap");
 p1->SetGrid();
 p2->cd();
 p=this->drawPull(nEntries, index, chan_t->GetV1(), chan_t->GetV2(), chan_t->GetV3(), chan_t->GetV4());
@@ -107,7 +107,7 @@ c->Print(output+".pdf");
 
 TGraphErrors Channel::drawReg(Int_t nEntries, Double_t *index,  Double_t *v1, Double_t *v2, Double_t *v3, Double_t *v4){
 
-auto chan_name =  (this->name).Data(); 
+auto chan_name =  (this->name).Data();
 gStyle->SetOptFit(1);
 TGraphErrors g(nEntries,index, v3, 0, v4);
 TAxis* a = g.GetXaxis();
@@ -137,7 +137,7 @@ return g;
 
 
 std::vector<TH1F> Channel::drawPull(Int_t nEntries, Double_t *index, Double_t *run, Double_t *minirun, Double_t *value, Double_t *value_error){
-  
+
 std::vector<TH1F> pulls;
 TH1F pull("pull", "",nEntries+1,0,nEntries+1);
 TH1F pull1D("pull1D", "", 40, -8, 8);
@@ -170,11 +170,11 @@ class Source {
     Int_t slug, ihwp, wein, hrs;
   public:
     std::vector<Channel> list;
-    TChain *T;   
+    TChain *T;
     Source (TString a, TString b, TString c, Int_t i, Int_t j, Int_t k, Int_t l): file(a), tree(b), output(c), slug(i), ihwp(j), wein(k), hrs(l) {T=new TChain(tree); T->Add(file+slug+".root");}
-    void printInfo() { std::cout << "Reading from  " << tree  << " tree in file " << std::endl;} 
+    void printInfo() { std::cout << "Reading from  " << tree  << " tree in file " << std::endl;}
     void drawAll();
-    Channel GetChannelByName(TString name);    
+    Channel GetChannelByName(TString name);
 
 };
 
@@ -188,12 +188,12 @@ void Source::drawAll(){
 
   TString empty = "CAM_OUTPUTDIR: Undefined variable.";
   TString outputDir = "";
-  TString out_dir = gSystem->Getenv("CAM_OUTPUTDIR"); 
+  TString out_dir = gSystem->Getenv("CAM_OUTPUTDIR");
   if (out_dir == "" || out_dir == "NULL"){
     Printf("Error: Output dir (%s) invalid, must be a string\n",out_dir.Data     ());
     out_dir = "./";
   }
-  outputDir = out_dir; 
+  outputDir = out_dir;
 
   TString aggregatorFileName = Form("%s/aggregator.root",outputDir.Data()); // FIXME, this is very specific, and doesn't allow for aggregating over slugs, for instance
   // Store all trees
@@ -201,7 +201,7 @@ void Source::drawAll(){
   TFile *aggregatorFile = new TFile(aggregatorFileName,"UPDATE");
   aggregatorFile->cd();
   TTree * outputTree = new TTree("agg","Aggregator Tree");
-  // Intentionally not using a struct here to match prior aggregator output definition 
+  // Intentionally not using a struct here to match prior aggregator output definition
   // and to simplify life for other people, and to allow for non-mean kinds of variables to be used
   tmpNRuns = (Double_t)this->slug;
   outputTree->Branch("run_number", &tmpRunN);
@@ -227,9 +227,9 @@ void Source::drawAll(){
   Int_t nChans = 0;
   while (auto *var= var_iter.Next()){
     TString name(var->GetName());
-    bool createPlotObj = ((name.Contains("_mean") || name.Contains("_slope") || name.Contains("_pslope")|| name.Contains("_rms")) && !(name.Contains("_error"))); 
+    bool createPlotObj = ((name.Contains("_mean") || name.Contains("_slope") || name.Contains("_pslope")|| name.Contains("_rms")) && !(name.Contains("_error")));
     if (createPlotObj) {
-      Channel *channel = new Channel(var->GetName());     
+      Channel *channel = new Channel(var->GetName());
       channel->printInfo();
       channel->draw(this->T, filename);
       (this->list).push_back(*channel);
@@ -241,7 +241,7 @@ void Source::drawAll(){
       //outputTree->Branch(Form("%s_error",name.Data()),this->list.at(nChans).value_err);
       nChans++;
     }
-  } 
+  }
   outputTree->Fill();
   outputTree->Write("agg",TObject::kOverwrite);
   aggregatorFile->Close();
@@ -256,7 +256,7 @@ Channel Source::GetChannelByName(TString name){
       chan=*iter;
       break;
     }
-  } 
+  }
   //printf("Found %s", (chan.name).Data());
   return chan;
 }

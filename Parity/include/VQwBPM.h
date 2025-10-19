@@ -55,7 +55,7 @@ class VQwBPM : public VQwDataElement {
    *         Virtual base class for the BPMs in the beamline.
    *         This will define a set of functions that are used by the
    *         BPMStripline and CombinedBPM classes for data decoding.
-   *         This parent class will define the basic structure of a 
+   *         This parent class will define the basic structure of a
    *         BPM. The basic object doesn't care about the inputs.
    *         It only defines absolute positions and an effective charge.
    *           BPMs  have 4 input wires for position: XP, XM, YP, YM
@@ -64,10 +64,10 @@ class VQwBPM : public VQwDataElement {
    ******************************************************************/
   template <typename TT> friend class QwBPMStripline;
   template <typename TT> friend class QwCombinedBPM;
-  friend class QwEnergyCalculator;  
+  friend class QwEnergyCalculator;
 
  public:
-  ///  Axis enumerator for the BPMs; 
+  ///  Axis enumerator for the BPMs;
   ///  Z will never be an instrumented axis.
   enum EBeamPositionMonitorAxis{kXAxis=0, kYAxis, kNumAxes};
 
@@ -95,7 +95,7 @@ class VQwBPM : public VQwDataElement {
 
   virtual  void    GetProjectedPosition(VQwBPM * /*device*/){}; // The base class function GetProjectedPosition is defined to have no effect.
   virtual  size_t  GetNumberOfElements(){return size_t(1);}
-  virtual  void    FillRawEventData() 
+  virtual  void    FillRawEventData()
     {std::cerr << "FillRawEventData for VQwBPM not implemented for device " << GetElementName() << "!\n";};
 
 //-------------------------------------------------------------------------------------
@@ -141,8 +141,8 @@ class VQwBPM : public VQwDataElement {
      return const_cast<VQwBPM*>(this)->GetPosition(axis);
    }
 
-   
- 
+
+
 
 protected:
    virtual VQwHardwareChannel* GetPosition(EBeamPositionMonitorAxis axis){
@@ -155,7 +155,7 @@ protected:
        TString loc="VQwBPM::GetPosition for "
          +this->GetElementName()+" failed for axis value "+Form("%d",axis);
        throw std::out_of_range(loc.Data());
-     } 
+     }
      return tmpptr;
    }
 
@@ -285,7 +285,7 @@ public:
   virtual void SetSubElementCalibrationFactor(Int_t /*j*/, Double_t /*value*/) {
     std::cerr << "SetSubElementCalibrationFactor is undefined!!!\n";
   }
-  void PrintInfo() const override { 
+  void PrintInfo() const override {
     std::cout<<"PrintInfo() for VQwBPM not impletemented\n";
   };
 

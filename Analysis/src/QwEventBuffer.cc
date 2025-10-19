@@ -116,7 +116,7 @@ void QwEventBuffer::DefineOptions(QwOptions &options)
     ("codafile-ext", po::value<string>()->default_value(fDefaultDataFileExtension),
      "extension of the input CODA filename");
   options.AddOptions()
-    ("directfile", po::value<string>(), 
+    ("directfile", po::value<string>(),
     "Run over single event file");
   //  Special flag to allow sub-bank IDs less than 31
   options.AddDefaultOptions()
@@ -125,16 +125,16 @@ void QwEventBuffer::DefineOptions(QwOptions &options)
   //  Options specific to the ET clients
   options.AddOptions("ET system options")
     ("ET.hostname", po::value<string>(),
-     "Name of the ET session's host machine --- Only used in online mode\nDefaults to the environment variable $HOSTNAME"); 
+     "Name of the ET session's host machine --- Only used in online mode\nDefaults to the environment variable $HOSTNAME");
   options.AddOptions("ET system options")
     ("ET.session", po::value<string>(),
-     "ET session name --- Only used in online mode\nDefaults to the environment variable $SESSION"); 
+     "ET session name --- Only used in online mode\nDefaults to the environment variable $SESSION");
   options.AddOptions("ET system options")
     ("ET.station", po::value<string>(),
-     "ET station name --- Only used in online mode"); 
+     "ET station name --- Only used in online mode");
   options.AddOptions("ET system options")
     ("ET.waitmode", po::value<int>()->default_value(0),
-     "ET system wait mode: 0 is wait-forever, 1 is timeout \"quickly\"  --- Only used in online mode"); 
+     "ET system wait mode: 0 is wait-forever, 1 is timeout \"quickly\"  --- Only used in online mode");
   options.AddOptions("ET system options")
     ("ET.exit-on-end", po::value<bool>()->default_value(false),
      "Exit the event loop if the end event is found. JAPAN remains open and waits for the next run. --- Only used in online mode");
@@ -211,7 +211,7 @@ void QwEventBuffer::ProcessOptions(QwOptions &options)
   fDataFileStem = options.GetValue<string>("codafile-stem");
   fDataFileExtension = options.GetValue<string>("codafile-ext");
 	fDataVersion = options.GetValue<int>("coda-version");
-	
+
 	if(fDataVersion == 2){
 		decoder = new Coda2EventDecoder();
 	} else if(fDataVersion == 3) {
@@ -221,7 +221,7 @@ void QwEventBuffer::ProcessOptions(QwOptions &options)
 						<< "Please set using --coda-version 2(3)" << QwLog::endl;
     exit(EXIT_FAILURE);
 	}
-	
+
 	decoder->SetAllowLowSubbankIDs( options.GetValue<bool>("allow-low-subbank-ids") );
 
   // Open run list file
@@ -461,9 +461,9 @@ Int_t QwEventBuffer::GetNextEvent()
       if (decoder->GetEvtNumber() > 1000) status = EOF;
     }
     if (fOnline && fExitOnEnd && decoder->GetEndTime()>0){
-      // fExitOnEnd exits the event loop only and does not exit JAPAN. 
+      // fExitOnEnd exits the event loop only and does not exit JAPAN.
       // The root file gets processed and JAPAN immediately waits for the next run.
-      // We considered adding a exit-JAPAN-on-end flag that quits JAPAN but decided 
+      // We considered adding a exit-JAPAN-on-end flag that quits JAPAN but decided
       // we didn't have a use case for it. If quitting JAPAN is desired, just set:
       // globalEXIT = 1
       // -- mrc (01/21/25)
@@ -522,7 +522,7 @@ Int_t QwEventBuffer::GetEvent()
 }
 
 // Tries to figure out what Coda Version the Data is
-// fDataVersionVerify = 
+// fDataVersionVerify =
 //  	      2 -- Coda Version 2
 //		      3 -- Coda Version 3
 // 	   	      0 -- Default (Unknown, Could be a EPICs Event or a ROCConfiguration)
@@ -534,14 +534,14 @@ void QwEventBuffer::VerifyCodaVersion( const UInt_t *buffer )
 	int bot = (header & 0xff      );
 	fDataVersionVerify = 0;     // Default
 	if( (top == 0xff) && (bot != 0xcc) ){
-		fDataVersionVerify = 3; // Coda 3	
+		fDataVersionVerify = 3; // Coda 3
 	} else if( (top != 0xff) && (bot == 0xcc) ){
 		fDataVersionVerify = 2; // Coda 2
-	} 
+	}
 	// Validate
 	if( (fDataVersion != fDataVersionVerify) && (fDataVersionVerify != 0 ) ){
     	QwError << "QwEventBuffer::GetEvent:  Coda Version is not recognized" << QwLog::endl;
-		QwError << "fDataVersion == " << fDataVersion 
+		QwError << "fDataVersion == " << fDataVersion
 	   	 	    << ", but it looks like the data is from Coda Version "
 			    << fDataVersionVerify
 			    << "\nTry running with --coda-version " << fDataVersionVerify
@@ -760,7 +760,7 @@ Bool_t QwEventBuffer::FillSubsystemData(QwSubsystemArray &subsystems)
   //  Reload the data buffer and decode the header again, this allows
   //  multiple calls to this function for different subsystem arrays.
   UInt_t *localbuff = (UInt_t*)(fEvStream->getEvBuffer());
-  
+
 	decoder->DecodeEventIDBank(localbuff);
 
   //  Clear the old event information from the subsystems.
@@ -810,7 +810,7 @@ Bool_t QwEventBuffer::FillSubsystemData(QwSubsystemArray &subsystems)
     //
     //  After trying the data in each subsystem, bump the
     //  fWordsSoFar to move to the next bank.
-		
+
 		// TODO:
 		// What is special about this subbank?
     if( decoder->GetROC() == 0 && decoder->GetSubbankTag()==0x6101) {
@@ -822,7 +822,7 @@ Bool_t QwEventBuffer::FillSubsystemData(QwSubsystemArray &subsystems)
       //		<<", FragLength="<<GetFragLength() << " " <<fCleanParameter[0]<< " " <<fCleanParameter[1]<< " " <<fCleanParameter[2]<<std::endl;
 
     }
-    
+
     subsystems.SetCleanParameters(fCleanParameter);
 
     std::size_t nmarkers = CheckForMarkerWords(subsystems);
@@ -840,7 +840,7 @@ Bool_t QwEventBuffer::FillSubsystemData(QwSubsystemArray &subsystems)
     } else {
       QwDebug << "QwEventBuffer::FillSubsystemData:  "
 	      << "fROC=="<<decoder->GetROC() << ", GetSubbankTag()==" << decoder->GetSubbankTag()
-	      << QwLog::endl;	
+	      << QwLog::endl;
       subsystems.ProcessEvBuffer(decoder->GetEvtType(), decoder->GetROC(), decoder->GetSubbankTag(),
 				 &localbuff[decoder->GetWordsSoFar()],
 				 decoder->GetFragLength());
@@ -892,10 +892,10 @@ Bool_t QwEventBuffer::FillEPICSData(QwEPICSEvent &epics)
 	//  This is an ASCII string bank.  Try to decode it and
 	//  pass it to the EPICS class.
 	char* tmpchar = (Char_t*)&localbuff[decoder->GetWordsSoFar()];
-	
+
 	epics.ExtractEPICSValues(string(tmpchar), GetEventNumber());
 	QwVerbose << "test for GetEventNumber =" << GetEventNumber() << QwLog::endl;// always zero, wrong.
-	
+
       }
 
 
@@ -914,11 +914,11 @@ Bool_t QwEventBuffer::FillEPICSData(QwEPICSEvent &epics)
       //  This is an ASCII string bank.  Try to decode it and
       //  pass it to the EPICS class.
       Char_t* tmpchar = (Char_t*)&localbuff[decoder->GetWordsSoFar()];
-      
+
       QwError << tmpchar << QwLog::endl;
-      
+
       epics.ExtractEPICSValues(string(tmpchar), GetEventNumber());
-      
+
     }
 
   }
@@ -1238,9 +1238,9 @@ std::size_t QwEventBuffer::CheckForMarkerWords(QwSubsystemArray &subsystems)
     fMarkerList.emplace(fThisRocBankLabel, tmpvec);
     fOffsetList.emplace(fThisRocBankLabel, std::vector<UInt_t>(tmpvec.size(),0));
   }
-  QwDebug << "QwEventBuffer::GetMarkerWordList:  fMarkerList.count(fThisRocBankLabel)==" 
-	  << fMarkerList.count(fThisRocBankLabel) 
-	  << " fMarkerList.at(fThisRocBankLabel).size()==" 
+  QwDebug << "QwEventBuffer::GetMarkerWordList:  fMarkerList.count(fThisRocBankLabel)=="
+	  << fMarkerList.count(fThisRocBankLabel)
+	  << " fMarkerList.at(fThisRocBankLabel).size()=="
 	  << fMarkerList.at(fThisRocBankLabel).size()
 	  << QwLog::endl;
   return fMarkerList.at(fThisRocBankLabel).size();

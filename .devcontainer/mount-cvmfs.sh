@@ -33,7 +33,7 @@ mount_cvmfs() {
             sleep 2
         fi
     done
-    
+
     log "❌ Failed to mount $repo after $max_attempts attempts"
     return 1
 }

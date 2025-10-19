@@ -11,7 +11,7 @@ void realtimeBmodAna() {
   //tree_R->Draw(">>elist1","beam_mod_ramp>0 && bmwobj>0","entrylist");
   //TEntryList *elist1 = (TEntryList*)gDirectory->Get("elist1");
   //tree_R->SetEntryList(elist1);
-  
+
   int nonzero = tree_R->Draw("bmwcycnum","beam_mod_ramp>0 && bmwobj>0","goff");
   //if (nonzero>50) { //then we have enough data to do a full cycle analysis most likely
   TLeaf *l_bmwcycnum = tree_R->GetLeaf("bmwcycnum");
@@ -37,7 +37,7 @@ void realtimeBmodAna() {
     runNum = runFile(runFile.Length()-13,4);
     Printf("Preparing to do run %s BMOD analysis",runNum.Data());
   }
-  if ((lastCyclenum < currentCyclenum-1)){ 
+  if ((lastCyclenum < currentCyclenum-1)){
     // The goal of this if condition is to prevent the analysis from running once every 10 seconds in panguin. Ideally we just check if the file was editted in the last 5 minutes. If no then analyze
     Printf("Running BMOD Analysis from inside PANGUIN on realtime root file");
     gSystem->Exec(Form("echo %f > /adaqfs/home/apar/PREX/japan/panguin/macros/BeamMod/last_cycle_num.txt",currentCyclenum));

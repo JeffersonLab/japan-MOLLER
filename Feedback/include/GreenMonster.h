@@ -116,5 +116,5 @@ private:
   void SCNUpdateStatus(Int_t);
   Bool_t SCNCheckStatus();
   void SCNCheckValues();
-  
+
 };

@@ -1,12 +1,12 @@
 !
-!This file contains beamline event cut properties last updated 10/27/2009 based on run 752/755 
+!This file contains beamline event cut properties last updated 10/27/2009 based on run 752/755
 !
 !*********************************************************************************************
 !Global switch to turn ON and OFF eventcut check
 !Available settings
 !***************************************************
 !To turn OFF all checks
-!EVENTCUTS = 0 
+!EVENTCUTS = 0
 
 !***************************************************
 !To turn OFF event cuts and perform only HW checks
@@ -26,37 +26,37 @@ EVENTCUTS = 3
 !device_type, device_name,  lower limit [uA], upper limit [uA]
 ! ****** The bcm lower cut value should be 70% of the asked current
 ! for 150 uA, lower limit 100 uA
-!bcm, qwk_bcm1,			110,		1000000,  	g,  	0 
+!bcm, qwk_bcm1,			110,		1000000,  	g,  	0
 
 ! for standard running beam current range 10-180 uA
-!bcm, qwk_bcm1,			1,		1000000,  	l,  	2 
-bcm, qwk_bcm8,			10,		1000000,  	g,  	2 
+!bcm, qwk_bcm1,			1,		1000000,  	l,  	2
+bcm, qwk_bcm8,			10,		1000000,  	g,  	2
 
 ! for 100 uA, lower limit 100 uA
-!bcm, qwk_bcm1,			80,		1000000,  	g,  	0 
-!bcm, qwk_bcm1,		20,		1000000,  	g,  	0 
+!bcm, qwk_bcm1,			80,		1000000,  	g,  	0
+!bcm, qwk_bcm1,		20,		1000000,  	g,  	0
 ! for 130 uA, lower limit 91 uA
-! bcm, qwk_bcm1,			91,		1000000,  	g,  	0  
+! bcm, qwk_bcm1,			91,		1000000,  	g,  	0
 ! for 120 uA, lower limit 84 uA
-! bcm, qwk_bcm1,		105,		1000000,  	g,  	0  
+! bcm, qwk_bcm1,		105,		1000000,  	g,  	0
 ! for 90 uA, lower limit 63 uA
-! bcm, qwk_bcm1,			63,		1000000, 	g, 	0  
+! bcm, qwk_bcm1,			63,		1000000, 	g, 	0
 ! for 80 uA, lower limit 56 uA
-! bcm, qwk_bcm1,			56,		1000000,  	g,  	0  
+! bcm, qwk_bcm1,			56,		1000000,  	g,  	0
 !halomonitor , sca_habcm, 5, 	1000000,	l,	0
 ! for 1 uA, lower limit 98 uA
-!bcm, qwk_bcm1,			0.2,		1000000,  	g,  	0  
+!bcm, qwk_bcm1,			0.2,		1000000,  	g,  	0
 
-!bcm, qwk_bcm1,			35,		1000000,  	g,  	0 
-!bcm, qwk_bcm1,                  14,             1000000,  	g,  	0 
-!bcm, qwk_bcm1,  		7,		1000000,  	g,  	0 
-!bcm, qwk_bcm2, 		0, 		0,  	g,  	0 
-!bcm, qwk_bcm3, 		0, 		0,  	g,  	0 
-!bcm, qwk_bcm5, 		0, 		0,  	g,  	0 
-!bcm, qwk_bcm6, 		0, 		0,  	g,  	0 
+!bcm, qwk_bcm1,			35,		1000000,  	g,  	0
+!bcm, qwk_bcm1,                  14,             1000000,  	g,  	0
+!bcm, qwk_bcm1,  		7,		1000000,  	g,  	0
+!bcm, qwk_bcm2, 		0, 		0,  	g,  	0
+!bcm, qwk_bcm3, 		0, 		0,  	g,  	0
+!bcm, qwk_bcm5, 		0, 		0,  	g,  	0
+!bcm, qwk_bcm6, 		0, 		0,  	g,  	0
 
 
-!For bpmstrpline devices 
+!For bpmstrpline devices
 !channel_name can be relx, rely, absx, absy, effective charge, xp, xm, yp, ym
 !Cuts are applied after the VQwSubsystem::ProcessEvent() routine.
 ! So pedestals are applied before appyling the cuts.
@@ -89,7 +89,7 @@ bpmstripline, 	qwk_bpm3h09,    YM,		0,  61900,	 l,	 0
 !
 !IMPORTANT
 !---------
-!Make sure when puting tabs in the map file entries, always put ", " before inserting a tab. 
+!Make sure when puting tabs in the map file entries, always put ", " before inserting a tab.
 !Otherwise the routine QwParameterFile::GetNextToken(", ") will extract the entry with the tab character.
 
 !Comments
@@ -98,4 +98,3 @@ bpmstripline, 	qwk_bpm3h09,    YM,		0,  61900,	 l,	 0
 !All devices  will be tested for HW checks.
 !
 !For device_type =bcm only upper and lower limit of the calibrated charge on the ADC HW sum. (QwVQWK_Channel::fHardwareBlockSum)
-

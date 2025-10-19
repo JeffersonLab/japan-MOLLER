@@ -43,11 +43,11 @@ void  QwLinearDiodeArray::InitializeChannel(TString name)
 
   for(i=0;i<8;i++) {
     fPhotodiode[i].InitializeChannel(name+subelement[i],"raw");
-    
+
     if(localdebug)
       std::cout<<" photodiode ["<<i<<"]="<<fPhotodiode[i].GetElementName()<<"\n";
   }
-  
+
 
   fEffectiveCharge.InitializeChannel(name+"WS","derived");
 
@@ -169,7 +169,7 @@ UInt_t QwLinearDiodeArray::UpdateErrorFlag()
 {
   size_t i=0;
   UInt_t error1=0;
-  UInt_t error2=0;  
+  UInt_t error2=0;
   for(i=0;i<8;i++){
     error1|=fPhotodiode[i].GetErrorCode();
     error2|=fPhotodiode[i].GetEventcutErrorFlag();
@@ -194,7 +194,7 @@ Bool_t QwLinearDiodeArray::ApplySingleEventCuts()
   UInt_t error_code = 0;
   //Event cuts for four wires
   for(i=0;i<8;i++){
-    if (fPhotodiode[i].ApplySingleEventCuts()){ 
+    if (fPhotodiode[i].ApplySingleEventCuts()){
       status&=kTRUE;
     }
     else{
@@ -314,7 +314,7 @@ Bool_t QwLinearDiodeArray::CheckForBurpFail(const VQwDataElement *ev_error){
         for(i=0;i<8;i++){
           burpstatus |= fPhotodiode[i].CheckForBurpFail(&(value_lin->fPhotodiode[i]));
         }
-        burpstatus |= fEffectiveCharge.CheckForBurpFail(&(value_lin->fEffectiveCharge)); 
+        burpstatus |= fEffectiveCharge.CheckForBurpFail(&(value_lin->fEffectiveCharge));
       }
     } else {
       TString loc="Standard exception from QwLinearDiodeArray::CheckForBurpFail :"+
@@ -351,7 +351,7 @@ void QwLinearDiodeArray::UpdateErrorFlag(const VQwBPM *ev_error){
     }
   } catch (std::exception& e) {
     std::cerr<< e.what()<<std::endl;
-  }  
+  }
 };
 
 void  QwLinearDiodeArray::ProcessEvent()
@@ -369,8 +369,8 @@ void  QwLinearDiodeArray::ProcessEvent()
 
 
   ApplyHWChecks();
-  //first apply HW checks and update HW  error flags. 
-  // Calling this routine here and not in ApplySingleEventCuts  
+  //first apply HW checks and update HW  error flags.
+  // Calling this routine here and not in ApplySingleEventCuts
   //makes a difference for a LinearArrays because they have derived devices.
 
   fEffectiveCharge.ClearEventData();
@@ -378,8 +378,8 @@ void  QwLinearDiodeArray::ProcessEvent()
     fPhotodiode[i].ProcessEvent();
     fEffectiveCharge+=fPhotodiode[i];
   }
-  
-  
+
+
   //  First calculate the mean pad position and mean of squared pad position
   //  with respect to the center of the array, in units of pad spacing.
   mean.ClearEventData();
@@ -412,7 +412,7 @@ void  QwLinearDiodeArray::ProcessEvent()
     std::cout<<" total charge ="<<fEffectiveCharge.GetValue()<<std::endl;
 
   }
-  
+
   return;
 }
 
@@ -879,7 +879,7 @@ void  QwLinearDiodeArray::SetRandomEventParameters(Double_t meanX, Double_t sigm
   Double_t sumX = 1.1e8; // These are just guesses, but I made X and Y different
   Double_t sumY = 0.9e8; // to make it more interesting for the analyzer...
 
-  
+
   // Determine the asymmetry from the position
   Double_t meanXP = (1.0 + meanX) * sumX / 2.0;
   Double_t meanXM = (1.0 - meanX) * sumX / 2.0; // = sumX - meanXP;
@@ -944,4 +944,3 @@ void QwLinearDiodeArray::SetSubElementCalibrationFactor(Int_t j, Double_t value)
   fPhotodiode[j].SetCalibrationFactor(value);
   return;
 }
-

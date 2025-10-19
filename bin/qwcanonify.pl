@@ -10,7 +10,7 @@ use File::Glob qw[:glob];
 ### search for "helpstring" below for documentation
 ################################################################
 
-my ($help,$quiet,$dryrun,$runrange); 
+my ($help,$quiet,$dryrun,$runrange);
 my @searchpaths = (`pwd`, $ENV{QW_DATA});
 
 ## Add other useful defalut paths here, whitespace-separated
@@ -45,7 +45,7 @@ Options:
 	--dryrun	just yak about it, don't do anything
 Symlinks are made in \$QW_DATA; yours is
 	$ENV{QW_DATA}
-Your search path is 
+Your search path is
 EOF
 $helpstring .= "\t$_\n" foreach @searchpaths;
 
@@ -85,7 +85,7 @@ RUN: foreach my $run ($lowrun .. $highrun) {
     my @found = glob "$path/*_$run.{dat,log}*";
 
     FILE: foreach my $src (@found) {
-      my($segment) = ($src =~ /(\.\d+)?$/); 
+      my($segment) = ($src =~ /(\.\d+)?$/);
       $segment = "" unless defined $segment;
       print "$src -> $dest$segment\n" unless $quiet;
       unless ($dryrun) {

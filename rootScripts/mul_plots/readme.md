@@ -14,9 +14,9 @@
 
 ## rootfiles
   there are two trees in the resulted root file: reg and dit; the 'reg' tree store
-  raw and reg data and the 'dit' tree collects dithering data. Currently, only 
-  asym of main det. (and their combinations) are collected. If you need data about 
-  other det. (monitors), then you can modify the code of "make_mul_tree.C" to add 
+  raw and reg data and the 'dit' tree collects dithering data. Currently, only
+  asym of main det. (and their combinations) are collected. If you need data about
+  other det. (monitors), then you can modify the code of "make_mul_tree.C" to add
   needed branch (remember to compile modified file with `make` command).
 
   !!! Note: the cut condition for these two trees are different:
@@ -31,25 +31,25 @@
     > ./draw_single_arm -n "name_prefix" path_to_rootfiles1 path_to_rootfiles2 ...
 
   correspondingly, there areeeeeee sign corrected version of previous two command:
-  * draw_mul_plots_sign_corrected:  
-      as the name implies, this command applies sign correction to data, currently, this command only works 
+  * draw_mul_plots_sign_corrected:
+      as the name implies, this command applies sign correction to data, currently, this command only works
       with slug data, but not any run data
     > ./draw_mul_plots_sign_corrected -n "name_prefix" slug1 slug2
-      it reads data from reselts dir. by assuming root file path as "results/slugN_mul_tree.root", so if you 
-      have rootfiles stored in some other place, you need to make a link in the results dir. and change its 
+      it reads data from reselts dir. by assuming root file path as "results/slugN_mul_tree.root", so if you
+      have rootfiles stored in some other place, you need to make a link in the results dir. and change its
       name to proper format to make the command work
   * draw_single_arm_sign_corrected
       left (right) version
 
   To make sign correction, it depends on a default input of "/adaqfs/home/apar/weibin/analysis/slug_sign.list"
-  which specify the sign for each slug. 
+  which specify the sign for each slug.
 
 ## compilation
   > make
 
 
 # Notes
-## single arm running: 
+## single arm running:
   * slug8: 3453-3507
   * slug9: 3524-3541
   * slug10: 3543-3563
