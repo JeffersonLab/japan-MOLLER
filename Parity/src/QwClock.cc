@@ -90,7 +90,7 @@ Bool_t QwClock<T>::ApplyHWChecks()
 {
   Bool_t eventokay=kTRUE;
 
-  UInt_t deviceerror=fClock.ApplyHWChecks();//will check for HW consistancy and return the error code (=0 is HW good)
+  UInt_t deviceerror=fClock.ApplyHWChecks();//will check for HW consistency and return the error code (=0 is HW good)
   eventokay=(deviceerror & 0x0);//if no HW error return true
 
   return eventokay;
@@ -123,7 +123,7 @@ Bool_t QwClock<T>::ApplySingleEventCuts(){
   }
   else{
 
-    if (bDEBUG) std::cout<<" evnt cut failed:-> set limit "<<fULimit<<" harware sum  "<<fClock.GetValue();
+    if (bDEBUG) std::cout<<" evnt cut failed:-> set limit "<<fULimit<<" hardware sum  "<<fClock.GetValue();
     status&=kFALSE;
   }
   return status;
@@ -132,7 +132,7 @@ Bool_t QwClock<T>::ApplySingleEventCuts(){
 /********************************************************/
 
 template<typename T>
-void QwClock<T>::PrintErrorCounters() const{// report number of events failed due to HW and event cut faliure
+void QwClock<T>::PrintErrorCounters() const{// report number of events failed due to HW and event cut failure
   fClock.PrintErrorCounters();
 }
 
@@ -178,7 +178,7 @@ VQwClock& QwClock<T>::operator= (const VQwClock &value)
         this_cast->fCalibration=value_bcm->fCalibration;
       }
     } else {
-      TString loc="Standard exception from QwClock::operato= :"+
+      TString loc="Standard exception from QwClock::operator= :"+
         value.GetElementName()+" "+this->GetElementName()+" are not of the "
         +"same type";
       throw std::invalid_argument(loc.Data());

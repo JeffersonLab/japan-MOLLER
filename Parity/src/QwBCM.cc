@@ -223,7 +223,7 @@ void QwBCM<T>::EncodeEventData(std::vector<UInt_t> &buffer)
 template<typename T>
 void QwBCM<T>::ProcessEvent()
 {
-  this->ApplyHWChecks();//first apply HW checks and update HW  error flags. Calling this routine either in ApplySingleEventCuts or here do not make any difference for a BCM but do for a BPMs because they have derrived devices.
+  this->ApplyHWChecks();//first apply HW checks and update HW  error flags. Calling this routine either in ApplySingleEventCuts or here do not make any difference for a BCM but do for a BPMs because they have derived devices.
   fBeamCurrent.ProcessEvent();
 }
 /********************************************************/
@@ -236,7 +236,7 @@ Bool_t QwBCM<T>::ApplyHWChecks()
 {
   Bool_t eventokay=kTRUE;
 
-  UInt_t deviceerror=fBeamCurrent.ApplyHWChecks();//will check for HW consistancy and return the error code (=0 is HW good)
+  UInt_t deviceerror=fBeamCurrent.ApplyHWChecks();//will check for HW consistency and return the error code (=0 is HW good)
   eventokay=(deviceerror & 0x0);//if no HW error return true
 
   return eventokay;
@@ -245,7 +245,7 @@ Bool_t QwBCM<T>::ApplyHWChecks()
 
 /** \brief Set basic single-event cut limits. */
 template<typename T>
-Int_t QwBCM<T>::SetSingleEventCuts(Double_t LL, Double_t UL){//std::vector<Double_t> & dEventCuts){//two limts and sample size
+Int_t QwBCM<T>::SetSingleEventCuts(Double_t LL, Double_t UL){//std::vector<Double_t> & dEventCuts){//two limits and sample size
   fBeamCurrent.SetSingleEventCuts(LL,UL);
   return 1;
 }
@@ -294,14 +294,14 @@ Bool_t QwBCM<T>::ApplySingleEventCuts()
 /** \brief Increment error counters (number of failed events). */
 template<typename T>
 void QwBCM<T>::IncrementErrorCounters()
-{// report number of events failed due to HW and event cut faliure
+{// report number of events failed due to HW and event cut failure
   fBeamCurrent.IncrementErrorCounters();
 }
 
 /** \brief Print error counters (const overload). */
 template<typename T>
 void QwBCM<T>::PrintErrorCounters() const
-{// report number of events failed due to HW and event cut faliure
+{// report number of events failed due to HW and event cut failure
   fBeamCurrent.PrintErrorCounters();
 }
 
@@ -371,7 +371,7 @@ VQwBCM& QwBCM<T>::operator= (const VQwBCM &value)
         this_cast->fBeamCurrent= value_bcm->fBeamCurrent;
       }
     } else {
-      TString loc="Standard exception from QwBCM::operato= :"+
+      TString loc="Standard exception from QwBCM::operator= :"+
         value.GetElementName()+" "+this->GetElementName()+" are not of the "
         +"same type";
       throw std::invalid_argument(loc.Data());

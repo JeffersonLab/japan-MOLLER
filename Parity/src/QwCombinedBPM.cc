@@ -252,7 +252,7 @@ Bool_t QwCombinedBPM<T>::ApplySingleEventCuts()
     ///         is not meaningful for every VQwDataElement.
     ///         Maybe the return should be a VQwHardwareChannel?
 
-    //To update the event cut faliures in individual BPM devices
+    //To update the event cut failures in individual BPM devices
     charge_error      |= fElement[i]->GetEffectiveCharge()->GetErrorCode();
     pos_error[kXAxis] |= fElement[i]->GetPosition(kXAxis)->GetErrorCode();
     pos_error[kYAxis] |= fElement[i]->GetPosition(kYAxis)->GetErrorCode();
@@ -334,7 +334,7 @@ UInt_t QwCombinedBPM<T>::UpdateErrorFlag()
   UInt_t error = 0;
   
   for(size_t i=0;i<fElement.size();i++){
-    //To update the event cut faliures in individual BPM devices
+    //To update the event cut failures in individual BPM devices
     charge_error      |= fElement[i]->GetEffectiveCharge()->GetErrorCode();
     pos_error[kXAxis] |= fElement[i]->GetPosition(kXAxis)->GetErrorCode();
     pos_error[kYAxis] |= fElement[i]->GetPosition(kYAxis)->GetErrorCode();
@@ -597,11 +597,11 @@ void  QwCombinedBPM<T>::ProcessEvent()
     std::cout<<" QwCombinedBPM:: Projected target X position = "<<fAbsPos[kXAxis].GetValue()
 	     <<" and target X slope = "<<fSlope[kXAxis].GetValue()
 	     <<" and target X intercept = "<<fIntercept[kXAxis].GetValue()
-	     <<" with mimimum chi square = "<< fMinimumChiSquare[kXAxis].GetValue()
+	     <<" with minimum chi square = "<< fMinimumChiSquare[kXAxis].GetValue()
 	     <<" \nProjected target Y position = "<<fAbsPos[kYAxis].GetValue()
 	     <<" and target Y slope = "<<fSlope[kYAxis].GetValue()
 	     <<" and target Y intercept = "<<fIntercept[kYAxis].GetValue()
-	     <<" with mimimum chi square = "<< fMinimumChiSquare[kYAxis].GetValue()<<std::endl;
+	     <<" with minimum chi square = "<< fMinimumChiSquare[kYAxis].GetValue()<<std::endl;
 		 
   }
 
@@ -661,7 +661,7 @@ template<typename T>
    Double_t sum = 0.0;
    if(weight.size()!=fElement.size()){
      std::cout
-       <<"QwCombinedBPM:: Number of devices doesnt match the number of weights."
+       <<"QwCombinedBPM:: Number of devices doesn't match the number of weights."
        <<" Exiting calculating parameters for the least squares fit"
        <<std::endl;
    }
@@ -750,7 +750,7 @@ template<typename T>
 
 
    // to perform the minimul chi-square test
-   // We want to calculte (X-az-b)^2 for each bpm in the combination and sum over the values
+   // We want to calculate (X-az-b)^2 for each bpm in the combination and sum over the values
    tmp3.ClearEventData();
    fMinimumChiSquare[axis].ClearEventData();
 
@@ -961,7 +961,7 @@ template<typename T>
 void QwCombinedBPM<T>::Ratio(QwCombinedBPM<T> &numer,
     QwCombinedBPM<T> &denom)
 {
-  // this function is called when forming asymmetries. In this case waht we actually want for the
+  // this function is called when forming asymmetries. In this case what we actually want for the
   // combined bpm is the difference only not the asymmetries
 
   *this=numer;
@@ -1057,7 +1057,7 @@ void  QwCombinedBPM<T>::ConstructHistograms(TDirectory *folder, TString &prefix)
     //  This channel is not used, so skip filling the histograms.
   }
   else{
-    //we calculate the asym_ for the fEffectiveCharge becasue its an asymmetry and not a difference.
+    //we calculate the asym_ for the fEffectiveCharge because its an asymmetry and not a difference.
     fEffectiveCharge.ConstructHistograms(folder, prefix);
     TString thisprefix=prefix;
     if(prefix.Contains("asym_"))
@@ -1323,7 +1323,7 @@ void QwCombinedBPM<T>::LoadMockDataParameters(QwParameterFile &paramfile){
   Double_t meanX=0.0, sigmaX=0.0, meanY=0.0, sigmaY=0.0;
   Double_t meanXslope=0.0, sigmaXslope=0.0, meanYslope=0.0, sigmaYslope=0.0;
 */
-  Double_t xres=0.0, yres=0.0; //  Temporary variables for the resoluton.
+  Double_t xres=0.0, yres=0.0; //  Temporary variables for the resolution.
 
   if (paramfile.GetLine().find("resolution")!=std::string::npos){
     paramfile.GetNextToken();

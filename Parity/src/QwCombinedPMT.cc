@@ -192,7 +192,7 @@ void QwCombinedPMT::SetDefaultSampleSize(Int_t sample_size)
   fSumADC.SetDefaultSampleSize((size_t)sample_size);
 }
 
-// report number of events failed due to HW and event cut faliure
+// report number of events failed due to HW and event cut failure
 /** \brief Print error counters aggregated by the sum ADC. */
 void QwCombinedPMT::PrintErrorCounters() const
 {

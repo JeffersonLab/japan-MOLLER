@@ -305,7 +305,7 @@ void QwEnergyCalculator::IncrementErrorCounters()
  * \brief Print accumulated error counters for diagnostic purposes.
  */
 void QwEnergyCalculator::PrintErrorCounters() const{
-  // report number of events failed due to HW and event cut faliure
+  // report number of events failed due to HW and event cut failure
   fEnergyChange.PrintErrorCounters();
 }
 /*

@@ -95,10 +95,10 @@ template<typename T> class QwBCM : public VQwBCM {
   void  SetExternalRandomVariable(Double_t random_variable);
 
   void  ProcessEvent() override;
-  Bool_t ApplyHWChecks();//Check for harware errors in the devices
-  Bool_t ApplySingleEventCuts() override;//Check for good events by stting limits on the devices readings
+  Bool_t ApplyHWChecks();//Check for hardware errors in the devices
+  Bool_t ApplySingleEventCuts() override;//Check for good events by setting limits on the devices readings
   void IncrementErrorCounters() override;
-  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure
   UInt_t GetEventcutErrorFlag() override{//return the error flag
     return fBeamCurrent.GetEventcutErrorFlag();
   }
@@ -108,7 +108,7 @@ template<typename T> class QwBCM : public VQwBCM {
   UInt_t GetErrorCode() const {return (fBeamCurrent.GetErrorCode());}; 
 
 
-  Int_t SetSingleEventCuts(Double_t mean = 0, Double_t sigma = 0);//two limts and sample size
+  Int_t SetSingleEventCuts(Double_t mean = 0, Double_t sigma = 0);//two limits and sample size
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   void SetSingleEventCuts(UInt_t errorflag, Double_t min = 0, Double_t max = 0, Double_t stability = 0, Double_t burplevel = 0) override;
 

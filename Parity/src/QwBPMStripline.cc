@@ -459,7 +459,7 @@ void  QwBPMStripline<T>::ProcessEvent()
   ApplyHWChecks();
   /**First apply HW checks and update HW  error flags. 
      Calling this routine here and not in ApplySingleEventCuts  
-     makes a difference for a BPMs because they have derrived devices.
+     makes a difference for a BPMs because they have derived devices.
   */
 
   fEffectiveCharge.ClearEventData();
@@ -494,12 +494,12 @@ void  QwBPMStripline<T>::ProcessEvent()
 
      To get back to accelerator coordinates, rotate anti-clockwise around +Z by phi degrees (angle w.r.t X axis).							
      
-     RelX (accelarator coordinates) =  cos(phi) RelX - sin(phi)RelY
+     RelX (accelerator coordinates) =  cos(phi) RelX - sin(phi)RelY
     
-     RelY (accelarator coordinates) =  sin(phi) RelX + cos(Phi)RelY 
+     RelY (accelerator coordinates) =  sin(phi) RelX + cos(Phi)RelY 
  
      The Ellipticity is calculated as coefficients*(xp+xm-yp-ym)/(xp+xm+yp+ym) 
-       where the coeffients are ~ 2*k/sigma, k = stripline calibration, sigma = BPM effective size
+       where the coefficients are ~ 2*k/sigma, k = stripline calibration, sigma = BPM effective size
   */
 
   for(i=kXAxis;i<kNumAxes;i++)
@@ -573,7 +573,7 @@ Int_t QwBPMStripline<T>::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in
   else
     {
     std::cerr <<
-      "QwBPMStripline::ProcessEvBuffer(): attempt to fill in raw data for a wire that doesn't exist \n";
+      "QwBPMStripline::ProcessEvBuffer(): attemptt to fill in raw data for a wire that doesn't exist \n";
     }
   return word_position_in_buffer;
 }
@@ -744,7 +744,7 @@ void QwBPMStripline<T>::Ratio( VQwBPM &numer, VQwBPM &denom)
 template<typename T>
 void QwBPMStripline<T>::Ratio( QwBPMStripline<T> &numer, QwBPMStripline<T> &denom)
 {
-  // this function is called when forming asymmetries. In this case waht we actually want for the
+  // this function is called when forming asymmetries. In this case what we actually want for the
   // stripline is the difference only not the asymmetries
 
   *this=numer;

@@ -690,7 +690,7 @@ class QwRootFile {
     template < class T >
     Int_t WriteObject(const T* obj, const char* name, Option_t* option = "", Int_t bufsize = 0) {
       Int_t retval = 0;
-      // TMapFile has no suport for WriteObject
+      // TMapFile has no support for WriteObject
       if (fRootFile) retval = fRootFile->WriteObject(obj,name,option,bufsize);
       return retval;
     }
@@ -711,7 +711,7 @@ class QwRootFile {
 	  nBytes += iter->second.front()->AutoSave("SaveSelf");
         
 	QwMessage << "TFile saved: "
-                  << nBytes/1000000 << "MB (innacurate number)" //FIXME this calculation is innacurate
+                  << nBytes/1000000 << "MB (inaccurate number)" //FIXME this calculation is inaccurate
                   << QwLog::endl;
       }
     }
@@ -770,7 +770,7 @@ class QwRootFile {
 
     // Wrapped functionality
     TDirectory* mkdir(const char* name, const char* title = "") {
-      // TMapFile has no suport for mkdir
+      // TMapFile has no support for mkdir
       if (fRootFile) return fRootFile->mkdir(name, title);
       else return 0;
     }
@@ -778,7 +778,7 @@ class QwRootFile {
     // Wrapped functionality
     Int_t Write(const char* name = 0, Int_t option = 0, Int_t bufsize = 0) {
       Int_t retval = 0;
-      // TMapFile has no suport for Write
+      // TMapFile has no support for Write
       if (fRootFile) retval = fRootFile->Write(name, option, bufsize);
       return retval;
     }

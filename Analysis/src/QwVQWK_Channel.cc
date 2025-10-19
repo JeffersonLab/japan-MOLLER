@@ -1156,7 +1156,7 @@ void QwVQWK_Channel::AssignValueFrom(const  VQwDataElement* valueptr)
     *this = *tmpptr;
   } else {
     TString loc="Standard exception from QwVQWK_Channel::AssignValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -1168,7 +1168,7 @@ void QwVQWK_Channel::AddValueFrom(const  VQwHardwareChannel* valueptr)
     *this += *tmpptr;
   } else {
     TString loc="Standard exception from QwVQWK_Channel::AddValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -1180,7 +1180,7 @@ void QwVQWK_Channel::SubtractValueFrom(const  VQwHardwareChannel* valueptr)
     *this -= *tmpptr;
   } else {
     TString loc="Standard exception from QwVQWK_Channel::SubtractValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -1192,7 +1192,7 @@ void QwVQWK_Channel::MultiplyBy(const VQwHardwareChannel* valueptr)
     *this *= *tmpptr;
   } else {
     TString loc="Standard exception from QwVQWK_Channel::MultiplyBy = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -1204,7 +1204,7 @@ void QwVQWK_Channel::DivideBy(const VQwHardwareChannel* valueptr)
     *this /= *tmpptr;
   } else {
     TString loc="Standard exception from QwVQWK_Channel::DivideBy = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -1954,7 +1954,7 @@ void QwVQWK_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *value)
     this -> fSequenceNumber  =  0;
     this -> fErrorFlag       |= (input->fErrorFlag);   
   }
-  //   QwWarning << "Finsihed with addition"  << QwLog::endl;
+  //   QwWarning << "Finished with addition"  << QwLog::endl;
   //   PrintValue();
 }
 

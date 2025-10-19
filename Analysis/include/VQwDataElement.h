@@ -199,7 +199,7 @@ class VQwDataElement: public MQwHistograms {
 
   /// \brief Update the error flag based on the error flags of internally
   ///        contained objects
-  ///        Return paramter is the "Eventcut Error Flag".
+  ///        Return parameter is the "Eventcut Error Flag".
   virtual UInt_t UpdateErrorFlag() {return GetEventcutErrorFlag();};
 
   // These are related to those hardware channels that need to normalize

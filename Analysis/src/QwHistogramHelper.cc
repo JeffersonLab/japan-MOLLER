@@ -140,7 +140,7 @@ void  QwHistogramHelper::LoadHistParamsFromFile(const std::string& filename)
   //fDEBUG = 1;
 
   if (fDEBUG) std::cout<< "file name "<<fInputFile<<std::endl;
-  //Important to empty the fHistParams to reload the real time histo difinition file
+  //Important to empty the fHistParams to reload the real time histo definition file
   if (fTrimHistoEnable)
     fHistParams.clear();
   
@@ -284,7 +284,7 @@ const QwHistogramHelper::HistParams QwHistogramHelper::GetHistParamsFromList(con
 
   fDEBUG = 0;
   if (fDEBUG) {
-    QwMessage << "Finding histogram defination from: " << histname << QwLog::endl;
+    QwMessage << "Finding histogram definition from: " << histname << QwLog::endl;
     QwMessage << tmpstruct << QwLog::endl;
   }
   if (tmpstruct.name_title == fInvalidName && !fTrimHistoEnable) {

@@ -542,7 +542,7 @@ Bool_t QwSubsystemArrayParity::CheckForBurpFail(QwSubsystemArrayParity &event)
 }
 
 
-void QwSubsystemArrayParity::PrintErrorCounters() const{// report number of events failed due to HW and event cut faliure
+void QwSubsystemArrayParity::PrintErrorCounters() const{// report number of events failed due to HW and event cut failure
   const VQwSubsystemParity *subsys_parity = nullptr;
   if (!empty()){
     for (const_iterator subsys = begin(); subsys != end(); ++subsys){

@@ -273,7 +273,7 @@ void QwDataHandlerArray::ProcessOptions(QwOptions &options)
 }
 
 /**
- * Get the handler in this array with the spcified name
+ * Get the handler in this array with the specified name
  * @param name Name of the handler
  * @return Pointer to the handler
  */
@@ -608,7 +608,7 @@ void QwDataHandlerArray::AccumulateAllRunningSum(const QwDataHandlerArray& value
 
 
 /*
-void QwDataHandlerArray::PrintErrorCounters() const{// report number of events failed due to HW and event cut faliure
+void QwDataHandlerArray::PrintErrorCounters() const{// report number of events failed due to HW and event cut failure
   const VQwDataHandler *handler_parity;
   if (!empty()){
     for (const_iterator handler = begin(); handler != end(); ++handler){

@@ -69,8 +69,8 @@ class QwClock : public VQwClock {
   void  EncodeEventData(std::vector<UInt_t> &buffer);
 
   void  ProcessEvent() override;
-  Bool_t ApplyHWChecks();//Check for harware errors in the devices
-  Bool_t ApplySingleEventCuts() override;//Check for good events by stting limits on the devices readings
+  Bool_t ApplyHWChecks();//Check for hardware errors in the devices
+  Bool_t ApplySingleEventCuts() override;//Check for good events by setting limits on the devices readings
   void IncrementErrorCounters() override{fClock.IncrementErrorCounters();}
 
   Bool_t CheckForBurpFail(const QwClock *ev_error){
@@ -96,7 +96,7 @@ class QwClock : public VQwClock {
   }
 
 
-  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure
   UInt_t GetEventcutErrorFlag() override{//return the error flag
     return fClock.GetEventcutErrorFlag();
   }
@@ -177,7 +177,7 @@ class QwClock : public VQwClock {
   Int_t fDeviceErrorCode;//keep the device HW status using a unique code from the QwVQWK_Channel::fDeviceErrorCode
 
   const static  Bool_t bDEBUG=kFALSE;//debugging display purposes
-  Bool_t bEVENTCUTMODE;//If this set to kFALSE then Event cuts do not depend on HW ckecks. This is set externally through the qweak_beamline_eventcuts.map
+  Bool_t bEVENTCUTMODE;//If this set to kFALSE then Event cuts do not depend on HW checks. This is set externally through the qweak_beamline_eventcuts.map
 
   Double_t fNormalizationValue;
 

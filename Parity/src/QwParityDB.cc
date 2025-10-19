@@ -87,7 +87,7 @@ void QwParityDB::SetupOneRun(QwEventBuffer& qwevt)
     UInt_t runlet_id   = this->GetRunletID(qwevt);
     UInt_t analysis_id = this->GetAnalysisID(qwevt);
     
-    //  Write from the datebase
+    //  Write from the database
     QwMessage << "QwParityDB::SetupOneRun::"
 	      << " Run Number "  << QwColor(Qw::kBoldMagenta) << qwevt.GetRunNumber() << QwColor(Qw::kNormal)
 	      << " Run ID "      << QwColor(Qw::kBoldMagenta) << run_id << QwColor(Qw::kNormal)

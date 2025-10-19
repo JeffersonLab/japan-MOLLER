@@ -170,7 +170,7 @@ public:
   void DivideBy(const VQwScaler_Channel &denom);
   
 
-  Int_t ApplyHWChecks() override; //Check for harware errors in the devices. This will return the device error code.
+  Int_t ApplyHWChecks() override; //Check for hardware errors in the devices. This will return the device error code.
 
   Bool_t ApplySingleEventCuts() override;//check values read from modules are at desired level
 

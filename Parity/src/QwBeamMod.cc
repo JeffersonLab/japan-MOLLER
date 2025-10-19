@@ -291,7 +291,7 @@ void QwBeamMod::LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, I
 	  device_name.ToLower();
 	  Double_t LLX = mapstr.GetTypedNextToken<Double_t>();	//lower limit for BCM value
 	  Double_t ULX = mapstr.GetTypedNextToken<Double_t>();	//upper limit for BCM value
-	  varvalue = mapstr.GetTypedNextToken<TString>();//global/loacal
+	  varvalue = mapstr.GetTypedNextToken<TString>();//global/local
     Double_t burplevel = mapstr.GetTypedNextToken<Double_t>();
 	  varvalue.ToLower();
 	  Double_t stabilitycut = mapstr.GetTypedNextToken<Double_t>();
@@ -780,7 +780,7 @@ void  QwBeamMod::FillHistograms()
   // Due to the the way the ADC averages the ramp signal we want to filter
   // out events at the edged of the signal.
   //
-  // Seperated the ramp cut here because it is ridiculously long... 
+  // Separated the ramp cut here because it is ridiculously long... 
   //
 
   [[maybe_unused]]

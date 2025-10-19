@@ -476,7 +476,7 @@ void QwBeamLine::LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, 
 
 	Double_t LLX = mapstr.GetTypedNextToken<Double_t>();	//lower limit for BCM value
 	Double_t ULX = mapstr.GetTypedNextToken<Double_t>();	//upper limit for BCM value
-	varvalue = mapstr.GetTypedNextToken<TString>();//global/loacal
+	varvalue = mapstr.GetTypedNextToken<TString>();//global/local
   varvalue.ToLower();
 
   Double_t stabilitycut = mapstr.GetTypedNextToken<Double_t>();
@@ -618,7 +618,7 @@ Int_t QwBeamLine::LoadGeometryDefinition(TString mapfile){
       devOffsetX   = mapstr.GetTypedNextToken<Double_t>(); // X offset
       devOffsetY   = mapstr.GetTypedNextToken<Double_t>(); // Y offset
       devOffsetZ   = mapstr.GetTypedNextToken<Double_t>(); // Z offset
-      devSENfactor = mapstr.GetTypedNextToken<Double_t>(); // sensivity scaling factor
+      devSENfactor = mapstr.GetTypedNextToken<Double_t>(); // sensitivity scaling factor
       devAlphaX    = mapstr.GetTypedNextToken<Double_t>(); // alpha X
       devAlphaY    = mapstr.GetTypedNextToken<Double_t>(); // alpha Y
       
@@ -695,7 +695,7 @@ Int_t QwBeamLine::LoadGeometryDefinition(TString mapfile){
 	  //Load cavity bpm offsets
 	  if(index == -1){
 	    QwError << "QwBeamLine::LoadGeometryDefinition:  Unknown bpm : "
-		    <<devname<<" will not be asigned with geometry parameters. \n"
+		    <<devname<<" will not be assigned with geometry parameters. \n"
 		    <<QwLog::endl;
 	    notfound=kFALSE;
 	    continue;
@@ -715,7 +715,7 @@ Int_t QwBeamLine::LoadGeometryDefinition(TString mapfile){
 	  //Load QPD calibration factors
 	  if(index == -1){
 	    QwError << "QwBeamLine::LoadGeometryDefinition:  Unknown QPD : "
-		    <<devname<<" will not be asigned with calibration factors. \n"
+		    <<devname<<" will not be assigned with calibration factors. \n"
 		    <<QwLog::endl;
 	    notfound=kFALSE;
 	    continue;
@@ -1882,7 +1882,7 @@ VQwDataElement* QwBeamLine::GetElement(EQwBeamInstrumentType TypeID, Int_t index
     break;
   default:
     TString loc="QwBeamLine::GetElement called by "
-      +this->GetName()+" with invalid arguements: "
+      +this->GetName()+" with invalid arguments: "
       +GetQwBeamInstrumentTypeName(TypeID)+" "
       +Form("%d",index);
     throw std::invalid_argument(loc.Data());
@@ -1936,7 +1936,7 @@ const VQwHardwareChannel* QwBeamLine::GetChannel(EQwBeamInstrumentType TypeID, I
     tmp_channel = fClock.at(index)->GetTime();
   } else {
     TString loc="QwBeamLine::GetChannel called by "
-      +this->GetName()+" with invalid arguements: "
+      +this->GetName()+" with invalid arguments: "
       +GetQwBeamInstrumentTypeName(TypeID)+" "
       +Form("%d",index);
     throw std::invalid_argument(loc.Data());

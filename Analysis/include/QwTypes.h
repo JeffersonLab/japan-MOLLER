@@ -16,7 +16,7 @@ class TString;
 // Qweak headers
 #include "QwUnits.h"
 
-//  Types for the ROC_ID and Bank_ID used in decoding and destributing data
+//  Types for the ROC_ID and Bank_ID used in decoding and     distributing this software and its documentation for any purpose is hereby
 typedef UInt_t    ROCID_t;
 typedef ULong64_t BankID_t; /// Bank ID will combine both bank and marker words
 static const ROCID_t  kNullROCID  = kMaxUInt;

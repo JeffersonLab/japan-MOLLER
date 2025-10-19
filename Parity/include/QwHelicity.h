@@ -315,7 +315,7 @@ class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHeli
 
   UInt_t fErrorFlag;
 
-  /// Flag to disable the printing os missed MPS error messags during
+  /// Flag to disable the printing os missed MPS error messages during
   /// online running
   Bool_t fSuppressMPSErrorMsgs;
 

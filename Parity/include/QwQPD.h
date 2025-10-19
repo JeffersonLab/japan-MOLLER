@@ -90,14 +90,14 @@ class QwQPD : public VQwBPM {
   TString GetSubElementName(Int_t subindex) override;
   void    GetAbsolutePosition() override{};
 
-  Bool_t  ApplyHWChecks();//Check for harware errors in the devices
-  Bool_t  ApplySingleEventCuts() override;//Check for good events by stting limits on the devices readings
+  Bool_t  ApplyHWChecks();//Check for hardware errors in the devices
+  Bool_t  ApplySingleEventCuts() override;//Check for good events by setting limits on the devices readings
   //void    SetSingleEventCuts(TString ch_name, Double_t minX, Double_t maxX);
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   void    SetSingleEventCuts(TString ch_name, UInt_t errorflag,Double_t minX, Double_t maxX, Double_t stability, Double_t burplevel);
   void    SetEventCutMode(Int_t bcuts) override;
   void IncrementErrorCounters() override;
-  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure
   UInt_t  GetEventcutErrorFlag() override;
   UInt_t  UpdateErrorFlag() override;
   void UpdateErrorFlag(const VQwBPM *ev_error) override;

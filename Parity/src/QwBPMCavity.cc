@@ -469,7 +469,7 @@ void  QwBPMCavity::ProcessEvent()
   ApplyHWChecks();
   /**First apply HW checks and update HW  error flags. 
      Calling this routine here and not in ApplySingleEventCuts  
-     makes a difference for a BPMs because they have derrived devices.
+     makes a difference for a BPMs because they have derived devices.
   */
   for(i=0;i<kNumElements;i++) {
     fElement[i].ProcessEvent();
@@ -501,7 +501,7 @@ Int_t QwBPMCavity::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffe
   }
   else {
     std::cerr <<
-      "QwBPMCavity::ProcessEvBuffer(): attempt to fill in raw date for a wire that doesn't exist \n";
+      "QwBPMCavity::ProcessEvBuffer(): attemptt to fill in raw date for a wire that doesn't exist \n";
   }
   return word_position_in_buffer;
 }

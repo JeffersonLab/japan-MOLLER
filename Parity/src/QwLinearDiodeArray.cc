@@ -371,7 +371,7 @@ void  QwLinearDiodeArray::ProcessEvent()
   ApplyHWChecks();
   //first apply HW checks and update HW  error flags. 
   // Calling this routine here and not in ApplySingleEventCuts  
-  //makes a difference for a LinearArrays because they have derrived devices.
+  //makes a difference for a LinearArrays because they have derived devices.
 
   fEffectiveCharge.ClearEventData();
   for(i=0;i<8;i++){
@@ -408,7 +408,7 @@ void  QwLinearDiodeArray::ProcessEvent()
     for(Int_t i = 0; i<8; i++)
       std::cout<<" pad"<<i<<" ="<<fPhotodiode[i].GetValue()<<std::endl;
     std::cout<<" mean ="<<fRelPos[0].GetValue()<<std::endl;
-    std::cout<<" varaiance ="<<fRelPos[1].GetValue()<<std::endl;
+    std::cout<<" variance ="<<fRelPos[1].GetValue()<<std::endl;
     std::cout<<" total charge ="<<fEffectiveCharge.GetValue()<<std::endl;
 
   }
@@ -426,7 +426,7 @@ Int_t QwLinearDiodeArray::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_i
   else
     {
     std::cerr <<
-      "QwLinearDiodeArray::ProcessEvBuffer(): attemp to fill in raw data for a pad that doesn't exist \n";
+      "QwLinearDiodeArray::ProcessEvBuffer(): attempt to fill in raw data for a pad that doesn't exist \n";
     }
   return word_position_in_buffer;
 }
@@ -565,7 +565,7 @@ QwLinearDiodeArray& QwLinearDiodeArray::operator-= (const QwLinearDiodeArray &va
 
 void QwLinearDiodeArray::Ratio(QwLinearDiodeArray &numer, QwLinearDiodeArray &denom)
 {
-  // this function is called when forming asymmetries. In this case waht we actually want for the
+  // this function is called when forming asymmetries. In this case what we actually want for the
   // LinearArray is the difference only not the asymmetries
 
   *this=numer;

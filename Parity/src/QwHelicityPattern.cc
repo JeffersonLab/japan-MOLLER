@@ -270,7 +270,7 @@ void QwHelicityPattern::LoadEventData(QwSubsystemArrayParity &event)
 		<< QwLog::endl;
       }
     } else {
-      // We are not usng any helicity subsystem
+      // We are not using any helicity subsystem
       static Bool_t user_has_been_warned = kFALSE;
       if (! user_has_been_warned) {
 	QwError << "No helicity subsystem found!  Dropping to \"Missing Helicity\" mode!" << QwLog::endl;
@@ -396,7 +396,7 @@ void  QwHelicityPattern::CalculatePairAsymmetry()
 	// Helicity polarity is undefined.
 	QwDebug<<" QwHelicityPattern::CalculatePairAsymmetry == \n"
 	       <<" undefined local helicity (-9999) \n"
-	       <<" impossible to compute assymetry \n"
+	       <<" impossible to compute asymmetry \n"
 	       <<" dropping every thing -- pattern number ="<<fCurrentPatternNumber<<QwLog::endl;
 	// This is an unknown helicity event.
 	fPairIsGood = kFALSE;
@@ -409,7 +409,7 @@ void  QwHelicityPattern::CalculatePairAsymmetry()
 	// there is a different number of plus and minus helicity window.
 	QwError<<" QwHelicityPattern::CalculatePairAsymmetry == \n"
 	       <<" you do not have the same number of positive and negative \n"
-	       <<" impossible to compute assymetry \n"
+	       <<" impossible to compute asymmetry \n"
 	       <<" dropping every thing -- pattern number ="<<fCurrentPatternNumber<<QwLog::endl;
 	// This is an unknown helicity event.
       }
@@ -564,7 +564,7 @@ void  QwHelicityPattern::CalculateAsymmetry()
     // there is a different number of plus and minus helicity window.
     QwError<<" QwHelicityPattern::CalculateAsymmetry == \n"
 	   <<" you do not have the same number of positive and negative \n"
-	   <<" impossible to compute assymetry \n"
+	   <<" impossible to compute asymmetry \n"
 	   <<" dropping every thing -- pattern number ="<<fCurrentPatternNumber<<QwLog::endl;
   } else {
     //  This is a good pattern.
