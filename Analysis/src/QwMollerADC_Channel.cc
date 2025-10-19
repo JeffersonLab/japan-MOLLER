@@ -1573,9 +1573,9 @@ void QwMollerADC_Channel::AccumulateRunningSum(const QwMollerADC_Channel& value,
   Double_t M11 = fHardwareBlockSum;
   Double_t M12 = value.fHardwareBlockSum;
   Double_t M22 = value.fHardwareBlockSumM2;
-  std::valarray<Double_t>& M11b = fBlock;
-  std::valarray<Double_t>& M12b = value.fBlock;
-  std::valarray<Double_t>& M22b = value.fBlockM2;
+  const std::valarray<Double_t>& M11b = fBlock;
+  const std::valarray<Double_t>& M12b = value.fBlock;
+  const std::valarray<Double_t>& M22b = value.fBlockM2;
 
   if (n2 == 0) {
     // no good events for addition
