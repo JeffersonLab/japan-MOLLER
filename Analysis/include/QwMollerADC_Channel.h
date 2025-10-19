@@ -333,10 +333,10 @@ private:
 
   /*! \name Event data members---Raw values */
   // @{
+  alignas(64) std::valarray<Long64_t> fBlockSumSq_raw = std::valarray<Long64_t>(fBlocksPerEvent + 1);
   std::valarray<Int_t> fBlock_raw = std::valarray<Int_t>(fBlocksPerEvent);      ///< Array of the sub-block data as read from the module
   Int_t fHardwareBlockSum_raw = 0; ///< Module-based sum of the four sub-blocks as read from the module
   Int_t fSoftwareBlockSum_raw = 0; ///< Sum of the data in the four sub-blocks raw
-  std::valarray<Long64_t> fBlockSumSq_raw = std::valarray<Long64_t>(fBlocksPerEvent + 1);
   std::valarray<Int_t> fBlock_min = std::valarray<Int_t>(fBlocksPerEvent + 1);
   std::valarray<Int_t> fBlock_max = std::valarray<Int_t>(fBlocksPerEvent + 1);
   std::valarray<Short_t> fBlock_numSamples = std::valarray<Short_t>(fBlocksPerEvent + 1);
@@ -345,16 +345,12 @@ private:
   /*! \name Event data members---Potentially calibrated values*/
   // @{
   // The following values potentially have pedestal removed  and calibration applied
-  std::valarray<Double_t> fBlock = std::valarray<Double_t>(fBlocksPerEvent);          ///< Array of the sub-block data
-  Double_t fHardwareBlockSum = 0;  ///< Module-based sum of the four sub-blocks
-  // @}
-
-
-  /// \name Calculation of the statistical moments
+  alignas(64) std::valarray<Double_t> fBlock = std::valarray<Double_t>(fBlocksPerEvent);          ///< Array of the sub-block data
+  Double_t fHardwareBlockSum = 0;  ///< Module-based sum of the four sub-blocksCalculation  /// \name Calculation of the statistical moments
   // @{
   // Moments of the separate blocks
-  std::valarray<Double_t> fBlockM2 = std::valarray<Double_t>(fBlocksPerEvent);        ///< Second moment of the sub-block
-  std::valarray<Double_t> fBlockError = std::valarray<Double_t>(fBlocksPerEvent);     ///< Uncertainty on the sub-block
+  alignas(64) std::valarray<Double_t> fBlockM2 = std::valarray<Double_t>(fBlocksPerEvent);        ///< Second moment of the sub-block
+  alignas(64) std::valarray<Double_t> fBlockError = std::valarray<Double_t>(fBlocksPerEvent);     ///< Uncertainty on the sub-block
   // Moments of the hardware sum
   Double_t fHardwareBlockSumM2 = 0;    ///< Second moment of the hardware sum
   Double_t fHardwareBlockSumError = 0; ///< Uncertainty on the hardware sum
