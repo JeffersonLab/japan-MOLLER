@@ -1288,11 +1288,25 @@ Int_t QwEventBuffer::OpenETStream(TString computer, TString session, int mode,
   Int_t status = CODA_OK;
   if (fEvStreamMode==fEvStreamNull){
 #ifdef __CODA_ET
+    THaEtClient* et_stream{nullptr};
     if (stationname != ""){
-      fEvStream = new THaEtClient(computer, session, mode, stationname.Data());
+      et_stream = new THaEtClient(computer, session, mode, stationname.Data());
     } else {
-      fEvStream = new THaEtClient(computer, session, mode);
+      et_stream = new THaEtClient(computer, session, mode);
     }
+
+    // In ET_STATION_SELECT_MATCH mode each element of the station's selection array is
+    // checked to see if the is equal to -1. If it is, then the corresponding element of the
+    // event's control array is ignored. Thus, if all elements of a station's selection array
+    // are set to -1, the event will NOT be selected. If the first element of the station's
+    // selection array is not -1 but is equal to the first element of the event's control array,
+    // then the event is selected. Likewise if the second element of the selection array is
+    // not -1 and if the bitwise AND (&) of the select and control second elements is true,
+    // then the event is selected.
+    int selectwords[ET_STATION_SELECT_INTS] = {-1, -1 ,-1, -1, 0, -1};
+    et_stream->codaSetSelect(selectwords);
+
+    fEvStream = et_stream;
     fEvStreamMode = fEvStreamET;
 #endif
   }

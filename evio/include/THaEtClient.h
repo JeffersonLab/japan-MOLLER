@@ -54,6 +54,7 @@ private:
   Int_t nused{0};
   int32_t waitflag{0};
   bool opened{false};
+  int* selectwords{nullptr};
   std::string daqhost, session, etfile, station;
   Int_t init( const char* station = "japa_sta" );
 
