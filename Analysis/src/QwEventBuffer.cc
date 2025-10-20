@@ -644,6 +644,11 @@ Int_t QwEventBuffer::WriteEvent(int* buffer)
   } else if (fEvStreamMode==fEvStreamET) {
     status = WriteEtEvent(buffer);
   }
+
+  if (globalEXIT == 1) {
+    status = CODA_ERROR;
+  }
+
   return status;
 }
 
