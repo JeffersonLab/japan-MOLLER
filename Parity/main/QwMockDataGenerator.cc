@@ -8,6 +8,7 @@
 
 // C and C++ headers
 #include <iostream>
+#include <cstdint>
 
 // Boost math library for random number generation
 #include <boost/random.hpp>
@@ -305,8 +306,13 @@ if(1==2){
 
       // Write this event to file or ET stream
       constexpr int num_control = 6;
-      constexpr int max_num_stations = 8;
-      int control[num_control] = { event, 0, event / kMultiplet, 0, (event / kMultiplet) % max_num_stations, 0 };
+      constexpr int max_num_stations = 30;
+      // Note that max_num_stations cannot be 32 and still support a single station,
+      // since that would require a select word with all bits set, which is -1 and ignored.
+      const int multiplet = event / kMultiplet;
+      const int station = multiplet % max_num_stations;
+      const std::uint32_t station_mask = (1u << (station % max_num_stations));
+      int control[num_control] = {event, 0, multiplet, 0, station, static_cast<int>(station_mask)};
       Int_t status = eventbuffer.EncodeSubsystemData(detectors, control, num_control);
       if (status != CODA_OK) {
         QwError << "Error: could not write event " << event << QwLog::endl;

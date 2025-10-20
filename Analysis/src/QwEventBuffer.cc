@@ -1303,7 +1303,8 @@ Int_t QwEventBuffer::OpenETStream(TString computer, TString session, int mode,
     // then the event is selected. Likewise if the second element of the selection array is
     // not -1 and if the bitwise AND (&) of the select and control second elements is true,
     // then the event is selected.
-    int selectwords[ET_STATION_SELECT_INTS] = {-1, -1 ,-1, -1, 0, -1};
+    const std::uint32_t station_mask = 0x3fffffff;
+    int selectwords[ET_STATION_SELECT_INTS] = {-1, -1 ,-1, -1, -1, static_cast<int>(station_mask)};
     et_stream->codaSetSelect(selectwords);
 
     fEvStream = et_stream;
