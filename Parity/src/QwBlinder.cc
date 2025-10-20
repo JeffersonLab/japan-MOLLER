@@ -292,23 +292,21 @@ void QwBlinder::Update()
  *
  * @param detectors Current subsystem array
  */
+ */
 void QwBlinder::Update(const QwSubsystemArrayParity& detectors)
 {
-  static QwMollerADC_Channel q_targ("q_targ");
+  // Check for the target blindability flag
   if (fBlindingStrategy != kDisabled && fTargetBlindability==kBlindable) {
-    // Check for the target blindability flag
     
-
     // Check that the current on target is above acceptable limit
     Bool_t tmp_beam = kFALSE;
-    //    if (detectors.RequestExternalValue(q_targ.GetElementName(), &q_targ)) {
-    if (detectors.RequestExternalValue("q_targ", &q_targ)) {
-      if (q_targ.GetValue() > fBeamCurrentThreshold){
-	// 	std::cerr << "q_targ.GetValue()==" 
-	// 		  << q_targ.GetValue() << std::endl;
-	tmp_beam = kTRUE;
+    const VQwHardwareChannel* q_targ = detectors.RequestExternalPointer("q_targ");
+    if (q_targ != nullptr) {
+      if (q_targ->GetValue() > fBeamCurrentThreshold) {
+        tmp_beam = kTRUE;
       }
     }
+
     fBeamIsPresent &= tmp_beam;
   }
 }
