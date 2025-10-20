@@ -304,7 +304,11 @@ if(1==2){
       }
 
       // Write this event to file
-      eventbuffer.EncodeSubsystemData(detectors);
+      Int_t status = eventbuffer.EncodeSubsystemData(detectors);
+      if (status != CODA_OK) {
+        QwError << "Error: could not write event " << event << QwLog::endl;
+        break;
+      }
 
       // Periodically print event number
       constexpr int nevents = kDebug ? 1000 : 10000;
