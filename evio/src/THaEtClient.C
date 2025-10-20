@@ -230,7 +230,7 @@ Int_t THaEtClient::codaRead()
   } else {
     time_t daqt2 = time(nullptr);
     double tdiff = difftime(daqt2, daqt1);
-    evsum += evh.etChunkNumRead;
+    ++evsum;
     if( tdiff > 4 && evsum > 30 ) {
       double daqrate = evsum / tdiff;
       evsum = 0;
