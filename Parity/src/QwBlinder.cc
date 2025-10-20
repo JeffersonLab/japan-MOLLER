@@ -294,7 +294,7 @@ void QwBlinder::Update()
  */
 void QwBlinder::Update(const QwSubsystemArrayParity& detectors)
 {
-  static QwVQWK_Channel q_targ("q_targ");
+  static QwMollerADC_Channel q_targ("q_targ");
   if (fBlindingStrategy != kDisabled && fTargetBlindability==kBlindable) {
     // Check for the target blindability flag
     
