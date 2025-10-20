@@ -292,7 +292,6 @@ void QwBlinder::Update()
  *
  * @param detectors Current subsystem array
  */
- */
 void QwBlinder::Update(const QwSubsystemArrayParity& detectors)
 {
   // Check for the target blindability flag
