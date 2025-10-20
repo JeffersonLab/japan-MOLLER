@@ -47,7 +47,7 @@ jobs:
         echo "Cleaned up existing documentation directories"
 
     - name: Generate documentation in LCG environment
-      uses: aidasoft/run-lcg-view@v1
+      uses: aidasoft/run-lcg-view@v5
       with:
         release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
         run: |
