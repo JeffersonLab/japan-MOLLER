@@ -1,0 +1,7 @@
+# Blinder configuration file for unit tests
+# This is a minimal configuration for testing purposes
+
+# Blinder settings - commented out for testing
+# blinder.seed = 12345
+# blinder.offset = 0.0
+# blinder.enabled = false

@@ -41,6 +41,10 @@ qwroot
 lib
 *build
 *test*
+!Analysis/tests/
+!Analysis/tests/**
+!Parity/tests/
+!Parity/tests/**
 output
 Doxygen/html
 

@@ -14,6 +14,11 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
          CACHE PATH "default install path" FORCE)
 endif()
 
+# Testing and benchmarking options
+option(ENABLE_TESTING "Build unit and integration tests" OFF)
+option(ENABLE_BENCHMARKING "Build performance benchmarks" OFF)
+option(ENABLE_COVERAGE "Enable code coverage analysis" OFF)
+
 # Use our modules and utility functions
 include(CMakeEnv)
 
@@ -192,6 +197,53 @@ list(APPEND my_project_headers ${CMAKE_BINARY_DIR}/version-config.h)
 
 
 #----------------------------------------------------------------------------
+# Coverage analysis setup
+#
+if(ENABLE_COVERAGE)
+    if(CMAKE_COMPILER_IS_GNUCXX OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+        message(STATUS "Coverage analysis enabled")
+        
+        # Find required tools for coverage
+        find_program(LCOV_EXECUTABLE lcov)
+        find_program(GENHTML_EXECUTABLE genhtml)
+        find_program(GCOV_EXECUTABLE gcov)
+        
+        if(NOT LCOV_EXECUTABLE)
+            message(FATAL_ERROR "lcov not found! Install with: sudo apt install lcov")
+        endif()
+        
+        if(NOT GENHTML_EXECUTABLE)
+            message(FATAL_ERROR "genhtml not found! Install with: sudo apt install lcov")
+        endif()
+        
+        if(NOT GCOV_EXECUTABLE)
+            message(FATAL_ERROR "gcov not found! Install with: sudo apt install gcc")
+        endif()
+        
+        # Coverage compile flags
+        set(COVERAGE_COMPILE_FLAGS "-g;-O0;--coverage;-fprofile-arcs;-ftest-coverage")
+        set(COVERAGE_LINK_FLAGS "--coverage")
+        
+        # Set output directories for coverage data
+        set(COVERAGE_OUTPUT_DIR ${CMAKE_BINARY_DIR}/coverage)
+        set(COVERAGE_HTML_DIR ${COVERAGE_OUTPUT_DIR}/html)
+        
+        # Create coverage output directories
+        file(MAKE_DIRECTORY ${COVERAGE_OUTPUT_DIR})
+        file(MAKE_DIRECTORY ${COVERAGE_HTML_DIR})
+        
+        message(STATUS "Coverage tools found:")
+        message(STATUS "  lcov: ${LCOV_EXECUTABLE}")
+        message(STATUS "  genhtml: ${GENHTML_EXECUTABLE}")
+        message(STATUS "  gcov: ${GCOV_EXECUTABLE}")
+        message(STATUS "Coverage output directory: ${COVERAGE_OUTPUT_DIR}")
+        
+    else()
+        message(FATAL_ERROR "Coverage analysis requires GCC or Clang compiler")
+    endif()
+endif()
+
+#----------------------------------------------------------------------------
 # Compiler flags
 #
 set_compiler_flags("${ROOT_CXX_FLAGS}")
@@ -278,6 +330,12 @@ target_link_libraries(${PROJECT_NAME}
     ${Boost_LIBRARIES}
   )
 
+# Apply coverage flags if enabled
+if(ENABLE_COVERAGE)
+    target_compile_options(${PROJECT_NAME} PRIVATE ${COVERAGE_COMPILE_FLAGS})
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${COVERAGE_LINK_FLAGS})
+endif()
+
 # Link sqlpp11 if enabled
 if((Sqlpp11_FOUND OR TARGET sqlpp11::sqlpp11) AND TARGET generate_schema)
   target_link_libraries(${PROJECT_NAME}
@@ -323,6 +381,13 @@ foreach(file ${exefiles})
     PRIVATE
       ${${PROJECT_NAME_UC}_DIAG_FLAGS_LIST}
   )
+  
+  # Apply coverage flags if enabled
+  if(ENABLE_COVERAGE)
+      target_compile_options(${filelower} PRIVATE --coverage)
+      target_link_libraries(${filelower} PRIVATE --coverage)
+  endif()
+  
   if(${CMAKE_SYSTEM_NAME} MATCHES Linux)
     target_compile_options(${filelower} PUBLIC -fPIC)
   endif()
@@ -355,3 +420,190 @@ endif()
 #
 add_subdirectory(cmake)
 
+#----------------------------------------------------------------------------
+# Testing and benchmarking
+#
+if(ENABLE_TESTING OR ENABLE_BENCHMARKING)
+    # Find testing frameworks using modern CMake approach
+    find_package(GTest REQUIRED)
+    
+    # Include GoogleTest module for gtest_discover_tests
+    include(GoogleTest)
+    
+    # Also provide backward compatibility variables for pkg-config style
+    set(GTEST_LIBRARIES GTest::gtest GTest::gtest_main)
+    get_target_property(GTEST_INCLUDE_DIRS GTest::gtest INTERFACE_INCLUDE_DIRECTORIES)
+    set(GTEST_CFLAGS_OTHER "")
+    
+    if(ENABLE_BENCHMARKING)
+        # Try to find Google Benchmark
+        find_package(PkgConfig QUIET)
+        if(PkgConfig_FOUND)
+            pkg_check_modules(BENCHMARK benchmark)
+        endif()
+        
+        if(NOT BENCHMARK_FOUND)
+            message(STATUS "Google Benchmark not found. Install with: sudo apt install libbenchmark-dev")
+            message(STATUS "Benchmarking will be disabled.")
+            set(ENABLE_BENCHMARKING OFF)
+        endif()
+    endif()
+endif()
+
+if(ENABLE_TESTING)
+    enable_testing()
+    message(STATUS "Testing enabled - building test suites")
+    add_subdirectory(Analysis/tests)
+    add_subdirectory(Parity/tests)
+endif()
+
+if(ENABLE_BENCHMARKING)
+    message(STATUS "Benchmarking enabled - building benchmark suites")
+endif()
+
+#----------------------------------------------------------------------------
+# Coverage analysis targets
+#
+if(ENABLE_COVERAGE)
+    # Coverage initialization target
+    add_custom_target(coverage_init
+        COMMAND ${LCOV_EXECUTABLE} --directory . --zerocounters
+        COMMAND ${LCOV_EXECUTABLE} --directory . --capture --initial --output-file coverage_base.info
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Initializing coverage counters"
+    )
+    
+    # Coverage data capture target (run after tests)
+    add_custom_target(coverage_capture
+        COMMAND ${LCOV_EXECUTABLE} --directory . --capture --output-file coverage_test.info
+        COMMAND ${LCOV_EXECUTABLE} --add-tracefile coverage_base.info --add-tracefile coverage_test.info --output-file coverage_total.info
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Capturing coverage data"
+    )
+    
+    # Coverage filtering and cleanup
+    add_custom_target(coverage_filter
+        COMMAND ${LCOV_EXECUTABLE} --remove coverage_total.info '/usr/*' --output-file coverage_filtered.info
+        COMMAND ${LCOV_EXECUTABLE} --remove coverage_filtered.info '*/thirdparty/*' --output-file coverage_filtered.info
+        COMMAND ${LCOV_EXECUTABLE} --remove coverage_filtered.info '*/evio/*' --output-file coverage_filtered.info
+        COMMAND ${LCOV_EXECUTABLE} --remove coverage_filtered.info '*Dict.cxx' --output-file coverage_filtered.info
+        COMMAND ${LCOV_EXECUTABLE} --remove coverage_filtered.info '*/tests/*' --output-file coverage_filtered.info
+        COMMAND ${LCOV_EXECUTABLE} --remove coverage_filtered.info '*/Test*' --output-file coverage_filtered.info
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        DEPENDS coverage_capture
+        COMMENT "Filtering coverage data"
+    )
+    
+    # Generate HTML coverage report
+    add_custom_target(coverage_html
+        COMMAND ${GENHTML_EXECUTABLE} coverage_filtered.info --output-directory ${COVERAGE_HTML_DIR}
+        COMMAND ${CMAKE_COMMAND} -E echo "Coverage report generated in ${COVERAGE_HTML_DIR}/index.html"
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        DEPENDS coverage_filter
+        COMMENT "Generating HTML coverage report"
+    )
+    
+    # Main coverage target that runs tests and generates report
+    add_custom_target(coverage
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target coverage_init
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target test
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target coverage_capture
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target coverage_filter
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target coverage_html
+        COMMENT "Running full coverage analysis"
+    )
+    
+    # Coverage summary (console output)
+    add_custom_target(coverage_summary
+        COMMAND ${LCOV_EXECUTABLE} --summary coverage_filtered.info
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        DEPENDS coverage_filter
+        COMMENT "Displaying coverage summary"
+    )
+    
+    # Unit test coverage only
+    add_custom_target(coverage_unit
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target coverage_init
+        COMMAND ${CMAKE_CTEST_COMMAND} -L "unit" --output-on-failure
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target coverage_capture
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target coverage_filter
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target coverage_html
+        COMMENT "Running coverage analysis for unit tests only"
+    )
+    
+    # Integration test coverage only
+    add_custom_target(coverage_integration
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target coverage_init
+        COMMAND ${CMAKE_CTEST_COMMAND} -L "integration" --output-on-failure
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target coverage_capture
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target coverage_filter
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target coverage_html
+        COMMENT "Running coverage analysis for integration tests only"
+    )
+    
+    # Analysis framework coverage
+    add_custom_target(coverage_analysis
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target coverage_init
+        COMMAND ${CMAKE_CTEST_COMMAND} -L "analysis" --output-on-failure
+        COMMAND ${LCOV_EXECUTABLE} --directory . --capture --output-file coverage_analysis.info
+        COMMAND ${LCOV_EXECUTABLE} --extract coverage_analysis.info '*/Analysis/*' --output-file coverage_analysis_filtered.info
+        COMMAND ${GENHTML_EXECUTABLE} coverage_analysis_filtered.info --output-directory ${COVERAGE_OUTPUT_DIR}/analysis_html
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Running coverage analysis for Analysis framework only"
+    )
+    
+    # Parity framework coverage
+    add_custom_target(coverage_parity
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target coverage_init
+        COMMAND ${CMAKE_CTEST_COMMAND} -L "parity" --output-on-failure
+        COMMAND ${LCOV_EXECUTABLE} --directory . --capture --output-file coverage_parity.info
+        COMMAND ${LCOV_EXECUTABLE} --extract coverage_parity.info '*/Parity/*' --output-file coverage_parity_filtered.info
+        COMMAND ${GENHTML_EXECUTABLE} coverage_parity_filtered.info --output-directory ${COVERAGE_OUTPUT_DIR}/parity_html
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Running coverage analysis for Parity framework only"
+    )
+    
+    # Coverage cleanup
+    add_custom_target(coverage_clean
+        COMMAND ${CMAKE_COMMAND} -E remove -f *.info
+        COMMAND ${CMAKE_COMMAND} -E remove_directory ${COVERAGE_OUTPUT_DIR}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${COVERAGE_OUTPUT_DIR}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${COVERAGE_HTML_DIR}
+        COMMAND find . -name "*.gcda" -delete
+        COMMAND find . -name "*.gcno" -delete
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Cleaning coverage data"
+    )
+    
+    # Detailed coverage report with function-level data
+    add_custom_target(coverage_detailed
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target coverage_init
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target test
+        COMMAND ${LCOV_EXECUTABLE} --directory . --capture --output-file coverage_detailed.info
+        COMMAND ${LCOV_EXECUTABLE} --remove coverage_detailed.info '/usr/*' '*/thirdparty/*' '*/evio/*' '*Dict.cxx' '*/tests/*' --output-file coverage_detailed_filtered.info
+        COMMAND ${GENHTML_EXECUTABLE} coverage_detailed_filtered.info --output-directory ${COVERAGE_OUTPUT_DIR}/detailed_html --function-coverage --branch-coverage
+        COMMAND ${LCOV_EXECUTABLE} --list coverage_detailed_filtered.info
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Generating detailed coverage report with function and branch coverage"
+    )
+    
+    # Coverage CI target (suitable for continuous integration)
+    add_custom_target(coverage_ci
+        COMMAND ${LCOV_EXECUTABLE} --directory . --zerocounters
+        COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+        COMMAND ${LCOV_EXECUTABLE} --directory . --capture --output-file coverage_ci.info
+        COMMAND ${LCOV_EXECUTABLE} --remove coverage_ci.info '/usr/*' '*/thirdparty/*' '*/evio/*' '*Dict.cxx' '*/tests/*' --output-file coverage_ci_filtered.info
+        COMMAND ${LCOV_EXECUTABLE} --summary coverage_ci_filtered.info
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Running coverage analysis for CI (console output only)"
+    )
+    
+    # Coverage threshold check
+    add_custom_target(coverage_check
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/CheckCoverage.cmake
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        DEPENDS coverage_filter
+        COMMENT "Checking coverage thresholds"
+    )
+    
+endif()
