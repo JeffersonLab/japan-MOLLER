@@ -600,7 +600,7 @@ Int_t QwEventBuffer::GetEtEvent(){
 }
 
 
-Int_t QwEventBuffer::WriteEvent(int* buffer)
+Int_t QwEventBuffer::WriteEvent(int* buffer, int* control, int num_control)
 {
   Int_t status = kFileHandleNotConfigured;
   ResetFlags();
@@ -642,7 +642,7 @@ Int_t QwEventBuffer::WriteEvent(int* buffer)
   if (fEvStreamMode==fEvStreamFile){
     status = WriteFileEvent(buffer);
   } else if (fEvStreamMode==fEvStreamET) {
-    status = WriteEtEvent(buffer);
+    status = WriteEtEvent(buffer, control, num_control);
   }
 
   if (globalEXIT == 1) {
@@ -661,7 +661,7 @@ Int_t QwEventBuffer::WriteFileEvent(int* buffer)
   return status;
 }
 
-Int_t QwEventBuffer::WriteEtEvent(int* buffer)
+Int_t QwEventBuffer::WriteEtEvent(int* buffer, int* control, int num_control)
 {
   Int_t status = CODA_OK;
   //  fEvStream is of inherited type THaCodaData,
@@ -676,7 +676,7 @@ Int_t QwEventBuffer::WriteEtEvent(int* buffer)
     return CODA_ERROR;
   }
   
-  status = ((THaEtClient*)fEvStream)->codaWrite(ubuffer, event_length);
+  status = ((THaEtClient*)fEvStream)->codaWrite(ubuffer, event_length, control, num_control);
   if( status != CODA_OK ) {
     QwError << "WriteEtEvent: codaWrite failed with status " << status << QwLog::endl;
   }
@@ -688,7 +688,7 @@ Int_t QwEventBuffer::WriteEtEvent(int* buffer)
 }
 
 
-Int_t QwEventBuffer::EncodeSubsystemData(QwSubsystemArray &subsystems)
+Int_t QwEventBuffer::EncodeSubsystemData(QwSubsystemArray &subsystems, int* control, int num_control)
 {
   // Encode the data in the elements of the subsystem array
   std::vector<UInt_t> buffer;
@@ -711,7 +711,7 @@ Int_t QwEventBuffer::EncodeSubsystemData(QwSubsystemArray &subsystems)
     codabuffer[k++] = buffer.at(i);
 
   // Now write the buffer to the stream
-  Int_t status = WriteEvent(codabuffer);
+  Int_t status = WriteEvent(codabuffer, control, num_control);
   // delete the buffer
   delete[] codabuffer;
   // and report success or fail

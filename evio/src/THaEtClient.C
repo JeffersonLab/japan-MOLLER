@@ -251,7 +251,7 @@ Int_t THaEtClient::codaRead()
 }
 
 //______________________________________________________________________________
-Int_t THaEtClient::codaWrite( const UInt_t* buffer, UInt_t buffer_length )
+Int_t THaEtClient::codaWrite( const UInt_t* buffer, UInt_t buffer_length, int* control, int num_control )
 {
   if( !opened ) {
     Int_t status = init(station.c_str());
@@ -295,6 +295,10 @@ Int_t THaEtClient::codaWrite( const UInt_t* buffer, UInt_t buffer_length )
   size_t et_buf_size = 0;
   et_event_getdata(event, (void**)&pdata);
   et_event_getlength(event, &et_buf_size);
+  // Set control words in each obtained event
+  if( control != NULL && num_control > 0 ) {
+    et_event_setcontrol(event, control, num_control);
+  }
   
   if( pdata == nullptr ) {
     cerr << "THaEtClient: ERROR: null data pointer from ET event" << endl;
@@ -600,6 +604,16 @@ int THaEtClient::EvET::get_chunk()
   et_event_getlength(currentChunk, &currentChunkStat.length);
   et_event_getendian(currentChunk, &currentChunkStat.endian);
   et_event_needtoswap(currentChunk, &currentChunkStat.swap);
+
+  if( verbose > 1 ) {
+    int control[ET_STATION_SELECT_INTS];
+    et_event_getcontrol(currentChunk, control);
+    printf("%s: got ET event with control words:", __func__);
+    for( int i = 0; i < ET_STATION_SELECT_INTS; i++ ) {
+      printf(" %d", control[i]);
+    }
+    printf("\n");
+  }
 
   if( verbose > 1 )
     print_chunk();
