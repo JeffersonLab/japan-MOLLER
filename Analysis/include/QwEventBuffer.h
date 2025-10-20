@@ -140,7 +140,7 @@ class QwEventBuffer {
   Int_t GetNextEvent();
 
   Int_t  GetEvent();
-  Int_t  WriteEvent(int* buffer);
+  Int_t  WriteEvent(int* buffer, int* control = nullptr, int num_control = 0);
 
   Bool_t IsOnline(){return fOnline;};
 
@@ -162,7 +162,7 @@ class QwEventBuffer {
 
   void ResetControlParameters();
 	void ReportRunSummary();
-  Int_t EncodeSubsystemData(QwSubsystemArray &subsystems);
+  Int_t EncodeSubsystemData(QwSubsystemArray &subsystems, int* control = nullptr, int num_control = 0);
   Int_t EncodePrestartEvent(int runnumber, int runtype = 0);
   Int_t EncodeGoEvent();
   Int_t EncodePauseEvent();
@@ -236,7 +236,7 @@ class QwEventBuffer {
   Int_t  GetEtEvent();
 
   Int_t WriteFileEvent(int* buffer);
-  Int_t WriteEtEvent(int* buffer);
+  Int_t WriteEtEvent(int* buffer, int* control = nullptr, int num_control = 0);
 
   Bool_t DataFileIsSegmented();
 

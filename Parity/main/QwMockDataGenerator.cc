@@ -303,8 +303,11 @@ if(1==2){
       detchannels[i]->RandomizeMollerEvent(myhelicity);
       }
 
-      // Write this event to file
-      Int_t status = eventbuffer.EncodeSubsystemData(detectors);
+      // Write this event to file or ET stream
+      constexpr int num_control = 6;
+      constexpr int max_num_stations = 8;
+      int control[num_control] = { event, 0, event / kMultiplet, 0, (event / kMultiplet) % max_num_stations, 0 };
+      Int_t status = eventbuffer.EncodeSubsystemData(detectors, control, num_control);
       if (status != CODA_OK) {
         QwError << "Error: could not write event " << event << QwLog::endl;
         break;
