@@ -85,6 +85,7 @@ THaEtClient::THaEtClient( const char* computer, const char* mysession, Int_t smo
 //______________________________________________________________________________
 THaEtClient::~THaEtClient()
 {
+  delete[] selectwords;
   THaEtClient::codaClose();
   // If error, codaClose already printed a message
 }
@@ -132,7 +133,12 @@ Int_t THaEtClient::init( const char* mystation )
   et_station_config_setblock(sconfig, ET_STATION_NONBLOCKING);
   et_station_config_setcue(sconfig, 100);
   et_station_config_setprescale(sconfig, 1);
-  et_station_config_setselect(sconfig, ET_STATION_SELECT_ALL);
+  if( selectwords == nullptr ) {
+    et_station_config_setselect(sconfig, ET_STATION_SELECT_ALL);
+  } else {
+    et_station_config_setselect(sconfig, ET_STATION_SELECT_MATCH);
+    et_station_config_setselectwords(sconfig, selectwords);
+  }
   et_stat_id my_stat{};
   int status = et_station_create(id, &my_stat, station.c_str(), sconfig);
   if( status != ET_OK ) {
@@ -411,6 +417,18 @@ Int_t THaEtClient::codaOpen( const char* computer, Int_t smode )
     return CODA_ERROR;
   }
   return codaOpen(computer, s, smode);
+}
+
+//______________________________________________________________________________
+Int_t THaEtClient::codaSetSelect( int* words )
+{
+  if (words == nullptr) {
+    cerr << "THaEtClient: ERROR: null selectwords pointer" << endl;
+    return CODA_ERROR;
+  }
+  selectwords = new int[ET_STATION_SELECT_INTS];
+  std::copy(words, words + ET_STATION_SELECT_INTS, selectwords);
+  return CODA_OK;
 }
 
 //______________________________________________________________________________
