@@ -573,7 +573,7 @@ Int_t QwBPMStripline<T>::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in
   else
     {
     std::cerr <<
-      "QwBPMStripline::ProcessEvBuffer(): attemptt to fill in raw data for a wire that doesn't exist \n";
+      "QwBPMStripline::ProcessEvBuffer(): attempt to fill in raw data for a wire that doesn't exist \n";
     }
   return word_position_in_buffer;
 }

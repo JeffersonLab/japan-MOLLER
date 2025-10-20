@@ -501,7 +501,7 @@ Int_t QwBPMCavity::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffe
   }
   else {
     std::cerr <<
-      "QwBPMCavity::ProcessEvBuffer(): attemptt to fill in raw date for a wire that doesn't exist \n";
+      "QwBPMCavity::ProcessEvBuffer(): attempt to fill in raw date for a wire that doesn't exist \n";
   }
   return word_position_in_buffer;
 }

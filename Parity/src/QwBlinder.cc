@@ -842,7 +842,7 @@ Int_t QwBlinder::UsePseudorandom(const TString& barestring)
   Int_t bitcount;
   Int_t tempout = 0;
 
-  //  This is an attemptt to build a portable 64-bit constant
+  //  This is an attempt to build a portable 64-bit constant
   ULong64_t longmask = (0x7FFFFFFF);
   longmask<<=32;
   longmask|=0xFFFFFFFF;
