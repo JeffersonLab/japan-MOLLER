@@ -43,8 +43,8 @@ class QwDBInterface;
 class QwEnergyCalculator : public VQwDataElement{
   /******************************************************************
    *  Class:QwEnergyCalculator
-   *         Perfroms the beam energy calculation using the beam angle
-   *         amnd position at the target and the beam postition at the
+   *         Performs the beam energy calculation using the beam angle
+   *         amnd position at the target and the beam position at the
    *         highest dispersive region on the beamline.
    *
    ******************************************************************/
@@ -87,9 +87,9 @@ class QwEnergyCalculator : public VQwDataElement{
     void    PrintInfo() const override;
     void    SetRootSaveStatus(TString &prefix);
 
-    Bool_t  ApplyHWChecks();//Check for harware errors in the devices
-    Bool_t  ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
-    Int_t   SetSingleEventCuts(Double_t mean, Double_t sigma);//two limts and sample size
+    Bool_t  ApplyHWChecks();//Check for hardware errors in the devices
+    Bool_t  ApplySingleEventCuts();//Check for good events by setting limits on the devices readings
+    Int_t   SetSingleEventCuts(Double_t mean, Double_t sigma);//two limits and sample size
     /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
     void    SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel);
     void    SetEventCutMode(Int_t bcuts){
@@ -99,7 +99,7 @@ class QwEnergyCalculator : public VQwDataElement{
     Bool_t CheckForBurpFail(const VQwDataElement *ev_error);
 
     void    IncrementErrorCounters();
-    void    PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
+    void    PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure
     UInt_t   GetEventcutErrorFlag() override{//return the error flag
       return fEnergyChange.GetEventcutErrorFlag();
     }
@@ -158,7 +158,7 @@ class QwEnergyCalculator : public VQwDataElement{
     std::vector <TString>  fProperty;
     std::vector <TString>  fType;
     Int_t    fDeviceErrorCode;//keep the device HW status using a unique code from the QwVQWK_Channel::fDeviceErrorCode
-    Bool_t bEVENTCUTMODE;//If this set to kFALSE then Event cuts do not depend on HW ckecks. This is set externally through the qweak_beamline_eventcuts.map
+    Bool_t bEVENTCUTMODE;//If this set to kFALSE then Event cuts do not depend on HW checks. This is set externally through the qweak_beamline_eventcuts.map
     Bool_t   bFullSave; // used to restrict the amount of data histogramed
 
 

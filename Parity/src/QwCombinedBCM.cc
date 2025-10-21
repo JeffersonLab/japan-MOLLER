@@ -51,7 +51,7 @@ void QwCombinedBCM<T>::SetTripSeed(uint seedval)
 
 /********************************************************/
 
-//this is a combined BCM made out of BCMs that are already callibrated and have pedstals removed.
+//this is a combined BCM made out of BCMs that are already calibrated and have pedstals removed.
 //This will be used for projection of charge at the target
 
 /**
@@ -173,12 +173,12 @@ void  QwCombinedBCM<T>::RandomizeEventData(int helicity, double time)
   //                         (period-triplength- tripramp) > fmod(time,period) : leave the variable alone
 
 
-  //  Determine the probablity of having a beam trip
+  //  Determine the probability of having a beam trip
   if (fLastTripTime<=-99999.9) {
      fLastTripTime = time - fTripLength - fTripRamp;
   }
 //  if ( ((time-fLastTripTime) > (fTripPeriod)) ){ //  Make some comparison to a probablilty instead of the time
-//  Probablity of a trip happening in one event:  # of trips per hour/3600 * eventtime_in_seconds (which is 0.001s)
+//  Probability of a trip happening in one event:  # of trips per hour/3600 * eventtime_in_seconds (which is 0.001s)
   Double_t tmp = fRandomVariable();
 //  std::cout << "random value=="<<tmp << "; fProbabilityOfTrip=="<<fProbabilityOfTrip<<std::endl;
   if (tmp < fProbabilityOfTrip) {
@@ -243,7 +243,7 @@ template<typename T>
 Bool_t QwCombinedBCM<T>::ApplySingleEventCuts()
 {
   
-  //This is required to update single event cut faliures in individual channels
+  //This is required to update single event cut failures in individual channels
   //  First update the error code based on the codes
   //  of the elements.  This requires that the BCMs
   //  have had ApplySingleEventCuts run on them already.

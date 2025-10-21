@@ -196,9 +196,9 @@ void QwMollerDetector::ProcessEvent()
       tempscaler = fSTR7200_Channel[i][j];
       fSTR7200_Channel[i][j] -= fPrevious_STR7200_Channel[i][j];
       fPrevious_STR7200_Channel[i][j] = tempscaler;
-      // Store a temproary copy of this channel's raw value as a scaler channel
+      // Store a temporary copy of this channel's raw value as a scaler channel
       // Subtract the corresponding fPrevious_STR7200_Channel from this scaler channel
-      // Put the temprary copy into the fPrevious_STR7200_Channel
+      // Put the temporary copy into the fPrevious_STR7200_Channel
     }
   }
 }

@@ -104,13 +104,13 @@ void RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeam
   Double_t GetValue(Int_t blocknum);
 
   void  ProcessEvent();
-  Bool_t ApplyHWChecks();//Check for harware errors in the devices
-  Bool_t ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
+  Bool_t ApplyHWChecks();//Check for hardware errors in the devices
+  Bool_t ApplySingleEventCuts();//Check for good events by setting limits on the devices readings
   void IncrementErrorCounters(){
     fTriumf_ADC.IncrementErrorCounters();
   }
-  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
-  Int_t SetSingleEventCuts(Double_t, Double_t);//set two limts
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure
+  Int_t SetSingleEventCuts(Double_t, Double_t);//set two limits
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   void SetSingleEventCuts(UInt_t errorflag, Double_t LL, Double_t UL, Double_t stability, Double_t burplevel);
   void SetDefaultSampleSize(Int_t sample_size);

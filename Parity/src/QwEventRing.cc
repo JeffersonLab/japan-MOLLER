@@ -89,7 +89,7 @@ void QwEventRing::ProcessOptions(QwOptions &options)
   tmpval += 2;
   if (fRING_SIZE<tmpval){
     QwWarning << "Forcing ring size to be " << tmpval
-	      << " to accomodate a burp extent of " << fBurpExtent
+         << " to accommodate a burp extent of " << fBurpExtent
 	      << " and a burp precut of " << fBurpPrecut
 	      << "; it had been " << fRING_SIZE << "." << QwLog::endl;
     fRING_SIZE = tmpval;
@@ -151,10 +151,10 @@ void QwEventRing::push(QwSubsystemArrayParity &event)
 	    fRollingAvg.CalculateRunningAverage();
     	/*
 	    //The fRollingAvg dose not contain any regular errorcodes since it only accumulate rolling sum for errorflag==0 event.
-	    //The only errorflag it generates is the stability cut faliure error when the rolling avg is computed. 
+	    //The only errorflag it generates is the stability cut failure error when the rolling avg is computed. 
 	    //Therefore when fRollingAvg.GetEventcutErrorFlag() is called it will return non-zero error code only if a global stability cut has failed
 	    //When fRollingAvg.GetEventcutErrorFlag() is called the fErrorFlag of the subsystemarrayparity object will be updated with any global
-	    //stability cut faliures
+	    //stability cut failures
 	    */
 	    fRollingAvg.UpdateErrorFlag(); //to update the global error code in the fRollingAvg
 	    if ( fRollingAvg.GetEventcutErrorFlag() != 0 ) {
@@ -213,7 +213,7 @@ QwSubsystemArrayParity& QwEventRing::pop(){
 
 
 /** Check if the ring buffer has events ready for retrieval. */
-Bool_t QwEventRing::IsReady(){ //Check for readyness to read data from the ring using the pop() routine   
+Bool_t QwEventRing::IsReady(){ //Check for readiness to read data from the ring using the pop() routine   
   return bRING_READY;
 }
 

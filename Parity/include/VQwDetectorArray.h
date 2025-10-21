@@ -47,7 +47,7 @@ class QwDetectorArrayID {
 
     int fSubbankIndex;
     int fWordInSubbank; //first word reported for this channel in the subbank
-                        //(eg VQWK channel report 6 words for each event, scalers oly report one word per event)
+                        //(eg VQWK channel report 6 words for each event, scalers only report one word per event)
                         // The first word of the subbank gets fWordInSubbank=0
 
     EQwPMTInstrumentType fTypeID;     // type of detector
@@ -129,12 +129,12 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
     void LoadEventCuts_Init() override {};
     void LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, Int_t &eventcut_flag) override;
     void LoadEventCuts_Fin(Int_t &eventcut_flag) override;
-    Bool_t ApplySingleEventCuts() override;//Check for good events by stting limits on the devices readings
+    Bool_t ApplySingleEventCuts() override;//Check for good events by setting limits on the devices readings
 
     Bool_t  CheckForBurpFail(const VQwSubsystem *subsys) override;
 
     void IncrementErrorCounters() override;
-    void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
+    void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure
     UInt_t GetEventcutErrorFlag() override;//return the error flag
 
     //update the error flag in the subsystem level from the top level routines related to stability checks. This will uniquely update the errorflag at each channel based on the error flag in the corresponding channel in the ev_error subsystem
@@ -210,7 +210,7 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
 
     void DoNormalization(Double_t factor=1.0);
 
-    Bool_t ApplyHWChecks(){//Check for harware errors in the devices
+    Bool_t ApplyHWChecks(){//Check for hardware errors in the devices
 
         Bool_t status = kTRUE;
 
@@ -240,7 +240,7 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
 
     // when the type and the name is passed the detector index from appropriate vector
     // will be returned. For example if TypeID is IntegrationPMT  then the index of
-    // the detector from fIntegrationPMT vector for given name will be returnd.
+    // the detector from fIntegrationPMT vector for given name will be returned.
     Int_t GetDetectorIndex(EQwPMTInstrumentType TypeID, TString name);
 
     std::vector <QwIntegrationPMT> fIntegrationPMT;

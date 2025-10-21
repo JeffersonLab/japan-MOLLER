@@ -128,7 +128,7 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   /// Internally generate random event data
   void  RandomizeEventData(int helicity = 0.0, double time = 0.0) override;
 
-  /// Forces the event "number of samples" varible to be what was expected from the mapfile.
+  /// Forces the event "number of samples" variable to be what was expected from the mapfile.
   /// NOTE: this should only be used in mock data generation!
   void  ForceMapfileSampleSize() {fNumberOfSamples = fNumberOfSamples_map;};
 
@@ -210,7 +210,7 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   /*Event cut related routines*/
   Bool_t ApplySingleEventCuts(Double_t LL,Double_t UL);//check values read from modules are at desired level
   Bool_t ApplySingleEventCuts() override;//check values read from modules are at desired level by comparing upper and lower limits (fULimit and fLLimit) set on this channel
-  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure
 
   void SetMollerADCSaturationLimt(Double_t sat_volts=8.5){//Set the absolute staturation limit in volts.
     fSaturationABSLimit=sat_volts;
@@ -221,7 +221,7 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   }
 
 
-  Int_t ApplyHWChecks() override; //Check for harware errors in the devices. This will return the device error code.
+  Int_t ApplyHWChecks() override; //Check for hardware errors in the devices. This will return the device error code.
 
   void IncrementErrorCounters() override;//update the error counters based on the internal fErrorFlag
   

@@ -77,7 +77,7 @@ public:
   virtual void SetEventCutMode(Int_t bcuts) = 0;
   virtual void SetPedestal(Double_t ped) = 0;
   virtual void SetCalibrationFactor(Double_t calib) = 0;
-  virtual Bool_t ApplySingleEventCuts() = 0;//Check for good events by stting limits on the devices readings
+  virtual Bool_t ApplySingleEventCuts() = 0;//Check for good events by setting limits on the devices readings
   virtual void IncrementErrorCounters() = 0;
   virtual void  ProcessEvent() = 0;
   virtual void Scale(Double_t factor) = 0;

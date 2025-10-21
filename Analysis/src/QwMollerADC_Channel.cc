@@ -1158,7 +1158,7 @@ void QwMollerADC_Channel::AssignValueFrom(const  VQwDataElement* valueptr)
     *this = *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::AssignValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -1170,7 +1170,7 @@ void QwMollerADC_Channel::AddValueFrom(const  VQwHardwareChannel* valueptr)
     *this += *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::AddValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -1182,7 +1182,7 @@ void QwMollerADC_Channel::SubtractValueFrom(const  VQwHardwareChannel* valueptr)
     *this -= *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::SubtractValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -1194,7 +1194,7 @@ void QwMollerADC_Channel::MultiplyBy(const VQwHardwareChannel* valueptr)
     *this *= *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::MultiplyBy = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -1206,7 +1206,7 @@ void QwMollerADC_Channel::DivideBy(const VQwHardwareChannel* valueptr)
     *this /= *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::DivideBy = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -1954,7 +1954,7 @@ void QwMollerADC_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *va
     this -> fSequenceNumber  =  0;
     this -> fErrorFlag       |= (input->fErrorFlag);   
   }
-  //   QwWarning << "Finsihed with addition"  << QwLog::endl;
+  //   QwWarning << "Finished with addition"  << QwLog::endl;
   //   PrintValue();
 }
 

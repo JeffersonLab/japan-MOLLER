@@ -452,7 +452,7 @@ void VQwScaler_Channel::AssignValueFrom(const VQwDataElement* valueptr){
     *this = *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::AssignValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -464,7 +464,7 @@ void VQwScaler_Channel::AddValueFrom(const  VQwHardwareChannel* valueptr)
     *this += *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::AddValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -476,7 +476,7 @@ void VQwScaler_Channel::SubtractValueFrom(const  VQwHardwareChannel* valueptr)
     *this -= *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::SubtractValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -488,7 +488,7 @@ void VQwScaler_Channel::MultiplyBy(const VQwHardwareChannel* valueptr)
     *this *= *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::MultiplyBy = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -501,7 +501,7 @@ void VQwScaler_Channel::DivideBy(const VQwHardwareChannel* valueptr)
     *this /= *tmpptr;
   } else {
     TString loc="Standard exception from VQwScaler_Channel::DivideBy = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -899,7 +899,7 @@ void  VQwScaler_Channel::PrintErrorCounters() const{
     if (fNumEvtsWithHWErrors>0)
       QwMessage << "QwScaler_Channel " << GetElementName()
 		<< " had " << fNumEvtsWithHWErrors
-		<< " events with a hardware faliure."
+		<< " events with a hardware failure."
 		<< QwLog::endl;
 
     if (fNumEvtsWithEventCutsRejected>0)

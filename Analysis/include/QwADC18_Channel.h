@@ -107,7 +107,7 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   /// Internally generate random event data
   void  RandomizeEventData(int helicity = 0.0, double time = 0.0) override;
 
-  /// Forces the event "number of samples" varible to be what was expected from the mapfile.
+  /// Forces the event "number of samples" variable to be what was expected from the mapfile.
   /// NOTE: this should only be used in mock data generation!
   void  ForceMapfileSampleSize() {fNumberOfSamples = fNumberOfSamples_map;};
 
@@ -190,7 +190,7 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   Bool_t ApplySingleEventCuts(Double_t LL, Double_t UL);
   //check values read from modules are at desired level by comparing upper and lower limits (fULimit and fLLimit) set on this channel
   Bool_t ApplySingleEventCuts() override;
-  // report number of events failed due to HW and event cut faliure
+  // report number of events failed due to HW and event cut failure
   void PrintErrorCounters() const override;
 
   // FIXME Set the absolute staturation limit in volts
@@ -204,7 +204,7 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   }
 
 
-  // Check for harware errors in the devices. This will return the device error code.
+  // Check for hardware errors in the devices. This will return the device error code.
   Int_t ApplyHWChecks() override;
 
   // Update the error counters based on the internal fErrorFlag

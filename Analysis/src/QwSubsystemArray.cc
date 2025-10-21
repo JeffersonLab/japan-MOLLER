@@ -301,7 +301,7 @@ void QwSubsystemArray::LoadAllEventRanges(QwOptions &options){
 }
 
 /**
- * Get the subsystem in this array with the spcified name
+ * Get the subsystem in this array with the specified name
  * @param name Name of the subsystem
  * @return Pointer to the subsystem
  */

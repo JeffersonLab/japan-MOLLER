@@ -57,7 +57,7 @@ class VQwBPM : public VQwDataElement {
    *         BPMStripline and CombinedBPM classes for data decoding.
    *         This parent class will define the basic structure of a 
    *         BPM. The basic object doesn't care about the inputs.
-   *         It only defines absoloute positions and an effective charge.
+   *         It only defines absolute positions and an effective charge.
    *           BPMs  have 4 input wires for position: XP, XM, YP, YM
    *           Cavityy monitors have 3 wires: X, Y and I
    *           CombinedBPM use absolute X and Y derived from BPM X and Ys.
@@ -225,10 +225,10 @@ public:
     std::cerr << "GetAbsolutePosition() is not implemented!!\n";
   }
   virtual void SetEventCutMode(Int_t bcuts) = 0;
-  void PrintErrorCounters() const override {// report number of events failed due to HW and event cut faliure
+  void PrintErrorCounters() const override {// report number of events failed due to HW and event cut failure
     std::cerr << "PrintErrorCounters() is not implemented!!\n";
   }
-  virtual Bool_t ApplySingleEventCuts() = 0;//Check for good events by stting limits on the devices readings
+  virtual Bool_t ApplySingleEventCuts() = 0;//Check for good events by setting limits on the devices readings
   virtual void IncrementErrorCounters() = 0;
   virtual void ProcessEvent() = 0;
 
@@ -324,7 +324,7 @@ public:
   protected:
   std::vector<TString> fSubelementNames;
 
-  // Position calculation related paramters
+  // Position calculation related parameters
   Double_t fPositionCenter[3];
   Double_t fQwStriplineCalibration;
   Double_t fQwStriplineCorrection;
@@ -332,7 +332,7 @@ public:
   Double_t fGains[2];
   static const TString axis[3];
 
-  // Rotation related paramters
+  // Rotation related parameters
   Bool_t   bRotated;
   Double_t fRotationAngle;
   Double_t fCosRotation;

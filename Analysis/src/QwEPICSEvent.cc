@@ -684,7 +684,7 @@ void QwEPICSEvent::ReportEPICSData() const
   std::ofstream output;
   TString theEPICSDataFile;
   theEPICSDataFile =  getenv("QW_TMP");
-  theEPICSDataFile += "/QwEPICSData.txt";// puts QwEPICSData.txt in  QwAnalysis_DB_01.00.0000/scratch/tmp/ diretory.
+  theEPICSDataFile += "/QwEPICSData.txt";// puts QwEPICSData.txt in  QwAnalysis_DB_01.00.0000/scratch/tmp/ directory.
   output.open(theEPICSDataFile,std::ofstream::out);
 
   if (output.is_open()) {
@@ -782,7 +782,7 @@ void  QwEPICSEvent::ResetCounters()
 void QwEPICSEvent::FillDB(QwParityDB *db)
 {
   // Sunday, January 16 22:09:16 EST 2011, jhlee
-  // don't change disbale database flag
+  // don't change disable database flag
   // just disable FillSlowControlsSettings(db) when fDisableDatabase is off
 
   bool hold_fDisableDatabase = fDisableDatabase;

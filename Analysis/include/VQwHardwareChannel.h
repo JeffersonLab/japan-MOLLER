@@ -154,7 +154,7 @@ public:
   virtual void  InitializeChannel(TString name, TString datatosave) = 0;
   virtual void  InitializeChannel(TString subsystem, TString instrumenttype, TString name, TString datatosave) = 0;
   
-  //Check for harware errors in the devices. This will return the device error code.
+  //Check for hardware errors in the devices. This will return the device error code.
   virtual Int_t ApplyHWChecks() = 0;
 
   void SetEventCutMode(Int_t bcuts){bEVENTCUTMODE=bcuts;};

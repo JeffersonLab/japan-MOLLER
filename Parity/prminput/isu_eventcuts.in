@@ -11,7 +11,7 @@ EVENTCUTS = 3
 
 !IMPORTANT
 !---------
-!Make sure when puting tabs in the map file entries, always put ", " before inserting a tab. 
+!Make sure when putting tabs in the map file entries, always put ", " before inserting a tab. 
 !Otherwise the routine QwParameterFile::GetNextToken(", ") will extract the entry with the tab character.
 
 

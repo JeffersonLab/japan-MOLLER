@@ -4,7 +4,7 @@
 !
 ! X/Yoffset - The difference in the ideal position and the surveyed position of a BPM in X/Y axis.
 !
-! Z offset  - The location of the BPM in the hallC beamline (alog Z axis) from the begining of the beamline
+! Z offset  - The location of the BPM in the hallC beamline (along Z axis) from the beginning of the beamline
 !             to the center of the device/ origin of device coordinate system.
 !
 ! BSEN scaling factor - Bpm SENsitivity scaling factor is the ratio of general BSEN = 18.81 adc counts/mm 
@@ -15,7 +15,7 @@
 !
 ! AlphaX/Y  - Relative gains of the individual XM,YM pairs compared to XP,YP pairs.
 ! 
-! The units of the offsets are in millemeters to be comparable with the units of the anaysis results.
+! The units of the offsets are in millimeters to be comparable with the units of the analysis results.
 !
 ! BSEN, ALPHAX and ALPHA Y were obtained from EPICS.
 !

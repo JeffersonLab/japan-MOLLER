@@ -290,7 +290,7 @@ Bool_t QwIntegrationPMT::ApplyHWChecks()
 {
   Bool_t eventokay=kTRUE;
 
-  UInt_t deviceerror=fTriumf_ADC.ApplyHWChecks();//will check for consistancy between HWSUM and SWSUM also check for sample size
+  UInt_t deviceerror=fTriumf_ADC.ApplyHWChecks();//will check for consistency between HWSUM and SWSUM also check for sample size
   eventokay=(deviceerror & 0x0);//if no HW error return true
 
 
@@ -304,7 +304,7 @@ Bool_t QwIntegrationPMT::ApplyHWChecks()
  * \param UL Upper limit.
  * \return 1 on success.
  */
-Int_t QwIntegrationPMT::SetSingleEventCuts(Double_t LL=0, Double_t UL=0){//std::vector<Double_t> & dEventCuts){//two limts and sample size
+Int_t QwIntegrationPMT::SetSingleEventCuts(Double_t LL=0, Double_t UL=0){//std::vector<Double_t> & dEventCuts){//two limits and sample size
   fTriumf_ADC.SetSingleEventCuts(LL,UL);
   return 1;
 }
@@ -366,7 +366,7 @@ Bool_t QwIntegrationPMT::ApplySingleEventCuts(){
 /********************************************************/
 
 /** \brief Print error counters (const overload). */
-void QwIntegrationPMT::PrintErrorCounters() const{// report number of events failed due to HW and event cut faliure
+void QwIntegrationPMT::PrintErrorCounters() const{// report number of events failed due to HW and event cut failure
   fTriumf_ADC.PrintErrorCounters();
 }
 

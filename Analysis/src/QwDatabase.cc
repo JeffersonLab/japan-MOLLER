@@ -273,7 +273,7 @@ bool QwDatabase::Connect()
    * Must call QwDatabase::ConnectionInfo() first.
    */
 
-  //  Return flase, if we're not using the DB.
+  //  Return false, if we're not using the DB.
   if (fAccessLevel==kQwDatabaseOff) return false;
 
   // Make sure not already connected

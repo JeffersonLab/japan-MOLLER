@@ -18,9 +18,9 @@
    Each subsystem will have a class derived from "VQwSubsystem", and
    will be responsible for decoding of it's own data stream and any
    special event processing required. QwSubsystemArray will handle
-   mutiple "VQwSubsystem" objects and one call on the QwSubsystemArray
+   multiple "VQwSubsystem" objects and one call on the QwSubsystemArray
    will handle all the calls to that method in each subsystem.  Each
-   susbsytem will also own the histograms and ntupling functions used
+   subsystem will also own the histograms and ntupling functions used
    for its data.
 
 *//*-------------------------------------------------------------------------*/
@@ -103,7 +103,7 @@ Int_t VQwSubsystem::LoadDetectorMaps(QwParameterFile& file)
   //
   // The above approach that fDetectorMapsNames.push_back(value) in VQwSubsystem doesn't work, because it reads the following...
   //
-  // >>> VQwSubsystem::LoadDetectorMaps Subsytem Main Detector uses the following map files : 
+  // >>> VQwSubsystem::LoadDetectorMaps Subsystem Main Detector uses the following map files : 
   //   --->    1/3 :        qweak_maindet.map
   //   --->    2/3 : qweak_maindet_pedestal.map
   //   --->    3/3 : qweak_maindet_eventcuts.in
@@ -112,7 +112,7 @@ Int_t VQwSubsystem::LoadDetectorMaps(QwParameterFile& file)
   // So, fDetectorMapsNams.push_back will be called LoadChannelMap(), LoadInputParameter(), LoadEventCuts(),
   // and  LoadGeometryDefinition() in each subsystem.
   //
-  // >>> VQwSubsystem::LoadDetectorMaps Subsytem Main Detector uses the following map files : 
+  // >>> VQwSubsystem::LoadDetectorMaps Subsystem Main Detector uses the following map files : 
   //   --->    1/3 : /home/jhlee/QwAnalysis/trunk/Parity/prminput/qweak_maindet.10213-.map
   //   --->    2/3 : /home/jhlee/QwAnalysis/trunk/Parity/prminput/qweak_maindet_pedestal.10229-.map
   //   --->    3/3 : /home/jhlee/QwAnalysis/trunk/Parity/prminput/qweak_maindet_eventcuts.in

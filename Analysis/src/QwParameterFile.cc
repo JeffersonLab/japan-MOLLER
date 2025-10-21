@@ -221,7 +221,7 @@ bool QwParameterFile::OpenFile(const fs::path& file)
     }
 
     // fFile.clear();
-    // fFile.close(); // disconnet file
+    // fFile.close(); // disconnect file
     //    this->Test();
   } else {
 

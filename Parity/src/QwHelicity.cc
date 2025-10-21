@@ -431,7 +431,7 @@ void QwHelicity::IncrementErrorCounters()
 }
 
 void QwHelicity::PrintErrorCounters() const{
-  // report number of events failed due to HW and event cut faliure
+  // report number of events failed due to HW and event cut failure
   QwMessage << "\n*********QwHelicity Error Summary****************"
 	    << QwLog::endl;
   QwMessage << "First helicity gate counter:  "
@@ -505,7 +505,7 @@ void QwHelicity::ProcessEventUserbitMode()
 
   /** In this version of the code, the helicity is extracted for a userbit configuration.
       This is not what we plan to have for Qweak but it was done for injector tests and 
-      so is usefull to have as another option to get helicity information. */
+      so is useful to have as another option to get helicity information. */
   
   Bool_t ldebug=kFALSE;
   UInt_t userbits;
@@ -515,7 +515,7 @@ void QwHelicity::ProcessEventUserbitMode()
   if(scaleroffset==1 || scaleroffset==0) {
     userbits = (fWord[kUserbit].fValue & 0xE0000000)>>28;
 
-    //  Now fake the input register, MPS coutner, QRT counter, and QRT phase.
+    //  Now fake the input register, MPS counter, QRT counter, and QRT phase.
     fEventNumber=fEventNumberOld+1;
 
     lastuserbits = userbits;
@@ -965,7 +965,7 @@ Int_t QwHelicity::LoadChannelMap(TString mapfile)
       } else {
 	QwError  << "The helicity decoding mode read in file " << mapfile
 		 << " is not recognized in function QwHelicity::LoadChannelMap \n"
-		 << " Quiting this execution." << QwLog::endl;
+		 << " Quitting this execution." << QwLog::endl;
       }
     }
 
@@ -1761,8 +1761,8 @@ UInt_t QwHelicity::GetRandomSeed(UShort_t* first24randbits)
   QwDebug << " Entering QwHelicity::GetRandomSeed \n";
 
   /**  This the random seed generator used in G0 (L.Jianglai)
-      Here we get the 24 random bits and derive the randome seed from that.
-      randome seed                      : b24 b23 b22.....b2 b1
+      Here we get the 24 random bits and derive the random seed from that.
+      random seed                      : b24 b23 b22.....b2 b1
       first 24 random bit from this seed: h1 h2 h3 ....h23 h24
       we have,
       b23 = h1, b22 = h2,... b5 = h20,
@@ -1787,7 +1787,7 @@ UInt_t QwHelicity::GetRandomSeed(UShort_t* first24randbits)
   b[2] = first24randbits[23]^b[23]^b[22];// h23^b23^b22 = b2
   b[1] = first24randbits[24]^b[21]^b[22]^b[24];// h24^b22^b24 = b1
 
-  ///assign the values in the h aray and into the sead
+  ///assign the values in the h array and into the sead
   for(size_t i=24;i>=1;i--)  ranseed = (ranseed << 1) | (b[i]&1);
 
   ranseed = ranseed&0xFFFFFF; //put a mask
@@ -1976,12 +1976,12 @@ Bool_t QwHelicity::CollectRandBits30()
   /** Starting to collect 30 bits/helicity state to get the
       random seed for the 30 bit helicity predictor.
       These bits (1/0) are the reported helicity states of the first event
-      of each new pattern ot the so called pattern polarity.*/
+      of each new pattern or the so called pattern polarity.*/
 
   //  Bool_t  ldebug = kFALSE;
   const UInt_t ranbit_goal = 30;
 
-  /** If we have finished collecting the bits then ignore the rest of this funciton and return true.
+  /** If we have finished collecting the bits then ignore the rest of this function and return true.
       No need to recollect!*/
   if (n_ranbits == ranbit_goal)    return kTRUE;
 
@@ -2002,7 +2002,7 @@ Bool_t QwHelicity::CollectRandBits30()
   fGoodHelicity = kFALSE; //reset before prediction begins
 
   if(IsContinuous()) {
-    /**  Make sure we are at the beging of a valid pattern. */
+    /**  Make sure we are at the beginning of a valid pattern. */
     if((fPatternPhaseNumber==fMinPatternPhase)&& (fPatternNumber>=0)) {
       iseed_Delayed = ((iseed_Delayed << 1)&0x3FFFFFFF)|fHelicityReported;
       QwDebug << "QwHelicity:: CollectRandBits30:  Collecting randbit " << n_ranbits << ".." << QwLog::endl;
@@ -2183,7 +2183,7 @@ VQwSubsystem&  QwHelicity::operator+=  (VQwSubsystem *value)
   //  Bool_t localdebug=kFALSE;
   QwDebug << "Entering QwHelicity::operator+= adding " << value->GetName() << " to " << this->GetName() << " " << QwLog::endl;
 
-  //this routine is most likely to be called during the computatin of assymetry
+  //this routine is most likely to be called during the computatin of asymmetry
   //this call doesn't make too much sense for this class so the following lines
   //are only use to put safe gards testing for example if the two instantiation indeed
   // refers to elements in the same pattern.

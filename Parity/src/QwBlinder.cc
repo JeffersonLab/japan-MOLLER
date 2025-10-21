@@ -129,7 +129,7 @@ QwBlinder::QwBlinder(const EQwBlindingStrategy blinding_strategy):
   if (blinder.FileHasVariablePair("=", "strategy", strategy)) {
     std::transform(strategy.begin(), strategy.end(), strategy.begin(), ::tolower);
     QwVerbose << "Using blinding strategy from file: " << strategy << QwLog::endl;
-    if (strategy == "diabled") fBlindingStrategy = kDisabled;
+    if (strategy == "disabled") fBlindingStrategy = kDisabled;
     else if (strategy == "additive") fBlindingStrategy = kAdditive;
     else if (strategy == "multiplicative") fBlindingStrategy = kMultiplicative;
     else if (strategy == "additivemultiplicative") fBlindingStrategy = kAdditiveMultiplicative;
@@ -694,7 +694,7 @@ void QwBlinder::InitBlinders(const UInt_t seed_id)
     Double_t tmp1 = maximum_asymmetry_sqrt * (newtempout / Int_t(0x7FFFFFFF));
     fBlindingOffset = tmp1 * fabs(tmp1) * 0.000001;
 
-    //  Do another little calulation to round off the blinding asymmetry
+    //  Do another little calculation to round off the blinding asymmetry
     Double_t tmp2;
     tmp1 = fBlindingOffset * 4;    // Exactly shifts by two binary places
     tmp2 = tmp1 + fBlindingOffset; // Rounds 5*fBlindingOffset
@@ -1331,12 +1331,12 @@ QwBlinder::EQwBlinderStatus QwBlinder::CheckBlindability(std::vector<Int_t> &fCo
     fCounters.at(kBlinderCount_Transverse)++;
   } else if (fTargetBlindability==kBlindable 
 	     && fBeamIsPresent) {
-    //  This is a blindable target and the beam is sufficent.
+    //  This is a blindable target and the beam is sufficient.
     status = QwBlinder::kBlindable;
     fCounters.at(kBlinderCount_Blindable)++;
   } else if (fTargetBlindability==kBlindable 
 	     && (! fBeamIsPresent) ) {
-    //  This is a blindable target but there is insufficent beam present
+    //  This is a blindable target but there is insufficient beam present
     status = QwBlinder::kNotBlindable;
     fCounters.at(kBlinderCount_NoBeam)++;
   } else {

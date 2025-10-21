@@ -466,7 +466,7 @@ void  QwQPD::ProcessEvent()
   ApplyHWChecks();
   /* Frst apply HW checks and update HW  error flags. 
      Calling this routine here and not in ApplySingleEventCuts  
-     makes a difference for a QPDs because they are derrived devices.
+     makes a difference for a QPDs because they are derived devices.
   */
 
   fEffectiveCharge.ClearEventData();
@@ -563,7 +563,7 @@ Int_t QwQPD::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer,UInt
   else
     {
     std::cerr <<
-      "QwQPD::ProcessEvBuffer(): attemp to fill in raw date for a wire that doesn't exist \n";
+      "QwQPD::ProcessEvBuffer(): attempt to fill in raw date for a wire that doesn't exist \n";
     }
   return word_position_in_buffer;
 }

@@ -63,10 +63,10 @@ class QwIntegratedRasterChannel : public VQwDataElement{
   void  SetExternalRandomVariable(Double_t random_variable);
 
   void  ProcessEvent();
-  Bool_t ApplyHWChecks();//Check for harware errors in the devices
-  Bool_t ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
+  Bool_t ApplyHWChecks();//Check for hardware errors in the devices
+  Bool_t ApplySingleEventCuts();//Check for good events by setting limits on the devices readings
   void IncrementErrorCounters(){fTriumf_ADC.IncrementErrorCounters();};
-  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure
   UInt_t GetEventcutErrorFlag() override{//return the error flag
     return fTriumf_ADC.GetEventcutErrorFlag();
   }
@@ -75,7 +75,7 @@ class QwIntegratedRasterChannel : public VQwDataElement{
     return fTriumf_ADC.UpdateErrorFlag(ev_error->fTriumf_ADC);
   }
 
-  Int_t SetSingleEventCuts(Double_t mean = 0, Double_t sigma = 0);//two limts and sample size
+  Int_t SetSingleEventCuts(Double_t mean = 0, Double_t sigma = 0);//two limits and sample size
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   void SetSingleEventCuts(UInt_t errorflag, Double_t min = 0, Double_t max = 0, Double_t stability = 0);
 
@@ -138,7 +138,7 @@ class QwIntegratedRasterChannel : public VQwDataElement{
   Int_t fDeviceErrorCode;//keep the device HW status using a unique code from the QwVQWK_Channel::fDeviceErrorCode
 
   const static  Bool_t bDEBUG=kFALSE;//debugging display purposes
-  Bool_t bEVENTCUTMODE;//If this set to kFALSE then Event cuts do not depend on HW ckecks. This is set externally through the qweak_beamline_eventcuts.map
+  Bool_t bEVENTCUTMODE;//If this set to kFALSE then Event cuts do not depend on HW checks. This is set externally through the qweak_beamline_eventcuts.map
 
 
 };

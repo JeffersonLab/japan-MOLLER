@@ -83,7 +83,7 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
 
   Bool_t CheckForBurpFail(const VQwSubsystem *subsys) override;
 
-  void   PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliures
+  void   PrintErrorCounters() const override;// report number of events failed due to HW and event cut failures
   UInt_t GetEventcutErrorFlag() override;//return the error flag
 
   UInt_t UpdateErrorFlag() override;//Update and return the error flags
@@ -184,7 +184,7 @@ protected:
   
   Int_t GetDetectorIndex(EQwBeamInstrumentType TypeID, TString name) const;
   //when the type and the name is passed the detector index from appropriate vector will be returned
-  //for example if TypeID is bcm  then the index of the detector from fBCM vector for given name will be returnd.
+  //for example if TypeID is bcm  then the index of the detector from fBCM vector for given name will be returned.
 
   std::vector <VQwBPM_ptr> fStripline;
   std::vector <VQwBPM_ptr> fBPMCombo;
