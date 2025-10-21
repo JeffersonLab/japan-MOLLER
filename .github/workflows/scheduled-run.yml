@@ -70,6 +70,7 @@ jobs:
           release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           run: |
             echo "::group::Compilation with ccache"
+            git -C thirdparty/sqlpp11 merge-base --is-ancestor 3b8f409 HEAD
             cmake -Bbuild -S. \
               -DBUILD_MARIADB_CONNECTOR=ON \
               -DBUILD_MYSQL_CONNECTOR=ON \
