@@ -264,11 +264,11 @@ jobs:
             else
               echo "❌ $filename: Differences found beyond timestamps"
               echo "--- Expected (target branch) ---"
-              grep -v "Start Time:\|End Time:" "$target_file"
+              grep -v "Start Time:\|End Time:" "$target_file" | cat
               echo "--- Actual (current PR) ---"
-              grep -v "Start Time:\|End Time:" "$current_file"
+              grep -v "Start Time:\|End Time:" "$current_file" | cat
               echo "--- Detailed diff ---"
-              diff -u <(grep -v "Start Time:\|End Time:" "$target_file") <(grep -v "Start Time:\|End Time:" "$current_file")
+              diff -u <(grep -v "Start Time:\|End Time:" "$target_file") <(grep -v "Start Time:\|End Time:" "$current_file") | cat
               comparison_failed=true
             fi
           done
