@@ -829,15 +829,13 @@ Bool_t QwEventBuffer::FillSubsystemData(QwSubsystemArray &subsystems)
     if (nmarkers>0) {
       //  There are markerwords for this ROC/Bank
       for (size_t i=0; i<nmarkers; i++){
-	offset = FindMarkerWord(i,&localbuff[decoder->GetWordsSoFar()],decoder->GetFragLength());
-	BankID_t tmpbank = GetMarkerWord(i);
-	tmpbank = ((tmpbank)<<32) + decoder->GetSubbankTag();
-	if (offset != -1){
-	  offset++; //  Skip the marker word
-	  subsystems.ProcessEvBuffer(decoder->GetEvtType(), decoder->GetROC(), tmpbank,
+        offset = FindMarkerWord(i,&localbuff[decoder->GetWordsSoFar()],decoder->GetFragLength());
+	      BankID_t tmpbank = GetMarkerWord(i);
+        tmpbank = ((tmpbank)<<32) + decoder->GetSubbankTag();
+        offset++; //  Skip the marker word
+        subsystems.ProcessEvBuffer(decoder->GetEvtType(), decoder->GetROC(), tmpbank,
 				     &localbuff[decoder->GetWordsSoFar()+offset],
 				     decoder->GetFragLength()-offset);
-	}
       }
     } else {
       QwDebug << "QwEventBuffer::FillSubsystemData:  "
