@@ -52,11 +52,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #----------------------------------------------------------------------------
 # Sources and headers
 #
-file(GLOB my_project_sources
+file(GLOB my_project_sources CONFIGURE_DEPENDS
 		 Analysis/src/*.cc
 		 Parity/src/*.cc
 		 )
-file(GLOB my_project_headers
+file(GLOB my_project_headers CONFIGURE_DEPENDS
 		 Analysis/include/*.h
 		 Parity/include/*.h
 		 )
@@ -301,7 +301,7 @@ install(FILES ${my_project_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 #----------------------------------------------------------------------------
 # executables
 #
-file(GLOB exefiles
+file(GLOB exefiles CONFIGURE_DEPENDS
   Parity/main/*.cc
   Analysis/main/*.cc
 )
