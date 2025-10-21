@@ -228,7 +228,7 @@ void  QwHaloMonitor::FillHistograms()
  * \param prefix Branch name prefix.
  * \param values Output value vector to be appended.
  */
-void  QwHaloMonitor::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwHaloMonitor::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
@@ -274,7 +274,7 @@ void  QwHaloMonitor::ConstructBranch(TTree *tree, TString &prefix, QwParameterFi
 
 
 
-void  QwHaloMonitor::FillTreeVector(std::vector<Double_t> &values) const
+void  QwHaloMonitor::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.

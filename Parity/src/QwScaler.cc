@@ -373,7 +373,7 @@ void QwScaler::FillHistograms()
 }
 
 /** Construct TTree branches and backing vectors for all scaler channels. */
-void QwScaler::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values)
+void QwScaler::ConstructBranchAndVector(TTree *tree, TString & prefix, QwRootTreeBranchVector &values)
 {
   for (size_t i = 0; i < fScaler.size(); i++) {
     fScaler.at(i)->ConstructBranchAndVector(tree, prefix, values);
@@ -381,7 +381,7 @@ void QwScaler::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vect
 }
 
 /** Fill tree vector with current scaler channel values. */
-void QwScaler::FillTreeVector(std::vector<Double_t> &values) const
+void QwScaler::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   for(size_t i = 0; i < fScaler.size(); i++) {
     fScaler.at(i)->FillTreeVector(values);

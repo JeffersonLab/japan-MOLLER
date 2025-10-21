@@ -234,14 +234,14 @@ class QwVQWK_Channel: public VQwHardwareChannel, public MQwMockable {
   void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
   void  FillHistograms() override;
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) override;
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override;
   void  ConstructBranch(TTree *tree, TString &prefix) override;
-  void  FillTreeVector(std::vector<Double_t> &values) const override;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const override;
 
 #ifdef HAS_RNTUPLE_SUPPORT
   // RNTuple support methods
-  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, std::vector<Double_t> &values, std::vector<std::shared_ptr<Double_t>> &fieldPtrs) override;
-  void  FillNTupleVector(std::vector<Double_t> &values) const override;
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>> &fieldPtrs) override;
+  void  FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif // HAS_RNTUPLE_SUPPORT
 
   Int_t GetRawValue(size_t element) const override {
@@ -354,12 +354,11 @@ private:
   // @}
 
 
-  size_t fSequenceNumber;      ///< Event sequence number for this channel
-  size_t fPreviousSequenceNumber; ///< Previous event sequence number for this channel
-  size_t fNumberOfSamples;     ///< Number of samples  read through the module
-  size_t fNumberOfSamples_map; ///< Number of samples in the expected to  read through the module. This value is set in the QwBeamline map file
+  UInt_t fSequenceNumber;      ///< Event sequence number for this channel
+  UInt_t fPreviousSequenceNumber; ///< Previous event sequence number for this channel
+  UInt_t fNumberOfSamples;     ///< Number of samples  read through the module
+  UInt_t fNumberOfSamples_map; ///< Number of samples in the expected to  read through the module. This value is set in the QwBeamline map file
 
- 
 
   // Set of error counters for each HW test.
   Int_t fErrorCount_HWSat;    ///< check to see ADC channel is saturated 

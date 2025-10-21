@@ -27,7 +27,7 @@ using std::string;
 
 // Forward declarations
 class QwParityDB;
-
+class QwRootTreeBranchVector;
 
 /**
  * \class QwEPICSEvent
@@ -113,9 +113,9 @@ class QwEPICSEvent
  public:
 
   /// \brief Construct the branch and tree vector
-  void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values);
+  void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values);
   /// \brief Fill the tree vector
-  void FillTreeVector(std::vector<Double_t>& values) const;
+  void FillTreeVector(QwRootTreeBranchVector &values) const;
 
 #ifdef HAS_RNTUPLE_SUPPORT
   /// \brief Construct the RNTuple fields and vector

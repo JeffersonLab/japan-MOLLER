@@ -134,8 +134,8 @@ class QwBPMCavity : public VQwBPM {
   void    ConstructHistograms(TDirectory *folder, TString &prefix) override;
   void    FillHistograms() override;
 
-  void    ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) override;
-  void    FillTreeVector(std::vector<Double_t> &values) const override;
+  void    ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override;
+  void    FillTreeVector(QwRootTreeBranchVector &values) const override;
   void    ConstructBranch(TTree *tree, TString &prefix) override;
   void    ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist) override;
 #ifdef HAS_RNTUPLE_SUPPORT

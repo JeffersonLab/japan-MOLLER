@@ -132,10 +132,10 @@ class QwMollerDetector:
     };
 
     using VQwSubsystem::ConstructBranchAndVector;
-    void ConstructBranchAndVector(TTree*, TString&, std::vector<double, std::allocator<double> >&) override;
+    void ConstructBranchAndVector(TTree*, TString&, QwRootTreeBranchVector&) override;
     void ConstructBranch(TTree *tree, TString& prefix) override { };
     void ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file) override { };
-    void FillTreeVector(std::vector<Double_t> &values) const override;
+    void FillTreeVector(QwRootTreeBranchVector &values) const override;
 
     // RNTuple methods
 #ifdef HAS_RNTUPLE_SUPPORT

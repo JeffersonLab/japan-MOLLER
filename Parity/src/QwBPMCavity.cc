@@ -797,7 +797,7 @@ void  QwBPMCavity::FillHistograms()
  * Define TTree branches and attach backing vectors for output variables.
  * The prefix "asym_" is converted to "diff_" for positions.
  */
-void  QwBPMCavity::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwBPMCavity::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing trees.
@@ -898,7 +898,7 @@ void  QwBPMCavity::ConstructBranchAndVector(TTree *tree, TString &prefix, std::v
 
 
 /** Append this detector's values to the provided output vector. */
-void  QwBPMCavity::FillTreeVector(std::vector<Double_t> &values) const
+void  QwBPMCavity::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()=="") {
     //  This channel is not used, so skip filling the tree.

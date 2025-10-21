@@ -857,7 +857,7 @@ void  QwHelicityPattern::FillHistograms()
   }
 }
 
-void QwHelicityPattern::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values)
+void QwHelicityPattern::ConstructBranchAndVector(TTree *tree, TString & prefix, QwRootTreeBranchVector &values)
 {
 TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length())+"BurstCounter";
   tree->Branch(basename,&fBurstCounter,basename+"/S");
@@ -921,7 +921,7 @@ void QwHelicityPattern::ConstructBranch(TTree *tree, TString & prefix, QwParamet
   }
 }
 
-void QwHelicityPattern::FillTreeVector(std::vector<Double_t> &values) const
+void QwHelicityPattern::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (fPatternIsGood) {
     fYield.FillTreeVector(values);

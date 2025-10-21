@@ -2530,7 +2530,7 @@ void  QwBeamLine::FillHistograms()
 
 
 //*****************************************************************//
-void QwBeamLine::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values)
+void QwBeamLine::ConstructBranchAndVector(TTree *tree, TString & prefix, QwRootTreeBranchVector &values)
 {
 
   for(size_t i = 0; i < fClock.size(); i++)
@@ -2682,7 +2682,7 @@ void QwBeamLine::ConstructBranch(TTree *tree, TString & prefix, QwParameterFile&
 }
 
 //*****************************************************************//
-void QwBeamLine::FillTreeVector(std::vector<Double_t> &values) const
+void QwBeamLine::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   for(size_t i = 0; i < fClock.size(); i++)
     fClock[i].get()->FillTreeVector(values);

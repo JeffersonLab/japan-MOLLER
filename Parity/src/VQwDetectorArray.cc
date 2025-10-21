@@ -1295,7 +1295,7 @@ void  VQwDetectorArray::FillHistograms() {
 }
 
 
-void VQwDetectorArray::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values) {
+void VQwDetectorArray::ConstructBranchAndVector(TTree *tree, TString & prefix, QwRootTreeBranchVector &values) {
 
     for (size_t i=0;i<fIntegrationPMT.size();i++)
      fIntegrationPMT[i].ConstructBranchAndVector(tree, prefix, values);
@@ -1350,7 +1350,7 @@ void VQwDetectorArray::ConstructBranch(TTree *tree, TString & prefix, QwParamete
     return;
 }
 
-void VQwDetectorArray::FillTreeVector(std::vector<Double_t> &values) const {
+void VQwDetectorArray::FillTreeVector(QwRootTreeBranchVector &values) const {
 
     for (size_t i=0;i<fIntegrationPMT.size();i++)
      fIntegrationPMT[i].FillTreeVector(values);

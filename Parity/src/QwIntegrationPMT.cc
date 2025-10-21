@@ -566,7 +566,7 @@ void  QwIntegrationPMT::FillHistograms()
   return;
 }
 
-void  QwIntegrationPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwIntegrationPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
@@ -606,7 +606,7 @@ void  QwIntegrationPMT::ConstructBranch(TTree *tree, TString &prefix, QwParamete
 }
 
 
-void  QwIntegrationPMT::FillTreeVector(std::vector<Double_t> &values) const
+void  QwIntegrationPMT::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.

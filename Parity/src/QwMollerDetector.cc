@@ -220,7 +220,7 @@ void QwMollerDetector::FillHistograms(){
   }
 }
 
-void QwMollerDetector::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values){
+void QwMollerDetector::ConstructBranchAndVector(TTree *tree, TString & prefix, QwRootTreeBranchVector &values){
   for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
     for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
       fSTR7200_Channel[i][j].ConstructBranchAndVector(tree, prefix, values);
@@ -228,7 +228,7 @@ void QwMollerDetector::ConstructBranchAndVector(TTree *tree, TString & prefix, s
   }
 }
 
-void QwMollerDetector::FillTreeVector(std::vector<Double_t> &values) const {
+void QwMollerDetector::FillTreeVector(QwRootTreeBranchVector &values) const {
   for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
     for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
       fSTR7200_Channel[i][j].FillTreeVector(values);

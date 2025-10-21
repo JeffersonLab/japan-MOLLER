@@ -362,7 +362,7 @@ void QwClock<T>::FillHistograms()
 }
 
 template<typename T>
-void QwClock<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void QwClock<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip
@@ -409,7 +409,7 @@ void  QwClock<T>::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile&
 }
 
 template<typename T>
-void QwClock<T>::FillTreeVector(std::vector<Double_t> &values) const
+void QwClock<T>::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.

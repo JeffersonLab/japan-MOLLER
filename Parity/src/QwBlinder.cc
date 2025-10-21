@@ -526,16 +526,17 @@ Int_t QwBlinder::ReadRandomSeed()
     "abcdefghijklmnopqrstuvwxyz";
 
   Int_t strLen = sizeof(alphanum) - 1;
-  Char_t randomchar[20];
+  const size_t length = 20;
+  Char_t randomchar[length];
   // Initialize random number generator.
   srand(time(0));
   //get  a "random" positive integer 
   
-  for (int i = 0; i < 20; ++i) {
+  for (int i = 0; i < length; ++i) {
     randomchar[i] = alphanum[rand() % strLen];
   }
   fSeedID=rand();
-  TString frandomSeed(randomchar);
+  TString frandomSeed(randomchar, length);
   fSeed=frandomSeed;//a random string
   return fSeedID;
 }

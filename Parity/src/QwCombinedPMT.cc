@@ -443,7 +443,7 @@ void  QwCombinedPMT::FillHistograms()
   return;
 }
 
-void  QwCombinedPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwCombinedPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (GetElementName()=="")
     {
@@ -493,7 +493,7 @@ void  QwCombinedPMT::ConstructBranch(TTree *tree, TString &prefix, QwParameterFi
 }
 
 
-void  QwCombinedPMT::FillTreeVector(std::vector<Double_t> &values) const
+void  QwCombinedPMT::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()=="") {
     //  This channel is not used, so skip filling the histograms.

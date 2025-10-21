@@ -27,6 +27,7 @@
 // Forward declarations
 class VQwHardwareChannel;
 class QwParameterFile;
+class QwRootTreeBranchVector;
 
 /**
  * \class QwSubsystemArray
@@ -206,18 +207,18 @@ class QwSubsystemArray:
   /// \name Tree and vector construction and maintenance
   // @{
   /// Construct the tree and vector for this subsystem
-  void ConstructBranchAndVector(TTree *tree, std::vector <Double_t> &values) {
+  void ConstructBranchAndVector(TTree *tree, QwRootTreeBranchVector &values) {
     TString tmpstr("");
     ConstructBranchAndVector(tree,tmpstr,values);
   };
   /// \brief Construct a branch and vector for this subsystem with a prefix
-  void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector <Double_t> &values);
+  void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values);
   /// \brief Construct a branch for this subsystem with a prefix
   void ConstructBranch(TTree *tree, TString& prefix);
   /// \brief Construct a branch for this subsystem with a prefix after tree leave trimming
   void ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file);
   /// \brief Fill the vector for this subsystem
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const;
   
 #ifdef HAS_RNTUPLE_SUPPORT
   /// \brief Construct RNTuple fields and vector for this subsystem

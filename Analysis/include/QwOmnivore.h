@@ -106,9 +106,9 @@ class QwOmnivore: public VQwSubsystem_t {
     void  FillHistograms() override { };
 
     /// Construct the branch and tree vector
-    void ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values) override { };
+    void ConstructBranchAndVector(TTree *tree, TString & prefix, QwRootTreeBranchVector &values) override { };
     /// Fill the tree vector
-    void FillTreeVector(std::vector<Double_t> &values) const override { };
+    void FillTreeVector(QwRootTreeBranchVector &values) const override { };
 #ifdef HAS_RNTUPLE_SUPPORT
     /// Construct the RNTuple fields and vector
     void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override { };

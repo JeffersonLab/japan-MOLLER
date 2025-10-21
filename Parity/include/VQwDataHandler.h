@@ -124,9 +124,9 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
     virtual void  FillHistograms() { };
 
     // Fill the vector for this subsystem
-    void FillTreeVector(std::vector<Double_t> &values) const;
+    void FillTreeVector(QwRootTreeBranchVector &values) const;
 
-    void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values);
+    void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values);
 #ifdef HAS_RNTUPLE_SUPPORT
     void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
     void FillNTupleVector(std::vector<Double_t>& values) const;

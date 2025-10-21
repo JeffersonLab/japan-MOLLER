@@ -1094,7 +1094,7 @@ void  QwCombinedBPM<T>::FillHistograms()
 }
 
 template<typename T>
-void  QwCombinedBPM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwCombinedBPM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip constructing trees.
@@ -1179,7 +1179,7 @@ void  QwCombinedBPM<T>::ConstructBranch(TTree *tree, TString &prefix, QwParamete
 
 
 template<typename T>
-void  QwCombinedBPM<T>::FillTreeVector(std::vector<Double_t> &values) const
+void  QwCombinedBPM<T>::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip filling the tree.

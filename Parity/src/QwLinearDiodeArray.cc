@@ -666,7 +666,7 @@ void  QwLinearDiodeArray::FillHistograms()
   return;
 }
 
-void  QwLinearDiodeArray::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwLinearDiodeArray::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing trees.
@@ -754,7 +754,7 @@ void  QwLinearDiodeArray::ConstructBranch(TTree *tree, TString &prefix, QwParame
   return;
 }
 
-void  QwLinearDiodeArray::FillTreeVector(std::vector<Double_t> &values) const
+void  QwLinearDiodeArray::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()=="") {
     //  This channel is not used, so skip filling the tree.
