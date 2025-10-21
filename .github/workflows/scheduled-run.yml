@@ -98,8 +98,8 @@ jobs:
               --write-promptsummary \
               --QwDatabase.accesslevel RW \
               --QwDatabase.dbtype postgresql \
-              --QwDatabase.dbserver "${{ secrets.PSQL_HOST }}" \
-              --QwDatabase.dbusername "${{ secrets.PSQL_USERNAME }}" \
-              --QwDatabase.dbpassword "${{ secrets.PSQL_PASSWORD }}" \
+              --QwDatabase.dbserver '${{ secrets.PSQL_HOST }}' \
+              --QwDatabase.dbusername '${{ secrets.PSQL_USERNAME }}' \
+              --QwDatabase.dbpassword '${{ secrets.PSQL_PASSWORD }}' \
               --QwDatabase.dbname qwparity
             echo "::endgroup::"
