@@ -1,0 +1,102 @@
+---
+name: Scheduled Run with DB Write
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # Every 6 hours
+  workflow_dispatch:
+    inputs:
+      nevents:
+        description: 'Number of events to simulate'
+        required: false
+        default: '20000'
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+env:
+  nevents: ${{ github.event.inputs.nevents || 20000 }} # Number of events to simulate
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - release: "LCG_108"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc15"
+            opt: "opt"
+            cxxflags: ""
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+      - uses: cvmfs-contrib/github-action-cvmfs@v5
+        with:
+          cvmfs_repositories: 'sft.cern.ch'
+      - name: Install ccache
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ccache
+      - name: Setup ccache cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}-${{ github.ref_name }}
+          restore-keys: |
+            ccache-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}-
+            ccache-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-
+            ccache-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-
+            ccache-${{ matrix.release }}-${{ matrix.arch }}-
+            ccache-${{ matrix.release }}-
+            ccache-
+      - name: Configure ccache
+        run: |
+          ccache --set-config=cache_dir=$HOME/.ccache
+          ccache --set-config=max_size=1G
+          ccache --set-config=compression=true
+          ccache --zero-stats
+          echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
+      - uses: aidasoft/run-lcg-view@v5
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            echo "::group::Compilation with ccache"
+            cmake -Bbuild -S. \
+              -DBUILD_MARIADB_CONNECTOR=ON \
+              -DBUILD_MYSQL_CONNECTOR=ON \
+              -DBUILD_POSTGRESQL_CONNECTOR=ON \
+              -DBUILD_SQLITE3_CONNECTOR=ON \
+              -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+              -DCMAKE_INSTALL_PREFIX=install \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_CXX_FLAGS="${{ matrix.cxxflags }}"
+            cmake --build build -j$(nproc) --target install
+            echo "::endgroup::"
+            
+            echo "::group::Mock data generation"
+            bin/qwmockdatagenerator -r ${{ github.run_id }} -e 1:${{ env.nevents }} \
+              --config qwparity_simple.conf \
+              --detectors mock_newdets.map \
+              --data .
+            echo "::endgroup::"
+
+            echo "::group::Mock data analysis (postgresql)"
+            bin/qwparity -r ${{ github.run_id }} \
+              --config qwparity_simple.conf \
+              --detectors mock_newdets.map \
+              --datahandlers mock_datahandlers.map \
+              --data . \
+              --rootfiles . \
+              --write-promptsummary \
+              --QwDatabase.accesslevel RW \
+              --QwDatabase.dbtype postgresql \
+              --QwDatabase.dbserver ${{ secrets.PSQL_HOST }} \
+              --QwDatabase.dbusername ${{ secrets.PSQL_USERNAME }} \
+              --QwDatabase.dbpassword ${{ secrets.PSQL_PASSWORD }} \
+              --QwDatabase.dbname qwparity
+            echo "::endgroup::"
