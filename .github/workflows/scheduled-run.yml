@@ -79,14 +79,14 @@ jobs:
             echo "::endgroup::"
             
             echo "::group::Mock data generation"
-            bin/qwmockdatagenerator -r ${{ github.run_id }} -e 1:${{ env.nevents }} \
+            build/qwmockdatagenerator -r ${{ github.run_id }} -e 1:${{ env.nevents }} \
               --config qwparity_simple.conf \
               --detectors mock_newdets.map \
               --data .
             echo "::endgroup::"
 
             echo "::group::Mock data analysis (postgresql)"
-            bin/qwparity -r ${{ github.run_id }} \
+            build/qwparity -r ${{ github.run_id }} \
               --config qwparity_simple.conf \
               --detectors mock_newdets.map \
               --datahandlers mock_datahandlers.map \
