@@ -105,7 +105,7 @@ public:
   VQwHardwareChannel(const VQwHardwareChannel& value, VQwDataElement::EDataToSave datatosave);
   ~VQwHardwareChannel() override { };
 
-  virtual void CopyFrom(const VQwHardwareChannel& value);
+  void CopyFrom(const VQwHardwareChannel& value);
 
   void ProcessOptions();
 

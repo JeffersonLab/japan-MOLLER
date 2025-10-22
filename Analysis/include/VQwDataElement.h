@@ -110,7 +110,7 @@ class VQwDataElement: public MQwHistograms {
   /// Virtual destructor
   ~VQwDataElement() override { };
 
-  virtual void CopyFrom(const VQwDataElement& value){
+  void CopyFrom(const VQwDataElement& value){
     fElementName       = value.fElementName;
     //    fNumberOfDataWords = value.fNumberOfDataWords;
     fGoodEventCount    = value.fGoodEventCount;
