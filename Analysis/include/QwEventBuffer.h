@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <string>
 #include <vector>
 #include "Rtypes.h"
@@ -139,7 +140,7 @@ class QwEventBuffer {
   Int_t GetNextEvent();
 
   Int_t  GetEvent();
-  Int_t  WriteEvent(int* buffer);
+  Int_t  WriteEvent(int* buffer, int* control = nullptr, int num_control = 0);
 
   Bool_t IsOnline(){return fOnline;};
 
@@ -161,7 +162,7 @@ class QwEventBuffer {
 
   void ResetControlParameters();
 	void ReportRunSummary();
-  Int_t EncodeSubsystemData(QwSubsystemArray &subsystems);
+  Int_t EncodeSubsystemData(QwSubsystemArray &subsystems, int* control = nullptr, int num_control = 0);
   Int_t EncodePrestartEvent(int runnumber, int runtype = 0);
   Int_t EncodeGoEvent();
   Int_t EncodePauseEvent();
@@ -195,6 +196,12 @@ class QwEventBuffer {
   Int_t   fETWaitMode;
   Bool_t  fExitOnEnd;
 
+  // Event rate limiting
+  Bool_t fEventRateLimitEnabled{false};
+  Double_t fMaxEventRate{0.0};
+  std::chrono::duration<double> fMinEventInterval;
+  std::chrono::duration<double> fAccumulatedDelay{0.0};
+  std::chrono::steady_clock::time_point fLastEventTime;
 
   Bool_t fChainDataFiles;
   std::pair<Int_t, Int_t> fRunRange;
@@ -229,6 +236,7 @@ class QwEventBuffer {
   Int_t  GetEtEvent();
 
   Int_t WriteFileEvent(int* buffer);
+  Int_t WriteEtEvent(int* buffer, int* control = nullptr, int num_control = 0);
 
   Bool_t DataFileIsSegmented();
 

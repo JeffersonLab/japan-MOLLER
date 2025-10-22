@@ -5,6 +5,9 @@
 
 #include "QwEventBuffer.h"
 
+#include <chrono>
+#include <thread>
+
 #include "QwOptions.h"
 #include "QwEPICSEvent.h"
 #include "VQwSubsystem.h"
@@ -141,6 +144,9 @@ void QwEventBuffer::DefineOptions(QwOptions &options)
   options.AddOptions("CodaVersion")
     ("coda-version", po::value<int>()->default_value(3),
      "Sets the Coda Version. Allowed values = {2,3}. \nThis is needed for writing and reading mock data. Mock data needs to be written and read with the same Coda Version.");
+  options.AddOptions("Event rate limiting")
+    ("max-event-rate", po::value<double>()->default_value(0.0),
+     "Maximum event write rate in Hz (0 = disabled, no rate limiting)");
 }
 
 void QwEventBuffer::ProcessOptions(QwOptions &options)
@@ -223,6 +229,19 @@ void QwEventBuffer::ProcessOptions(QwOptions &options)
 	}
 	
 	decoder->SetAllowLowSubbankIDs( options.GetValue<bool>("allow-low-subbank-ids") );
+
+  // Process event rate limiting option
+  fMaxEventRate = options.GetValue<double>("max-event-rate");
+  if (fMaxEventRate > 0.0) {
+    fEventRateLimitEnabled = true;
+    fMinEventInterval = std::chrono::duration<double>(1.0 / fMaxEventRate);
+    QwMessage << "Event rate limiting enabled: " << fMaxEventRate << " Hz "
+              << "(minimum interval: " << (1000.0 / fMaxEventRate) << " ms)" 
+              << QwLog::endl;
+  } else {
+    fEventRateLimitEnabled = false;
+  }
+  fLastEventTime = std::chrono::steady_clock::now();
 
   // Open run list file
   /* runlist file format example:
@@ -581,16 +600,55 @@ Int_t QwEventBuffer::GetEtEvent(){
 }
 
 
-Int_t QwEventBuffer::WriteEvent(int* buffer)
+Int_t QwEventBuffer::WriteEvent(int* buffer, int* control, int num_control)
 {
   Int_t status = kFileHandleNotConfigured;
   ResetFlags();
+  
+  // Rate limiting: sleep until minimum interval has elapsed, accounting for accumulated delays
+  if (fEventRateLimitEnabled) {
+    auto now = std::chrono::steady_clock::now();
+    auto elapsed = now - fLastEventTime;
+
+    if (elapsed < fMinEventInterval) {
+      // We're ahead of schedule - need to wait
+      auto target_sleep = fMinEventInterval - elapsed;
+      
+      // Reduce sleep time by accumulated delay (time we're behind)
+      auto actual_sleep = target_sleep - fAccumulatedDelay;
+      
+      if (actual_sleep > std::chrono::duration<double>(0)) {
+        // Still need to sleep after compensation
+        auto sleep_until_time = now + actual_sleep;
+        std::this_thread::sleep_until(sleep_until_time);
+        
+        // We've compensated for some or all of the accumulated delay
+        fAccumulatedDelay -= (target_sleep - actual_sleep);
+        if (fAccumulatedDelay < std::chrono::duration<double>(0)) {
+          fAccumulatedDelay = std::chrono::duration<double>(0);
+        }
+      } else {
+        // Accumulated delay is larger than needed sleep - don't sleep at all
+        fAccumulatedDelay -= target_sleep;
+      }
+    } else {
+      // We're behind schedule - accumulate the delay
+      auto delay = elapsed - fMinEventInterval;
+      fAccumulatedDelay += delay;
+    }
+    fLastEventTime = std::chrono::steady_clock::now();
+  }
+  
   if (fEvStreamMode==fEvStreamFile){
     status = WriteFileEvent(buffer);
   } else if (fEvStreamMode==fEvStreamET) {
-    QwMessage << "No support for writing to ET streams" << QwLog::endl;
+    status = WriteEtEvent(buffer, control, num_control);
+  }
+
+  if (globalEXIT == 1) {
     status = CODA_ERROR;
   }
+
   return status;
 }
 
@@ -603,8 +661,34 @@ Int_t QwEventBuffer::WriteFileEvent(int* buffer)
   return status;
 }
 
+Int_t QwEventBuffer::WriteEtEvent(int* buffer, int* control, int num_control)
+{
+  Int_t status = CODA_OK;
+  //  fEvStream is of inherited type THaCodaData,
+  //  but codaWrite for ET is defined in THaEtClient.
+#ifdef __CODA_ET
+  // Get the buffer length from the first word (CODA event header)
+  UInt_t* ubuffer = (UInt_t*)buffer;
+  UInt_t event_length = ubuffer[0];  // First word is event length in words
+  
+  if( event_length == 0 || event_length > MAXEVLEN ) {
+    QwError << "WriteEtEvent: Invalid event length: " << event_length << QwLog::endl;
+    return CODA_ERROR;
+  }
+  
+  status = ((THaEtClient*)fEvStream)->codaWrite(ubuffer, event_length, control, num_control);
+  if( status != CODA_OK ) {
+    QwError << "WriteEtEvent: codaWrite failed with status " << status << QwLog::endl;
+  }
+#else
+  QwError << "WriteEtEvent: ET support not compiled in" << QwLog::endl;
+  status = CODA_ERROR;
+#endif
+  return status;
+}
 
-Int_t QwEventBuffer::EncodeSubsystemData(QwSubsystemArray &subsystems)
+
+Int_t QwEventBuffer::EncodeSubsystemData(QwSubsystemArray &subsystems, int* control, int num_control)
 {
   // Encode the data in the elements of the subsystem array
   std::vector<UInt_t> buffer;
@@ -627,7 +711,7 @@ Int_t QwEventBuffer::EncodeSubsystemData(QwSubsystemArray &subsystems)
     codabuffer[k++] = buffer.at(i);
 
   // Now write the buffer to the stream
-  Int_t status = WriteEvent(codabuffer);
+  Int_t status = WriteEvent(codabuffer, control, num_control);
   // delete the buffer
   delete[] codabuffer;
   // and report success or fail
@@ -1204,11 +1288,26 @@ Int_t QwEventBuffer::OpenETStream(TString computer, TString session, int mode,
   Int_t status = CODA_OK;
   if (fEvStreamMode==fEvStreamNull){
 #ifdef __CODA_ET
+    THaEtClient* et_stream{nullptr};
     if (stationname != ""){
-      fEvStream = new THaEtClient(computer, session, mode, stationname.Data());
+      et_stream = new THaEtClient(computer, session, mode, stationname.Data());
     } else {
-      fEvStream = new THaEtClient(computer, session, mode);
+      et_stream = new THaEtClient(computer, session, mode);
     }
+
+    // In ET_STATION_SELECT_MATCH mode each element of the station's selection array is
+    // checked to see if the is equal to -1. If it is, then the corresponding element of the
+    // event's control array is ignored. Thus, if all elements of a station's selection array
+    // are set to -1, the event will NOT be selected. If the first element of the station's
+    // selection array is not -1 but is equal to the first element of the event's control array,
+    // then the event is selected. Likewise if the second element of the selection array is
+    // not -1 and if the bitwise AND (&) of the select and control second elements is true,
+    // then the event is selected.
+    const std::uint32_t station_mask = 0x3fffffff;
+    int selectwords[ET_STATION_SELECT_INTS] = {-1, -1 ,-1, -1, -1, static_cast<int>(station_mask)};
+    et_stream->codaSetSelect(selectwords);
+
+    fEvStream = et_stream;
     fEvStreamMode = fEvStreamET;
 #endif
   }
