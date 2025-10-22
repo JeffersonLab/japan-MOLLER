@@ -1,12 +1,9 @@
-/**********************************************************\
-* File: QwIntegratedRasterChannel.h                       *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwIntegratedRasterChannel.h
+ * \brief  Integrated raster channel template class for position data
+ */
 
-#ifndef __QwIntegratedRasterChannel__
-#define __QwIntegratedRasterChannel__
+#pragma once
 
 // System headers
 #include <vector>
@@ -22,11 +19,15 @@
 // Forward declarations
 class QwDBInterface;
 
-/*****************************************************************
-*  Class:
-******************************************************************/
-///
-/// \ingroup QwAnalysis_BL
+/**
+ * \class QwIntegratedRasterChannel
+ * \ingroup QwAnalysis_BL
+ * \brief Template for integrated raster readout channel
+ *
+ * Provides accumulation and processing of fast raster signals into
+ * per-window integrated values. The template parameter T is the
+ * underlying hardware channel type (e.g. QwVQWK_Channel).
+ */
 template<typename T>
 class QwIntegratedRasterChannel : public VQwDataElement{
 /////
@@ -39,14 +40,14 @@ class QwIntegratedRasterChannel : public VQwDataElement{
     SetSubsystemName(subsystemname);
     InitializeChannel(subsystemname, name,"raw");
   };
-  virtual ~QwIntegratedRasterChannel() { };
+  ~QwIntegratedRasterChannel() override { };
 
-  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0);
+  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0) override;
 
   void  InitializeChannel(TString name, TString datatosave);
   // new routine added to update necessary information for tree trimming
   void  InitializeChannel(TString subsystem, TString name, TString datatosave);
-  void  ClearEventData();
+  void  ClearEventData() override;
 
 
   void  SetRandomEventDriftParameters(Double_t amplitude, Double_t phase, Double_t frequency);
@@ -62,19 +63,19 @@ class QwIntegratedRasterChannel : public VQwDataElement{
   void  SetExternalRandomVariable(Double_t random_variable);
 
   void  ProcessEvent();
-  Bool_t ApplyHWChecks();//Check for harware errors in the devices
-  Bool_t ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
+  Bool_t ApplyHWChecks();//Check for hardware errors in the devices
+  Bool_t ApplySingleEventCuts();//Check for good events by setting limits on the devices readings
   void IncrementErrorCounters(){fTriumf_ADC.IncrementErrorCounters();};
-  void PrintErrorCounters() const;// report number of events failed due to HW and event cut faliure
-  UInt_t GetEventcutErrorFlag(){//return the error flag
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure
+  UInt_t GetEventcutErrorFlag() override{//return the error flag
     return fTriumf_ADC.GetEventcutErrorFlag();
   }
-  UInt_t UpdateErrorFlag() {return GetEventcutErrorFlag();};
+  UInt_t UpdateErrorFlag() override {return GetEventcutErrorFlag();};
   void UpdateErrorFlag(const QwIntegratedRasterChannel *ev_error){
     return fTriumf_ADC.UpdateErrorFlag(ev_error->fTriumf_ADC);
   }
 
-  Int_t SetSingleEventCuts(Double_t mean = 0, Double_t sigma = 0);//two limts and sample size
+  Int_t SetSingleEventCuts(Double_t mean = 0, Double_t sigma = 0);//two limits and sample size
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   void SetSingleEventCuts(UInt_t errorflag, Double_t min = 0, Double_t max = 0, Double_t stability = 0);
 
@@ -84,8 +85,8 @@ class QwIntegratedRasterChannel : public VQwDataElement{
     fTriumf_ADC.SetEventCutMode(bcuts);
   }
 
-  void PrintValue() const;
-  void PrintInfo() const;
+  void PrintValue() const override;
+  void PrintInfo() const override;
 
   
   QwIntegratedRasterChannel& operator=  (const QwIntegratedRasterChannel &value);
@@ -102,13 +103,13 @@ class QwIntegratedRasterChannel : public VQwDataElement{
   void SetPedestal(Double_t ped);
   void SetCalibrationFactor(Double_t calib);
 
-  void  ConstructHistograms(TDirectory *folder, TString &prefix);
-  void  FillHistograms();
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
+  void  FillHistograms() override;
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values);
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const;
 
   std::vector<QwDBInterface>    GetDBEntry();
   std::vector<QwErrDBInterface> GetErrDBEntry();
@@ -137,9 +138,7 @@ class QwIntegratedRasterChannel : public VQwDataElement{
   Int_t fDeviceErrorCode;//keep the device HW status using a unique code from the QwVQWK_Channel::fDeviceErrorCode
 
   const static  Bool_t bDEBUG=kFALSE;//debugging display purposes
-  Bool_t bEVENTCUTMODE;//If this set to kFALSE then Event cuts do not depend on HW ckecks. This is set externally through the qweak_beamline_eventcuts.map
+  Bool_t bEVENTCUTMODE;//If this set to kFALSE then Event cuts do not depend on HW checks. This is set externally through the qweak_beamline_eventcuts.map
 
 
 };
-
-#endif

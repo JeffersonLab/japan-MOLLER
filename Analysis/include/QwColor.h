@@ -1,5 +1,9 @@
-#ifndef QWCOLOR_H
-#define QWCOLOR_H
+/*!
+ * \file   QwColor.h
+ * \brief  ANSI color codes and color management for terminal output
+ */
+
+#pragma once
 
 // System headers
 #include <map>
@@ -7,7 +11,7 @@
 #include <iostream>
 
 // This header contains the terminals color codes.
-// This might be useful to distingush many output of QwAnalysis into
+// This might be useful to distinguish many output of QwAnalysis into
 // terminals.
 
 // Simply use printf function
@@ -153,5 +157,3 @@ inline std::ostream& operator<<(std::ostream& out, const QwColor& color)
 {
   return out << color.kColorMap[color.foreground];
 }
-
-#endif // QWCOLOR_H

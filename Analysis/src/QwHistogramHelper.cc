@@ -140,7 +140,7 @@ void  QwHistogramHelper::LoadHistParamsFromFile(const std::string& filename)
   //fDEBUG = 1;
 
   if (fDEBUG) std::cout<< "file name "<<fInputFile<<std::endl;
-  //Important to empty the fHistParams to reload the real time histo difinition file
+  //Important to empty the fHistParams to reload the real time histo definition file
   if (fTrimHistoEnable)
     fHistParams.clear();
   
@@ -179,8 +179,8 @@ void  QwHistogramHelper::LoadTreeParamsFromFile(const std::string& filename)
   TString devicename;
   TString moduletype;
   TString subsystemname;
-  QwParameterFile *section = nullptr;
-  QwParameterFile *module = nullptr;
+  std::unique_ptr<QwParameterFile> section = nullptr;
+  std::unique_ptr<QwParameterFile> module = nullptr;
   std::vector<TString> TrimmedList;//stores the list of elements for each module
   std::vector<std::vector<TString> > ModulebyTrimmedList;//stores the list of elements for each module
   std::vector<TString> ModuleList;//stores the list of modules for each subsystem
@@ -284,7 +284,7 @@ const QwHistogramHelper::HistParams QwHistogramHelper::GetHistParamsFromList(con
 
   fDEBUG = 0;
   if (fDEBUG) {
-    QwMessage << "Finding histogram defination from: " << histname << QwLog::endl;
+    QwMessage << "Finding histogram definition from: " << histname << QwLog::endl;
     QwMessage << tmpstruct << QwLog::endl;
   }
   if (tmpstruct.name_title == fInvalidName && !fTrimHistoEnable) {

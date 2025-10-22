@@ -6,9 +6,9 @@
  * \date   2010-01-07
  */
 
+#pragma once
+
 #ifdef __USE_DATABASE__
-#ifndef QWPARITYDB_HH
-#define QWPARITYDB_HH
 
 // System headers
 #include <map>
@@ -42,6 +42,15 @@ class QwEventBuffer;
  *
  */
 
+/**
+ * \class QwParityDB
+ * \ingroup QwAnalysis_BL
+ * \brief Database interface specialized for parity analysis metadata
+ *
+ * Extends QwDatabase to provide convenience getters for detector IDs,
+ * run/runlet/analysis identifiers, and to populate parameter files
+ * for the parity analyzer subsystems.
+ */
 class QwParityDB: public QwDatabase {
   public:
 
@@ -108,8 +117,5 @@ class QwParityDB: public QwDatabase {
     friend class StoreSlowControlDetectorID;
     friend class StoreErrorCodeID;
 };
-
-
-#endif
 
 #endif // #ifdef __USE_DATABASE__                                                                                                         

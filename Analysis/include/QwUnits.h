@@ -1,5 +1,9 @@
-#ifndef QWUNITS_H
-#define QWUNITS_H
+/*!
+ * \file   QwUnits.h
+ * \brief  Physical units and constants for Qweak analysis
+ */
+
+#pragma once
 
 /**
  * \ingroup QwAnalysis
@@ -138,5 +142,3 @@ namespace Qw {
   //@}
 
 } // namespace Qw
-
-#endif // QWUNITS_H

@@ -1,10 +1,8 @@
-/*
- * QwAlarmHandler.cc
- *
- *  Created on: Oct 22, 2010
- *      Author: wdconinc
- *
- *  Last Modified: August 1, 2018 1:45 PM
+/*!
+ * \file   QwAlarmHandler.cc
+ * \brief  Implementation of alarm handling data handler for monitoring
+ * \author wdconinc
+ * \date   2010-10-22
  */
 
 #include "QwAlarmHandler.h"
@@ -155,12 +153,7 @@ Int_t QwAlarmHandler::LoadChannelMap(const std::string& mapfile)
   return 0;
 }
 
-/** Connect to the dependent and independent channels
- *
- * @param asym Asymmetry event structure
- * @param diff Difference event structure
- * @return Zero on success
- */
+// Connect to the dependent and independent channels (implementation). Parameters are documented in the header.
 Int_t QwAlarmHandler::ConnectChannels(
     QwSubsystemArrayParity& yield,
     QwSubsystemArrayParity& asym,
@@ -210,11 +203,7 @@ Int_t QwAlarmHandler::ConnectChannels(
   return 0;
 }
 
-/** Connect to the dependent and independent channels
- *
- * @param event Helicity event structure
- * @return Zero on success
- */
+// Connect to the dependent and independent channels (overload)
 /*Int_t QwAlarmHandler::ConnectChannels(QwSubsystemArrayParity& event)
 {
   // Return if correction is not enabled

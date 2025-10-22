@@ -98,7 +98,7 @@ asym_qwk_mdoddbars_hw		TH1F	1001	0	0				Asymmetry       Events
 asym_qwk_mdoddbars_block.	TH1F	1001	0	0				Asymmetry       Events
 
 
-###  Auxilliary/Background detector
+###  Auxiliary/Background detector
 qwk_pmtled_hw                   TH1F	1001	0 0				V/#muA	Events
 qwk_pmtled_block.               TH1F	1001	0 0				V/#muA	Events
 qwk_pmtonl_hw                   TH1F	1001	0 0				V/#muA	Events

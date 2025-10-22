@@ -33,12 +33,13 @@ jobs:
           - release: "LCG_108"
             arch: "x86_64"
             os: "el9"
-            compiler: "gcc15"
+            compiler: "clang19"
             opt: "opt"
+            cxxflags: ""
           - release: "LCG_108"
             arch: "x86_64"
             os: "el9"
-            compiler: "clang19"
+            compiler: "gcc15"
             opt: "opt"
             cxxflags: ""
     steps:
@@ -67,7 +68,7 @@ jobs:
           ccache --set-config=compression=true
           ccache --zero-stats
           echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
-      - uses: aidasoft/run-lcg-view@v1
+      - uses: aidasoft/run-lcg-view@v5
         with:
           release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           run: |
@@ -89,11 +90,10 @@ jobs:
             echo "::endgroup::"
 
             echo "::group::Compilation with ccache"
-            # Note that postgresql fails in v0.65; see rbock/sqlpp11#623
             cmake -Bbuild -S. \
               -DBUILD_MARIADB_CONNECTOR=ON \
               -DBUILD_MYSQL_CONNECTOR=ON \
-              -DBUILD_POSTGRESQL_CONNECTOR=OFF \
+              -DBUILD_POSTGRESQL_CONNECTOR=ON \
               -DBUILD_SQLITE3_CONNECTOR=ON \
               -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache \
               -DCMAKE_INSTALL_PREFIX=install \
@@ -284,7 +284,6 @@ jobs:
   valgrind:
     runs-on: ubuntu-latest
     needs: linux
-    if: github.event_name == 'pull_request'
     strategy:
       fail-fast: false
       matrix:
@@ -306,10 +305,10 @@ jobs:
       - name: Uncompress build artifact
         run: tar -xaf build.tar.zst
 
-      - uses: cvmfs-contrib/github-action-cvmfs@v3
+      - uses: cvmfs-contrib/github-action-cvmfs@v5
         with:
           cvmfs_repositories: 'sft.cern.ch,geant4.cern.ch'
-      - uses: aidasoft/run-lcg-view@v1
+      - uses: aidasoft/run-lcg-view@v5
         with:
           release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           run: |
@@ -320,7 +319,7 @@ jobs:
             echo "::group::Run callgrind on mock data analysis (no rntuples, no trees, no hists)"
             valgrind --tool=callgrind --callgrind-out-file=callgrind.out.no-out --instr-atstart=no \
               build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data . --rootfiles . --write-promptsummary --callgrind-instr-start-event-loop \
-                --disable-trees --disable-hists
+                --disable-trees --disable-histos
             echo "::endgroup::"
 
             echo "::group::Annotate callgrind info on source code (no rntuples, no trees, no hists)"

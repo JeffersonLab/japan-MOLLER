@@ -183,7 +183,7 @@ QwHelicityPattern::QwHelicityPattern(QwSubsystemArrayParity &event, const TStrin
         {
           TString loc=
             "Standard exception from QwHelicityPattern : the pattern size has to be even;  right now pattern_size=";
-          loc+=Form("%d",fPatternSize);
+          loc+=Form("%zu",fPatternSize);
           throw std::invalid_argument(loc.Data());
         }
     }
@@ -270,7 +270,7 @@ void QwHelicityPattern::LoadEventData(QwSubsystemArrayParity &event)
 		<< QwLog::endl;
       }
     } else {
-      // We are not usng any helicity subsystem
+      // We are not using any helicity subsystem
       static Bool_t user_has_been_warned = kFALSE;
       if (! user_has_been_warned) {
 	QwError << "No helicity subsystem found!  Dropping to \"Missing Helicity\" mode!" << QwLog::endl;
@@ -396,7 +396,7 @@ void  QwHelicityPattern::CalculatePairAsymmetry()
 	// Helicity polarity is undefined.
 	QwDebug<<" QwHelicityPattern::CalculatePairAsymmetry == \n"
 	       <<" undefined local helicity (-9999) \n"
-	       <<" impossible to compute assymetry \n"
+	       <<" impossible to compute asymmetry \n"
 	       <<" dropping every thing -- pattern number ="<<fCurrentPatternNumber<<QwLog::endl;
 	// This is an unknown helicity event.
 	fPairIsGood = kFALSE;
@@ -409,7 +409,7 @@ void  QwHelicityPattern::CalculatePairAsymmetry()
 	// there is a different number of plus and minus helicity window.
 	QwError<<" QwHelicityPattern::CalculatePairAsymmetry == \n"
 	       <<" you do not have the same number of positive and negative \n"
-	       <<" impossible to compute assymetry \n"
+	       <<" impossible to compute asymmetry \n"
 	       <<" dropping every thing -- pattern number ="<<fCurrentPatternNumber<<QwLog::endl;
 	// This is an unknown helicity event.
       }
@@ -497,9 +497,9 @@ void  QwHelicityPattern::CalculateAsymmetry()
   if (fIgnoreHelicity){
     //  Don't check to see if we have equal numbers of even and odd helicity states in this pattern.
     //  Build an asymmetry with even-parity phases as "+" and odd-parity phases as "-"
-    for (size_t i = 0; i < (size_t) fPatternSize; i++) {
+    for (size_t i = 0; i < fPatternSize; i++) {
       Int_t localhel = 1;
-      for (size_t j = 0; j < (size_t) fPatternSize/2; j++) {
+      for (size_t j = 0; j < fPatternSize/2; j++) {
 	localhel ^= ((i >> j)&0x1);
       }
       if (localhel == plushel) {
@@ -520,7 +520,7 @@ void  QwHelicityPattern::CalculateAsymmetry()
     }
   } else {
     //  
-    for (size_t i = 0; i < (size_t) fPatternSize; i++) {
+    for (size_t i = 0; i < fPatternSize; i++) {
       if (fHelicity[i] == plushel) {
 	if (localdebug) std::cout<<"QwHelicityPattern::CalculateAsymmetry:  here filling fPositiveHelicitySum \n";
 	if (firstplushel) {
@@ -549,8 +549,8 @@ void  QwHelicityPattern::CalculateAsymmetry()
 		<<" but is "<< fHelicity[i]
 		<< "; Asymmetry computation aborted!"<<QwLog::endl;
 	ClearEventData();
-	i = fPatternSize;
 	checkhel = -9999;
+  break;
 	// This is an unknown helicity event.
       }
     }
@@ -564,7 +564,7 @@ void  QwHelicityPattern::CalculateAsymmetry()
     // there is a different number of plus and minus helicity window.
     QwError<<" QwHelicityPattern::CalculateAsymmetry == \n"
 	   <<" you do not have the same number of positive and negative \n"
-	   <<" impossible to compute assymetry \n"
+	   <<" impossible to compute asymmetry \n"
 	   <<" dropping every thing -- pattern number ="<<fCurrentPatternNumber<<QwLog::endl;
   } else {
     //  This is a good pattern.
@@ -615,7 +615,7 @@ void  QwHelicityPattern::CalculateAsymmetry()
       fPositiveHelicitySum = fEvents.at(0);
       fNegativeHelicitySum = fEvents.at(fPatternSize/2);
       if (fPatternSize/2 > 1){
-	for (size_t i = 1; i < (size_t) fPatternSize/2 ; i++){
+	for (size_t i = 1; i < fPatternSize/2 ; i++){
 	  fPositiveHelicitySum += fEvents.at(i);
 	  fNegativeHelicitySum += fEvents.at(fPatternSize/2 +i);
 	}
@@ -633,7 +633,7 @@ void  QwHelicityPattern::CalculateAsymmetry()
 	fPositiveHelicitySum = fEvents.at(0);
 	fNegativeHelicitySum = fEvents.at(1);
 	if (fPatternSize/2 > 1){
-	  for (size_t i = 1; i < (size_t) fPatternSize/2 ; i++){
+	  for (size_t i = 1; i < fPatternSize/2 ; i++){
 	    fPositiveHelicitySum += fEvents.at(2*i);
 	    fNegativeHelicitySum += fEvents.at(2*i + 1);
 	  }
@@ -857,7 +857,7 @@ void  QwHelicityPattern::FillHistograms()
   }
 }
 
-void QwHelicityPattern::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values)
+void QwHelicityPattern::ConstructBranchAndVector(TTree *tree, TString & prefix, QwRootTreeBranchVector &values)
 {
 TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length())+"BurstCounter";
   tree->Branch(basename,&fBurstCounter,basename+"/S");
@@ -921,7 +921,7 @@ void QwHelicityPattern::ConstructBranch(TTree *tree, TString & prefix, QwParamet
   }
 }
 
-void QwHelicityPattern::FillTreeVector(std::vector<Double_t> &values) const
+void QwHelicityPattern::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (fPatternIsGood) {
     fYield.FillTreeVector(values);
@@ -1013,7 +1013,7 @@ void QwHelicityPattern::WritePromptSummary(QwPromptSummary *ps)
 void QwHelicityPattern::Print() const
 {
   QwOut << "Pattern number = " << fCurrentPatternNumber << QwLog::endl;
-  for (Int_t i = 0; i < fPatternSize; i++)
+  for (size_t i = 0; i < fPatternSize; i++)
     QwOut << "Event " << fEventNumber[i] << ": "
           << fEventLoaded[i] << ", " << fHelicity[i] << QwLog::endl;
   QwOut << "Is a complete pattern? (n/y:0/1) " << IsCompletePattern() << QwLog::endl;

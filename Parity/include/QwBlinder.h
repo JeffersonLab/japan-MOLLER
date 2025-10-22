@@ -6,8 +6,12 @@
  * \date   2010-04-14
  */
 
-#ifndef __QWBLINDER__
-#define __QWBLINDER__
+/*!
+ * \file   QwBlinder.h
+ * \brief  Data blinding utilities for parity violation analysis
+ */
+
+#pragma once
 
 // System headers
 #include <vector>
@@ -42,27 +46,13 @@ typedef unsigned long long ULong64_t; // Portable unsigned long integer 8 bytes
 /**
  * \class QwBlinder
  * \ingroup QwAnalysis
+ * \brief Data blinding utilities for parity violation analysis
  *
- * \brief Class for blinding data, adapted from G0 blinder class
- *
- * 1. Asymmetry blinding scheme:
- * \f[
- *   Asym_{blinded} = (Asym_{actual} + fBlindingOffset) * fBlindingFactor
- * \f]
- * where \f$ fBlindingOffset = F \times sign(\lambda/2) \f$, F is an encrypted factor
- * with |F| < 0.06 ppm.
- * This offset fBlindingOffset will be applied on the block and blocksum of the asymmetry.
- *
- * 2. Difference blinding scheme:
- * For blinding the helicity correlated differences of the detectors, we'd have to do:
- * \f[
- *   Diff_{blinded} = (Diff_{raw} + Yield_{raw} * fBlindingOffset) * fBlindingFactor)
- * \f]
- * where \f$ Asym_{raw} = Diff_{raw} / Yield_{raw} \f$ is the unblinded asymmetry,
- * and \f$ Asym_{blinded} = Diff_{blinded} / Yield_{blinded} \f$ the blinded asymmetry.
- * Blinding the differences allows that the difference can be written to the output
- * ROOT files without compromising the blinding.
- *
+ * Implements cryptographic data blinding to prevent bias in parity violation
+ * measurements. Supports multiple blinding strategies (additive, multiplicative,
+ * or combined) with encrypted offsets and factors. Provides both asymmetry
+ * and difference blinding schemes to maintain analysis integrity while
+ * preserving statistical properties of the data.
  */
 class QwBlinder {
 
@@ -232,7 +222,7 @@ class QwBlinder {
     };
 
  private:
-    ///  Indicates the first value recieved of the blindability of the target 
+    ///  Indicates the first value received of the blindability of the target 
     EQwBlinderStatus fTargetBlindability_firstread;
     EQwBlinderStatus fTargetBlindability;
     Bool_t fTargetPositionForced;
@@ -241,12 +231,13 @@ class QwBlinder {
     Int_t fIHWPPolarity_firstread;
     Int_t fIHWPPolarity;
     Bool_t fSpinDirectionForced;
+    /** \brief Set the current target blindability status. */
     void SetTargetBlindability(EQwBlinderStatus status);
     void SetWienState(EQwWienMode wienmode);
     void SetIHWPPolarity(Int_t ihwppolarity);
 
     //  Target position look-up index for PREX/CREX.
-    //  Index value of -1 is for the PREX positons
+    //  Index value of -1 is for the PREX positions
     //  CREX index values in date order go from "min" to "Max" and must correspond to cases in the QwBlinder::Update(const QwEPICSEvent& epics) function.
     Int_t  fCREXTargetIndex;
     Int_t  kCREXTgtIndexMin = 1;
@@ -272,7 +263,7 @@ class QwBlinder {
     EQwBlindingStrategy fBlindingStrategy; /// Blinding strategy
     Double_t fBlindingOffset; /// The term to be added to detector asymmetries
     Double_t fBlindingOffset_Base; /// The term to be added to detector asymmetries, before polarity correction
-    Double_t fBlindingFactor; /// The factor to be mutliplied to detector asymmetries
+    Double_t fBlindingFactor; /// The factor to be multiplied to detector asymmetries
 
 
     static const Double_t kDefaultMaximumBlindingAsymmetry; /// Default maximum blinding asymmetry (in ppm)
@@ -325,5 +316,3 @@ class QwBlinder {
     std::vector<Int_t> fPatternCounters; ///< Counts the number of events in each failure mode
     std::vector<Int_t> fPairCounters; ///< Counts the number of helicity pairs in each failure mode
 };
-
-#endif //__QWBLINDER__

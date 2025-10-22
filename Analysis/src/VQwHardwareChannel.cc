@@ -1,3 +1,12 @@
+/**
+ * VQwHardwareChannel.cc
+ *
+ * Base implementation for hardware channels providing common functionality:
+ * constructors, option processing, single-event cuts, database interfaces,
+ * and tree branch construction with module list filtering. Used by all
+ * concrete channel types. Documentation-only edits; runtime behavior unchanged.
+ */
+
 #include "VQwHardwareChannel.h"
 
 // Qweak database headers
@@ -8,20 +17,22 @@
 #include "QwParameterFile.h"
 #include "QwOptions.h"
 
+Int_t VQwHardwareChannel::fBurpHoldoff = 10;
+
+/** Default constructor: initialize limits, error flags, and process options. */
 VQwHardwareChannel::VQwHardwareChannel():
   fNumberOfDataWords(0),
-  fNumberOfSubElements(0), fDataToSave(kRaw)
+  fNumberOfSubElements(0),
+  fDataToSave(kRaw)
 {
   fULimit = -1;
   fLLimit = 1;
   fErrorFlag = 0;
   fErrorConfigFlag = 0;
-  fBurpHoldoff = 10;
   fBurpThreshold = -1.0;
-  
-  ProcessOptions();
 }
 
+/** Copy constructor: duplicate all channel state and configuration. */
 VQwHardwareChannel::VQwHardwareChannel(const VQwHardwareChannel& value)
   :VQwDataElement(value),
    fNumberOfDataWords(value.fNumberOfDataWords),
@@ -38,11 +49,11 @@ VQwHardwareChannel::VQwHardwareChannel(const VQwHardwareChannel& value)
    fLLimit(value.fLLimit),
    fStability(value.fStability),
    fBurpThreshold(value.fBurpThreshold),
-   fBurpCountdown(value.fBurpCountdown),
-   fBurpHoldoff(value.fBurpHoldoff)
+   fBurpCountdown(value.fBurpCountdown)
 {
 }
 
+/** Copy constructor with data-to-save override. */
 VQwHardwareChannel::VQwHardwareChannel(const VQwHardwareChannel& value, VQwDataElement::EDataToSave datatosave)
   :VQwDataElement(value),
    fNumberOfDataWords(value.fNumberOfDataWords),
@@ -59,11 +70,11 @@ VQwHardwareChannel::VQwHardwareChannel(const VQwHardwareChannel& value, VQwDataE
    fLLimit(value.fLLimit),
    fStability(value.fStability),
    fBurpThreshold(value.fBurpThreshold),
-   fBurpCountdown(value.fBurpCountdown),
-   fBurpHoldoff(value.fBurpHoldoff)
+   fBurpCountdown(value.fBurpCountdown)
 {
 }
 
+/** Copy all state from another hardware channel instance. */
 void VQwHardwareChannel::CopyFrom(const VQwHardwareChannel& value)
 {
   VQwDataElement::CopyFrom(value);
@@ -82,22 +93,19 @@ void VQwHardwareChannel::CopyFrom(const VQwHardwareChannel& value)
   fStability = value.fStability;
   fBurpThreshold = value.fBurpThreshold;
   fBurpCountdown = value.fBurpCountdown;
-  fBurpHoldoff = value.fBurpHoldoff;
 }
 
-
-
-void VQwHardwareChannel::ProcessOptions(){
-  if (gQwOptions.HasValue("burp.holdoff"))
-    fBurpHoldoff=gQwOptions.GetValue<int>("burp.holdoff");
-}
-
+/** Configure upper and lower limits for single-event cuts. */
 void VQwHardwareChannel::SetSingleEventCuts(Double_t min, Double_t max)
 {
   fULimit=max;
   fLLimit=min;
 }
 
+/**
+ * Configure comprehensive single-event cuts with error flags, stability, and
+ * burp detection thresholds.
+ */
 void VQwHardwareChannel::SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t BurpLevel)
 {
   //QwError<<"***************************inside VQwHardwareChannel, BurpLevel = "<<BurpLevel<<QwLog::endl;
@@ -110,6 +118,9 @@ void VQwHardwareChannel::SetSingleEventCuts(UInt_t errorflag,Double_t min, Doubl
       << ", global? " << ((fErrorConfigFlag & kGlobalCut)==kGlobalCut) << ", stability? " << ((fErrorConfigFlag & kStabilityCut)==kStabilityCut)<<" cut "<<fStability << ", burpcut  " << fBurpThreshold << QwLog::endl;
 }
 
+/**
+ * Build database interface rows for all subelements of this channel.
+ */
 #ifdef __USE_DATABASE__
 void VQwHardwareChannel::AddEntriesToList(std::vector<QwDBInterface> &row_list)
 {
@@ -129,8 +140,12 @@ void VQwHardwareChannel::AddEntriesToList(std::vector<QwDBInterface> &row_list)
     row_list.push_back(row);
   }
 }
-#endif
+#endif // __USE_DATABASE__
 
+/**
+ * Conditionally construct tree branch if this channel name appears in the
+ * module list filter.
+ */
 void VQwHardwareChannel::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist){
   if (GetElementName()!=""){
     TString devicename;

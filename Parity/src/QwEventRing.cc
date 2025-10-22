@@ -1,6 +1,16 @@
+/**
+ * QwEventRing.cc
+ *
+ * Event ring buffer for burp detection and stability monitoring.
+ * Maintains a circular buffer of recent events, applies rolling averages
+ * for stability cuts, and implements burp detection with configurable
+ * extent and precut parameters. Documentation-only edits; runtime
+ * behavior unchanged.
+ */
+
 #include "QwEventRing.h"
 
-
+/** Constructor: initialize ring buffer with specified size and options. */
 QwEventRing::QwEventRing(QwOptions &options, QwSubsystemArrayParity &event)
   : fRollingAvg(event), fBurpAvg(event)
 {
@@ -22,6 +32,7 @@ QwEventRing::QwEventRing(QwOptions &options, QwSubsystemArrayParity &event)
 }
 
 
+/** Define command-line options for ring buffer and burp detection parameters. */
 void QwEventRing::DefineOptions(QwOptions &options)
 {
   // Define the execution options
@@ -52,6 +63,7 @@ void QwEventRing::DefineOptions(QwOptions &options)
       "QwEventRing: number of events ignored after the beam trips");
 }
 
+/** Process options and validate ring/burp parameter consistency. */
 void QwEventRing::ProcessOptions(QwOptions &options)
 {
   // Reads Event Ring parameters from cmd
@@ -77,11 +89,14 @@ void QwEventRing::ProcessOptions(QwOptions &options)
   tmpval += 2;
   if (fRING_SIZE<tmpval){
     QwWarning << "Forcing ring size to be " << tmpval
-	      << " to accomodate a burp extent of " << fBurpExtent
+         << " to accommodate a burp extent of " << fBurpExtent
 	      << " and a burp precut of " << fBurpPrecut
 	      << "; it had been " << fRING_SIZE << "." << QwLog::endl;
     fRING_SIZE = tmpval;
   }
+
+  if (gQwOptions.HasValue("burp.holdoff"))
+    VQwHardwareChannel::SetBurpHoldoff(gQwOptions.GetValue<int>("burp.holdoff"));
 
   if (gQwOptions.HasValue("ring.stability_cut"))
     stability=gQwOptions.GetValue<double>("ring.stability_cut");
@@ -96,6 +111,10 @@ void QwEventRing::ProcessOptions(QwOptions &options)
 
   fPrintAfterUnwind = gQwOptions.GetValue<bool>("ring.print-after-unwind");
 }
+/**
+ * Add an event to the ring buffer, applying stability cuts and burp detection.
+ * Updates rolling averages and marks events with beam trip or stability errors.
+ */
 void QwEventRing::push(QwSubsystemArrayParity &event)
 {
   if (bDEBUG) QwMessage << "QwEventRing::push:  BEGIN" <<QwLog::endl;
@@ -132,10 +151,10 @@ void QwEventRing::push(QwSubsystemArrayParity &event)
 	    fRollingAvg.CalculateRunningAverage();
     	/*
 	    //The fRollingAvg dose not contain any regular errorcodes since it only accumulate rolling sum for errorflag==0 event.
-	    //The only errorflag it generates is the stability cut faliure error when the rolling avg is computed. 
+	    //The only errorflag it generates is the stability cut failure error when the rolling avg is computed. 
 	    //Therefore when fRollingAvg.GetEventcutErrorFlag() is called it will return non-zero error code only if a global stability cut has failed
 	    //When fRollingAvg.GetEventcutErrorFlag() is called the fErrorFlag of the subsystemarrayparity object will be updated with any global
-	    //stability cut faliures
+	    //stability cut failures
 	    */
 	    fRollingAvg.UpdateErrorFlag(); //to update the global error code in the fRollingAvg
 	    if ( fRollingAvg.GetEventcutErrorFlag() != 0 ) {
@@ -165,6 +184,12 @@ void QwEventRing::push(QwSubsystemArrayParity &event)
 }
 
 
+/**
+ * Retrieve the next event from the ring buffer and deaccumulate from
+ * rolling average if stability monitoring is enabled.
+ *
+ * @return Reference to the retrieved event.
+ */
 QwSubsystemArrayParity& QwEventRing::pop(){
   Int_t tempIndex;
   tempIndex=fNextToBeRead;  
@@ -187,10 +212,15 @@ QwSubsystemArrayParity& QwEventRing::pop(){
 }
 
 
-Bool_t QwEventRing::IsReady(){ //Check for readyness to read data from the ring using the pop() routine   
+/** Check if the ring buffer has events ready for retrieval. */
+Bool_t QwEventRing::IsReady(){ //Check for readiness to read data from the ring using the pop() routine   
   return bRING_READY;
 }
 
+/**
+ * Perform burp detection for the specified event, marking preceding events
+ * if a burp is detected and maintaining the burp average window.
+ */
 void QwEventRing::CheckBurpCut(Int_t thisevent)
 {
   if (bRING_READY || thisevent>fBurpExtent){

@@ -1,8 +1,8 @@
-/**
- *  \file   QwRunCondition.cc
- *  \brief  
- *  \author jhlee@jlab.org
- *  \date   Thursday, September  9 21:42:26 EDT 2010
+/*!
+ * \file   QwRunCondition.cc
+ * \brief  Implementation for run condition management and metadata
+ * \author jhlee@jlab.org
+ * \date   2010-09-09
  */
 
 #include "QwRunCondition.h"

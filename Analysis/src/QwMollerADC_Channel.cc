@@ -1,5 +1,10 @@
+/*!
+ * \file   QwMollerADC_Channel.cc
+ * \brief  Implementation for Moller ADC channel decoding and management
+ */
+
 #include "QwMollerADC_Channel.h"
- 
+
 // System headers
 #include <stdexcept>
 
@@ -673,7 +678,7 @@ void  QwMollerADC_Channel::FillHistograms()
     }
 }
 
-void  QwMollerADC_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwMollerADC_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   //  This channel is not used, so skip setting up the tree.
   if (IsNameEmpty()) return;
@@ -695,71 +700,53 @@ void  QwMollerADC_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix
   bSequence_number = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "sequence_number");
 
   if (bHw_sum) {
-    values.push_back(0.0);
-    list += "hw_sum/D";
+    values.push_back("hw_sum", 'D');
     if (fDataToSave == kMoments) {
-      values.push_back(0.0);
-      list += ":hw_sum_m2/D";
-      values.push_back(0.0);
-      list += ":hw_sum_err/D";
+      values.push_back("hw_sum_m2", 'D');
+      values.push_back("hw_sum_err", 'D');
     }
   }
 
   if (bBlock) {
-    values.push_back(0.0);
-    list += ":block0/D";
-    values.push_back(0.0);
-    list += ":block1/D";
-    values.push_back(0.0);
-    list += ":block2/D";
-    values.push_back(0.0);
-    list += ":block3/D";
+    values.push_back("block0", 'D');
+    values.push_back("block1", 'D');
+    values.push_back("block2", 'D');
+    values.push_back("block3", 'D');
   }
 
   if (bNum_samples) {
-    values.push_back(0.0);
-    list += ":num_samples/D";
+    values.push_back("num_samples", 'i');
   }
 
   if (bDevice_Error_Code) {
-    values.push_back(0.0);
-    list += ":Device_Error_Code/D";
+    values.push_back("Device_Error_Code", 'i');
   }
 
   if (fDataToSave == kRaw) {
     if (bHw_sum_raw) {
-      values.push_back(0.0);
-      list += ":hw_sum_raw/D";
+      values.push_back("hw_sum_raw", 'I');
     }
     if (bBlock_raw) {
-      values.push_back(0.0);
-      list += ":block0_raw/D";
-      values.push_back(0.0);
-      list += ":block1_raw/D";
-      values.push_back(0.0);
-      list += ":block2_raw/D";
-      values.push_back(0.0);
-      list += ":block3_raw/D";
+      values.push_back("block0_raw", 'I');
+      values.push_back("block1_raw", 'I');
+      values.push_back("block2_raw", 'I');
+      values.push_back("block3_raw", 'I');
     }
 
-    for(int i = 0; i < 4; i++){
-     if (bBlock_raw) {
-      values.push_back(0.0);
-      list += Form(":SumSq1_%d/D",i);
-      values.push_back(0.0);
-      list += Form(":SumSq2_%d/D",i);
-      values.push_back(0.0);
-      list += Form(":RawMin_%d/D",i);
-      values.push_back(0.0);
-      list += Form(":RawMax_%d/D",i);
-     }
+    for (int i = 0; i < 4; i++) {
+      if (bBlock_raw) {
+        values.push_back(Form("SumSq_%d", i), 'L');
+        values.push_back(Form("RawMin_%d", i), 'I');
+        values.push_back(Form("RawMax_%d", i), 'I');
+      }
     }
 
     if (bSequence_number) {
-      values.push_back(0.0);
-      list += ":sequence_number/D";
+      values.push_back("sequence_number", 'i');
     }
   }
+
+  std::string leaf_list = values.LeafList(fTreeArrayIndex);
 
   fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
 
@@ -768,20 +755,20 @@ void  QwMollerADC_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix
         bHw_sum_raw || bBlock_raw || bSequence_number)) {
 
     // This is for the RT mode
-    if (list == "hw_sum/D")
-      list = basename+"/D";
+    if (leaf_list == "hw_sum/D")
+      leaf_list = basename+"/D";
 
     if (kDEBUG)
-      QwMessage << "base name " << basename << " List " << list << QwLog::endl;
+      QwMessage << "base name " << basename << " List " << leaf_list << QwLog::endl;
 
-    tree->Branch(basename, &(values[fTreeArrayIndex]), list);
+    tree->Branch(basename, &(values[fTreeArrayIndex]), leaf_list.c_str());
   }
 
   if (kDEBUG) {
     std::cerr << "QwMollerADC_Channel::ConstructBranchAndVector: fTreeArrayIndex==" << fTreeArrayIndex
               << "; fTreeArrayNumEntries==" << fTreeArrayNumEntries
               << "; values.size()==" << values.size()
-              << "; list==" << list
+              << "; list==" << leaf_list
               << std::endl;
   }
 }
@@ -801,7 +788,7 @@ void  QwMollerADC_Channel::ConstructBranch(TTree *tree, TString &prefix)
 }
 
 
-void  QwMollerADC_Channel::FillTreeVector(std::vector<Double_t> &values) const
+void  QwMollerADC_Channel::FillTreeVector(QwRootTreeBranchVector& values) const
 {
   if (IsNameEmpty()) {
     //  This channel is not used, so skip filling the tree vector.
@@ -820,51 +807,50 @@ void  QwMollerADC_Channel::FillTreeVector(std::vector<Double_t> &values) const
 
     // hw_sum
     if (bHw_sum) {
-      values[index++] = this->GetHardwareSum();
+      values.SetValue(index++, this->GetHardwareSum());
       if (fDataToSave == kMoments) {
-        values[index++] = this->GetHardwareSumM2();
-        values[index++] = this->GetHardwareSumError();
+        values.SetValue(index++, this->GetHardwareSumM2());
+        values.SetValue(index++, this->GetHardwareSumError());
       }
     }
 
     if (bBlock) {
       for (Int_t i = 0; i < fBlocksPerEvent; i++) {
         // blocki
-        values[index++] = this->GetBlockValue(i);
+        values.SetValue(index++, this->GetBlockValue(i));
       }
     }
 
     // num_samples
     if (bNum_samples)
-      values[index++] =
-          (fDataToSave == kMoments)? this->fGoodEventCount: this->fNumberOfSamples;
-
+      values.SetValue(index++, (fDataToSave == kMoments)? this->fGoodEventCount: this->fNumberOfSamples);
     // Device_Error_Code
     if (bDevice_Error_Code)
-      values[index++] = this->fErrorFlag;
+      values.SetValue(index++, this->fErrorFlag);
 
     if (fDataToSave == kRaw)
       {
         // hw_sum_raw
         if (bHw_sum_raw)
-          values[index++] = this->GetRawHardwareSum();
+          values.SetValue(index++, this->GetRawHardwareSum());
 
         if (bBlock_raw) {
           for (Int_t i = 0; i < fBlocksPerEvent; i++) {
             // blocki_raw
-            values[index++] = this->GetRawBlockValue(i);
+            values.SetValue(index++, this->GetRawBlockValue(i));
           }
         }
 
-        for(int i = 0; i < 4; i++){
-        values[index++] = fBlockSumSq_raw[i] & 0xffffffff;
-        values[index++] = fBlockSumSq_raw[i] >> 32;
-        values[index++] = fBlock_min[i];
-        values[index++] = fBlock_max[i];
+        if (bBlock_raw) {
+          for (int i = 0; i < 4; i++) {
+            values.SetValue(index++, fBlockSumSq_raw[i]);
+            values.SetValue(index++, fBlock_min[i]);
+            values.SetValue(index++, fBlock_max[i]);
+          }
         }
         // sequence_number
         if (bSequence_number)
-          values[index++] = this->fSequenceNumber;
+          values.SetValue(index++, this->fSequenceNumber);
       }
   }
 }
@@ -1039,12 +1025,6 @@ void  QwMollerADC_Channel::FillNTupleVector(std::vector<Double_t>& values) const
       return;
     }
 
-    // For moments data (stat prefix), delegate to TTree behavior for exact match
-    if (fDataToSave == kMoments) {
-      // Use the existing TTree fill logic to ensure exact matching
-      FillTreeVector(values);
-      return;
-    }
 
     // For raw data, use the full detailed format
     // hw_sum
@@ -1061,7 +1041,7 @@ void  QwMollerADC_Channel::FillNTupleVector(std::vector<Double_t>& values) const
 
     // num_samples
     if (bNum_samples)
-      values[index++] = this->fNumberOfSamples;
+      values[index++] = fDataToSave == kMoments ? this->fGoodEventCount : this->fNumberOfSamples;
 
     // Device_Error_Code
     if (bDevice_Error_Code)
@@ -1101,22 +1081,25 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator= (const QwMollerADC_Channel &
   if (!IsNameEmpty()) {
     VQwHardwareChannel::operator=(value);
     for (Int_t i=0; i<fBlocksPerEvent; i++){
-      this->fBlock_raw[i] = value.fBlock_raw[i];
       this->fBlock[i]     = value.fBlock[i];
       this->fBlockM2[i]   = value.fBlockM2[i];
-      this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
-      this->fBlock_min[i]     = value.fBlock_min[i];
-      this->fBlock_max[i]     = value.fBlock_max[i];
     }
-    this->fHardwareBlockSum_raw = value.fHardwareBlockSum_raw;
-    this->fSoftwareBlockSum_raw = value.fSoftwareBlockSum_raw;
     this->fHardwareBlockSum = value.fHardwareBlockSum;
     this->fHardwareBlockSumM2 = value.fHardwareBlockSumM2;
     this->fHardwareBlockSumError = value.fHardwareBlockSumError;
     this->fNumberOfSamples = value.fNumberOfSamples;
     this->fSequenceNumber  = value.fSequenceNumber;
    
-
+    if (this->fDataToSave == kRaw){
+      for (Int_t i=0; i<fBlocksPerEvent; i++){
+       this->fBlock_raw[i] = value.fBlock_raw[i];
+       this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
+       this->fBlock_min[i]     = value.fBlock_min[i];
+       this->fBlock_max[i]     = value.fBlock_max[i];
+      }
+      this->fHardwareBlockSum_raw = value.fHardwareBlockSum_raw;
+      this->fSoftwareBlockSum_raw = value.fSoftwareBlockSum_raw;
+    }
   }
   return *this;
 }
@@ -1128,16 +1111,10 @@ void QwMollerADC_Channel::AssignScaledValue(const QwMollerADC_Channel &value,
 
   if (!IsNameEmpty()) {
     for (Int_t i=0; i<fBlocksPerEvent; i++){
-      this->fBlock_raw[i] = value.fBlock_raw[i];   // Keep this?
       this->fBlock[i]   = value.fBlock[i]   * scale;
       this->fBlockM2[i] = value.fBlockM2[i] * scale * scale;
-      this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
-      this->fBlock_min[i]     = value.fBlock_min[i];
-      this->fBlock_max[i]     = value.fBlock_max[i];
 
     }
-    this->fHardwareBlockSum_raw = value.fHardwareBlockSum_raw;  // Keep this?
-    this->fSoftwareBlockSum_raw = value.fSoftwareBlockSum_raw;  // Keep this?
     this->fHardwareBlockSum   = value.fHardwareBlockSum * scale;
     this->fHardwareBlockSumM2 = value.fHardwareBlockSumM2 * scale * scale;
     this->fHardwareBlockSumError = value.fHardwareBlockSumError;   // Keep this?
@@ -1156,7 +1133,7 @@ void QwMollerADC_Channel::AssignValueFrom(const  VQwDataElement* valueptr)
     *this = *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::AssignValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -1168,7 +1145,7 @@ void QwMollerADC_Channel::AddValueFrom(const  VQwHardwareChannel* valueptr)
     *this += *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::AddValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -1180,7 +1157,7 @@ void QwMollerADC_Channel::SubtractValueFrom(const  VQwHardwareChannel* valueptr)
     *this -= *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::SubtractValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -1192,7 +1169,7 @@ void QwMollerADC_Channel::MultiplyBy(const VQwHardwareChannel* valueptr)
     *this *= *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::MultiplyBy = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -1204,7 +1181,7 @@ void QwMollerADC_Channel::DivideBy(const VQwHardwareChannel* valueptr)
     *this /= *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::DivideBy = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -1223,15 +1200,8 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator+= (const QwMollerADC_Channel 
   if (!IsNameEmpty()) {
     for (Int_t i = 0; i < fBlocksPerEvent; i++) {
       this->fBlock[i] += value.fBlock[i];
-      this->fBlock_raw[i] += value.fBlock_raw[i];
-
-      this->fBlock_min[i] = TMath::Min(fBlock_min[i],value.fBlock_min[i]);
-      this->fBlock_max[i] = TMath::Max(fBlock_max[i],value.fBlock_max[i]);    
-      this->fBlockSumSq_raw[i] += value.fBlockSumSq_raw[i];
       this->fBlockM2[i] = 0.0;
     }
-    this->fHardwareBlockSum_raw = value.fHardwareBlockSum_raw;
-    this->fSoftwareBlockSum_raw = value.fSoftwareBlockSum_raw;
     this->fHardwareBlockSum    += value.fHardwareBlockSum;
     this->fHardwareBlockSumM2   = 0.0;
     this->fNumberOfSamples     += value.fNumberOfSamples;
@@ -1255,14 +1225,8 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator-= (const QwMollerADC_Channel 
   if (!IsNameEmpty()){
     for (Int_t i=0; i<fBlocksPerEvent; i++){
       this->fBlock[i] -= value.fBlock[i];
-      this->fBlock_raw[i] = 0;
-      this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
-      this->fBlock_min[i] = TMath::Min(fBlock_min[i],value.fBlock_min[i]);
-      this->fBlock_max[i] = TMath::Max(fBlock_max[i],value.fBlock_max[i]);  
       this->fBlockM2[i] = 0.0;
     }
-    this->fHardwareBlockSum_raw = 0;
-    this->fSoftwareBlockSum_raw = 0;
     this->fHardwareBlockSum    -= value.fHardwareBlockSum;
     this->fHardwareBlockSumM2   = 0.0;
     this->fNumberOfSamples     += value.fNumberOfSamples;
@@ -1285,20 +1249,8 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator*= (const QwMollerADC_Channel 
   if (!IsNameEmpty()){
     for (Int_t i=0; i<fBlocksPerEvent; i++){
       this->fBlock[i] *= value.fBlock[i];
-      this->fBlock_raw[i] *= value.fBlock_raw[i];
-      if(fBlockSumSq_raw[i] != 0){
-        this->fBlockSumSq_raw[i] *= value.fBlockSumSq_raw[i];
-        this->fBlock_min[i] *= value.fBlock_min[i];
-        this->fBlock_max[i] *= value.fBlock_max[i];
-      } else {
-        this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
-        this->fBlock_min[i] = value.fBlock_min[i];
-        this->fBlock_max[i] = value.fBlock_max[i];
-      }
       this->fBlockM2[i] = 0.0;
     }
-    this->fHardwareBlockSum_raw *= value.fHardwareBlockSum_raw;
-    this->fSoftwareBlockSum_raw *= value.fSoftwareBlockSum_raw;
     this->fHardwareBlockSum     *= value.fHardwareBlockSum;
     this->fHardwareBlockSumM2    = 0.0;
     this->fNumberOfSamples      *= value.fNumberOfSamples;
@@ -1385,11 +1337,6 @@ void QwMollerADC_Channel::Ratio(const QwMollerADC_Channel &numer, const QwMoller
     *this  = numer;
     *this /= denom;
 
-    //  Set the raw values to zero.
-    for (Int_t i = 0; i < fBlocksPerEvent; i++) fBlock_raw[i] = 0;
-    fHardwareBlockSum_raw = 0;
-    fSoftwareBlockSum_raw = 0;
-    // Remaining variables
     fNumberOfSamples      = denom.fNumberOfSamples;
     fSequenceNumber       = 0;
     fGoodEventCount       = denom.fGoodEventCount;
@@ -1477,25 +1424,12 @@ void QwMollerADC_Channel::Product(const QwMollerADC_Channel &value1, const QwMol
   if (!IsNameEmpty()){
     for (Int_t i = 0; i < fBlocksPerEvent; i++) {
       this->fBlock[i] = (value1.fBlock[i]) * (value2.fBlock[i]);
-      this->fBlock_raw[i] = 0;
       // For a single event the second moment is still zero
       this->fBlockM2[i] = 0.0;
-      if(value1.fBlockSumSq_raw[i] != 0){
-        this->fBlockSumSq_raw[i] = value1.fBlockSumSq_raw[i];
-        this->fBlock_min[i]     = value1.fBlock_min[i];
-        this->fBlock_max[i]     = value1.fBlock_max[i];
-      } else {
-        this->fBlockSumSq_raw[i] = value2.fBlockSumSq_raw[i];
-        this->fBlock_min[i]     = value2.fBlock_min[i];
-        this->fBlock_max[i]     = value2.fBlock_max[i];
-      }
     }
 
     // For a single event the second moment is still zero
     this->fHardwareBlockSumM2 = 0.0;
-
-    this->fSoftwareBlockSum_raw = 0;
-    this->fHardwareBlockSum_raw = value1.fHardwareBlockSum_raw * value2.fHardwareBlockSum_raw;
     this->fHardwareBlockSum = value1.fHardwareBlockSum * value2.fHardwareBlockSum;
     this->fNumberOfSamples = value1.fNumberOfSamples;
     this->fSequenceNumber  = 0;
@@ -1584,11 +1518,8 @@ void QwMollerADC_Channel::DivideBy(const QwMollerADC_Channel &denom)
  * We use the formulas provided there for the calculation of the first and
  * second moments (i.e. average and variance).
  */
-/**
- * Accumulate the running moments M1 and M2
- * @param value Object (single event or accumulated) to add to running moments
- * @param count Number of good events in value
- */
+// Accumulate the running moments M1 and M2.
+// See header for parameter and return documentation.
 void QwMollerADC_Channel::AccumulateRunningSum(const QwMollerADC_Channel& value, Int_t count, Int_t ErrorMask)
 {
   /*
@@ -1990,14 +1921,8 @@ void QwMollerADC_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *va
     //     input->PrintValue();
     for(Int_t i = 0; i < fBlocksPerEvent; i++){
       this -> fBlock[i] += scale * input->fBlock[i];
-      this->fBlock_raw[i] = 0;
       this -> fBlockM2[i] = 0.0;
-      this->fBlockSumSq_raw[i] = input->fBlockSumSq_raw[i];
-      this->fBlock_min[i]     = input->fBlock_min[i];
-      this->fBlock_max[i]     = input->fBlock_max[i];
     }
-    this->fHardwareBlockSum_raw = 0;
-    this->fSoftwareBlockSum_raw = 0;
     this -> fHardwareBlockSum += scale * input->fHardwareBlockSum;
     this -> fHardwareBlockSumM2 = 0.0;
     this -> fNumberOfSamples += input->fNumberOfSamples;

@@ -4,8 +4,7 @@
 * Author: P. M. King, W. Deconinck, B. Michaels            *
 \**********************************************************/
 
-#ifndef __QwADC18_CHANNEL__
-#define __QwADC18_CHANNEL__
+#pragma once
 
 // System headers
 #include <vector>
@@ -22,10 +21,16 @@ class QwParameterFile;
 class QwErrDBInterface;
 #endif
 
-///
-/// \ingroup QwAnalysis_ADC
-///
-/// \ingroup QwAnalysis_BL
+/**
+ * \class QwADC18_Channel
+ * \ingroup QwAnalysis_ADC
+ * \brief Concrete hardware channel for HAPPEX 18-bit ADC modules
+ *
+ * Decodes and processes data from HAPPEX 18-bit ADC channels, providing
+ * access to raw and calibrated values, statistical moments, single-event
+ * cuts, and running statistics. Implements the dual-operator pattern for
+ * both type-specific and polymorphic operations.
+ */
 class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
 /****************************************************************//**
  *  Class: QwADC18_Channel
@@ -75,21 +80,21 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   {
     *this = value;
   };
-  virtual ~QwADC18_Channel() { };
+  ~QwADC18_Channel() override { };
 
   using VQwHardwareChannel::Clone;
 
-  VQwHardwareChannel* Clone(VQwDataElement::EDataToSave datatosave) const{
+  VQwHardwareChannel* Clone(VQwDataElement::EDataToSave datatosave) const override{
     return new QwADC18_Channel(*this,datatosave);
   };
 
   /// \brief Initialize the fields in this object
-  void  InitializeChannel(TString name, TString datatosave);
+  void  InitializeChannel(TString name, TString datatosave) override;
 
   /// \brief Initialize the fields in this object
-  void  InitializeChannel(TString subsystem, TString instrumenttype, TString name, TString datatosave);
+  void  InitializeChannel(TString subsystem, TString instrumenttype, TString name, TString datatosave) override;
 
-  void LoadChannelParameters(QwParameterFile &paramfile);
+  void LoadChannelParameters(QwParameterFile &paramfile) override;
 
   // Will update the default sample size for the module.
   void SetDefaultSampleSize(size_t num_samples_map) {
@@ -97,40 +102,40 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
     fNumberOfSamples_map = num_samples_map;
   };
 
-  void  ClearEventData();
+  void  ClearEventData() override;
 
   /// Internally generate random event data
-  void  RandomizeEventData(int helicity = 0.0, double time = 0.0);
+  void  RandomizeEventData(int helicity = 0.0, double time = 0.0) override;
 
-  /// Forces the event "number of samples" varible to be what was expected from the mapfile.
+  /// Forces the event "number of samples" variable to be what was expected from the mapfile.
   /// NOTE: this should only be used in mock data generation!
   void  ForceMapfileSampleSize() {fNumberOfSamples = fNumberOfSamples_map;};
 
 //------------------------------------------------------------------------------------------
-  virtual void SmearByResolution(double resolution);
+  void SmearByResolution(double resolution) override;
 //------------------------------------------------------------------------------------------
 
   void  SetEventData(Double_t value);
-  void  SetRawEventData();
+  void  SetRawEventData() override;
 
   /// Encode the event data into a CODA buffer
-  void  EncodeEventData(std::vector<UInt_t> &buffer);
+  void  EncodeEventData(std::vector<UInt_t> &buffer) override;
 
   /// Decode the event data from a CODA buffer
   Bool_t IsHeaderWord(UInt_t word) const;
   Int_t ProcessDataWord(UInt_t word);
-  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t index = 0);
+  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t index = 0) override;
 
   /// Process the event data according to pedestal and calibration factor
-  void  ProcessEvent();
+  void  ProcessEvent() override;
 
   QwADC18_Channel& operator=  (const QwADC18_Channel &value);
   void AssignScaledValue(const QwADC18_Channel &value, Double_t scale);
-  void AssignValueFrom(const VQwDataElement* valueptr);
-  void AddValueFrom(const VQwHardwareChannel* valueptr);
-  void SubtractValueFrom(const VQwHardwareChannel* valueptr);
-  void MultiplyBy(const VQwHardwareChannel* valueptr);
-  void DivideBy(const VQwHardwareChannel* valueptr);
+  void AssignValueFrom(const VQwDataElement* valueptr) override;
+  void AddValueFrom(const VQwHardwareChannel* valueptr) override;
+  void SubtractValueFrom(const VQwHardwareChannel* valueptr) override;
+  void MultiplyBy(const VQwHardwareChannel* valueptr) override;
+  void DivideBy(const VQwHardwareChannel* valueptr) override;
   void ArcTan(const QwADC18_Channel &value);
 
   QwADC18_Channel& operator+= (const QwADC18_Channel &value);
@@ -151,10 +156,16 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   void Product(const QwADC18_Channel &value1, const QwADC18_Channel &value2);
   void DivideBy(const QwADC18_Channel& denom);
   void AddChannelOffset(Double_t Offset);
-  void Scale(Double_t Offset);
+  void Scale(Double_t Offset) override;
 
+  /**
+   * Accumulate event values into the running sum with optional scaling.
+   * @param value     Source channel to accumulate from.
+   * @param count     Event count scaling (0 means use value.fGoodEventCount).
+   * @param ErrorMask Bit mask of error flags to exclude when accumulating.
+   */
   void AccumulateRunningSum(const QwADC18_Channel& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
-  void AccumulateRunningSum(const VQwHardwareChannel *value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF){
+  void AccumulateRunningSum(const VQwHardwareChannel *value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override{
     const QwADC18_Channel *tmp_ptr = dynamic_cast<const QwADC18_Channel*>(value);
     if (tmp_ptr != NULL) {
       AccumulateRunningSum(*tmp_ptr, count, ErrorMask);
@@ -177,7 +188,7 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   };
   */
 
-  void CalculateRunningAverage();
+  void CalculateRunningAverage() override;
 
   Bool_t MatchSequenceNumber(size_t seqnum);
   Bool_t MatchNumberOfSamples(size_t numsamp);
@@ -186,9 +197,9 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   //check values read from modules are at desired level
   Bool_t ApplySingleEventCuts(Double_t LL, Double_t UL);
   //check values read from modules are at desired level by comparing upper and lower limits (fULimit and fLLimit) set on this channel
-  Bool_t ApplySingleEventCuts();
-  // report number of events failed due to HW and event cut faliure
-  void PrintErrorCounters() const;
+  Bool_t ApplySingleEventCuts() override;
+  // report number of events failed due to HW and event cut failure
+  void PrintErrorCounters() const override;
 
   // FIXME Set the absolute staturation limit in volts
   void SetADC18SaturationLimt(Double_t sat_volts = 8.5){
@@ -201,28 +212,28 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   }
 
 
-  // Check for harware errors in the devices. This will return the device error code.
-  Int_t ApplyHWChecks();
+  // Check for hardware errors in the devices. This will return the device error code.
+  Int_t ApplyHWChecks() override;
 
   // Update the error counters based on the internal fErrorFlag
-  void IncrementErrorCounters();
+  void IncrementErrorCounters() override;
 
   /*End*/
 
-  Int_t GetRawValue(size_t element) const      { return fValue_Raw; };
-  Double_t GetValue(size_t element) const      { return fValue; };
-  Double_t GetValueM2(size_t element) const    { return fValueM2; };
-  Double_t GetValueError(size_t element) const { return fValueError; };
+  Int_t GetRawValue(size_t element) const override      { return fValue_Raw; };
+  Double_t GetValue(size_t element) const override      { return fValue; };
+  Double_t GetValueM2(size_t element) const override    { return fValueM2; };
+  Double_t GetValueError(size_t element) const override { return fValueError; };
 
-  void  ConstructHistograms(TDirectory *folder, TString &prefix);
-  void  FillHistograms();
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
+  void  FillHistograms() override;
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
-  void  ConstructBranch(TTree *tree, TString &prefix);
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override;
+  void  ConstructBranch(TTree *tree, TString &prefix) override;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const override;
 #ifdef HAS_RNTUPLE_SUPPORT
-  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
-  void  FillNTupleVector(std::vector<Double_t>& values) const;
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
+  void  FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif // HAS_RNTUPLE_SUPPORT
 
   Double_t GetAverageVolts() const;
@@ -233,15 +244,15 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   void   SetCalibrationToVolts(){SetCalibrationFactor(kADC18_VoltsPerBit);};
 
   friend std::ostream& operator<< (std::ostream& stream, const QwADC18_Channel& channel);
-  void PrintValue() const;
-  void PrintInfo() const;
+  void PrintValue() const override;
+  void PrintInfo() const override;
 
   /// \brief Blind this channel as an asymmetry
   void Blind(const QwBlinder *blinder);
   /// \brief Blind this channel as a difference
   void Blind(const QwBlinder *blinder, const QwADC18_Channel& yield);
 
-  void ScaledAdd(Double_t scale, const VQwHardwareChannel *value);
+  void ScaledAdd(Double_t scale, const VQwHardwareChannel *value) override;
 
 #ifdef __USE_DATABASE__
   // Error Counters exist in QwADC18_Channel, not in VQwHardwareChannel
@@ -300,10 +311,10 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   /*! \name Channel configuration data members */
   // @{
 
-  size_t fSequenceNumber;      ///< Event sequence number for this channel
-  size_t fPreviousSequenceNumber; ///< Previous event sequence number for this channel
-  size_t fNumberOfSamples;     ///< Number of samples  read through the module
-  size_t fNumberOfSamples_map; ///< Number of samples in the expected to  read through the module. This value is set in the QwBeamline map file
+  UInt_t fSequenceNumber;      ///< Event sequence number for this channel
+  UInt_t fPreviousSequenceNumber; ///< Previous event sequence number for this channel
+  UInt_t fNumberOfSamples;     ///< Number of samples  read through the module
+  UInt_t fNumberOfSamples_map; ///< Number of samples in the expected to  read through the module. This value is set in the QwBeamline map file
 
   // Set of error counters for each HW test.
   Int_t fErrorCount_HWSat;    ///< check to see ADC channel is saturated
@@ -339,5 +350,3 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   Bool_t bSequence_number;
 
 };
-
-#endif

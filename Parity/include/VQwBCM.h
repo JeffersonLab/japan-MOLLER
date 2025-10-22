@@ -5,8 +5,12 @@
 * Time-stamp: <2011-05-26>                                 *
 \**********************************************************/
 
-#ifndef __VQWBCM__
-#define __VQWBCM__
+/*!
+ * \file   VQwBCM.h
+ * \brief  Virtual base class for beam current monitors
+ */
+
+#pragma once
 
 // System headers
 #include <vector>
@@ -35,6 +39,16 @@ template<typename T> class QwBCM;
 /**
  * \ingroup QwAnalysis_BeamLine
  */
+/**
+ * \class VQwBCM
+ * \ingroup QwAnalysis_BeamLine
+ * \brief Abstract base for beam current monitors (BCMs)
+ *
+ * Provides the interface for current-like data elements used for normalization
+ * and beam quality monitoring. Concrete implementations (e.g., QwBCM<T>,
+ * QwCombinedBCM<T>) implement hardware decoding, event processing, and error
+ * handling, while this base exposes common hooks for the analysis framework.
+ */
 class VQwBCM : public VQwDataElement {
   /***************************************************************
    *  Class:  VQwBCM
@@ -51,32 +65,32 @@ protected:
   VQwBCM(VQwDataElement& beamcurrent, TString /*name*/): fBeamCurrent_ref(beamcurrent) { };
 
 public:
-  virtual ~VQwBCM() { };
+  ~VQwBCM() override { };
 
   // VQwDataElement virtual functions
-  virtual Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0) = 0;
-  virtual void  ConstructHistograms(TDirectory *folder, TString &prefix) = 0;
-  virtual void  FillHistograms() = 0;
+  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0) override = 0;
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override = 0;
+  void  FillHistograms() override = 0;
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   virtual void SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel) = 0;
   virtual void Ratio( const VQwBCM &/*numer*/, const VQwBCM &/*denom*/)
     { std::cerr << "Ratio not defined! (VQwBCM)" << std::endl; }
-  virtual void ClearEventData() = 0;
+  void ClearEventData() override = 0;
 
   // Virtual functions delegated to sub classes
   virtual void  InitializeChannel(TString name, TString datatosave) = 0;
   // new routine added to update necessary information for tree trimming
   virtual void  InitializeChannel(TString subsystem, TString name, TString datatosave) = 0;
 
-  virtual void LoadChannelParameters(QwParameterFile &paramfile) = 0;
-  virtual Bool_t NeedsExternalClock() = 0;
-  virtual void SetExternalClockPtr( const VQwHardwareChannel* clock) = 0;
-  virtual void SetExternalClockName( const std::string name) = 0;
-  virtual Double_t GetNormClockValue() = 0;
+  void LoadChannelParameters(QwParameterFile &paramfile) override = 0;
+  Bool_t NeedsExternalClock() override = 0;
+  void SetExternalClockPtr( const VQwHardwareChannel* clock) override = 0;
+  void SetExternalClockName( const std::string name) override = 0;
+  Double_t GetNormClockValue() override = 0;
 
   virtual void SetDefaultSampleSize(Int_t sample_size) = 0;
   virtual void SetEventCutMode(Int_t bcuts) = 0;
-  virtual UInt_t UpdateErrorFlag(){return this->GetEventcutErrorFlag();};
+  UInt_t UpdateErrorFlag() override{return this->GetEventcutErrorFlag();};
   virtual void UpdateErrorFlag(const VQwBCM *ev_error) = 0;
   virtual void SetPedestal(Double_t ped) = 0;
   virtual void SetCalibrationFactor(Double_t calib) = 0;
@@ -89,10 +103,10 @@ public:
   virtual void CalculateRunningAverage() = 0;
   virtual void AccumulateRunningSum(const VQwBCM& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) = 0;
   virtual void DeaccumulateRunningSum(VQwBCM& value, Int_t ErrorMask=0xFFFFFFF) = 0;
-  virtual void ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) = 0;
+  virtual void ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) = 0;
   virtual void ConstructBranch(TTree *tree, TString &prefix) = 0;
   virtual void ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist) = 0;
-  virtual void FillTreeVector(std::vector<Double_t> &values) const = 0;
+  virtual void FillTreeVector(QwRootTreeBranchVector &values) const = 0;
 
 #ifdef HAS_RNTUPLE_SUPPORT
   virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
@@ -168,5 +182,3 @@ protected:
 };
 
 typedef std::shared_ptr<VQwBCM> VQwBCM_ptr;
-
-#endif // __VQWBCM__

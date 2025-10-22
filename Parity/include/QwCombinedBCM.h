@@ -1,13 +1,9 @@
-/**********************************************************\
-* File: QwCombinedBCM.h                                  *
-* File: QwBCM.h                                           *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwCombinedBCM.h
+ * \brief  Combined beam current monitor using weighted average of multiple BCMs
+ */
 
-#ifndef __Qw_COMBINEDBCM__
-#define __Qw_COMBINEDBCM__
+#pragma once
 
 // System headers
 #include <vector>
@@ -28,9 +24,15 @@
 class QwDBInterface;
 #endif // __USE_DATABASE__
 
-/*****************************************************************
-*  Class:
-******************************************************************/
+/**
+ * \class QwCombinedBCM
+ * \ingroup QwAnalysis_BL
+ * \brief Template for a combined beam current monitor using weighted inputs
+ *
+ * Aggregates multiple BCMs into a single effective current channel by
+ * applying user-provided weights. Provides event processing hooks and
+ * error propagation consistent with VQwBCM.
+ */
 
 template<typename T>
 class QwCombinedBCM : public QwBCM<T> {
@@ -50,41 +52,41 @@ class QwCombinedBCM : public QwBCM<T> {
   QwCombinedBCM(const QwCombinedBCM& source)
   : QwBCM<T>(source)
   { }
-  virtual ~QwCombinedBCM() { };
+  ~QwCombinedBCM() override { };
 
   // This is to setup one of the used BCM's in this combo
-  void SetBCMForCombo(VQwBCM* bcm, Double_t weight, Double_t sumqw );
+  void SetBCMForCombo(VQwBCM* bcm, Double_t weight, Double_t sumqw ) override;
 
   // No processing of event buffer
-  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement = 0) { return 0; };
+  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement = 0) override { return 0; };
 
-  void  InitializeChannel(TString name, TString datatosave);
+  void  InitializeChannel(TString name, TString datatosave) override;
   // new routine added to update necessary information for tree trimming
-  void  InitializeChannel(TString subsystem, TString name, TString datatosave);
+  void  InitializeChannel(TString subsystem, TString name, TString datatosave) override;
   void  InitializeChannel(TString subsystem, TString name, TString type,
       TString datatosave);
 
-  void  ProcessEvent();
+  void  ProcessEvent() override;
 
 //---------------------------------------------------------------------------------------------
-  void    GetProjectedCharge(VQwBCM *device);
-  void    RandomizeEventData(int helicity = 0, double time = 0.0);
-  size_t  GetNumberOfElements() {return fElement.size();};
-  TString GetSubElementName(Int_t index) {return fElement.at(index)->GetElementName();};
-  void    LoadMockDataParameters(QwParameterFile &paramfile);
+  void    GetProjectedCharge(VQwBCM *device) override;
+  void    RandomizeEventData(int helicity = 0, double time = 0.0) override;
+  size_t  GetNumberOfElements() override {return fElement.size();};
+  TString GetSubElementName(Int_t index) override {return fElement.at(index)->GetElementName();};
+  void    LoadMockDataParameters(QwParameterFile &paramfile) override;
 //---------------------------------------------------------------------------------------------
 
   Bool_t ApplyHWChecks(){
     return kTRUE;
   };
 
-  Bool_t ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
+  Bool_t ApplySingleEventCuts() override;//Check for good events by setting limits on the devices readings
 
-  UInt_t UpdateErrorFlag();
+  UInt_t UpdateErrorFlag() override;
 
 
   // Implementation of Parent class's virtual operators
-  VQwBCM& operator=  (const VQwBCM &value);
+  VQwBCM& operator=  (const VQwBCM &value) override;
   QwCombinedBCM& operator=  (const QwCombinedBCM &value);
 
   /*
@@ -92,18 +94,18 @@ class QwCombinedBCM : public QwBCM<T> {
   void DeaccumulateRunningSum(VQwBCM &value);
   void CalculateRunningAverage();
   */
-  void SetPedestal(Double_t ped) {
+  void SetPedestal(Double_t ped) override {
     QwBCM<T>::SetPedestal(0.0);
   }
-  void SetCalibrationFactor(Double_t calib) {
+  void SetCalibrationFactor(Double_t calib) override {
     QwBCM<T>::SetCalibrationFactor(1.0);
   }
 
-  VQwHardwareChannel* GetCharge(){
+  VQwHardwareChannel* GetCharge() override{
     return &(this->fBeamCurrent);
   };
 
-  const VQwHardwareChannel* GetCharge() const {
+  const VQwHardwareChannel* GetCharge() const override {
     return const_cast<QwCombinedBCM*>(this)->GetCharge();
   };
 
@@ -134,5 +136,3 @@ public:
   static void SetTripSeed(uint seedval);
   // @}
 };
-
-#endif

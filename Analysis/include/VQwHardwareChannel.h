@@ -5,8 +5,7 @@
 * Date:   Tue Mar 29 13:08:12 EDT 2011                     *
 \**********************************************************/
 
-#ifndef __VQWHARDWARECHANNEL__
-#define __VQWHARDWARECHANNEL__
+#pragma once
 
 // System headers
 #include <cmath>
@@ -28,7 +27,69 @@ class TTree;
 class QwDBInterface;
 class QwParameterFile;
 class QwErrDBInterface;
+class QwRootTreeBranchVector;
 
+/**
+ * \class VQwHardwareChannel
+ * \ingroup QwAnalysis
+ * \brief Abstract base for concrete hardware channels implementing dual-operator pattern
+ *
+ * This class extends VQwDataElement to provide common services for hardware
+ * channel implementations that represent single physical readouts (ADC channels,
+ * scalers, etc.). It enforces the dual-operator architectural pattern at the
+ * channel level and provides infrastructure for calibration, cuts, and statistics.
+ *
+ * \par Dual-Operator Pattern Implementation:
+ * VQwHardwareChannel inherits the dual-operator requirement from VQwDataElement
+ * and adds channel-specific enforcement. Derived classes must implement:
+ *
+ * **Required Operator Pairs:**
+ * - `QwVQWK_Channel& operator+=(const QwVQWK_Channel&)` (type-specific)
+ * - `VQwHardwareChannel& operator+=(const VQwHardwareChannel&)` (polymorphic)
+ *
+ * **Polymorphic Delegation Pattern:**
+ * \code
+ * VQwHardwareChannel& QwVQWK_Channel::operator+=(const VQwHardwareChannel& source) {
+ *   const QwVQWK_Channel* tmpptr = dynamic_cast<const QwVQWK_Channel*>(&source);
+ *   if (tmpptr != NULL) {
+ *     *this += *tmpptr;  // Calls type-specific version
+ *   } else {
+ *     throw std::invalid_argument("Type mismatch in operator+=");
+ *   }
+ *   return *this;
+ * }
+ * \endcode
+ *
+ * \par Assignment + Operators Pattern:
+ * Sum/Difference methods follow the canonical pattern:
+ * \code
+ * void Sum(const QwVQWK_Channel& value1, const QwVQWK_Channel& value2) {
+ *   *this = value1;      // Uses derived class assignment operator
+ *   *this += value2;     // Uses type-specific operator+=
+ * }
+ * \endcode
+ *
+ * \par Channel Infrastructure:
+ * - **Calibration**: Pedestal subtraction and gain application
+ * - **Event Cuts**: Single-event limits with error flag propagation
+ * - **Statistics**: Running sums with error mask support
+ * - **Hardware Checks**: Burp detection and error counting
+ * - **Subelements**: Support for multi-element channels
+ *
+ * \par Representative Example:
+ * QwVQWK_Channel provides the canonical implementation demonstrating:
+ * - Complete dual-operator pattern with proper delegation
+ * - Six-word VQWK data processing (blocks 0-5)
+ * - Pedestal/calibration application
+ * - Single-event cuts and error propagation
+ * - Histogram and tree branch construction
+ *
+ * \par Error Handling Strategy:
+ * - Type mismatches in operators throw std::invalid_argument
+ * - Hardware errors set device-specific error codes
+ * - Event cuts use configurable upper/lower limits
+ * - Burp detection compares against reference channels
+ */
 class VQwHardwareChannel: public VQwDataElement {
 /****************************************************************//**
  *  Class: VQwHardwareChannel
@@ -42,7 +103,7 @@ public:
   VQwHardwareChannel();
   VQwHardwareChannel(const VQwHardwareChannel& value);
   VQwHardwareChannel(const VQwHardwareChannel& value, VQwDataElement::EDataToSave datatosave);
-  virtual ~VQwHardwareChannel() { };
+  ~VQwHardwareChannel() override { };
 
   virtual void CopyFrom(const VQwHardwareChannel& value);
 
@@ -81,7 +142,7 @@ public:
     return width;
   };
 
-  virtual void  ClearEventData(){
+  void  ClearEventData() override{
     VQwDataElement::ClearEventData();
   };
 
@@ -94,7 +155,7 @@ public:
   virtual void  InitializeChannel(TString name, TString datatosave) = 0;
   virtual void  InitializeChannel(TString subsystem, TString instrumenttype, TString name, TString datatosave) = 0;
   
-  //Check for harware errors in the devices. This will return the device error code.
+  //Check for hardware errors in the devices. This will return the device error code.
   virtual Int_t ApplyHWChecks() = 0;
 
   void SetEventCutMode(Int_t bcuts){bEVENTCUTMODE=bcuts;};
@@ -133,7 +194,7 @@ public:
 
   Double_t GetStabilityLimit() const { return fStability;};
 
-  UInt_t UpdateErrorFlag() {return GetEventcutErrorFlag();};
+  UInt_t UpdateErrorFlag() override {return GetEventcutErrorFlag();};
   void UpdateErrorFlag(const VQwHardwareChannel& elem){fErrorFlag |= elem.fErrorFlag;};
   virtual UInt_t GetErrorCode() const {return (fErrorFlag);}; 
 
@@ -166,7 +227,7 @@ public:
      }
   }
 
-  void AssignValueFrom(const VQwDataElement* valueptr) = 0;
+  void AssignValueFrom(const VQwDataElement* valueptr) override = 0;
   virtual VQwHardwareChannel& operator+=(const VQwHardwareChannel& input) = 0;
   virtual VQwHardwareChannel& operator-=(const VQwHardwareChannel& input) = 0;
   virtual VQwHardwareChannel& operator*=(const VQwHardwareChannel& input) = 0;
@@ -200,10 +261,10 @@ public:
   virtual void MultiplyBy(const VQwHardwareChannel* valueptr) = 0;
   virtual void DivideBy(const VQwHardwareChannel* valueptr) = 0;
 
-  virtual void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values) = 0;
+  virtual void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector& values) = 0;
   virtual void ConstructBranch(TTree *tree, TString &prefix) = 0;
   void ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
-  virtual void FillTreeVector(std::vector<Double_t>& values) const = 0;
+  virtual void FillTreeVector(QwRootTreeBranchVector& values) const = 0;
 #ifdef HAS_RNTUPLE_SUPPORT
   virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
   virtual void FillNTupleVector(std::vector<Double_t>& values) const = 0;
@@ -255,8 +316,6 @@ public:
     }
   };
 
-
-
 protected:
   UInt_t  fNumberOfDataWords; ///< Number of raw data words in this data element
   UInt_t  fNumberOfSubElements; ///< Number of subelements in this data element
@@ -286,10 +345,18 @@ protected:
 
   Double_t fBurpThreshold;
   Int_t fBurpCountdown;
-  Int_t fBurpHoldoff;
-
   //@}
 
-};   // class VQwHardwareChannel
 
-#endif // __MQWHARDWARECHANNEL__
+public:
+  /*! \name Global event cuts */
+  static void SetBurpHoldoff(Int_t holdoff) {
+    fBurpHoldoff = holdoff;
+  }
+
+protected:
+  // @{
+  static Int_t fBurpHoldoff;
+  // @}
+
+};   // class VQwHardwareChannel

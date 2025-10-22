@@ -1,9 +1,13 @@
+/*!
+ * \file   QwHistogramHelper.h
+ * \brief  Helper functions and utilities for ROOT histogram management
+ */
+
 ///  This class exists to encapsulate several helper functions to aid in
 ///  describing histograms.
 ///  There will be a global copy defined within the analysis framework.
 
-#ifndef __QWHISTOGRAMHELPER__
-#define __QWHISTOGRAMHELPER__
+#pragma once
 
 #include <string>
 #include <vector>
@@ -16,8 +20,15 @@
 
 #include "QwParameterFile.h"
 #include "QwOptions.h"
-///
-/// \ingroup QwAnalysis
+/**
+ * \class QwHistogramHelper
+ * \ingroup QwAnalysis
+ * \brief Utility class for histogram creation and management
+ *
+ * Provides helper functions for creating, configuring, and managing
+ * ROOT histograms with consistent naming and binning conventions
+ * throughout the analysis framework.
+ */
 class QwHistogramHelper{
  public:
   QwHistogramHelper(): fDEBUG(kFALSE) { fHistParams.clear(); };
@@ -158,7 +169,3 @@ class QwHistogramHelper{
 //  Declare a global copy of the histogram helper.
 //  It is instantiated in the source file.
 extern QwHistogramHelper gQwHists;
-
-#endif
-
-

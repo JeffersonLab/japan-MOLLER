@@ -1,12 +1,9 @@
-/**********************************************************\
-* File: QwIntegrationPMT.h                                *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwIntegrationPMT.h
+ * \brief  Integration PMT detector for charge and asymmetry measurements
+ */
 
-#ifndef __QwMollerADC_IntegrationPMT__
-#define __QwMollerADC_IntegrationPMT__
+#pragma once
 
 // System headers
 #include <vector>
@@ -32,6 +29,11 @@ class QwDBInterface;
 ******************************************************************/
 ///
 /// \ingroup QwAnalysis_BL
+/**
+ * \class QwIntegrationPMT
+ * \ingroup QwAnalysis_BL
+ * \brief Integration PMT providing yield/diff/asym readout from Moller ADC
+ */
 class QwIntegrationPMT : public VQwDataElement{
 /////
  public:
@@ -53,11 +55,18 @@ class QwIntegrationPMT : public VQwDataElement{
     fIsBlindable(source.fIsBlindable),
     fIsNormalizable(source.fIsNormalizable)
   { }
-  virtual ~QwIntegrationPMT() { };
+  ~QwIntegrationPMT() override { };
 
-  void    LoadChannelParameters(QwParameterFile &paramfile){};
+  void    LoadChannelParameters(QwParameterFile &paramfile) override{};
 
-  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0);
+  /**
+   * Decode the Moller ADC block for this PMT from an event buffer.
+   * @param buffer                    Event buffer pointer.
+   * @param word_position_in_buffer   Current word index in buffer.
+   * @param subelement                Block index within the PMT (default 0).
+   * @return 0 on success; negative on error.
+   */
+  Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0) override;
 
   void  InitializeChannel(TString name, TString datatosave);
   // new routine added to update necessary information for tree trimming
@@ -73,7 +82,7 @@ class QwIntegrationPMT : public VQwDataElement{
 
 
 
-  void  ClearEventData();
+  void  ClearEventData() override;
   void PrintErrorCounters();
 /********************************************************/
 
@@ -95,24 +104,24 @@ void RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeam
   Double_t GetValue(Int_t blocknum);
 
   void  ProcessEvent();
-  Bool_t ApplyHWChecks();//Check for harware errors in the devices
-  Bool_t ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
+  Bool_t ApplyHWChecks();//Check for hardware errors in the devices
+  Bool_t ApplySingleEventCuts();//Check for good events by setting limits on the devices readings
   void IncrementErrorCounters(){
     fTriumf_ADC.IncrementErrorCounters();
   }
-  void PrintErrorCounters() const;// report number of events failed due to HW and event cut faliure
-  Int_t SetSingleEventCuts(Double_t, Double_t);//set two limts
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure
+  Int_t SetSingleEventCuts(Double_t, Double_t);//set two limits
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   void SetSingleEventCuts(UInt_t errorflag, Double_t LL, Double_t UL, Double_t stability, Double_t burplevel);
   void SetDefaultSampleSize(Int_t sample_size);
   void SetSaturationLimit(Double_t saturation_volt );
-  UInt_t GetEventcutErrorFlag(){//return the error flag
+  UInt_t GetEventcutErrorFlag() override{//return the error flag
     return fTriumf_ADC.GetEventcutErrorFlag();
   }
 
   Bool_t CheckForBurpFail(const VQwDataElement *ev_error);
   
-  UInt_t UpdateErrorFlag() {return GetEventcutErrorFlag();};
+  UInt_t UpdateErrorFlag() override {return GetEventcutErrorFlag();};
   void UpdateErrorFlag(const QwIntegrationPMT *ev_error);
 
   void SetEventCutMode(Int_t bcuts){
@@ -128,8 +137,8 @@ void RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeam
   /// \brief Blind the difference using the yield
   void Blind(const QwBlinder *blinder, const QwIntegrationPMT& yield);
 
-  void PrintValue() const;
-  void PrintInfo() const;
+  void PrintValue() const override;
+  void PrintInfo() const override;
 
 /*   Double_t GetRawBlockValue(size_t blocknum) */
 /*            {return fTriumf_ADC.GetRawBlockValue(blocknum);}; */
@@ -161,13 +170,13 @@ void RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeam
   void SetCoefficientCyp(Double_t value){fCoeff_yp  = value;};
   void SetCoefficientCe(Double_t value) {fCoeff_e   = value;};
 
-  void  ConstructHistograms(TDirectory *folder, TString &prefix);
-  void  FillHistograms();
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
+  void  FillHistograms() override;
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values);
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file);
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const;
 
 #ifdef HAS_RNTUPLE_SUPPORT
   // RNTuple methods
@@ -206,7 +215,3 @@ void RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeam
   const static  Bool_t bDEBUG=kFALSE;//debugging display purposes
   Bool_t bEVENTCUTMODE; //global switch to turn event cuts ON/OFF
 };
-
-
-
-#endif

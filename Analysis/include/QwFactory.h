@@ -1,5 +1,9 @@
-#ifndef __QWFACTORY__
-#define __QWFACTORY__
+/*!
+ * \file   QwFactory.h
+ * \brief  Factory pattern implementation for creating analysis objects
+ */
+
+#pragma once
 
 // System headers
 #include <cxxabi.h>
@@ -23,12 +27,12 @@ struct QwException_TypeUnknown {
 /**
  *  \class VQwFactory
  *  \ingroup QwAnalysis
- *  \brief Pure virtual factory
+ *  \brief Abstract factory base for runtime object creation
  *
- * In order to enable the instantiation of types based on run-time
- * information, we generate a map of type factories by type name.
- * This map is filled automatically when the executable is loaded, and
- * contains concrete factories derived from this pure virtual base class.
+ * Enables instantiation of derived types based on runtime string identifiers.
+ * Maintains a registry of concrete factory instances that can create objects
+ * of specified types. Used throughout the framework to support configuration-
+ * driven object creation for subsystems, data handlers, and data elements.
  */
 template <class base_t>
 class VQwFactory {
@@ -96,11 +100,12 @@ class VQwFactory {
 /**
  *  \class QwFactory
  *  \ingroup QwAnalysis
- *  \brief Concrete templated type factory
+ *  \brief Concrete templated factory for creating specific object types
  *
- * This class represents concrete instances of the virtual VQwFactory
- * from which it inherits.  Each concrete factory can create types with
- * a given name.
+ * Template specialization that provides concrete object creation for a
+ * specific derived type. Automatically registers itself in the factory
+ * registry during static initialization. Used by RegisterSomethingFactory
+ * macros to enable runtime type creation.
  */
 template <class base_t, class type_t>
 class QwFactory: public VQwFactory<base_t> {
@@ -113,12 +118,12 @@ class QwFactory: public VQwFactory<base_t> {
     }
 
     /// Concrete type creation
-    base_t* Create(const std::string& name) const {
+    base_t* Create(const std::string& name) const override {
       return new type_t(name);
     }
 
     /// Dynamic cast of type
-    type_t* Cast(base_t* base) const {
+    type_t* Cast(base_t* base) const override {
       return dynamic_cast<type_t*>(base);
     }
 
@@ -152,7 +157,14 @@ class QwDataElementFactory: public QwFactory<VQwDataElement,dataelement_t> { };
 
 
 
-/// Polymorphic copy constructor virtual base class
+/**
+ * \class VQwCloneable
+ * \ingroup QwAnalysis
+ * \brief Virtual base providing polymorphic copy construction
+ *
+ * Template base class that enables runtime cloning of derived objects
+ * through a common interface. Part of the factory pattern implementation.
+ */
 template <class base_t>
 class VQwCloneable {
 
@@ -186,23 +198,30 @@ class VQwCloneable {
 }; // class VQwCloneable
 
 
-/// Polymorphic copy construction by curiously recurring template pattern (mix-in)
-/// We have lost covariancy: clone will have the base type, not the derived type...
+/**
+ * \class MQwCloneable
+ * \ingroup QwAnalysis
+ * \brief Mix-in template for concrete cloneable types
+ *
+ * Implements the curiously recurring template pattern to provide
+ * concrete clone functionality for specific derived types.
+ * Enables factory-based object creation and copying.
+ */
 template <class base_t, class type_t>
 class MQwCloneable: virtual public VQwCloneable<base_t> {
 
   public:
 
     /// Virtual destructor
-    virtual ~MQwCloneable() { };
+    ~MQwCloneable() override { };
 
     /// Concrete clone method
-    virtual base_t* Clone() const {
+    base_t* Clone() const override {
       return new type_t(static_cast<const type_t&>(*this));
     }
 
     /// Factory getter
-    const VQwFactory<base_t>* Factory() const { return fFactory; }
+    const VQwFactory<base_t>* Factory() const override { return fFactory; }
 
     /// Object creation
     static base_t* Create(const std::string& name) {
@@ -248,6 +267,3 @@ class MQwDataElementCloneable: public MQwCloneable<VQwDataElement,dataelement_t>
 /// Macros to create and register the data element factory of type A
 /// Note: a call to this macro should be followed by a semi-colon!
 #define RegisterDataElementFactory(A) template<> const VQwDataElementFactory* MQwCloneable<VQwDataElement,A>::fFactory = new QwFactory<VQwDataElement,A>(#A)
-
-
-#endif // __QWFACTORY__

@@ -1,19 +1,18 @@
-/**********************************************************\
-* File: QwParameterFile.h                                  *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2007-05-08 15:40>                           *
-\**********************************************************/
+/*!
+ * \file   QwParameterFile.h
+ * \brief  Parameter file parsing and management
+ * \author P. M. King
+ * \date   2007-05-08
+ */
 
-#ifndef __QWPARAMETERFILE__
-#define __QWPARAMETERFILE__
-
+#pragma once
 
 // System headers
 #include <vector>
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <memory>
 #include <string>
 #include <map>
 #include <set>
@@ -36,8 +35,17 @@ using boost::lexical_cast;
 // Qweak headers
 #include "QwLog.h"
 
-///
-/// \ingroup QwAnalysis
+/**
+ * \class QwParameterFile
+ * \ingroup QwAnalysis
+ * \brief Configuration file parser with flexible tokenization and search capabilities
+ *
+ * Provides parsing of configuration files with support for comments, section
+ * headers, variable substitution, file inclusion (append), and configurable
+ * token separators. Includes search path management and run-number-based
+ * parameter file selection. Used throughout the framework for loading
+ * detector maps, cut parameters, and subsystem configurations.
+ */
 class QwParameterFile {
 
   public:
@@ -173,21 +181,21 @@ class QwParameterFile {
     Bool_t SkipSection(std::string secname);
 
     /// \brief Rewinds to the start and read until it finds next section header
-    QwParameterFile* ReadSectionPreamble();
-    QwParameterFile* ReadUntilNextSection(const bool add_current_line = false);
-    QwParameterFile* ReadNextSection(std::string &secname, const bool keep_header = false);
-    QwParameterFile* ReadNextSection(TString &secname, const bool keep_header = false);
-    QwParameterFile* ReadNextSection(const bool keep_header = false) {
+    std::unique_ptr<QwParameterFile> ReadSectionPreamble();
+    std::unique_ptr<QwParameterFile> ReadUntilNextSection(const bool add_current_line = false);
+    std::unique_ptr<QwParameterFile> ReadNextSection(std::string &secname, const bool keep_header = false);
+    std::unique_ptr<QwParameterFile> ReadNextSection(TString &secname, const bool keep_header = false);
+    std::unique_ptr<QwParameterFile> ReadNextSection(const bool keep_header = false) {
       std::string dummy;
       return ReadNextSection(dummy, keep_header);
     };
 
     /// \brief Rewinds to the start and read until it finds next module header
-    QwParameterFile* ReadModulePreamble();
-    QwParameterFile* ReadUntilNextModule(const bool add_current_line = false);
-    QwParameterFile* ReadNextModule(std::string &secname, const bool keep_header = false);
-    QwParameterFile* ReadNextModule(TString &secname, const bool keep_header = false);
-    QwParameterFile* ReadNextModule(const bool keep_header = false) {
+    std::unique_ptr<QwParameterFile> ReadModulePreamble();
+    std::unique_ptr<QwParameterFile> ReadUntilNextModule(const bool add_current_line = false);
+    std::unique_ptr<QwParameterFile> ReadNextModule(std::string &secname, const bool keep_header = false);
+    std::unique_ptr<QwParameterFile> ReadNextModule(TString &secname, const bool keep_header = false);
+    std::unique_ptr<QwParameterFile> ReadNextModule(const bool keep_header = false) {
       std::string dummy;
       return ReadNextModule(dummy, keep_header);
     };
@@ -401,5 +409,3 @@ template <>
 inline TString QwParameterFile::ConvertValue<TString>(const std::string& value) {
   return TString(value.c_str());
 }
-
-#endif // __QWPARAMETERFILE__

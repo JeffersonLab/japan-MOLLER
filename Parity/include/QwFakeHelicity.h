@@ -1,21 +1,27 @@
-/**********************************************************\
-* File: QwFakeHelicity.h                                  *
-*                                                         *
-* Author: B.Waidyawansa                                   *
-* Time-stamp:03-06-2010                                   *
-\**********************************************************/
+/*!
+ * \file   QwFakeHelicity.h
+ * \brief  Fake helicity generator using pregenerated random seeds
+ * \author B.Waidyawansa
+ * \date   2010-03-06
+ */
 /**
   The QwFakeHelicity class uses a pregenerated random seed to generate
-  the fake helicity signal that then can be used to perfrom helicity
+  the fake helicity signal that then can be used to perform helicity
   related calculations.
 */
 
-
-#ifndef __QwFAKEHELICITY__
-#define __QwFAKEHELICITY__
+#pragma once
 
 #include "QwHelicity.h"
 
+/**
+ * \class QwFakeHelicity
+ * \ingroup QwAnalysis_BL
+ * \brief Helicity source that generates a reproducible sequence from seeds
+ *
+ * Used for testing and simulations when real helicity decoding is not
+ * available. Inherits the helicity interface and overrides event handling.
+ */
 class QwFakeHelicity: public QwHelicity {
  public:
   QwFakeHelicity(TString region_tmp):VQwSubsystem(region_tmp),QwHelicity(region_tmp),fMinPatternPhase(1)
@@ -24,22 +30,20 @@ class QwFakeHelicity: public QwHelicity {
       // using the constructor of the base class
     };
 
-    virtual ~QwFakeHelicity() { };
+    ~QwFakeHelicity() override { };
 
-    void    ClearEventData();
-    Bool_t  IsGoodHelicity();
-    void    ProcessEvent();
+    void    ClearEventData() override;
+    Bool_t  IsGoodHelicity() override;
+    void    ProcessEvent() override;
 
-    Bool_t CheckForBurpFail(const VQwSubsystem *subsys){
+    Bool_t CheckForBurpFail(const VQwSubsystem *subsys) override{
       return kFALSE;
     };
 
  protected:
     Int_t fMinPatternPhase;
 
-    Bool_t CollectRandBits();
-    UInt_t GetRandbit(UInt_t& ranseed);
+    Bool_t CollectRandBits() override;
+    UInt_t GetRandbit(UInt_t& ranseed) override;
 
 };
-
-#endif

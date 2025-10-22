@@ -1,12 +1,11 @@
-/**********************************************************\
-* File: QwDataHandlerArray.h                           *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2009-02-04 10:30>                           *
-\**********************************************************/
+/*!
+ * \file   QwDataHandlerArray.h
+ * \brief  Array container for managing multiple data handlers
+ * \author P. M. King
+ * \date   2009-02-04
+ */
 
-#ifndef __QWDATAHANDLERARRAY__
-#define __QWDATAHANDLERARRAY__
+#pragma once
 
 #include <vector>
 #include <map>
@@ -69,16 +68,26 @@ class QwDataHandlerArray:
     /// Copy constructor by reference
     QwDataHandlerArray(const QwDataHandlerArray& source);
     /// Default destructor
-    virtual ~QwDataHandlerArray();
+    ~QwDataHandlerArray() override;
 
     /// \brief Define configuration options for global array
     static void DefineOptions(QwOptions &options);
     /// \brief Process configuration options for the datahandler array itself
     void ProcessOptions(QwOptions &options);
 
-    /// \brief Load from mapfile with T = helicity pattern or subsystem array
-    template<class T>
-    void LoadDataHandlersFromParameterFile(QwParameterFile& mapfile, T& detectors, const TString &run);
+  /**
+   * \brief Load data handlers from a parameter file.
+   *
+   * Parses the map file and constructs/initializes handlers, connecting
+   * them to the provided source container.
+   *
+   * @tparam T           Source type (QwHelicityPattern or QwSubsystemArrayParity).
+   * @param mapfile      Parameter file describing handlers and settings.
+   * @param detectors    Source object to connect handlers to.
+   * @param run          Run label used for per-run configuration.
+   */
+  template<class T>
+  void LoadDataHandlersFromParameterFile(QwParameterFile& mapfile, T& detectors, const TString &run);
 
     /// \brief Add the datahandler to this array
     void push_back(VQwDataHandler* handler);
@@ -95,11 +104,11 @@ class QwDataHandlerArray:
         const std::string& branchprefix = "");
 
     /// \brief Construct a branch and vector for this handler with a prefix
-    void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector <Double_t> &values);
+    void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values);
 
     void FillTreeBranches(QwRootFile *treerootfile);
     /// \brief Fill the vector for this handler
-    void FillTreeVector(std::vector<Double_t>& values) const;
+    void FillTreeVector(QwRootTreeBranchVector &values) const;
 
     /// RNTuple methods
     void ConstructNTupleFields(
@@ -216,5 +225,3 @@ class QwDataHandlerArray:
     };
 
 }; // class QwDataHandlerArray
-
-#endif // __QWDATAHANDLERARRAY__

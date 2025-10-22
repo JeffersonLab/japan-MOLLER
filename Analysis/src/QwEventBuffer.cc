@@ -1,3 +1,8 @@
+/*!
+ * \file   QwEventBuffer.cc
+ * \brief  Event buffer management for reading and processing CODA data files
+ */
+
 #include "QwEventBuffer.h"
 
 #include "QwOptions.h"
@@ -46,7 +51,8 @@ const UInt_t QwEventBuffer::kNullDataWord = 0x4e554c4c;
 
 /// Default constructor
 QwEventBuffer::QwEventBuffer()
-  :    fRunListFile(NULL),
+  :    fRunListFile(nullptr),
+       fEventListFile(nullptr),
        fDataFileStem(fDefaultDataFileStem),
        fDataFileExtension(fDefaultDataFileExtension),
        fDataDirectory(fDefaultDataDirectory),
@@ -237,14 +243,14 @@ void QwEventBuffer::ProcessOptions(QwOptions &options)
     - for runs 5261 through 5270 it will analyze the events 9000 through 10000)
   */
   if (fRunListFileName.size() > 0) {
-    fRunListFile = new QwParameterFile(fRunListFileName);
-    fEventListFile = 0;
+    fRunListFile = std::make_unique<QwParameterFile>(fRunListFileName);
+    fEventListFile = nullptr;
     if (! GetNextRunRange()) {
       QwWarning << "No run range found in run list file: " << fRunListFile->GetLine() << QwLog::endl;
     }
   } else {
-    fRunListFile = NULL;
-    fEventListFile = NULL;
+    fRunListFile = nullptr;
+    fEventListFile = nullptr;
   }
 }
 
@@ -287,8 +293,6 @@ Bool_t QwEventBuffer::GetNextEventRange() {
 
 /// Read the next requested run range, return true if success
 Bool_t QwEventBuffer::GetNextRunRange() {
-  // Delete any open event list file before moving to next run
-  if (fEventListFile) delete fEventListFile;
   // If there is a run list, open the next section
   std::string runrange;
   if (fRunListFile && !fRunListFile->IsEOF() &&
@@ -825,15 +829,13 @@ Bool_t QwEventBuffer::FillSubsystemData(QwSubsystemArray &subsystems)
     if (nmarkers>0) {
       //  There are markerwords for this ROC/Bank
       for (size_t i=0; i<nmarkers; i++){
-	offset = FindMarkerWord(i,&localbuff[decoder->GetWordsSoFar()],decoder->GetFragLength());
-	BankID_t tmpbank = GetMarkerWord(i);
-	tmpbank = ((tmpbank)<<32) + decoder->GetSubbankTag();
-	if (offset != -1){
-	  offset++; //  Skip the marker word
-	  subsystems.ProcessEvBuffer(decoder->GetEvtType(), decoder->GetROC(), tmpbank,
+        offset = FindMarkerWord(i,&localbuff[decoder->GetWordsSoFar()],decoder->GetFragLength());
+	      BankID_t tmpbank = GetMarkerWord(i);
+        tmpbank = ((tmpbank)<<32) + decoder->GetSubbankTag();
+        offset++; //  Skip the marker word
+        subsystems.ProcessEvBuffer(decoder->GetEvtType(), decoder->GetROC(), tmpbank,
 				     &localbuff[decoder->GetWordsSoFar()+offset],
 				     decoder->GetFragLength()-offset);
-	}
       }
     } else {
       QwDebug << "QwEventBuffer::FillSubsystemData:  "

@@ -1,12 +1,11 @@
-#ifndef __QwRunCondition__
-#define __QwRunCondition__
-/**
- *  \file   QwRunCondition.h
- *  \brief  
- *  \author jhlee@jlab.org
- *  \date   Thursday, September  9 21:42:30 EDT 2010
+/*!
+ * \file   QwRunCondition.h
+ * \brief  Run condition management and metadata
+ * \author jhlee@jlab.org
+ * \date   2010-09-09
  */
 
+#pragma once
 
 #include <unistd.h>
 #include <iostream>
@@ -18,6 +17,15 @@
 #include "TObjString.h"
 #include "TTimeStamp.h"
 
+/**
+ * \class QwRunCondition
+ * \ingroup QwAnalysis
+ * \brief Run condition and quality management
+ *
+ * Manages run-level conditions including run quality flags,
+ * beam conditions, and other run-specific parameters used
+ * for data quality assessment and analysis filtering.
+ */
 class QwRunCondition
 {
 
@@ -70,5 +78,3 @@ class QwRunCondition
 //         std::cout << list->At(i)->GetName() << std::endl;
 //    }
 //  }
-
-#endif

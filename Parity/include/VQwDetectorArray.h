@@ -8,8 +8,12 @@
 ///
 /// \ingroup QwAnalysis_ADC
 
-#ifndef __VQWDETECTORARRAY__
-#define __VQWDETECTORARRAY__
+/*!
+ * \file   VQwDetectorArray.h
+ * \brief  Virtual base class for detector arrays (PMTs, etc.)
+ */
+
+#pragma once
 
 // System headers
 #include <vector>
@@ -26,6 +30,14 @@
 
 
 class QwDetectorArrayID {
+    /**
+     * \class QwDetectorArrayID
+     * \ingroup QwAnalysis_ADC
+     * \brief Identifier and mapping information for detector-array channels
+     *
+     * Encapsulates mapping metadata for channels in a detector array,
+     * including subbank indexing, subelement, type, and naming.
+     */
 
  public:
 
@@ -35,7 +47,7 @@ class QwDetectorArrayID {
 
     int fSubbankIndex;
     int fWordInSubbank; //first word reported for this channel in the subbank
-                        //(eg VQWK channel report 6 words for each event, scalers oly report one word per event)
+                        //(eg VQWK channel report 6 words for each event, scalers only report one word per event)
                         // The first word of the subbank gets fWordInSubbank=0
 
     EQwPMTInstrumentType fTypeID;     // type of detector
@@ -55,6 +67,15 @@ class QwDetectorArrayID {
 };
 
 
+/**
+ * \class VQwDetectorArray
+ * \ingroup QwAnalysis_ADC
+ * \brief Abstract base for arrays of PMT-like detectors
+ *
+ * Provides common functionality for subsystems composed of multiple
+ * integration PMTs and combined PMTs, including normalization,
+ * histogram/NTuple construction, and running statistics.
+ */
 class VQwDetectorArray: virtual public VQwSubsystemParity {
 
  /******************************************************************
@@ -93,7 +114,7 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
 
     /// Virtual destructor
 
-    virtual ~VQwDetectorArray() { };
+    ~VQwDetectorArray() override { };
 
     /*  Member functions derived from VQwSubsystemParity. */
 
@@ -102,62 +123,62 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
     static void DefineOptions(QwOptions &options);
 
 
-    void ProcessOptions(QwOptions &options);//Handle command line options
-    Int_t LoadChannelMap(TString mapfile);
-    Int_t LoadInputParameters(TString pedestalfile);
-    void LoadEventCuts_Init() {};
-    void LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, Int_t &eventcut_flag);
-    void LoadEventCuts_Fin(Int_t &eventcut_flag);
-    Bool_t ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
+    void ProcessOptions(QwOptions &options) override;//Handle command line options
+    Int_t LoadChannelMap(TString mapfile) override;
+    Int_t LoadInputParameters(TString pedestalfile) override;
+    void LoadEventCuts_Init() override {};
+    void LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, Int_t &eventcut_flag) override;
+    void LoadEventCuts_Fin(Int_t &eventcut_flag) override;
+    Bool_t ApplySingleEventCuts() override;//Check for good events by setting limits on the devices readings
 
-    Bool_t  CheckForBurpFail(const VQwSubsystem *subsys);
+    Bool_t  CheckForBurpFail(const VQwSubsystem *subsys) override;
 
-    void IncrementErrorCounters();
-    void PrintErrorCounters() const;// report number of events failed due to HW and event cut faliure
-    UInt_t GetEventcutErrorFlag();//return the error flag
+    void IncrementErrorCounters() override;
+    void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure
+    UInt_t GetEventcutErrorFlag() override;//return the error flag
 
     //update the error flag in the subsystem level from the top level routines related to stability checks. This will uniquely update the errorflag at each channel based on the error flag in the corresponding channel in the ev_error subsystem
-    void UpdateErrorFlag(const VQwSubsystem *ev_error);
+    void UpdateErrorFlag(const VQwSubsystem *ev_error) override;
 
 
-    Int_t ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
-    Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
+    Int_t ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override;
+    Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override;
 
-    void  ClearEventData();
+    void  ClearEventData() override;
     Bool_t IsGoodEvent();
 
-    void  ProcessEvent();
-    void  ExchangeProcessedData();
-    void  ProcessEvent_2();
+    void  ProcessEvent() override;
+    void  ExchangeProcessedData() override;
+    void  ProcessEvent_2() override;
 
-    Bool_t PublishInternalValues() const;
-    Bool_t PublishByRequest(TString device_name);
+    Bool_t PublishInternalValues() const override;
+    Bool_t PublishByRequest(TString device_name) override;
 
     void  SetRandomEventParameters(Double_t mean, Double_t sigma);
     void  SetRandomEventAsymmetry(Double_t asymmetry);
-    void  RandomizeEventData(int helicity = 0, Double_t time = 0.0);
-    void  EncodeEventData(std::vector<UInt_t> &buffer);
+    void  RandomizeEventData(int helicity = 0, Double_t time = 0.0) override;
+    void  EncodeEventData(std::vector<UInt_t> &buffer) override;
     void  RandomizeMollerEvent(int helicity/*, const QwBeamCharge& charge, const QwBeamPosition& xpos, const QwBeamPosition& ypos, const QwBeamAngle& xprime, const QwBeamAngle& yprime, const QwBeamEnergy& energy*/);
 
-    void  ConstructHistograms(TDirectory *folder){
+    void  ConstructHistograms(TDirectory *folder) override{
 
         TString tmpstr("");
         ConstructHistograms(folder,tmpstr);
     };
 
     using VQwSubsystem::ConstructHistograms;
-    void  ConstructHistograms(TDirectory *folder, TString &prefix);
-    void  FillHistograms();
+    void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
+    void  FillHistograms() override;
 
     using VQwSubsystem::ConstructBranchAndVector;
-    void ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
-    void ConstructBranch(TTree *tree, TString &prefix);
-    void ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file );
+    void ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override;
+    void ConstructBranch(TTree *tree, TString &prefix) override;
+    void ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file ) override;
 
-    void  FillTreeVector(std::vector<Double_t> &values) const;
+    void  FillTreeVector(QwRootTreeBranchVector &values) const override;
 #ifdef HAS_RNTUPLE_SUPPORT
-    void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
-    void  FillNTupleVector(std::vector<Double_t>& values) const;
+    void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
+    void  FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
@@ -170,26 +191,26 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
     Bool_t Compare(VQwSubsystem* source);
 
 
-    VQwSubsystem&  operator=  ( VQwSubsystem *value);
-    VQwSubsystem&  operator+= ( VQwSubsystem *value);
-    VQwSubsystem&  operator-= ( VQwSubsystem *value);
+    VQwSubsystem&  operator=  ( VQwSubsystem *value) override;
+    VQwSubsystem&  operator+= ( VQwSubsystem *value) override;
+    VQwSubsystem&  operator-= ( VQwSubsystem *value) override;
 
 
-    void Ratio(VQwSubsystem* numer, VQwSubsystem* denom);
-    void Scale(Double_t factor);
+    void Ratio(VQwSubsystem* numer, VQwSubsystem* denom) override;
+    void Scale(Double_t factor) override;
     void Normalize(VQwDataElement* denom);
 
-    void AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
+    void AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override;
     //remove one entry from the running sums for devices
-    void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF);
-    void CalculateRunningAverage();
+    void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF) override;
+    void CalculateRunningAverage() override;
 
     const QwIntegrationPMT* GetIntegrationPMT(const TString name) const;
     const QwCombinedPMT* GetCombinedPMT(const TString name) const;
 
     void DoNormalization(Double_t factor=1.0);
 
-    Bool_t ApplyHWChecks(){//Check for harware errors in the devices
+    Bool_t ApplyHWChecks(){//Check for hardware errors in the devices
 
         Bool_t status = kTRUE;
 
@@ -203,11 +224,11 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
 
     };
 
-    void LoadMockDataParameters(TString pedestalfile);
+    void LoadMockDataParameters(TString pedestalfile) override;
 
-    void  PrintValue() const;
-    void  WritePromptSummary(QwPromptSummary *ps, TString type);
-    void  PrintInfo() const;
+    void  PrintValue() const override;
+    void  WritePromptSummary(QwPromptSummary *ps, TString type) override;
+    void  PrintInfo() const override;
     void  PrintDetectorID() const;
 
 
@@ -219,7 +240,7 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
 
     // when the type and the name is passed the detector index from appropriate vector
     // will be returned. For example if TypeID is IntegrationPMT  then the index of
-    // the detector from fIntegrationPMT vector for given name will be returnd.
+    // the detector from fIntegrationPMT vector for given name will be returned.
     Int_t GetDetectorIndex(EQwPMTInstrumentType TypeID, TString name);
 
     std::vector <QwIntegrationPMT> fIntegrationPMT;
@@ -259,6 +280,3 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
   Int_t fMainDetErrorCount;
 
 };
-
-
-#endif

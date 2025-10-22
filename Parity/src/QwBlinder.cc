@@ -129,7 +129,7 @@ QwBlinder::QwBlinder(const EQwBlindingStrategy blinding_strategy):
   if (blinder.FileHasVariablePair("=", "strategy", strategy)) {
     std::transform(strategy.begin(), strategy.end(), strategy.begin(), ::tolower);
     QwVerbose << "Using blinding strategy from file: " << strategy << QwLog::endl;
-    if (strategy == "diabled") fBlindingStrategy = kDisabled;
+    if (strategy == "disabled") fBlindingStrategy = kDisabled;
     else if (strategy == "additive") fBlindingStrategy = kAdditive;
     else if (strategy == "multiplicative") fBlindingStrategy = kMultiplicative;
     else if (strategy == "additivemultiplicative") fBlindingStrategy = kAdditiveMultiplicative;
@@ -219,7 +219,6 @@ QwBlinder::~QwBlinder()
 
 /**
  * Update the blinder status with new external information
- *
  * @param options Qweak option handler
  */
 void QwBlinder::ProcessOptions(QwOptions& options)
@@ -243,12 +242,12 @@ void QwBlinder::ProcessOptions(QwOptions& options)
   fBeamCurrentThreshold = options.GetValue<double>("blinder.beam-current-threshold");
 }
 
+#ifdef __USE_DATABASE__
 /**
  * Update the blinder status with new external information
  *
  * @param db Database connection
  */
-#ifdef __USE_DATABASE__
 void QwBlinder::Update(QwParityDB* db)
 {
   //  Update the seed ID then tell us if it has changed.
@@ -267,7 +266,6 @@ void QwBlinder::Update(QwParityDB* db)
 
 /**
  * Update the blinder status using a random number
- *
  */
 void QwBlinder::Update()
 {
@@ -528,16 +526,17 @@ Int_t QwBlinder::ReadRandomSeed()
     "abcdefghijklmnopqrstuvwxyz";
 
   Int_t strLen = sizeof(alphanum) - 1;
-  Char_t randomchar[20];
+  const size_t length = 20;
+  Char_t randomchar[length];
   // Initialize random number generator.
   srand(time(0));
   //get  a "random" positive integer 
   
-  for (int i = 0; i < 20; ++i) {
+  for (int i = 0; i < length; ++i) {
     randomchar[i] = alphanum[rand() % strLen];
   }
   fSeedID=rand();
-  TString frandomSeed(randomchar);
+  TString frandomSeed(randomchar, length);
   fSeed=frandomSeed;//a random string
   return fSeedID;
 }
@@ -696,7 +695,7 @@ void QwBlinder::InitBlinders(const UInt_t seed_id)
     Double_t tmp1 = maximum_asymmetry_sqrt * (newtempout / Int_t(0x7FFFFFFF));
     fBlindingOffset = tmp1 * fabs(tmp1) * 0.000001;
 
-    //  Do another little calulation to round off the blinding asymmetry
+    //  Do another little calculation to round off the blinding asymmetry
     Double_t tmp2;
     tmp1 = fBlindingOffset * 4;    // Exactly shifts by two binary places
     tmp2 = tmp1 + fBlindingOffset; // Rounds 5*fBlindingOffset
@@ -796,7 +795,7 @@ void QwBlinder::InitTestValues(const int n)
 Int_t QwBlinder::UseStringManip(const TString& barestring)
 {
   std::vector<UInt_t> choppedwords;
-  UInt_t tmpword;
+  UInt_t tmpword = 0;
   Int_t finalseed = 0;
 
   for (Int_t i = 0; i < barestring.Length(); i++)
@@ -1156,8 +1155,6 @@ void QwBlinder::PrintCountersValues(std::vector<Int_t> fCounters, TString counte
 
 /**
  * Write the blinding parameters to the database
- * @param db Database connection
- * @param datatype Datatype
  *
  * For each analyzed run the database contains a digest of the blinding parameters
  * and a number of blinded test entries.
@@ -1335,12 +1332,12 @@ QwBlinder::EQwBlinderStatus QwBlinder::CheckBlindability(std::vector<Int_t> &fCo
     fCounters.at(kBlinderCount_Transverse)++;
   } else if (fTargetBlindability==kBlindable 
 	     && fBeamIsPresent) {
-    //  This is a blindable target and the beam is sufficent.
+    //  This is a blindable target and the beam is sufficient.
     status = QwBlinder::kBlindable;
     fCounters.at(kBlinderCount_Blindable)++;
   } else if (fTargetBlindability==kBlindable 
 	     && (! fBeamIsPresent) ) {
-    //  This is a blindable target but there is insufficent beam present
+    //  This is a blindable target but there is insufficient beam present
     status = QwBlinder::kNotBlindable;
     fCounters.at(kBlinderCount_NoBeam)++;
   } else {

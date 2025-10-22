@@ -1,12 +1,11 @@
-/**********************************************************\
-* File: QwSubsystemArray.h                                 *
-*                                                          *
-* Author: P. M. King,  Rakitha Beminiwattha                *
-* Time-stamp: <2008-07-22 15:50>                           *
-\**********************************************************/
+/*!
+ * \file   QwSubsystemArray.h
+ * \brief  Array container for managing multiple subsystems
+ * \author P. M. King, Rakitha Beminiwattha
+ * \date   2008-07-22
+ */
 
-#ifndef __QWSUBSYSTEMARRAY__
-#define __QWSUBSYSTEMARRAY__
+#pragma once
 
 #include <vector>
 #include <map>
@@ -28,9 +27,18 @@
 // Forward declarations
 class VQwHardwareChannel;
 class QwParameterFile;
+class QwRootTreeBranchVector;
 
-///
-/// \ingroup QwAnalysis
+/**
+ * \class QwSubsystemArray
+ * \ingroup QwAnalysis
+ * \brief Container for managing multiple subsystems with common operations
+ *
+ * Extends std::vector to provide subsystem-level operations such as
+ * event processing, accumulation, tree/histogram construction, and
+ * publishing. Uses container-delegation pattern to forward arithmetic
+ * operations to individual subsystems while maintaining type safety.
+ */
 class QwSubsystemArray:
     public std::vector<std::shared_ptr<VQwSubsystem>>,
     public MQwPublishable<QwSubsystemArray, VQwSubsystem> {
@@ -59,7 +67,7 @@ class QwSubsystemArray:
   /// \brief Copy constructor by reference
   QwSubsystemArray(const QwSubsystemArray& source);
   /// \brief Virtual destructor
-  virtual ~QwSubsystemArray() { };
+  ~QwSubsystemArray() override { };
 
   /// \brief Assignment operator
   QwSubsystemArray& operator=(const QwSubsystemArray& value);
@@ -199,18 +207,18 @@ class QwSubsystemArray:
   /// \name Tree and vector construction and maintenance
   // @{
   /// Construct the tree and vector for this subsystem
-  void ConstructBranchAndVector(TTree *tree, std::vector <Double_t> &values) {
+  void ConstructBranchAndVector(TTree *tree, QwRootTreeBranchVector &values) {
     TString tmpstr("");
     ConstructBranchAndVector(tree,tmpstr,values);
   };
   /// \brief Construct a branch and vector for this subsystem with a prefix
-  void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector <Double_t> &values);
+  void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values);
   /// \brief Construct a branch for this subsystem with a prefix
   void ConstructBranch(TTree *tree, TString& prefix);
   /// \brief Construct a branch for this subsystem with a prefix after tree leave trimming
   void ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file);
   /// \brief Fill the vector for this subsystem
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const;
   
 #ifdef HAS_RNTUPLE_SUPPORT
   /// \brief Construct RNTuple fields and vector for this subsystem
@@ -310,6 +318,3 @@ protected:
   
 
 }; // class QwSubsystemArray
-
-
-#endif // __QWSUBSYSTEMARRAY__

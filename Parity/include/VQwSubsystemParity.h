@@ -1,13 +1,11 @@
-/**********************************************************\
-* File: VQwSubsystemParity.h                               *
-*                                                          *
-* Author: P. M. King, Rakitha Beminiwattha                 *
-* Time-stamp: <2007-05-08 15:40>                           *
-\**********************************************************/
+/*!
+ * \file   VQwSubsystemParity.h
+ * \brief  Virtual base class for parity analysis subsystems
+ * \author P. M. King, Rakitha Beminiwattha
+ * \date   2007-05-08
+ */
 
-
-#ifndef __VQWSUBSYSTEMPARITY__
-#define __VQWSUBSYSTEMPARITY__
+#pragma once
 
 // ROOT headers
 #include <TTree.h>
@@ -25,14 +23,12 @@ class QwPromptSummary;
 /**
  * \class VQwSubsystemParity
  * \ingroup QwAnalysis
+ * \brief Abstract base class for subsystems participating in parity analysis
  *
- * \brief Virtual base class for the parity subsystems
- *
- *   Virtual base class for the classes containing the
- *   event-based information from each parity subsystem.
- *   This will define the interfaces used in communicating
- *   with the CODA routines.
- *
+ * Extends VQwSubsystem with parity-specific capabilities including asymmetry
+ * formation, blinding support, database output, running sum accumulation,
+ * and event cuts. Provides the contract for subsystems that contribute to
+ * parity violation measurements and helicity-based analyses.
  */
 class VQwSubsystemParity: virtual public VQwSubsystem {
 
@@ -50,7 +46,7 @@ class VQwSubsystemParity: virtual public VQwSubsystem {
     : VQwSubsystem(source)
     { }
     /// Default destructor
-    virtual ~VQwSubsystemParity() { };
+    ~VQwSubsystemParity() override { };
 
     /// \brief Fill the database with MPS-based variables
     ///        Note that most subsystems don't need to do this.
@@ -60,7 +56,7 @@ class VQwSubsystemParity: virtual public VQwSubsystem {
     virtual void FillErrDB(QwParityDB * /*db*/, TString /*type*/) { };
 
     // VQwSubsystem routine is overridden. Call it at the beginning by VQwSubsystem::operator=(value)
-    virtual VQwSubsystem& operator=  (VQwSubsystem *value) = 0;
+    VQwSubsystem& operator=  (VQwSubsystem *value) override = 0;
     virtual VQwSubsystem& operator+= (VQwSubsystem *value) = 0;
     virtual VQwSubsystem& operator-= (VQwSubsystem *value) = 0;
     virtual void Sum(VQwSubsystem *value1, VQwSubsystem *value2)
@@ -89,7 +85,7 @@ class VQwSubsystemParity: virtual public VQwSubsystem {
     virtual void CalculateRunningAverage() = 0;
 
     /// \brief Load the event cuts file
-    virtual Int_t LoadEventCuts(TString filename){
+    Int_t LoadEventCuts(TString filename) override{
       Int_t eventcut_flag = 1;
 
       // Open the file
@@ -156,5 +152,3 @@ class VQwSubsystemParity: virtual public VQwSubsystem {
     virtual void LoadMockDataParameters(TString /*mapfile*/) {};
 	
 }; // class VQwSubsystemParity
-
-#endif // __VQWSUBSYSTEMPARITY__

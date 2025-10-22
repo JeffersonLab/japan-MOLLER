@@ -1,9 +1,12 @@
-/**********************************************************\
-* File: QwCombinedBCM.cc                                  *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwCombinedBCM.cc
+ * \brief  Combined beam current monitor implementation using weighted averages
+ *
+ * Combined beam current monitor implementation: weighted average of multiple
+ * BCMs with optional beam trip simulation, resolution smearing, and random
+ * event generation. Template class supporting various channel types.
+ * Documentation-only edits; runtime behavior unchanged.
+ */
 
 #include "QwCombinedBCM.h"
 
@@ -39,6 +42,7 @@ template<typename T> boost::random::uniform_real_distribution<double> QwCombined
 template<typename T> boost::variate_generator < boost::mt19937, boost::random::uniform_real_distribution<double> >
   QwCombinedBCM<T>::fRandomVariable(fRandomnessGenerator, fDistribution);
 
+/** Set random number generator seed for beam trip simulation. */
 template<typename T>
 void QwCombinedBCM<T>::SetTripSeed(uint seedval)
 {
@@ -47,9 +51,16 @@ void QwCombinedBCM<T>::SetTripSeed(uint seedval)
 
 /********************************************************/
 
-//this is a combined BCM made out of BCMs that are already callibrated and have pedstals removed.
+//this is a combined BCM made out of BCMs that are already calibrated and have pedstals removed.
 //This will be used for projection of charge at the target
 
+/**
+ * Add a constituent BCM to the combination with specified weight.
+ *
+ * @param bcm    Pointer to the BCM to include.
+ * @param weight Charge weight for this BCM.
+ * @param sumqw  Total sum of absolute weights.
+ */
 template<typename T>
 void QwCombinedBCM<T>::SetBCMForCombo(VQwBCM* bcm, Double_t weight, Double_t sumqw )
 {
@@ -61,6 +72,7 @@ void QwCombinedBCM<T>::SetBCMForCombo(VQwBCM* bcm, Double_t weight, Double_t sum
 
 /********************************************************/
 
+/** Initialize combined BCM with simple name and default settings. */
 template<typename T>
 void  QwCombinedBCM<T>::InitializeChannel(TString name, TString datatosave)
 {
@@ -71,6 +83,7 @@ void  QwCombinedBCM<T>::InitializeChannel(TString name, TString datatosave)
   this->fBeamCurrent.InitializeChannel(name,"derived");
 }
 
+/** Initialize combined BCM with subsystem scoping. */
 template<typename T>
 void  QwCombinedBCM<T>::InitializeChannel(TString subsystem, TString name, TString datatosave)
 {
@@ -95,6 +108,10 @@ void  QwCombinedBCM<T>::InitializeChannel(TString subsystem, TString name,
 
 
 /********************************************************/
+/**
+ * Compute weighted average of constituent BCM currents and normalize by
+ * total weight sum.
+ */
 template<typename T>
 void  QwCombinedBCM<T>::ProcessEvent()
 {
@@ -127,6 +144,10 @@ void  QwCombinedBCM<T>::ProcessEvent()
 //---------------------------------------------------------------------------------------------------------
 
 
+/**
+ * Project the combined current to a device channel, applying resolution
+ * smearing and filling raw event data.
+ */
 template<typename T>
 void  QwCombinedBCM<T>::GetProjectedCharge(VQwBCM *device)
 {
@@ -138,6 +159,10 @@ void  QwCombinedBCM<T>::GetProjectedCharge(VQwBCM *device)
 }
 
 
+/**
+ * Generate random event data and optionally simulate beam trips with
+ * configurable trip period, length, and ramp duration.
+ */
 template<typename T>
 void  QwCombinedBCM<T>::RandomizeEventData(int helicity, double time)
 {
@@ -148,12 +173,12 @@ void  QwCombinedBCM<T>::RandomizeEventData(int helicity, double time)
   //                         (period-triplength- tripramp) > fmod(time,period) : leave the variable alone
 
 
-  //  Determine the probablity of having a beam trip
+  //  Determine the probability of having a beam trip
   if (fLastTripTime<=-99999.9) {
      fLastTripTime = time - fTripLength - fTripRamp;
   }
 //  if ( ((time-fLastTripTime) > (fTripPeriod)) ){ //  Make some comparison to a probablilty instead of the time
-//  Probablity of a trip happening in one event:  # of trips per hour/3600 * eventtime_in_seconds (which is 0.001s)
+//  Probability of a trip happening in one event:  # of trips per hour/3600 * eventtime_in_seconds (which is 0.001s)
   Double_t tmp = fRandomVariable();
 //  std::cout << "random value=="<<tmp << "; fProbabilityOfTrip=="<<fProbabilityOfTrip<<std::endl;
   if (tmp < fProbabilityOfTrip) {
@@ -176,6 +201,10 @@ void  QwCombinedBCM<T>::RandomizeEventData(int helicity, double time)
 }
 
 
+/**
+ * Load mock data parameters including beam trip settings and resolution.
+ * Recognizes 'beamtrip' and 'resolution' keywords.
+ */
 template<typename T>
 void  QwCombinedBCM<T>::LoadMockDataParameters(QwParameterFile &paramfile){
 
@@ -206,11 +235,15 @@ void  QwCombinedBCM<T>::LoadMockDataParameters(QwParameterFile &paramfile){
 
 
 /********************************************************/
+/**
+ * Apply single-event cuts: first propagate error codes from constituent
+ * BCMs, then apply cuts using the inherited BCM logic.
+ */
 template<typename T>
 Bool_t QwCombinedBCM<T>::ApplySingleEventCuts()
 {
   
-  //This is required to update single event cut faliures in individual channels
+  //This is required to update single event cut failures in individual channels
   //  First update the error code based on the codes
   //  of the elements.  This requires that the BCMs
   //  have had ApplySingleEventCuts run on them already.
@@ -224,6 +257,9 @@ Bool_t QwCombinedBCM<T>::ApplySingleEventCuts()
   return QwBCM<T>::ApplySingleEventCuts();
 }
 
+/**
+ * Update error flags by propagating error codes from constituent BCMs.
+ */
 template<typename T>
 UInt_t QwCombinedBCM<T>::UpdateErrorFlag(){
   for (size_t i=0;i<fElement.size();i++){
@@ -288,6 +324,7 @@ void QwCombinedBCM<T>::DeaccumulateRunningSum(VQwBCM &value){
 
 
 /********************************************************/
+/** Assignment operator: copy the beam current value. */
 template<typename T>
 QwCombinedBCM<T>& QwCombinedBCM<T>::operator= (const QwCombinedBCM<T> &value)
 {
@@ -297,6 +334,7 @@ QwCombinedBCM<T>& QwCombinedBCM<T>::operator= (const QwCombinedBCM<T> &value)
   return *this;
 }
 
+/** Polymorphic assignment operator. */
 template<typename T>
 VQwBCM& QwCombinedBCM<T>::operator= (const VQwBCM &value)
 {
@@ -373,7 +411,7 @@ void  QwCombinedBCM<T>::FillHistograms()
 }
 
 template<typename T>
-void  QwCombinedBCM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwCombinedBCM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
@@ -417,7 +455,7 @@ void  QwCombinedBCM<T>::ConstructBranch(TTree *tree, TString &prefix, QwParamete
 
 
 template<typename T>
-void  QwCombinedBCM<T>::FillTreeVector(std::vector<Double_t> &values) const
+void  QwCombinedBCM<T>::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.

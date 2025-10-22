@@ -12,6 +12,7 @@
 
 // Qweak headers
 #include "VQwSubsystemParity.h"
+#include "QwRootFile.h"
 
 //*****************************************************************//
 
@@ -542,7 +543,7 @@ Bool_t QwSubsystemArrayParity::CheckForBurpFail(QwSubsystemArrayParity &event)
 }
 
 
-void QwSubsystemArrayParity::PrintErrorCounters() const{// report number of events failed due to HW and event cut faliure
+void QwSubsystemArrayParity::PrintErrorCounters() const{// report number of events failed due to HW and event cut failure
   const VQwSubsystemParity *subsys_parity = nullptr;
   if (!empty()){
     for (const_iterator subsys = begin(); subsys != end(); ++subsys){
@@ -619,22 +620,22 @@ Bool_t QwSubsystemArrayParity::CheckBadEventRange(){
   return kFALSE;
 }
 
-void  QwSubsystemArrayParity::ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values){
+void  QwSubsystemArrayParity::ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values){
   QwSubsystemArray::ConstructBranchAndVector(tree, prefix, values);
   if (prefix.Contains("yield_") || prefix==""){
-    values.push_back(0.0);
+    values.push_back("ErrorFlag", 'D');
     fErrorFlagTreeIndex = values.size()-1;
-    tree->Branch("ErrorFlag",&(values[fErrorFlagTreeIndex]),"ErrorFlag/D");
+    tree->Branch("ErrorFlag", &(values.back<Double_t>()), "ErrorFlag/D");
   } else {
     fErrorFlagTreeIndex = -1;
   }
 }
 
-void QwSubsystemArrayParity::FillTreeVector(std::vector<Double_t>& values) const
+void QwSubsystemArrayParity::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   QwSubsystemArray::FillTreeVector(values);
   if (fErrorFlagTreeIndex>=0 && fErrorFlagTreeIndex<static_cast<int>(values.size())){
-    values.at(fErrorFlagTreeIndex) = fErrorFlag;
+    values.SetValue(fErrorFlagTreeIndex, static_cast<double>(fErrorFlag));
   }
 }
 
@@ -655,7 +656,7 @@ void QwSubsystemArrayParity::LoadMockDataParameters(std::string mapfile)
   // }
   QwParameterFile detectors(mapfile);
     // This is how this should work
-  QwParameterFile* preamble = nullptr;
+  std::unique_ptr<QwParameterFile> preamble = nullptr;
   preamble = detectors.ReadSectionPreamble();
   // Process preamble
   QwVerbose << "Preamble:" << QwLog::endl;
@@ -669,10 +670,7 @@ void QwSubsystemArrayParity::LoadMockDataParameters(std::string mapfile)
 
   QwMessage << "fWindowPeriod = " << fWindowPeriod << QwLog::endl;
 
-    
-  if (preamble) delete preamble;
-
-  QwParameterFile* section = nullptr;
+  std::unique_ptr<QwParameterFile> section = nullptr;
   std::string section_name;
   while ((section = detectors.ReadNextSection(section_name))) {
 
@@ -685,13 +683,11 @@ void QwSubsystemArrayParity::LoadMockDataParameters(std::string mapfile)
     std::string subsys_name;
     if (! section->FileHasVariablePair("=","name",subsys_name)) {
       QwError << "No name defined in section for subsystem " << subsys_type << "." << QwLog::endl;
-      delete section; section = 0;
       continue;
     }
     std::string mock_param_name;
     if (! section->FileHasVariablePair("=","mock_param",mock_param_name)) {
      QwError << "No mock data parameter defined for " << subsys_name << "." << QwLog::endl;
-     delete section; section = 0;
      continue;
     }
     VQwSubsystemParity* subsys_parity = dynamic_cast<VQwSubsystemParity*>(GetSubsystemByName(subsys_name));
@@ -700,6 +696,5 @@ void QwSubsystemArrayParity::LoadMockDataParameters(std::string mapfile)
     } else {
       subsys_parity->LoadMockDataParameters(mock_param_name);
     }
-    delete section; section = 0;
   }
 }

@@ -201,7 +201,7 @@ Bool_t QwDatabase::ValidateConnection()
           config.host = fDBServer;
           config.user = fDBUsername;
           config.password = fDBPassword;
-          config.database = fDatabase;
+          config.dbname = fDatabase;
           config.port = fDBPortNumber;
           config.debug = fDBDebug;
           fDBConnection = std::make_shared<sqlpp::postgresql::connection>(config);
@@ -273,7 +273,7 @@ bool QwDatabase::Connect()
    * Must call QwDatabase::ConnectionInfo() first.
    */
 
-  //  Return flase, if we're not using the DB.
+  //  Return false, if we're not using the DB.
   if (fAccessLevel==kQwDatabaseOff) return false;
 
   // Make sure not already connected
@@ -323,7 +323,7 @@ bool QwDatabase::Connect()
           config.host = fDBServer;
           config.user = fDBUsername;
           config.password = fDBPassword;
-          config.database = fDatabase;
+          config.dbname = fDatabase;
           config.port = fDBPortNumber;
           fDBConnection = std::make_shared<sqlpp::postgresql::connection>(config);
           break;

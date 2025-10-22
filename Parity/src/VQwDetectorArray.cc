@@ -1,9 +1,12 @@
-/**********************************************************\
-* File: VQwDetectorArray.cc                          *
-*                                                          *
-* Author: Kevin Ward (Original Code by P. M. King)                                       *
-* Time-stamp: <2007-05-08 15:40>                           *
-\**********************************************************/
+/*!
+ * \file   VQwDetectorArray.cc
+ * \brief  Virtual base class implementation for detector arrays managing PMT collections
+ *
+ * Base detector array implementation managing PMT collections (integration
+ * and combined), including channel mapping, event cuts, normalization options,
+ * publishing, tree construction, and running sums. Derived classes implement
+ * specific detector systems. Documentation-only edits; runtime behavior unchanged.
+ */
 
 #include "VQwDetectorArray.h"
 
@@ -26,12 +29,10 @@
 #include "QwPromptSummary.h"
 
 /**
- * Defines configuration options for QwEventBuffer class using QwOptions
- * functionality.
+ * Define command-line options for detector array normalization.
  *
- * @param options Options object
+ * @param options Options object to configure.
  */
-
 void VQwDetectorArray::DefineOptions(QwOptions &options){
   // Define the execution options
   options.AddOptions()
@@ -45,13 +46,11 @@ void VQwDetectorArray::DefineOptions(QwOptions &options){
      "Normalize the detectors for currents above this value");
 }
 
-/*!
- * Loads the configuration options into this instance of
- * VQwDetectorArray from the QwOptions object.
+/**
+ * Load detector array configuration from parsed command-line options.
  *
- * @param options Options object
+ * @param options Options object.
  */
-
 void VQwDetectorArray::ProcessOptions(QwOptions &options) {
 
     bNormalization = options.GetValue<bool>("QwDetectorArray.normalize");
@@ -71,10 +70,11 @@ void VQwDetectorArray::ProcessOptions(QwOptions &options) {
 
 //*****************************************************************//
 /**
- * Publish internal values
- * @return
+ * Publish internal detector channels according to the configured
+ * publish list (integration and combined PMTs).
+ *
+ * @return true if all requested channels are successfully published.
  */
-
 Bool_t VQwDetectorArray::PublishInternalValues() const {
 
   // Publish variables
@@ -134,7 +134,7 @@ Bool_t VQwDetectorArray::PublishInternalValues() const {
         device_type.ToLower();
         device_prop.ToLower();
 
-        const VQwHardwareChannel* tmp_channel;
+        const VQwHardwareChannel* tmp_channel = NULL;
 
         if (device_type == "integrationpmt") {
 
@@ -170,6 +170,12 @@ Bool_t VQwDetectorArray::PublishInternalValues() const {
 }
 
 
+/**
+ * Publish a specific device channel on-demand by name lookup.
+ *
+ * @param device_name Name of the detector channel to publish.
+ * @return true if the channel is found and published successfully.
+ */
 Bool_t VQwDetectorArray::PublishByRequest(TString device_name) {
 
     Bool_t status = kFALSE;
@@ -210,6 +216,13 @@ Bool_t VQwDetectorArray::PublishByRequest(TString device_name) {
 
 
 //*****************************************************************//
+/**
+ * Load detector channel map file, creating integration and combined PMTs
+ * and configuring buffer layout, saturation limits, and sample sizes.
+ *
+ * @param mapfile Path to the channel map file.
+ * @return 0 on success.
+ */
 Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
      
     Bool_t ldebug=kFALSE;
@@ -490,7 +503,7 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
 
      // Now load the variables to publish
     mapstr.RewindToFileStart();
-    QwParameterFile *section;
+    std::unique_ptr<QwParameterFile> section;
     std::vector<TString> publishinfo;
     while ((section = mapstr.ReadNextSection(varvalue))) {
 
@@ -1282,7 +1295,7 @@ void  VQwDetectorArray::FillHistograms() {
 }
 
 
-void VQwDetectorArray::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values) {
+void VQwDetectorArray::ConstructBranchAndVector(TTree *tree, TString & prefix, QwRootTreeBranchVector &values) {
 
     for (size_t i=0;i<fIntegrationPMT.size();i++)
      fIntegrationPMT[i].ConstructBranchAndVector(tree, prefix, values);
@@ -1309,7 +1322,7 @@ void VQwDetectorArray::ConstructBranch(TTree *tree, TString & prefix) {
 void VQwDetectorArray::ConstructBranch(TTree *tree, TString & prefix, QwParameterFile& trim_file) {
 
     TString tmp;
-    QwParameterFile* nextmodule;
+    std::unique_ptr<QwParameterFile> nextmodule;
     trim_file.RewindToFileStart();
     tmp="QwIntegrationPMT";
     trim_file.RewindToFileStart();
@@ -1337,7 +1350,7 @@ void VQwDetectorArray::ConstructBranch(TTree *tree, TString & prefix, QwParamete
     return;
 }
 
-void VQwDetectorArray::FillTreeVector(std::vector<Double_t> &values) const {
+void VQwDetectorArray::FillTreeVector(QwRootTreeBranchVector &values) const {
 
     for (size_t i=0;i<fIntegrationPMT.size();i++)
      fIntegrationPMT[i].FillTreeVector(values);

@@ -1,9 +1,10 @@
-/********************************************************\
-* File: VQwClock.h                                       *
-*                                                        *
-* Author: Juan Carlos Cornejo <cornejo@jlab.org>         *
-* Time-stamp: <2011-06-16>                               *
-\********************************************************/
+/*!
+ * \file   VQwClock.cc
+ * \brief  Virtual base class implementation for clock channels
+ *
+ * Factory helpers to create concrete Clock channels by module type.
+ * Documentation-only edits; runtime behavior unchanged.
+ */
 
 #include "VQwClock.h"
 
@@ -23,7 +24,8 @@
 
 
 /**
- * \brief A fast way of creating a Clock of specified type
+ * Create a concrete Clock instance for the requested module type.
+ * Supported: VQWK, SIS3801, SIS3801D24/SCALER.
  */
 VQwClock* VQwClock::Create(TString subsystemname, TString name, TString type)
 {
@@ -46,6 +48,7 @@ VQwClock* VQwClock::Create(TString subsystemname, TString name, TString type)
   }
 }
 
+/** Copy-construct a concrete Clock based on the source module type. */
 VQwClock* VQwClock::Create(const VQwClock& source) {
   Bool_t localDebug = kFALSE;
   TString type = source.GetModuleType();

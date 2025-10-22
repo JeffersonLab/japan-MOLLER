@@ -1,13 +1,12 @@
-/**********************************************************\
-* File: QwEventBuffer.h                                    *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2008-07-22 15:40>                           *
-\**********************************************************/
 
-#ifndef __QWEVENTBUFFER__
-#define __QWEVENTBUFFER__
+/*!
+ * \file   QwEventBuffer.h
+ * \brief  Event buffer management for reading and processing CODA data
+ * \author P. M. King
+ * \date   2008-07-22
+ */
 
+#pragma once
 
 #include <string>
 #include <vector>
@@ -34,9 +33,16 @@ class QwSubsystemArray;
 //////////////////////////////////////////////////////////////////////
 
 
-///
-/// \ingroup QwAnalysis
-// class QwEventBuffer: public MQwCodaControlEvent{
+/**
+ * \class QwEventBuffer
+ * \ingroup QwAnalysis
+ * \brief Event buffer management for reading and processing CODA data
+ *
+ * Manages the reading of CODA event data files, including support for
+ * segmented files, run lists, and event stream processing. Handles
+ * event decoding via pluggable decoder classes and provides iteration
+ * over events and runs.
+ */
 class QwEventBuffer {
  public:
   static void DefineOptions(QwOptions &options);
@@ -66,11 +72,6 @@ class QwEventBuffer {
     if (fEvStream != NULL) {
       delete fEvStream;
       fEvStream = NULL;
-    }
-    // Delete run list file
-    if (fRunListFile != NULL) {
-      delete fRunListFile;
-      fRunListFile = NULL;
     }
 	  // Delete Decoder
 	  if(decoder != NULL) {
@@ -198,12 +199,12 @@ class QwEventBuffer {
   Bool_t fChainDataFiles;
   std::pair<Int_t, Int_t> fRunRange;
   std::string fRunListFileName;
-  QwParameterFile* fRunListFile;
+  std::unique_ptr<QwParameterFile> fRunListFile;
   std::vector<Int_t> fRunRangeMinList, fRunRangeMaxList;
 
   std::pair<UInt_t, UInt_t> fEventRange;
   std::string fEventListFileName;
-  QwParameterFile* fEventListFile;
+  std::unique_ptr<QwParameterFile> fEventListFile;
   std::vector<UInt_t> fEventList;
 
   std::pair<Int_t, Int_t> fSegmentRange;
@@ -329,7 +330,3 @@ template < class T > Bool_t QwEventBuffer::FillObjectWithEventData(T &object){
   }
   return okay;
 }
-
-
-
-#endif

@@ -1,10 +1,8 @@
-/*
- * QwCombiner.cc
- *
- *  Created on: Oct 22, 2010
- *      Author: wdconinc
- *
- *  Last Modified: August 1, 2018 1:45 PM
+/*!
+ * \file   QwCombiner.cc
+ * \brief  Implementation of data combiner handler for channel operations
+ * \author wdconinc
+ * \date   2010-10-22
  */
 
 #include "QwCombiner.h"
@@ -76,7 +74,7 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
   QwParameterFile map(mapfile);
 
   // Read the preamble
-  QwParameterFile* preamble = map.ReadSectionPreamble();
+  std::unique_ptr<QwParameterFile> preamble = map.ReadSectionPreamble();
   TString mask;
   if (preamble->FileHasVariablePair("=", "mask", mask)) {
     fErrorFlagMask = QwParameterFile::GetUInt(mask);
@@ -86,7 +84,7 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
   // Read the sections of dependent variables
   bool keep_header = true;
   std::string section_name;
-  QwParameterFile* section = 0;
+  std::unique_ptr<QwParameterFile> section = nullptr;
   std::pair<EQwHandleType,std::string> type_name;
   while ((section = map.ReadNextSection(section_name,keep_header))) {
     if(section_name=="PUBLISH") continue;
@@ -141,7 +139,7 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
   // Now load the variables to publish
   std::vector<std::vector<TString> > fPublishList;
   map.RewindToFileStart();
-  QwParameterFile *section2;
+  std::unique_ptr<QwParameterFile> section2;
   std::vector<TString> publishinfo;
   while ((section2=map.ReadNextSection(varvalue))) {
     if (varvalue == "PUBLISH") {
@@ -160,7 +158,6 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
         publishinfo.clear();
       }
     }
-    delete section2;
   }
   // Print list of variables to publish
   if (fPublishList.size()>0){
@@ -172,12 +169,7 @@ Int_t QwCombiner::LoadChannelMap(const std::string& mapfile)
   return 0;
 }
 
-/** Connect to the dependent and independent channels
- *
- * @param asym Asymmetry event structure
- * @param diff Difference event structure
- * @return Zero on success
- */
+/** Connect to the dependent and independent channels */
 Int_t QwCombiner::ConnectChannels(
     QwSubsystemArrayParity& asym,
     QwSubsystemArrayParity& diff)
@@ -300,8 +292,8 @@ Int_t QwCombiner::ConnectChannels(
 
 /** Connect to the dependent and independent channels
  *
- * @param event Helicity event structure
- * @return Zero on success
+ * Parameters: event Helicity event structure
+ * Returns: Zero on success
  */
 Int_t QwCombiner::ConnectChannels(QwSubsystemArrayParity& event)
 {

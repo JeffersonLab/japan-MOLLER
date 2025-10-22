@@ -6,8 +6,12 @@
  * \date   2009-12-01
  */
 
-#ifndef QWOPTIONS_H
-#define QWOPTIONS_H
+/*!
+ * \file   QwOptions.h
+ * \brief  Command-line options processing using Boost.Program_options
+ */
+
+#pragma once
 
 // System headers
 #include <iostream>
@@ -47,17 +51,19 @@ inline const TString getenv_safe_TString (const char* name) {
 // Starting with boost::program_options 1.35.0 there is support for the semantic
 // implicit_value.  An explicit option value is optional, but if given, must be
 // strictly adjacent to the option.
-#if BOOST_VERSION >= 103500
 #define default_bool_value(b) default_value(b)->implicit_value(true)
-#else
-#define default_bool_value(b) default_value(b)
-#endif
 
 
 /**
  *  \class QwOptions
  *  \ingroup QwAnalysis
- *  \brief An options class
+ *  \brief Command-line and configuration file options processor
+ *
+ * QwOptions provides a unified interface for handling command-line arguments,
+ * configuration files, and environment variables using Boost.Program_options.
+ * It supports typed options with defaults, positional arguments, and
+ * hierarchical configuration loading. The global gQwOptions singleton
+ * is available throughout the framework.
  *
  * On instantiation of the global gQwOptions object the argc and argv are passed.
  * The filename is set to a default value, but on instantiation a check is done
@@ -97,7 +103,7 @@ inline const TString getenv_safe_TString (const char* name) {
  * and it will not allow you to unset settings in the default configuration file.
  * A better approach is to use the implicit_value(b) semantic that will still accept
  * the value after the option.  However, this was only introduced in boost 1.35.0.
- * To avoid the need to test for this, use the syntac default_bool_value(b), with b
+ * To avoid the need to test for this, use the syntax default_bool_value(b), with b
  * the default value.  If the flag is specified, the option will be set to true
  * regardless of the specified default value.
  *
@@ -311,5 +317,3 @@ class QwOptions {
 
     bool fParsed;
 };
-
-#endif // QWOPTIONS_H

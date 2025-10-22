@@ -12,7 +12,7 @@ This directory contains the VS Code devcontainer configuration for the JAPAN-MOL
 
 ### 🗂️ **CVMFS Integration**
 - **Automatic Setup**: CVMFS installed and configured on container creation
-- **CVMFS Repositories**: Access to 5 repositories including `sft.cern.ch`, `geant4.cern.ch`, `sw.cern.ch`, `singularity.opensciencegrid.org`, and `oasis.opensciencegrid.org`
+- **CVMFS Repositories**: Access to 4 repositories including `sft.cern.ch`, `geant4.cern.ch`, `singularity.opensciencegrid.org`, and `oasis.opensciencegrid.org`
 - **LCG Software Stacks**: Pre-configured access to LCG environments
 - **Persistent Mounts**: CVMFS repositories mounted on container start
 
@@ -37,11 +37,6 @@ The container provides access to these CVMFS repositories:
 - Multiple versions for compatibility testing
 - Physics data libraries and examples
 
-### **sw.cern.ch** - CERN Software Repository
-- Additional CERN software packages
-- Experimental and development tools
-- Specialized physics computing software
-
 ### **singularity.opensciencegrid.org** - OSG Singularity Containers
 - Pre-built container images for scientific computing
 - Ready-to-use environments for various physics applications
@@ -57,13 +52,6 @@ The container provides access to these CVMFS repositories:
 ### **Starting the Development Environment**
 
 1. **Open in VS Code**: Click "Reopen in Container" when prompted, or use Command Palette: `Remote-Containers: Reopen in Container`
-
-2. **Wait for Setup**: First-time setup installs CVMFS and dependencies (~5-10 minutes)
-
-3. **Verify CVMFS**: Check that repositories are mounted:
-   ```bash
-   ls /cvmfs/sft.cern.ch/lcg/views/
-   ```
 
 ### **Using LCG Software Environments**
 
@@ -84,9 +72,6 @@ make -j$(nproc)
 ### **Using Additional CVMFS Resources**
 
 ```bash
-# Browse CERN software repository
-ls /cvmfs/sw.cern.ch/
-
 # List available Singularity containers
 ls /cvmfs/singularity.opensciencegrid.org/
 
@@ -152,7 +137,114 @@ cvmfs_config probe
 # Manually remount repositories
 sudo mount -t cvmfs sft.cern.ch /cvmfs/sft.cern.ch
 sudo mount -t cvmfs geant4.cern.ch /cvmfs/geant4.cern.ch
-sudo mount -t cvmfs sw.cern.ch /cvmfs/sw.cern.ch
+sudo mount -t cvmfs singularity.opensciencegrid.org /cvmfs/singularity.opensciencegrid.org
+sudo mount -t cvmfs oasis.opensciencegrid.org /cvmfs/oasis.opensciencegrid.org
+
+# Check mount points
+df -h | grep cvmfs
+```
+
+### **Build Issues**
+```bash
+# Clean and rebuild
+rm -rf build && mkdir build && cd build
+cmake .. && make clean && make -j$(nproc)
+
+### **Starting the Development Environment**
+
+1. **Open in VS Code**: Click "Reopen in Container" when prompted, or use Command Palette: `Remote-Containers: Reopen in Container`
+
+2. **Wait for Setup**: First-time setup installs CVMFS and dependencies (~5-10 minutes)
+
+3. **Verify CVMFS**: Check that repositories are mounted:
+   ```bash
+   ls /cvmfs/sft.cern.ch/lcg/views/
+   ```
+
+### **Using LCG Software Environments**
+
+Source an LCG environment to access pre-built software:
+```bash
+# Example: LCG 106 with GCC 13
+source /cvmfs/sft.cern.ch/lcg/views/LCG_106/x86_64-el9-gcc13-opt/setup.sh
+
+# Verify ROOT is available
+root-config --version
+
+# Build JAPAN-MOLLER with LCG environment
+mkdir -p build && cd build
+cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+make -j$(nproc)
+```
+
+### **Using Additional CVMFS Resources**
+
+```bash
+# List available Singularity containers
+ls /cvmfs/singularity.opensciencegrid.org/
+
+# Run a Singularity container (example)
+singularity exec /cvmfs/singularity.opensciencegrid.org/opensciencegrid/osgvo-el7:latest /bin/bash
+
+# Access OSG software
+ls /cvmfs/oasis.opensciencegrid.org/mis/
+
+# Use Geant4 directly
+source /cvmfs/geant4.cern.ch/geant4/11.1.0/x86_64-el9-gcc13-opt/bin/geant4.sh
+```
+
+### **Running Static Analysis**
+
+The container includes clang-tidy with the project's `.clang-tidy` configuration:
+```bash
+# Analyze specific files
+clang-tidy -p build Analysis/src/QwPromptSummary.cc
+
+# Analyze multiple files
+find Analysis/src -name "*.cc" | xargs -I {} clang-tidy -p build {}
+```
+
+### **GitHub Actions Locally**
+
+Run CI workflows locally using `act`:
+```bash
+# List available workflows
+act --list
+
+# Run specific workflow (dry-run)
+act pull_request -W .github/workflows/build-lcg-cvmfs.yml --dryrun
+
+# Run actual workflow (requires Docker)
+act pull_request -W .github/workflows/build-lcg-cvmfs.yml
+```
+
+## Configuration Files
+
+### **devcontainer.json**
+- Container base image and VS Code extensions
+- Privileged mode for CVMFS FUSE mounts
+- Port forwarding and user configuration
+
+### **setup-cvmfs.sh**
+- Installs CVMFS and development dependencies
+- Configures CERN repository access
+- Runs once during container creation
+
+### **mount-cvmfs.sh**
+- Mounts CVMFS repositories on container start
+- Includes retry logic and verification
+- Runs automatically when container starts
+
+## Troubleshooting
+
+### **CVMFS Mount Issues**
+```bash
+# Check CVMFS status
+cvmfs_config probe
+
+# Manually remount repositories
+sudo mount -t cvmfs sft.cern.ch /cvmfs/sft.cern.ch
+sudo mount -t cvmfs geant4.cern.ch /cvmfs/geant4.cern.ch
 sudo mount -t cvmfs singularity.opensciencegrid.org /cvmfs/singularity.opensciencegrid.org
 sudo mount -t cvmfs oasis.opensciencegrid.org /cvmfs/oasis.opensciencegrid.org
 

@@ -1,19 +1,19 @@
 
+/*!
+ * \file   QwPromptSummary.cc
+ * \brief  Implementation for prompt summary data management
+ * \author jhlee@jlab.org
+ * \date   2011-12-16
+ */
+
 #include "QwPromptSummary.h"
 
-#include "QwColor.h"
-#include "QwLog.h"
-#include "QwParameterFile.h"
+// System headers
+#include <iostream>
+#include <fstream>
 
-#include "TROOT.h"
+// ROOT headers
 #include "TMath.h"
-
-/**
- *  \file   QwPromptSummary.cc
- *  \brief  
- *  \author jhlee@jlab.org
- *  \date   Friday, December 16 10:55:31 EST 2011
- */
 
 //
 //
@@ -266,15 +266,14 @@ QwPromptSummary::LoadElementsFromParameterFile(QwParameterFile& parameterfile)
   QwMessage << "QwPromptSummary::LoadElementsFromParameterFile: Loading prompt summary elements" << QwLog::endl;
   
   // Read preamble
-  QwParameterFile* preamble = parameterfile.ReadSectionPreamble();
+  std::unique_ptr<QwParameterFile> preamble = parameterfile.ReadSectionPreamble();
   if (preamble) {
     QwVerbose << "PromptSummary preamble:" << QwLog::endl;
     QwVerbose << *preamble << QwLog::endl;
-    delete preamble;
   }
   
   // Read sections
-  QwParameterFile* section;
+  std::unique_ptr<QwParameterFile> section;
   std::string section_name;
   while ((section = parameterfile.ReadNextSection(section_name))) {
     QwVerbose << "Processing section: " << section_name << QwLog::endl;
@@ -321,7 +320,6 @@ QwPromptSummary::LoadElementsFromParameterFile(QwParameterFile& parameterfile)
         }
       }
     }
-    delete section;
   }
   
   QwMessage << "QwPromptSummary: Loaded " << fElementList.size() << " elements from parameter file" << QwLog::endl;

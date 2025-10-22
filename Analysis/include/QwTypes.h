@@ -1,5 +1,9 @@
-#ifndef QWTYPES_H
-#define QWTYPES_H
+/*!
+ * \file   QwTypes.h
+ * \brief  Basic data types and constants used throughout the Qweak analysis framework
+ */
+
+#pragma once
 
 // C and C++ headers
 #include <map>
@@ -12,7 +16,7 @@ class TString;
 // Qweak headers
 #include "QwUnits.h"
 
-//  Types for the ROC_ID and Bank_ID used in decoding and destributing data
+//  Types for the ROC_ID and Bank_ID used in decoding and distributing data
 typedef UInt_t    ROCID_t;
 typedef ULong64_t BankID_t; /// Bank ID will combine both bank and marker words
 static const ROCID_t  kNullROCID  = kMaxUInt;
@@ -229,8 +233,15 @@ inline QwHelicityMap CreateHelicityMap()
 static const QwHelicityMap kMapHelicity = CreateHelicityMap();
 
 
-///
-/// \ingroup QwAnalysis
+/**
+ * \class QwDetectorID
+ * \ingroup QwAnalysis
+ * \brief Detector identification structure for tracking system components
+ *
+ * Encapsulates the complete identification of a detector element including
+ * region, package, octant, plane, direction, and element number. Used
+ * throughout the tracking system for detector mapping and data organization.
+ */
 class QwDetectorID
 {
  public:
@@ -274,8 +285,15 @@ class QwDetectorID
 };
 
 
-///
-/// \ingroup QwAnalysis
+/**
+ * \class QwDelayLineID
+ * \ingroup QwAnalysis
+ * \brief Identification structure for delay line detector components
+ *
+ * Specifies the location of delay line elements using backplane number,
+ * line number, and side identification. Used for delay line detector
+ * mapping and data processing.
+ */
 class QwDelayLineID{
  public:
  QwDelayLineID():fBackPlane(-1),fLineNumber(-1),fSide(-1){};
@@ -304,5 +322,3 @@ typedef class QwMollerADC_Channel QwBeamCharge;
 typedef class QwMollerADC_Channel QwBeamPosition;
 typedef class QwMollerADC_Channel QwBeamAngle;
 typedef class QwMollerADC_Channel QwBeamEnergy;
-
-#endif

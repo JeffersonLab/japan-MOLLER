@@ -1,9 +1,10 @@
-/**********************************************************\
-* File: VQwBCM.h                                          *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   VQwBCM.cc
+ * \brief  Virtual base class implementation for beam current monitors
+ *
+ * Factory helpers to create concrete BCMs and combined BCMs by module type.
+ * Documentation-only edits; runtime behavior unchanged.
+ */
 
 #include "VQwBCM.h"
 
@@ -24,10 +25,19 @@
 #include "QwScaler_Channel.h"
 #include "QwMollerADC_Channel.h"
 
-/**
- * \brief A fast way of creating a BCM of specified type
+/*!
+ * \brief Factory method to create a concrete BCM instance for the requested module type.
+ * \param subsystemname Name of the parent subsystem.
+ * \param name BCM channel name.
+ * \param type Module type string (VQWK, ADC18, SIS3801, SIS3801D24/SCALER, MOLLERADC).
+ * \param clock Clock reference name for timing-based modules.
+ * \return Pointer to newly created BCM instance.
+ * 
+ * Creates appropriate concrete BCM template instantiation based on module type.
+ * Supported types include integrating ADCs (VQWK, ADC18, MOLLERADC) and 
+ * scalers (SIS3801, SIS3801D24). Each type uses the corresponding channel class
+ * for data handling and calibration.
  */
-
 VQwBCM* VQwBCM::Create(TString subsystemname, TString name, TString type, TString clock)
 {
   Bool_t localDebug = kFALSE;
@@ -52,6 +62,15 @@ VQwBCM* VQwBCM::Create(TString subsystemname, TString name, TString type, TStrin
   }
 }
 
+/*!
+ * \brief Copy constructor factory method to clone a BCM from an existing instance.
+ * \param source Reference BCM to copy from.
+ * \return Pointer to newly created BCM copy.
+ * 
+ * Creates a deep copy of the source BCM by determining its concrete type
+ * and calling the appropriate template constructor. Preserves all calibration
+ * parameters and configuration from the source.
+ */
 VQwBCM* VQwBCM::Create(const VQwBCM& source)
 {
   Bool_t localDebug = kFALSE;
@@ -76,8 +95,8 @@ VQwBCM* VQwBCM::Create(const VQwBCM& source)
   }
 }
 
-/**
- * \brief A fast way of creating a combo BCM of specified type
+/*!
+ * \brief Factory method to create a concrete Combined BCM for the requested module type.
  */
 VQwBCM* VQwBCM::CreateCombo(TString subsystemname, TString name, TString type)
 {

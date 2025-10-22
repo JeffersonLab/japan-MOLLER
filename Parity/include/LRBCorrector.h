@@ -1,38 +1,39 @@
-/********************************************************************
-File Name: LRBCorrector.h
+/*!
+ * \file   LRBCorrector.h
+ * \brief  Linear regression blue corrector data handler class
+ * \author Michael Vallee
+ * \date   2018-08-01
+ */
 
-Created by: Michael Vallee
-Email: mv836315@ohio.edu
-
-Description:  This is the header file of the LRBCorrector class,
-              which is a child of the VQwDataHandler class.  The
-              functionality of this class is derived from
-              LinRegBlue.
-
-Last Modified: August 1, 2018 1:41 PM
-********************************************************************/
-
-#ifndef LRBCORRECTOR_H_
-#define LRBCORRECTOR_H_
+#pragma once
 
 // Parent Class
 #include "VQwDataHandler.h"
 
 
+/**
+ * \class LRBCorrector
+ * \ingroup QwAnalysis_BL
+ * \brief Linear-regression corrector applying per-burst slopes to data
+ *
+ * Loads cycle-dependent sensitivities and applies linear regression
+ * corrections to monitored channels, selecting the appropriate set
+ * based on the current burst counter.
+ */
 class LRBCorrector : public VQwDataHandler, public MQwDataHandlerCloneable<LRBCorrector>{
  public:
     /// \brief Constructor with name
     LRBCorrector(const TString& name);
 
-    void ParseConfigFile(QwParameterFile& file);
+    void ParseConfigFile(QwParameterFile& file) override;
 
-    Int_t LoadChannelMap(const std::string& mapfile);
+    Int_t LoadChannelMap(const std::string& mapfile) override;
 
-    Int_t ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff);
+    Int_t ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff) override;
     
-    void ProcessData();
+    void ProcessData() override;
 
-    void UpdateBurstCounter(Short_t burstcounter){
+    void UpdateBurstCounter(Short_t burstcounter) override{
       if (burstcounter<fLastCycle){
 	fBurstCounter=burstcounter;
       } else if (fLastCycle==1){
@@ -66,6 +67,3 @@ class LRBCorrector : public VQwDataHandler, public MQwDataHandlerCloneable<LRBCo
     std::map<Short_t,std::vector<std::vector<Double_t>>> fSensitivity;
     
 };
-
-
-#endif // LRBCORRECTOR_H_

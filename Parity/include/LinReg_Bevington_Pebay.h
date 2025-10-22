@@ -1,14 +1,18 @@
-#ifndef LINREGBEVPEB_h
-#define LINREGBEVPEB_h
-/*********************************************************************
- * $Id: $
- * \author Jan Balewski, MIT, 2010
- *********************************************************************
- * Descripion:
- * Utility class accumulating variances and computing alphas  based on :
- * "Data reduction and error analysis for the physical sciences" / Philip R. Bevington, D. Keith Robinson. Bevington, Philip R., 1933- Boston : McGraw-Hill, c2003.
- * "Formulas for Robust, One-Pass Parallel Computation of Covariances and Arbitrary-Order Statistical Moments" Philippe Peba, SANDIA REPORT SAND2008-6212, Unlimited Release, Printed September 2008
- *********************************************************************/
+/*!
+ * \file   LinReg_Bevington_Pebay.h
+ * \brief  Linear regression utility class based on Bevington and Pebay algorithms
+ * \author Jan Balewski, MIT
+ * \date   2010
+ *
+ * References:
+ *  "Data reduction and error analysis for the physical sciences"
+ *   Philip R. Bevington, D. Keith Robinson. Bevington, Philip R., 1933- Boston : McGraw-Hill, c2003.
+ *
+ *  "Formulas for Robust, One-Pass Parallel Computation of Covariances and Arbitrary-Order Statistical Moments"
+ *  Philippe Pebay, SANDIA REPORT SAND2008-6212, Unlimited Release, Printed September 2008
+ */
+
+#pragma once
 
 // System headers
 #include <utility>
@@ -18,6 +22,11 @@
 #include <TMatrixD.h>
 
 //-----------------------------------------
+/**
+ * \class LinRegBevPeb
+ * \ingroup QwAnalysis_BL
+ * \brief Online linear regression with incremental covariance updates
+ */
 class LinRegBevPeb {
   int  nP; // number of independent variables
   int  nY; // number of   dependent variables
@@ -118,5 +127,3 @@ inline std::ostream& operator<< (std::ostream& stream, const LinRegBevPeb& h)
   stream << "LRB: " << h.fGoodEventNumber << " events";
   return stream;
 }
-
-#endif

@@ -17,8 +17,12 @@
     "source=/tmp,target=/tmp,type=bind,consistency=cached"
   ],
 
-  "postCreateCommand": ".devcontainer/setup-cvmfs.sh",
-  "postStartCommand": ".devcontainer/mount-cvmfs.sh",
+  "postCreateCommand": ".devcontainer/post-create.sh",
+  "postAttachCommand": ".devcontainer/post-attach.sh",
+
+  "containerEnv": {
+    "LCG_ENVIRONMENT": "LCG_107/x86_64-ubuntu2404-gcc13-opt"
+  },
 
   "customizations": {
     "vscode": {

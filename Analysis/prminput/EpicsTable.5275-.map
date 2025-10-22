@@ -9,7 +9,7 @@
 ! This table has three columns. The first column is the name for an epics
 ! variable. The second column at the moment is just a flag to insert epics data
 ! in the MySQL database. The third column is related to those epics variables
-! that have only string-value (e.g. the epics varaible for the half wave plate
+! that have only string-value (e.g. the epics variable for the half wave plate
 ! is IGL1I00DI24_24M and has either IN or OUT value).
 !
 !

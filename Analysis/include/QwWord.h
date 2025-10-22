@@ -5,8 +5,12 @@
  *      Author: wdconinc
  */
 
-#ifndef QWWORD_H_
-#define QWWORD_H_
+/*!
+ * \file   QwWord.h
+ * \brief  Word-level data manipulation and bit operations
+ */
+
+#pragma once
 
 // ROOT headers
 #include "Rtypes.h"
@@ -14,8 +18,15 @@
 // Qweak headers
 #include "QwLog.h"
 
-///
-/// \ingroup QwAnalysis
+/**
+ * \class QwWord
+ * \ingroup QwAnalysis
+ * \brief Word-level data manipulation and bit operations
+ *
+ * Provides low-level word manipulation capabilities for decoding
+ * and processing raw data words from various detector modules.
+ * Handles bit extraction, word identification, and basic value access.
+ */
 class QwWord
 {
   public:
@@ -55,7 +66,3 @@ class QwWord
    
 
 };
-
-
-
-#endif /* QWWORD_H_ */

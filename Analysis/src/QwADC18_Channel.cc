@@ -1,3 +1,8 @@
+/*!
+ * \file   QwADC18_Channel.cc
+ * \brief  Implementation for HAPPEX 18-bit ADC channel decoding
+ */
+
 #include "QwADC18_Channel.h"
 
 // System headers
@@ -11,6 +16,7 @@
 #include "QwUnits.h"
 #include "QwBlinder.h"
 #include "QwHistogramHelper.h"
+#include "QwRootFile.h"
 #ifdef __USE_DATABASE__
 #include "QwDBInterface.h"
 #endif
@@ -563,7 +569,7 @@ void  QwADC18_Channel::FillHistograms()
     }
 }
 
-void  QwADC18_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwADC18_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (IsNameEmpty()){
     //  This channel is not used, so skip setting up the tree.
@@ -574,34 +580,23 @@ void  QwADC18_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, st
     TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
     fTreeArrayIndex  = values.size();
 
-    TString list;
-
-    values.push_back(0.0);
-    list = "value/D";
+    values.push_back("value", 'D');
     if (fDataToSave == kMoments) {
-      values.push_back(0.0);
-      list += ":value_m2/D";
-      values.push_back(0.0);
-      list += ":value_err/D";
+      values.push_back("value_m2", 'D');
+      values.push_back("value_err", 'D');
     }
 
-    values.push_back(0.0);
-    list += ":Device_Error_Code/D";
-
+    values.push_back("Device_Error_Code", 'i');
     if (fDataToSave == kRaw){
-      values.push_back(0.0);
-      list += ":raw/D";
-      values.push_back(0.0);
-      list += ":diff/D";
-      values.push_back(0.0);
-      list += ":peak/D";
-      values.push_back(0.0);
-      list += ":base/D";
+      values.push_back("raw", 'I');
+      values.push_back("diff", 'I');
+      values.push_back("peak", 'I');
+      values.push_back("base", 'I');
     }
 
     fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
     if (gQwHists.MatchDeviceParamsFromList(basename.Data()))
-      tree->Branch(basename, &(values[fTreeArrayIndex]), list);
+      tree->Branch(basename, &(values[fTreeArrayIndex]), values.LeafList(fTreeArrayIndex).c_str());
   }
 }
 
@@ -615,14 +610,10 @@ void  QwADC18_Channel::ConstructBranch(TTree *tree, TString &prefix)
   }
 }
 
-
-void  QwADC18_Channel::FillTreeVector(std::vector<Double_t> &values) const
+void  QwADC18_Channel::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (IsNameEmpty()) {
     //  This channel is not used, so skip setting up the tree.
-  } else if (fTreeArrayNumEntries < 0) {
-    QwError << "QwADC18_Channel::FillTreeVector:  fTreeArrayNumEntries=="
-            << fTreeArrayNumEntries << QwLog::endl;
   } else if (fTreeArrayNumEntries == 0) {
     static bool warned = false;
     if (!warned) {
@@ -640,17 +631,17 @@ void  QwADC18_Channel::FillTreeVector(std::vector<Double_t> &values) const
             << QwLog::endl;
   } else {
     size_t index = fTreeArrayIndex;
-    values[index++] = this->fValue;
+    values.SetValue(index++, this->fValue);
     if (fDataToSave == kMoments) {
-      values[index++] = fValueM2;
-      values[index++] = fValueError;
+      values.SetValue(index++, fValueM2);
+      values.SetValue(index++, fValueError);
     }
-    values[index++] = this->fErrorFlag;
+    values.SetValue(index++, this->fErrorFlag);
     if(fDataToSave==kRaw){
-      values[index++] = this->fValue_Raw;
-      values[index++] = this->fDiff_Raw;
-      values[index++] = this->fPeak_Raw;
-      values[index++] = this->fBase_Raw;
+      values.SetValue(index++, this->fValue_Raw);
+      values.SetValue(index++, this->fDiff_Raw);
+      values.SetValue(index++, this->fPeak_Raw);
+      values.SetValue(index++, this->fBase_Raw);
     }
   }
 }
@@ -779,7 +770,7 @@ void QwADC18_Channel::AssignValueFrom(const  VQwDataElement* valueptr)
     *this = *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::AssignValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -791,7 +782,7 @@ void QwADC18_Channel::AddValueFrom(const  VQwHardwareChannel* valueptr)
     *this += *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::AddValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -803,7 +794,7 @@ void QwADC18_Channel::SubtractValueFrom(const  VQwHardwareChannel* valueptr)
     *this -= *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::SubtractValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -815,7 +806,7 @@ void QwADC18_Channel::MultiplyBy(const VQwHardwareChannel* valueptr)
     *this *= *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::MultiplyBy = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -827,7 +818,7 @@ void QwADC18_Channel::DivideBy(const VQwHardwareChannel* valueptr)
     *this /= *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::DivideBy = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -1112,11 +1103,8 @@ void QwADC18_Channel::DivideBy(const QwADC18_Channel &denom)
  * We use the formulas provided there for the calculation of the first and
  * second moments (i.e. average and variance).
  */
-/**
- * Accumulate the running moments M1 and M2
- * @param value Object (single event or accumulated) to add to running moments
- * @param count Number of good events in value
- */
+// Accumulate the running moments M1 and M2.
+// See header for parameter and return documentation.
 void QwADC18_Channel::AccumulateRunningSum(const QwADC18_Channel& value, Int_t count, Int_t ErrorMask)
 {
 

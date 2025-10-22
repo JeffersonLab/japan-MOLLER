@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
 
 # Name of this project
 project(QwAnalysis VERSION 2.0.0 LANGUAGES CXX)
@@ -52,11 +52,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #----------------------------------------------------------------------------
 # Sources and headers
 #
-file(GLOB my_project_sources
+file(GLOB my_project_sources CONFIGURE_DEPENDS
 		 Analysis/src/*.cc
 		 Parity/src/*.cc
 		 )
-file(GLOB my_project_headers
+file(GLOB my_project_headers CONFIGURE_DEPENDS
 		 Analysis/include/*.h
 		 Parity/include/*.h
 		 )
@@ -68,7 +68,13 @@ file(GLOB my_project_headers
 list(APPEND SQLPP11_OPTIONAL_COMPONENTS SQLite3 MySQL MariaDB PostgreSQL)
 find_package(Sqlpp11 QUIET OPTIONAL_COMPONENTS ${SQLPP11_OPTIONAL_COMPONENTS})
 if(NOT Sqlpp11_FOUND)
-  if(EXISTS ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11/CMakeLists.txt)
+  find_package(Git QUIET)
+  set(Sqlpp11_MIN_COMMIT 3b8f409)
+  execute_process(
+      COMMAND ${GIT_EXECUTABLE} -C ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11 merge-base --is-ancestor ${Sqlpp11_MIN_COMMIT} HEAD
+      OUTPUT_QUIET ERROR_QUIET
+      RESULT_VARIABLE GIT_IS_ANCESTOR)
+  if(EXISTS ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11/CMakeLists.txt AND GIT_IS_ANCESTOR EQUAL "0")
     message(STATUS "sqlpp11 included as subproject")
     add_subdirectory(${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11)
     list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/thirdparty/sqlpp11/cmake/modules)
@@ -77,7 +83,7 @@ if(NOT Sqlpp11_FOUND)
     # to hide compiler warnings
     include_directories(SYSTEM ${date_SOURCE_DIR}/include)
   else()
-    message(WARNING "sqlpp11 not available in thirdparty directory. Use 'git clone --recurse-submodules` on new clone or 'git submodule update --init --recursive' on existing repository.")
+    message(WARNING "sqlpp11 not available or outdated in thirdparty directory. Use 'git clone --recurse-submodules` on new clone or 'git submodule update --init --recursive' on existing repository.")
   endif()
 endif()
 if(TARGET sqlpp11::sqlpp11)
@@ -224,10 +230,7 @@ foreach(file ${my_project_headers})
     # Add dictionary target with possible LinkDef file
     set(dict ${CMAKE_CURRENT_BINARY_DIR}/${file_name}Dict)
     set(linkdef ${file_path}/${file_name}LinkDef.h)
-    build_root_dictionary(${file_name} ${file}
-      TARGETS ${PROJECT_NAME}
-      LINKDEF ${linkdef}
-    )
+    ROOT_GENERATE_DICTIONARY(${dict} ${file} LINKDEF ${linkdef})
     # Add dictionary to project sources
     set(my_project_sources ${my_project_sources} ${dict}.cxx)
   endif()
@@ -270,7 +273,8 @@ target_link_libraries(${PROJECT_NAME}
   PRIVATE
     eviowrapper
   PUBLIC
-    ROOT::Libraries
+    ROOT::Core ROOT::Tree ROOT::Hist ROOT::Rint
+    $<TARGET_NAME_IF_EXISTS:ROOT::ROOTNTuple>
     ${Boost_LIBRARIES}
   )
 
@@ -297,7 +301,7 @@ install(FILES ${my_project_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 #----------------------------------------------------------------------------
 # executables
 #
-file(GLOB exefiles
+file(GLOB exefiles CONFIGURE_DEPENDS
   Parity/main/*.cc
   Analysis/main/*.cc
 )

@@ -1,0 +1,32 @@
+/**
+ * \file PackageGroups.dox
+ * \brief Central definitions for Doxygen groups used across JAPAN-MOLLER
+ */
+
+/** \defgroup QwAnalysis QwAnalysis
+ *  Core analysis framework utilities and base classes.
+ */
+
+/** \defgroup QwAnalysis_ADC ADC channels and digitizers
+ *  Data acquisition channels, ADC front-ends, and related helpers.
+ */
+
+/** \defgroup QwAnalysis_BL Beam line instrumentation
+ *  Beam-line devices (BCM, BPM, raster, QPD, clocks) and helpers.
+ */
+
+/** \defgroup QwAnalysis_BeamLine Beam line subsystem helper classes
+ *  Abstract bases (VQw*) and shared logic for beam-line subsystems.
+ */
+
+/** \defgroup QwTracking Tracking and PMT-related elements
+ *  PMT channels, tracking-related data elements, and utilities.
+ */
+
+/** \defgroup QwThreadSafe Thread-safety utilities
+ *  Classes providing thread-safe ROOT interfaces and helpers.
+ */
+
+/** \defgroup QwMoller MOLLER detector and related analysis
+ *  MOLLER-specific detector classes and analysis modules.
+ */

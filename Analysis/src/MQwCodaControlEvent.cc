@@ -1,3 +1,8 @@
+/*!
+ * \file   MQwCodaControlEvent.cc
+ * \brief  CODA control event data structure and management
+ */
+
 #include "MQwCodaControlEvent.h"
 
 #include "QwLog.h"
@@ -190,7 +195,7 @@ time_t MQwCodaControlEvent::GetStartUnixTime()
 time_t MQwCodaControlEvent::GetEndUnixTime()
 {
   // if GetEndTime is equal to 0
-  // we wiil see the end time as 
+  // we will see the end time as 
   //
   UInt_t end_time       = GetEndTime();
   UInt_t qweak_end_time = 1338523199;

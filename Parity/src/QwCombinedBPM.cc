@@ -1,9 +1,12 @@
-/**********************************************************\
- * File: QwCombinedBPM.cc                                  *
- *                                                         *
- * Author: B. Waidyawansa                                  *
- * Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwCombinedBPM.cc
+ * \brief  Combined beam position monitor implementation using linear fitting
+ *
+ * Implementation of a combined BPM that fits transverse position as a
+ * charge-weighted linear combination of constituent BPMs. Provides per-axis
+ * slope/intercept, minimum chi-square, and an effective charge channel.
+ * Documentation-only edits; runtime behavior unchanged.
+ */
 
 #include "QwCombinedBPM.h"
 
@@ -25,6 +28,11 @@
 #include "QwParameterFile.h"
 #include "QwMollerADC_Channel.h"
 
+/**
+ * Initialize derived output channels using a simple detector name.
+ * Creates absolute position, slope, intercept, chi-square per axis, and
+ * an effective charge channel. Clears internal element/weight lists.
+ */
 template<typename T>
 void  QwCombinedBPM<T>::InitializeChannel(TString name)
 {
@@ -62,6 +70,10 @@ void  QwCombinedBPM<T>::InitializeChannel(TString name)
   return;
 }
 
+/**
+ * Initialize derived output channels with explicit subsystem scoping.
+ * Forwards subsystem/name/type information to child channels.
+ */
 template<typename T>
 void  QwCombinedBPM<T>::InitializeChannel(TString subsystem, TString name)
 {
@@ -100,6 +112,7 @@ void  QwCombinedBPM<T>::InitializeChannel(TString subsystem, TString name)
 }
 
 
+/** Clear event-time state for effective charge and per-axis outputs. */
 template<typename T>
 void QwCombinedBPM<T>::ClearEventData()
 {
@@ -115,9 +128,18 @@ void QwCombinedBPM<T>::ClearEventData()
 }
 
 
+/**
+ * Add a constituent BPM and associated weights to the combination.
+ *
+ * @param bpm            Pointer to a constituent BPM instance.
+ * @param charge_weight  Weight contributing to effective charge.
+ * @param x_weight       Weight contributing to X position fit.
+ * @param y_weight       Weight contributing to Y position fit.
+ * @param sumqw          Precomputed sum of absolute charge weights.
+ */
 template<typename T>
 void QwCombinedBPM<T>::SetBPMForCombo(const VQwBPM* bpm, Double_t charge_weight,  Double_t x_weight, Double_t y_weight,
-			Double_t sumqw)
+      Double_t sumqw)
 {
   fElement.push_back(bpm);
   fQWeights.push_back(charge_weight);
@@ -144,6 +166,11 @@ void QwCombinedBPM<T>::SetBPMForCombo(const VQwBPM* bpm, Double_t charge_weight,
 }
 
 
+/**
+ * Combined BPM does not add hardware checks beyond constituents.
+ *
+ * @return Always true; underlying BPMs manage their own HW checks.
+ */
 template<typename T>
 Bool_t QwCombinedBPM<T>::ApplyHWChecks()
 {
@@ -153,6 +180,7 @@ Bool_t QwCombinedBPM<T>::ApplyHWChecks()
 }
 
 
+/** Increment persistent error counters for all derived outputs. */
 template<typename T>
 void QwCombinedBPM<T>::IncrementErrorCounters()
 {
@@ -166,6 +194,7 @@ void QwCombinedBPM<T>::IncrementErrorCounters()
   fEffectiveCharge.IncrementErrorCounters();
 }
 
+/** Print persistent error counters for all derived outputs. */
 template<typename T>
 void QwCombinedBPM<T>::PrintErrorCounters() const
 {
@@ -179,6 +208,10 @@ void QwCombinedBPM<T>::PrintErrorCounters() const
   fEffectiveCharge.PrintErrorCounters();
 }
 
+/**
+ * Aggregate event-cut error flags across per-axis outputs and effective
+ * charge.
+ */
 template<typename T>
 UInt_t QwCombinedBPM<T>::GetEventcutErrorFlag()
 {
@@ -196,6 +229,12 @@ UInt_t QwCombinedBPM<T>::GetEventcutErrorFlag()
 
 
 
+/**
+ * Apply single-event cuts to slope/intercept outputs per axis, using error
+ * masks from constituent BPM positions to gate derived quantities.
+ *
+ * @return true if all derived outputs pass their cuts.
+ */
 template<typename T>
 Bool_t QwCombinedBPM<T>::ApplySingleEventCuts()
 {
@@ -213,7 +252,7 @@ Bool_t QwCombinedBPM<T>::ApplySingleEventCuts()
     ///         is not meaningful for every VQwDataElement.
     ///         Maybe the return should be a VQwHardwareChannel?
 
-    //To update the event cut faliures in individual BPM devices
+    //To update the event cut failures in individual BPM devices
     charge_error      |= fElement[i]->GetEffectiveCharge()->GetErrorCode();
     pos_error[kXAxis] |= fElement[i]->GetPosition(kXAxis)->GetErrorCode();
     pos_error[kYAxis] |= fElement[i]->GetPosition(kYAxis)->GetErrorCode();
@@ -295,7 +334,7 @@ UInt_t QwCombinedBPM<T>::UpdateErrorFlag()
   UInt_t error = 0;
   
   for(size_t i=0;i<fElement.size();i++){
-    //To update the event cut faliures in individual BPM devices
+    //To update the event cut failures in individual BPM devices
     charge_error      |= fElement[i]->GetEffectiveCharge()->GetErrorCode();
     pos_error[kXAxis] |= fElement[i]->GetPosition(kXAxis)->GetErrorCode();
     pos_error[kYAxis] |= fElement[i]->GetPosition(kYAxis)->GetErrorCode();
@@ -558,11 +597,11 @@ void  QwCombinedBPM<T>::ProcessEvent()
     std::cout<<" QwCombinedBPM:: Projected target X position = "<<fAbsPos[kXAxis].GetValue()
 	     <<" and target X slope = "<<fSlope[kXAxis].GetValue()
 	     <<" and target X intercept = "<<fIntercept[kXAxis].GetValue()
-	     <<" with mimimum chi square = "<< fMinimumChiSquare[kXAxis].GetValue()
+	     <<" with minimum chi square = "<< fMinimumChiSquare[kXAxis].GetValue()
 	     <<" \nProjected target Y position = "<<fAbsPos[kYAxis].GetValue()
 	     <<" and target Y slope = "<<fSlope[kYAxis].GetValue()
 	     <<" and target Y intercept = "<<fIntercept[kYAxis].GetValue()
-	     <<" with mimimum chi square = "<< fMinimumChiSquare[kYAxis].GetValue()<<std::endl;
+	     <<" with minimum chi square = "<< fMinimumChiSquare[kYAxis].GetValue()<<std::endl;
 		 
   }
 
@@ -622,7 +661,7 @@ template<typename T>
    Double_t sum = 0.0;
    if(weight.size()!=fElement.size()){
      std::cout
-       <<"QwCombinedBPM:: Number of devices doesnt match the number of weights."
+       <<"QwCombinedBPM:: Number of devices doesn't match the number of weights."
        <<" Exiting calculating parameters for the least squares fit"
        <<std::endl;
    }
@@ -711,7 +750,7 @@ template<typename T>
 
 
    // to perform the minimul chi-square test
-   // We want to calculte (X-az-b)^2 for each bpm in the combination and sum over the values
+   // We want to calculate (X-az-b)^2 for each bpm in the combination and sum over the values
    tmp3.ClearEventData();
    fMinimumChiSquare[axis].ClearEventData();
 
@@ -922,7 +961,7 @@ template<typename T>
 void QwCombinedBPM<T>::Ratio(QwCombinedBPM<T> &numer,
     QwCombinedBPM<T> &denom)
 {
-  // this function is called when forming asymmetries. In this case waht we actually want for the
+  // this function is called when forming asymmetries. In this case what we actually want for the
   // combined bpm is the difference only not the asymmetries
 
   *this=numer;
@@ -1018,7 +1057,7 @@ void  QwCombinedBPM<T>::ConstructHistograms(TDirectory *folder, TString &prefix)
     //  This channel is not used, so skip filling the histograms.
   }
   else{
-    //we calculate the asym_ for the fEffectiveCharge becasue its an asymmetry and not a difference.
+    //we calculate the asym_ for the fEffectiveCharge because its an asymmetry and not a difference.
     fEffectiveCharge.ConstructHistograms(folder, prefix);
     TString thisprefix=prefix;
     if(prefix.Contains("asym_"))
@@ -1055,7 +1094,7 @@ void  QwCombinedBPM<T>::FillHistograms()
 }
 
 template<typename T>
-void  QwCombinedBPM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwCombinedBPM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip constructing trees.
@@ -1140,7 +1179,7 @@ void  QwCombinedBPM<T>::ConstructBranch(TTree *tree, TString &prefix, QwParamete
 
 
 template<typename T>
-void  QwCombinedBPM<T>::FillTreeVector(std::vector<Double_t> &values) const
+void  QwCombinedBPM<T>::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip filling the tree.
@@ -1284,7 +1323,7 @@ void QwCombinedBPM<T>::LoadMockDataParameters(QwParameterFile &paramfile){
   Double_t meanX=0.0, sigmaX=0.0, meanY=0.0, sigmaY=0.0;
   Double_t meanXslope=0.0, sigmaXslope=0.0, meanYslope=0.0, sigmaYslope=0.0;
 */
-  Double_t xres=0.0, yres=0.0; //  Temporary variables for the resoluton.
+  Double_t xres=0.0, yres=0.0; //  Temporary variables for the resolution.
 
   if (paramfile.GetLine().find("resolution")!=std::string::npos){
     paramfile.GetNextToken();

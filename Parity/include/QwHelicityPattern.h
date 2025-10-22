@@ -1,11 +1,11 @@
-/**********************************************************\
-* File: QwHelicityPattern.h                                *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2007-05-08 15:40>                           *
-\**********************************************************/
-#ifndef __QwHelicityPattern__
-#define __QwHelicityPattern__
+/*!
+ * \file   QwHelicityPattern.h
+ * \brief  Helicity pattern analysis and management
+ * \author P. M. King
+ * \date   2007-05-08
+ */
+
+#pragma once
 
 // System headers
 #include <vector>
@@ -31,6 +31,14 @@ class QwHelicity;
 /// \ingroup QwAnalysis_ADC
 ///
 /// \ingroup QwAnalysis_BL
+/**
+ * \class QwHelicityPattern
+ * \ingroup QwAnalysis_BL
+ * \brief Manages yields/differences/asymmetries for helicity patterns
+ *
+ * Aggregates per-window subsystem arrays into pairs and patterns, supports
+ * burst and running sums, and integrates with the blinder strategy.
+ */
 class QwHelicityPattern {
   /******************************************************************
    *  Class: QwHelicityPattern
@@ -173,10 +181,10 @@ class QwHelicityPattern {
   void  ConstructHistograms(TDirectory *folder);
   void  FillHistograms();
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values);
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile &trim_tree);
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const;
 
 #ifdef HAS_RNTUPLE_SUPPORT
   // RNTuple methods
@@ -218,7 +226,7 @@ class QwHelicityPattern {
   std::vector<Int_t> fHelicity;// this is here up to when we code the Helicity decoding routine
   std::vector<Int_t> fEventNumber;
   Int_t fCurrentPatternNumber;
-  Int_t fPatternSize;
+  size_t fPatternSize;
   Int_t fQuartetNumber;
 
   // Blinding strategy
@@ -282,6 +290,3 @@ class QwHelicityPattern {
 
   friend class QwDataHandlerArray;
 };
-
-
-#endif

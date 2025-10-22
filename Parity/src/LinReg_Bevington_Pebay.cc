@@ -1,12 +1,9 @@
-/*********************************************************************
- * $Id: $
- * \author Jan Balewski, MIT, 2010
- *********************************************************************
- * Descripion:
- * Utility class accumulating variances and computing alphas  based on :
- * "Data reduction and error analysis for the physical sciences" / Philip R. Bevington, D. Keith Robinson. Bevington, Philip R., 1933- Boston : McGraw-Hill, c2003.
- * "Formulas for Robust, One-Pass Parallel Computation of Covariances and Arbitrary-Order Statistical Moments" Philippe Peba, SANDIA REPORT SAND2008-6212, Unlimited Release, Printed September 2008
- *********************************************************************/
+/*!
+ * \file   LinReg_Bevington_Pebay.cc
+ * \brief  Implementation of linear regression utility using Bevington and Pebay algorithms
+ * \author Jan Balewski, MIT
+ * \date   2010
+ */
 
 #include <assert.h>
 #include <math.h>
@@ -329,7 +326,7 @@ void LinRegBevPeb::printSummaryP() const
     for (size_t i = 1; i <dim; i++) {
       QwMessage << Form("P%d%11s",(int)i," ");
     }
-    QwMessage << Form("\n           mean     sig(distrib)   nSig(mean)       corelation-matrix ....\n");
+    QwMessage << Form("\n           mean     sig(distrib)   nSig(mean)       correlation-matrix ....\n");
     for (size_t i = 0; i <dim; i++) {
       double meanI,sigI;
       if (getMeanP(i,meanI) < 0) QwWarning << "LRB::getMeanP failed" << QwLog::endl;
@@ -400,12 +397,12 @@ void LinRegBevPeb::printSummaryYP() const
 {
   QwMessage << Form("\nLinRegBevPeb::printSummaryYP seen good eve=%lld",fGoodEventNumber)<<QwLog::endl;
 
-  if(fGoodEventNumber<2) { QwMessage<<"  too fiew events, skip"<<QwLog::endl; return;}
+  if(fGoodEventNumber<2) { QwMessage<<"  too few events, skip"<<QwLog::endl; return;}
   QwMessage << Form("\n         name:             ");
   for (int i = 0; i <nP; i++) {
     QwMessage << Form(" %10sP%d "," ",i);
   }
-  QwMessage << Form("\n  j                   meanY         sigY      corelation with Ps ....\n");
+  QwMessage << Form("\n  j                   meanY         sigY      correlation with Ps ....\n");
   for (int iy = 0; iy <nY; iy++) {
     double meanI,sigI;
     if (getMeanY(iy,meanI) < 0) QwWarning << "LRB::getMeanY failed" << QwLog::endl;

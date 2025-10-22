@@ -1,9 +1,7 @@
-/**********************************************************\
-* File: QwSubsystemArray.cc                               *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwSubsystemArray.cc
+ * \brief  Implementation for array container managing multiple subsystems
+ */
 
 #include "QwSubsystemArray.h"
 
@@ -14,6 +12,7 @@
 #include "VQwHardwareChannel.h"
 #include "QwLog.h"
 #include "QwParameterFile.h"
+#include "QwRootFile.h"
 
 //*****************************************************************
 
@@ -34,7 +33,8 @@ QwSubsystemArray::QwSubsystemArray(QwOptions& options, CanContainFn myCanContain
  * @param source Source subsystem array
  */
 QwSubsystemArray::QwSubsystemArray(const QwSubsystemArray& source)
-: MQwPublishable(source),
+: std::vector<std::shared_ptr<VQwSubsystem>>(),
+  MQwPublishable(source),
   fTreeArrayIndex(source.fTreeArrayIndex),
   fCodaRunNumber(source.fCodaRunNumber),
   fCodaSegmentNumber(source.fCodaSegmentNumber),
@@ -108,14 +108,14 @@ QwSubsystemArray& QwSubsystemArray::operator=(const QwSubsystemArray& source)
 void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detectors)
 {
   // This is how this should work
-  QwParameterFile* preamble;
+  std::unique_ptr<QwParameterFile> preamble;
   preamble = detectors.ReadSectionPreamble();
   // Process preamble
   QwVerbose << "Preamble:" << QwLog::endl;
   QwVerbose << *preamble << QwLog::endl;
-  if (preamble) delete preamble;
+  if (preamble) preamble.reset();
 
-  QwParameterFile* section;
+  std::unique_ptr<QwParameterFile> section;
   std::string section_name;
   while ((section = detectors.ReadNextSection(section_name))) {
 
@@ -128,7 +128,6 @@ void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detector
     std::string subsys_name;
     if (! section->FileHasVariablePair("=","name",subsys_name)) {
       QwError << "No name defined in section for subsystem " << subsys_type << "." << QwLog::endl;
-      delete section; section = 0;
       continue;
     }
 
@@ -139,7 +138,6 @@ void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detector
         disabled_by_type = true;
     if (disabled_by_type) {
       QwWarning << "Subsystem of type " << subsys_type << " disabled." << QwLog::endl;
-      delete section; section = 0;
       continue;
     }
 
@@ -150,7 +148,6 @@ void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detector
         disabled_by_name = true;
     if (disabled_by_name) {
       QwWarning << "Subsystem with name " << subsys_name << " disabled." << QwLog::endl;
-      delete section; section = 0;
       continue;
     }
 
@@ -167,7 +164,6 @@ void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detector
     }
     if (! subsys) {
       QwError << "Could not create subsystem " << subsys_type << "." << QwLog::endl;
-      delete section; section = 0;
       continue;
     }
 
@@ -176,7 +172,6 @@ void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detector
       QwMessage << "Subsystem " << subsys_name << " cannot be stored in this "
                 << "subsystem array." << QwLog::endl;
       QwMessage << "Deleting subsystem " << subsys_name << " again" << QwLog::endl;
-      delete section; section = 0;
       delete subsys; subsys = 0;
       continue;
     }
@@ -191,9 +186,6 @@ void QwSubsystemArray::LoadSubsystemsFromParameterFile(QwParameterFile& detector
       QwError << "Not all variables for " << subsys->GetName()
               << " could be published!" << QwLog::endl;
     }
-
-    // Delete parameter file section
-    delete section; section = 0;
   }
 }
 
@@ -252,21 +244,12 @@ void QwSubsystemArray::DefineOptions(QwOptions &options)
                        "map file with bad event ranges");
 
   // Versions of boost::program_options below 1.39.0 have a bug in multitoken processing
-#if BOOST_VERSION < 103900
-  options.AddOptions()("disable-by-type",
-                       po::value<std::vector <std::string> >(),
-                       "subsystem types to disable");
-  options.AddOptions()("disable-by-name",
-                       po::value<std::vector <std::string> >(),
-                       "subsystem names to disable");
-#else // BOOST_VERSION >= 103900
   options.AddOptions()("disable-by-type",
                        po::value<std::vector <std::string> >()->multitoken(),
                        "subsystem types to disable");
   options.AddOptions()("disable-by-name",
                        po::value<std::vector <std::string> >()->multitoken(),
                        "subsystem names to disable");
-#endif // BOOST_VERSION
 }
 
 
@@ -319,7 +302,7 @@ void QwSubsystemArray::LoadAllEventRanges(QwOptions &options){
 }
 
 /**
- * Get the subsystem in this array with the spcified name
+ * Get the subsystem in this array with the specified name
  * @param name Name of the subsystem
  * @return Pointer to the subsystem
  */
@@ -570,21 +553,21 @@ void  QwSubsystemArray::PrintInfo() const
 void  QwSubsystemArray::ConstructBranchAndVector(
         TTree *tree,
         TString& prefix,
-        std::vector<Double_t>& values)
+        QwRootTreeBranchVector &values)
 {
   fTreeArrayIndex = values.size();
 
   // Each tree should only contain event number and type once, but will
   // still reserve space in the values vector, so we don't need to modify
   // FillTreeVector().
-  values.push_back(0.0);
-  values.push_back(0.0);
-  values.push_back(0.0);
-  values.push_back(0.0);
-  values.push_back(0.0);
+  values.push_back("CodaEventNumber", 'i');
+  values.push_back("CodaEventType", 'i');
+  values.push_back("Coda_CleanData", 'D');
+  values.push_back("Coda_ScanData1", 'D');
+  values.push_back("Coda_ScanData2", 'D');
   if (prefix == "" || prefix.Index("yield_") == 0) {
-    tree->Branch("CodaEventNumber",&(values[fTreeArrayIndex]),"CodaEventNumber/D");
-    tree->Branch("CodaEventType",&(values[fTreeArrayIndex+1]),"CodaEventType/D");
+    tree->Branch("CodaEventNumber",&(values[fTreeArrayIndex]),"CodaEventNumber/i");
+    tree->Branch("CodaEventType",&(values[fTreeArrayIndex+1]),"CodaEventType/i");
     tree->Branch("Coda_CleanData",&(values[fTreeArrayIndex+2]),"Coda_CleanData/D");
     tree->Branch("Coda_ScanData1",&(values[fTreeArrayIndex+3]),"Coda_ScanData1/D");
     tree->Branch("Coda_ScanData2",&(values[fTreeArrayIndex+4]),"Coda_ScanData2/D");
@@ -606,8 +589,8 @@ void QwSubsystemArray::ConstructBranch(TTree *tree, TString& prefix)
 {
   // Only MPS tree should contain event number and type
   if (prefix == "" || prefix == "yield_") {
-    tree->Branch("CodaEventNumber",&fCodaEventNumber,"CodaEventNumber/I");
-    tree->Branch("CodaEventType",&fCodaEventType,"CodaEventType/I");
+    tree->Branch("CodaEventNumber",&fCodaEventNumber,"CodaEventNumber/i");
+    tree->Branch("CodaEventType",&fCodaEventType,"CodaEventType/i");
   }
 
   for (iterator subsys = begin(); subsys != end(); ++subsys) {
@@ -630,8 +613,8 @@ void QwSubsystemArray::ConstructBranch(
 {
   QwMessage << " QwSubsystemArray::ConstructBranch " << QwLog::endl;
 
-  QwParameterFile* preamble;
-  QwParameterFile* nextsection;
+  std::unique_ptr<QwParameterFile> preamble;
+  std::unique_ptr<QwParameterFile> nextsection;
   preamble = trim_file.ReadSectionPreamble();
 
   // Process preamble
@@ -639,8 +622,8 @@ void QwSubsystemArray::ConstructBranch(
   QwVerbose << *preamble << QwLog::endl;
 
   if (prefix == "" || prefix == "yield_") {
-    tree->Branch("CodaEventNumber",&fCodaEventNumber,"CodaEventNumber/I");
-    tree->Branch("CodaEventType",&fCodaEventType,"CodaEventType/I");
+    tree->Branch("CodaEventNumber",&fCodaEventNumber,"CodaEventNumber/i");
+    tree->Branch("CodaEventType",&fCodaEventType,"CodaEventType/i");
   }
 
   for (iterator subsys = begin(); subsys != end(); ++subsys) {
@@ -664,16 +647,15 @@ void QwSubsystemArray::ConstructBranch(
  * Fill the tree vector
  * @param values Vector of values
  */
-void QwSubsystemArray::FillTreeVector(std::vector<Double_t>& values) const
+void QwSubsystemArray::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   // Fill the event number and event type
   size_t index = fTreeArrayIndex;
-  values[index++] = this->GetCodaEventNumber();
-  values[index++] = this->GetCodaEventType();
-  values[index++] = this->fCleanParameter[0];
-  values[index++] = this->fCleanParameter[1];
-  values[index++] = this->fCleanParameter[2];
-
+  values.SetValue(index++, this->GetCodaEventNumber());
+  values.SetValue(index++, this->GetCodaEventType());
+  values.SetValue(index++, this->fCleanParameter[0]);
+  values.SetValue(index++, this->fCleanParameter[1]);
+  values.SetValue(index++, this->fCleanParameter[2]);
 
   // Fill the subsystem data
   for (const_iterator subsys = begin(); subsys != end(); ++subsys) {

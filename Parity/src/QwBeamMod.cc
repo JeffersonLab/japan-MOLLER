@@ -1,14 +1,9 @@
-/**********************************************************\
-* File: QwBeamMod.cc                                      *
-*                                                         *
-* Author: Joshua Hoskins                                  *
-* Time-stamp: 052510                                      *
-*                                                         *
-* Updated for PREX by Ezekiel Wertz and Paul King         *
-* Time-Stamp: 06/17/19                                    *
-*                                                         *
-*                                                         *
-\**********************************************************/
+/*!
+ * \file   QwBeamMod.cc
+ * \brief  Beam modulation subsystem implementation
+ * \author Joshua Hoskins, Ezekiel Wertz, Paul King
+ * \date   2010-05-25
+ */
 
 #include "QwBeamMod.h"
 
@@ -26,6 +21,7 @@
 #include "QwLog.h"
 #include "QwParameterFile.h"
 #include "QwHistogramHelper.h"
+#include "QwRootFile.h"
 #ifdef __USE_DATABASE__
 #include "QwParitySchema.h"
 #include "QwParityDB.h"
@@ -296,7 +292,7 @@ void QwBeamMod::LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, I
 	  device_name.ToLower();
 	  Double_t LLX = mapstr.GetTypedNextToken<Double_t>();	//lower limit for BCM value
 	  Double_t ULX = mapstr.GetTypedNextToken<Double_t>();	//upper limit for BCM value
-	  varvalue = mapstr.GetTypedNextToken<TString>();//global/loacal
+	  varvalue = mapstr.GetTypedNextToken<TString>();//global/local
     Double_t burplevel = mapstr.GetTypedNextToken<Double_t>();
 	  varvalue.ToLower();
 	  Double_t stabilitycut = mapstr.GetTypedNextToken<Double_t>();
@@ -785,7 +781,7 @@ void  QwBeamMod::FillHistograms()
   // Due to the the way the ADC averages the ramp signal we want to filter
   // out events at the edged of the signal.
   //
-  // Seperated the ramp cut here because it is ridiculously long... 
+  // Separated the ramp cut here because it is ridiculously long... 
   //
 
   [[maybe_unused]]
@@ -798,7 +794,7 @@ void  QwBeamMod::FillHistograms()
 }
 
 
-void QwBeamMod::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values)
+void QwBeamMod::ConstructBranchAndVector(TTree *tree, TString & prefix, QwRootTreeBranchVector &values)
 {
   TString basename;
   
@@ -812,12 +808,12 @@ void QwBeamMod::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vec
     // 	  basename = fWord[i].fWordName;
     basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length());
     basename += fWord[i].fWordName;
-    values.push_back(0.0);
-    tree->Branch(basename, &(values.back()), basename+"/D");
+    values.push_back(basename.Data(), 'D');
+    tree->Branch(basename, &(values[fTreeArrayIndex + i]), values.LeafList(fTreeArrayIndex + i).c_str());
   }
 }
 
-void QwBeamMod::FillTreeVector(std::vector<Double_t> &values) const
+void QwBeamMod::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   //std::cout << "inside FillTreeVector"<< std::endl; 
   //std::cout << "fTreeArrayIndex: " << fTreeArrayIndex << std::endl;
@@ -828,8 +824,7 @@ void QwBeamMod::FillTreeVector(std::vector<Double_t> &values) const
     // fModChannel[i]->PrintValue();
   }
   for (size_t i = 0; i < fWord.size(); i++){
-    values[index++] = fWord[i].fValue;
-    //std::cout << fWord[i].fValue<< std::endl;
+    values.SetValue(index++, fWord[i].fValue);
   }
   //for (size_t i=0; i<values.size(); i++){
   //  std::cout << values[i] << " ";
