@@ -102,7 +102,7 @@ jobs:
             echo "::endgroup::"
 
             echo "::group::Compilation with ccache"
-            cmake -Bbuild -S. \
+            cmake -Bbuild -S. -Wdev -Werror=dev \
               -DBUILD_MARIADB_CONNECTOR=ON \
               -DBUILD_MYSQL_CONNECTOR=ON \
               -DBUILD_POSTGRESQL_CONNECTOR=ON \
