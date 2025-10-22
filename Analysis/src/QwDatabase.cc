@@ -12,8 +12,14 @@
 // System headers
 
 // Third-party headers
+#ifdef __USE_SQLPP11__
 #include <sqlpp11/select.h>
 #include <sqlpp11/functions.h>
+#endif // __USE_SQLPP11__
+#ifdef __USE_SQLPP23__
+#include <sqlpp23/core/clause/select.h>
+#include <sqlpp23/core/function.h>
+#endif // __USE_SQLPP23__
 
 // Qweak headers
 #include "QwParitySchema.h"
@@ -176,7 +182,16 @@ Bool_t QwDatabase::ValidateConnection()
           config.password = fDBPassword;
           config.database = fDatabase;
           config.port = fDBPortNumber;
+#ifdef __USE_SQLPP11__
           config.debug = fDBDebug;
+#endif
+#ifdef __USE_SQLPP23__
+          if (fDBDebug) {
+            config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
+              QwMessage << "SQL Debug: " << msg << QwLog::endl;
+            });
+          }
+#endif
           fDBConnection = std::make_shared<sqlpp::mysql::connection>(config);
           break;
         }
@@ -189,7 +204,16 @@ Bool_t QwDatabase::ValidateConnection()
           config.password = fDBPassword;
           // FIXME (wdconinc) use proper access flags
           config.flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+#ifdef __USE_SQLPP11__
           config.debug = fDBDebug;
+#endif
+#ifdef __USE_SQLPP23__
+          if (fDBDebug) {
+            config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
+              QwMessage << "SQL Debug: " << msg << QwLog::endl;
+            });
+          }
+#endif
           fDBConnection = std::make_shared<sqlpp::sqlite3::connection>(config);
           break;
         }
@@ -203,7 +227,16 @@ Bool_t QwDatabase::ValidateConnection()
           config.password = fDBPassword;
           config.dbname = fDatabase;
           config.port = fDBPortNumber;
+#ifdef __USE_SQLPP11__
           config.debug = fDBDebug;
+#endif
+#ifdef __USE_SQLPP23__
+          if (fDBDebug) {
+            config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
+              QwMessage << "SQL Debug: " << msg << QwLog::endl;
+            });
+          }
+#endif
           fDBConnection = std::make_shared<sqlpp::postgresql::connection>(config);
           break;
         }
@@ -299,6 +332,16 @@ bool QwDatabase::Connect()
           config.password = fDBPassword;
           config.database = fDatabase;
           config.port = fDBPortNumber;
+#ifdef __USE_SQLPP11__
+          config.debug = fDBDebug;
+#endif
+#ifdef __USE_SQLPP23__
+          if (fDBDebug) {
+            config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
+              QwMessage << "SQL Debug: " << msg << QwLog::endl;
+            });
+          }
+#endif
           fDBConnection = std::make_shared<sqlpp::mysql::connection>(config);
           break;
         }
@@ -311,7 +354,16 @@ bool QwDatabase::Connect()
           config.password = fDBPassword;
           // FIXME (wdconinc) use proper access flags
           config.flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+#ifdef __USE_SQLPP11__
           config.debug = fDBDebug;
+#endif
+#ifdef __USE_SQLPP23__
+          if (fDBDebug) {
+            config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
+              QwMessage << "SQL Debug: " << msg << QwLog::endl;
+            });
+          }
+#endif
           fDBConnection = std::make_shared<sqlpp::sqlite3::connection>(config);
           break;
         }
@@ -520,7 +572,7 @@ bool QwDatabase::StoreDBVersion()
       size_t record_count = QueryCount(
           sqlpp::select(sqlpp::all_of(db_schema))
           .from(db_schema)
-          .unconditionally()
+          .where(sqlpp::value(true))
       );
       QwDebug << "QwDatabase::StoreDBVersion => Number of rows returned:  " << record_count << QwLog::endl;
 
@@ -540,7 +592,7 @@ bool QwDatabase::StoreDBVersion()
         auto results = QuerySelect(
             sqlpp::select(sqlpp::all_of(db_schema))
             .from(db_schema)
-            .unconditionally()
+            .where(sqlpp::value(true))
         );
         ForFirstResult(
           results,

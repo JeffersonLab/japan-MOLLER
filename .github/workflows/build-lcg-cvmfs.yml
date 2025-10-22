@@ -75,6 +75,11 @@ jobs:
             echo "::group::Dependencies"
             # Install dependencies
             PYTHONHOME="" PYTHONPATH="" dnf install -y time
+            # Sqlpp23 requires pyparsing>=3
+            pip install 'pyparsing>=3'
+            for i in $HOME/.local/lib/python* ; do
+              export PYTHONPATH=$i/site-packages:$PYTHONPATH
+            done
             echo "::endgroup::"
 
             echo "::group::Configuration"

@@ -18,6 +18,7 @@
 
 // Third Party Headers
 #ifdef __USE_DATABASE__
+#ifdef __USE_SQLPP11__
 #include <sqlpp11/sqlpp11.h>
 #ifdef __USE_DATABASE_MYSQL__
 #include <sqlpp11/mysql/mysql.h>
@@ -28,6 +29,34 @@
 #ifdef __USE_DATABASE_POSTGRESQL__
 #include <sqlpp11/postgresql/postgresql.h>
 #endif // __USE_DATABASE_POSTGRESQL__
+#endif // __USE_SQLPP11__
+#ifdef __USE_SQLPP23__
+#include <sqlpp23/sqlpp23.h>
+#ifdef __USE_DATABASE_MYSQL__
+#include <sqlpp23/mysql/mysql.h>
+#endif // __USE_DATABASE_MYSQL__
+#ifdef __USE_DATABASE_SQLITE3__
+#include <sqlpp23/sqlite3/sqlite3.h>
+#endif // __USE_DATABASE_SQLITE3__
+#ifdef __USE_DATABASE_POSTGRESQL__
+#include <sqlpp23/postgresql/postgresql.h>
+#endif // __USE_DATABASE_POSTGRESQL__
+
+// Compatibility shims for sqlpp23 to support sqlpp11 syntax
+namespace sqlpp {
+  // Make std::nullopt available as sqlpp::null for compatibility  
+  static constexpr auto null = std::nullopt;
+}
+
+// Compatibility helper for result field null checking
+// For sqlpp11: use free function is_null() to call the member function .is_null()
+// For sqlpp23: result fields are std::optional<T>, provide is_null() via ADL
+template<typename T>
+constexpr bool is_null(const std::optional<T>& opt) {
+  return !opt.has_value();
+}
+
+#endif // __USE_SQLPP23__
 #endif // __USE_DATABASE__
 
 // ROOT headers
@@ -366,12 +395,11 @@ class QwDatabase {
         using T = std::decay_t<decltype(connection)>;
         if constexpr (!std::is_same_v<T, std::monostate>) {
           auto result = (*connection)(statement);
-          // For INSERT operations, some databases return the ID directly as uint64_t
-          // while others return it as a result object with insert_id() method
+          // For INSERT operations, most databases return the ID directly as uint64_t
           if constexpr (std::is_integral_v<decltype(result)>) {
             return static_cast<uint64_t>(result);
           } else {
-            return result.insert_id();
+            throw std::runtime_error("Unexpected result type from INSERT operation - expected integral type");
           }
         }
         // This should never be reached due to VisitConnection logic

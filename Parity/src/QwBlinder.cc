@@ -26,8 +26,14 @@
 ///  Run table aliases for seed query
 ///  (these types must be defined outside function scope)
 #ifdef __USE_DATABASE__
+#ifdef __USE_SQLPP11__
 SQLPP_ALIAS_PROVIDER(run_first);
 SQLPP_ALIAS_PROVIDER(run_last);
+#endif // __USE_SQLPP11__
+#ifdef __USE_SQLPP23__
+SQLPP_CREATE_NAME_TAG(run_first);
+SQLPP_CREATE_NAME_TAG(run_last);
+#endif // __USE_SQLPP23__
 #endif // __USE_DATABASE__
 
 ///  Blinder event counter indices
@@ -475,7 +481,7 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db)
       c->ForFirstResult(results, [this](const auto& row) {
         // Process first (and only) row
         fSeedID = row.seed_id;
-        if (!row.seed.is_null()) {
+        if (!is_null(row.seed)) {
           fSeed = row.seed.value();
         } else {
           QwError << "QwBlinder::ReadSeed(): Seed value came back NULL from the database." << QwLog::endl;
@@ -583,7 +589,7 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db, const UInt_t seed_id)
       
       db->ForFirstResult(results, [&](const auto& row) {
         found_seed_id = row.seed_id;
-        if (!row.seed.is_null()) {
+        if (!is_null(row.seed)) {
           found_seed = row.seed.value();
         } else {
           QwError << "QwBlinder::ReadSeed(): Seed value came back NULL from the database." << QwLog::endl;
@@ -611,7 +617,7 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db, const UInt_t seed_id)
                    .from(seeds)
                    .order_by(seeds.seed_id.desc())
                    .limit(1u)
-                   .unconditionally();
+                   .where(sqlpp::value(true));
       auto results = db->QuerySelect(query);
       
       // Process results using database-agnostic interface  
@@ -622,7 +628,7 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db, const UInt_t seed_id)
 
       db->ForFirstResult(results, [&](const auto& row) {
         found_seed_id2 = row.seed_id;
-        if (!row.seed.is_null()) {
+        if (!is_null(row.seed)) {
           found_seed2 = row.seed.value();
         } else {
           QwError << "QwBlinder::ReadSeed(): Seed value came back NULL from the database." << QwLog::endl;

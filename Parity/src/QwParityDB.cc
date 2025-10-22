@@ -588,7 +588,7 @@ void QwParityDB::StoreMonitorIDs()
     auto c = GetScopedConnection();
 
     QwParitySchema::monitor monitor{};
-    auto query = sqlpp::select(sqlpp::all_of(monitor)).from(monitor).unconditionally();
+    auto query = sqlpp::select(sqlpp::all_of(monitor)).from(monitor).where(sqlpp::value(true));
     QuerySelectForEachResult(query, [&](const auto& row) {
       QwDebug << "StoreMonitorID:  monitor_id = " << row.monitor_id << " quantity = " << row.quantity << QwLog::endl;
       QwParityDB::fMonitorIDs.insert(std::make_pair(row.quantity, row.monitor_id));
@@ -655,7 +655,7 @@ void QwParityDB::StoreMainDetectorIDs()
     auto c = GetScopedConnection();
 
     QwParitySchema::main_detector main_detector{};
-    auto query = sqlpp::select(sqlpp::all_of(main_detector)).from(main_detector).unconditionally();
+    auto query = sqlpp::select(sqlpp::all_of(main_detector)).from(main_detector).where(sqlpp::value(true));
     QuerySelectForEachResult(query, [&](const auto& row) {
       QwDebug << "StoreMainDetectorID:  main_detector_id = " << row.main_detector_id << " quantity = " << row.quantity << QwLog::endl;
       QwParityDB::fMainDetectorIDs.insert(std::make_pair(row.quantity, row.main_detector_id));
@@ -744,7 +744,7 @@ void QwParityDB::StoreSlowControlDetectorIDs()
     auto c = GetScopedConnection();
 
     QwParitySchema::sc_detector sc_detector{};
-    auto query = sqlpp::select(sqlpp::all_of(sc_detector)).from(sc_detector).unconditionally();
+    auto query = sqlpp::select(sqlpp::all_of(sc_detector)).from(sc_detector).where(sqlpp::value(true));
     QuerySelectForEachResult(query, [&](const auto& row) {
       QwDebug << "StoreSlowControlDetectorID: sc_detector_id = " << row.sc_detector_id << " name = " << row.name << QwLog::endl;
       QwParityDB::fSlowControlDetectorIDs.insert(std::make_pair(row.name, row.sc_detector_id));
@@ -766,7 +766,7 @@ void QwParityDB::StoreErrorCodeIDs()
     auto c = GetScopedConnection();
     
     QwParitySchema::error_code error_code{};
-    auto query = sqlpp::select(sqlpp::all_of(error_code)).from(error_code).unconditionally();
+    auto query = sqlpp::select(sqlpp::all_of(error_code)).from(error_code).where(sqlpp::value(true));
     QuerySelectForEachResult(query, [&](const auto& row) {
       QwDebug << "StoreErrorCodeID: error_code_id = " << row.error_code_id << " quantity = " << row.quantity << QwLog::endl;
       QwParityDB::fErrorCodeIDs.insert(std::make_pair(row.quantity, row.error_code_id));
@@ -806,7 +806,7 @@ void QwParityDB::StoreLumiDetectorIDs()
     auto c = GetScopedConnection();
 
     QwParitySchema::lumi_detector lumi_detector{};
-    auto query = sqlpp::select(sqlpp::all_of(lumi_detector)).from(lumi_detector).unconditionally();
+    auto query = sqlpp::select(sqlpp::all_of(lumi_detector)).from(lumi_detector).where(sqlpp::value(true));
     QuerySelectForEachResult(query, [&](const auto& row) {
       QwDebug << "StoreLumiDetectorID:  lumi_detector_id = " << row.lumi_detector_id << " quantity = " << row.quantity << QwLog::endl;
       QwParityDB::fLumiDetectorIDs.insert(std::make_pair(row.quantity, row.lumi_detector_id));
@@ -843,7 +843,7 @@ void QwParityDB::StoreMeasurementIDs()
     auto c = GetScopedConnection();
 
     QwParitySchema::measurement_type measurement_type{};
-    auto query = sqlpp::select(sqlpp::all_of(measurement_type)).from(measurement_type).unconditionally();
+    auto query = sqlpp::select(sqlpp::all_of(measurement_type)).from(measurement_type).where(sqlpp::value(true));
     QuerySelectForEachResult(query, [&](const auto& row) {
       QwDebug << "StoreMeasurementID:  measurement_type = " << row.measurement_type_id << QwLog::endl;
       QwParityDB::fMeasurementIDs.push_back((std::string) row.measurement_type_id);

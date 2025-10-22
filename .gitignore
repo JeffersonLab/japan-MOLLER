@@ -39,7 +39,7 @@ qwroot
 
 # Directories
 lib
-*build
+*build*
 *test*
 output
 Doxygen/html
