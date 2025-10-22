@@ -104,5 +104,6 @@ jobs:
               --QwDatabase.dbusername '${{ secrets.PSQL_USERNAME }}' \
               --QwDatabase.dbpassword '${{ secrets.PSQL_PASSWORD }}' \
               --QwDatabase.dbname qwparity \
-              --QwDatabase.dbport 5432
+              --QwDatabase.dbport 5432 \
+              --QwDatabase.insert-missing-keys true
             echo "::endgroup::"
