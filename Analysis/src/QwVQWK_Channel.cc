@@ -1974,9 +1974,12 @@ void QwVQWK_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *value)
     this -> fNumberOfSamples += input->fNumberOfSamples;
     this -> fSequenceNumber  =  0;
     this -> fErrorFlag       |= (input->fErrorFlag);   
+  } else if (input == NULL && value != NULL) {
+    TString loc="Standard exception from QwVQWK_Channel::ScaledAdd "
+        +value->GetElementName()+" "
+        +this->GetElementName()+" are not of the same type";
+    throw(std::invalid_argument(loc.Data()));
   }
-  //   QwWarning << "Finished with addition"  << QwLog::endl;
-  //   PrintValue();
 }
 
 #ifdef __USE_DATABASE__
