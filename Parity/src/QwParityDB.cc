@@ -234,9 +234,10 @@ UInt_t QwParityDB::GetRunID(QwEventBuffer& qwevt)
   // we should convert it to UInt_t here. I think, it is OK.
 
   if (fRunID == 0 || fRunNumber != (UInt_t) qwevt.GetRunNumber() ) {
-     QwDebug << "QwParityDB::GetRunID() set fRunID to " << SetRunID(qwevt) << QwLog::endl;
-     fRunletID = 0;
-     fAnalysisID = 0;
+    fRunID = SetRunID(qwevt);
+    QwDebug << "QwParityDB::GetRunID() set fRunID to " << fRunID << QwLog::endl;
+    fRunletID = 0;
+    fAnalysisID = 0;
   }
 
   return fRunID;
@@ -328,30 +329,29 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
 
       // If we reach here, runlet is not in database so insert pertinent data and retrieve run ID
       // Right now this does not insert start/stop times or info on number of events.
-      QwParitySchema::runlet runlet_table{};
-      QwParitySchema::row<QwParitySchema::runlet> row;
-      row[runlet_table.run_id]      = fRunID;
-      row[runlet_table.run_number]      = qwevt.GetRunNumber();
+      QwParitySchema::row<QwParitySchema::runlet> runlet_row;
+      runlet_row[runlet.run_id]      = fRunID;
+      runlet_row[runlet.run_number]      = qwevt.GetRunNumber();
       // Note: start_time and end_time are nullable fields but we need to use proper sqlpp11 null types
-      // row[runlet_table.start_time]      = sqlpp::null;
-      // row[runlet_table.end_time]        = sqlpp::null;
-      row[runlet_table.first_mps] = 0;
-      row[runlet_table.last_mps]	= 0;
-      
+      // runlet_row[runlet.start_time]      = sqlpp::null;
+      // runlet_row[runlet.end_time]        = sqlpp::null;
+      runlet_row[runlet.first_mps] = 0;
+      runlet_row[runlet.last_mps]	= 0;
+
       // Handle segment_number based on runlet split condition
       if (qwevt.AreRunletsSplit()) {
-        row[runlet_table.segment_number]  = fSegmentNumber;
-        row[runlet_table.full_run] = "false";
+        runlet_row[runlet.segment_number]  = fSegmentNumber;
+        runlet_row[runlet.full_run] = "false";
         QwDebug << "QwParityDB::SetRunletID() => Executing sqlpp11 runlet insert (with segment)" << QwLog::endl;
       } else {
         // Note: segment_number is nullable, but row assignment might need special handling for null
         // For now, use 0 or another default value
-        // row[runlet_table.segment_number]  = sqlpp::null;
-        row[runlet_table.full_run] = "true";
+        // runlet_row[runlet.segment_number]  = sqlpp::null;
+        runlet_row[runlet.full_run] = "true";
         QwDebug << "QwParityDB::SetRunletID() => Executing sqlpp11 runlet insert (no segment)" << QwLog::endl;
       }
 
-      auto insert_id = QueryInsertAndGetId(row.insert_into());
+      auto insert_id = QueryInsertAndGetId(runlet_row.insert_into());
       if (insert_id != 0) {
         fRunletID = insert_id;
       }
@@ -373,8 +373,9 @@ UInt_t QwParityDB::GetRunletID(QwEventBuffer& qwevt)
   // or if fRunID is not set, then retrieve data from database and update if necessary.
 
   if (fRunletID == 0 || (qwevt.AreRunletsSplit() && fSegmentNumber!=qwevt.GetSegmentNumber()) || fRunNumber != (UInt_t) qwevt.GetRunNumber() ) {
-     QwDebug << "QwParityDB::GetRunletID() set fRunletID to " << SetRunletID(qwevt) << QwLog::endl;
-     fAnalysisID = 0;
+    fRunletID = SetRunletID(qwevt);
+    QwDebug << "QwParityDB::GetRunletID() set fRunletID to " << fRunletID << QwLog::endl;
+    fAnalysisID = 0;
   }
 
   return fRunletID;
@@ -548,7 +549,8 @@ UInt_t QwParityDB::GetAnalysisID(QwEventBuffer& qwevt)
 
   if (fAnalysisID == 0 || fRunNumber != (UInt_t) qwevt.GetRunNumber()
       || (qwevt.AreRunletsSplit() && fSegmentNumber!=qwevt.GetSegmentNumber())) {
-    QwDebug << "QwParityDB::GetAnalysisID() set fAnalysisID to " << SetAnalysisID(qwevt) << QwLog::endl;
+    fAnalysisID = SetAnalysisID(qwevt);
+    QwDebug << "QwParityDB::GetAnalysisID() set fAnalysisID to " << fAnalysisID << QwLog::endl;
     if (fAnalysisID==0) {
       QwError << "QwParityDB::SetAnalysisID() unable to set valid fAnalysisID for this run.  Exiting." <<QwLog::endl;
       exit(1);
