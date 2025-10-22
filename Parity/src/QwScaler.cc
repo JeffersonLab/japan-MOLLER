@@ -19,7 +19,7 @@
 #include "QwParameterFile.h"
 
 // Register this subsystem with the factory
-RegisterSubsystemFactory(QwScaler);
+REGISTER_SUBSYSTEM_FACTORY(QwScaler);
 
 
 /** Define command-line options for scaler subsystem (placeholder). */

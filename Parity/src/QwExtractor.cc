@@ -23,7 +23,7 @@
 #include "QwRootFile.h"
 
 // Register this handler with the factory
-RegisterHandlerFactory(QwExtractor);
+REGISTER_DATA_HANDLER_FACTORY(QwExtractor);
 
 
 /// \brief Constructor with name
