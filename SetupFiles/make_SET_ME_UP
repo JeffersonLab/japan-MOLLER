@@ -231,9 +231,6 @@ if [[ -z ${ROOTSYS} ]]; then
   exit 1
 fi
 
-# Check ROOT version
-${QWANALYSIS}/SetupFiles/checkrootversion
-
 
 
 ###  Create the setup scripts.
