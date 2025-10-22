@@ -104,7 +104,7 @@ jobs:
             echo "::group::Compilation with ccache"
             cmake -Bbuild -S. \
               -Wdev -Werror=dev \
-              --error-unused-vars \
+              -DCMAKE_ERROR_ON_UNUSED_VARIABLES=ON \
               -DBUILD_MARIADB_CONNECTOR=ON \
               -DBUILD_MYSQL_CONNECTOR=ON \
               -DBUILD_POSTGRESQL_CONNECTOR=ON \
