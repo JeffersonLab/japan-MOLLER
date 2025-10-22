@@ -71,7 +71,6 @@ jobs:
           run: |
             echo "::group::Compilation with ccache"
             git config --global --add safe.directory $PWD/thirdparty/sqlpp11
-            git -C thirdparty/sqlpp11 merge-base --is-ancestor 3b8f409 HEAD
             cmake -Bbuild -S. \
               -DBUILD_MARIADB_CONNECTOR=ON \
               -DBUILD_MYSQL_CONNECTOR=ON \
@@ -104,5 +103,6 @@ jobs:
               --QwDatabase.dbserver '${{ secrets.PSQL_HOST }}' \
               --QwDatabase.dbusername '${{ secrets.PSQL_USERNAME }}' \
               --QwDatabase.dbpassword '${{ secrets.PSQL_PASSWORD }}' \
-              --QwDatabase.dbname qwparity
+              --QwDatabase.dbname qwparity \
+              --QwDatabase.dbport 5432
             echo "::endgroup::"
