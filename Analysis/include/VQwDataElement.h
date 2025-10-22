@@ -250,7 +250,9 @@ class VQwDataElement: public MQwHistograms {
 
   //  The most basic version of UpdateErrorFlag, which should get hidden
   //  by all the derived class versions.
-  virtual void UpdateErrorFlag(const UInt_t& error){fErrorFlag |= (error);};
+  void UpdateErrorFlag(const UInt_t& error){
+    fErrorFlag |= (error);
+  };
 
  protected:
   TString fElementName; ///< Name of this data element
