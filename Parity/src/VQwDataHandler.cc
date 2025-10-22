@@ -25,6 +25,7 @@ using namespace std;
 #include "QwParameterFile.h"
 #include "QwRootFile.h"
 #include "QwVQWK_Channel.h"
+#include "QwMollerADC_Channel.h"
 #include "QwPromptSummary.h"
 
 #ifdef __USE_DATABASE__
@@ -208,7 +209,7 @@ Int_t VQwDataHandler::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemA
     // alias
     if(fDependentName.at(dv).at(0) == '@') {
       //QwMessage << "dv: " << name << QwLog::endl;
-      new_ptr = new QwVQWK_Channel(name, VQwDataElement::kDerived);
+      new_ptr = new QwMollerADC_Channel(name, VQwDataElement::kDerived);
       new_ptr->SetSubsystemName(fName);
     }
     // defined type
@@ -216,7 +217,7 @@ Int_t VQwDataHandler::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemA
       //QwMessage << "dv: " << fDependentName.at(dv) << QwLog::endl;
     }else {
       QwWarning << "Dependent variable " << fDependentName.at(dv) << " could not be found, "
-                << "or is not a VQWK channel." << QwLog::endl;
+                << "or is not a known channel type." << QwLog::endl;
       continue; 
     }
 

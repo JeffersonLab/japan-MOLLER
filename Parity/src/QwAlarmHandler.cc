@@ -8,8 +8,10 @@
 #include "QwAlarmHandler.h"
 
 // Qweak headers
+#include "QwLog.h"
 #include "VQwDataElement.h"
 #include "QwVQWK_Channel.h"
+#include "QwMollerADC_Channel.h"
 #include "QwParameterFile.h"
 #include "QwHelicityPattern.h"
 
@@ -213,8 +215,8 @@ Int_t QwAlarmHandler::ConnectChannels(
     // Get the dependent variables
 
     const VQwHardwareChannel* dv_ptr = 0;
-    QwVQWK_Channel* new_vqwk = NULL;
-    QwVQWK_Channel* vqwk = NULL;
+    VQwHardwareChannel* new_chan = NULL;
+    const VQwHardwareChannel* chan = NULL;
     string name = " s";
     string calc = "calc_";
 
@@ -230,30 +232,41 @@ Int_t QwAlarmHandler::ConnectChannels(
     } else {
       if(fAnalysisName.at(dv).at(0) == '@' ){
         name = fAnalysisName.at(dv).substr(1,fAnalysisName.at(dv).length());
-        new_vqwk = new QwVQWK_Channel(name, VQwDataElement::kDerived);
+        new_chan = new QwMollerADC_Channel(name, VQwDataElement::kDerived);
       } else {
         dv_ptr = event.RequestExternalPointer(fAnalysisName.at(dv));
 
-        vqwk = dynamic_cast<QwVQWK_Channel*>(dv_ptr);
-        name = vqwk.GetElementName().Data();
-        new_vqwk = new QwVQWK_Channel(*vqwk, VQwDataElement::kDerived);
-        new_vqwk.SetElementName(name);
+        name = dv_ptr->GetElementName().Data();
+        
+        const QwMollerADC_Channel* moll = dynamic_cast<const QwMollerADC_Channel*>(dv_ptr);
+        const QwVQWK_Channel* vqwk = dynamic_cast<const QwVQWK_Channel*>(dv_ptr);
+        if (moll != nullptr) {
+          new_chan = new QwMollerADC_Channel(*moll, VQwDataElement::kDerived);
+          new_chan->SetElementName(name);
+        } else if (vqwk != nullptr) {
+          new_chan = new QwVQWK_Channel(*vqwk, VQwDataElement::kDerived);
+          new_chan->SetElementName(name);
+        } else {
+          QwWarning << "Dependent variable " << fAnalysisName.at(dv) << " could not be found, "
+                    << "or is not a VQWK or MollerADC channel." << QwLog::endl;
+          continue;
+        }
       }
-      new_vqwk.SetSubsystemName(fName);
+      new_chan->SetSubsystemName(fName);
     }
 
     // alias
-    if(new_vqwk==NULL){
+    if(new_chan==NULL){
       QwWarning << "Dependent variable " << fAnalysisName.at(dv) << " could not be found, "
-                << "or is not a VQWK channel." << QwLog::endl;
+                << "or is not a VQWK or MollerADC channel." << QwLog::endl;
       continue; 
     } else {
-      //QwMessage << "dv: " << new_vqwk.GetElementName() << QwLog::endl;
+      //QwMessage << "dv: " << new_chan->GetElementName() << QwLog::endl;
       // pair creation
       fAnalysisType.push_back(fAnalysisType.at(dv));
-      fDependentVar.push_back(vqwk);
-      fOutputVar.push_back(new_vqwk);
-      //fDependentVar.push_back(std::make_pair(vqwk, new_vqwk));
+      fDependentVar.push_back(chan);
+      fOutputVar.push_back(new_chan);
+      //fDependentVar.push_back(std::make_pair(chan, new_chan));
     }
   }
   return 0; // FIXME this won't work, and the pointers are all wrong anyway... 
