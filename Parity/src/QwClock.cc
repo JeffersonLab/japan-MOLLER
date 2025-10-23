@@ -457,6 +457,6 @@ std::vector<QwDBInterface> QwClock<T>::GetDBEntry()
 }
 #endif // __USE_DATABASE__
 
-template class QwClock<QwVQWK_Channel>; 
-template class QwClock<QwSIS3801_Channel>; 
-template class QwClock<QwSIS3801D24_Channel>; 
+template class QwClock<QwVQWK_Channel>;
+template class QwClock<QwSIS3801_Channel>;
+template class QwClock<QwSIS3801D24_Channel>;

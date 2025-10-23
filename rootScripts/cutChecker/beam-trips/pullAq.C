@@ -83,7 +83,7 @@ void pullAq(Int_t flip_state = 1, TString pass = "respin2", TString ana = "Aq") 
     Int_t nData_c = mul_tree->Draw(Form("rcdb_sign*%s",draw.Data()),Form("%s && ErrorFlag==0 && SinceLastTripEnd>=500 && SinceLastTripEnd<750 && rcdb_flip_state==%d && run_number==%d",cut.Data(),flip_state,i),"goff");
     if (nData_a != 0 && nData_b != 0 && nData_c != 0) {
       TH1F* c_th1 = (TH1F*)gROOT->FindObject("htemp");
-      Double_t c_tmpMean = 0.0; 
+      Double_t c_tmpMean = 0.0;
       Double_t c_tmpMeanErr = 0.0;
       c_tmpMean = c_th1->GetMean();
       c_tmpMeanErr = c_th1->GetMeanError();
@@ -93,7 +93,7 @@ void pullAq(Int_t flip_state = 1, TString pass = "respin2", TString ana = "Aq") 
     }
     infile_run->Close();
     delete infile_run;
-  } 
+  }
   TGraphErrors * tga = new TGraphErrors(bins_a.size(),&bins_a[0],&a_means[0],0,&a_meanerrs[0]);
   TGraphErrors * tgb = new TGraphErrors(bins_b.size(),&bins_b[0],&b_means[0],0,&b_meanerrs[0]);
   TGraphErrors * tgc = new TGraphErrors(bins_c.size(),&bins_c[0],&c_means[0],0,&c_meanerrs[0]);

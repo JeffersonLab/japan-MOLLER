@@ -10,7 +10,7 @@ void RHWP_scan_Caryn(Int_t runnumber=1, TString device="bpm1i02", int IHWPstate=
 
 	TString ihwpstate;
 	Int_t orientation;
-    
+
 	if (IHWPstate==1){
 		ihwpstate = "IHWP IN";
 		cout << endl << "RHWP scan with IHWP IN" << endl;
@@ -18,7 +18,7 @@ void RHWP_scan_Caryn(Int_t runnumber=1, TString device="bpm1i02", int IHWPstate=
 		ihwpstate = "IHWP OUT";
 		cout << endl << "RHWP scan with IHWP OUT" << endl;
 	}
-  
+
 	TString gtitle;
 	TString pstit;
 	TString psnam;
@@ -44,7 +44,7 @@ void RHWP_scan_Caryn(Int_t runnumber=1, TString device="bpm1i02", int IHWPstate=
 
 
 	       gtitle+=  ", AposV=";
-	      
+
 		gtitle+= Form("%d",PITAposV);
 
 
@@ -52,10 +52,10 @@ void RHWP_scan_Caryn(Int_t runnumber=1, TString device="bpm1i02", int IHWPstate=
 		psnam += Form("_AposU%d",PITAposU);
 		psnam += Form("_AposV%d",PITAposV);
 
-	      
+
 			psnam += Form("_%s",device.Data());
 			gtitle += Form(", %s",device.Data());
-	  
+
 		psnam += ".png";
 
 		pstit = "rhwpscan_run";
@@ -69,21 +69,21 @@ void RHWP_scan_Caryn(Int_t runnumber=1, TString device="bpm1i02", int IHWPstate=
 	} else {
 		return;
 	}
-    
-	// define style here 
+
+	// define style here
 	// general parameters
 	gStyle->SetOptDate(0);     gStyle->SetOptTitle(0);
 	gStyle->SetStatColor(10);  gStyle->SetStatH(0.2);
-	gStyle->SetStatW(0.3);     gStyle->SetOptStat(0); 
-  
+	gStyle->SetStatW(0.3);     gStyle->SetOptStat(0);
+
 	gStyle->SetPaperSize(12,15);
 	// canvas parameters
 	gStyle->SetFrameBorderMode(0);
 	gStyle->SetFrameBorderSize(0);
 	gStyle->SetFrameFillColor(10);
 	// pads parameters
-	//  gStyle->SetPadColor(39); 
-	gStyle->SetPadColor(0); 
+	//  gStyle->SetPadColor(39);
+	gStyle->SetPadColor(0);
 	gStyle->SetPadBorderMode(0);
 	gStyle->SetPadBorderSize(0);
 	gStyle->SetPadBottomMargin(0.16);
@@ -91,21 +91,21 @@ void RHWP_scan_Caryn(Int_t runnumber=1, TString device="bpm1i02", int IHWPstate=
 	gStyle->SetPadLeftMargin(0.15);
 	gStyle->SetLabelSize(0.05,"x");
 	gStyle->SetLabelSize(0.05,"y");
-	gROOT->ForceStyle();  
+	gROOT->ForceStyle();
 
 	TCanvas *a1 = new TCanvas("a1", "Scan plate scan",
 							  0,0,800,800);
 
 	TPad* a1_p[6];
 
-	a1_p[0]  = new TPad("a1_0","a1_0",0.00,0.727,1.0,0.940);    
+	a1_p[0]  = new TPad("a1_0","a1_0",0.00,0.727,1.0,0.940);
 	a1_p[1]  = new TPad("a1_1","a1_1",0.00,0.624,1.0,0.727);
-	a1_p[2]  = new TPad("a1_2","a1_2",0.00,0.415,1.0,0.624);    
+	a1_p[2]  = new TPad("a1_2","a1_2",0.00,0.415,1.0,0.624);
 	a1_p[3]  = new TPad("a1_3","a1_3",0.00,0.312,1.0,0.415);
-	a1_p[4]  = new TPad("a1_4","a1_4",0.00,0.103,1.0,0.312);    
+	a1_p[4]  = new TPad("a1_4","a1_4",0.00,0.103,1.0,0.312);
 	a1_p[5]  = new TPad("a1_5","a1_5",0.00,0.000,1.0,0.103);
 
-	TPad* a1_title = new TPad("a1_title","a1_title",0.0,0.94,1.0,1.0);    
+	TPad* a1_title = new TPad("a1_title","a1_title",0.0,0.94,1.0,1.0);
 
 	a1->cd();
 	for (Int_t i =0; i<6; i++) a1_p[i]->Draw();
@@ -131,9 +131,9 @@ void RHWP_scan_Caryn(Int_t runnumber=1, TString device="bpm1i02", int IHWPstate=
 }
 
 void plot_element(TPad *p1, TPad *p2, TPad *p3, TPad *p4, TPad *p5, TPad *p6,
-				  TString devnam, TString lcut, Int_t runnumber) 
+				  TString devnam, TString lcut, Int_t runnumber)
 {
-  
+
 	TString *bpmNam = new TString(devnam);
 
 	Int_t ifnd = 0;
@@ -193,7 +193,7 @@ void plot_element(TPad *p1, TPad *p2, TPad *p3, TPad *p4, TPad *p5, TPad *p6,
     Double_t rectphs = f1->GetParameter(2);
     while (rectphs>3.14159) rectphs-=2*3.14159;
     while (rectphs<-3.14159) rectphs+=2*3.14159;
-    if (rectphs<0) { 
+    if (rectphs<0) {
 		rectphs+=3.14159;
 		f1->SetParameter(1,-1*f1->GetParameter(1));
     }
@@ -201,7 +201,7 @@ void plot_element(TPad *p1, TPad *p2, TPad *p3, TPad *p4, TPad *p5, TPad *p6,
     rectphs = f1->GetParameter(4);
     while (rectphs>3.14159) rectphs-=2*3.14159;
     while (rectphs<-3.14159) rectphs+=2*3.14159;
-    if (rectphs<0) { 
+    if (rectphs<0) {
 		rectphs+=3.14159;
 		f1->SetParameter(3,-1*f1->GetParameter(3));
     }
@@ -236,8 +236,8 @@ void plot_element(TPad *p1, TPad *p2, TPad *p3, TPad *p4, TPad *p5, TPad *p6,
     t1->DrawLine(xmin,0,xmax,0);
     //    t1->Draw();
 
-    
-    //print fit eqn to canvas   
+
+    //print fit eqn to canvas
     p2->cd();
     char linetxt[50];
     sprintf(linetxt,"Aq = %7.2f + ",f1->GetParameter(0));
@@ -295,7 +295,7 @@ void plot_element(TPad *p1, TPad *p2, TPad *p3, TPad *p4, TPad *p5, TPad *p6,
     rectphs = f1->GetParameter(2);
     while (rectphs>3.14159) rectphs-=2*3.14159;
     while (rectphs<-3.14159) rectphs+=2*3.14159;
-    if (rectphs<0) { 
+    if (rectphs<0) {
 		rectphs+=3.14159;
 		f1->SetParameter(1,-1*f1->GetParameter(1));
     }
@@ -303,7 +303,7 @@ void plot_element(TPad *p1, TPad *p2, TPad *p3, TPad *p4, TPad *p5, TPad *p6,
     rectphs = f1->GetParameter(4);
     while (rectphs>3.14159) rectphs-=2*3.14159;
     while (rectphs<-3.14159) rectphs+=2*3.14159;
-    if (rectphs<0) { 
+    if (rectphs<0) {
 		rectphs+=3.14159;
 		f1->SetParameter(3,-1*f1->GetParameter(3));
     }
@@ -321,12 +321,12 @@ void plot_element(TPad *p1, TPad *p2, TPad *p3, TPad *p4, TPad *p5, TPad *p6,
     tit = bpmNam->Data();
     tit += ",  Dx/2 vs. #theta";
     hDx->GetXaxis()->SetTitle(tit.Data());
-    
+
     xmin = f1->GetXaxis()->GetXmin();
     xmax = f1->GetXaxis()->GetXmax();
     t1->DrawLine(xmin,0,xmax,0);
 
-    //print fit eqn to canvas   
+    //print fit eqn to canvas
     p4->cd();
     //    linetxt[50];
     sprintf(linetxt,"Dx/2 = %7.2f + ",f1->GetParameter(0));
@@ -374,7 +374,7 @@ void plot_element(TPad *p1, TPad *p2, TPad *p3, TPad *p4, TPad *p5, TPad *p6,
     rectphs = f1->GetParameter(2);
     while (rectphs>3.14159) rectphs-=2*3.14159;
     while (rectphs<-3.14159) rectphs+=2*3.14159;
-    if (rectphs<0) { 
+    if (rectphs<0) {
 		rectphs+=3.14159;
 		f1->SetParameter(1,-1*f1->GetParameter(1));
     }
@@ -382,7 +382,7 @@ void plot_element(TPad *p1, TPad *p2, TPad *p3, TPad *p4, TPad *p5, TPad *p6,
     rectphs = f1->GetParameter(4);
     while (rectphs>3.14159) rectphs-=2*3.14159;
     while (rectphs<-3.14159) rectphs+=2*3.14159;
-    if (rectphs<0) { 
+    if (rectphs<0) {
 		rectphs+=3.14159;
 		f1->SetParameter(3,-1*f1->GetParameter(3));
     }
@@ -401,12 +401,12 @@ void plot_element(TPad *p1, TPad *p2, TPad *p3, TPad *p4, TPad *p5, TPad *p6,
     if(tmpname.Contains("lina1"))    tit += ",  diff_rms vs. #theta";
     else tit += ",  Dy/2 vs. #theta";
     hDy->GetXaxis()->SetTitle(tit.Data());
-    
+
     xmin = f1->GetXaxis()->GetXmin();
     xmax = f1->GetXaxis()->GetXmax();
     t1->DrawLine(xmin,0,xmax,0);
 
-    //print fit eqn to canvas   
+    //print fit eqn to canvas
     p6->cd();
     //linetxt[50];
     if(tmpname.Contains("lina1")) sprintf(linetxt,"Drms = %7.2f + ",f1->GetParameter(0));
@@ -429,7 +429,7 @@ void plot_element(TPad *p1, TPad *p2, TPad *p3, TPad *p4, TPad *p5, TPad *p6,
       cout<<"Y phase err "<<f1->GetParError(4)*180/3.14159<<endl;
       cout<<"Y offs err "<<f1->GetParError(0)<<endl;
 
-    
+
     for (Int_t i = 0; i<5; i++) {
 		dypar[i]=f1->GetParameter(i);
     }

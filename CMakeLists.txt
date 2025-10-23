@@ -148,7 +148,7 @@ if(TARGET ${sqlpp}::${sqlpp})
   set(SCHEMA_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
   set(SCHEMA_OUTPUT_FILE ${SCHEMA_OUTPUT_DIR}/QwParitySchema.h)
   set(SCHEMA_INPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Parity/prminput/qwparity_schema.sql)
-  
+
   # Find sqlpp ddl2cpp executable
   find_program(SQLPP_DDL2CPP
     NAMES ddl2cpp ${sqlpp}-ddl2cpp
@@ -189,7 +189,7 @@ if(TARGET ${sqlpp}::${sqlpp})
         VERBATIM
       )
     endif()
-    
+
     # Add a custom target to ensure the schema is generated
     add_custom_target(generate_schema DEPENDS ${SCHEMA_OUTPUT_FILE})
   else()
@@ -221,7 +221,7 @@ set(POST_CONFIGURE_FILE ${CMAKE_BINARY_DIR}/gitinfo.cc)
 include(CMakeGitInfo)
 list(APPEND my_project_sources ${POST_CONFIGURE_FILE})
 #----------------------------------------------------------------------------
-# Version 
+# Version
 #
 configure_file(${PROJECT_SOURCE_DIR}/cmake/templates/version-config.in ${CMAKE_BINARY_DIR}/version-config.h)
 list(APPEND my_project_headers ${CMAKE_BINARY_DIR}/version-config.h)
@@ -334,7 +334,7 @@ install(TARGETS ${PROJECT_NAME}
   )
 install(FILES ${my_project_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-# Install generated schema header 
+# Install generated schema header
 if((${sqlpp}_FOUND OR TARGET ${sqlpp}::${sqlpp}) AND SQLPP_DDL2CPP)
   install(FILES ${SCHEMA_OUTPUT_FILE} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif()
@@ -395,4 +395,3 @@ endif()
 # cmake config
 #
 add_subdirectory(cmake)
-

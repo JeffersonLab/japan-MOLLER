@@ -36,23 +36,23 @@ else
 #  then
 #    RUNNUM=$2
 #    if [ "$3" == "-f" ]
-#    then 
+#    then
 #      CONFIG=$4
 #    fi
 #  elif [ "$1" == "-f" ]
-#  then 
+#  then
 #    CONFIG=$2
 #    if [ "$3" == "-r" ]
-#    then 
+#    then
 #      RUNNUM=$4
 #    fi
 #  fi
 fi
 
 if [ $# -gt 6 ]
-then 
+then
   if [ "$7" == "-P" ]
-  then 
+  then
     PRINT=1
   else
 	  echo " "
@@ -76,4 +76,3 @@ elif [ $PRINT -eq 0 ]
 then
   ../../panguin/build/panguin -r $RUNNUM -f $CONFIG
 fi
-

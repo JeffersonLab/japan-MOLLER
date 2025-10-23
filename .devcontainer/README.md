@@ -32,7 +32,7 @@ The container provides access to these CVMFS repositories:
 - ROOT, Geant4, and other physics software packages
 - Pre-configured build environments for different architectures
 
-### **geant4.cern.ch** - Geant4 Simulation Toolkit  
+### **geant4.cern.ch** - Geant4 Simulation Toolkit
 - Official Geant4 installations and data files
 - Multiple versions for compatibility testing
 - Physics data libraries and examples

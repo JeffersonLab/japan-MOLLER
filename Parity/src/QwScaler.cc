@@ -416,7 +416,7 @@ VQwSubsystem& QwScaler::operator=(VQwSubsystem *value)
       *(fScaler.at(i)) = *(input->fScaler.at(i));
     }
   }
-  return *this; 
+  return *this;
 }
 
 /**

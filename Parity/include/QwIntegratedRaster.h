@@ -64,7 +64,7 @@ class QwIntegratedRasterDetectorID{
  * \brief Subsystem handling integrated raster X/Y channels
  */
 class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneable<QwIntegratedRaster> {
-  /////  
+  /////
 
  private:
   /// Private default constructor (not implemented, will throw linker error on use)
@@ -147,7 +147,7 @@ class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneab
   void  FillTreeVector(QwRootTreeBranchVector &values) const override;
 
 #ifdef HAS_RNTUPLE_SUPPORT
-  // RNTuple methods  
+  // RNTuple methods
   void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
   void  FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif
@@ -165,13 +165,13 @@ class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneab
   void PrintInfo() const override;
 
 /////
-protected: 
- 
+protected:
+
   // EQwPMTInstrumentType GetDetectorTypeID(TString name);
- 
+
   Int_t GetDetectorIndex(TString name);
 
-  std::vector <QwIntegratedRasterChannel<QwVQWK_Channel> >      fIntegratedRasterChannel;  
+  std::vector <QwIntegratedRasterChannel<QwVQWK_Channel> >      fIntegratedRasterChannel;
   std::vector <QwIntegratedRasterDetectorID>   fDetectorIDs;
 
 protected:

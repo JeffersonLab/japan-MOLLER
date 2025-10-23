@@ -42,7 +42,7 @@ class QwParityDB;
 
 class QwDBInterface {
  public:
-  enum EQwDBIDataTableType{kQwDBI_OtherTable, kQwDBI_BeamTable, 
+  enum EQwDBIDataTableType{kQwDBI_OtherTable, kQwDBI_BeamTable,
 			   kQwDBI_MDTable, kQwDBI_LumiTable};
  private:
   static std::map<TString, TString> fPrefix;

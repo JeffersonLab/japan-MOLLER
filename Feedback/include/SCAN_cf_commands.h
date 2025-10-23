@@ -14,4 +14,3 @@
 #define SCAN_SET_DATA    1002
 #define SCAN_GET_STATUS  1003
 #define SCAN_SET_STATUS  1004
-

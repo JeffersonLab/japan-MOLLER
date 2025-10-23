@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
 
 //-----------------------------------------------------------------------------------------------
   // Get the main detector channels we want to correlate
-//  QwDetectorArray* maindetector = 
+//  QwDetectorArray* maindetector =
 //    dynamic_cast<QwDetectorArray*>(detectors.GetSubsystemByName("Main Detector"));
 //  if (! maindetector) QwWarning << "No main detector subsystem defined!" << QwLog::endl;
 
@@ -144,7 +144,7 @@ if(1==2){
   maindetector->GetIntegrationPMT("MD3Neg")->AddRandomEventDriftParameters(3.0e6, 0, 60*Qw::Hz);
   maindetector->GetIntegrationPMT("MD3Neg")->AddRandomEventDriftParameters(6.0e5, 0, 120*Qw::Hz);
   maindetector->GetIntegrationPMT("MD3Neg")->AddRandomEventDriftParameters(4.5e5, 0, 240*Qw::Hz);
-  
+
 } //end if(1==2)
 */
 
@@ -173,8 +173,8 @@ if(1==2){
 
     // Open new output file
     // (giving run number as argument to OpenDataFile confuses the segment search)
-  
-    
+
+
     TString filename = Form("%sQwMock_%u.log", eventbuffer.GetDataDirectory().Data(), run);
     if (eventbuffer.OpenDataFile(filename,"W") != CODA_OK) {
       std::cout << "Error: could not open file!" << std::endl;
@@ -238,7 +238,7 @@ if(1==2){
       double time = event * detectors.GetWindowPeriod();
 
       // Fill the detectors with randomized data
-      
+
       int myhelicity = helicity->GetHelicityActual() ? +1 : -1;
       //std::cout << myhelicity << std::endl;
 
@@ -288,7 +288,7 @@ if(1==2){
       detectors.RandomizeEventData(myhelicity, time);
 //      detectors.ProcessEvent();
 //      beamline-> ProcessEvent(); //Do we need to keep this line now?  Check the maindetector correlation with beamline devices with and without it.
-      
+
      for (std::size_t i = 0; i < detchannels.size(); i++){
       detchannels[i]->ExchangeProcessedData();
       detchannels[i]->RandomizeMollerEvent(myhelicity);

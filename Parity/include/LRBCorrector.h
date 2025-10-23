@@ -30,7 +30,7 @@ class LRBCorrector : public VQwDataHandler, public MQwDataHandlerCloneable<LRBCo
     Int_t LoadChannelMap(const std::string& mapfile) override;
 
     Int_t ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff) override;
-    
+
     void ProcessData() override;
 
     void UpdateBurstCounter(Short_t burstcounter) override{
@@ -41,7 +41,7 @@ class LRBCorrector : public VQwDataHandler, public MQwDataHandlerCloneable<LRBCo
 	fBurstCounter = 0;
       } else {
 	fBurstCounter = fLastCycle-1;
-	QwWarning << "LRBCorrector, " << GetName() 
+	QwWarning << "LRBCorrector, " << GetName()
 		  << ": Burst counter, " << burstcounter
 		  << ", is greater than the stored number of sets of slopes.  "
 		  << "Using the last set of slopes (cycle=" << fLastCycle
@@ -65,5 +65,5 @@ class LRBCorrector : public VQwDataHandler, public MQwDataHandlerCloneable<LRBCo
 
     Short_t fLastCycle;
     std::map<Short_t,std::vector<std::vector<Double_t>>> fSensitivity;
-    
+
 };

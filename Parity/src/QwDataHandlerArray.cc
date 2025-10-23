@@ -147,7 +147,7 @@ void QwDataHandlerArray::LoadDataHandlersFromParameterFile(
     QwMessage << "Creating handler of type " << handler_type << " "
               << "with name " << handler_name << "." << QwLog::endl;
     VQwDataHandler* handler = 0;
-    
+
     try {
       handler =
         VQwDataHandlerFactory::Create(handler_type, handler_name);
@@ -180,7 +180,7 @@ void QwDataHandlerArray::LoadDataHandlersFromParameterFile(
 
     // Add to array
     this->push_back(handler);
-    /*    
+    /*
     // Instruct the handler to publish variables
     if (handler->PublishInternalValues() == kFALSE) {
       QwError << "Not all variables for " << handler->GetName()
@@ -626,7 +626,7 @@ void QwDataHandlerArray::PrintErrorCounters() const{// report number of events f
  */
 void QwDataHandlerArray::push_back(std::shared_ptr<VQwDataHandler> handler)
 {
-  
+
  if (handler.get() == NULL) {
    QwError << "QwDataHandlerArray::push_back(): NULL handler"
            << QwLog::endl;
@@ -681,11 +681,11 @@ TList* QwDataHandlerArray::GetParamFileNameList(TString name) const
 
     std::map<TString, TString> mapfiles_handler;
 
-    for (const_iterator handler = begin(); handler != end(); ++handler) 
+    for (const_iterator handler = begin(); handler != end(); ++handler)
       {
 	mapfiles_handler = (*handler)->GetDetectorMaps();
 	for( std::map<TString, TString>::iterator ii= mapfiles_handler.begin(); ii!= mapfiles_handler.end(); ++ii)
-	  {	
+	  {
 	    TList *test = new TList;
 	    test->SetName((*ii).first);
 	    test->AddLast(new TObjString((*ii).second));
@@ -720,8 +720,3 @@ void QwDataHandlerArray::FinishDataHandler()
     }
   }
 }
-  
-  
-  
-  
-  

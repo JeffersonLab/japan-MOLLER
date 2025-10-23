@@ -32,9 +32,9 @@
  * \param type Module type string (VQWK, ADC18, SIS3801, SIS3801D24/SCALER, MOLLERADC).
  * \param clock Clock reference name for timing-based modules.
  * \return Pointer to newly created BCM instance.
- * 
+ *
  * Creates appropriate concrete BCM template instantiation based on module type.
- * Supported types include integrating ADCs (VQWK, ADC18, MOLLERADC) and 
+ * Supported types include integrating ADCs (VQWK, ADC18, MOLLERADC) and
  * scalers (SIS3801, SIS3801D24). Each type uses the corresponding channel class
  * for data handling and calibration.
  */
@@ -66,7 +66,7 @@ VQwBCM* VQwBCM::Create(TString subsystemname, TString name, TString type, TStrin
  * \brief Copy constructor factory method to clone a BCM from an existing instance.
  * \param source Reference BCM to copy from.
  * \return Pointer to newly created BCM copy.
- * 
+ *
  * Creates a deep copy of the source BCM by determining its concrete type
  * and calling the appropriate template constructor. Preserves all calibration
  * parameters and configuration from the source.

@@ -22,7 +22,7 @@ Files:
 
      README  -- this file
      Makefile  -- to compile, type 'make'
-                  It was tested on Linux RedHat 6.2 
+                  It was tested on Linux RedHat 6.2
                   and SunOS in the ADAQ environment.
 
  CODA Classes by R. Michaels
@@ -40,7 +40,7 @@ Files:
      tstcoda_main.C  -- the most interesting one, tests abstract interface
      tstcoda_main_brief.C  -- a briefer version of tstcoda.
      etclient_main.C
-     etclient_main_nonptr.C   -- uses ET class 
+     etclient_main_nonptr.C   -- uses ET class
      etclient_main_ptr.C      -- same, but uses pointer to class
      tstio_main.C             -- read a CODA file
 
@@ -53,10 +53,6 @@ Files:
      libevio.a      Evio library (compile with 'make libevio.a')
                     This library can be used elsewhere, e.g. for
                     the parity analyzer.  Just copy it where you need it.
- 
+
   Small sample of CODA data
      snippet.dat
-
-
-
-

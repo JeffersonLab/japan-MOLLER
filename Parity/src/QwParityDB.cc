@@ -45,7 +45,7 @@ QwParityDB::QwParityDB() : QwDatabase("01", "04", "0000")
   fAnalysisID        = 0;
   fSegmentNumber     = -1;
   fDisableAnalysisCheck = false;
-  
+
 }
 
 /*! The constructor initializes member fields using the values in
@@ -63,7 +63,7 @@ QwParityDB::QwParityDB(QwOptions &options) : QwDatabase(options, "01", "04", "00
   fAnalysisID        = 0;
   fSegmentNumber     = -1;
   fDisableAnalysisCheck = false;
-  
+
   ProcessAdditionalOptions(options);
 
 }
@@ -86,13 +86,13 @@ void QwParityDB::SetupOneRun(QwEventBuffer& qwevt)
     UInt_t run_id      = this->GetRunID(qwevt);
     UInt_t runlet_id   = this->GetRunletID(qwevt);
     UInt_t analysis_id = this->GetAnalysisID(qwevt);
-    
+
     //  Write from the database
     QwMessage << "QwParityDB::SetupOneRun::"
 	      << " Run Number "  << QwColor(Qw::kBoldMagenta) << qwevt.GetRunNumber() << QwColor(Qw::kNormal)
 	      << " Run ID "      << QwColor(Qw::kBoldMagenta) << run_id << QwColor(Qw::kNormal)
 	      << " Runlet ID "   << QwColor(Qw::kBoldMagenta) << runlet_id << QwColor(Qw::kNormal)
-	      << " Analysis ID " << QwColor(Qw::kBoldMagenta) << analysis_id 
+	      << " Analysis ID " << QwColor(Qw::kBoldMagenta) << analysis_id
 	      << QwColor(Qw::kNormal)
 	      << QwLog::endl;
   }
@@ -169,7 +169,7 @@ UInt_t QwParityDB::SetRunID(QwEventBuffer& qwevt)
         first_run_id = row.run_id;
         first_run_number = row.run_number;
       });
-      
+
       QwDebug << "QwParityDB::SetRunID => Number of rows returned:  " << result_count << QwLog::endl;
 
       // If there is more than one run in the DB with the same run number, then there will be trouble later on.  Catch and bomb out.
@@ -208,7 +208,7 @@ UInt_t QwParityDB::SetRunID(QwEventBuffer& qwevt)
 
       QwDebug << "QwParityDB::SetRunID() => Executing sqlpp11 run insert" << QwLog::endl;
       auto insert_id = QueryInsertAndGetId(run_row.insert_into());
-      
+
       if (insert_id != 0) {
         fRunNumber = qwevt.GetRunNumber();
         fRunID     = insert_id;
@@ -259,7 +259,7 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
       auto c = GetScopedConnection();
 
       QwParitySchema::runlet runlet{};
-      
+
       // Query is slightly different if file segments are being chained together for replay or not.
       if (qwevt.AreRunletsSplit()) {
         fSegmentNumber = qwevt.GetSegmentNumber();
@@ -269,16 +269,16 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
                             and runlet.full_run == "false"
                             and runlet.segment_number == fSegmentNumber);
         auto results = QuerySelect(query);
-        
+
         // Count results and process using helper functions
         size_t result_count = CountResults(results);
         UInt_t found_runlet_id = 0;
         ForFirstResult(results, [&](const auto& row) {
           found_runlet_id = row.runlet_id;
         });
-        
+
         QwDebug << "QwParityDB::SetRunletID => Number of rows returned:  " << result_count << QwLog::endl;
-        
+
         // If there is more than one run in the DB with the same runlet number, then there will be trouble later on.
         if (result_count > 1) {
           QwError << "Unable to find unique runlet number " << qwevt.GetRunNumber() << " in database." << QwLog::endl;
@@ -286,30 +286,30 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
           QwError << "Please make sure that the database contains one unique entry for this run." << QwLog::endl;
           return 0;
         }
-        
+
         // Run already exists in database.  Pull runlet_id and move along.
         if (result_count == 1) {
           QwDebug << "QwParityDB::SetRunletID => Runlet ID = " << found_runlet_id << QwLog::endl;
           fRunletID = found_runlet_id;
           return fRunletID;
         }
-        
+
       } else {
         auto query = sqlpp::select(sqlpp::all_of(runlet))
                      .from(runlet)
                      .where(runlet.run_id == fRunID
                             and runlet.full_run == "true");
         auto results = QuerySelect(query);
-        
+
         // Count results and process using helper functions
         size_t result_count = CountResults(results);
         UInt_t found_runlet_id = 0;
         ForFirstResult(results, [&](const auto& row) {
           found_runlet_id = row.runlet_id;
         });
-        
+
         QwDebug << "QwParityDB::SetRunletID => Number of rows returned:  " << result_count << QwLog::endl;
-        
+
         // If there is more than one run in the DB with the same runlet number, then there will be trouble later on.
         if (result_count > 1) {
           QwError << "Unable to find unique runlet number " << qwevt.GetRunNumber() << " in database." << QwLog::endl;
@@ -317,7 +317,7 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
           QwError << "Please make sure that the database contains one unique entry for this run." << QwLog::endl;
           return 0;
         }
-        
+
         // Run already exists in database.  Pull runlet_id and move along.
         if (result_count == 1) {
           QwDebug << "QwParityDB::SetRunletID => Runlet ID = " << found_runlet_id << QwLog::endl;
@@ -337,7 +337,7 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
       // row[runlet_table.end_time]        = sqlpp::null;
       row[runlet_table.first_mps] = 0;
       row[runlet_table.last_mps]	= 0;
-      
+
       // Handle segment_number based on runlet split condition
       if (qwevt.AreRunletsSplit()) {
         row[runlet_table.segment_number]  = fSegmentNumber;
@@ -430,7 +430,7 @@ UInt_t QwParityDB::SetAnalysisID(QwEventBuffer& qwevt)
 
     analysis_row[analysis.runlet_id]  = GetRunletID(qwevt);
     analysis_row[analysis.seed_id] = 1;
-  
+
     std::pair<UInt_t, UInt_t> event_range;
     event_range = qwevt.GetEventRange();
 
@@ -445,7 +445,7 @@ UInt_t QwParityDB::SetAnalysisID(QwEventBuffer& qwevt)
     analysis_row[analysis.slope_calculation] = "off";  // we will match this as a real one later
     analysis_row[analysis.slope_correction]  = "off"; // we will match this as a real one later
 
-    // Analyzer Information Parsing 
+    // Analyzer Information Parsing
     QwRunCondition run_condition(
       gQwOptions.GetArgc(),
       gQwOptions.GetArgv(),
@@ -461,7 +461,7 @@ UInt_t QwParityDB::SetAnalysisID(QwEventBuffer& qwevt)
 
     // Iterate over each entry in run_condition
     while ((obj_str = (TObjString *) next())) {
-      QwMessage << obj_str->GetName() << QwLog::endl; 
+      QwMessage << obj_str->GetName() << QwLog::endl;
 
       // Store string contents for parsing
       str_var = str_val = obj_str->GetString();
@@ -470,7 +470,7 @@ UInt_t QwParityDB::SetAnalysisID(QwEventBuffer& qwevt)
       str_val.Remove(0,location); //str_val stores value to go in DB
 
       // Decision tree to figure out which variable to store in
-      if (str_var.BeginsWith("ROOT Version")) { 
+      if (str_var.BeginsWith("ROOT Version")) {
         analysis_row[analysis.root_version] = str_val;
       } else if (str_var.BeginsWith("ROOT file creating time")) {
         analysis_row[analysis.root_file_time] = str_val;
@@ -496,7 +496,7 @@ UInt_t QwParityDB::SetAnalysisID(QwEventBuffer& qwevt)
     auto c = GetScopedConnection();
 
     auto insert_id = QueryInsertAndGetId(analysis_row.insert_into());
-    
+
     if (insert_id != 0)
     {
       fAnalysisID = insert_id;
@@ -515,7 +515,7 @@ void QwParityDB::FillParameterFiles(QwSubsystemArrayParity& subsys){
   TList* param_file_list = subsys.GetParamFileNameList("mapfiles");
   try {
     auto c = GetScopedConnection();
-    
+
     QwParitySchema::parameter_files parameter_files;
     QwParitySchema::row<QwParitySchema::parameter_files> parameter_file_row;
     parameter_file_row[parameter_files.analysis_id] = GetAnalysisID();
@@ -764,7 +764,7 @@ void QwParityDB::StoreErrorCodeIDs()
 {
   try {
     auto c = GetScopedConnection();
-    
+
     QwParitySchema::error_code error_code{};
     auto query = sqlpp::select(sqlpp::all_of(error_code)).from(error_code).where(sqlpp::value(true));
     QuerySelectForEachResult(query, [&](const auto& row) {
@@ -867,7 +867,7 @@ void QwParityDB::DefineAdditionalOptions(QwOptions& options)
 {
   // Specify command line options for use by QwParityDB
   options.AddOptions("Parity Analyzer Database options")
-    ("QwParityDB.disable-analysis-check", 
+    ("QwParityDB.disable-analysis-check",
      po::value<bool>()->default_bool_value(false),
      "disable check of pre-existing analysis_id");
 }
@@ -879,7 +879,7 @@ void QwParityDB::DefineAdditionalOptions(QwOptions& options)
  */
 void QwParityDB::ProcessAdditionalOptions(QwOptions &options)
 {
-  if (options.GetValue<bool>("QwParityDB.disable-analysis-check"))  
+  if (options.GetValue<bool>("QwParityDB.disable-analysis-check"))
     fDisableAnalysisCheck=true;
 
   return;

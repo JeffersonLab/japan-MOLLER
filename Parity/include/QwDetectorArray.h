@@ -31,9 +31,9 @@ class QwDetectorArrayID;
  * detector array measurements. Supports various PMT configurations
  * and combination schemes.
  */
-class QwDetectorArray: 
- public VQwDetectorArray, 
- virtual public VQwSubsystemParity, 
+class QwDetectorArray:
+ public VQwDetectorArray,
+ virtual public VQwSubsystemParity,
  public MQwSubsystemCloneable<QwDetectorArray> {
 
 /******************************************************************
@@ -50,7 +50,7 @@ QwDetectorArray();
 public:
 
 /// Constructor with name
-QwDetectorArray(const TString& name) 
+QwDetectorArray(const TString& name)
  :VQwSubsystem(name), VQwSubsystemParity(name), VQwDetectorArray(name){};
 
 

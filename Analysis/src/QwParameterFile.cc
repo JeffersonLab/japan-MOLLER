@@ -198,15 +198,15 @@ bool QwParameterFile::OpenFile(const fs::path& file)
   Bool_t status = false;
 
   Bool_t check_whether_path_exists_and_is_a_regular_file = false;
-  
+
   // Check whether path exists and is a regular file
   check_whether_path_exists_and_is_a_regular_file = fs::exists(file) && fs::is_regular_file(file);
 
   if (check_whether_path_exists_and_is_a_regular_file) {
-    
+
     fBestParamFileNameAndPath = file.string();
     this->SetParamFilename();
-    
+
     // Connect stream (fFile) to file
     fFile.open(file.string().c_str());
     if (! fFile.good())
@@ -234,7 +234,7 @@ bool QwParameterFile::OpenFile(const fs::path& file)
     std::cout << "-------after close ----------" << std::endl;
     std::cout << fStream.str() << std::endl;
   }
-  
+
   return status;
 }
 
@@ -661,7 +661,7 @@ Bool_t QwParameterFile::SkipSection(std::string secname)
 	//  Do nothing for each line.
       }
       QwDebug << "QwParameterFile::SkipSection:  "
-	      << "Reached the end of the section." 
+	      << "Reached the end of the section."
 	      << QwLog::endl;
       if (status){
 	// Recurse, in case the next section has the same
@@ -855,23 +855,23 @@ std::pair<int,int> QwParameterFile::ParseIntRange(const std::string& separatorch
 
 
 
-void QwParameterFile::SetParamFilename() 
+void QwParameterFile::SetParamFilename()
 {
   Char_t delimiters[] = "/";
-  fBestParamFileName = LastString(fBestParamFileNameAndPath, delimiters);  
+  fBestParamFileName = LastString(fBestParamFileNameAndPath, delimiters);
   return;
 };
- 
+
 
 TString QwParameterFile::LastString(TString in, char* delim)
-{	
-  TObjArray*  all_strings = in.Tokenize(delim); 
+{
+  TObjArray*  all_strings = in.Tokenize(delim);
   TObjString* last_string = (TObjString*) all_strings->Last();
   TString return_string = last_string->GetString();
   delete all_strings;
   return return_string;
 };
- 
+
 
 TString QwParameterFile::GetParameterFileContents()
 {

@@ -44,7 +44,7 @@
 
 // Compatibility shims for sqlpp23 to support sqlpp11 syntax
 namespace sqlpp {
-  // Make std::nullopt available as sqlpp::null for compatibility  
+  // Make std::nullopt available as sqlpp::null for compatibility
   static constexpr auto null = std::nullopt;
 }
 
@@ -88,21 +88,21 @@ private:
 public:
     explicit QwScopedConnection(QwDatabase* db);
     ~QwScopedConnection();
-    
+
     // Delete copy constructor and assignment operator to prevent copying
     QwScopedConnection(const QwScopedConnection&) = delete;
     QwScopedConnection& operator=(const QwScopedConnection&) = delete;
-    
+
     // Allow move constructor and assignment
     QwScopedConnection(QwScopedConnection&& other) noexcept;
     QwScopedConnection& operator=(QwScopedConnection&& other) noexcept;
-    
+
     // Provide access to the database interface
     QwDatabase* operator->() { return fDatabase; }
     const QwDatabase* operator->() const { return fDatabase; }
     QwDatabase& operator*() { return *fDatabase; }
     const QwDatabase& operator*() const { return *fDatabase; }
-    
+
     // Check if connection is valid
     bool IsConnected() const;
 };
@@ -330,7 +330,7 @@ class QwDatabase {
         }
       });
     }
-    
+
     //!< Get a scoped connection that automatically disconnects when destroyed
     QwScopedConnection GetScopedConnection() {
       return QwScopedConnection(this);
@@ -361,12 +361,12 @@ class QwDatabase {
         throw std::runtime_error("Unreachable: monostate in QueryCount lambda");
       });
     }
-    
+
     template<typename Statement>
     bool QueryExists(const Statement& statement) {
       return QueryCount(statement) > 0;
     } //<! Generate a query to check existence in the database.
-    
+
     template<typename Statement>
     auto QuerySelect(const Statement& statement) {
       return VisitConnectionForSelect<Statement>([&statement](auto& connection) {
@@ -378,7 +378,7 @@ class QwDatabase {
         throw std::runtime_error("Unreachable: monostate in QuerySelect lambda");
       });
     } //<! Execute a SELECT statement and return the result.
-    
+
     template<typename Statement>
     void QueryExecute(const Statement& statement) {
       VisitConnection<EConnectionCheck::kChecked>([&statement](auto& connection) {
@@ -388,7 +388,7 @@ class QwDatabase {
         }
       });
     } //<! Execute a statement without returning a result.
-    
+
     template<typename InsertStatement>
     uint64_t QueryInsertAndGetId(const InsertStatement& statement) {
       return VisitConnection<EConnectionCheck::kChecked>([&statement](auto& connection) -> uint64_t {
@@ -406,7 +406,7 @@ class QwDatabase {
         throw std::runtime_error("Unreachable: monostate in QueryInsertAndGetId lambda");
       });
     } //<! Execute an INSERT statement and return the auto-increment ID.
-    
+
     const string GetVersion();                             //! Return a full version string for the DB schema
     const string GetVersionMajor() {return fVersionMajor;} //<! fVersionMajor getter
     const string GetVersionMinor() {return fVersionMinor;} //<! fVersionMinor getter

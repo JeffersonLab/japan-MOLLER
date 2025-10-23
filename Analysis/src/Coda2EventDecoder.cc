@@ -57,7 +57,7 @@ void Coda2EventDecoder::EncodePauseEventHeader(int* buffer, int eventcount, int 
 	buffer[4] = eventcount;
   ProcessPause(localtime, eventcount);
 }
- 
+
 // Creates END Event EVIO Header. See header for parameters.
 void Coda2EventDecoder::EncodeEndEventHeader(int* buffer, int eventcount, int localtime)
 {
@@ -65,7 +65,7 @@ void Coda2EventDecoder::EncodeEndEventHeader(int* buffer, int eventcount, int lo
 	buffer[1] = ((kEND_EVENT << 16) | (0x01 << 8) | 0xCC);
 	buffer[2] = localtime;
 	buffer[3] = 0; // unused
-	buffer[4] = eventcount; 
+	buffer[4] = eventcount;
   ProcessEnd(localtime, eventcount);
 }
 
@@ -83,7 +83,7 @@ Int_t Coda2EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 			<< buffer[1] << " "
 			<< buffer[2] << " "
 			<< buffer[3] << " "
-			<< buffer[4] << std::dec 
+			<< buffer[4] << std::dec
 			<< QwLog::endl;
 
 	if ( buffer[0] == 0 ){
@@ -151,7 +151,7 @@ Int_t Coda2EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 			fWordsSoFar = (2);
 		}
 	}
-	//  Initialize the fragment size to the event size, in case the 
+	//  Initialize the fragment size to the event size, in case the
 	//  event is not subbanked.
 	fFragLength = fEvtLength-fWordsSoFar;
 	QwDebug << Form("buffer[0-1] 0x%x 0x%x ; ",

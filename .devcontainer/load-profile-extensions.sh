@@ -14,7 +14,7 @@ alias setup-lcg="source ${LCG_SETUP_PATH}"
 auto_source_lcg() {
     # Set default LCG environment if not specified via container
     local lcg_env="${LCG_ENVIRONMENT:-LCG_107/x86_64-ubuntu2404-gcc13-opt}"
-    
+
     # Only auto-source if environment not already loaded
     if [[ -z "$LCG_VERSION" && -z "$ROOTSYS" ]]; then
         local lcg_setup_path="/cvmfs/sft.cern.ch/lcg/views/$lcg_env/setup.sh"
@@ -60,7 +60,7 @@ if [[ $- == *i* ]]; then  # Only in interactive shells
     echo "   check-cvmfs  - Show current CVMFS mount status"
     echo "   setup-lcg    - Source LCG environment ($LCG_ENV)"
     echo ""
-    
+
     # Quick CVMFS status check
     if mountpoint -q /cvmfs/sft.cern.ch 2>/dev/null; then
         echo "✅ CVMFS is mounted and ready"

@@ -44,7 +44,7 @@ g.SetMarkerStyle(20);
 //TF1 *fit=g.GetFunction("pol0");
 //printf("%3.1f",fit->GetParameter(0));
 return g;
-} 
+}
 
 
 void twoDagg(TString var, TString agg){
@@ -80,5 +80,3 @@ grmsEC.SetMarkerStyle(47);
 c->Print(Form("%s.png",var.Data()));
 return 0;
 }
-
-

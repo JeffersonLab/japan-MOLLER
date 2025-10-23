@@ -164,18 +164,18 @@ void MQwCodaControlEvent::ReportRunSummary()
     else
       QwMessage << "Run Duration (sec): " << "n/a" << QwLog::endl;
     QwMessage << "SQL-Formatted Start Time: " << GetStartSQLTime()
-	      << QwLog::endl; 
+	      << QwLog::endl;
     QwMessage << "SQL-Formatted End Time:   " << GetEndSQLTime()
-	      << QwLog::endl; 
-    QwMessage << "Number of Pauses during this run: " << fNumberPause 
+	      << QwLog::endl;
+    QwMessage << "Number of Pauses during this run: " << fNumberPause
 	      << QwLog::endl;
     for (i=0; i<(Int_t)fNumberPause; i++) {
       QwMessage << "Pause Number: " << i
-		<<"; Events so far: " << fPauseEventCount[i] 
-		<< "; Runtime since start (sec): " 
+		<<"; Events so far: " << fPauseEventCount[i]
+		<< "; Runtime since start (sec): "
 		<< fPauseTime[i]-fStartTime;
       if ((Int_t)fNumberGo > i+1){
-	QwMessage << "; Duration of Pause (sec): " 
+	QwMessage << "; Duration of Pause (sec): "
 		  << fGoTime[i+1]-fPauseTime[i]
 		  << QwLog::endl;
       }else {
@@ -195,12 +195,12 @@ time_t MQwCodaControlEvent::GetStartUnixTime()
 time_t MQwCodaControlEvent::GetEndUnixTime()
 {
   // if GetEndTime is equal to 0
-  // we will see the end time as 
+  // we will see the end time as
   //
   UInt_t end_time       = GetEndTime();
   UInt_t qweak_end_time = 1338523199;
   // 2012-05-31 23:59:59 in the MySQL database
-  // $date -d@1338523199 
+  // $date -d@1338523199
   // Thu May 31 23:59:59 EDT 2012 in a xterm (Linux)
 
   if(end_time) return (time_t) end_time;

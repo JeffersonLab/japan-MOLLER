@@ -114,7 +114,7 @@ class QwScaler: public VQwSubsystemParity, public MQwSubsystemCloneable<QwScaler
     //update the error flag in the subsystem level from the top level routines related to stability checks. This will uniquely update the errorflag at each channel based on the error flag in the corresponding channel in the ev_error subsystem
     void UpdateErrorFlag(const VQwSubsystem *ev_error) override{
     };
-    
+
     void PrintValue() const override;
     void PrintInfo() const override;
 

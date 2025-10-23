@@ -105,7 +105,7 @@ template<typename T> class QwBCM : public VQwBCM {
 
   void UpdateErrorFlag(const VQwBCM *ev_error) override;
 
-  UInt_t GetErrorCode() const {return (fBeamCurrent.GetErrorCode());}; 
+  UInt_t GetErrorCode() const {return (fBeamCurrent.GetErrorCode());};
 
 
   Int_t SetSingleEventCuts(Double_t mean = 0, Double_t sigma = 0);//two limits and sample size

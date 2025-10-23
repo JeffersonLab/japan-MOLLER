@@ -83,7 +83,7 @@ void QwEPICSEvent::DefineOptions(QwOptions &options)
 #ifdef __USE_DATABASE__
   // Option to disable EPICS database accesses
   options.AddOptions("Default options")
-    ("disable-db-epics", 
+    ("disable-db-epics",
      po::value<bool>()->default_bool_value(false),
      "disable EPICS database access");
 #endif
@@ -808,7 +808,7 @@ void QwEPICSEvent::FillDB(QwParityDB *db)
     QwError << "Unable to determine if there are other slow controls entries in the database for this run.  THERE MAY BE DUPLICATES." << QwLog::endl;
   }
 
- 
+
   if (! fDisableDatabase) {
     FillSlowControlsData(db);
     FillSlowControlsStrings(db);
@@ -885,7 +885,7 @@ void QwEPICSEvent::FillSlowControlsData(QwParityDB *db)
 	  tmp_row[slow_controls_data.error] = sigma;
 	  tmp_row[slow_controls_data.min_value] = fEPICSCumulativeData[tagindex].Minimum;
 	  tmp_row[slow_controls_data.max_value] = fEPICSCumulativeData[tagindex].Maximum;
-	  
+
 	  entrylist.push_back(tmp_row);
 	}
       }
@@ -896,7 +896,7 @@ void QwEPICSEvent::FillSlowControlsData(QwParityDB *db)
   if( entrylist.size() ) {
     auto c = db->GetScopedConnection();
     QwDebug << "QwEPICSEvent::FillSlowControlsData::Writing to database now" << QwLog::endl;
-    
+
     // Convert to sqlpp11 bulk insert
     try {
       for (const auto& entry : entrylist) {
@@ -958,7 +958,7 @@ void QwEPICSEvent::FillSlowControlsStrings(QwParityDB *db)
   if( entrylist.size() ) {
     auto c = db->GetScopedConnection();
     QwDebug << "QwEPICSEvent::FillSlowControlsStrigs Writing to database now" << QwLog::endl;
-    
+
     // Convert to sqlpp11 bulk insert
     try {
       for (const auto& entry : entrylist) {
@@ -980,20 +980,20 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
   // Get database connection
   QwParitySchema::slow_controls_settings slow_controls_settings{};
   QwParitySchema::row<QwParitySchema::slow_controls_settings> tmp_row;
-  
+
   // Initialize values
   UInt_t runlet_id = db->GetRunletID();
   tmp_row[slow_controls_settings.runlet_id] = runlet_id;
 
   std::string precession_reversal;
-  
+
   // Set precession_reversal
   if (fPrecessionReversal == 1) {
     precession_reversal = "CCW";
   } else {
     precession_reversal = "CW";
   }
-  
+
   Int_t tagindex;
 
   // Add as many blocks as needed in the following for all slow_controls_settings.
@@ -1114,7 +1114,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
   tagindex = FindIndex("IGL1I00DIOFLRD");
   if (tagindex != kEPICS_Error) {
     QwDebug << "tagindex for IGL1I00DIOFLRD = " << tagindex << QwLog::endl;
-    
+
     if (! fEPICSCumulativeData[tagindex].Filled) {
       //  No data for this run.
       tmp_row[slow_controls_settings.passive_helicity_plate] = sqlpp::null;
@@ -1200,9 +1200,9 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
           std::string(wien_enum[WienModeIndex(fEPICSDataEvent[tagindex].StringValue)].Data());
     }
   }
-  
+
   // For the precession reversal
-  //   This just uses the flag from the channel map to determine if the precession 
+  //   This just uses the flag from the channel map to determine if the precession
   //   is normal or reversed.
   if (fPrecessionReversal){
     tmp_row[slow_controls_settings.precession_reversal] = std::string("reverse");
@@ -1285,8 +1285,8 @@ TList *QwEPICSEvent::GetEPICSStringValues()
   string_list->SetOwner(true);
 
   std::size_t tagindex = 0;
-  
-  for (tagindex=0; tagindex<fEPICSVariableList.size(); tagindex++) 
+
+  for (tagindex=0; tagindex<fEPICSVariableList.size(); tagindex++)
     {
       if (fEPICSVariableType[tagindex] == kEPICSString) {
 
@@ -1295,7 +1295,7 @@ TList *QwEPICSEvent::GetEPICSStringValues()
 
 	if (fEPICSDataEvent[tagindex].Filled) {
 	  epics_string += fEPICSDataEvent[tagindex].StringValue;
-	} 
+	}
 	else {
 	  epics_string += "empty";
 	}
@@ -1307,7 +1307,7 @@ TList *QwEPICSEvent::GetEPICSStringValues()
 	string_list -> Add(new TObjString(epics_string));
       }
     }
-    
+
   return string_list;
 }
 
@@ -1320,9 +1320,9 @@ void QwEPICSEvent::WriteEPICSStringValues()
   TSeqCollection *file_list = gROOT->GetListOfFiles();
 
   if (file_list) {
-    
+
     Int_t size = file_list->GetSize();
-    for (Int_t i=0; i<size; i++) 
+    for (Int_t i=0; i<size; i++)
       {
 	TFile *file = (TFile*) file_list->At(i);
 
@@ -1331,14 +1331,14 @@ void QwEPICSEvent::WriteEPICSStringValues()
 		    << file->GetName()
 		    << std::endl;
 	}
-	
+
 	TTree *slow_tree = (TTree*) file->Get("slow");
-	
-	for (std::size_t tagindex=0; tagindex<fEPICSVariableList.size(); tagindex++) 
+
+	for (std::size_t tagindex=0; tagindex<fEPICSVariableList.size(); tagindex++)
 	  {
-	    // only String 
+	    // only String
 	    if (fEPICSVariableType[tagindex] == kEPICSString) {
-	      
+
 	      TString name = fEPICSVariableList[tagindex];
 	      name.ReplaceAll(':','_'); // remove colons before creating branch
 	      TString name_type = name + "/C";\
@@ -1347,10 +1347,10 @@ void QwEPICSEvent::WriteEPICSStringValues()
 	      TString epics_string;
 
 	      TBranch *new_branch = slow_tree->Branch(name, epics_char, name_type);
-	      
+
 	      if (fEPICSDataEvent[tagindex].Filled) {
 		epics_string = fEPICSDataEvent[tagindex].StringValue;
-	      } 
+	      }
 	      else {
 		epics_string = "empty";
 	      }
@@ -1364,7 +1364,7 @@ void QwEPICSEvent::WriteEPICSStringValues()
 	      sprintf(epics_char, "%s", epics_string.Data());
 	      new_branch->Fill();
 	    }
-	    
+
 	  }
 
 	file -> Write("", TObject::kOverwrite);
@@ -1374,7 +1374,7 @@ void QwEPICSEvent::WriteEPICSStringValues()
   QwDebug << "Leaving QwEPICSEvent::WriteEPICSStringValues() normally"  << QwLog::endl;
 
   return;
-  
+
 }
 
 
@@ -1414,12 +1414,12 @@ Int_t QwEPICSEvent::DetermineIHWPPolarity() const{
 
 EQwWienMode QwEPICSEvent::DetermineWienMode() const{
   EQwWienMode wienmode = kWienIndeterminate;
-  
+
   Double_t launchangle = 0.0;
 
   Double_t vwienangle = GetDataValue("VWienAngle");
   Double_t phiangle   = GetDataValue("Phi_FG");
-  Double_t hwienangle = GetDataValue("HWienAngle"); 
+  Double_t hwienangle = GetDataValue("HWienAngle");
   Double_t hoffset = 0.0;
   if (fabs(vwienangle)<10.0 && fabs(phiangle)<10.0){
     hoffset = 0.0;
@@ -1431,10 +1431,10 @@ EQwWienMode QwEPICSEvent::DetermineWienMode() const{
     hoffset = +90.0;
   } else if (fabs(vwienangle)>80.0 && fabs(phiangle)<10.0) {
     wienmode = kWienVertTrans;
-  } 
+  }
   if (wienmode == kWienIndeterminate){
     launchangle = hoffset+hwienangle;
-    Double_t long_proj = 
+    Double_t long_proj =
       cos((launchangle-fNominalWienAngle)*TMath::DegToRad());
     if (long_proj > 0.5){
       wienmode = kWienForward;

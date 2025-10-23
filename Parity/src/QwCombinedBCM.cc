@@ -195,7 +195,7 @@ void  QwCombinedBCM<T>::RandomizeEventData(int helicity, double time)
     //std::cout << "(fTripPeriod - fmod(time, fTripPeriod))=="<<(fTripPeriod - fmod(time, fTripPeriod))<<"; fTripLength=="<<fTripLength
     //          << "; ((fTripPeriod - fmod(time, fTripPeriod)) / fTripLength)=="<<((fTripPeriod - fmod(time, fTripPeriod)) / fTripLength)
     //          << std::endl;
-    this->fBeamCurrent.Scale(factor); 
+    this->fBeamCurrent.Scale(factor);
     //std::cout << "fBeamCurrent.Scale(factor) = " << factor << std::endl;
   }
 }
@@ -242,16 +242,16 @@ void  QwCombinedBCM<T>::LoadMockDataParameters(QwParameterFile &paramfile){
 template<typename T>
 Bool_t QwCombinedBCM<T>::ApplySingleEventCuts()
 {
-  
+
   //This is required to update single event cut failures in individual channels
   //  First update the error code based on the codes
   //  of the elements.  This requires that the BCMs
   //  have had ApplySingleEventCuts run on them already.
-  
+
   for (size_t i=0;i<fElement.size();i++){
     this->fBeamCurrent.UpdateErrorFlag(fElement.at(i)->fBeamCurrent.GetErrorCode());
   }
-  
+
 
   //  Everything is identical as for a regular BCM
   return QwBCM<T>::ApplySingleEventCuts();
@@ -273,7 +273,7 @@ UInt_t QwCombinedBCM<T>::UpdateErrorFlag(){
 /*
 template<typename T>
 void QwCombinedBCM<T>::UpdateErrorFlag(const VQwBCM *ev_error){
-    
+
   try {
     if(typeid(*ev_error)==typeid(*this)) {
       // std::cout<<" Here in QwCombinedBCM::UpdateErrorFlag \n";
@@ -290,8 +290,8 @@ void QwCombinedBCM<T>::UpdateErrorFlag(const VQwBCM *ev_error){
     }
   } catch (std::exception& e) {
     std::cerr<< e.what()<<std::endl;
-  }  
-    
+  }
+
     QwBCM<T>::UpdateErrorFlag(const ev_error);
 };
 */

@@ -26,4 +26,3 @@ Preload libNew and consume data with
 ```
 LD_PRELOAD=$(root-config --libdir)/libNew.so ./qwcons
 ```
-

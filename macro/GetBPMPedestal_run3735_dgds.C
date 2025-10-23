@@ -2,7 +2,7 @@
 //	date: July, 2019
 void LoadStyle();
 
-void GetBPMPedestal_run3735_dgds(int run_num=3735, 
+void GetBPMPedestal_run3735_dgds(int run_num=3735,
 		    TString bcm_name="(bcm_dg_ds.hw_sum_raw/bcm_dg_ds.num_samples--396.60)*0.002328",
 		    Double_t lowlimit=10,
 		    Double_t upperlimit=75,
@@ -13,11 +13,11 @@ void GetBPMPedestal_run3735_dgds(int run_num=3735,
 			qwrootfile_path,run_num);
   TFile *rootfile = TFile::Open(rf_name);
   if(rootfile ==NULL){
-    cout << rf_name 
+    cout << rf_name
 	 << " doesn't exist !!" << endl;
     return;
   }
-    
+
   TTree *tree= (TTree*)rootfile->Get("evt");
 
   TString device_name[] ={"4a","4e",
@@ -33,17 +33,17 @@ void GetBPMPedestal_run3735_dgds(int run_num=3735,
   TVirtualPad* c_res = c1->cd(2);
   c_fit->Divide(5,1);
   c_res->Divide(5,1);
-  
+
   TF1 *f_zero = new TF1("f_zero","0",0,100);
   f_zero->SetLineWidth(2);
   f_zero->SetLineColor(kRed);
   f_zero->SetLineStyle(9);
-  
+
   TString branch_name;
   TString num_samples_name;
 
   //  run 3396
-  TCut beam_evtcut[] ={ 
+  TCut beam_evtcut[] ={
     "cleandata && scandata1>0 && scandata2==1",
     "cleandata && scandata1>0 && scandata2==2",
     "cleandata && scandata1==448 && scandata2==3",
@@ -56,7 +56,7 @@ void GetBPMPedestal_run3735_dgds(int run_num=3735,
   double adc_error[5][ndata];
   double adc_res[5][ndata]; // residual
 
-  double bcm_mean[ndata]; 
+  double bcm_mean[ndata];
   double bcm_error[ndata];
 
   TString gfit_title[5];
@@ -66,7 +66,7 @@ void GetBPMPedestal_run3735_dgds(int run_num=3735,
   double slope[nBPM][5];
 
   TGraphErrors *g_res[5];
-  TGraphErrors *g_fit[5];  
+  TGraphErrors *g_fit[5];
   TGraphErrors *g_res_ref[5];
   TGraphErrors *g_fit_ref[5];
   TMultiGraph *mg_res[5];
@@ -89,9 +89,9 @@ void GetBPMPedestal_run3735_dgds(int run_num=3735,
     h_stat =(TH1D*)gDirectory->FindObject("htemp");
     bcm_mean[i] = h_stat->GetMean();
     bcm_error[i] = h_stat->GetRMS()/TMath::Sqrt(h_stat->GetEntries());
-    cout << "beam current(uA) : " 
+    cout << "beam current(uA) : "
 	 << bcm_mean[i]
-	 << "+/-" 
+	 << "+/-"
 	 << bcm_error[i]
 	 << endl;
     // my_cut = pedestal_evtcut[i];
@@ -131,7 +131,7 @@ void GetBPMPedestal_run3735_dgds(int run_num=3735,
 	adc_error[ich][i] = h_stat->GetRMS()/TMath::Sqrt(h_stat->GetEntries());
       }
       c_fit->cd(ich+1);
-      
+
       g_fit[ich] = new TGraphErrors(ndata,
 				    bcm_mean,adc_mean[ich],
 				    bcm_error,adc_error[ich]);
@@ -148,10 +148,10 @@ void GetBPMPedestal_run3735_dgds(int run_num=3735,
 
       ped[ibpm][ich] = f_fit->GetParameter(0);
       slope[ibpm][ich] = f_fit->GetParameter(1);
-      
+
       for(int i=0;i<ndata;i++)
 	adc_res[ich][i] = adc_mean[ich][i] - f_fit->Eval(bcm_mean[i]);
-      
+
       c_res->cd(ich+1);
       g_res[ich] = new TGraphErrors(ndata,
 				    bcm_mean,adc_res[ich],
@@ -185,14 +185,14 @@ void LoadStyle(){
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.2);
   gStyle->SetStatW(0.3);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(1011);
   gStyle->SetStatX(0.7);
   gStyle->SetStatY(0.9);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -201,5 +201,5 @@ void LoadStyle(){
   gStyle->SetLabelSize(0.035,"x");
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.06,"hxyz");
-  gROOT->ForceStyle();  
+  gROOT->ForceStyle();
 }

@@ -44,7 +44,7 @@ class QwLinearDiodeArray : public VQwBPM {
   QwLinearDiodeArray(TString subsystemname, TString name):VQwBPM(name){
     SetSubsystemName(subsystemname);
     InitializeChannel(subsystemname, name);
-  };    
+  };
   QwLinearDiodeArray(const QwLinearDiodeArray& source)
   : VQwBPM(source),
     fEffectiveCharge(source.fEffectiveCharge)
@@ -58,7 +58,7 @@ class QwLinearDiodeArray : public VQwBPM {
     }
   }
   ~QwLinearDiodeArray() override { };
-  
+
   void    InitializeChannel(TString name);
   // new routine added to update necessary information for tree trimming
   void    InitializeChannel(TString subsystem, TString name);
@@ -154,7 +154,7 @@ class QwLinearDiodeArray : public VQwBPM {
   /////
  private:
   static const size_t kMaxElements;
-  static const TString subelement[8]; 
+  static const TString subelement[8];
 
   /*  Position calibration factor, transform ADC counts in mm */
   static const Double_t kQwLinearDiodeArrayPadSize;

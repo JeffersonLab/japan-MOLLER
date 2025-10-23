@@ -43,7 +43,7 @@ class QwExtractor:public VQwDataHandler, public MQwDataHandlerCloneable<QwExtrac
     void ProcessData() override;
     void SetPointer(QwSubsystemArrayParity *ptr){fSourcePointer = ptr;};
     void FillTreeBranches(QwRootFile *treerootfile) override;
-  
+
   protected:
     /// Default constructor (Protected for child class access)
 

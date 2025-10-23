@@ -34,7 +34,7 @@ Bool_t VEventDecoder::DecodeSubbankHeader(UInt_t *buffer){
 			<< ", fAllowLowSubbankIDs==" << fAllowLowSubbankIDs
 			<< QwLog::endl;
 
-		if (fSubbankTag<=31 
+		if (fSubbankTag<=31
 			&& ( (fAllowLowSubbankIDs==kFALSE)
 			|| (fAllowLowSubbankIDs==kTRUE && fSubbankType==0x10) ) ){
 			//  Subbank tags between 0 and 31 indicate this is
@@ -51,7 +51,7 @@ Bool_t VEventDecoder::DecodeSubbankHeader(UInt_t *buffer){
 		}
 		fWordsSoFar   += 2;
 	}
-	QwDebug << "QwEventBuffer::DecodeSubbankHeader: " 
+	QwDebug << "QwEventBuffer::DecodeSubbankHeader: "
 			<< "fROC=="<<fROC << ", fSubbankTag==" << fSubbankTag <<": "
 			<<  std::hex
 			<< buffer[0] << " "
@@ -61,7 +61,7 @@ Bool_t VEventDecoder::DecodeSubbankHeader(UInt_t *buffer){
 			<< buffer[4] << std::dec << " "
 			<< fWordsSoFar << " "<< fEvtLength
 			<< QwLog::endl;
-	//  There is no final else, because any bank type other than 
+	//  There is no final else, because any bank type other than
 	//  0x10 should just return okay.
 	return okay;
 }

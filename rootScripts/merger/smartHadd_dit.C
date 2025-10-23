@@ -46,7 +46,7 @@ std::vector<std::string> TreeGetter::fileglob(const char *pattern) {
   return filelist;
 }
 
-Int_t TreeGetter::getData() { 
+Int_t TreeGetter::getData() {
   for (Int_t i = 0; i < listOfFileIndices.size() ; i++ ){
     Printf("Run %d",listOfFileIndices.at(i));
   }

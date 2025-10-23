@@ -338,11 +338,11 @@ void QwSubsystemArrayParity::DeaccumulateRunningSum(const QwSubsystemArrayParity
 {
   //Bool_t berror=kTRUE;//only needed for deaccumulation (stability check purposes)
   //if (value.fErrorFlag>0){//check the error is global
-  //berror=((value.fErrorFlag & 0x2FF) == 0); //The operation value.fErrorFlag & 0x2FF clear everything else but the HW errors + event cut errors + blinder error    
+  //berror=((value.fErrorFlag & 0x2FF) == 0); //The operation value.fErrorFlag & 0x2FF clear everything else but the HW errors + event cut errors + blinder error
   //}
   if (!value.empty()) {
     if (this->size() == value.size()) {
-      //if (value.GetEventcutErrorFlag()==0){//do derunningsum only if error flag is zero. 
+      //if (value.GetEventcutErrorFlag()==0){//do derunningsum only if error flag is zero.
 	for (size_t i = 0; i < value.size(); i++) {
 	  if (value.at(i)==NULL || this->at(i)==NULL) {
 	    //  Either the value or the destination subsystem
@@ -469,7 +469,7 @@ Bool_t QwSubsystemArrayParity::ApplySingleEventCuts(){
   fErrorFlag=0;  // Testing if event number is within bad Event Range cut
   if( CheckBadEventRange() )
     fErrorFlag |=kBadEventRangeError;
-  
+
   VQwSubsystemParity *subsys_parity = nullptr;
   CountFalse=0;
   if (!empty()){
@@ -478,7 +478,7 @@ Bool_t QwSubsystemArrayParity::ApplySingleEventCuts(){
       status=subsys_parity->ApplySingleEventCuts();
       ErrorFlag = subsys_parity->GetEventcutErrorFlag();
       if ((ErrorFlag & kEventCutMode3)==kEventCutMode3)//we only care about the event cut flag in event cut mode 3
-	fErrorFlag |= ErrorFlag; 
+	fErrorFlag |= ErrorFlag;
       if (!status)
       {
 	if ((ErrorFlag&kGlobalCut)==kGlobalCut){
@@ -486,7 +486,7 @@ Bool_t QwSubsystemArrayParity::ApplySingleEventCuts(){
 	  fErrorFlag |= ErrorFlag; //we need the error code for failed events in event mode 2 for beam trips and etc.
 	}
       }
-      
+
 
     }
   }
@@ -586,13 +586,13 @@ void QwSubsystemArrayParity::UpdateErrorFlag(const QwSubsystemArrayParity& ev_er
     }
   } else {
     //  The source is empty
-  }  
+  }
 };
 
 
-void QwSubsystemArrayParity::UpdateErrorFlag() { 
+void QwSubsystemArrayParity::UpdateErrorFlag() {
   //this routine will refresh the global error flag after stability cut check
-  //by default at the ApplySingleEventCuts routine fErrorFlag is updated properly and a const GetEventcutErrorFlag() routine 
+  //by default at the ApplySingleEventCuts routine fErrorFlag is updated properly and a const GetEventcutErrorFlag() routine
   //returns the fErrorFlag value
   fErrorFlag=0;
   if( CheckBadEventRange() )
@@ -611,7 +611,7 @@ void QwSubsystemArrayParity::UpdateErrorFlag() {
 Bool_t QwSubsystemArrayParity::CheckBadEventRange(){
   std::vector< std::pair<UInt_t, UInt_t> >::iterator itber = fBadEventRange.begin(); // ber = bad event range
   while(itber!=fBadEventRange.end()){
-    if( fCodaEventNumber >= (*itber).first 
+    if( fCodaEventNumber >= (*itber).first
         && fCodaEventNumber <= (*itber).second){
       return kTRUE;
     }

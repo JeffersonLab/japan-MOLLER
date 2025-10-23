@@ -54,7 +54,7 @@ class QwCombinedPMT : public VQwDataElement {
 
   void  InitializeChannel(TString name, TString datatosave);
   // new routine added to update necessary information for tree trimming
-  void  InitializeChannel(TString subsystem, TString name, TString datatosave); 
+  void  InitializeChannel(TString subsystem, TString name, TString datatosave);
   void  LinkChannel(TString name);
 
   const QwMollerADC_Channel* GetChannel(const TString name) const {
@@ -119,7 +119,7 @@ class QwCombinedPMT : public VQwDataElement {
   void CalculateRunningAverage();
 
   void SetBlindability(Bool_t isblindable){fSumADC.SetBlindability(isblindable);};
-  void SetNormalizability(Bool_t isnormalizable){fSumADC.SetNormalizability(isnormalizable);}; 
+  void SetNormalizability(Bool_t isnormalizable){fSumADC.SetNormalizability(isnormalizable);};
 
   /// \brief Blind the asymmetry
   void Blind(const QwBlinder *blinder);

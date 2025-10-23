@@ -6,18 +6,18 @@ void RHWP_scan(TString device="bpm1i02", TString ucut ="1",Int_t myii=0) {
   		    0,0,1,1);
      p1->Draw();
      p1->Divide(1,3);
-     
-	// define style here 
+
+	// define style here
 	// general parameters
 	gStyle->SetOptDate(0);     gStyle->SetOptTitle(0);
 	gStyle->SetStatColor(10);  gStyle->SetStatH(0.2);
-	gStyle->SetStatW(0.3);     gStyle->SetOptStat(0); 
-  
+	gStyle->SetStatW(0.3);     gStyle->SetOptStat(0);
+
 
 	//	TString finalcut = "cleandata==1 && ";
 	//finalcut += ucut;
 
-  
+
 	TString *bpmNam = new TString(device);
 
 	TString tmpname;
@@ -64,7 +64,7 @@ void RHWP_scan(TString device="bpm1i02", TString ucut ="1",Int_t myii=0) {
     Double_t rectphs = f1->GetParameter(2);
     while (rectphs>3.14159) rectphs-=2*3.14159;
     while (rectphs<-3.14159) rectphs+=2*3.14159;
-    if (rectphs<0) { 
+    if (rectphs<0) {
 		rectphs+=3.14159;
 		f1->SetParameter(1,-1*f1->GetParameter(1));
     }
@@ -72,7 +72,7 @@ void RHWP_scan(TString device="bpm1i02", TString ucut ="1",Int_t myii=0) {
     rectphs = f1->GetParameter(4);
     while (rectphs>3.14159) rectphs-=2*3.14159;
     while (rectphs<-3.14159) rectphs+=2*3.14159;
-    if (rectphs<0) { 
+    if (rectphs<0) {
 		rectphs+=3.14159;
 		f1->SetParameter(3,-1*f1->GetParameter(3));
     }
@@ -115,7 +115,7 @@ void RHWP_scan(TString device="bpm1i02", TString ucut ="1",Int_t myii=0) {
     }
 
 
-  
+
     // plot Dx
     tmpname = bpmNam->Data();
     plotcommand = "diff_";
@@ -134,7 +134,7 @@ void RHWP_scan(TString device="bpm1i02", TString ucut ="1",Int_t myii=0) {
     rectphs = f1->GetParameter(2);
     while (rectphs>3.14159) rectphs-=2*3.14159;
     while (rectphs<-3.14159) rectphs+=2*3.14159;
-    if (rectphs<0) { 
+    if (rectphs<0) {
 		rectphs+=3.14159;
 		f1->SetParameter(1,-1*f1->GetParameter(1));
     }
@@ -142,7 +142,7 @@ void RHWP_scan(TString device="bpm1i02", TString ucut ="1",Int_t myii=0) {
     rectphs = f1->GetParameter(4);
     while (rectphs>3.14159) rectphs-=2*3.14159;
     while (rectphs<-3.14159) rectphs+=2*3.14159;
-    if (rectphs<0) { 
+    if (rectphs<0) {
 		rectphs+=3.14159;
 		f1->SetParameter(3,-1*f1->GetParameter(3));
     }
@@ -161,12 +161,12 @@ void RHWP_scan(TString device="bpm1i02", TString ucut ="1",Int_t myii=0) {
     tit = bpmNam->Data();
     tit += ",  Dx/2 vs. #theta";
     hDx->GetYaxis()->SetTitle(tit.Data());
-    
+
     xmin = f1->GetXaxis()->GetXmin();
     xmax = f1->GetXaxis()->GetXmax();
     t1->DrawLine(xmin,0,xmax,0);
 
-    //print fit eqn to canvas   
+    //print fit eqn to canvas
     sprintf(linetxt,"Dx/2 = %7.2f + ",f1->GetParameter(0));
     funcstr = linetxt;
     sprintf(linetxt," %7.2f sin (2#theta +%7.2f) +",
@@ -187,7 +187,7 @@ void RHWP_scan(TString device="bpm1i02", TString ucut ="1",Int_t myii=0) {
     plotcommand += tmpname.Data();
     plotcommand += "Y";
     plotcommand += Form("*1e6:scandata1*180./4000>>hDy%d",myii);
-   
+
     p1->cd(3);
     p->Draw(plotcommand.Data(),scut.Data(),"prof");
     // fit Dy vs theta
@@ -200,7 +200,7 @@ void RHWP_scan(TString device="bpm1i02", TString ucut ="1",Int_t myii=0) {
     rectphs = f1->GetParameter(2);
     while (rectphs>3.14159) rectphs-=2*3.14159;
     while (rectphs<-3.14159) rectphs+=2*3.14159;
-    if (rectphs<0) { 
+    if (rectphs<0) {
 		rectphs+=3.14159;
 		f1->SetParameter(1,-1*f1->GetParameter(1));
     }
@@ -208,7 +208,7 @@ void RHWP_scan(TString device="bpm1i02", TString ucut ="1",Int_t myii=0) {
     rectphs = f1->GetParameter(4);
     while (rectphs>3.14159) rectphs-=2*3.14159;
     while (rectphs<-3.14159) rectphs+=2*3.14159;
-    if (rectphs<0) { 
+    if (rectphs<0) {
 		rectphs+=3.14159;
 		f1->SetParameter(3,-1*f1->GetParameter(3));
     }
@@ -228,12 +228,12 @@ void RHWP_scan(TString device="bpm1i02", TString ucut ="1",Int_t myii=0) {
     if(tmpname.Contains("lina1"))    tit += ",  diff_rms vs. #theta";
     else tit += ",  Dy/2 vs. #theta";
     hDy->GetYaxis()->SetTitle(tit.Data());
-    
+
     xmin = f1->GetXaxis()->GetXmin();
     xmax = f1->GetXaxis()->GetXmax();
     t1->DrawLine(xmin,0,xmax,0);
 
-    //print fit eqn to canvas   
+    //print fit eqn to canvas
     if(tmpname.Contains("lina1")) sprintf(linetxt,"Drms = %7.2f + ",f1->GetParameter(0));
     else sprintf(linetxt,"Dy/2 = %7.2f + ",f1->GetParameter(0));
     funcstr = linetxt;
@@ -244,7 +244,7 @@ void RHWP_scan(TString device="bpm1i02", TString ucut ="1",Int_t myii=0) {
 			f1->GetParameter(3),f1->GetParameter(4)*180.0/3.14159);
     funcstr += linetxt;
     hDy->GetXaxis()->SetTitle(funcstr.Data());
-    
+
     for (Int_t i = 0; i<5; i++) {
 		dypar[i]=f1->GetParameter(i);
     }

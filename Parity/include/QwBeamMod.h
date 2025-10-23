@@ -116,7 +116,7 @@ class QwBeamMod: public VQwSubsystemParity, public MQwSubsystemCloneable<QwBeamM
   QwBeamMod(const QwBeamMod& source)
   : VQwSubsystem(source),VQwSubsystemParity(source),
     fWord(source.fWord)
-  { 
+  {
     // std::cout<< "Here in the copy constructor" << std::endl;
     this->fModChannel.reserve(source.fModChannel.size());
     for(size_t i=0;i< source.fModChannel.size();i++) {

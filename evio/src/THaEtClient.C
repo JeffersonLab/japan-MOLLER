@@ -74,7 +74,7 @@ THaEtClient::THaEtClient( const char* computer, const char* mysession, Int_t smo
       	"THaEtClient: invalid session name");
 		}
 	} catch(...) {
-		cout << "Using Default  Station Name: japa_sta\n"; 
+		cout << "Using Default  Station Name: japa_sta\n";
 		station = "japa_sta";
 	}
   if( THaEtClient::codaOpen(computer, mysession, smode) != CODA_OK )

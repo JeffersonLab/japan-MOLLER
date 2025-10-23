@@ -21,11 +21,11 @@ class QwParameterFile;
  *
  */
 
-class QwCombinerSubsystem: public VQwSubsystemParity, 
+class QwCombinerSubsystem: public VQwSubsystemParity,
   public MQwSubsystemCloneable<QwCombinerSubsystem>,
   public QwCombiner
 {
-  
+
   public:
       // Constructors
       /// \brief Constructor with just name.
@@ -35,8 +35,8 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
       // Copy Constructor
       QwCombinerSubsystem(const QwCombinerSubsystem &source)
       : VQwSubsystem(source), VQwSubsystemParity(source), QwCombiner(source) { }
-	
-      // Destructor 
+
+      // Destructor
       ~QwCombinerSubsystem() override;
 
       std::shared_ptr<VQwSubsystem> GetSharedPointerToStaticObject();
@@ -92,7 +92,7 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
 
 
       /// \brief Derived functions
-      // not sure if there should be empty definition, no definition or defined 
+      // not sure if there should be empty definition, no definition or defined
       Int_t LoadChannelMap(TString) override;
       Int_t LoadInputParameters(TString) override;
       Int_t LoadEventCuts(TString) override;
@@ -126,15 +126,15 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
       UInt_t GetEventcutErrorFlag() override;
 
 
-  private: 
-       
+  private:
+
      /**
-      * Default Constructor 
-      * 
-      * Error: tries to call default constructors of base class, 
+      * Default Constructor
+      *
+      * Error: tries to call default constructors of base class,
       * 	QwCombiner() is private
       */
-   //   QwCombinerSubsystem() {};     
+   //   QwCombinerSubsystem() {};
 
-      
+
 }; // class QwCombinerSubsystem

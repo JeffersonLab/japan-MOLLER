@@ -341,7 +341,7 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
 
     return false;
   }
-  
+
   // First check if any in-memory trees have been filled
   for (auto& pair : fTreeByName) {
     for (auto& tree : pair.second) {
@@ -354,7 +354,7 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
       }
     }
   }
-  
+
 #ifdef HAS_RNTUPLE_SUPPORT
   // Then check if any RNTuples have been filled
   for (auto& pair : fNTupleByName) {

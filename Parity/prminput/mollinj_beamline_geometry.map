@@ -7,20 +7,20 @@
 ! Z offset  - The location of the BPM in the hallC beamline (along Z axis) from the beginning of the beamline
 !             to the center of the device/ origin of device coordinate system.
 !
-! BSEN scaling factor - Bpm SENsitivity scaling factor is the ratio of general BSEN = 18.81 adc counts/mm 
-!                       seen in most of the BPMs in the injector and the actual BSEN of a BPM. 
-!                       Almost all the BPMs in the injector beamline except 1I02,1I04,1I06,0I01,0I01A.0I02,0I02A,0I05,0I07 
+! BSEN scaling factor - Bpm SENsitivity scaling factor is the ratio of general BSEN = 18.81 adc counts/mm
+!                       seen in most of the BPMs in the injector and the actual BSEN of a BPM.
+!                       Almost all the BPMs in the injector beamline except 1I02,1I04,1I06,0I01,0I01A.0I02,0I02A,0I05,0I07
 !                       who has BSEN=13.7 adc counts/mm
 !                       So we use this factor to apply such changes.
 !
 ! AlphaX/Y  - Relative gains of the individual XM,YM pairs compared to XP,YP pairs.
-! 
+!
 ! The units of the offsets are in millimeters to be comparable with the units of the analysis results.
 !
 ! BSEN, ALPHAX and ALPHA Y were obtained from EPICS.
 !
 ! For BPMs that don't have factors or offsets given in the list below, default values will
-! be assigned. 
+! be assigned.
 !   default  offset (X/Y/Z) = 0.0
 !   default BSEN scaling factor = 18.81
 !   default AlphaX/AlphaY = 1.0

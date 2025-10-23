@@ -4,14 +4,14 @@ void GetHallCavPedestal_panguin_Caryn(TString user_cut ="1", double MIN = -1000,
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.2);
   gStyle->SetStatW(0.3);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(1011);
   gStyle->SetStatX(0.7);
   gStyle->SetStatY(0.9);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -20,9 +20,9 @@ void GetHallCavPedestal_panguin_Caryn(TString user_cut ="1", double MIN = -1000,
   gStyle->SetLabelSize(0.035,"x");
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.06,"hxyz");
-  gROOT->ForceStyle();  
-  
- 
+  gROOT->ForceStyle();
+
+
   TTree *tree= (TTree*)gROOT->FindObject("evt");
 
   //TString device_name[] = devnam;
@@ -57,11 +57,11 @@ void GetHallCavPedestal_panguin_Caryn(TString user_cut ="1", double MIN = -1000,
   f_zero->SetLineWidth(2);
   f_zero->SetLineColor(kRed);
   f_zero->SetLineStyle(9);
-  
+
   TString branch_name;
   TString num_samples_name;
   // run 1404
-  // TString beam_evtcut[] ={ 
+  // TString beam_evtcut[] ={
   //   "Entry$>1e3 && Entry$<27e3",
   //   "Entry$>30e3 && Entry$<42e3",
   //   "Entry$>70e3 && Entry$<88e3"};
@@ -71,7 +71,7 @@ void GetHallCavPedestal_panguin_Caryn(TString user_cut ="1", double MIN = -1000,
   //   "Entry$>45e3 && Entry$<50e3" };
 
   // run 1329
-  // TString beam_evtcut[] ={ 
+  // TString beam_evtcut[] ={
   //   "Entry$>10 && Entry$<3e3",
   //   "Entry$>4e3 && Entry$<6e3",
   //   "Entry$>7.5e3 && Entry$<10e3"};
@@ -81,7 +81,7 @@ void GetHallCavPedestal_panguin_Caryn(TString user_cut ="1", double MIN = -1000,
   //   "Entry$>11e3 && Entry$<13e3"};
 
   //  run 1280
-  // TString beam_evtcut[] ={ 
+  // TString beam_evtcut[] ={
     //    "Entry$>10 && Entry$<2.5e3",
     //   "Entry$>8.5e3 && Entry$<10e3",
     //   "Entry$>15e3 && Entry$<17e3"};
@@ -90,7 +90,7 @@ void GetHallCavPedestal_panguin_Caryn(TString user_cut ="1", double MIN = -1000,
     //    "Entry$>11e3 && Entry$<13e3",
     //    "Entry$>18e3 && Entry$<20e3"};
 
-  TString beam_evtcut[] ={ 
+  TString beam_evtcut[] ={
     "cleandata==1&&scandata2==1",
     "cleandata==1&&scandata2==2",
     "cleandata==1&&scandata2==3",
@@ -115,9 +115,9 @@ void GetHallCavPedestal_panguin_Caryn(TString user_cut ="1", double MIN = -1000,
 
 
   const int ndata = sizeof(beam_evtcut)/sizeof(*beam_evtcut);
-  double bcm_mean[ndata]; 
+  double bcm_mean[ndata];
   double bcm_error[ndata];
-  double unser_mean[ndata]; 
+  double unser_mean[ndata];
   double unser_error[ndata];
   double bcm_res[ndata]; // residual
 
@@ -130,7 +130,7 @@ void GetHallCavPedestal_panguin_Caryn(TString user_cut ="1", double MIN = -1000,
 	char outfilename[255];
 
   TGraphErrors *g_bcmc_res;
-  TGraphErrors *g_bcmc_fit;  
+  TGraphErrors *g_bcmc_fit;
   TGraphErrors *g_bcmc_res_ref;
   TGraphErrors *g_bcmc_fit_ref;
   TMultiGraph *mg_bcmc_res;
@@ -183,12 +183,12 @@ void GetHallCavPedestal_panguin_Caryn(TString user_cut ="1", double MIN = -1000,
 
       ped[ibcm] = f_fit->GetParameter(0);
       gain[ibcm] = f_fit->GetParameter(1);
-      
+
       for(int i=0;i<ndata;i++){
 	bcm_res[i] = (bcm_mean[i]-ped[ibcm])*gain[ibcm] - unser_mean[i];
 	bcm_error[i] = bcm_error[i] *gain[ibcm];
       }
-      
+
       c_res->cd(ibcm+1);
       g_bcmc_res = new TGraphErrors(ndata,unser_mean,bcm_res,unser_error,bcm_error);
       g_bcmc_res->SetMarkerStyle(20);

@@ -1,4 +1,4 @@
-///Panguin gui compatible diagnostic plots for shift taking online replay 
+///Panguin gui compatible diagnostic plots for shift taking online replay
 #include <TPad.h>
 #include <TObjArray.h>
 #include <TLatex.h>
@@ -39,7 +39,7 @@ void regMulPlot(TString type = "burst_lrb_std", TString det = "us_avg") {
     line3.DrawLatex(.12,.75,"(Wait for 5 minutes of good data)");
     return 0;
   }
-  
+
   TPad *CPlot = new TPad("CPlot","CPlot",0,0,1,1);
   CPlot->Draw();
   tree_C->Draw(">>elist", "","entrylist");
@@ -120,7 +120,7 @@ void regMulPlot(TString type = "burst_lrb_std", TString det = "us_avg") {
     if (n == 0) {
       tree_R->Draw(Form("(%s)/ppm>>%s",bdraw.Data(),det.Data()),bcut.Data());
     }
-    else { 
+    else {
       tree_R->Draw(Form("(%s)/ppm>>+%s",bdraw.Data(),det.Data()),bcut.Data());
     }
     bdraw = draw;

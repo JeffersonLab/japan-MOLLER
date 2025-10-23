@@ -111,9 +111,9 @@ void QwBCM<T>::LoadMockDataParameters(QwParameterFile &paramfile) {
   } else {
 /*
     asym    = paramfile.GetTypedNextToken<Double_t>();
-    mean    = paramfile.GetTypedNextToken<Double_t>(); 
+    mean    = paramfile.GetTypedNextToken<Double_t>();
     sigma   = paramfile.GetTypedNextToken<Double_t>();
-    
+
     if (ldebug==1) {
       std::cout << "#################### \n";
       std::cout << "asym, mean, sigma \n" << std::endl;
@@ -127,7 +127,7 @@ void QwBCM<T>::LoadMockDataParameters(QwParameterFile &paramfile) {
 */
     //std::cout << "In QwBCM: ChannelName = " << GetElementName() << std::endl;
     fBeamCurrent.SetMockDataAsDiff();
-    fBeamCurrent.LoadMockDataParameters(paramfile);    
+    fBeamCurrent.LoadMockDataParameters(paramfile);
   }
 }
 /********************************************************/
@@ -323,7 +323,7 @@ void QwBCM<T>::UpdateErrorFlag(const VQwBCM *ev_error){
       throw std::invalid_argument(loc.Data());
     }
   } catch (std::exception& e) {
-    std::cerr<< e.what()<<std::endl; 
+    std::cerr<< e.what()<<std::endl;
   }
 };
 
@@ -508,7 +508,7 @@ Bool_t QwBCM<T>::CheckForBurpFail(const VQwDataElement *ev_error){
       //std::cout<<" Here in VQwBCM::CheckForBurpFail \n";
       if (this->GetElementName()!="") {
         const QwBCM<T>* value_bcm = dynamic_cast<const QwBCM<T>* >(ev_error);
-        burpstatus |= fBeamCurrent.CheckForBurpFail(&(value_bcm->fBeamCurrent)); 
+        burpstatus |= fBeamCurrent.CheckForBurpFail(&(value_bcm->fBeamCurrent));
       }
     } else {
       TString loc="Standard exception from QwBCM::CheckForBurpFail :"+

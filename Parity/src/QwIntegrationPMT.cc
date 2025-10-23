@@ -384,7 +384,7 @@ Bool_t QwIntegrationPMT::CheckForBurpFail(const VQwDataElement *ev_error){
       //std::cout<<" Here in QwIntegrationPMT::CheckForBurpFail \n";
       if (this->GetElementName()!="") {
         const QwIntegrationPMT* value_pmt = dynamic_cast<const QwIntegrationPMT* >(ev_error);
-        burpstatus |= fTriumf_ADC.CheckForBurpFail(&(value_pmt->fTriumf_ADC)); 
+        burpstatus |= fTriumf_ADC.CheckForBurpFail(&(value_pmt->fTriumf_ADC));
       }
     } else {
       TString loc="Standard exception from QwIntegrationPMT::CheckForBurpFail :"+
@@ -418,7 +418,7 @@ void QwIntegrationPMT::UpdateErrorFlag(const QwIntegrationPMT* ev_error){
     }
   } catch (std::exception& e) {
     std::cerr<< e.what()<<std::endl;
-  }  
+  }
 };
 
 /********************************************************/
@@ -526,13 +526,13 @@ void QwIntegrationPMT::PrintInfo() const
   //std::cout<<" Running AVG "<<GetElementName()<<" current running AVG "<<IntegrationPMT_Running_AVG<<std::endl;
   std::cout<<"QwMollerADC_Channel Info " <<std::endl;
   fTriumf_ADC.PrintInfo();
-  std::cout<< "Blindability is "    << (fIsBlindable?"TRUE":"FALSE") 
+  std::cout<< "Blindability is "    << (fIsBlindable?"TRUE":"FALSE")
 	   <<std::endl;
   std::cout<< "Normalizability is " << (fIsNormalizable?"TRUE":"FALSE")
 	   <<std::endl;
-  std::cout << "fNormRate=" << fNormRate << "fVoltPerHz=" << fVoltPerHz 
-            << " Asym=" << fAsym << " C_x=" << fCoeff_x << " C_y=" << fCoeff_y 
-            << " C_xp=" << fCoeff_xp << " C_yp=" << fCoeff_yp 
+  std::cout << "fNormRate=" << fNormRate << "fVoltPerHz=" << fVoltPerHz
+            << " Asym=" << fAsym << " C_x=" << fCoeff_x << " C_y=" << fCoeff_y
+            << " C_xp=" << fCoeff_xp << " C_yp=" << fCoeff_yp
             << " C_e=" << fCoeff_e << std::endl;
   return;
 }

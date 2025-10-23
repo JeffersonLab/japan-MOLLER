@@ -114,7 +114,7 @@ public:
   void DataFrameDraw(std::vector <TString>);
   UInt_t GetTreeIndex(TString);
   UInt_t GetTreeIndexFromName(TString);
-  void TreeDraw(std::vector <TString>); 
+  void TreeDraw(std::vector <TString>);
   void HistDraw(std::vector <TString>);
   void MacroDraw(std::vector <TString>);
   void LoadDraw(std::vector <TString>);

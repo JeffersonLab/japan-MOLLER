@@ -72,7 +72,7 @@ Int_t VQwSubsystem::LoadDetectorMaps(QwParameterFile& file)
 	}
 	// Parameter file definition
 	else if (key == "param" ) {
-	  LoadInputParameters(value); 
+	  LoadInputParameters(value);
 	  // fDetectorMapsNames.push_back(value);
 	}
 	// Event cut file definition
@@ -95,15 +95,15 @@ Int_t VQwSubsystem::LoadDetectorMaps(QwParameterFile& file)
 	  SetEventTypeMask(file.GetUInt(value));
 	}
       }
-      
+
     } // end of HasVariablePair
-  } // end of while 
-  
-  
+  } // end of while
+
+
   //
   // The above approach that fDetectorMapsNames.push_back(value) in VQwSubsystem doesn't work, because it reads the following...
   //
-  // >>> VQwSubsystem::LoadDetectorMaps Subsystem Main Detector uses the following map files : 
+  // >>> VQwSubsystem::LoadDetectorMaps Subsystem Main Detector uses the following map files :
   //   --->    1/3 :        qweak_maindet.map
   //   --->    2/3 : qweak_maindet_pedestal.map
   //   --->    3/3 : qweak_maindet_eventcuts.in
@@ -112,7 +112,7 @@ Int_t VQwSubsystem::LoadDetectorMaps(QwParameterFile& file)
   // So, fDetectorMapsNams.push_back will be called LoadChannelMap(), LoadInputParameter(), LoadEventCuts(),
   // and  LoadGeometryDefinition() in each subsystem.
   //
-  // >>> VQwSubsystem::LoadDetectorMaps Subsystem Main Detector uses the following map files : 
+  // >>> VQwSubsystem::LoadDetectorMaps Subsystem Main Detector uses the following map files :
   //   --->    1/3 : /home/jhlee/QwAnalysis/trunk/Parity/prminput/qweak_maindet.10213-.map
   //   --->    2/3 : /home/jhlee/QwAnalysis/trunk/Parity/prminput/qweak_maindet_pedestal.10229-.map
   //   --->    3/3 : /home/jhlee/QwAnalysis/trunk/Parity/prminput/qweak_maindet_eventcuts.in

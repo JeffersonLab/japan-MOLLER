@@ -12,4 +12,3 @@ setenv QW_DATA      /adaq1/data1/apar/
 setenv QW_ROOTFILES /chafs2/work1/apar/japanOutput
 
 alias root 'root -l'
-

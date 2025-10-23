@@ -68,7 +68,7 @@ void pruneAllbpmLagr(int runNum = 5408, TString ana = "prompt"){ //(int start, i
     Double_t num_samples;
     Double_t Device_Error_Code;
   } japan_device ;
-  // BCMs 
+  // BCMs
   // RAW Asyms
   japan_device_mulc asym_us_avg;
   japan_device_mulc asym_us_dd;

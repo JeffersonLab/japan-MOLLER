@@ -67,7 +67,7 @@ namespace QwArchitecture {
 
 /**
  * @brief Concept to check if a type has a type-specific UpdateErrorFlag method
- * 
+ *
  * This concept verifies that a class implements UpdateErrorFlag with its own type,
  * which is required for the type-specific version in the Dual-Operator Pattern.
  */
@@ -78,7 +78,7 @@ concept HasTypeSpecificUpdateErrorFlag = requires(T& obj, const T& other) {
 
 /**
  * @brief Concept to check if a type has a polymorphic UpdateErrorFlag delegator
- * 
+ *
  * This concept verifies that a class implements the delegator method that bridges
  * from VQwDataElement signature to the type-specific signature.
  */
@@ -90,13 +90,13 @@ concept HasPolymorphicUpdateErrorFlag = requires(T& obj, const VQwDataElement* b
 /**
  * @brief Concept to check if a type properly implements the Dual-Operator Pattern
  * for UpdateErrorFlag methods.
- * 
+ *
  * According to copilot instructions, classes that implement type-specific methods
  * must also provide delegator methods for polymorphic dispatch.
  */
 template<typename T>
-concept ImplementsDualOperatorUpdateErrorFlag = 
-    HasTypeSpecificUpdateErrorFlag<T> && 
+concept ImplementsDualOperatorUpdateErrorFlag =
+    HasTypeSpecificUpdateErrorFlag<T> &&
     HasPolymorphicUpdateErrorFlag<T>;
 
 //==============================================================================
@@ -105,7 +105,7 @@ concept ImplementsDualOperatorUpdateErrorFlag =
 
 /**
  * @brief Concept for type-specific arithmetic operators
- * 
+ *
  * Validates that a class implements all required type-specific arithmetic operations
  * as specified in copilot-instructions.md
  */
@@ -120,7 +120,7 @@ concept HasTypeSpecificArithmetic = requires(T& obj, const T& other) {
 
 /**
  * @brief Concept for polymorphic arithmetic operators (for VQwDataElement derivatives)
- * 
+ *
  * Validates delegator methods that bridge from base class signatures to type-specific implementations
  */
 template<typename T>
@@ -136,8 +136,8 @@ concept HasPolymorphicArithmetic = requires(T& obj, const VQwDataElement& base) 
  * @brief Complete Dual-Operator Pattern for arithmetic operations
  */
 template<typename T>
-concept ImplementsDualOperatorArithmetic = 
-    HasTypeSpecificArithmetic<T> && 
+concept ImplementsDualOperatorArithmetic =
+    HasTypeSpecificArithmetic<T> &&
     HasPolymorphicArithmetic<T>;
 
 //==============================================================================
@@ -146,7 +146,7 @@ concept ImplementsDualOperatorArithmetic =
 
 /**
  * @brief Concept for type-specific event cuts and diagnostics
- * 
+ *
  * Validates that a class implements all required type-specific event cuts and diagnostics
  * as specified in copilot-instructions.md
  * Note: Using standard C++ types to avoid ROOT dependencies in concepts
@@ -159,7 +159,7 @@ concept HasTypeSpecificEventCutsAndDiagnostics = requires(T& obj, const T* other
 
 /**
  * @brief Concept for polymorphic event cuts and diagnostics (for VQwDataElement derivatives)
- * 
+ *
  * Validates delegator methods that bridge from base class signatures to type-specific implementations
  */
 template<typename T>
@@ -172,7 +172,7 @@ concept HasPolymorphicEventCutsAndDiagnostics = requires(T& obj, const VQwDataEl
  * @brief Complete Dual-Operator Pattern for event cuts and diagnostics
  */
 template<typename T>
-concept ImplementsDualOperatorEventCutsAndDiagnostics = 
+concept ImplementsDualOperatorEventCutsAndDiagnostics =
     HasTypeSpecificEventCutsAndDiagnostics<T> &&
     HasPolymorphicEventCutsAndDiagnostics<T>;
 
@@ -182,19 +182,19 @@ concept ImplementsDualOperatorEventCutsAndDiagnostics =
 
 /**
  * @brief Concept for specialized bases that need polymorphic UpdateErrorFlag
- * 
+ *
  * Some hierarchies introduce specialized abstract bases (VQwBPM, VQwBCM, VQwClock)
  * that are used polymorphically by container code and must expose virtual hooks.
  */
 template<typename T>
-concept SpecializedBaseWithPolymorphicUpdateErrorFlag = std::is_abstract_v<T> && 
+concept SpecializedBaseWithPolymorphicUpdateErrorFlag = std::is_abstract_v<T> &&
     requires(T& obj, const T* typed_ptr) {
         { obj.UpdateErrorFlag(typed_ptr) } -> std::same_as<void>;
     };
 
 /**
  * @brief Concept for specialized bases with CheckForBurpFail support
- * 
+ *
  * Validates that specialized bases like VQwClock, VQwBPM, VQwBCM provide
  * the necessary virtual hooks for polymorphic dispatch
  */
@@ -208,7 +208,7 @@ concept SpecializedBaseWithPolymorphicCheckForBurpFail = std::is_abstract_v<T> &
  * @brief Complete specialized base pattern validation
  */
 template<typename T>
-concept ImplementsSpecializedBasePattern = 
+concept ImplementsSpecializedBasePattern =
     SpecializedBaseWithPolymorphicUpdateErrorFlag<T> &&
     SpecializedBaseWithPolymorphicCheckForBurpFail<T>;
 
@@ -218,15 +218,15 @@ concept ImplementsSpecializedBasePattern =
 
 /**
  * @brief Concept for container classes using the Container-Delegation Pattern
- * 
+ *
  * Container classes should use single operator versions and delegate to
  * contained objects, avoiding virtual operator inheritance issues.
  * This applies to subsystem arrays and similar collection classes.
- * 
+ *
  * The pattern requires:
  * 1. Type-specific operators that return the container type
  * 2. Should NOT have virtual operators with VQwDataElement base signatures
- * 
+ *
  * Critical distinction from Dual-Operator Pattern:
  * - Container classes use type-specific operators (e.g., QwSubsystemArrayParity += QwSubsystemArrayParity)
  * - Contained objects use VQwSubsystem operators (for subsystem containers) or VQwDataElement operators (for data element containers)
@@ -242,7 +242,7 @@ concept ImplementsContainerDelegationPattern = requires(T& obj, const T& other) 
 
 /**
  * @brief Concept for polymorphic subsystem pattern
- * 
+ *
  * Regular subsystems (non-container) should implement VQwSubsystem polymorphic operators
  * for integration with the framework's polymorphic dispatch system.
  * This applies to classes like QwOmnivore that act as subsystem implementations.
@@ -257,7 +257,7 @@ concept ImplementsPolymorphicSubsystemPattern = requires(T& obj, VQwSubsystem* o
 
 /**
  * @brief Helper to determine if a class name suggests it's a container
- * 
+ *
  * Uses compile-time template matching to identify container classes.
  * Container classes typically have "Array" in their name.
  */
@@ -283,13 +283,13 @@ struct IsContainerClass<QwSubsystemArray> {
 
 /**
  * @brief Master concept for VQwDataElement derivatives
- * 
+ *
  * Enforces that concrete VQwDataElement derivatives properly implement
  * the complete Dual-Operator Pattern for all required methods as specified
  * in copilot-instructions.md
  */
 template<typename T>
-concept ValidVQwDataElementDerivative = 
+concept ValidVQwDataElementDerivative =
     std::is_base_of_v<VQwDataElement, T> &&
     !std::is_abstract_v<T> &&
     ImplementsDualOperatorArithmetic<T> &&
@@ -298,56 +298,56 @@ concept ValidVQwDataElementDerivative =
 
 /**
  * @brief Master concept for VQwHardwareChannel derivatives
- * 
+ *
  * VQwHardwareChannel derivatives must satisfy all VQwDataElement requirements
  * plus any additional hardware-specific patterns
  */
 template<typename T>
-concept ValidVQwHardwareChannelDerivative = 
+concept ValidVQwHardwareChannelDerivative =
     std::is_base_of_v<VQwHardwareChannel, T> &&
     !std::is_abstract_v<T> &&
     ValidVQwDataElementDerivative<T>;
 
 /**
  * @brief Master concept for specialized abstract bases
- * 
+ *
  * Validates specialized bases like VQwBPM, VQwBCM, VQwClock that provide
  * polymorphic dispatch points for container code
  */
 template<typename T>
-concept ValidSpecializedBase = 
+concept ValidSpecializedBase =
     std::is_abstract_v<T> &&
     std::is_base_of_v<VQwDataElement, T> &&
     ImplementsSpecializedBasePattern<T>;
 
 /**
  * @brief Master concept for container classes
- * 
+ *
  * Container classes should use the Container-Delegation Pattern
  */
 template<typename T>
-concept ValidContainerClass = 
+concept ValidContainerClass =
     ImplementsContainerDelegationPattern<T>;
 
 /**
  * @brief Master concept for polymorphic subsystem classes
- * 
+ *
  * Regular subsystem classes should use polymorphic VQwSubsystem operators
  */
 template<typename T>
-concept ValidPolymorphicSubsystem = 
+concept ValidPolymorphicSubsystem =
     std::is_base_of_v<VQwSubsystem, T> &&
     !std::is_abstract_v<T> &&
     ImplementsPolymorphicSubsystemPattern<T>;
 
 /**
  * @brief Unified subsystem validation concept
- * 
+ *
  * Validates subsystems using appropriate pattern based on class characteristics
  * Container classes use Container-Delegation Pattern, others use Polymorphic Subsystem Pattern
  */
 template<typename T>
-concept ValidSubsystemClass = 
+concept ValidSubsystemClass =
     (IsContainerClass<T>::value && ValidContainerClass<T>) ||
     (!IsContainerClass<T>::value && ValidPolymorphicSubsystem<T>);
 
@@ -359,9 +359,9 @@ concept ValidSubsystemClass =
 
 /**
  * @brief Helper macro to validate architectural compliance in concrete classes
- * 
+ *
  * Usage: VALIDATE_DATA_ELEMENT_PATTERN(MyConcreteClass);
- * 
+ *
  * In C++20: Performs full concept validation for all required methods
  * In C++17: Always passes but documents architectural requirements
  */
@@ -394,7 +394,7 @@ concept ValidSubsystemClass =
 
 /**
  * @brief Helper macro to validate data handler compliance
- * 
+ *
  * Data handlers have different architectural requirements than data elements.
  * They don't need the Dual-Operator Pattern since they handle data processing
  * rather than data storage and arithmetic operations.

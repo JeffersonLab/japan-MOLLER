@@ -105,17 +105,17 @@ void QwHelicityPattern::ProcessOptions(QwOptions &options)
 /*****************************************************************/
 QwHelicityPattern::QwHelicityPattern(QwSubsystemArrayParity &event, const TString &run)
   : fBlinder(),
-    fHelicityIsMissing(kFALSE),   
+    fHelicityIsMissing(kFALSE),
     fIgnoreHelicity(kFALSE),
-    fYield(event), 
-    fDifference(event), 
-    fAsymmetry(event),   
-    fEnableAlternateAsym(kFALSE), 
-    fAsymmetry1(event), 
+    fYield(event),
+    fDifference(event),
+    fAsymmetry(event),
+    fEnableAlternateAsym(kFALSE),
+    fAsymmetry1(event),
     fAsymmetry2(event),
     fEnablePairs(kTRUE),
-    fPairYield(event), 
-    fPairDifference(event), 
+    fPairYield(event),
+    fPairDifference(event),
     fPairAsymmetry(event),
     fBurstLength(0),
     fMaxBurstIndex(0x7fffffff),
@@ -125,11 +125,11 @@ QwHelicityPattern::QwHelicityPattern(QwSubsystemArrayParity &event, const TStrin
     fBurstCounter(0),
     fEnableBurstSum(kFALSE),
     fPrintBurstSum(kFALSE),
-    fEnableRunningSum(kTRUE),     
+    fEnableRunningSum(kTRUE),
     fPrintRunningSum(kFALSE),
     fEnableDifference(kFALSE),
     fAlternateDiff(event),
-    fPositiveHelicitySum(event), 
+    fPositiveHelicitySum(event),
     fNegativeHelicitySum(event),
     fLastWindowNumber(0),
     fLastPatternNumber(0),
@@ -158,7 +158,7 @@ QwHelicityPattern::QwHelicityPattern(QwSubsystemArrayParity &event, const TStrin
 
   } else {
     // We are not using any helicity subsystem
-    QwError << "No helicity subsystem defined!  " 
+    QwError << "No helicity subsystem defined!  "
 	    << "Calculate asymmetries based on (+--+) quartets!"
 	    << QwLog::endl;
     fHelicityIsMissing = kTRUE;
@@ -248,13 +248,13 @@ void QwHelicityPattern::LoadEventData(QwSubsystemArrayParity &event)
   Int_t  localPhaseNumber = -1;
   Int_t  localHelicityActual = -1;
   Bool_t localIgnoreHelicity = kFALSE;
-  
-  
+
+
   // Get the list of helicity subsystems
   if (! fHelicityIsMissing){
     std::vector<VQwSubsystem*> subsys_helicity = event.GetSubsystemByType("QwHelicity");
     QwHelicity* helicity = 0;
-    
+
     if (subsys_helicity.size() > 0) {
       // Take the first helicity subsystem
       helicity = dynamic_cast<QwHelicity*>(subsys_helicity.at(0));
@@ -290,7 +290,7 @@ void QwHelicityPattern::LoadEventData(QwSubsystemArrayParity &event)
     }
     fLastWindowNumber  = localEventNumber;
     fLastPhaseNumber   = localPhaseNumber;
-    fLastPatternNumber = localPatternNumber; 
+    fLastPatternNumber = localPatternNumber;
   }
   if(localdebug) {
     std::cout<<"\n ###################################\n";
@@ -380,7 +380,7 @@ void  QwHelicityPattern::CalculatePairAsymmetry()
 
     fPairYield.Sum(fEvents.at(firstevt), fEvents.at(secondevt));
     fPairYield.Scale(0.5);
-  
+
     if (fIgnoreHelicity){
       fPairDifference.Difference(fEvents.at(firstevt), fEvents.at(secondevt));
       fPairDifference.Scale(0.5);
@@ -519,7 +519,7 @@ void  QwHelicityPattern::CalculateAsymmetry()
       }
     }
   } else {
-    //  
+    //
     for (size_t i = 0; i < fPatternSize; i++) {
       if (fHelicity[i] == plushel) {
 	if (localdebug) std::cout<<"QwHelicityPattern::CalculateAsymmetry:  here filling fPositiveHelicitySum \n";
@@ -578,8 +578,8 @@ void  QwHelicityPattern::CalculateAsymmetry()
     fDifference.Difference(fPositiveHelicitySum,fNegativeHelicitySum);
     fDifference.Scale(1.0/fPatternSize);
 
-    
-    
+
+
     if (! fIgnoreHelicity){
       // Update the blinder if conditions have changed
       UpdateBlinder(fYield);
@@ -942,7 +942,7 @@ void QwHelicityPattern::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleMo
   TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length())+"BurstCounter";
   // Note: fBurstCounter is a Short_t, but we're only creating Double_t fields for now
   // This maintains compatibility with the existing TTree structure
-  
+
   TString newprefix = "yield_" + prefix;
   fYield.ConstructNTupleAndVector(model, newprefix, values, fieldPtrs);
   newprefix = "asym_" + prefix;
@@ -1018,7 +1018,3 @@ void QwHelicityPattern::Print() const
           << fEventLoaded[i] << ", " << fHelicity[i] << QwLog::endl;
   QwOut << "Is a complete pattern? (n/y:0/1) " << IsCompletePattern() << QwLog::endl;
 }
-
-
-
-
