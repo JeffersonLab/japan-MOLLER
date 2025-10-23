@@ -208,10 +208,14 @@ UInt_t QwParityDB::SetRunID(QwEventBuffer& qwevt)
 
       QwDebug << "QwParityDB::SetRunID() => Executing sqlpp11 run insert" << QwLog::endl;
       auto insert_id = QueryInsertAndGetId(run_row.insert_into());
-      
-      if (insert_id != 0) {
+
+      // Query again after insert
+      results = QuerySelect(query);
+      ForFirstResult(results, [this](const auto& row) {
+        fRunID = row.run_id;
+      });
+      if (fRunID != 0) {
         fRunNumber = qwevt.GetRunNumber();
-        fRunID     = insert_id;
       }
       return fRunID;
   }
@@ -253,7 +257,7 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
 {
 
   // Make sure 'run' table has been populated and retrieve run_id
-  //  UInt_t runid = this->GetRunID(qwevt);
+  fRunID = this->GetRunID(qwevt);
 
   // Check to see if runlet is already in database.  If so retrieve runlet_id and exit.
   try {
@@ -352,8 +356,27 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
       }
 
       auto insert_id = QueryInsertAndGetId(runlet_row.insert_into());
-      if (insert_id != 0) {
-        fRunletID = insert_id;
+
+      // Query again after insert
+      if (qwevt.AreRunletsSplit()) {
+        auto query = sqlpp::select(sqlpp::all_of(runlet))
+                      .from(runlet)
+                      .where(runlet.run_id == fRunID
+                             and runlet.full_run == "false"
+                             and runlet.segment_number == fSegmentNumber);
+        auto results = QuerySelect(query);
+        ForFirstResult(results, [this](const auto& row) {
+          fRunletID = row.runlet_id;
+        });
+      } else {
+        auto query = sqlpp::select(sqlpp::all_of(runlet))
+                      .from(runlet)
+                      .where(runlet.run_id == fRunID
+                             and runlet.full_run == "true");
+        auto results = QuerySelect(query);
+        ForFirstResult(results, [this](const auto& row) {
+          fRunletID = row.runlet_id;
+        });
       }
       return fRunletID;
   }
@@ -497,11 +520,15 @@ UInt_t QwParityDB::SetAnalysisID(QwEventBuffer& qwevt)
     auto c = GetScopedConnection();
 
     auto insert_id = QueryInsertAndGetId(analysis_row.insert_into());
-    
-    if (insert_id != 0)
-    {
-      fAnalysisID = insert_id;
-    }
+    // Query again after insert
+    auto query = sqlpp::select(analysis.analysis_id)
+                 .from(analysis)
+                 .where(analysis.runlet_id == this->GetRunletID(qwevt)
+                        and analysis.seed_id == 1);
+    auto results = QuerySelect(query);
+    ForFirstResult(results, [this](const auto& row) {
+      fAnalysisID = row.analysis_id;
+    });
     return fAnalysisID;
   }
   catch (const std::exception& er) {
