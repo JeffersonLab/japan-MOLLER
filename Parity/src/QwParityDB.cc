@@ -573,8 +573,34 @@ UInt_t QwParityDB::GetMonitorID(const string& name, Bool_t zero_id_is_error)
   UInt_t monitor_id = fMonitorIDs[name];
 
   if (zero_id_is_error && monitor_id==0) {
-    //    monitor_id = 6; // only for QwMockDataAnalysis
     QwError << "QwParityDB::GetMonitorID() => Unable to determine valid ID for beam monitor " << name << QwLog::endl;
+
+    if (fDBInsertMissingKeys) {
+      QwWarning << "Inserting missing variable " << name << " into monitor table." << QwLog::endl;
+      try {
+        auto c = GetScopedConnection();
+
+        QwParitySchema::monitor monitor;
+        QwParitySchema::row<QwParitySchema::monitor> monitor_row;
+        monitor_row[monitor.quantity] = name;
+        monitor_row[monitor.title] = "unknown";
+
+        auto insert_id = QueryInsertAndGetId(monitor_row.insert_into());
+
+        if (insert_id != 0) {
+          fMonitorIDs[name] = insert_id;
+          monitor_id = insert_id;
+          QwWarning << "Successfully inserted variable " << name << " into monitor table with ID " << insert_id << QwLog::endl;
+        } else {
+          QwError << "Failed to insert variable " << name << " into monitor table." << QwLog::endl;
+        }
+      }
+      catch (const std::exception& er) {
+        QwError << er.what() << QwLog::endl;
+      }
+    } else {
+      QwError << "To enable automatic insertion of missing variables, set the option '--QwDatabase.insert-missing-keys'" << QwLog::endl;
+    }
   }
 
   return monitor_id;
