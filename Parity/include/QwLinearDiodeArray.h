@@ -143,8 +143,8 @@ class QwLinearDiodeArray : public VQwBPM {
 
 
 
-  std::vector<QwDBInterface> GetDBEntry();
-  std::vector<QwErrDBInterface> GetErrDBEntry();
+  std::vector<QwDBInterface> GetDBEntry() override;
+  std::vector<QwErrDBInterface> GetErrDBEntry() override;
 
   void    MakeLinearArrayList();
 
