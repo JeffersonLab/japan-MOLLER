@@ -193,8 +193,8 @@ class QwHelicityPattern {
 #endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
-  void  FillDB(QwParityDB *db);
-  void  FillErrDB(QwParityDB *db);
+  void  FillDB(QwParityDB *db) override;
+  void  FillErrDB(QwParityDB *db) override;
 #endif
 
   void  WritePromptSummary(QwPromptSummary *ps);
