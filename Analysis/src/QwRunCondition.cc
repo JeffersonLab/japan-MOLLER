@@ -58,7 +58,9 @@ QwRunCondition::SetArgs(Int_t argc, Char_t* argv[])
   char user_string[fCharLength];
 
   gethostname(host_string, fCharLength);
-  getlogin_r (user_string, fCharLength);
+  if (getlogin_r(user_string, fCharLength) != 0) {
+    snprintf(user_string, fCharLength, "unknown");
+  }
 
   TString host_name = host_string;
   TString user_name = user_string;
