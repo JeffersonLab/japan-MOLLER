@@ -144,8 +144,8 @@ class QwBPMCavity : public VQwBPM {
 #endif
 
 
-  std::vector<QwDBInterface> GetDBEntry();
-  std::vector<QwErrDBInterface> GetErrDBEntry();
+  std::vector<QwDBInterface> GetDBEntry() override;
+  std::vector<QwErrDBInterface> GetErrDBEntry() override;
 
   protected:
   VQwHardwareChannel* GetSubelementByName(TString ch_name) override;

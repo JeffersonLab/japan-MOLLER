@@ -143,8 +143,8 @@ class QwQPD : public VQwBPM {
 
 
 #ifdef __USE_DATABASE__
-  std::vector<QwDBInterface> GetDBEntry();
-  std::vector<QwErrDBInterface> GetErrDBEntry();
+  std::vector<QwDBInterface> GetDBEntry() override;
+  std::vector<QwErrDBInterface> GetErrDBEntry() override;
 #endif // __USE_DATABASE__
 
   void    MakeQPDList();

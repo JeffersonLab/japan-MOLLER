@@ -133,8 +133,8 @@ class QwDataHandlerArray:
     void  FillHistograms();
 
     /// \brief Fill the database
-    void FillDB(QwParityDB *db, TString type);
-    //    void FillErrDB(QwParityDB *db, TString type);
+    void FillDB(QwParityDB *db, TString type) override;
+    //    void FillErrDB(QwParityDB *db, TString type) override;
 
     void  ClearEventData();
     void  ProcessEvent();
