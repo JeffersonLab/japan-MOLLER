@@ -111,8 +111,8 @@ class QwIntegratedRasterChannel : public VQwDataElement{
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
   void  FillTreeVector(QwRootTreeBranchVector &values) const;
 
-  std::vector<QwDBInterface>    GetDBEntry() override;
-  std::vector<QwErrDBInterface> GetErrDBEntry() override;
+  std::vector<QwDBInterface>    GetDBEntry();
+  std::vector<QwErrDBInterface> GetErrDBEntry();
 
   const VQwDataElement* GetElement() const {
     return const_cast<QwIntegratedRasterChannel*>(this)->GetElement();
