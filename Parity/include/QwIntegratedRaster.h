@@ -152,8 +152,8 @@ class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneab
   void  FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif
 #ifdef __USE_DATABASE__
-  void  FillDB(QwParityDB *db, TString datatype);
-  void  FillErrDB(QwParityDB *db, TString datatype);
+  void  FillDB(QwParityDB *db, TString datatype) override;
+  void  FillErrDB(QwParityDB *db, TString datatype) override;
 #endif // __USE_DATABASE__
   void  WritePromptSummary(QwPromptSummary *ps, TString type) override;
 
