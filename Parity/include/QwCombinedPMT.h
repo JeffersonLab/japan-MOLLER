@@ -144,8 +144,8 @@ class QwCombinedPMT : public VQwDataElement {
 #endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
-  std::vector<QwDBInterface>  GetDBEntry() override;
-  std::vector<QwErrDBInterface> GetErrDBEntry() override;
+  std::vector<QwDBInterface>  GetDBEntry();
+  std::vector<QwErrDBInterface> GetErrDBEntry();
 #endif
 
  protected:
