@@ -237,20 +237,31 @@ report_build_info()
 
 
 #----------------------------------------------------------------------------
+# ET library
+#
+find_package(ET)
+if(NOT ET_FOUND)
+  if(EXISTS ${PROJECT_SOURCE_DIR}/thirdparty/et/CMakeLists.txt)
+    message(STATUS "ET included as subproject")
+    add_subdirectory(${PROJECT_SOURCE_DIR}/thirdparty/et)
+    include_directories(${PROJECT_SOURCE_DIR}/thirdparty/et/src/libsrc)
+    set(ET_FOUND TRUE)
+  else()
+    message(WARNING "ET not available in thirdparty directory. Use 'git clone --recurse-submodules` on new clone or 'git submodule update --init --recursive' on existing repository.")
+  endif()
+endif()
+IF(ET_FOUND OR TARGET et)
+  #  The QwEventBuffer class also needs to see the "__CODA_ET" define,
+  #  not just the EVIO library.
+  add_definitions(-D__CODA_ET)
+ENDIF()
+
+#----------------------------------------------------------------------------
 # evio library
 #
 add_subdirectory(evio)
 include_directories(evio/include)
 
-#----------------------------------------------------------------------------
-# et library
-#
-find_package(ET)
-IF(ET_FOUND)
-  #  The QwEventBuffer class also needs to see the "__CODA_ET" define,
-  #  not just the EVIO library.
-  add_definitions(-D__CODA_ET)
-ENDIF(ET_FOUND)
 
 #----------------------------------------------------------------------------
 # main dictionaries

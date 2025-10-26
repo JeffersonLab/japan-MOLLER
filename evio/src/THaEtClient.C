@@ -169,8 +169,18 @@ Int_t THaEtClient::codaClose()
 {
   if( !opened )
     return CODA_OK;  // If not successfully opened, close() is a no-op
+    
+  // Flush any pending writes (only in write mode: etChunkNumRead == -1)
+  int status = CODA_OK;
+  if( evh.etChunkNumRead == -1 ) {
+    status = flushWrite();
+    if( status != CODA_OK ) {
+      return status;
+    }
+  }
+  
   auto* id = evh.etSysId;  // this gets zeroed out in evh.close();
-  int status = et_station_detach(id, evh.etAttId);
+  status = et_station_detach(id, evh.etAttId);
   if( status != ET_OK ) {
     cerr << "WARNING: codaClose: error detaching from ET: "
          << et_perror(status) << endl;
@@ -208,9 +218,9 @@ Int_t THaEtClient::codaRead()
   uint32_t len{};
   int status = evh.read_no_copy(&readBuffer, &len);
   if( status == ET_OK ) {
-    if( !evbuffer.grow(len / bpi + 1) )
+    if( !evbuffer.grow(len + 1) )
       throw runtime_error("THaEtClient: Maximum event buffer size reached");
-    assert(bpi * evbuffer.size() >= (size_t)len);
+    assert(evbuffer.size() >= (size_t)len);
     memcpy(evbuffer.get(), readBuffer, bpi * len);
   }
 
@@ -220,7 +230,7 @@ Int_t THaEtClient::codaRead()
   } else {
     time_t daqt2 = time(nullptr);
     double tdiff = difftime(daqt2, daqt1);
-    evsum += evh.etChunkNumRead;
+    ++evsum;
     if( tdiff > 4 && evsum > 30 ) {
       double daqrate = evsum / tdiff;
       evsum = 0;
@@ -238,6 +248,129 @@ Int_t THaEtClient::codaRead()
     }
   }
   return status;
+}
+
+//______________________________________________________________________________
+Int_t THaEtClient::codaWrite( const UInt_t* buffer, UInt_t buffer_length )
+{
+  if( !opened ) {
+    Int_t status = init(station.c_str());
+    if( status != CODA_OK ) {
+      cout << "THaEtClient: ERROR: codaWrite, cannot connect to CODA" << endl;
+      return CODA_FATAL;
+    }
+  }
+
+  // Get a new chunk of ET events if we've used all current ones
+  if( evh.currentChunkID >= evh.etChunkSize || evh.currentChunkID < 0 ) {
+    // Need enough space for event data plus EVIO overhead
+    // EVIO v4 block header = 32 bytes (EV_HDSIZ_BYTES)
+    // EVIO v6 block header = 56 bytes (EV_HDSIZ_BYTES_V6)
+    // See evio/src/libsrc/evio.h for EV_HDSIZ_BYTES(_V6) definitions
+#ifdef EV_HDSIZ_V6
+    constexpr size_t event_header_size_bytes = st::max(4 * EV_HDSIZ, 4 * EV_HDSIZ_V6);
+#else
+    constexpr size_t event_header_size_bytes = 4 * EV_HDSIZ;
+#endif
+    // May need 2 headers (current + ending empty block header)
+    size_t needed_bytes = buffer_length * sizeof(UInt_t) + 2 * event_header_size_bytes;
+
+    // Get new events from ET system
+    int num_obtained = 0;
+    int status = et_events_new(evh.etSysId, evh.etAttId, evh.etChunk.get(),
+                               ET_SLEEP, nullptr, 
+                               needed_bytes,
+                               evh.etChunkSize, &num_obtained);
+    if( status != ET_OK ) {
+      cerr << "THaEtClient: ERROR: et_events_new failed: " 
+           << et_perror(status) << endl;
+      return CODA_ERROR;
+    }
+    evh.currentChunkID = 0;  // Reset to beginning of new chunk
+  }
+
+  // Get the current ET event
+  et_event* event = evh.etChunk[evh.currentChunkID];
+  char* pdata = nullptr;
+  size_t et_buf_size = 0;
+  et_event_getdata(event, (void**)&pdata);
+  et_event_getlength(event, &et_buf_size);
+  
+  if( pdata == nullptr ) {
+    cerr << "THaEtClient: ERROR: null data pointer from ET event" << endl;
+    return CODA_ERROR;
+  }
+  
+  // Open the ET event buffer for EVIO writing
+  int evio_handle = 0;
+  int status = evOpenBuffer(pdata, et_buf_size, (char*)"w", &evio_handle);
+  if( status != S_SUCCESS ) {
+    cerr << "THaEtClient: ERROR: evOpenBuffer for write failed: "
+         << evPerror(status) << endl;
+    return CODA_ERROR;
+  }
+  
+  // Write the event data using EVIO format
+  status = evWrite(evio_handle, buffer);
+  if( status != S_SUCCESS ) {
+    cerr << "THaEtClient: ERROR: evWrite failed: "
+         << evPerror(status) << endl;
+    evClose(evio_handle);
+    return CODA_ERROR;
+  }
+  
+  // Get the actual bytes written by EVIO
+  uint32_t bytes_written = 0;
+  status = evGetBufferLength(evio_handle, &bytes_written);
+  if( status != S_SUCCESS ) {
+    cerr << "THaEtClient: ERROR: evGetBufferLength failed: "
+         << evPerror(status) << endl;
+    evClose(evio_handle);
+    return CODA_ERROR;
+  }
+  
+  // Close EVIO handle
+  status = evClose(evio_handle);
+  if( status != S_SUCCESS ) {
+    cerr << "THaEtClient: ERROR: evClose failed: "
+         << evPerror(status) << endl;
+    return CODA_ERROR;
+  }
+  
+  // Set the actual length of data written to ET event
+  et_event_setlength(event, bytes_written);
+  
+  // Move to next slot
+  evh.currentChunkID++;
+  
+  // If buffer is full, flush it
+  if( evh.currentChunkID >= evh.etChunkSize ) {
+    return flushWrite();
+  }
+  
+  return CODA_OK;
+}
+
+//______________________________________________________________________________
+Int_t THaEtClient::flushWrite()
+{
+  if( !opened || evh.currentChunkID <= 0 ) {
+    return CODA_OK;  // Nothing to flush
+  }
+  
+  // Put the events we've written back to ET
+  int status = et_events_put(evh.etSysId, evh.etAttId, 
+                            evh.etChunk.get(), evh.currentChunkID);
+  if( status != ET_OK ) {
+    cerr << "THaEtClient: ERROR: et_events_put failed: "
+         << et_perror(status) << endl;
+    return CODA_ERROR;
+  }
+  
+  // Reset write buffer - mark as needing new events
+  evh.currentChunkID = evh.etChunkSize;
+  
+  return CODA_OK;
 }
 
 //______________________________________________________________________________

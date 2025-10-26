@@ -20,10 +20,11 @@
 #include "QwHelicity.h"
 #include "QwHelicityPattern.h"
 #include "QwBlindDetectorArray.h"
-//#include "QwScanner.h"
 #include "QwSubsystemArrayParity.h"
 #include "QwDetectorArray.h"
 
+// ROOT headers
+#include "TStopwatch.h"
 
 // Number of variables to correlate
 #define NVARS 3
@@ -160,7 +161,8 @@ if(1==2){
   // Therefore you really should give an explicitly different seed for the
   // mt19937 randomness generator.
 
-
+  // Initialize the stopwatch
+  TStopwatch stopwatch;
 
   // Loop over all runs
   UInt_t runnumber_min = (UInt_t) gQwOptions.GetIntValuePairFirst("run");
@@ -176,9 +178,16 @@ if(1==2){
 
 
     TString filename = Form("%sQwMock_%u.log", eventbuffer.GetDataDirectory().Data(), run);
-    if (eventbuffer.OpenDataFile(filename,"W") != CODA_OK) {
-      std::cout << "Error: could not open file!" << std::endl;
-      return 0;
+    if (eventbuffer.IsOnline()) {
+      if (eventbuffer.ReOpenStream() != CODA_OK) {
+        std::cout << "Error: could not open ET stream!" << std::endl;
+        return 0;
+      }
+    } else {
+      if (eventbuffer.OpenDataFile(filename,"W") != CODA_OK) {
+        std::cout << "Error: could not open file!" << std::endl;
+        return 0;
+      }
     }
     eventbuffer.ResetControlParameters();
     eventbuffer.EncodePrestartEvent(run, 0); // prestart: runnumber, runtype
@@ -295,13 +304,22 @@ if(1==2){
       }
 
       // Write this event to file
-      eventbuffer.EncodeSubsystemData(detectors);
+      Int_t status = eventbuffer.EncodeSubsystemData(detectors);
+      if (status != CODA_OK) {
+        QwError << "Error: could not write event " << event << QwLog::endl;
+        break;
+      }
 
       // Periodically print event number
-      if ((kDebug && event % 1000 == 0)
-                  || event % 10000 == 0)
-        std::cout << "Generated " << event << " events." << std::endl;
-
+      constexpr int nevents = kDebug ? 1000 : 10000;
+      if (event % nevents == 0) {
+        QwMessage << "Generated " << event << " events ";
+        stopwatch.Stop();
+        QwMessage << "(" << stopwatch.RealTime()*1e3/nevents << " ms per event)";
+        stopwatch.Reset();
+        stopwatch.Start();
+        QwMessage << QwLog::endl;
+      }
 
     } // end of event loop
 
@@ -310,7 +328,11 @@ if(1==2){
     eventbuffer.CloseDataFile();
     eventbuffer.ReportRunSummary();
 
-    QwMessage << "Wrote mock data run " << filename << " successfully." << QwLog::endl;
+    if (eventbuffer.IsOnline()) {
+      QwMessage << "Wrote mock data run to ET stream successfully." << QwLog::endl;
+    } else {
+      QwMessage << "Wrote mock data run " << filename << " successfully." << QwLog::endl;
+    }
 
   } // end of run loop
 
