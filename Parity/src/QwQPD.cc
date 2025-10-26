@@ -667,7 +667,10 @@ void QwQPD::Ratio(QwQPD &numer, QwQPD &denom)
   return;
 }
 
-
+void QwQPD::Ratio(VQwBPM &numer, VQwBPM &denom)
+{
+  Ratio(*(dynamic_cast<QwQPD*>(&numer)), *(dynamic_cast<QwQPD*>(&denom)));
+}
 
 void QwQPD::Scale(Double_t factor)
 {

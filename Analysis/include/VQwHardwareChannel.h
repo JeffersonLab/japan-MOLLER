@@ -216,15 +216,8 @@ public:
      AssignValueFrom(&value);
      Scale(scale);
   };
-    virtual void Ratio(const VQwHardwareChannel* numer, const VQwHardwareChannel* denom){
-    if (!IsNameEmpty()){
-      this->AssignValueFrom(numer);
-      this->operator/=(*denom);
-
-        // Remaining variables
-    fGoodEventCount  = denom->fGoodEventCount;
-    fErrorFlag = (numer->fErrorFlag|denom->fErrorFlag);//error code is ORed.
-     }
+  void Ratio(const VQwHardwareChannel* numer, const VQwHardwareChannel* denom){
+    throw std::runtime_error(std::string("VQwHardwareChannel::Ratio not implemented for ") + GetElementName().Data());
   }
 
   void AssignValueFrom(const VQwDataElement* valueptr) override = 0;

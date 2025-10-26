@@ -149,7 +149,7 @@ public:
   QwBCM& operator=  (const QwBCM &value);
   QwBCM& operator+= (const QwBCM &value);
   QwBCM& operator-= (const QwBCM &value);
-  void Ratio(const VQwBCM &numer, const VQwBCM &denom) override;
+  void Ratio(const VQwBCM &numer, const VQwBCM &denom);
   void Ratio(const QwBCM &numer, const QwBCM &denom);
   void Scale(Double_t factor) override;
 
