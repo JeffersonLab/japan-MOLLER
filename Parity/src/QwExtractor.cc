@@ -23,7 +23,7 @@
 #include "QwRootFile.h"
 
 // Register this handler with the factory
-RegisterHandlerFactory(QwExtractor);
+REGISTER_DATA_HANDLER_FACTORY(QwExtractor);
 
 
 /// \brief Constructor with name
@@ -112,4 +112,3 @@ void QwExtractor::FillTreeBranches(QwRootFile *treerootfile)
   //  QwMessage << fLocalFlag << " failed mask " << "0x" << fErrorFlagMask << std::dec << QwLog::endl;
   //}
 }
-

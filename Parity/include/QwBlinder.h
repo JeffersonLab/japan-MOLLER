@@ -65,7 +65,7 @@ class QwBlinder {
     kMultiplicative,
     kAdditiveMultiplicative
   };
-  /// Status of the blinding process or intermediate steps of the process  
+  /// Status of the blinding process or intermediate steps of the process
   enum EQwBlinderStatus {
     kIndeterminate = 0,
     kNotBlindable,
@@ -73,8 +73,8 @@ class QwBlinder {
     kBlindableFail
   };
   static const TString fStatusName[4];
-  
-  ///  Error flag value 
+
+  ///  Error flag value
   static const UInt_t kErrorFlag_BlinderFail = 0x200;
   constexpr static const Double_t kValue_BlinderFail   = -1.0;
 
@@ -175,7 +175,7 @@ class QwBlinder {
       if (CheckBlindability(fPatternCounters)!=kNotBlindable)
 	diff.Blind(this);
     };
-    /// Blind the pair asymmetry 
+    /// Blind the pair asymmetry
     /// and only check fBlindingStrategy to avoid  overcounting fPatternCounters
     void  BlindPair(QwSubsystemArrayParity& diff) {
       if (CheckBlindability(fPairCounters)!=kNotBlindable)
@@ -222,7 +222,7 @@ class QwBlinder {
     };
 
  private:
-    ///  Indicates the first value recieved of the blindability of the target 
+    ///  Indicates the first value received of the blindability of the target
     EQwBlinderStatus fTargetBlindability_firstread;
     EQwBlinderStatus fTargetBlindability;
     Bool_t fTargetPositionForced;
@@ -237,7 +237,7 @@ class QwBlinder {
     void SetIHWPPolarity(Int_t ihwppolarity);
 
     //  Target position look-up index for PREX/CREX.
-    //  Index value of -1 is for the PREX positons
+    //  Index value of -1 is for the PREX positions
     //  CREX index values in date order go from "min" to "Max" and must correspond to cases in the QwBlinder::Update(const QwEPICSEvent& epics) function.
     Int_t  fCREXTargetIndex;
     Int_t  kCREXTgtIndexMin = 1;
@@ -249,7 +249,7 @@ class QwBlinder {
     EQwBlinderStatus CheckBlindability(std::vector<Int_t> &fCounters);
     Bool_t fBlinderIsOkay;
 
-    
+
 
 
  private:
@@ -263,7 +263,7 @@ class QwBlinder {
     EQwBlindingStrategy fBlindingStrategy; /// Blinding strategy
     Double_t fBlindingOffset; /// The term to be added to detector asymmetries
     Double_t fBlindingOffset_Base; /// The term to be added to detector asymmetries, before polarity correction
-    Double_t fBlindingFactor; /// The factor to be mutliplied to detector asymmetries
+    Double_t fBlindingFactor; /// The factor to be multiplied to detector asymmetries
 
 
     static const Double_t kDefaultMaximumBlindingAsymmetry; /// Default maximum blinding asymmetry (in ppm)

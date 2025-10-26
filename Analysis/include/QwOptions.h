@@ -103,7 +103,7 @@ inline const TString getenv_safe_TString (const char* name) {
  * and it will not allow you to unset settings in the default configuration file.
  * A better approach is to use the implicit_value(b) semantic that will still accept
  * the value after the option.  However, this was only introduced in boost 1.35.0.
- * To avoid the need to test for this, use the syntac default_bool_value(b), with b
+ * To avoid the need to test for this, use the syntax default_bool_value(b), with b
  * the default value.  If the flag is specified, the option will be set to true
  * regardless of the specified default value.
  *

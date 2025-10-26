@@ -34,7 +34,7 @@
 #include <string>
 #include <TEntryList.h>
 
-//using namespace std; 
+//using namespace std;
 
 class Cycle{
   public:
@@ -45,8 +45,8 @@ class Cycle{
     Double_t supercycslope;
     Double_t supercyc_err;
     std::vector <TMatrixD> coilNames;
-    std::vector <TMatrixD> BPMNames; 
-    std::vector <TMatrixD> detNames; 
+    std::vector <TMatrixD> BPMNames;
+    std::vector <TMatrixD> detNames;
     std::vector <TMatrixD> coilData; // 7 coils
     std::vector <TMatrixD> BPMData; // N devices
     std::vector <TMatrixD> detData; // N devices
@@ -92,7 +92,7 @@ BMOD::~BMOD(){
 
 int QuerySlugNumber(int run_number){
 
-  // Experimenting Function to Get slug number based on run number 
+  // Experimenting Function to Get slug number based on run number
   // Author : Tao Ye
 
   TSQLResult* res;
@@ -103,7 +103,7 @@ int QuerySlugNumber(int run_number){
   cout << " -- ServerInfo: " << rcdb->ServerInfo() << endl;
   cout << " -- Host : " << rcdb->GetHost() << endl;
   cout << " -- Query DataBase " << endl;
-  TString select_q ="SELECT run_number,name,int_value "; 
+  TString select_q ="SELECT run_number,name,int_value ";
   TString from_q =  "FROM `a-rcdb`.conditions,`a-rcdb`.condition_types ";
   TString where_q = Form("WHERE conditions.condition_type_id=condition_types.id and name='slug' and run_number='%d'",
 			 run_number);
@@ -147,9 +147,9 @@ int QuerySlugNumber(int run_number){
   return slug_id;
 }
 
-Int_t BMOD::getData(Int_t runNo) { 
+Int_t BMOD::getData(Int_t runNo) {
   Printf("Getting BMOD Data for run %d",runNo);
-  runNumber = runNo; 
+  runNumber = runNo;
   if (parameterVectors.count("ROOT input path") != 0 ) {
     infile = parameterVectors["ROOT input path"].at(0);
     if (!((TString)parameterVectors["ROOT input path"].at(0)).Contains("#") || parameterVectors["ROOT input path"].at(0).size() == 0) {
@@ -241,7 +241,7 @@ void BMOD::parseTextFile(std::string fileName = "input.txt"){
 }
 
 void BMOD::calculateSensitivities(){
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   if (parameterVectors.count("Tree") == 0){
     Printf("Looking in \"evt\" tree for BMOD data");
     std::string tmpTreeStr = "evt";
@@ -269,9 +269,9 @@ void BMOD::calculateSensitivities(){
       }
     }
   }
-  if (cycleNumbers.size()==0) { 
+  if (cycleNumbers.size()==0) {
     Printf("No good cycles this run, ERROR (for now)");
-    return; 
+    return;
   }
   /* OLD
   TLeaf *l_bmwcycnum = tree_R->GetLeaf("bmwcycnum");
@@ -280,15 +280,15 @@ void BMOD::calculateSensitivities(){
     Double_t cyclenum = l_bmwcycnum->GetValue();
     if(i==0){
       cycleNumbers.push_back(cyclenum);
-    }   
+    }
     else{
       int sizeVec = cycleNumbers.size();
       if(cyclenum != cycleNumbers[sizeVec-1]){
         cycleNumbers.push_back(cyclenum);
       }
-    }   
+    }
   }
-  */  
+  */
   //const int nCoil =7;
   //TString wire[nCoil]={"bmod_trim1","bmod_trim2","bmod_trim3","bmod_trim4","bmod_trim5","bmod_trim6","bmod_trim7"};
   // Guarantee device vectors is full of contents from parameter vectors
@@ -374,7 +374,7 @@ void BMOD::calculateSensitivities(){
     hist_trim = (TH1F *)gDirectory->Get(Form("hist_trim%d",k));
     trim_base.push_back(hist_trim->GetXaxis()->GetBinCenter(hist_trim->GetMaximumBin()));
   }
-  
+
   const double trimmin=0.38;
   const double trimmax=0.7;
   const double bpmmax=3;
@@ -518,17 +518,17 @@ void BMOD::saveSensitivityData() {
     if(cycles[i].BPMvalid==1){
       for(int ibpm=0;ibpm<nBPM;ibpm++){
         outfile0
-          << setw(tab_width) << setiosflags(ios::left) << runNumber 
-          << setw(tab_width) << setiosflags(ios::left) << cycles[i].cycleNumber 
-          << setw(tab_width) << setiosflags(ios::left) << cutflag 
+          << setw(tab_width) << setiosflags(ios::left) << runNumber
+          << setw(tab_width) << setiosflags(ios::left) << cycles[i].cycleNumber
+          << setw(tab_width) << setiosflags(ios::left) << cutflag
           << setw(tab_width) << setiosflags(ios::left) << parameterVectors["BPMs"][ibpm];
         for(int icoil=0;icoil<nCoil;icoil++){
           outfile0
-            << setw(tab_width) << setiosflags(ios::left) 
+            << setw(tab_width) << setiosflags(ios::left)
             << setprecision(5) << cycles[i].BPMsens[ibpm][icoil]
             << setw(tab_width) << setiosflags(ios::left)
             << setprecision(3) << cycles[i].BPMsens_err[ibpm][icoil]
-            << setw(tab_width) << setiosflags(ios::left) 
+            << setw(tab_width) << setiosflags(ios::left)
             << setprecision(4) << cycles[i].BPMfNdata[ibpm][icoil];
         } // end of coil loop
         outfile0 << std::endl;
@@ -537,8 +537,8 @@ void BMOD::saveSensitivityData() {
         for(int idet=0;idet<nDet;idet++){
           outfile0
             << setw(tab_width) << setiosflags(ios::left) << runNumber
-            << setw(tab_width) << setiosflags(ios::left) << cycles[i].cycleNumber 
-            << setw(tab_width) << setiosflags(ios::left) << cutflag // Now , just one o   
+            << setw(tab_width) << setiosflags(ios::left) << cycles[i].cycleNumber
+            << setw(tab_width) << setiosflags(ios::left) << cutflag // Now , just one o
             << setw(tab_width) << setiosflags(ios::left) << parameterVectors["Detectors"][idet];
           for(int icoil=0;icoil<nCoil;icoil++){
             outfile0
@@ -821,7 +821,7 @@ void BMOD::saveSlopeData() {
       for(int ibpm=0;ibpm<nBPM;ibpm++){
         dit_tree->Branch(Form("%s_%s",parameterVectors["Detectors"].at(idet).c_str(),parameterVectors["BPMs Slope Names"].at(ibpm).c_str()),&slopes[idet][ibpm]);
       }
-    }    
+    }
     for(int icoil=0;icoil<nCoil;icoil++){
       for(int ibpm=0;ibpm<nBPM;ibpm++){
         dit_tree->Branch(Form("%s_coil%s",      parameterVectors["BPMs Slope Names"].at(ibpm).c_str(),parameterVectors["Coils"].at(icoil).c_str()),&localBPMsens[icoil][ibpm]);
@@ -859,7 +859,7 @@ void BMOD::saveSlopeData() {
     dit_tree->Branch("flag",
         &flag,
         "flag/I");
-  }    
+  }
   else{
     for(int idet=0;idet<nDet;idet++){
       for(int ibpm=0;ibpm<nBPM;ibpm++){

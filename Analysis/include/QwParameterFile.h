@@ -85,7 +85,7 @@ class QwParameterFile {
       else           status = ReadNextLine_Single(varvalue);
       return status;
     }
-    Bool_t ReadNextLine_Greedy(std::string &varvalue);  
+    Bool_t ReadNextLine_Greedy(std::string &varvalue);
     Bool_t ReadNextLine_Single(std::string &varvalue) {
       fCurrentPos = 0;
       if (! getline(fStream, fLine))
@@ -225,7 +225,7 @@ class QwParameterFile {
       return status;
     };
 
-    template <typename T> 
+    template <typename T>
       Bool_t ReturnValue(const std::string keyname, T &retvalue){
       std::string value;
       Bool_t status = GetKeyValue(keyname, value);
@@ -234,7 +234,7 @@ class QwParameterFile {
       }
       return status;
     }
-    template <typename T> 
+    template <typename T>
       Bool_t PopValue(const std::string keyname, T &retvalue){
       std::string value;
       Bool_t status = GetKeyValue(keyname, value, kTRUE);
@@ -244,7 +244,7 @@ class QwParameterFile {
       return status;
     };
 
-    
+
 
   protected:
     void Trim(const std::string& chars, std::string& token, TString::EStripType head_tail = TString::kBoth);

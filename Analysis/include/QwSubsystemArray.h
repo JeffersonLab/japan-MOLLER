@@ -27,6 +27,7 @@
 // Forward declarations
 class VQwHardwareChannel;
 class QwParameterFile;
+class QwRootTreeBranchVector;
 
 /**
  * \class QwSubsystemArray
@@ -106,7 +107,7 @@ class QwSubsystemArray:
       VQwSubsystem* subsys = dynamic_cast<VQwSubsystem*>(subsys_iter->get());
       fEventTypeMask |= subsys->GetEventTypeMask();
     }
-    return fEventTypeMask; 
+    return fEventTypeMask;
   };
 
 
@@ -124,7 +125,7 @@ class QwSubsystemArray:
   /// \brief Process configuration options (default behavior)
   void ProcessOptions(QwOptions &options) { ProcessOptionsSubsystems(options); };
   void LoadAllEventRanges(QwOptions &options);
-  
+
   /// \brief Add the subsystem to this array
   void push_back(VQwSubsystem* subsys);
 
@@ -206,19 +207,19 @@ class QwSubsystemArray:
   /// \name Tree and vector construction and maintenance
   // @{
   /// Construct the tree and vector for this subsystem
-  void ConstructBranchAndVector(TTree *tree, std::vector <Double_t> &values) {
+  void ConstructBranchAndVector(TTree *tree, QwRootTreeBranchVector &values) {
     TString tmpstr("");
     ConstructBranchAndVector(tree,tmpstr,values);
   };
   /// \brief Construct a branch and vector for this subsystem with a prefix
-  void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector <Double_t> &values);
+  void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values);
   /// \brief Construct a branch for this subsystem with a prefix
   void ConstructBranch(TTree *tree, TString& prefix);
   /// \brief Construct a branch for this subsystem with a prefix after tree leave trimming
   void ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file);
   /// \brief Fill the vector for this subsystem
-  void  FillTreeVector(std::vector<Double_t> &values) const;
-  
+  void  FillTreeVector(QwRootTreeBranchVector &values) const;
+
 #ifdef HAS_RNTUPLE_SUPPORT
   /// \brief Construct RNTuple fields and vector for this subsystem
   void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) {
@@ -259,7 +260,7 @@ class QwSubsystemArray:
 
   /// \brief Print some information about the subsystem
   void PrintInfo() const;
-  
+
   void push_back(std::shared_ptr<VQwSubsystem> subsys);
 
  protected:
@@ -294,7 +295,7 @@ class QwSubsystemArray:
     return kFALSE;
   };
 
-  std::vector< std::pair<UInt_t,UInt_t> > fBadEventRange; 
+  std::vector< std::pair<UInt_t,UInt_t> > fBadEventRange;
 
  private:
   /// Filename of the global detector map
@@ -314,6 +315,6 @@ public:
 
 protected:
   double fWindowPeriod;
-  
+
 
 }; // class QwSubsystemArray

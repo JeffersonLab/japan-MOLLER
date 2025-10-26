@@ -147,7 +147,7 @@ void QwDataHandlerArray::LoadDataHandlersFromParameterFile(
     QwMessage << "Creating handler of type " << handler_type << " "
               << "with name " << handler_name << "." << QwLog::endl;
     VQwDataHandler* handler = 0;
-    
+
     try {
       handler =
         VQwDataHandlerFactory::Create(handler_type, handler_name);
@@ -180,7 +180,7 @@ void QwDataHandlerArray::LoadDataHandlersFromParameterFile(
 
     // Add to array
     this->push_back(handler);
-    /*    
+    /*
     // Instruct the handler to publish variables
     if (handler->PublishInternalValues() == kFALSE) {
       QwError << "Not all variables for " << handler->GetName()
@@ -273,7 +273,7 @@ void QwDataHandlerArray::ProcessOptions(QwOptions &options)
 }
 
 /**
- * Get the handler in this array with the spcified name
+ * Get the handler in this array with the specified name
  * @param name Name of the handler
  * @return Pointer to the handler
  */
@@ -388,7 +388,7 @@ void  QwDataHandlerArray::FillNTupleFields(QwRootFile *treerootfile)
 
 //*****************************************************************
 
-void  QwDataHandlerArray::ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector <Double_t> &values)
+void  QwDataHandlerArray::ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values)
 {
   if (!empty()){
     for (iterator handler = begin(); handler != end(); ++handler) {
@@ -398,7 +398,7 @@ void  QwDataHandlerArray::ConstructBranchAndVector(TTree *tree, TString& prefix,
   }
 }
 
-void  QwDataHandlerArray::FillTreeVector(std::vector <Double_t> &values) const
+void  QwDataHandlerArray::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (!empty()){
     for (const_iterator handler = begin(); handler != end(); ++handler) {
@@ -608,7 +608,7 @@ void QwDataHandlerArray::AccumulateAllRunningSum(const QwDataHandlerArray& value
 
 
 /*
-void QwDataHandlerArray::PrintErrorCounters() const{// report number of events failed due to HW and event cut faliure
+void QwDataHandlerArray::PrintErrorCounters() const{// report number of events failed due to HW and event cut failure
   const VQwDataHandler *handler_parity;
   if (!empty()){
     for (const_iterator handler = begin(); handler != end(); ++handler){
@@ -626,7 +626,7 @@ void QwDataHandlerArray::PrintErrorCounters() const{// report number of events f
  */
 void QwDataHandlerArray::push_back(std::shared_ptr<VQwDataHandler> handler)
 {
-  
+
  if (handler.get() == NULL) {
    QwError << "QwDataHandlerArray::push_back(): NULL handler"
            << QwLog::endl;
@@ -681,11 +681,11 @@ TList* QwDataHandlerArray::GetParamFileNameList(TString name) const
 
     std::map<TString, TString> mapfiles_handler;
 
-    for (const_iterator handler = begin(); handler != end(); ++handler) 
+    for (const_iterator handler = begin(); handler != end(); ++handler)
       {
 	mapfiles_handler = (*handler)->GetDetectorMaps();
 	for( std::map<TString, TString>::iterator ii= mapfiles_handler.begin(); ii!= mapfiles_handler.end(); ++ii)
-	  {	
+	  {
 	    TList *test = new TList;
 	    test->SetName((*ii).first);
 	    test->AddLast(new TObjString((*ii).second));
@@ -720,8 +720,3 @@ void QwDataHandlerArray::FinishDataHandler()
     }
   }
 }
-  
-  
-  
-  
-  

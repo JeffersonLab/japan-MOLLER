@@ -75,4 +75,3 @@ class MQwHistograms {
     }
 
 }; // class MQwHistograms
-

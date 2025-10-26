@@ -67,7 +67,7 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
   void   CopyTemplatedDataElements(const VQwSubsystem *source);
 
   /* derived from VQwSubsystem */
-  
+
   void   ProcessOptions(QwOptions &options) override;//Handle command line options
   Int_t  LoadChannelMap(TString mapfile) override;
   Int_t  LoadInputParameters(TString pedestalfile) override;
@@ -83,7 +83,7 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
 
   Bool_t CheckForBurpFail(const VQwSubsystem *subsys) override;
 
-  void   PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliures
+  void   PrintErrorCounters() const override;// report number of events failed due to HW and event cut failures
   UInt_t GetEventcutErrorFlag() override;//return the error flag
 
   UInt_t UpdateErrorFlag() override;//Update and return the error flags
@@ -127,10 +127,10 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
   void   FillHistograms() override;
 
   using  VQwSubsystem::ConstructBranchAndVector;
-  void   ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) override;
+  void   ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override;
   void   ConstructBranch(TTree *tree, TString &prefix) override;
   void   ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file ) override;
-  void   FillTreeVector(std::vector<Double_t> &values) const override;
+  void   FillTreeVector(QwRootTreeBranchVector &values) const override;
 
 #ifdef HAS_RNTUPLE_SUPPORT
   using  VQwSubsystem::ConstructNTupleAndVector;
@@ -181,10 +181,10 @@ protected:
   ///  the index of that element within the array.
   template <typename TT>
   Int_t AddToElementList(std::vector<TT> &elementlist, QwBeamDetectorID &detector_id);
-  
+
   Int_t GetDetectorIndex(EQwBeamInstrumentType TypeID, TString name) const;
   //when the type and the name is passed the detector index from appropriate vector will be returned
-  //for example if TypeID is bcm  then the index of the detector from fBCM vector for given name will be returnd.
+  //for example if TypeID is bcm  then the index of the detector from fBCM vector for given name will be returned.
 
   std::vector <VQwBPM_ptr> fStripline;
   std::vector <VQwBPM_ptr> fBPMCombo;
@@ -203,7 +203,7 @@ protected:
   std::vector <QwEnergyCalculator> fECalculator;
   std::vector <QwBeamDetectorID> fBeamDetectorID;
 
-  
+
 
 /////
 private:
@@ -213,6 +213,6 @@ private:
 
   static const Bool_t bDEBUG=kFALSE;
 
-  
+
 
 };

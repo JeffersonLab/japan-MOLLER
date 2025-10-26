@@ -6,7 +6,7 @@
  */
 /**
   The QwFakeHelicity class uses a pregenerated random seed to generate
-  the fake helicity signal that then can be used to perfrom helicity
+  the fake helicity signal that then can be used to perform helicity
   related calculations.
 */
 

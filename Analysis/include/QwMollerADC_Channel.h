@@ -17,6 +17,7 @@
 // Qweak headers
 #include "VQwHardwareChannel.h"
 #include "MQwMockable.h"
+#include "QwRootFile.h"
 
 // Forward declarations
 class QwBlinder;
@@ -76,7 +77,7 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
     InitializeChannel(name, datatosave);
     SetMollerADCSaturationLimt(8.5);//set the default saturation limit
   };
-  QwMollerADC_Channel(const QwMollerADC_Channel& value): 
+  QwMollerADC_Channel(const QwMollerADC_Channel& value):
     VQwHardwareChannel(value), MQwMockable(value),
     fBlocksPerEvent(value.fBlocksPerEvent),
     fNumberOfSamples_map(value.fNumberOfSamples_map),
@@ -101,7 +102,7 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
     fSaturationABSLimit = value.fSaturationABSLimit;
     *this = value;
   };
-  
+
 
   using VQwHardwareChannel::Clone;
 
@@ -122,13 +123,13 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
     // This will be checked against the no.of samples read by the module
     fNumberOfSamples_map = num_samples_map;
   };
-  
+
   void  ClearEventData() override;
 
   /// Internally generate random event data
   void  RandomizeEventData(int helicity = 0.0, double time = 0.0) override;
 
-  /// Forces the event "number of samples" varible to be what was expected from the mapfile.
+  /// Forces the event "number of samples" variable to be what was expected from the mapfile.
   /// NOTE: this should only be used in mock data generation!
   void  ForceMapfileSampleSize() {fNumberOfSamples = fNumberOfSamples_map;};
 
@@ -189,7 +190,11 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   void AccumulateRunningSum(const QwMollerADC_Channel& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
   void AccumulateRunningSum(const VQwHardwareChannel *value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override{
     const QwMollerADC_Channel *tmp_ptr = dynamic_cast<const QwMollerADC_Channel*>(value);
-    if (tmp_ptr != NULL) AccumulateRunningSum(*tmp_ptr, count, ErrorMask);
+    if (tmp_ptr != NULL) {
+      AccumulateRunningSum(*tmp_ptr, count, ErrorMask);
+    } else {
+      throw std::invalid_argument("Standard exception from QwMollerADC_Channel::AccumulateRunningSum: incompatible hardware channel type");
+    }
   };
   ////deaccumulate one value from the running sum
   inline void DeaccumulateRunningSum(const QwMollerADC_Channel& value, Int_t ErrorMask=0xFFFFFFF){
@@ -198,7 +203,11 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   /*
   void DeaccumulateRunningSum(VQwHardwareChannel *value){
     const QwMollerADC_Channel *tmp_ptr = dynamic_cast<const QwMollerADC_Channel*>(value);
-    if (tmp_ptr != NULL) DeaccumulateRunningSum(*tmp_ptr);
+    if (tmp_ptr != NULL) {
+      DeaccumulateRunningSum(*tmp_ptr);
+    } else {
+      throw std::invalid_argument("Standard exception from QwMollerADC_Channel::DeaccumulateRunningSum: incompatible hardware channel type");
+    }
   };
   */
 
@@ -210,7 +219,7 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   /*Event cut related routines*/
   Bool_t ApplySingleEventCuts(Double_t LL,Double_t UL);//check values read from modules are at desired level
   Bool_t ApplySingleEventCuts() override;//check values read from modules are at desired level by comparing upper and lower limits (fULimit and fLLimit) set on this channel
-  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure
 
   void SetMollerADCSaturationLimt(Double_t sat_volts=8.5){//Set the absolute staturation limit in volts.
     fSaturationABSLimit=sat_volts;
@@ -221,18 +230,18 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   }
 
 
-  Int_t ApplyHWChecks() override; //Check for harware errors in the devices. This will return the device error code.
+  Int_t ApplyHWChecks() override; //Check for hardware errors in the devices. This will return the device error code.
 
   void IncrementErrorCounters() override;//update the error counters based on the internal fErrorFlag
-  
+
   /*End*/
 
   void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
   void  FillHistograms() override;
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) override;
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override;
   void  ConstructBranch(TTree *tree, TString &prefix) override;
-  void  FillTreeVector(std::vector<Double_t> &values) const override;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const override;
 #ifdef HAS_RNTUPLE_SUPPORT
   void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
   void  FillNTupleVector(std::vector<Double_t>& values) const override;
@@ -331,7 +340,7 @@ private:
   Int_t fBlock_raw[4];      ///< Array of the sub-block data as read from the module
   Int_t fHardwareBlockSum_raw; ///< Module-based sum of the four sub-blocks as read from the module
   Int_t fSoftwareBlockSum_raw; ///< Sum of the data in the four sub-blocks raw
-  Long64_t fBlockSumSq_raw[5]; 
+  Long64_t fBlockSumSq_raw[5];
   Int_t fBlock_min[5];
   Int_t fBlock_max[5];
   Short_t fBlock_numSamples[5];
@@ -356,22 +365,21 @@ private:
   // @}
 
 
-  size_t fSequenceNumber;      ///< Event sequence number for this channel
-  size_t fPreviousSequenceNumber; ///< Previous event sequence number for this channel
-  size_t fNumberOfSamples;     ///< Number of samples  read through the module
-  size_t fNumberOfSamples_map; ///< Number of samples in the expected to  read through the module. This value is set in the QwBeamline map file
+  UInt_t fSequenceNumber;      ///< Event sequence number for this channel
+  UInt_t fPreviousSequenceNumber; ///< Previous event sequence number for this channel
+  UInt_t fNumberOfSamples;     ///< Number of samples  read through the module
+  UInt_t fNumberOfSamples_map; ///< Number of samples in the expected to  read through the module. This value is set in the QwBeamline map file
 
- 
 
   // Set of error counters for each HW test.
-  Int_t fErrorCount_HWSat;    ///< check to see ADC channel is saturated 
-  Int_t fErrorCount_sample;   ///< for sample size check                 
+  Int_t fErrorCount_HWSat;    ///< check to see ADC channel is saturated
+  Int_t fErrorCount_sample;   ///< for sample size check
   Int_t fErrorCount_SW_HW;    ///< HW_sum==SW_sum check
   Int_t fErrorCount_Sequence; ///< sequence number check
   Int_t fErrorCount_SameHW;   ///< check to see ADC returning same HW value
   Int_t fErrorCount_ZeroHW;   ///< check to see ADC returning zero
 
-  Int_t fNumEvtsWithEventCutsRejected; ///< Counts the Event cut rejected events 
+  Int_t fNumEvtsWithEventCutsRejected; ///< Counts the Event cut rejected events
 
 
 
@@ -400,8 +408,8 @@ private:
   Bool_t bSequence_number;
 
 private:
-  
-  
+
+
 
 
 

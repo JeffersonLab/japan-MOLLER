@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <string>
 #include <vector>
 #include "Rtypes.h"
@@ -180,11 +181,11 @@ class QwEventBuffer {
 
   Bool_t FillSubsystemConfigurationData(std::vector<VQwSubsystem*> &subsystems);
   Bool_t FillSubsystemData(std::vector<VQwSubsystem*> &subsystems);
-	
-	// Coda Version that is set by void VerifyCodaVersion( ) 
+
+	// Coda Version that is set by void VerifyCodaVersion( )
 	// Compared against the user-input coda version
 	Int_t fDataVersionVerify = 0;
-  Int_t fDataVersion; // User-input Coda Version	
+  Int_t fDataVersion; // User-input Coda Version
 
  protected:
   ///
@@ -195,6 +196,12 @@ class QwEventBuffer {
   Int_t   fETWaitMode;
   Bool_t  fExitOnEnd;
 
+  // Event rate limiting
+  Bool_t fEventRateLimitEnabled{false};
+  Double_t fMaxEventRate{0.0};
+  std::chrono::duration<double> fMinEventInterval;
+  std::chrono::duration<double> fAccumulatedDelay{0.0};
+  std::chrono::steady_clock::time_point fLastEventTime;
 
   Bool_t fChainDataFiles;
   std::pair<Int_t, Int_t> fRunRange;
@@ -229,6 +236,7 @@ class QwEventBuffer {
   Int_t  GetEtEvent();
 
   Int_t WriteFileEvent(int* buffer);
+  Int_t WriteEtEvent(int* buffer);
 
   Bool_t DataFileIsSegmented();
 
@@ -293,7 +301,7 @@ template < class T > Bool_t QwEventBuffer::FillObjectWithEventData(T &object){
   ///  - Bool_t T::CanUseThisEventType(const UInt_t event_type);
   ///  - Bool_t T::ClearEventData(const UInt_t event_type);
   ///  - Int_t  T::ProcessBuffer(const UInt_t event_type,
-  ///       const ROCID_t roc_id, const BankID_t bank_id, 
+  ///       const ROCID_t roc_id, const BankID_t bank_id,
   ///       const UInt_t banktype, UInt_t* buffer, UInt_t num_words);
   ///
   Bool_t okay = kFALSE;

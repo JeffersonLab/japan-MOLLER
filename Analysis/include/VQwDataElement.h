@@ -26,6 +26,7 @@
 
 class QwParameterFile;
 class VQwHardwareChannel;
+class QwRootTreeBranchVector;
 
 /**
  *  \class   VQwDataElement
@@ -109,7 +110,7 @@ class VQwDataElement: public MQwHistograms {
   /// Virtual destructor
   ~VQwDataElement() override { };
 
-  virtual void CopyFrom(const VQwDataElement& value){
+  void CopyFrom(const VQwDataElement& value){
     fElementName       = value.fElementName;
     //    fNumberOfDataWords = value.fNumberOfDataWords;
     fGoodEventCount    = value.fGoodEventCount;
@@ -144,7 +145,7 @@ class VQwDataElement: public MQwHistograms {
 
   UInt_t GetGoodEventCount() const { return fGoodEventCount; };
 
-  
+
   virtual void AssignValueFrom(const VQwDataElement* /*valueptr*/){
     std::cerr << "Operation AssignValueFrom not defined!" << std::endl;
   };
@@ -199,7 +200,7 @@ class VQwDataElement: public MQwHistograms {
 
   /// \brief Update the error flag based on the error flags of internally
   ///        contained objects
-  ///        Return paramter is the "Eventcut Error Flag".
+  ///        Return parameter is the "Eventcut Error Flag".
   virtual UInt_t UpdateErrorFlag() {return GetEventcutErrorFlag();};
 
   // These are related to those hardware channels that need to normalize
@@ -211,8 +212,8 @@ class VQwDataElement: public MQwHistograms {
   virtual void SetExternalClockName( const std::string /*name*/) {};
   virtual Double_t GetNormClockValue() { return 1.;}
 
-  
-  
+
+
   /*! \brief Return the name of the inheriting subsystem name*/
   TString GetSubsystemName() const {
     return fSubsystemName;
@@ -222,7 +223,7 @@ class VQwDataElement: public MQwHistograms {
   void SetSubsystemName(TString sysname){
     fSubsystemName=sysname;
   }
-  
+
    /*! \brief Return the type of the beam instrument*/
   TString GetModuleType() const {
     return fModuleType;
@@ -249,12 +250,14 @@ class VQwDataElement: public MQwHistograms {
 
   //  The most basic version of UpdateErrorFlag, which should get hidden
   //  by all the derived class versions.
-  virtual void UpdateErrorFlag(const UInt_t& error){fErrorFlag |= (error);};
+  void UpdateErrorFlag(const UInt_t& error){
+    fErrorFlag |= (error);
+  };
 
  protected:
   TString fElementName; ///< Name of this data element
   UInt_t  fNumberOfDataWords; ///< Number of raw data words in this data element
-  Int_t fGoodEventCount; ///< Number of good events accumulated in this element
+  UInt_t  fGoodEventCount; ///< Number of good events accumulated in this element
 
 
   // Name of the inheriting subsystem

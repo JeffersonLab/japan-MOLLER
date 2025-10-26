@@ -8,7 +8,7 @@ Parameter file: [32m/home/wdconinc/git/japan/Parity/prminput/mock_detectors.map
 Loading subsystems from mock_detectors.map.
 Creating subsystem of type QwHelicity with name Helicity Info.
 Parameter file: [32m/home/wdconinc/git/japan/Parity/prminput/mock_qweak_helicity.map[0m
- **** Input Register Mode **** 
+ **** Input Register Mode ****
 Creating subsystem of type QwBeamLine with name Injector BeamLine.
 Parameter file: [32m/home/wdconinc/git/japan/Parity/prminput/mock_qweak_beamline.map[0m
 [31mError: At end of processing the combined device [0m

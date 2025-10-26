@@ -71,7 +71,7 @@ class  QwHaloMonitor : public VQwDataElement{
 
 
   void  PrintErrorCounters();//This will display the error summary for each device
-  void  UpdateHWErrorCount();//Update error counter for HW faliure
+  void  UpdateHWErrorCount();//Update error counter for HW failure
 
   Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left,UInt_t index=0) override;
   void  ProcessEvent();
@@ -102,7 +102,7 @@ class  QwHaloMonitor : public VQwDataElement{
     fHalo_Counter.UpdateErrorFlag(ev_error->fHalo_Counter);
   };
 
-  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure
   Bool_t ApplyHWChecks();
   void SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel){
     QwError<<"***************************"<<QwLog::endl;
@@ -116,10 +116,10 @@ class  QwHaloMonitor : public VQwDataElement{
   void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
   void  FillHistograms() override;
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values);
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const;
 
 #ifdef HAS_RNTUPLE_SUPPORT
   void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
@@ -154,6 +154,6 @@ class  QwHaloMonitor : public VQwDataElement{
   QwSIS3801D24_Channel fHalo_Counter;
 
   Int_t  fDeviceErrorCode;//keep the device HW status using a unique code from the QwVQWK_Channel::fDeviceErrorCode
-  Bool_t bEVENTCUTMODE;//If this set to kFALSE then Event cuts do not depend on HW ckecks. This is set externally through the qweak_beamline_eventcuts.map
+  Bool_t bEVENTCUTMODE;//If this set to kFALSE then Event cuts do not depend on HW checks. This is set externally through the qweak_beamline_eventcuts.map
 
 };

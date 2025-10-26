@@ -28,7 +28,7 @@ class MQwPublishable_child {
    * Initializes the child object and sets up self-reference for publishing.
    */
   MQwPublishable_child() {fSelf = dynamic_cast<T*>(this); };
-  
+
   /**
    * \brief Copy constructor
    * @param source Source object to copy from
@@ -37,13 +37,13 @@ class MQwPublishable_child {
 
   /** \brief Virtual destructor */
   virtual ~MQwPublishable_child() { };
-    
+
     /**
      * \brief Set the parent container for this child object
      * @param parent Pointer to the parent container that manages variable publishing
      */
     void SetParent(U* parent){fParent = parent;};
-    
+
     /**
      * \brief Get the parent container for this child object
      * @return Pointer to the parent container, or nullptr if no parent is set
@@ -87,7 +87,7 @@ class MQwPublishable_child {
      * @return kTRUE if all variables were successfully published, kFALSE otherwise
      */
     virtual Bool_t PublishInternalValues() const = 0;
-    
+
     /**
      * \brief Try to publish an internal variable matching the submitted name
      * Called when another subsystem requests a variable that hasn't been published yet.
@@ -122,7 +122,7 @@ class MQwPublishable {
      * Initializes empty variable publishing maps.
      */
     MQwPublishable() { };
-    
+
     /**
      * \brief Copy constructor
      * Creates a new container with cleared publishing maps (variables are not copied).
@@ -139,7 +139,7 @@ class MQwPublishable {
 
   public:
     std::vector<std::vector<TString> > fPublishList;
-    
+
     /**
      * \brief Retrieve a variable value from external sources by copying
      * Searches for the named variable in external subsystem arrays and copies
@@ -158,7 +158,7 @@ class MQwPublishable {
      * @return Pointer to the variable's data element, or nullptr if not found
      */
     const VQwHardwareChannel* RequestExternalPointer(const TString& name) const;
-    
+
     /**
      * \brief Retrieve an internal variable by name (pointer version)
      * Searches for the named variable among published internal variables and
@@ -215,5 +215,5 @@ class MQwPublishable {
     std::map<TString, const VQwHardwareChannel*> fPublishedValuesDataElement;
     std::map<TString, const T*>                  fPublishedValuesSubsystem;
     std::map<TString, TString>                   fPublishedValuesDescription;
- 
+
 };

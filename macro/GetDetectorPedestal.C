@@ -6,7 +6,7 @@
 //	   therefore this function should be called at the second pass after
 // 	   beamline calibration.
 //
-//	Revised: Tao Ye  
+//	Revised: Tao Ye
 //	Date: July 2019
 
 void LoadStyle();
@@ -20,7 +20,7 @@ void GetDetectorPedestal(int run_num,
 			 TString bcm_name,
 			 Double_t lowlimit,
 			 TCut user_cut){
-  
+
   LoadStyle();
   TFile *rootfile = TFile::Open(Form("$QW_ROOTFILES/prexPrompt_pass2_%d.000.root",run_num));
   TTree *tree= (TTree*)rootfile->Get("evt");
@@ -29,7 +29,7 @@ void GetDetectorPedestal(int run_num,
 
   //---------------------------
 
-  TCut beam_evtcut[] ={ 
+  TCut beam_evtcut[] ={
     "cleandata && ErrorFlag==0 && scandata1>0 && scandata2==1",
     "cleandata && ErrorFlag==0 && scandata1>0 && scandata2==2"};
 
@@ -50,9 +50,9 @@ void GetDetectorPedestal(int run_num,
   f_zero->SetLineColor(kRed);
   f_zero->SetLineStyle(9);
 
-  double det_mean[ndata]; 
+  double det_mean[ndata];
   double det_error[ndata];
-  double bcm_mean[ndata]; 
+  double bcm_mean[ndata];
   double bcm_error[ndata];
   double det_res[ndata]; // residual
 
@@ -68,12 +68,12 @@ void GetDetectorPedestal(int run_num,
 	  outputDir.Data(),run_num);
   printf("Writing output to %s\n",outfilename);
 
-  //FILE *outfile = fopen(outfilename, "w"); 
+  //FILE *outfile = fopen(outfilename, "w");
   ofstream outfile;
   outfile.open(outfilename);
 
   TGraphErrors *g_res;
-  TGraphErrors *g_fit;  
+  TGraphErrors *g_fit;
   TGraphErrors *g_res_ref;
   TGraphErrors *g_fit_ref;
   TMultiGraph *mg_res;
@@ -97,9 +97,9 @@ void GetDetectorPedestal(int run_num,
     bcm_mean[i] = h_stat->GetMean();
     bcm_error[i] = h_stat->GetRMS()/TMath::Sqrt(h_stat->GetEntries());
 
-    cout << bcm_mean[i] 
+    cout << bcm_mean[i]
 	 << "+/-"
-	 << bcm_error[i] 
+	 << bcm_error[i]
 	 << endl;
   }
 
@@ -133,7 +133,7 @@ void GetDetectorPedestal(int run_num,
       for(int i=0;i<ndata;i++){
 	det_res[i] = det_mean[i] - f_fit->Eval(bcm_mean[i]);
       }
-      
+
       c_det->cd(2);
       g_res = new TGraphErrors(ndata,bcm_mean,det_res,bcm_error,det_error);
       g_res->SetMarkerStyle(20);
@@ -167,14 +167,14 @@ void LoadStyle(){
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.2);
   gStyle->SetStatW(0.3);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(1011);
   gStyle->SetStatX(0.7);
   gStyle->SetStatY(0.9);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -183,5 +183,5 @@ void LoadStyle(){
   gStyle->SetLabelSize(0.035,"x");
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.06,"hxyz");
-  gROOT->ForceStyle();  
+  gROOT->ForceStyle();
 }

@@ -4,14 +4,14 @@ void GetHallBCMPedestal_run3396(int run_num=3396 ,TString user_cut ="1",TString 
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.2);
   gStyle->SetStatW(0.3);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(1011);
   gStyle->SetStatX(0.7);
   gStyle->SetStatY(0.9);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -20,8 +20,8 @@ void GetHallBCMPedestal_run3396(int run_num=3396 ,TString user_cut ="1",TString 
   gStyle->SetLabelSize(0.035,"x");
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.06,"hxyz");
-  gROOT->ForceStyle();  
-  
+  gROOT->ForceStyle();
+
   // TString rf_name =Form("$QW_ROOTFILES/prexPrompt_pass2_%d.000.root",run_num);
   TFile *rootfile = TFile::Open(Form("$QW_ROOTFILES/prexPrompt_pass2_%d.000.root",run_num));
   TTree *tree= (TTree*)rootfile->Get("evt");
@@ -37,9 +37,9 @@ void GetHallBCMPedestal_run3396(int run_num=3396 ,TString user_cut ="1",TString 
   int nbinx = (int)(10*max); // to one-tenth precision.
 
   vector<double> vec_scandata;
-  TH1D *hsd = new TH1D(Form("hsd%d",myii),"scan data",nbinx,-0.05,max-0.05); 
+  TH1D *hsd = new TH1D(Form("hsd%d",myii),"scan data",nbinx,-0.05,max-0.05);
   tree->Draw(Form("scandata1>>hsd%d",myii),Form("%s&&scandata1!=0 && cleandata",user_cut.Data()),"goff");
-  int bin_content; 
+  int bin_content;
   double bin_center;
   for(int ibin=0;ibin<nbinx;ibin++){
     bin_content = hsd->GetBinContent(ibin+1); // Histogram bin number starts from 1
@@ -74,19 +74,19 @@ void GetHallBCMPedestal_run3396(int run_num=3396 ,TString user_cut ="1",TString 
 
   TCanvas *c_bcm = new TCanvas("c_bcm","c_bcm",1000,500);
   c_bcm->Divide(2,1);
-  
+
   TF1 *f_zero = new TF1("f_zero","0",0,10000);
   f_zero->SetLineWidth(2);
   f_zero->SetLineColor(kRed);
   f_zero->SetLineStyle(9);
-  
+
   TString branch_name;
   TString num_samples_name;
- 
 
-  double bcm_mean[ndata]; 
+
+  double bcm_mean[ndata];
   double bcm_error[ndata];
-  double unser_mean[ndata]; 
+  double unser_mean[ndata];
   double unser_error[ndata];
   double bcm_res[ndata]; // residual
 
@@ -101,12 +101,12 @@ void GetHallBCMPedestal_run3396(int run_num=3396 ,TString user_cut ="1",TString 
 	sprintf(outfilename,"%s/run%d_bcm_pedestal_fit.txt",
 			outputDir.Data(),run_num);
 	printf("Writing output to %s\n",outfilename);
-	//FILE *outfile = fopen(outfilename, "w"); 
+	//FILE *outfile = fopen(outfilename, "w");
 	ofstream outfile;
 	outfile.open(outfilename);
 
   TGraphErrors *g_res;
-  TGraphErrors *g_fit;  
+  TGraphErrors *g_fit;
   TGraphErrors *g_res_ref;
   TGraphErrors *g_fit_ref;
   TMultiGraph *mg_res;
@@ -169,7 +169,7 @@ void GetHallBCMPedestal_run3396(int run_num=3396 ,TString user_cut ="1",TString 
       ped[ibcm] = f_fit->GetParameter(0);
       slope[ibcm] = f_fit->GetParameter(1);
       gain[ibcm] = 1/slope[ibcm];
-      
+
       for(int i=0;i<ndata;i++){
 	//	bcm_res[i] = (bcm_mean[i]-ped[ibcm])*gain[ibcm] - unser_mean[i];
 	//	bcm_error[i] = bcm_error[i] *gain[ibcm];
@@ -177,7 +177,7 @@ void GetHallBCMPedestal_run3396(int run_num=3396 ,TString user_cut ="1",TString 
 	bcm_error[i] = bcm_error[i];
 
       }
-      
+
       c_bcm->cd(2);
       g_res = new TGraphErrors(ndata,unser_mean,bcm_res,unser_error,bcm_error);
       g_res->SetMarkerStyle(20);

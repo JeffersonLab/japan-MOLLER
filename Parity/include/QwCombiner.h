@@ -50,9 +50,9 @@ class QwCombiner:public VQwDataHandler, public MQwDataHandlerCloneable<QwCombine
 			  QwSubsystemArrayParity& diff) override;
 
     void ProcessData() override;
-  
+
   protected:
-  
+
     /// Default constructor (Protected for child class access)
     QwCombiner() { };
 

@@ -54,7 +54,7 @@ class QwCombinedPMT : public VQwDataElement {
 
   void  InitializeChannel(TString name, TString datatosave);
   // new routine added to update necessary information for tree trimming
-  void  InitializeChannel(TString subsystem, TString name, TString datatosave); 
+  void  InitializeChannel(TString subsystem, TString name, TString datatosave);
   void  LinkChannel(TString name);
 
   const QwMollerADC_Channel* GetChannel(const TString name) const {
@@ -79,9 +79,9 @@ class QwCombinedPMT : public VQwDataElement {
   void  EncodeEventData(std::vector<UInt_t> &buffer);
 
   void  ProcessEvent();
-  Bool_t ApplyHWChecks();//Check for harware errors in the devices
-  Bool_t ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
-  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
+  Bool_t ApplyHWChecks();//Check for hardware errors in the devices
+  Bool_t ApplySingleEventCuts();//Check for good events by setting limits on the devices readings
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   void SetSingleEventCuts(UInt_t errorflag, Double_t LL, Double_t UL, Double_t stability, Double_t burplevel);
 
@@ -119,7 +119,7 @@ class QwCombinedPMT : public VQwDataElement {
   void CalculateRunningAverage();
 
   void SetBlindability(Bool_t isblindable){fSumADC.SetBlindability(isblindable);};
-  void SetNormalizability(Bool_t isnormalizable){fSumADC.SetNormalizability(isnormalizable);}; 
+  void SetNormalizability(Bool_t isnormalizable){fSumADC.SetNormalizability(isnormalizable);};
 
   /// \brief Blind the asymmetry
   void Blind(const QwBlinder *blinder);
@@ -132,10 +132,10 @@ class QwCombinedPMT : public VQwDataElement {
   void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
   void  FillHistograms() override;
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values);
   void  ConstructBranch(TTree *tree, TString &prefix);
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const;
 
 #ifdef HAS_RNTUPLE_SUPPORT
   // RNTuple methods
@@ -171,7 +171,7 @@ class QwCombinedPMT : public VQwDataElement {
                           /// from the QwMollerADC_Channel::fDeviceErrorCode
 
   Bool_t bEVENTCUTMODE; /// If this set to kFALSE then Event cuts do not depend
-                        /// on HW ckecks. This is set externally through the
+                        /// on HW checks. This is set externally through the
                         /// qweak_beamline_eventcuts.map
 
   const static  Bool_t bDEBUG=kFALSE; /// debugging display purposes

@@ -38,7 +38,7 @@ class QwIntegratedRasterDetectorID{
 
   int fSubbankIndex;
   int fWordInSubbank; //first word reported for this channel in the subbank
-                      //(eg VQWK channel report 6 words for each event, scalers oly report one word per event)
+                      //(eg VQWK channel report 6 words for each event, scalers only report one word per event)
   // The first word of the subbank gets fWordInSubbank=0
 
   //  EQwInstrumentType fTypeID;     // type of detector
@@ -64,7 +64,7 @@ class QwIntegratedRasterDetectorID{
  * \brief Subsystem handling integrated raster X/Y channels
  */
 class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneable<QwIntegratedRaster> {
-  /////  
+  /////
 
  private:
   /// Private default constructor (not implemented, will throw linker error on use)
@@ -96,7 +96,7 @@ class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneab
   Int_t LoadEventCuts(TString filename) override;//derived from VQwSubsystemParity
   void IncrementErrorCounters() override;
   Bool_t ApplySingleEventCuts() override;//derived from VQwSubsystemParity
-  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliures
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failures
   UInt_t GetEventcutErrorFlag() override;//return the error flag
 
   Bool_t CheckForBurpFail(const VQwSubsystem *subsys) override{
@@ -141,13 +141,13 @@ class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneab
   void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
   void  FillHistograms() override;
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) override;
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override;
   void  ConstructBranch(TTree *tree, TString &prefix) override;
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file) override;
-  void  FillTreeVector(std::vector<Double_t> &values) const override;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const override;
 
 #ifdef HAS_RNTUPLE_SUPPORT
-  // RNTuple methods  
+  // RNTuple methods
   void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
   void  FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif
@@ -165,13 +165,13 @@ class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneab
   void PrintInfo() const override;
 
 /////
-protected: 
- 
+protected:
+
   // EQwPMTInstrumentType GetDetectorTypeID(TString name);
- 
+
   Int_t GetDetectorIndex(TString name);
 
-  std::vector <QwIntegratedRasterChannel<QwVQWK_Channel> >      fIntegratedRasterChannel;  
+  std::vector <QwIntegratedRasterChannel<QwVQWK_Channel> >      fIntegratedRasterChannel;
   std::vector <QwIntegratedRasterDetectorID>   fDetectorIDs;
 
 protected:

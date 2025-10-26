@@ -88,7 +88,7 @@ void  QwCombinedBPM<T>::InitializeChannel(TString subsystem, TString name)
     fIntercept[axis].InitializeChannel(subsystem, "QwCombinedBPM", name+kAxisLabel[axis]+"Intercept","derived");
     fMinimumChiSquare[axis].InitializeChannel(subsystem, "QwCombinedBPM",name+kAxisLabel[axis]+"MinChiSquare","derived");
   }
-  
+
   fixedParamCalculated = false;
 
   fElement.clear();
@@ -252,7 +252,7 @@ Bool_t QwCombinedBPM<T>::ApplySingleEventCuts()
     ///         is not meaningful for every VQwDataElement.
     ///         Maybe the return should be a VQwHardwareChannel?
 
-    //To update the event cut faliures in individual BPM devices
+    //To update the event cut failures in individual BPM devices
     charge_error      |= fElement[i]->GetEffectiveCharge()->GetErrorCode();
     pos_error[kXAxis] |= fElement[i]->GetPosition(kXAxis)->GetErrorCode();
     pos_error[kYAxis] |= fElement[i]->GetPosition(kYAxis)->GetErrorCode();
@@ -299,7 +299,7 @@ Bool_t QwCombinedBPM<T>::ApplySingleEventCuts()
   //Event cuts for  X & Y positions
   for(axis=kXAxis;axis<kNumAxes;axis++){
     fAbsPos[axis].UpdateErrorFlag(pos_error[axis]);
-    if (fAbsPos[axis].ApplySingleEventCuts()){ 
+    if (fAbsPos[axis].ApplySingleEventCuts()){
       status&=kTRUE;
     }
     else{
@@ -332,9 +332,9 @@ UInt_t QwCombinedBPM<T>::UpdateErrorFlag()
   pos_error[kYAxis]=0;
 
   UInt_t error = 0;
-  
+
   for(size_t i=0;i<fElement.size();i++){
-    //To update the event cut faliures in individual BPM devices
+    //To update the event cut failures in individual BPM devices
     charge_error      |= fElement[i]->GetEffectiveCharge()->GetErrorCode();
     pos_error[kXAxis] |= fElement[i]->GetPosition(kXAxis)->GetErrorCode();
     pos_error[kYAxis] |= fElement[i]->GetPosition(kYAxis)->GetErrorCode();
@@ -520,7 +520,7 @@ void QwCombinedBPM<T>::UpdateErrorFlag(const VQwBPM *ev_error){
     }
   } catch (std::exception& e) {
     std::cerr<< e.what()<<std::endl;
-  }  
+  }
 };
 
 
@@ -572,10 +572,10 @@ void  QwCombinedBPM<T>::ProcessEvent()
       } else
 	std::cout<<"got 4-wire.hw_sum = "<<fEffectiveCharge.GetValue()
 		 <<" vs     actual "
-		 << fElement[i]->GetEffectiveCharge()->GetValue() 
+		 << fElement[i]->GetEffectiveCharge()->GetValue()
 		 << std::endl << std::flush;
 
-      
+
       std::cout<<"copied absolute X position hw_sum from device "
 	       << fElement[i]->GetPosition(kXAxis)->GetValue() <<std::endl;
       std::cout<<"copied absolute Y position hw_sum from device "
@@ -597,12 +597,12 @@ void  QwCombinedBPM<T>::ProcessEvent()
     std::cout<<" QwCombinedBPM:: Projected target X position = "<<fAbsPos[kXAxis].GetValue()
 	     <<" and target X slope = "<<fSlope[kXAxis].GetValue()
 	     <<" and target X intercept = "<<fIntercept[kXAxis].GetValue()
-	     <<" with mimimum chi square = "<< fMinimumChiSquare[kXAxis].GetValue()
+	     <<" with minimum chi square = "<< fMinimumChiSquare[kXAxis].GetValue()
 	     <<" \nProjected target Y position = "<<fAbsPos[kYAxis].GetValue()
 	     <<" and target Y slope = "<<fSlope[kYAxis].GetValue()
 	     <<" and target Y intercept = "<<fIntercept[kYAxis].GetValue()
-	     <<" with mimimum chi square = "<< fMinimumChiSquare[kYAxis].GetValue()<<std::endl;
-		 
+	     <<" with minimum chi square = "<< fMinimumChiSquare[kYAxis].GetValue()<<std::endl;
+
   }
 
 
@@ -661,7 +661,7 @@ template<typename T>
    Double_t sum = 0.0;
    if(weight.size()!=fElement.size()){
      std::cout
-       <<"QwCombinedBPM:: Number of devices doesnt match the number of weights."
+       <<"QwCombinedBPM:: Number of devices doesn't match the number of weights."
        <<" Exiting calculating parameters for the least squares fit"
        <<std::endl;
    }
@@ -686,7 +686,7 @@ template<typename T>
       A = sigma(X * Wy)     B = sigma(Wy)    C = sigma(Y*Wy)    D = sigma(X *X * Wy)     E = sigma(X*Y*Wy)   F = sigma(Y * Y *Wy)
 
       then
-      a = (EB-CA)/(DB-AA)      b =(DC-EA)/(DB-AA)   
+      a = (EB-CA)/(DB-AA)      b =(DC-EA)/(DB-AA)
    **/
 
    Bool_t ldebug = kFALSE;
@@ -742,7 +742,7 @@ template<typename T>
 
 
    zpos = this->GetPositionInZ();
-   //UInt_t err_flag=fAbsPos[axis].GetEventcutErrorFlag();    
+   //UInt_t err_flag=fAbsPos[axis].GetEventcutErrorFlag();
    fAbsPos[axis] = fIntercept[axis]; // X =  b
    //fAbsPos[axis].ResetErrorFlag(err_flag);
    tmp1.AssignScaledValue(fSlope[axis],zpos); //az
@@ -750,7 +750,7 @@ template<typename T>
 
 
    // to perform the minimul chi-square test
-   // We want to calculte (X-az-b)^2 for each bpm in the combination and sum over the values
+   // We want to calculate (X-az-b)^2 for each bpm in the combination and sum over the values
    tmp3.ClearEventData();
    fMinimumChiSquare[axis].ClearEventData();
 
@@ -784,7 +784,7 @@ template<typename T>
    }
 
    //std::cout << "1.0/fElement.size() = " << 1.0/fElement.size() << std::endl;
-   
+
    return;
  }
 
@@ -827,7 +827,7 @@ void QwCombinedBPM<T>::GetProjectedPosition(VQwBPM *device)
    device->ApplyResolutionSmearing();
     //device->PrintInfo();
    device->FillRawEventData();
-    //std::cout << "Device " << device->GetElementName() << " X = " << std::setprecision(15) << device->GetPosition(kXAxis)->GetValue() 
+    //std::cout << "Device " << device->GetElementName() << " X = " << std::setprecision(15) << device->GetPosition(kXAxis)->GetValue()
     //<< "\t Y = " << std::setprecision(15) << device->GetPosition(kYAxis)->GetValue() << std::endl;
 }
 
@@ -961,7 +961,7 @@ template<typename T>
 void QwCombinedBPM<T>::Ratio(QwCombinedBPM<T> &numer,
     QwCombinedBPM<T> &denom)
 {
-  // this function is called when forming asymmetries. In this case waht we actually want for the
+  // this function is called when forming asymmetries. In this case what we actually want for the
   // combined bpm is the difference only not the asymmetries
 
   *this=numer;
@@ -1057,7 +1057,7 @@ void  QwCombinedBPM<T>::ConstructHistograms(TDirectory *folder, TString &prefix)
     //  This channel is not used, so skip filling the histograms.
   }
   else{
-    //we calculate the asym_ for the fEffectiveCharge becasue its an asymmetry and not a difference.
+    //we calculate the asym_ for the fEffectiveCharge because its an asymmetry and not a difference.
     fEffectiveCharge.ConstructHistograms(folder, prefix);
     TString thisprefix=prefix;
     if(prefix.Contains("asym_"))
@@ -1094,7 +1094,7 @@ void  QwCombinedBPM<T>::FillHistograms()
 }
 
 template<typename T>
-void  QwCombinedBPM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwCombinedBPM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip constructing trees.
@@ -1179,7 +1179,7 @@ void  QwCombinedBPM<T>::ConstructBranch(TTree *tree, TString &prefix, QwParamete
 
 
 template<typename T>
-void  QwCombinedBPM<T>::FillTreeVector(std::vector<Double_t> &values) const
+void  QwCombinedBPM<T>::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip filling the tree.
@@ -1287,7 +1287,7 @@ void QwCombinedBPM<T>::RandomizeEventData(int helicity, double time)
   static Double_t zpos = 0;
   static T tmp1("tmp1","derived");
   // Randomize the abs position and angle.
-  for (size_t axis=kXAxis; axis<kNumAxes; axis++) 
+  for (size_t axis=kXAxis; axis<kNumAxes; axis++)
   {
     //std::cout << "In QwCombinedBPM::RandomizeEventData-> Slope(before): " << fSlope[axis].GetValue() << std::endl;
     //std::cout << "BEFORE RANDOMIZING POS & SLOPE: " << std::endl;
@@ -1305,7 +1305,7 @@ void QwCombinedBPM<T>::RandomizeEventData(int helicity, double time)
 
     zpos = this->GetPositionInZ();
     //std::cout << "In QwCombinedBPM: zpos= " << zpos << std::endl;
-    //UInt_t err_flag=fAbsPos[axis].GetEventcutErrorFlag();    
+    //UInt_t err_flag=fAbsPos[axis].GetEventcutErrorFlag();
     fIntercept[axis] = fAbsPos[axis]; // b =  X
     //fAbsPos[axis].ResetErrorFlag(err_flag);
     tmp1.AssignScaledValue(fSlope[axis],zpos); //az
@@ -1323,14 +1323,14 @@ void QwCombinedBPM<T>::LoadMockDataParameters(QwParameterFile &paramfile){
   Double_t meanX=0.0, sigmaX=0.0, meanY=0.0, sigmaY=0.0;
   Double_t meanXslope=0.0, sigmaXslope=0.0, meanYslope=0.0, sigmaYslope=0.0;
 */
-  Double_t xres=0.0, yres=0.0; //  Temporary variables for the resoluton.
+  Double_t xres=0.0, yres=0.0; //  Temporary variables for the resolution.
 
   if (paramfile.GetLine().find("resolution")!=std::string::npos){
     paramfile.GetNextToken();
     xres = paramfile.GetTypedNextToken<Double_t>();
     yres = paramfile.GetTypedNextToken<Double_t>();
     this->SetResolution(xres, yres);
-  } else {  
+  } else {
     //  If we have asym, mean, sigma for each coorindate, then we can do:
 
     TString value = paramfile.GetNextToken();
@@ -1452,7 +1452,7 @@ std::vector<QwErrDBInterface> QwCombinedBPM<T>::GetErrDBEntry()
 
 #endif // __USE_DATABASE__
 
-template class QwCombinedBPM<QwVQWK_Channel>; 
-template class QwCombinedBPM<QwSIS3801_Channel>; 
+template class QwCombinedBPM<QwVQWK_Channel>;
+template class QwCombinedBPM<QwSIS3801_Channel>;
 template class QwCombinedBPM<QwSIS3801D24_Channel>;
 template class QwCombinedBPM<QwMollerADC_Channel>;

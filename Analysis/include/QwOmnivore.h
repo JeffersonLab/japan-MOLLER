@@ -75,7 +75,7 @@ class QwOmnivore: public VQwSubsystem_t {
     /// Process the event buffer
     Int_t ProcessEvBuffer(const UInt_t event_type, const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override {
       /// TODO:  Subsystems should be changing their ProcessEvBuffer routines to take the event_type as the first
-      ///  arguement.  But in the meantime, default to just calling the non-event-type-aware ProcessEvBuffer routine.
+      ///  argument.  But in the meantime, default to just calling the non-event-type-aware ProcessEvBuffer routine.
       return this->ProcessEvBuffer(roc_id, bank_id, buffer, num_words);
     };
     /// TODO:  The non-event-type-aware ProcessEvBuffer routine should be replaced with the event-type-aware version.
@@ -106,9 +106,9 @@ class QwOmnivore: public VQwSubsystem_t {
     void  FillHistograms() override { };
 
     /// Construct the branch and tree vector
-    void ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values) override { };
+    void ConstructBranchAndVector(TTree *tree, TString & prefix, QwRootTreeBranchVector &values) override { };
     /// Fill the tree vector
-    void FillTreeVector(std::vector<Double_t> &values) const override { };
+    void FillTreeVector(QwRootTreeBranchVector &values) const override { };
 #ifdef HAS_RNTUPLE_SUPPORT
     /// Construct the RNTuple fields and vector
     void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override { };

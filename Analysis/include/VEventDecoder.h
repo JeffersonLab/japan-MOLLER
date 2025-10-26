@@ -26,7 +26,7 @@
  */
 class VEventDecoder : public MQwCodaControlEvent {
 public:
-	VEventDecoder() : 
+	VEventDecoder() :
 		fWordsSoFar(0),
 		fEvtLength(0),
 		fEvtNumber(0),
@@ -141,12 +141,12 @@ public:
 	void AddWordsSoFarAndFragLength()               { fWordsSoFar += fFragLength;}
 	void SetFragLength(UInt_t val)					{ fFragLength = val;		 }
 	void SetAllowLowSubbankIDs(Bool_t val = kFALSE) { fAllowLowSubbankIDs = val; }
-	
+
 
 protected:
 	// Generic Information
 	UInt_t fWordsSoFar;
-	UInt_t fEvtLength;	
+	UInt_t fEvtLength;
 	UInt_t fEvtNumber;   ///< CODA event number; only defined for physics events
 	UInt_t fFragLength;
 

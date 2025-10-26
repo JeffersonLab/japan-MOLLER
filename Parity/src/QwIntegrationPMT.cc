@@ -290,7 +290,7 @@ Bool_t QwIntegrationPMT::ApplyHWChecks()
 {
   Bool_t eventokay=kTRUE;
 
-  UInt_t deviceerror=fTriumf_ADC.ApplyHWChecks();//will check for consistancy between HWSUM and SWSUM also check for sample size
+  UInt_t deviceerror=fTriumf_ADC.ApplyHWChecks();//will check for consistency between HWSUM and SWSUM also check for sample size
   eventokay=(deviceerror & 0x0);//if no HW error return true
 
 
@@ -304,7 +304,7 @@ Bool_t QwIntegrationPMT::ApplyHWChecks()
  * \param UL Upper limit.
  * \return 1 on success.
  */
-Int_t QwIntegrationPMT::SetSingleEventCuts(Double_t LL=0, Double_t UL=0){//std::vector<Double_t> & dEventCuts){//two limts and sample size
+Int_t QwIntegrationPMT::SetSingleEventCuts(Double_t LL=0, Double_t UL=0){//std::vector<Double_t> & dEventCuts){//two limits and sample size
   fTriumf_ADC.SetSingleEventCuts(LL,UL);
   return 1;
 }
@@ -366,7 +366,7 @@ Bool_t QwIntegrationPMT::ApplySingleEventCuts(){
 /********************************************************/
 
 /** \brief Print error counters (const overload). */
-void QwIntegrationPMT::PrintErrorCounters() const{// report number of events failed due to HW and event cut faliure
+void QwIntegrationPMT::PrintErrorCounters() const{// report number of events failed due to HW and event cut failure
   fTriumf_ADC.PrintErrorCounters();
 }
 
@@ -384,7 +384,7 @@ Bool_t QwIntegrationPMT::CheckForBurpFail(const VQwDataElement *ev_error){
       //std::cout<<" Here in QwIntegrationPMT::CheckForBurpFail \n";
       if (this->GetElementName()!="") {
         const QwIntegrationPMT* value_pmt = dynamic_cast<const QwIntegrationPMT* >(ev_error);
-        burpstatus |= fTriumf_ADC.CheckForBurpFail(&(value_pmt->fTriumf_ADC)); 
+        burpstatus |= fTriumf_ADC.CheckForBurpFail(&(value_pmt->fTriumf_ADC));
       }
     } else {
       TString loc="Standard exception from QwIntegrationPMT::CheckForBurpFail :"+
@@ -418,7 +418,7 @@ void QwIntegrationPMT::UpdateErrorFlag(const QwIntegrationPMT* ev_error){
     }
   } catch (std::exception& e) {
     std::cerr<< e.what()<<std::endl;
-  }  
+  }
 };
 
 /********************************************************/
@@ -526,13 +526,13 @@ void QwIntegrationPMT::PrintInfo() const
   //std::cout<<" Running AVG "<<GetElementName()<<" current running AVG "<<IntegrationPMT_Running_AVG<<std::endl;
   std::cout<<"QwMollerADC_Channel Info " <<std::endl;
   fTriumf_ADC.PrintInfo();
-  std::cout<< "Blindability is "    << (fIsBlindable?"TRUE":"FALSE") 
+  std::cout<< "Blindability is "    << (fIsBlindable?"TRUE":"FALSE")
 	   <<std::endl;
   std::cout<< "Normalizability is " << (fIsNormalizable?"TRUE":"FALSE")
 	   <<std::endl;
-  std::cout << "fNormRate=" << fNormRate << "fVoltPerHz=" << fVoltPerHz 
-            << " Asym=" << fAsym << " C_x=" << fCoeff_x << " C_y=" << fCoeff_y 
-            << " C_xp=" << fCoeff_xp << " C_yp=" << fCoeff_yp 
+  std::cout << "fNormRate=" << fNormRate << "fVoltPerHz=" << fVoltPerHz
+            << " Asym=" << fAsym << " C_x=" << fCoeff_x << " C_y=" << fCoeff_y
+            << " C_xp=" << fCoeff_xp << " C_yp=" << fCoeff_yp
             << " C_e=" << fCoeff_e << std::endl;
   return;
 }
@@ -566,7 +566,7 @@ void  QwIntegrationPMT::FillHistograms()
   return;
 }
 
-void  QwIntegrationPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwIntegrationPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
@@ -606,7 +606,7 @@ void  QwIntegrationPMT::ConstructBranch(TTree *tree, TString &prefix, QwParamete
 }
 
 
-void  QwIntegrationPMT::FillTreeVector(std::vector<Double_t> &values) const
+void  QwIntegrationPMT::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.

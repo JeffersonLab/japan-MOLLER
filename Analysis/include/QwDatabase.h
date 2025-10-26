@@ -18,6 +18,7 @@
 
 // Third Party Headers
 #ifdef __USE_DATABASE__
+#ifdef __USE_SQLPP11__
 #include <sqlpp11/sqlpp11.h>
 #ifdef __USE_DATABASE_MYSQL__
 #include <sqlpp11/mysql/mysql.h>
@@ -28,6 +29,34 @@
 #ifdef __USE_DATABASE_POSTGRESQL__
 #include <sqlpp11/postgresql/postgresql.h>
 #endif // __USE_DATABASE_POSTGRESQL__
+#endif // __USE_SQLPP11__
+#ifdef __USE_SQLPP23__
+#include <sqlpp23/sqlpp23.h>
+#ifdef __USE_DATABASE_MYSQL__
+#include <sqlpp23/mysql/mysql.h>
+#endif // __USE_DATABASE_MYSQL__
+#ifdef __USE_DATABASE_SQLITE3__
+#include <sqlpp23/sqlite3/sqlite3.h>
+#endif // __USE_DATABASE_SQLITE3__
+#ifdef __USE_DATABASE_POSTGRESQL__
+#include <sqlpp23/postgresql/postgresql.h>
+#endif // __USE_DATABASE_POSTGRESQL__
+
+// Compatibility shims for sqlpp23 to support sqlpp11 syntax
+namespace sqlpp {
+  // Make std::nullopt available as sqlpp::null for compatibility
+  static constexpr auto null = std::nullopt;
+}
+
+// Compatibility helper for result field null checking
+// For sqlpp11: use free function is_null() to call the member function .is_null()
+// For sqlpp23: result fields are std::optional<T>, provide is_null() via ADL
+template<typename T>
+constexpr bool is_null(const std::optional<T>& opt) {
+  return !opt.has_value();
+}
+
+#endif // __USE_SQLPP23__
 #endif // __USE_DATABASE__
 
 // ROOT headers
@@ -59,21 +88,21 @@ private:
 public:
     explicit QwScopedConnection(QwDatabase* db);
     ~QwScopedConnection();
-    
+
     // Delete copy constructor and assignment operator to prevent copying
     QwScopedConnection(const QwScopedConnection&) = delete;
     QwScopedConnection& operator=(const QwScopedConnection&) = delete;
-    
+
     // Allow move constructor and assignment
     QwScopedConnection(QwScopedConnection&& other) noexcept;
     QwScopedConnection& operator=(QwScopedConnection&& other) noexcept;
-    
+
     // Provide access to the database interface
     QwDatabase* operator->() { return fDatabase; }
     const QwDatabase* operator->() const { return fDatabase; }
     QwDatabase& operator*() { return *fDatabase; }
     const QwDatabase& operator*() const { return *fDatabase; }
-    
+
     // Check if connection is valid
     bool IsConnected() const;
 };
@@ -301,7 +330,7 @@ class QwDatabase {
         }
       });
     }
-    
+
     //!< Get a scoped connection that automatically disconnects when destroyed
     QwScopedConnection GetScopedConnection() {
       return QwScopedConnection(this);
@@ -332,12 +361,12 @@ class QwDatabase {
         throw std::runtime_error("Unreachable: monostate in QueryCount lambda");
       });
     }
-    
+
     template<typename Statement>
     bool QueryExists(const Statement& statement) {
       return QueryCount(statement) > 0;
     } //<! Generate a query to check existence in the database.
-    
+
     template<typename Statement>
     auto QuerySelect(const Statement& statement) {
       return VisitConnectionForSelect<Statement>([&statement](auto& connection) {
@@ -349,7 +378,7 @@ class QwDatabase {
         throw std::runtime_error("Unreachable: monostate in QuerySelect lambda");
       });
     } //<! Execute a SELECT statement and return the result.
-    
+
     template<typename Statement>
     void QueryExecute(const Statement& statement) {
       VisitConnection<EConnectionCheck::kChecked>([&statement](auto& connection) {
@@ -359,26 +388,25 @@ class QwDatabase {
         }
       });
     } //<! Execute a statement without returning a result.
-    
+
     template<typename InsertStatement>
     uint64_t QueryInsertAndGetId(const InsertStatement& statement) {
       return VisitConnection<EConnectionCheck::kChecked>([&statement](auto& connection) -> uint64_t {
         using T = std::decay_t<decltype(connection)>;
         if constexpr (!std::is_same_v<T, std::monostate>) {
           auto result = (*connection)(statement);
-          // For INSERT operations, some databases return the ID directly as uint64_t
-          // while others return it as a result object with insert_id() method
+          // For INSERT operations, most databases return the ID directly as uint64_t
           if constexpr (std::is_integral_v<decltype(result)>) {
             return static_cast<uint64_t>(result);
           } else {
-            return result.insert_id();
+            throw std::runtime_error("Unexpected result type from INSERT operation - expected integral type");
           }
         }
         // This should never be reached due to VisitConnection logic
         throw std::runtime_error("Unreachable: monostate in QueryInsertAndGetId lambda");
       });
     } //<! Execute an INSERT statement and return the auto-increment ID.
-    
+
     const string GetVersion();                             //! Return a full version string for the DB schema
     const string GetVersionMajor() {return fVersionMajor;} //<! fVersionMajor getter
     const string GetVersionMinor() {return fVersionMinor;} //<! fVersionMinor getter

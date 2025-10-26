@@ -11,14 +11,14 @@
 #include "QwSubsystemArrayParity.h"
 #include "QwParameterFile.h"
 
-RegisterSubsystemFactory(QwCombinerSubsystem);
+REGISTER_SUBSYSTEM_FACTORY(QwCombinerSubsystem);
 
 
 QwCombinerSubsystem::~QwCombinerSubsystem()
 {
 }
 
-struct null_deleter { 
+struct null_deleter {
   void operator()(void const *) const { }
 };
 
@@ -91,12 +91,12 @@ void QwCombinerSubsystem::Ratio(VQwSubsystem* value1, VQwSubsystem* value2)
 
 
 void QwCombinerSubsystem::Scale(Double_t value)
-{ 
+{
   for(size_t i = 0; i < this->fDependentVar.size(); i++)
   {
     this->fOutputVar.at(i)->Scale(value);
   }
-  
+
 };
 
 void QwCombinerSubsystem::AccumulateRunningSum(VQwSubsystem* input, Int_t count, Int_t ErrorMask)
@@ -180,15 +180,15 @@ void QwCombinerSubsystem::UpdateErrorFlag(const VQwSubsystem *ev_error){
   /// TODO:  Write QwCombinerSubsystem::UpdateErrorFlag
   //if (Compare(ev_error)){
   //QwCombinerSubsystem* input = dynamic_cast<QwCombinerSubsystem*> (ev_error);
-  //}  
+  //}
 };
 
 
-/// DERIVED FUNCTIONS /// 
+/// DERIVED FUNCTIONS ///
 
 
 /*  All of the functions below are using generic
- * returns for testing purposes. 
+ * returns for testing purposes.
  */
 
 
@@ -211,7 +211,7 @@ Int_t QwCombinerSubsystem::LoadEventCuts(TString)
 {
   Int_t sample = 0;
   return sample;
-  
+
 }
 
 Int_t QwCombinerSubsystem::ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words)
@@ -240,9 +240,5 @@ void QwCombinerSubsystem::PrintErrorCounters() const
 UInt_t QwCombinerSubsystem::GetEventcutErrorFlag()
 {
     return 0;
-  
+
 }
-
-
-
-

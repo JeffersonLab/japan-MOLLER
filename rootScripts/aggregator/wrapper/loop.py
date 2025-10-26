@@ -15,10 +15,10 @@ runlist    = args['runlist']
 devicelist = args['devicelist']
 fullruns = args['fullruns']
 slug     = args['slug']
-# Get slug: 
+# Get slug:
 #cmds = ['rcnd',str(run),'slug']
 #cond_out = "NULL"
-#cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+#cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful
 #slug = float(cond_out)
 #print("The slug is slug: "+str(slug))
 
@@ -31,7 +31,7 @@ try:
 except:
   print("ERROR: You forgot to have a runlist: "+runlist+"\n")
   sys.exit()
-    
+
 #f=open("runlist/"+runlist+".txt")
 #lines=[3348]
 #lines=[3344,3343]#,3342,3324,3323,3322,3321,3320,3319,3318,3316,3308,3305,3289]
