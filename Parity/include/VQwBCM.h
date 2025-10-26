@@ -74,7 +74,7 @@ public:
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   virtual void SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel) = 0;
   virtual void Ratio( const VQwBCM &/*numer*/, const VQwBCM &/*denom*/)
-    { std::cerr << "Ratio not defined! (VQwBCM)" << std::endl; }
+    { throw std::runtime_error(std::string("Ratio() is not defined for BCM named ") + GetElementName().Data()); }
   void ClearEventData() override = 0;
 
   // Virtual functions delegated to sub classes

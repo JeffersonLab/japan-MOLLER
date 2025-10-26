@@ -663,7 +663,6 @@ VQwBPM& QwBPMCavity::operator-= (const VQwBPM &value)
 }
 
 
-
 /**
  * Special ratio behavior for cavity BPMs when forming asymmetries.
  * Only the effective charge channel participates; transverse positions are
@@ -679,6 +678,12 @@ void QwBPMCavity::Ratio(QwBPMCavity &numer, QwBPMCavity &denom)
   return;
 }
 
+/** Type-erased ratio; forwards to the concrete Ratio. */
+void QwBPMCavity::Ratio(VQwBPM &numer, VQwBPM &denom)
+{ 
+  Ratio(*dynamic_cast<QwBPMCavity*>(&numer),
+      *dynamic_cast<QwBPMCavity*>(&denom));
+}
 
 
 /** Scale all raw and derived channels by a common factor. */
