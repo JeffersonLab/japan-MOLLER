@@ -62,4 +62,8 @@ QwDetectorArray(const QwDetectorArray& source)
 /// Virtual destructor
 ~QwDetectorArray() override {};
 
+
+/// Inherit assignment operator on base class
+using VQwDetectorArray::operator=;
+
 };
