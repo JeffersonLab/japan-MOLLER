@@ -22,15 +22,15 @@ std::vector<UInt_t> Coda3EventDecoder::EncodePHYSEventHeader(std::vector<ROCID_t
 	std::vector<UInt_t> header;
 	header.push_back(0xFF501001);
 	header.push_back(wordcount); 						 // word count for Trigger Bank
-	header.push_back(0xFF212000 | ROCCount); // # of ROCs 
-	
-	header.push_back(0x010a0004); 
+	header.push_back(0xFF212000 | ROCCount); // # of ROCs
+
+	header.push_back(0x010a0004);
 	// evtnum is held by a 64 bit ... for now we set the upper 32 bits to 0
 	header.push_back(++fEvtNumber );
 	header.push_back(0x0);
 
 	// evttime is held by a 64 bit (bits 0-48 is the time) ... for now we set the upper 32 bits to 0
-	header.push_back(localtime); 
+	header.push_back(localtime);
 	header.push_back(0x0);
 
 	header.push_back(0x1850001);
@@ -87,7 +87,7 @@ void Coda3EventDecoder::EncodeEndEventHeader(int* buffer, int eventcount, int lo
 	buffer[1] = ((0xffd4 << 16) | (0x01 << 8) );
 	buffer[2] = localtime;
 	buffer[3] = 0; // unused
-	buffer[4] = eventcount; 
+	buffer[4] = eventcount;
   ProcessEnd(localtime, eventcount);
 }
 
@@ -118,7 +118,7 @@ Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 	// Start Filling Data
 	fEvtTag     = (buffer[1] & 0xffff0000) >> 16;
 	fBankDataType = (buffer[1] & 0xff00) >> 8;
-	block_size  =	(buffer[1] & 0xff); 
+	block_size  =	(buffer[1] & 0xff);
 
 	if(block_size > 1) {
 		QwWarning << "MultiBlock is not properly supported! block_size = "
@@ -126,24 +126,24 @@ Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 	}
 
 	// Determine the event type by the evt tag
-	fEvtType = InterpretBankTag(fEvtTag);		
+	fEvtType = InterpretBankTag(fEvtTag);
 	fWordsSoFar = (2);
-	if(fEvtTag < 0xff00) { 
+	if(fEvtTag < 0xff00) {
 		// User Event
 		printUserEvent(buffer);
 	}
 	else if(fControlEventFlag) {
 		fEvtNumber = 0;	ProcessControlEvent(fEvtType, &buffer[fWordsSoFar]);
 	}
-	else if(fPhysicsEventFlag) { 
+	else if(fPhysicsEventFlag) {
 		ret = trigBankDecode( buffer );
 		if(ret != HED_OK) { trigBankErrorHandler( ret ); }
-		else { 
+		else {
 			fEvtNumber = tbank.evtNum;
 			fWordsSoFar = 2 + tbank.len;
 		}
 	}
-	else { 
+	else {
 		// Not a control event, user event, nor physics event. Not sure what it is
 		//  Arbitrarily set the event type to "fEvtTag".
 		//  The first two words have been examined.
@@ -151,11 +151,11 @@ Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 		for(size_t index = 0; fEvtLength; index++){
 			QwVerbose << "\t" << buffer[index];
 			if(index % 4 == 0){ QwVerbose << QwLog::endl; }
-		}	
+		}
 		fEvtType = fEvtTag;	fEvtNumber = 0;
 	}
 
-	fFragLength = fEvtLength - fWordsSoFar;	
+	fFragLength = fEvtLength - fWordsSoFar;
 	QwDebug << Form("buffer[0-1] 0x%x 0x%x ; ", buffer[0], buffer[1]);
 	if (gQwLog.GetLogLevel() >= QwLog::kDebug) {
   	  PrintDecoderInfo(gQwLog(QwLog::kDebug,__PRETTY_FUNCTION__));
@@ -281,7 +281,7 @@ Int_t Coda3EventDecoder::trigBankDecode( UInt_t* buffer)
 	// Set up exception handling for the PHYS Bank
 	try {
 		tbank.Fill(&buffer[fWordsSoFar], block_size, TSROCNumber);
-	} 
+	}
 	catch( const coda_format_error& e ) {
 		Error(HERE, "CODA 3 format error: %s", e.what() );
 		return HED_ERR;
@@ -441,6 +441,3 @@ void Coda3EventDecoder::trigBankErrorHandler( Int_t flag )
 
 	fWordsSoFar = fEvtLength;
 }
-
-
-

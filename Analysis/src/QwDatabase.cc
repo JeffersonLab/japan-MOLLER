@@ -25,7 +25,7 @@
 #include "QwParitySchema.h"
 
 // QwScopedConnection implementation
-QwScopedConnection::QwScopedConnection(QwDatabase* db) 
+QwScopedConnection::QwScopedConnection(QwDatabase* db)
     : fDatabase(db), fConnected(false) {
     if (fDatabase) {
         fConnected = fDatabase->Connect();
@@ -54,11 +54,11 @@ QwScopedConnection& QwScopedConnection::operator=(QwScopedConnection&& other) no
         if (fDatabase && fConnected) {
             fDatabase->Disconnect();
         }
-        
+
         // Move from other
         fDatabase = other.fDatabase;
         fConnected = other.fConnected;
-        
+
         // Clear other
         other.fDatabase = nullptr;
         other.fConnected = false;
@@ -171,7 +171,7 @@ Bool_t QwDatabase::ValidateConnection()
     //
     try {
       // FIXME (wdconinc) duplication with Connect
-      switch(fDBType) 
+      switch(fDBType)
       {
 #ifdef __USE_DATABASE_MYSQL__
         case kQwDatabaseMySQL: {
@@ -281,7 +281,7 @@ Bool_t QwDatabase::ValidateConnection()
   }
 
   // Check to make sure database and QwDatabase schema versions match up.
-  if (fAccessLevel == kQwDatabaseReadWrite && 
+  if (fAccessLevel == kQwDatabaseReadWrite &&
       (fVersionMajor != kValidVersionMajor ||
        fVersionMinor != kValidVersionMinor ||
        fVersionPoint <  kValidVersionPoint)) {
@@ -321,7 +321,7 @@ bool QwDatabase::Connect()
   if (fValidConnection) {
     // FIXME (wdconinc) duplication with ValidateConnection
     try {
-      switch(fDBType) 
+      switch(fDBType)
       {
 #ifdef __USE_DATABASE_MYSQL__
         case kQwDatabaseMySQL: {

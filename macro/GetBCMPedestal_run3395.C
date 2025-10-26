@@ -7,9 +7,9 @@ void GetBCMPedestal_run3395(int run_num=3395,
   char* qwrootfile_path = getenv("QW_ROOTFILES");
   TString rf_name =Form("%s/prexPrompt_pass2_%d.000.root",
 			qwrootfile_path,run_num);
-  TFile *rootfile = TFile::Open(rf_name);  
+  TFile *rootfile = TFile::Open(rf_name);
   if(rootfile ==NULL){
-    cout << rf_name 
+    cout << rf_name
 	 << " doesn't exist !!" << endl;
     return;
   }
@@ -27,17 +27,17 @@ void GetBCMPedestal_run3395(int run_num=3395,
 
   TCanvas *c_bcm = new TCanvas("c_bcm","c_bcm",1000,500);
   c_bcm->Divide(2,1);
-  
+
   TF1 *f_zero = new TF1("f_zero","0",0,100);
   f_zero->SetLineWidth(2);
   f_zero->SetLineColor(kRed);
   f_zero->SetLineStyle(9);
-  
+
   TString branch_name;
   TString num_samples_name;
 
   //  run 3395
-  TCut beam_evtcut[] ={ 
+  TCut beam_evtcut[] ={
     "cleandata && scandata1>0 && scandata2==1",
     "cleandata && scandata1>0 && scandata2==2",
     "cleandata && scandata1>0 && scandata2==3",
@@ -65,9 +65,9 @@ void GetBCMPedestal_run3395(int run_num=3395,
     "cleandata && scandata1==0 && (scandata2==11 || scandata2==10)"};
 
   const int ndata = sizeof(beam_evtcut)/sizeof(*beam_evtcut);
-  double bcm_mean[ndata]; 
+  double bcm_mean[ndata];
   double bcm_error[ndata];
-  double unser_mean[ndata]; 
+  double unser_mean[ndata];
   double unser_error[ndata];
   double bcm_res[ndata]; // residual
 
@@ -78,7 +78,7 @@ void GetBCMPedestal_run3395(int run_num=3395,
   double gain[nbcm];
 
   TGraphErrors *g_res;
-  TGraphErrors *g_fit;  
+  TGraphErrors *g_fit;
   TGraphErrors *g_res_ref;
   TGraphErrors *g_fit_ref;
   TMultiGraph *mg_res;
@@ -89,7 +89,7 @@ void GetBCMPedestal_run3395(int run_num=3395,
   f_fit->SetParName(1,"Gain");
   double init_par[2] = { 1e3,1e-3};
   double fit_up, fit_low;
-  fit_up = uplimit; 
+  fit_up = uplimit;
   fit_low = lowlimit;
 
   TString my_cut;
@@ -139,12 +139,12 @@ void GetBCMPedestal_run3395(int run_num=3395,
 
       ped[ibcm] = f_fit->GetParameter(0);
       gain[ibcm] = f_fit->GetParameter(1);
-      
+
       for(int i=0;i<ndata;i++){
 	bcm_res[i] = (bcm_mean[i]-ped[ibcm])*gain[ibcm] - unser_mean[i];
 	bcm_error[i] = bcm_error[i] *gain[ibcm];
       }
-      
+
       c_bcm->cd(2);
       g_res = new TGraphErrors(ndata,unser_mean,bcm_res,unser_error,bcm_error);
       g_res->SetMarkerStyle(20);
@@ -171,14 +171,14 @@ void LoadStyle(){
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.2);
   gStyle->SetStatW(0.3);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(1011);
   gStyle->SetStatX(0.7);
   gStyle->SetStatY(0.9);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -187,5 +187,5 @@ void LoadStyle(){
   gStyle->SetLabelSize(0.035,"x");
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.06,"hxyz");
-  gROOT->ForceStyle();  
+  gROOT->ForceStyle();
 }

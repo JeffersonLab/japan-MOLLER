@@ -65,7 +65,7 @@ class QwBlinder {
     kMultiplicative,
     kAdditiveMultiplicative
   };
-  /// Status of the blinding process or intermediate steps of the process  
+  /// Status of the blinding process or intermediate steps of the process
   enum EQwBlinderStatus {
     kIndeterminate = 0,
     kNotBlindable,
@@ -73,8 +73,8 @@ class QwBlinder {
     kBlindableFail
   };
   static const TString fStatusName[4];
-  
-  ///  Error flag value 
+
+  ///  Error flag value
   static const UInt_t kErrorFlag_BlinderFail = 0x200;
   constexpr static const Double_t kValue_BlinderFail   = -1.0;
 
@@ -175,7 +175,7 @@ class QwBlinder {
       if (CheckBlindability(fPatternCounters)!=kNotBlindable)
 	diff.Blind(this);
     };
-    /// Blind the pair asymmetry 
+    /// Blind the pair asymmetry
     /// and only check fBlindingStrategy to avoid  overcounting fPatternCounters
     void  BlindPair(QwSubsystemArrayParity& diff) {
       if (CheckBlindability(fPairCounters)!=kNotBlindable)
@@ -222,7 +222,7 @@ class QwBlinder {
     };
 
  private:
-    ///  Indicates the first value received of the blindability of the target 
+    ///  Indicates the first value received of the blindability of the target
     EQwBlinderStatus fTargetBlindability_firstread;
     EQwBlinderStatus fTargetBlindability;
     Bool_t fTargetPositionForced;
@@ -249,7 +249,7 @@ class QwBlinder {
     EQwBlinderStatus CheckBlindability(std::vector<Int_t> &fCounters);
     Bool_t fBlinderIsOkay;
 
-    
+
 
 
  private:

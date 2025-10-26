@@ -8,7 +8,7 @@
 # Author :   P. M. King (pking@jlab.org)
 # Date :     07 November 2006
 #
-# 
+#
 #******************************************************************************
 
 if [ -z "${QWSCRATCH}" ] ; then
@@ -48,4 +48,3 @@ export QW_PRMINPUT="${QWSCRATCH}/setupfiles"
 export QW_FIELDMAP="${QWSCRATCH}/calib"
 export QW_SEARCHTREE="${QWSCRATCH}/tree"
 export QW_LOOKUP="${QWSCRATCH}/calib"
-

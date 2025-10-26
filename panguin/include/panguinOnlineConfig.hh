@@ -23,8 +23,8 @@ private:
   TString protorootfile; // Prototype for getting the rootfilename
   TString guicolor; // User's choice of background color
   TString plotsdir; // Where to store sample plots.. automatically stored as .jpg's).
-  std::vector < std::pair <UInt_t,UInt_t> > pageInfo; 
-  std::vector <TCut> cutList; 
+  std::vector < std::pair <UInt_t,UInt_t> > pageInfo;
+  std::vector <TCut> cutList;
   std::vector <UInt_t> GetDrawIndex(UInt_t);
   Bool_t fFoundCfg;
   Bool_t fMonitor;

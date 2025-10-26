@@ -8,14 +8,14 @@ void PITAscan_main_run4808(int run_num = 4808, TString mainBCM = "bcm_dg_ds", TS
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.15);
   gStyle->SetStatW(0.37);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(111);
   gStyle->SetStatX(0.9);
   gStyle->SetStatY(0.9);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -25,10 +25,10 @@ void PITAscan_main_run4808(int run_num = 4808, TString mainBCM = "bcm_dg_ds", TS
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.05,"hxyz");
   gStyle->SetTitleOffset(1.3,"y");
-  gROOT->ForceStyle();  
+  gROOT->ForceStyle();
 
   TString mydir = "~/PREX/japan/plots/parityOutputs";
-  
+
   // TString rf_name =Form("$QW_ROOTFILES/prexPrompt_pass1_%d.000.root",run_num);
    TString rf_name =Form("$QW_ROOTFILES/prexALL_%d.000.root",run_num);
 
@@ -107,7 +107,7 @@ TString device_name[] =
   double bcm_dev[nBCM];
   TString my_cut = Form("%s",ucut.Data());
 
-  
+
 
 
   for(int idet=0;idet<nDET;idet++){

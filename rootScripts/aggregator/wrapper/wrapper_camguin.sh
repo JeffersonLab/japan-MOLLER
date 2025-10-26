@@ -2,7 +2,7 @@
 
 
 usage()
-{ 
+{
 	[ $1 -eq 2 ] && echo "Please enter runnumber."
   [ $1 -eq 3 ] && echo "Please enter minirunnumber."
   [ $1 -eq 4 ] && echo "Please enter splitnumber."
@@ -24,7 +24,7 @@ do
     s) SPLITNUM=$OPTARG;;
     f) CONFIG=$OPTARG ;;
     n) NRUNS=$OPTARG ;;
-    h) usage 5 ;;  
+    h) usage 5 ;;
   esac
 done
 

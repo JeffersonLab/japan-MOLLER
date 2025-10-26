@@ -54,7 +54,7 @@ class QwAlarmHandler:public VQwDataHandler, public MQwDataHandlerCloneable<QwAla
       QwSubsystemArrayParity& yield,
       QwSubsystemArrayParity& asym,
       QwSubsystemArrayParity& diff) override;
-    
+
 
     /**
     * \brief Process a single event: update alarm states and outputs.
@@ -69,9 +69,9 @@ class QwAlarmHandler:public VQwDataHandler, public MQwDataHandlerCloneable<QwAla
     void ParseConfigFile(QwParameterFile&) override;
 
 
-  
+
   protected:
-  
+
     /// Default constructor (Protected for child class access)
     QwAlarmHandler() { };
 

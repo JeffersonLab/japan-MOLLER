@@ -180,11 +180,11 @@ class QwEventBuffer {
 
   Bool_t FillSubsystemConfigurationData(std::vector<VQwSubsystem*> &subsystems);
   Bool_t FillSubsystemData(std::vector<VQwSubsystem*> &subsystems);
-	
-	// Coda Version that is set by void VerifyCodaVersion( ) 
+
+	// Coda Version that is set by void VerifyCodaVersion( )
 	// Compared against the user-input coda version
 	Int_t fDataVersionVerify = 0;
-  Int_t fDataVersion; // User-input Coda Version	
+  Int_t fDataVersion; // User-input Coda Version
 
  protected:
   ///
@@ -293,7 +293,7 @@ template < class T > Bool_t QwEventBuffer::FillObjectWithEventData(T &object){
   ///  - Bool_t T::CanUseThisEventType(const UInt_t event_type);
   ///  - Bool_t T::ClearEventData(const UInt_t event_type);
   ///  - Int_t  T::ProcessBuffer(const UInt_t event_type,
-  ///       const ROCID_t roc_id, const BankID_t bank_id, 
+  ///       const ROCID_t roc_id, const BankID_t bank_id,
   ///       const UInt_t banktype, UInt_t* buffer, UInt_t num_words);
   ///
   Bool_t okay = kFALSE;

@@ -74,6 +74,6 @@ public:
 private:
 	// Event Information (CODA 2 Specific)
 	UInt_t fEvtClass;
-	UInt_t fStatSum;  
+	UInt_t fStatSum;
 	UInt_t fIDBankNum;
 };

@@ -1,7 +1,7 @@
 # Continuous Aggregate Monitor Graphical User INterface: CAMGUIN
-A set of methods useful for reading a root tree, doing some analysis, and printing those results into an updatable ROOT file. This is a fully functioning macro whose methods stand alone in PANGUIN and in ROOT in general as well, and it represents several possible ways of accessing and manipulating ROOT output. 
+A set of methods useful for reading a root tree, doing some analysis, and printing those results into an updatable ROOT file. This is a fully functioning macro whose methods stand alone in PANGUIN and in ROOT in general as well, and it represents several possible ways of accessing and manipulating ROOT output.
 
-## Usage 
+## Usage
 
 Example script for how to use environment variables and PANGUIN to execute the CAMGUIN macros on data files
 
@@ -16,7 +16,7 @@ Panguin Interface:
 
 Using ROOT directly:
   ./wrapper.sh -r 1296 -f input.txt -n 1
-  
+
 ## What is happening
 
 * The Panguin Wrapper script intelligently sets environment variables ROOT can access (since PANGUIN doesn't share them)
@@ -24,7 +24,7 @@ Using ROOT directly:
 * The macro opens the requested ROOT file itself (using similar methods to PANGUIN) and reads the desired tree, branch, leaf, and cut information
 * The data is fed into a histogram or looped over, and further analysis is done in analysis methods (default cuts = (ErrorFlag == 0 && [userData].Device_Error_Code == 0))
 
-## Results 
+## Results
 
 The results of analysis methods are written into a re-writable ROOT file "run_aggregator.root"
 * The aggregate ROOT file will contain "run_number", "n_runs" (useful for further aggregating many runs into one result), and the name of the analyzed outputs (e.g. "rms_asym_bcm_an_ds3", the first "_" can be changed later if wanted)
@@ -41,4 +41,4 @@ root -L camguin.C'("meanrms","reg","reg_asym_sam2","reg_asym_sam2","1",0,"defaul
 * To run a standard Japan output file do:
 root -L camguin.C'("meanrms","mul","asym_sam2","hw_sum","defaultCuts",0,"defaultHist")'
 * To store the post-pan output coefficients from the textfiles do:
-root -L camguin.C'("postpan")' 
+root -L camguin.C'("postpan")'

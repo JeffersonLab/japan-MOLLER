@@ -8,14 +8,14 @@ void GetMainDetPedestalL_panguin_Caryn(TString user_cut ="1",TString scan_data =
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.2);
   gStyle->SetStatW(0.3);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(1011);
   gStyle->SetStatX(0.7);
   gStyle->SetStatY(0.9);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -24,7 +24,7 @@ void GetMainDetPedestalL_panguin_Caryn(TString user_cut ="1",TString scan_data =
   gStyle->SetLabelSize(0.035,"x");
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.06,"hxyz");
-  gROOT->ForceStyle();  
+  gROOT->ForceStyle();
 
 
   TTree *tree= (TTree*)gROOT->FindObject("evt");
@@ -37,9 +37,9 @@ void GetMainDetPedestalL_panguin_Caryn(TString user_cut ="1",TString scan_data =
   int nbinx = (int)(10*max); // to one-tenth precision.
 
   vector<double> vec_scandata;
-  TH1D *hsd = new TH1D(Form("hsd%d",myii),"scan data",nbinx,-0.05,max-0.05); 
+  TH1D *hsd = new TH1D(Form("hsd%d",myii),"scan data",nbinx,-0.05,max-0.05);
   tree->Draw(Form("beam_current>>hsd%d",myii),Form("%s&&scandata1!=0",user_cut.Data()),"goff");
-  int bin_content; 
+  int bin_content;
   double bin_center;
   for(int ibin=0;ibin<nbinx;ibin++){
     bin_content = hsd->GetBinContent(ibin+1); // Histogram bin number starts from 1
@@ -70,9 +70,9 @@ void GetMainDetPedestalL_panguin_Caryn(TString user_cut ="1",TString scan_data =
   f_zero->SetLineStyle(9);
 
   //const int ndata = sizeof(beam_evtcut)/sizeof(*beam_evtcut);
-  double det_mean[ndata]; 
+  double det_mean[ndata];
   double det_error[ndata];
-  double unser_mean[ndata]; 
+  double unser_mean[ndata];
   double unser_error[ndata];
   double det_res[ndata]; // residual
 
@@ -84,7 +84,7 @@ void GetMainDetPedestalL_panguin_Caryn(TString user_cut ="1",TString scan_data =
 
 
   TGraphErrors *g_detl_res;
-  TGraphErrors *g_detl_fit;  
+  TGraphErrors *g_detl_fit;
   TGraphErrors *g_detl_res_ref;
   TGraphErrors *g_detl_fit_ref;
   TMultiGraph *mg_detl_res;
@@ -143,11 +143,11 @@ void GetMainDetPedestalL_panguin_Caryn(TString user_cut ="1",TString scan_data =
 
       ped[idet] = f_fit->GetParameter(0);
       slope[idet] = f_fit->GetParameter(1);
-      
+
       for(int i=0;i<ndata;i++){
 	det_res[i] = det_mean[i] - f_fit->Eval(unser_mean[i]);
       }
-      
+
       cl_res->cd(idet+1);
       g_detl_res = new TGraphErrors(ndata,unser_mean,det_res,unser_error,det_error);
       g_detl_res->SetMarkerStyle(20);
@@ -156,7 +156,7 @@ void GetMainDetPedestalL_panguin_Caryn(TString user_cut ="1",TString scan_data =
       g_detl_res->SetTitle(gres_title.Data());
       f_zero->Draw("same");
 
-  
+
   } // End of device loop
 
 

@@ -296,7 +296,7 @@ void QwOptions::ParseConfigFile()
     }
     // Notify of new options
     po::notify(fVariablesMap);
-    
+
     // If a configuration file is specified, load it.
     if (fVariablesMap.count("add-config") > 0) {
       AddConfigFile(fVariablesMap["add-config"].as<std::vector<std::string> >());
