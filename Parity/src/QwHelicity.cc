@@ -34,7 +34,7 @@ extern QwHistogramHelper gQwHists;
 //**************************************************//
 
 // Register this subsystem with the factory
-REGISTER_SUBSYSTEM_FACTORY(QwHelicity);
+//REGISTER_SUBSYSTEM_FACTORY(QwHelicity);
 
 
 /// Default helicity bit pattern of 0x69 represents a -++-+--+ octet

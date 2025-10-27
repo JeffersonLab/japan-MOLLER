@@ -183,3 +183,5 @@ private:
   static const Bool_t bDEBUG=kFALSE;
 
 };
+
+REGISTER_SUBSYSTEM_FACTORY(QwIntegratedRaster);

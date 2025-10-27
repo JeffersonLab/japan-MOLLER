@@ -63,3 +63,5 @@ QwDetectorArray(const QwDetectorArray& source)
 ~QwDetectorArray() override {};
 
 };
+
+REGISTER_SUBSYSTEM_FACTORY(QwDetectorArray);

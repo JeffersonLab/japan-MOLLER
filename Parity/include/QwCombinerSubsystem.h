@@ -138,3 +138,5 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
 
 
 }; // class QwCombinerSubsystem
+
+REGISTER_SUBSYSTEM_FACTORY(QwCombinerSubsystem);
