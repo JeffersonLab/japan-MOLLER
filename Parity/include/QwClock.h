@@ -150,7 +150,7 @@ class QwClock : public VQwClock {
 #endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
-  std::vector<QwDBInterface> GetDBEntry();
+  std::vector<QwDBInterface> GetDBEntry() override;
 #endif // __USE_DATABASE__
 
   // These are related to those hardware channels that need to normalize
