@@ -333,3 +333,5 @@ class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHeli
   }
 
 };
+
+REGISTER_SUBSYSTEM_FACTORY(QwHelicity);

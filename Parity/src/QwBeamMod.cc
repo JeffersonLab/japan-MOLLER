@@ -35,7 +35,7 @@
 #include "TMath.h"
 
 // Register this subsystem with the factory
-REGISTER_SUBSYSTEM_FACTORY(QwBeamMod);
+//REGISTER_SUBSYSTEM_FACTORY(QwBeamMod);
 
 
 //*****************************************************************

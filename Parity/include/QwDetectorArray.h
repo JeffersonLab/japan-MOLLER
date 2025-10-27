@@ -67,3 +67,5 @@ QwDetectorArray(const QwDetectorArray& source)
 using VQwDetectorArray::operator=;
 
 };
+
+REGISTER_SUBSYSTEM_FACTORY(QwDetectorArray);

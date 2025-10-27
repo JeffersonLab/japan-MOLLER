@@ -216,3 +216,5 @@ private:
 
 
 };
+
+REGISTER_SUBSYSTEM_FACTORY(QwBeamLine);

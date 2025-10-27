@@ -69,6 +69,8 @@ class QwCombiner:public VQwDataHandler, public MQwDataHandlerCloneable<QwCombine
 
 }; // class QwCombiner
 
+REGISTER_DATA_HANDLER_FACTORY(QwCombiner);
+
 inline std::ostream& operator<< (std::ostream& stream, const QwCombiner::EQwHandleType& i) {
   switch (i){
   case QwCombiner::kHandleTypeMps:  stream << "mps"; break;
