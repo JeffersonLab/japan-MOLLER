@@ -38,10 +38,10 @@ qwparity_simple
 qwroot
 
 # Directories
-bin
-lib
+/bin
+/lib
 *build*
-include
+/include
 *test*
 output
 Doxygen/html
