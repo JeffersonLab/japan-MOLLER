@@ -46,7 +46,7 @@ QwExtractor::QwExtractor(const QwExtractor &source)
 /// Destructor
 QwExtractor::~QwExtractor() {delete fSourceCopy;}
 
-Int_t QwExtractor::LoadChannelMap(const std::string& mapfile) {return 0;}
+Int_t QwExtractor::LoadChannelMap(const TString& mapfile) {return 0;}
 
 /** Connect to the dependent and independent channels (implementation) */
 Int_t QwExtractor::ConnectChannels(QwSubsystemArrayParity& event)

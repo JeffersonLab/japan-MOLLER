@@ -43,10 +43,10 @@ void LRBCorrector::ParseConfigFile(QwParameterFile& file)
   file.PopValue("slope-path", fAlphaFilePath);
 }
 
-Int_t LRBCorrector::LoadChannelMap(const std::string& mapfile)
+Int_t LRBCorrector::LoadChannelMap(const TString& mapfile)
 {
   // Open the file
-  QwParameterFile map(mapfile);
+  QwParameterFile map(mapfile.Data());
 
   // Read the sections of dependent variables
   std::pair<EQwHandleType,std::string> type_name;

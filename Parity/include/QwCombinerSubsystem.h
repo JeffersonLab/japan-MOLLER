@@ -93,9 +93,9 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
 
       /// \brief Derived functions
       // not sure if there should be empty definition, no definition or defined
-      Int_t LoadChannelMap(TString) override;
-      Int_t LoadInputParameters(TString) override;
-      Int_t LoadEventCuts(TString) override;
+      Int_t LoadChannelMap(const TString&) override;
+      Int_t LoadInputParameters(const TString&) override;
+      Int_t LoadEventCuts(const TString&) override;
       void ClearEventData() override{
         for (size_t i = 0; i < fOutputVar.size(); ++i) {
           if (fOutputVar.at(i) != NULL) {

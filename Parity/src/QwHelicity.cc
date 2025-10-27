@@ -412,7 +412,7 @@ Int_t QwHelicity::ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_
   return 0;
 }
 
-Int_t QwHelicity::LoadInputParameters(TString pedestalfile)
+Int_t QwHelicity::LoadInputParameters(const TString& pedestalfile)
 {
   return 0;
 }
@@ -877,7 +877,7 @@ void QwHelicity::Print() const
 }
 
 
-Int_t QwHelicity::LoadChannelMap(TString mapfile)
+Int_t QwHelicity::LoadChannelMap(const TString& mapfile)
 {
   Bool_t ldebug=kFALSE;
 
@@ -1079,7 +1079,7 @@ std::cout << fHelicityBitPattern.size() << std::endl;
 }
 
 
-Int_t QwHelicity::LoadEventCuts(TString filename){
+Int_t QwHelicity::LoadEventCuts(const TString& filename){
   return 0;
 }
 

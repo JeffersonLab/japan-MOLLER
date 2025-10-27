@@ -30,14 +30,14 @@ class QwOmnivore: public VQwSubsystem_t {
     ~QwOmnivore() override;
 
     /// Map file definition
-    Int_t LoadChannelMap(TString mapfile) override { return 0; };
+    Int_t LoadChannelMap(const TString& mapfile) override { return 0; };
     /// Parameter file definition
-    Int_t LoadInputParameters(TString mapfile) override { return 0; };
+    Int_t LoadInputParameters(const TString& mapfile) override { return 0; };
     /// Geometry definition for tracking subsystems
-    Int_t LoadGeometryDefinition(TString mapfile) override { return 0; };
+    Int_t LoadGeometryDefinition(const TString& mapfile) override { return 0; };
 
     /// Load the event cuts file
-    Int_t LoadEventCuts(TString filename) override { return 0; };
+    Int_t LoadEventCuts(const TString& filename) override { return 0; };
     /// Apply the single event cuts
     Bool_t ApplySingleEventCuts() override { return kTRUE; };
 

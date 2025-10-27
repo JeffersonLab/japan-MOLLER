@@ -137,12 +137,12 @@ class QwBeamMod: public VQwSubsystemParity, public MQwSubsystemCloneable<QwBeamM
   void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF) override{
   };
 
-  Int_t LoadChannelMap(TString mapfile) override;
+  Int_t LoadChannelMap(const TString& mapfile) override;
   void LoadEventCuts_Init() override;
   void LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, Int_t &eventcut_flag) override;
   void LoadEventCuts_Fin(Int_t &eventcut_flag) override;
-  Int_t LoadGeometry(TString mapfile);
-  Int_t LoadInputParameters(TString pedestalfile) override;
+  Int_t LoadGeometry(const TString& mapfile);
+  Int_t LoadInputParameters(const TString& pedestalfile) override;
 
 
   Bool_t ApplySingleEventCuts() override;//derived from VQwSubsystemParity

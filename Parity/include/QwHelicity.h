@@ -70,9 +70,9 @@ class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHeli
 
   static void DefineOptions(QwOptions &options);
   void ProcessOptions(QwOptions &options) override;
-  Int_t LoadChannelMap(TString mapfile) override;
-  Int_t LoadInputParameters(TString pedestalfile) override;
-  Int_t LoadEventCuts(TString  filename) override;//Loads event cuts applicable to QwHelicity class, derived from VQwSubsystemParity
+  Int_t LoadChannelMap(const TString& mapfile) override;
+  Int_t LoadInputParameters(const TString& pedestalfile) override;
+  Int_t LoadEventCuts(const TString& filename) override;//Loads event cuts applicable to QwHelicity class, derived from VQwSubsystemParity
   Bool_t ApplySingleEventCuts() override;//Apply event cuts in the QwHelicity class, derived from VQwSubsystemParity
 
   Bool_t  CheckForBurpFail(const VQwSubsystem *ev_error) override{

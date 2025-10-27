@@ -85,7 +85,7 @@ class VQwSubsystemParity: virtual public VQwSubsystem {
     virtual void CalculateRunningAverage() = 0;
 
     /// \brief Load the event cuts file
-    Int_t LoadEventCuts(TString filename) override{
+    Int_t LoadEventCuts(const TString& filename) override{
       Int_t eventcut_flag = 1;
 
       // Open the file
@@ -149,6 +149,6 @@ class VQwSubsystemParity: virtual public VQwSubsystem {
 
     virtual Bool_t CheckForEndOfBurst() const {return kFALSE;};
 
-    virtual void LoadMockDataParameters(TString /*mapfile*/) {};
+    virtual void LoadMockDataParameters(const TString& /*mapfile*/) {};
 
 }; // class VQwSubsystemParity
