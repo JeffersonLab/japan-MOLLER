@@ -334,4 +334,5 @@ class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHeli
 
 };
 
+// Register this subsystem with the factory
 REGISTER_SUBSYSTEM_FACTORY(QwHelicity);

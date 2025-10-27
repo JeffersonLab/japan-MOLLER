@@ -22,9 +22,6 @@
 #include "QwParameterFile.h"
 #include "QwRootFile.h"
 
-// Register this handler with the factory
-REGISTER_DATA_HANDLER_FACTORY(QwCorrelator);
-
 // Static members
 bool QwCorrelator::fPrintCorrelations = false;
 

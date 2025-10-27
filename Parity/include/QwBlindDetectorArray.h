@@ -62,7 +62,7 @@ class QwBlindDetectorArray:
 
 
   /// Virtual destructor
-  ~QwBlindDetectorArray() override{};
+  ~QwBlindDetectorArray() override;
 
   /// Inherit assignment operator on base class
   using VQwDetectorArray::operator=;
@@ -83,4 +83,5 @@ class QwBlindDetectorArray:
 
 };
 
+// Register this subsystem with the factory
 REGISTER_SUBSYSTEM_FACTORY(QwBlindDetectorArray);

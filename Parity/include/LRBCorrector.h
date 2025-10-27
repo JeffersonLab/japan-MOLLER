@@ -68,4 +68,5 @@ class LRBCorrector : public VQwDataHandler, public MQwDataHandlerCloneable<LRBCo
 
 };
 
+// Register this handler with the factory
 REGISTER_DATA_HANDLER_FACTORY(LRBCorrector);

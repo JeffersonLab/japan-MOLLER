@@ -50,3 +50,6 @@ class QwFakeHelicity: public QwHelicity {
     UInt_t GetRandbit(UInt_t& ranseed) override;
 
 };
+
+// Register this subsystem with the factory
+REGISTER_SUBSYSTEM_FACTORY(QwFakeHelicity);

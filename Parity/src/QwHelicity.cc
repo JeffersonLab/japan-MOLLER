@@ -31,12 +31,8 @@
 #include "QwLog.h"
 
 extern QwHistogramHelper gQwHists;
+
 //**************************************************//
-
-// Register this subsystem with the factory
-//REGISTER_SUBSYSTEM_FACTORY(QwHelicity);
-
-
 /// Default helicity bit pattern of 0x69 represents a -++-+--+ octet
 /// (event polarity listed in reverse time order), where the LSB
 /// of the bit pattern is the first event of the pattern.
