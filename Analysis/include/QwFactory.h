@@ -239,7 +239,7 @@ class MQwCloneable: virtual public VQwCloneable<base_t> {
   private:
 
     /// Pointer to the factory of this type
-    inline static const VQwFactory<base_t>* fFactory = nullptr;
+    static const VQwFactory<base_t>* fFactory;
 
 }; // class MQwCloneable
 
