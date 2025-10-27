@@ -35,9 +35,6 @@ class QwParityDB;
 //class QwDBInterface;
 #endif // __USE_DATABASE__
 
-// Register this subsystem with the factory
-REGISTER_SUBSYSTEM_FACTORY(QwBeamLine);
-
 //*****************************************************************//
 /** Parse and handle beamline-specific command-line options. */
 void QwBeamLine::ProcessOptions(QwOptions &options){

@@ -67,3 +67,6 @@ class LRBCorrector : public VQwDataHandler, public MQwDataHandlerCloneable<LRBCo
     std::map<Short_t,std::vector<std::vector<Double_t>>> fSensitivity;
 
 };
+
+// Register this handler with the factory
+REGISTER_DATA_HANDLER_FACTORY(LRBCorrector);

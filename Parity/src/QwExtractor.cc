@@ -22,9 +22,6 @@
 #include "QwParameterFile.h"
 #include "QwRootFile.h"
 
-// Register this handler with the factory
-REGISTER_DATA_HANDLER_FACTORY(QwExtractor);
-
 
 /// \brief Constructor with name
 QwExtractor::QwExtractor(const TString& name)

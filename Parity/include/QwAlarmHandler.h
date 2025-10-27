@@ -113,6 +113,9 @@ class QwAlarmHandler:public VQwDataHandler, public MQwDataHandlerCloneable<QwAla
 
 }; // class QwAlarmHandler
 
+// Register this handler with the factory
+REGISTER_DATA_HANDLER_FACTORY(QwAlarmHandler);
+
 inline std::ostream& operator<< (std::ostream& stream, const QwAlarmHandler::EQwHandleType& i) {
   switch (i){
   case QwAlarmHandler::kHandleTypeMps:  stream << "mps"; break;

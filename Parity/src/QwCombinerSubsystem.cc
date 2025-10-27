@@ -11,8 +11,6 @@
 #include "QwSubsystemArrayParity.h"
 #include "QwParameterFile.h"
 
-REGISTER_SUBSYSTEM_FACTORY(QwCombinerSubsystem);
-
 
 QwCombinerSubsystem::~QwCombinerSubsystem()
 {

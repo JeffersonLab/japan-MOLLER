@@ -63,7 +63,7 @@ class QwBlindDetectorArray:
 
 
   /// Virtual destructor
-  ~QwBlindDetectorArray() override{};
+  ~QwBlindDetectorArray() override;
 
   public:
 
@@ -80,3 +80,6 @@ class QwBlindDetectorArray:
 #endif // HAS_RNTUPLE_SUPPORT
 
 };
+
+// Register this subsystem with the factory
+REGISTER_SUBSYSTEM_FACTORY(QwBlindDetectorArray);
