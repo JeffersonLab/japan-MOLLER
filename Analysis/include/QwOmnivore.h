@@ -66,7 +66,7 @@ class QwOmnivore: public VQwSubsystem_t {
     Int_t ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override {
       /// Om nom nom nom
       // TODO (wdc) configuration events seem to have num_words = 0xffffffff
-      //UInt_t cheeseburger;
+      //UInt_t cheeseburger{0};
       //for (UInt_t word = 0; word < num_words; word++)
       //  cheeseburger += buffer[word]; // (addition to prevent compiler from optimizing local away)
       return 0; // my plate is empty
@@ -81,7 +81,8 @@ class QwOmnivore: public VQwSubsystem_t {
     /// TODO:  The non-event-type-aware ProcessEvBuffer routine should be replaced with the event-type-aware version.
     Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override {
       /// Om nom nom nom
-      UInt_t cheeseburger;
+      [[maybe_unused]]
+      UInt_t cheeseburger{0};
       for (UInt_t word = 0; word < num_words; word++)
         cheeseburger += buffer[word]; // (addition to prevent compiler from optimizing local away)
       return 0; // my plate is empty
