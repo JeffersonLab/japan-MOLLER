@@ -230,4 +230,5 @@ class QwBeamMod: public VQwSubsystemParity, public MQwSubsystemCloneable<QwBeamM
 
 };
 
+// Register this subsystem with the factory
 REGISTER_SUBSYSTEM_FACTORY(QwBeamMod);

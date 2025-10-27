@@ -60,8 +60,9 @@ QwDetectorArray(const QwDetectorArray& source)
 
 
 /// Virtual destructor
-~QwDetectorArray() override {};
+~QwDetectorArray() override;
 
 };
 
+// Register this subsystem with the factory
 REGISTER_SUBSYSTEM_FACTORY(QwDetectorArray);

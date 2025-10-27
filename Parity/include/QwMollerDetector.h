@@ -171,3 +171,7 @@ class QwMollerDetector:
     UInt_t fNumberOfEvents; //! Number of triggered events
 
 };
+
+// Register this subsystem with the factory
+REGISTER_SUBSYSTEM_FACTORY(QwMollerDetector);
+

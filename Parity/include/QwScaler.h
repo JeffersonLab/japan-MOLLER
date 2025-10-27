@@ -149,3 +149,6 @@ class QwScaler: public VQwSubsystemParity, public MQwSubsystemCloneable<QwScaler
     std::vector< UInt_t > fBufferOffset; // Offset in scaler buffer
     std::vector< std::pair< VQwScaler_Channel*, double > > fNorm;
 };
+
+// Register this subsystem with the factory
+REGISTER_SUBSYSTEM_FACTORY(QwScaler);

@@ -139,4 +139,5 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
 
 }; // class QwCombinerSubsystem
 
+// Register this subsystem with the factory
 REGISTER_SUBSYSTEM_FACTORY(QwCombinerSubsystem);

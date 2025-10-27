@@ -61,3 +61,7 @@ class QwExtractor:public VQwDataHandler, public MQwDataHandlerCloneable<QwExtrac
     QwExtractor();
 
 }; // class QwExtractor
+
+// Register this handler with the factory
+REGISTER_DATA_HANDLER_FACTORY(QwExtractor);
+
