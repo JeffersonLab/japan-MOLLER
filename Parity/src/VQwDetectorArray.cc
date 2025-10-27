@@ -601,21 +601,21 @@ void VQwDetectorArray::LoadEventCuts_Fin(Int_t &eventcut_flag) {
 Int_t VQwDetectorArray::LoadInputParameters(const TString& pedestalfile) {
 
     Bool_t ldebug=kFALSE;
-    TString varname;
-    Double_t varped;
-    Double_t varcal;
+    TString varname{""};
+    Double_t varped{0};
+    Double_t varcal{0};
 
     //  Double_t varbaserate;
-    Double_t varnormrate;
-    Double_t varvoltperhz;
-    Double_t varasym;
-    Double_t varcx;
-    Double_t varcy;
-    Double_t varcxp;
-    Double_t varcyp;
-    Double_t varce;
+    Double_t varnormrate{0};
+    Double_t varvoltperhz{0};
+    Double_t varasym{0};
+    Double_t varcx{0};
+    Double_t varcy{0};
+    Double_t varcxp{0};
+    Double_t varcyp{0};
+    Double_t varce{0};
 
-    TString localname;
+    TString localname{""};
 
     Int_t lineread=0;
 
@@ -695,21 +695,21 @@ Int_t VQwDetectorArray::LoadInputParameters(const TString& pedestalfile) {
 void VQwDetectorArray::LoadMockDataParameters(const TString& pedestalfile) {
 
     Bool_t ldebug=kFALSE;
-    TString varname;
-    Double_t varped;
-    Double_t varcal;
+    TString varname{""};
+    Double_t varped{0};
+    Double_t varcal{0};
 
     //  Double_t varbaserate;
-    Double_t varnormrate;
-    Double_t varvoltperhz;
-    Double_t varasym;
-    Double_t varcx;
-    Double_t varcy;
-    Double_t varcxp;
-    Double_t varcyp;
-    Double_t varce;
+    Double_t varnormrate{0};
+    Double_t varvoltperhz{0};
+    Double_t varasym{0};
+    Double_t varcx{0};
+    Double_t varcy{0};
+    Double_t varcxp{0};
+    Double_t varcyp{0};
+    Double_t varce{0};
 
-    TString localname;
+    TString localname{""};
 
     Int_t lineread=0;
 
