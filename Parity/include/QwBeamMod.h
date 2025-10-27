@@ -229,3 +229,5 @@ class QwBeamMod: public VQwSubsystemParity, public MQwSubsystemCloneable<QwBeamM
  UInt_t fBmwObj_ErrorFlag;
 
 };
+
+REGISTER_SUBSYSTEM_FACTORY(QwBeamMod);

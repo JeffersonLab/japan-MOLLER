@@ -49,7 +49,6 @@
 #include "QwFakeHelicity.h"
 #include "QwBeamLine.h"
 #include "QwBeamMod.h"
-#include "QwIntegratedRaster.h"
 
 // Valgrind headers
 #if __has_include(<valgrind/callgrind.h>)

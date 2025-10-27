@@ -82,3 +82,5 @@ class QwBlindDetectorArray:
 #endif // HAS_RNTUPLE_SUPPORT
 
 };
+
+REGISTER_SUBSYSTEM_FACTORY(QwBlindDetectorArray);
