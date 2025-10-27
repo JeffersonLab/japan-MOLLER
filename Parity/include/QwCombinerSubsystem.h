@@ -43,6 +43,7 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
 
       /// \brief Update the running sums
       void AccumulateRunningSum(VQwSubsystem* input, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override;
+      void AccumulateRunningSum(VQwDataHandler& input, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override { };
       void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF) override;
       /// \brief Calculate the average for all good events
       void CalculateRunningAverage() override;
