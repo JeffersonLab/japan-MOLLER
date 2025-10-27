@@ -157,7 +157,6 @@ class QwEnergyCalculator : public VQwDataElement{
     std::vector <Double_t> fTMatrixRatio;
     std::vector <TString>  fProperty;
     std::vector <TString>  fType;
-    Int_t    fDeviceErrorCode;//keep the device HW status using a unique code from the QwVQWK_Channel::fDeviceErrorCode
     Bool_t bEVENTCUTMODE;//If this set to kFALSE then Event cuts do not depend on HW checks. This is set externally through the qweak_beamline_eventcuts.map
     Bool_t   bFullSave; // used to restrict the amount of data histogramed
 
