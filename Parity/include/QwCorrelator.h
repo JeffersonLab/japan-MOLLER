@@ -46,7 +46,7 @@ class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCor
 
   void ParseConfigFile(QwParameterFile& file) override;
 
-  Int_t LoadChannelMap(const std::string& mapfile) override;
+  Int_t LoadChannelMap(const TString& mapfile) override;
 
   /// \brief Connect to Channels (asymmetry/difference only)
   /// \param asym Subsystem array with asymmetries
