@@ -223,7 +223,7 @@ Bool_t VQwDetectorArray::PublishByRequest(TString device_name) {
  * @param mapfile Path to the channel map file.
  * @return 0 on success.
  */
-Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
+Int_t VQwDetectorArray::LoadChannelMap(const TString& mapfile) {
 
     Bool_t ldebug=kFALSE;
 
@@ -598,7 +598,7 @@ void VQwDetectorArray::LoadEventCuts_Fin(Int_t &eventcut_flag) {
 
 
 
-Int_t VQwDetectorArray::LoadInputParameters(TString pedestalfile) {
+Int_t VQwDetectorArray::LoadInputParameters(const TString& pedestalfile) {
 
     Bool_t ldebug=kFALSE;
     TString varname;
@@ -692,7 +692,7 @@ Int_t VQwDetectorArray::LoadInputParameters(TString pedestalfile) {
 
 
 
-void VQwDetectorArray::LoadMockDataParameters(TString pedestalfile) {
+void VQwDetectorArray::LoadMockDataParameters(const TString& pedestalfile) {
 
     Bool_t ldebug=kFALSE;
     TString varname;

@@ -91,9 +91,9 @@ class QwIntegratedRaster : public VQwSubsystemParity, public MQwSubsystemCloneab
 
 
   void ProcessOptions(QwOptions &options) override;//Handle command line options
-  Int_t LoadChannelMap(TString mapfile) override;
-  Int_t LoadInputParameters(TString pedestalfile) override;
-  Int_t LoadEventCuts(TString filename) override;//derived from VQwSubsystemParity
+  Int_t LoadChannelMap(const TString& mapfile) override;
+  Int_t LoadInputParameters(const TString& pedestalfile) override;
+  Int_t LoadEventCuts(const TString& filename) override;//derived from VQwSubsystemParity
   void IncrementErrorCounters() override;
   Bool_t ApplySingleEventCuts() override;//derived from VQwSubsystemParity
   void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failures

@@ -36,7 +36,7 @@ class QwCombiner:public VQwDataHandler, public MQwDataHandlerCloneable<QwCombine
     ~QwCombiner() override;
 
     /// \brief Load the channels and sensitivities
-    Int_t LoadChannelMap(const std::string& mapfile) override;
+    Int_t LoadChannelMap(const TString& mapfile) override;
 
     /// \brief Connect to Channels (event only)
     /// \param event Subsystem array with per-MPS yields

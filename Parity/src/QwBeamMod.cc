@@ -43,7 +43,7 @@ void QwBeamMod::ProcessOptions(QwOptions &options){
       //Handle command line options
 }
 
-Int_t QwBeamMod::LoadChannelMap(TString mapfile){
+Int_t QwBeamMod::LoadChannelMap(const TString& mapfile){
   //  std::cout <<"Here in LoadChannelMap" << std::endl;
   Bool_t ldebug=kFALSE;
 
@@ -336,7 +336,7 @@ Bool_t QwBeamMod::CheckForBurpFail(const VQwSubsystem *subsys){
 }
 
 //*****************************************************************
-Int_t QwBeamMod::LoadInputParameters(TString pedestalfile)
+Int_t QwBeamMod::LoadInputParameters(const TString& pedestalfile)
 {
   Bool_t ldebug=kFALSE;
   TString varname;

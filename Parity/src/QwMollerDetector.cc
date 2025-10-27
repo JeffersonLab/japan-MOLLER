@@ -36,7 +36,7 @@ REGISTER_SUBSYSTEM_FACTORY(QwMollerDetector);
  * @return Zero if successful
  */
 
-Int_t QwMollerDetector::LoadChannelMap(TString mapfile)
+Int_t QwMollerDetector::LoadChannelMap(const TString& mapfile)
 {
   TString varname, varvalue;
   TString modtype, dettype, name, keyword;
@@ -131,7 +131,7 @@ Int_t QwMollerDetector::LoadChannelMap(TString mapfile)
 }
 
 void QwMollerDetector::ProcessOptions(QwOptions &){}
-Int_t QwMollerDetector::LoadInputParameters(TString){ return 0;}
+Int_t QwMollerDetector::LoadInputParameters(const TString&){ return 0;}
 void QwMollerDetector::ClearEventData(){}
 
 
@@ -340,7 +340,7 @@ void QwMollerDetector::CalculateRunningAverage(){
   }
 }
 
-Int_t QwMollerDetector::LoadEventCuts(TString filename){return 0;}
+Int_t QwMollerDetector::LoadEventCuts(const TString& filename){return 0;}
 
 Bool_t QwMollerDetector::ApplySingleEventCuts(){
   std::cout << "QwMoller::ApplySingleEventCuts() ";

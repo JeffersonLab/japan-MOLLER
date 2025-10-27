@@ -111,7 +111,7 @@ Int_t QwBeamLine::AddToElementList(std::vector<TT> &elementlist,
  * @param mapfile Path to the map file.
  * @return 0 on success.
  */
-Int_t QwBeamLine::LoadChannelMap(TString mapfile)
+Int_t QwBeamLine::LoadChannelMap(const TString& mapfile)
 {
   Bool_t ldebug=kFALSE;
 
@@ -566,7 +566,7 @@ void QwBeamLine::LoadEventCuts_Fin(Int_t &eventcut_flag) {
  * Load geometry and electronics calibration parameters from a map file and
  * apply them to the proper devices (offsets, rotation, gains).
  */
-Int_t QwBeamLine::LoadGeometryDefinition(TString mapfile){
+Int_t QwBeamLine::LoadGeometryDefinition(const TString& mapfile){
   Bool_t ldebug=kFALSE;
   TString varname, varvalue;
   Int_t lineread=1;
@@ -747,7 +747,7 @@ Int_t QwBeamLine::LoadGeometryDefinition(TString mapfile){
 
 //--------------------------------------------------------------------------------------------------------
 /** Load per-device mock-data generation parameters from a file. */
-void QwBeamLine::LoadMockDataParameters(TString mapfile) {
+void QwBeamLine::LoadMockDataParameters(const TString& mapfile) {
 
   Bool_t   ldebug=kFALSE;
   TString  varname, varvalue;
@@ -847,7 +847,7 @@ void QwBeamLine::AssignGeometry(QwParameterFile* mapstr, VQwBPM * bpm)
  * @param pedestalfile Path to the input parameter file.
  * @return 0 on success.
  */
-Int_t QwBeamLine::LoadInputParameters(TString pedestalfile)
+Int_t QwBeamLine::LoadInputParameters(const TString& pedestalfile)
 {
   Bool_t ldebug=kFALSE;
 

@@ -192,15 +192,15 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
    */
   virtual Int_t LoadDetectorMaps(QwParameterFile& file);
   /// Mandatory map file definition
-  virtual Int_t LoadChannelMap(TString mapfile) = 0;
+  virtual Int_t LoadChannelMap(const TString& mapfile) = 0;
   /// Mandatory parameter file definition
-  virtual Int_t LoadInputParameters(TString mapfile) = 0;
+  virtual Int_t LoadInputParameters(const TString& mapfile) = 0;
   /// Optional geometry definition
-  virtual Int_t LoadGeometryDefinition(TString /*mapfile*/) { return 0; };
+  virtual Int_t LoadGeometryDefinition(const TString& /*mapfile*/) { return 0; };
   /// Optional crosstalk definition
-  virtual Int_t LoadCrosstalkDefinition(TString /*mapfile*/) { return 0; };
+  virtual Int_t LoadCrosstalkDefinition(const TString& /*mapfile*/) { return 0; };
   /// Optional event cut file
-  virtual Int_t LoadEventCuts(TString /*mapfile*/) { return 0; };
+  virtual Int_t LoadEventCuts(const TString& /*mapfile*/) { return 0; };
 
   /// Set event type mask
   void SetEventTypeMask(const UInt_t mask) { fEventTypeMask = mask; };
