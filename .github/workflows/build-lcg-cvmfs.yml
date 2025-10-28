@@ -193,7 +193,7 @@ jobs:
       - name: Compress build directory
         run: tar -caf build.tar.zst build/
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
           path: build.tar.zst
@@ -201,7 +201,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload profiling analysis
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: gprof-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
           path: |
@@ -210,7 +210,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload prompt summary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
           path: |
@@ -220,7 +220,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload database dumps
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: qwparity-sql-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
           path: |
@@ -229,7 +229,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload regression alias definitions
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
           path: |
@@ -390,7 +390,7 @@ jobs:
             echo "::endgroup::"
 
       - name: Upload callgrind analysis
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: callgrind-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
           path: |
