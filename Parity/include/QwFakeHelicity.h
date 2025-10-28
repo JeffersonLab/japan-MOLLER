@@ -16,9 +16,9 @@
 
 #include "QwHelicity.h"
 
-class QwFakeHelicity: public QwHelicity {
+class QwFakeHelicity: public QwHelicityBase {
  public:
-  QwFakeHelicity(TString region_tmp):VQwSubsystem(region_tmp),QwHelicity(region_tmp),fMinPatternPhase(1)
+  QwFakeHelicity(TString region_tmp):VQwSubsystem(region_tmp),QwHelicityBase(region_tmp),fMinPatternPhase(1)
 
     {
       // using the constructor of the base class
