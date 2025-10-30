@@ -72,15 +72,8 @@ class QwHelicityBase: public VQwSubsystemParity{
     return ProcessEvBuffer(0x1,roc_id,bank_id,buffer,num_words);
   };
   Int_t  ProcessEvBuffer(UInt_t ev_type, const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
-  void   ProcessEventUserbitMode();//ProcessEvent has two modes Userbit and Inputregister modes
-  void   ProcessEventInputRegisterMode();
-  void   ProcessEventInputMollerMode();
-
-  void   EncodeEventData(std::vector<UInt_t> &buffer);
-
 
   virtual void  ClearEventData();
-  virtual void  ProcessEvent();
 
   UInt_t GetRandomSeedActual() { return iseed_Actual; };
   UInt_t GetRandomSeedDelayed() { return iseed_Delayed; };
@@ -146,31 +139,11 @@ virtual  VQwSubsystem& operator-= (VQwSubsystem *value) {return *this;};
   void CheckPatternNum(VQwSubsystem *value);
   void MergeCounters(VQwSubsystem *value);
   
-  Bool_t CheckIORegisterMask(const UInt_t& ioregister, const UInt_t& mask) const {
-    return ((mask != 0)&&((ioregister & mask) == mask));
-  };
 
  protected:
   enum HelicityRootSavingType{kHelSaveMPS = 0,
 			      kHelSavePattern,
 			      kHelNoSave};
-
-  enum HelicityEncodingType{kHelUserbitMode=0,
-			    kHelInputRegisterMode,
-			    kHelLocalyMadeUp,
-			    kHelInputMollerMode};
-  // this values allow to switch the code between different helicity encoding mode.
-
-  enum InputRegisterBits{kDefaultInputReg_HelPlus     = 0x1,
-			 kDefaultInputReg_HelMinus    = 0x2,
-			 kDefaultInputReg_PatternSync = 0x4,
-			 kDefaultInputReg_FakeMPS     = 0x8000};
-
-  UInt_t fInputReg_FakeMPS;
-  UInt_t fInputReg_HelPlus;
-  UInt_t fInputReg_HelMinus;
-  UInt_t fInputReg_PatternSync;
-  UInt_t fInputReg_PairSync;
 
   static const std::vector<UInt_t> kDefaultHelicityBitPattern;
 

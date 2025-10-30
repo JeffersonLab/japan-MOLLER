@@ -26,10 +26,7 @@ class QwParityDB;
 /*****************************************************************
 *  Class:
 ******************************************************************/
-///
-/// \ingroup QwAnalysis_ADC
-///
-/// \ingroup QwAnalysis_BL
+
 class QwHelicityDecoder: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicityDecoder> {
 
  private:
@@ -67,9 +64,6 @@ class QwHelicityDecoder: public QwHelicityBase, public MQwSubsystemCloneable<QwH
     return ProcessEvBuffer(0x1,roc_id,bank_id,buffer,num_words);
   };
   Int_t  ProcessEvBuffer(UInt_t ev_type, const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
-  void   ProcessEventUserbitMode();//ProcessEvent has two modes Userbit and Inputregister modes
-  void   ProcessEventInputRegisterMode();
-  void   ProcessEventInputMollerMode();
 
   void   EncodeEventData(std::vector<UInt_t> &buffer);
 

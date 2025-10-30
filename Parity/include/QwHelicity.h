@@ -137,6 +137,19 @@ class QwHelicity: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicity
     return ((mask != 0)&&((ioregister & mask) == mask));
   };
 
+  enum HelicityEncodingType{kHelUserbitMode=0,
+			    kHelInputRegisterMode,
+			    kHelLocalyMadeUp,
+			    kHelInputMollerMode};
+  // this values allow to switch the code between different helicity encoding mode.
+
+  enum InputRegisterBits{kDefaultInputReg_HelPlus     = 0x1,
+			 kDefaultInputReg_HelMinus    = 0x2,
+			 kDefaultInputReg_PatternSync = 0x4,
+			 kDefaultInputReg_FakeMPS     = 0x8000};
+
+
+
   UInt_t fInputReg_FakeMPS;
   UInt_t fInputReg_HelPlus;
   UInt_t fInputReg_HelMinus;
@@ -150,12 +163,12 @@ class QwHelicity: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicity
   std::vector <QwWord> fWord;
   std::vector < std::pair<Int_t, Int_t> > fWordsPerSubbank;  // The indices of the first & last word in each subbank
 
-  Int_t fHelicityDecodingMode;
+//  Int_t fHelicityDecodingMode;
 
-  Int_t kUserbit;
-  Int_t kInputRegister, kPatternCounter, kMpsCounter, kPatternPhase;
+//  Int_t kUserbit;
+//  Int_t kInputRegister, kPatternCounter, kMpsCounter, kPatternPhase;
 
-  UInt_t kEventTypeHelPlus, kEventTypeHelMinus;
+//  UInt_t kEventTypeHelPlus, kEventTypeHelMinus;
 
   Int_t fEventNumberOld, fEventNumber;
   Int_t fPatternPhaseNumberOld, fPatternPhaseNumber;
