@@ -103,13 +103,19 @@ jobs:
 
             echo "::group::Compilation with ccache"
             cmake -Bbuild -S. \
+              -Wdev -Werror=dev \
               -DBUILD_MARIADB_CONNECTOR=ON \
               -DBUILD_MYSQL_CONNECTOR=ON \
               -DBUILD_POSTGRESQL_CONNECTOR=ON \
               -DBUILD_SQLITE3_CONNECTOR=ON \
               -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache \
               -DCMAKE_INSTALL_PREFIX=install \
-              -DCMAKE_CXX_FLAGS="${{ matrix.cxxflags }}"
+              -DCMAKE_CXX_FLAGS="${{ matrix.cxxflags }}" 2>&1 | tee cmake.txt
+            # Check the log file for unused variables
+            if grep -q "Manually-specified variables were not used" cmake.txt; then
+                echo "ERROR: Unused CMake variables detected."
+                exit 1
+            fi
             cmake --build build -j$(nproc) --target install
             echo "::endgroup::"
 
