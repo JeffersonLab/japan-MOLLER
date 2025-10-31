@@ -9,7 +9,7 @@ Bank=0x102
 !same sample size for ADCs in a given bank
 !sample_size=480
 !for 960Hz
-sample_size=464  
+sample_size=464
 !
 !
 ! module.type, module.num  chan.num, det.type, det.name, if unrotated then last column ->UNROTATED
@@ -17,7 +17,7 @@ sample_size=464
 !ADC0, Slot 18, Serial Number 13, Address 0x7B
 !   VQWK, 0, 4,  bcm,  QWK_BCM5
 !   VQWK, 0, 5,  bcm,  QWK_BCM6
-   VQWK, 0, 6,  bcm,  QWK_BCM7 
+   VQWK, 0, 6,  bcm,  QWK_BCM7
    VQWK, 0, 7,  bcm,  QWK_BCM8
 
 
@@ -46,8 +46,8 @@ sample_size=464
 
 !Last updated Nov 23 2011 by Rakitha (rakithab) using Parity/prminput/qweak_hallc_beamline.13337-.map revision-3566
 !ADC4, Slot 7, Address 37, 0x7F
-   VQWK, 4, 6,  bcm,  QWK_BCM2              
-   VQWK, 4, 7,  bcm,  QWK_BCM1    
+   VQWK, 4, 6,  bcm,  QWK_BCM2
+   VQWK, 4, 7,  bcm,  QWK_BCM1
 
 !Last updated Feb 08 2012 Rakitha (rakithab) using Parity/prminput/qweak_hallc_beamline.15261-.map
 !ADC6, Slot 9,  Serial Number 04, Address 0x81
@@ -78,15 +78,15 @@ begin=combinedbcm
 name=qwk_charge
 !name	   type	 wieght
 ! qwk_bcm1,  bcm, 1.0
-qwk_bcm8,  bcm, 1.0	
+qwk_bcm8,  bcm, 1.0
 
 end=combinedbcm
 
 
 begin=combinedbpm
-name=qwk_target 
-!name           type          q      x          y    
- QWK_BPM3H07A,  bpmstripline, 1.0,   1.0,   1.0 
+name=qwk_target
+!name           type          q      x          y
+ QWK_BPM3H07A,  bpmstripline, 1.0,   1.0,   1.0
  QWK_BPM3H07B,  bpmstripline, 1.0,   1.0,   1.0
  QWK_BPM3H07C,  bpmstripline, 1.0,   1.0,   1.0
  QWK_BPM3H09,   bpmstripline, 1.0,   1.0,   1.0
@@ -109,8 +109,8 @@ end=combinedbpm
 !	combobcm
 !	comboenergy
 !       scaler
-!3. device name 
-!4. property to publish 
+!3. device name
+!4. property to publish
 !	x-pos
 !	xp-angle
 !	y-pos
@@ -135,5 +135,3 @@ end=combinedbpm
 
  bcm7, bcm, qwk_bcm7, c
  bcm8, bcm, qwk_bcm8, c
-
-

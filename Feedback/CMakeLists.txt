@@ -73,7 +73,7 @@ install(TARGETS QwFeedback
 
 file(GLOB exefiles
   main/*.cc
-) 
+)
 foreach(file ${exefiles})
   get_filename_component(filename ${file} NAME_WE)
   string(TOLOWER ${filename} filelower)
@@ -105,6 +105,3 @@ install(FILES ${my_feedback_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 endif(EPICS_FOUND)
 endif(ET_FOUND)
-
-
-

@@ -126,7 +126,7 @@ class QwLog : public std::ostream {
      */
     void                        SetFileThreshold(int thr);
 
-    /*! \brief Get highest log level 
+    /*! \brief Get highest log level
      */
     QwLogLevel                  GetLogLevel() const {
       return std::max(fScreenThreshold, fFileThreshold);

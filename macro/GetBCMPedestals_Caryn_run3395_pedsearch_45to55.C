@@ -10,14 +10,14 @@ void GetBCMPedestals_Caryn_run3395_pedsearch_45to55(int run_num = 3395,TString u
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.2);
   gStyle->SetStatW(0.3);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(1011);
   gStyle->SetStatX(1.0);//0.7
   gStyle->SetStatY(0.4);//0.9
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -26,7 +26,7 @@ void GetBCMPedestals_Caryn_run3395_pedsearch_45to55(int run_num = 3395,TString u
   gStyle->SetLabelSize(0.035,"x");
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.04,"hxyz");
-  gROOT->ForceStyle();  
+  gROOT->ForceStyle();
 
   //  TString rf_name =Form("$QW_ROOTFILES/prexPrompt_pass2_%d.000.root",run_num);
   TFile *rootfile = TFile::Open(Form("$QW_ROOTFILES/prexPrompt_pass2_%d.000.root",run_num));
@@ -44,9 +44,9 @@ void GetBCMPedestals_Caryn_run3395_pedsearch_45to55(int run_num = 3395,TString u
   int nbinx = (int)(10*max); // to one-tenth precision.
 
   vector<double> vec_scandata;
-  TH1D *hsd = new TH1D(Form("hsd%d",myii),"scan data",nbinx,-0.05,max-0.05); 
+  TH1D *hsd = new TH1D(Form("hsd%d",myii),"scan data",nbinx,-0.05,max-0.05);
   tree->Draw(Form("beam_current>>hsd%d",myii),Form("%s&&scandata1!=0",user_cut.Data()),"goff");
-  int bin_content; 
+  int bin_content;
   double bin_center;
   double tempbincenter;
   for(int ibin=0;ibin<nbinx;ibin++){
@@ -59,7 +59,7 @@ void GetBCMPedestals_Caryn_run3395_pedsearch_45to55(int run_num = 3395,TString u
     }
   }
   const int ndata = vec_scandata.size();
-  
+
 
   TString device_name[] =
     {"bcm_an_us","bcm_an_ds3","bcm_dg_us","bcm_dg_ds","bcm_an_ds10"};
@@ -82,9 +82,9 @@ void GetBCMPedestals_Caryn_run3395_pedsearch_45to55(int run_num = 3395,TString u
   f_zero->SetLineStyle(9);
 
   // const int ndata = sizeof(beam_evtcut)/sizeof(*beam_evtcut);
-  double det_mean[ndata]; 
+  double det_mean[ndata];
   double det_error[ndata];
-  double unser_mean[ndata]; 
+  double unser_mean[ndata];
   double unser_error[ndata];
   double det_res[ndata]; // residual
 
@@ -99,12 +99,12 @@ void GetBCMPedestals_Caryn_run3395_pedsearch_45to55(int run_num = 3395,TString u
 	sprintf(outfilename,"%s/run%d_detsamcavbcm_pedestal_fit_fittods1x45_55.txt",
 			outputDir.Data(),run_num);
 	printf("Writing output to %s\n",outfilename);
-	//FILE *outfile = fopen(outfilename, "w"); 
+	//FILE *outfile = fopen(outfilename, "w");
 	ofstream outfile;
 	outfile.open(outfilename);
 
   TGraphErrors *g_res;
-  TGraphErrors *g_fit;  
+  TGraphErrors *g_fit;
   TGraphErrors *g_res_ref;
   TGraphErrors *g_fit_ref;
   TMultiGraph *mg_res;
@@ -156,7 +156,7 @@ void GetBCMPedestals_Caryn_run3395_pedsearch_45to55(int run_num = 3395,TString u
       }
       c_det->cd(1);
 
-      // g_fit = new TGraphErrors(ndata,unser_mean,det_mean,unser_error,det_error); 
+      // g_fit = new TGraphErrors(ndata,unser_mean,det_mean,unser_error,det_error);
       g_fit = new TGraphErrors(Np,unser_mean,det_mean,unser_error,det_error);
       g_fit->SetMarkerStyle(20);
       g_fit->Draw("AP");
@@ -177,16 +177,16 @@ void GetBCMPedestals_Caryn_run3395_pedsearch_45to55(int run_num = 3395,TString u
       ped[idet] = f_fit->GetParameter(0);
       slope[idet] = f_fit->GetParameter(1);
       //      if(device_name[idet]=="cav4cQ" || device_name[idet]=="cav4cXI" || device_name[idet]=="cav4cYI"){
-              gain[idet] = 1/slope[idet];      
+              gain[idet] = 1/slope[idet];
       //  }
       // else{
-      // gain[idet] = 76.293e-6;  
+      // gain[idet] = 76.293e-6;
       // }
 
       for(int i=0;i<ndata;i++){
 	det_res[i] = det_mean[i] - f_fit->Eval(unser_mean[i]);
       }
-      
+
       c_det->cd(2);
       // g_res = new TGraphErrors(ndata,unser_mean,det_res,unser_error,det_error);
       g_res = new TGraphErrors(Np,unser_mean,det_res,unser_error,det_error);

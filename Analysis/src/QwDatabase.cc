@@ -25,7 +25,7 @@
 #include "QwParitySchema.h"
 
 // QwScopedConnection implementation
-QwScopedConnection::QwScopedConnection(QwDatabase* db) 
+QwScopedConnection::QwScopedConnection(QwDatabase* db)
     : fDatabase(db), fConnected(false) {
     if (fDatabase) {
         fConnected = fDatabase->Connect();
@@ -54,11 +54,11 @@ QwScopedConnection& QwScopedConnection::operator=(QwScopedConnection&& other) no
         if (fDatabase && fConnected) {
             fDatabase->Disconnect();
         }
-        
+
         // Move from other
         fDatabase = other.fDatabase;
         fConnected = other.fConnected;
-        
+
         // Clear other
         other.fDatabase = nullptr;
         other.fConnected = false;
@@ -171,7 +171,7 @@ Bool_t QwDatabase::ValidateConnection()
     //
     try {
       // FIXME (wdconinc) duplication with Connect
-      switch(fDBType) 
+      switch(fDBType)
       {
 #ifdef __USE_DATABASE_MYSQL__
         case kQwDatabaseMySQL: {
@@ -281,7 +281,7 @@ Bool_t QwDatabase::ValidateConnection()
   }
 
   // Check to make sure database and QwDatabase schema versions match up.
-  if (fAccessLevel == kQwDatabaseReadWrite && 
+  if (fAccessLevel == kQwDatabaseReadWrite &&
       (fVersionMajor != kValidVersionMajor ||
        fVersionMinor != kValidVersionMinor ||
        fVersionPoint <  kValidVersionPoint)) {
@@ -321,7 +321,7 @@ bool QwDatabase::Connect()
   if (fValidConnection) {
     // FIXME (wdconinc) duplication with ValidateConnection
     try {
-      switch(fDBType) 
+      switch(fDBType)
       {
 #ifdef __USE_DATABASE_MYSQL__
         case kQwDatabaseMySQL: {
@@ -416,8 +416,8 @@ void QwDatabase::DefineOptions(QwOptions& options)
   options.AddOptions("Database options")("QwDatabase.dbusername", po::value<string>(), "database username");
   options.AddOptions("Database options")("QwDatabase.dbpassword", po::value<string>(), "database password");
   options.AddOptions("Database options")("QwDatabase.dbport", po::value<int>()->default_value(0), "database server port number (defaults to standard mysql port)");
-  options.AddOptions("Database options")("QwDatabase.debug", po::value<bool>()->default_value(false), "enable database debug output (default false)");
-  options.AddOptions("Database options")("QwDatabase.insert-missing-keys", po::value<bool>()->default_value(false), "insert missing keys into the database (default false)");
+  options.AddOptions("Database options")("QwDatabase.debug", po::value<bool>()->default_bool_value(false), "enable database debug output (default false)");
+  options.AddOptions("Database options")("QwDatabase.insert-missing-keys", po::value<bool>()->default_bool_value(false), "insert missing keys into the database (default false)");
 
   std::stringstream dbtypes;
   dbtypes << "none";

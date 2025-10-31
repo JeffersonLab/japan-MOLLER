@@ -67,7 +67,7 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
   void   CopyTemplatedDataElements(const VQwSubsystem *source);
 
   /* derived from VQwSubsystem */
-  
+
   void   ProcessOptions(QwOptions &options) override;//Handle command line options
   Int_t  LoadChannelMap(TString mapfile) override;
   Int_t  LoadInputParameters(TString pedestalfile) override;
@@ -181,7 +181,7 @@ protected:
   ///  the index of that element within the array.
   template <typename TT>
   Int_t AddToElementList(std::vector<TT> &elementlist, QwBeamDetectorID &detector_id);
-  
+
   Int_t GetDetectorIndex(EQwBeamInstrumentType TypeID, TString name) const;
   //when the type and the name is passed the detector index from appropriate vector will be returned
   //for example if TypeID is bcm  then the index of the detector from fBCM vector for given name will be returned.
@@ -203,7 +203,7 @@ protected:
   std::vector <QwEnergyCalculator> fECalculator;
   std::vector <QwBeamDetectorID> fBeamDetectorID;
 
-  
+
 
 /////
 private:
@@ -213,6 +213,6 @@ private:
 
   static const Bool_t bDEBUG=kFALSE;
 
-  
+
 
 };

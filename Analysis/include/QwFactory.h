@@ -277,4 +277,3 @@ class MQwDataElementCloneable: public MQwCloneable<VQwDataElement,dataelement_t>
 #define REGISTER_DATA_ELEMENT_FACTORY(A) \
   VALIDATE_DATA_ELEMENT_PATTERN(A); \
   template<> const VQwDataElementFactory* MQwCloneable<VQwDataElement,A>::fFactory = new QwFactory<VQwDataElement,A>(#A)
-

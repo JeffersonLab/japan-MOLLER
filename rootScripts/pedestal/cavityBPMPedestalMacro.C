@@ -90,7 +90,7 @@ void cavityBPMPedestalMacro(int runnum, int pass = 1) {
   //print all fit line parameters to screen in format of map file
   if (pass == 1) {
     cout << endl;
-    cout << "Replace the following lines in the pedestal mapfile:" << endl; 
+    cout << "Replace the following lines in the pedestal mapfile:" << endl;
     cout << endl;
     cout << "  cav4bq,   " << p0[6] << ",    " << 1/p1[6] << endl;
     cout << endl;
@@ -104,7 +104,7 @@ void cavityBPMPedestalMacro(int runnum, int pass = 1) {
   }
   else if (pass == 2) {
     cout << endl;
-    cout << "Replace the following lines in the pedestal mapfile:" << endl; 
+    cout << "Replace the following lines in the pedestal mapfile:" << endl;
     cout << endl;
     cout << "  cav4bxi,  " << p0[0] << ",    " << 1/p1[0] << endl;
     cout << "  cav4byi,  " << p0[3] << ",    " << 1/p1[3] << endl;

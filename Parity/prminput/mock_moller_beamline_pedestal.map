@@ -24,14 +24,14 @@ BPM1C12XP  ,	            0   ,  76.293e-6
 BPM1C12XM  ,	            0   ,  76.293e-6
 BPM1C12YP  ,	            0   ,  76.293e-6
 BPM1C12YM  ,	            0   ,  76.293e-6
-BPM1C16XP  ,                0   ,  76.293e-6 
-BPM1C16XM  ,                0   ,  76.293e-6 
-BPM1C16YP  ,                0   ,  76.293e-6 
-BPM1C16YM  ,                0   ,  76.293e-6 
-BPM1C20XP  ,                0   ,  76.293e-6 
-BPM1C20XM  ,                0   ,  76.293e-6 
-BPM1C20YP  ,                0   ,  76.293e-6 
-BPM1C20YM  ,                0   ,  76.293e-6 
+BPM1C16XP  ,                0   ,  76.293e-6
+BPM1C16XM  ,                0   ,  76.293e-6
+BPM1C16YP  ,                0   ,  76.293e-6
+BPM1C16YM  ,                0   ,  76.293e-6
+BPM1C20XP  ,                0   ,  76.293e-6
+BPM1C20XM  ,                0   ,  76.293e-6
+BPM1C20YP  ,                0   ,  76.293e-6
+BPM1C20YM  ,                0   ,  76.293e-6
 BPM1P02BXP  ,	            0   ,  76.293e-6
 BPM1P02BXM  ,	            0   ,  76.293e-6
 BPM1P02BYP  ,	            0   ,  76.293e-6
@@ -71,10 +71,3 @@ BPM1H14YM  ,	            0   ,  76.293e-6
 
 !END
 .
-
-
-
-
-
-
-

@@ -58,7 +58,9 @@ QwRunCondition::SetArgs(Int_t argc, Char_t* argv[])
   char user_string[fCharLength];
 
   gethostname(host_string, fCharLength);
-  getlogin_r (user_string, fCharLength);
+  if (getlogin_r(user_string, fCharLength) != 0) {
+    snprintf(user_string, fCharLength, "unknown");
+  }
 
   TString host_name = host_string;
   TString user_name = user_string;
@@ -73,9 +75,9 @@ QwRunCondition::SetArgs(Int_t argc, Char_t* argv[])
   TTimeStamp time_stamp;
   TString current_time = time_stamp.AsString("l"); // local time
 
-  // get current ROC flags 
+  // get current ROC flags
   TString roc_flags;
-  // if one of the cdaq cluster AND the user must be a "cdaq", 
+  // if one of the cdaq cluster AND the user must be a "cdaq",
   if( (host_name.Contains("cdaql")) and (not user_name.CompareTo("cdaq", TString::kExact)) )  {
     roc_flags = this->GetROCFlags();
   }
@@ -147,32 +149,32 @@ QwRunCondition::SetName(TString name)
 TString
 QwRunCondition::GetROCFlags()
 {
-  
+
   Bool_t local_debug = false;
   TString flags;
 
   std::ifstream flag_file;
   flag_file.clear();
-  
+
   fROCFlagFileName.Insert(0, "/home/cdaq/qweak/Settings/");
 
   flag_file.open(fROCFlagFileName);
 
   if(not flag_file.is_open()) {
     std::cout << "There is no flag file, which you try to access "
-	      << fROCFlagFileName  
+	      << fROCFlagFileName
 	      << std::endl;
     flags = fROCFlagFileName;
     flags += " is not found";
 
   }
   else {
-    while (not flag_file.eof() ) 
+    while (not flag_file.eof() )
       {
 	TString line;
-	line.ReadLine(flag_file);   
+	line.ReadLine(flag_file);
 	if(not line.IsNull()) {
-	  if(local_debug) { 
+	  if(local_debug) {
 	    std::cout << line << std::endl;
 	  }
 	  if(not line.Contains(";")) {

@@ -87,7 +87,7 @@ public:
 
   virtual void  SetRawEventData() = 0;
 
-  /// Encode the event data into a CODA buffer  
+  /// Encode the event data into a CODA buffer
   virtual void EncodeEventData(std::vector<UInt_t> &buffer) = 0;
 
   /// Set the flag to use an externally provided random variable

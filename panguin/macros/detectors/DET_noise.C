@@ -13,7 +13,7 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <fstream>
- 
+
 void DET_noise(){
          gStyle->SetTitleYOffset(1.5);
 //         gStyle->SetOptStat(0);
@@ -159,5 +159,3 @@ void DET_noise(){
 
         rootfile1->Close();
     }
-
-

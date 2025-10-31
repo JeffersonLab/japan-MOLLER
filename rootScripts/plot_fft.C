@@ -8,7 +8,7 @@
 //To change the frequency limit, you need to change the event period using the command: set_period(period).
 //You can also change the CntHouse file run number by using the command:open_myfile(), and in the parenthesis you will insert the run number. For example: open_myfile(16664).
 //The parameters of the plot can also be changed when running the program.
-//"open_myfile" can also be used with the full path to open any other root file. 
+//"open_myfile" can also be used with the full path to open any other root file.
 #include "TFile.h"
 #include "TTree.h"
 
@@ -44,7 +44,7 @@ void set_frequency_lim(Double_t input)
 
 }
 
-  
+
 
 //This is having the user choose the event period for frequencies of either 920Hz or 240Hz and setting it to a variable called "evt_period".
 
@@ -67,7 +67,7 @@ void set_chan(TString input)
   chan_name=input;
 }
 
-void open_myfile(Int_t run_num=16664, 
+void open_myfile(Int_t run_num=16664,
 		 TString path="/volatile/halla/moller12gev/pking/rootfiles/",
 		 TString name="sbs_CntHouse_")
 {
@@ -119,7 +119,7 @@ void plot_fft(Int_t first_event=0, Int_t num_events=1000)
    for (Int_t i=0;i<2*((n+1)/2+1);i++){
      in[i]=0;
    }
-   
+
    Int_t ii=0;
    Double_t meanval=0.0;
    for (Long64_t i=first_event;i<maxevent;i++) {
@@ -142,8 +142,8 @@ void plot_fft(Int_t first_event=0, Int_t num_events=1000)
 
 // Data array - same transform
 // ===========================
- 
-   
+
+
    //Make our own TVirtualFFT object (using option "K")
    //Third parameter (option) consists of 3 parts:
    //- transform type:
@@ -157,7 +157,7 @@ void plot_fft(Int_t first_event=0, Int_t num_events=1000)
    if (!fft_own) return;
    fft_own->SetPoints(in);
    fft_own->Transform();
- 
+
    //Copy all the output points:
    fft_own->GetPoints(in);
    //Draw the real part of the output
@@ -171,7 +171,7 @@ void plot_fft(Int_t first_event=0, Int_t num_events=1000)
    //   hr->GetXaxis()->SetRangeUser(0,300);
 
    std::cout << "Bins in Magnitude Histogram" << hr->GetNbinsX()
- << endl; 
+ << endl;
 
    TString histname(Form("FFTmag%d",plot_counter++));
    TH1D *FFTmag = new TH1D(histname, histname, hr->GetNbinsX(), 0, 1.0/evt_period);
@@ -186,7 +186,7 @@ void plot_fft(Int_t first_event=0, Int_t num_events=1000)
    FFTmag->Draw();
 
    hr->Delete();
-   
+
    delete fft_own;
    delete [] in;
    // delete [] re_full;
@@ -203,7 +203,7 @@ void plot_block_fft(Int_t first_event=0, Int_t num_events=1000)
   if (myfile == NULL) open_myfile();
 
   Double_t block_period=evt_period/4;
-  
+
   if (frequency_lim < 0)
     frequency_lim = 0.5/block_period;
 
@@ -231,7 +231,7 @@ void plot_block_fft(Int_t first_event=0, Int_t num_events=1000)
    for (Int_t i=0;i<2*((n+1)/2+1);i++){
      in[i]=0;
    }
-   
+
    Int_t ii=0;
    Double_t meanval=0.0;
    for (Long64_t i=first_event;i<maxevent;i++) {
@@ -260,8 +260,8 @@ void plot_block_fft(Int_t first_event=0, Int_t num_events=1000)
 
 // Data array - same transform
 // ===========================
- 
-   
+
+
    //Make our own TVirtualFFT object (using option "K")
    //Third parameter (option) consists of 3 parts:
    //- transform type:
@@ -275,7 +275,7 @@ void plot_block_fft(Int_t first_event=0, Int_t num_events=1000)
    if (!fft_own) return;
    fft_own->SetPoints(in);
    fft_own->Transform();
- 
+
    //Copy all the output points:
    fft_own->GetPoints(in);
    //Draw the real part of the output
@@ -289,7 +289,7 @@ void plot_block_fft(Int_t first_event=0, Int_t num_events=1000)
    //   hr->GetXaxis()->SetRangeUser(0,300);
 
    std::cout << "Bins in Magnitude Histogram" << hr->GetNbinsX()
- << endl; 
+ << endl;
 
    TString histname(Form("FFTmag%d",plot_counter++));
    TH1D *FFTmag = new TH1D(histname, histname, hr->GetNbinsX(), 0, 1.0/block_period);
@@ -304,12 +304,9 @@ void plot_block_fft(Int_t first_event=0, Int_t num_events=1000)
    FFTmag->Draw();
 
    hr->Delete();
-   
+
    delete fft_own;
    delete [] in;
    // delete [] re_full;
    // delete [] im_full;
 }
-  
-  
-

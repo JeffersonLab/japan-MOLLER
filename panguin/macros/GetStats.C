@@ -64,17 +64,17 @@ void GetStats(){
 
     TLatex text;
     text.SetTextSize(0.08);
-    a1->cd(); 
+    a1->cd();
     Float_t iniY = 0.90, diffY = 0.05;
-    text.DrawLatex(0.10, 0.93, "Stats->for endrun HALOG"); 
+    text.DrawLatex(0.10, 0.93, "Stats->for endrun HALOG");
     text.SetTextSize(0.06);
     gSystem->Exec("echo \"Live ROOTfile last updated at `stat -c %z /adaq1/work1/apar/japanOutput_realtime/prexALL_999999.root`\" > /adaqfs/home/apar/scripts/stats.dat");
     gSystem->Exec("echo \"Stats file last updated at `stat -c %z /adaqfs/home/apar/scripts/stats.dat`\" >> /adaqfs/home/apar/scripts/stats.dat");
     //gSystem->Exec("echo \"Now is `date +\%F\%_H:\%M:\%S.\%N\%_z`\" >> /adaqfs/home/apar/scripts/stats.dat");
 
     for (Int_t j = 0 ; j < Nstats ; j++){
-      text.DrawLatex(0.10, iniY - (j*2.5+1)*diffY, statStr[j]); 
-      text.DrawLatex(0.10, iniY - (j*2.5+2)*diffY, statStrNumbers[j]); 
+      text.DrawLatex(0.10, iniY - (j*2.5+1)*diffY, statStr[j]);
+      text.DrawLatex(0.10, iniY - (j*2.5+2)*diffY, statStrNumbers[j]);
       string = string + "\n\t" + statStr[j] + statStrNumbers[j];
     }
     gSystem->Exec(Form("echo \"%s\" >> /adaqfs/home/apar/scripts/stats.dat",string.Data()));

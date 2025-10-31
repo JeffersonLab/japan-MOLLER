@@ -360,15 +360,15 @@ void QwScaler_Channel<data_mask,data_shift>::ConstructNTupleAndVector(std::uniqu
       numElements += 1; // raw
       if ((~data_mask) != 0) numElements += 1; // header
     }
-    
+
     // Resize vectors once to avoid reallocation
     size_t oldSize = values.size();
     values.resize(oldSize + numElements, 0.0);
     fieldPtrs.reserve(fieldPtrs.size() + numElements);
-    
+
     // Main value
     fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
-    
+
     if (fDataToSave == kMoments) {
       fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_m2").Data()));
       fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_err").Data()));
@@ -380,7 +380,7 @@ void QwScaler_Channel<data_mask,data_shift>::ConstructNTupleAndVector(std::uniqu
 
     if(fDataToSave==kRaw){
       fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_raw").Data()));
-      
+
       if ((~data_mask) != 0){
         fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_header").Data()));
       }
@@ -627,14 +627,14 @@ void VQwScaler_Channel::Ratio(const VQwScaler_Channel &numer, const VQwScaler_Ch
   if (!IsNameEmpty()){
     *this  = numer;
     *this /= denom;
-    
+
     //  Set the raw values to zero.
     fHeader    = 0;
     fValue_Raw = 0;
-    
+
     // Remaining variables
     fGoodEventCount  = denom.fGoodEventCount;
-    fErrorFlag = (numer.fErrorFlag|denom.fErrorFlag);//error code is ORed.    
+    fErrorFlag = (numer.fErrorFlag|denom.fErrorFlag);//error code is ORed.
   }
 }
 
@@ -660,7 +660,7 @@ VQwScaler_Channel& VQwScaler_Channel::operator/= (const VQwScaler_Channel &denom
       fValue   = 0.0;
       fValueM2 = 0.0;
     } else {
-      QwVerbose << "Attempting to divide by zero in " 
+      QwVerbose << "Attempting to divide by zero in "
 		<< GetElementName() << QwLog::endl;
       fValue   = 0.0;
       fValueM2 = 0.0;
@@ -684,7 +684,7 @@ void VQwScaler_Channel::Product(VQwScaler_Channel &numer, VQwScaler_Channel &den
     fValue = numer.fValue * denom.fValue;
     fHeader    = 0;
     fValue_Raw = 0;
-    
+
     // Remaining variables
     fGoodEventCount  = denom.fGoodEventCount;
     fErrorFlag = (numer.fErrorFlag|denom.fErrorFlag);//error code is ORed.
@@ -731,7 +731,7 @@ Int_t VQwScaler_Channel::ApplyHWChecks() {
 
 Bool_t VQwScaler_Channel::ApplySingleEventCuts()
 {
-  //std::cout << "Here in VQwScaler_Channel: "<< std::endl; 
+  //std::cout << "Here in VQwScaler_Channel: "<< std::endl;
   Bool_t status;
   //QwError<<" Single Event Check ! "<<QwLog::endl;
   if (bEVENTCUTMODE>=2){//Global switch to ON/OFF event cuts set at the event cut file
@@ -768,7 +768,7 @@ Bool_t VQwScaler_Channel::ApplySingleEventCuts()
   }
 
 
-  return status;  
+  return status;
 }
 
 void VQwScaler_Channel::IncrementErrorCounters()
@@ -776,7 +776,7 @@ void VQwScaler_Channel::IncrementErrorCounters()
   if ( (kErrorFlag_ZeroHW &  fErrorFlag)==kErrorFlag_ZeroHW){
     fNumEvtsWithHWErrors++; //increment the hw error counter
   }
-  if ( ((kErrorFlag_EventCut_L &  fErrorFlag)==kErrorFlag_EventCut_L) 
+  if ( ((kErrorFlag_EventCut_L &  fErrorFlag)==kErrorFlag_EventCut_L)
        || ((kErrorFlag_EventCut_U &  fErrorFlag)==kErrorFlag_EventCut_U)){
     fNumEvtsWithEventCutsRejected++; //increment the event cut error counter
   }
@@ -789,7 +789,7 @@ void VQwScaler_Channel::AccumulateRunningSum(const VQwScaler_Channel& value, Int
   if(count==0){
     count = value.fGoodEventCount;
   }
-  
+
   // Moment calculations
   Int_t n1 = fGoodEventCount;
   Int_t n2 = count;
@@ -940,5 +940,3 @@ VQwHardwareChannel* QwScaler_Channel<0xffffffff,0>::Clone(VQwDataElement::EDataT
 //  types that are typedef'ed in the header file.
 template class QwScaler_Channel<0x00ffffff,0>;  // QwSIS3801D24_Channel
 template class QwScaler_Channel<0xffffffff,0>;  // QwSIS3801_Channel, etc.
-
-

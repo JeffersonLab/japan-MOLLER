@@ -148,7 +148,7 @@ if(TARGET ${sqlpp}::${sqlpp})
   set(SCHEMA_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
   set(SCHEMA_OUTPUT_FILE ${SCHEMA_OUTPUT_DIR}/QwParitySchema.h)
   set(SCHEMA_INPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Parity/prminput/qwparity_schema.sql)
-  
+
   # Find sqlpp ddl2cpp executable
   find_program(SQLPP_DDL2CPP
     NAMES ddl2cpp ${sqlpp}-ddl2cpp
@@ -189,7 +189,7 @@ if(TARGET ${sqlpp}::${sqlpp})
         VERBATIM
       )
     endif()
-    
+
     # Add a custom target to ensure the schema is generated
     add_custom_target(generate_schema DEPENDS ${SCHEMA_OUTPUT_FILE})
   else()
@@ -221,7 +221,7 @@ set(POST_CONFIGURE_FILE ${CMAKE_BINARY_DIR}/gitinfo.cc)
 include(CMakeGitInfo)
 list(APPEND my_project_sources ${POST_CONFIGURE_FILE})
 #----------------------------------------------------------------------------
-# Version 
+# Version
 #
 configure_file(${PROJECT_SOURCE_DIR}/cmake/templates/version-config.in ${CMAKE_BINARY_DIR}/version-config.h)
 list(APPEND my_project_headers ${CMAKE_BINARY_DIR}/version-config.h)
@@ -237,20 +237,31 @@ report_build_info()
 
 
 #----------------------------------------------------------------------------
+# ET library
+#
+find_package(ET)
+if(NOT ET_FOUND)
+  if(EXISTS ${PROJECT_SOURCE_DIR}/thirdparty/et/CMakeLists.txt)
+    message(STATUS "ET included as subproject")
+    add_subdirectory(${PROJECT_SOURCE_DIR}/thirdparty/et)
+    include_directories(${PROJECT_SOURCE_DIR}/thirdparty/et/src/libsrc)
+    set(ET_FOUND TRUE)
+  else()
+    message(WARNING "ET not available in thirdparty directory. Use 'git clone --recurse-submodules` on new clone or 'git submodule update --init --recursive' on existing repository.")
+  endif()
+endif()
+IF(ET_FOUND OR TARGET et)
+  #  The QwEventBuffer class also needs to see the "__CODA_ET" define,
+  #  not just the EVIO library.
+  add_definitions(-D__CODA_ET)
+ENDIF()
+
+#----------------------------------------------------------------------------
 # evio library
 #
 add_subdirectory(evio)
 include_directories(evio/include)
 
-#----------------------------------------------------------------------------
-# et library
-#
-find_package(ET)
-IF(ET_FOUND)
-  #  The QwEventBuffer class also needs to see the "__CODA_ET" define,
-  #  not just the EVIO library.
-  add_definitions(-D__CODA_ET)
-ENDIF(ET_FOUND)
 
 #----------------------------------------------------------------------------
 # main dictionaries
@@ -303,13 +314,14 @@ target_compile_options(${PROJECT_NAME}
 # TMapFile is broken with C++17 or higher and ROOT < 6.32
 if(${CMAKE_CXX_STANDARD} LESS 17 OR ${ROOT_VERSION} VERSION_GREATER_EQUAL 6.32)
   target_compile_definitions(${PROJECT_NAME} PUBLIC QW_ENABLE_MAPFILE)
+  set(LIBMAPFILE ROOT::New)
 endif()
 
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
     eviowrapper
   PUBLIC
-    ROOT::Core ROOT::Tree ROOT::Hist ROOT::Rint
+    ROOT::Core ROOT::Tree ROOT::Hist ROOT::Rint ${LIBMAPFILE}
     $<TARGET_NAME_IF_EXISTS:ROOT::ROOTNTuple>
     ${Boost_LIBRARIES}
   )
@@ -334,7 +346,7 @@ install(TARGETS ${PROJECT_NAME}
   )
 install(FILES ${my_project_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-# Install generated schema header 
+# Install generated schema header
 if((${sqlpp}_FOUND OR TARGET ${sqlpp}::${sqlpp}) AND SQLPP_DDL2CPP)
   install(FILES ${SCHEMA_OUTPUT_FILE} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif()
@@ -395,4 +407,3 @@ endif()
 # cmake config
 #
 add_subdirectory(cmake)
-

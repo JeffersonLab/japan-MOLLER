@@ -78,7 +78,7 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
     InitializeChannel(name, datatosave);
     SetMollerADCSaturationLimt(8.5);//set the default saturation limit
   };
-  QwMollerADC_Channel(const QwMollerADC_Channel& value): 
+  QwMollerADC_Channel(const QwMollerADC_Channel& value):
     VQwHardwareChannel(value), MQwMockable(value),
     fNumberOfSamples_map(value.fNumberOfSamples_map),
     fSaturationABSLimit(value.fSaturationABSLimit)
@@ -100,7 +100,7 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
     fSaturationABSLimit = value.fSaturationABSLimit;
     *this = value;
   };
-  
+
 
   using VQwHardwareChannel::Clone;
 
@@ -121,7 +121,7 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
     // This will be checked against the no.of samples read by the module
     fNumberOfSamples_map = num_samples_map;
   };
-  
+
   void  ClearEventData() override;
 
   /// Internally generate random event data
@@ -231,7 +231,7 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   Int_t ApplyHWChecks() override; //Check for hardware errors in the devices. This will return the device error code.
 
   void IncrementErrorCounters() override;//update the error counters based on the internal fErrorFlag
-  
+
   /*End*/
 
   void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
@@ -364,14 +364,14 @@ private:
 
 
   // Set of error counters for each HW test.
-  Int_t fErrorCount_HWSat;    ///< check to see ADC channel is saturated 
-  Int_t fErrorCount_sample;   ///< for sample size check                 
+  Int_t fErrorCount_HWSat;    ///< check to see ADC channel is saturated
+  Int_t fErrorCount_sample;   ///< for sample size check
   Int_t fErrorCount_SW_HW;    ///< HW_sum==SW_sum check
   Int_t fErrorCount_Sequence; ///< sequence number check
   Int_t fErrorCount_SameHW;   ///< check to see ADC returning same HW value
   Int_t fErrorCount_ZeroHW;   ///< check to see ADC returning zero
 
-  Int_t fNumEvtsWithEventCutsRejected; ///< Counts the Event cut rejected events 
+  Int_t fNumEvtsWithEventCutsRejected; ///< Counts the Event cut rejected events
 
 
 
@@ -400,8 +400,8 @@ private:
   Bool_t bSequence_number;
 
 private:
-  
-  
+
+
 
 
 
