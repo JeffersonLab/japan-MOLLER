@@ -329,13 +329,13 @@ QwPromptSummary::LoadElementsFromParameterFile(QwParameterFile& parameterfile)
 void
 QwPromptSummary::AddElement(PromptSummaryElement *in)
 {
-  TString name = in->GetName(); name.ToLower();
+  TString name = in->GetElementName(); name.ToLower();
   fElementList[name] = in;
   if(fLocalDebug) {
-    printf("AddElement %s at pos %lu\n", in->GetName().Data(), fElementList.size()-1);
+    printf("AddElement %s at pos %lu\n", in->GetElementName().Data(), fElementList.size()-1);
   }
   if (fElementList.size() == 1) {
-    QwMessage << "First element: " << in->GetName() << " will be reference" << QwLog::endl;
+    QwMessage << "First element: " << in->GetElementName() << " will be reference" << QwLog::endl;
     fReferenceElement = in;
   }
 };
@@ -348,7 +348,7 @@ QwPromptSummary::GetElementByName(TString name)
   if (fElementList.find(name) != fElementList.end()) {
     PromptSummaryElement* an_element = fElementList[name];
     if(fLocalDebug) {
-      std::cout << "System " << an_element->GetName()
+      std::cout << "System " << an_element->GetElementName()
                 << " QwPromptSummary::GetElementByName address at " << an_element << std::endl;
     }
     return an_element;
@@ -396,7 +396,7 @@ QwPromptSummary::PrintCSVHeader(Int_t nEvents, TString start_time, TString end_t
   // Use the first element in the list to determine good events
   if (fReferenceElement) {
     goodEvents = fReferenceElement->GetNumGoodEvents() * fPatternSize;
-    referenceElementName = fReferenceElement->GetName();
+    referenceElementName = fReferenceElement->GetElementName();
   } else {
     QwError << "Warning: No reference element found in QwPromptSummary. Setting goodEvents=0." << QwLog::endl;
   }
