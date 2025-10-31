@@ -1839,7 +1839,8 @@ void QwHelicity::RunPredictor()
 
   Int_t localphase = fPatternPhaseNumber-fMinPatternPhase;//Paul's modifications
 
-  Int_t localbit,indexnum,shiftnum;
+  UInt_t localbit;
+  Int_t indexnum,shiftnum;
   indexnum = TMath::FloorNint(localphase/32.);
   shiftnum = localphase - indexnum*32;
   //std::cout << localphase << " " << indexnum << " " << shiftnum << " "<< fHelicityBitPattern.size() << std::endl;

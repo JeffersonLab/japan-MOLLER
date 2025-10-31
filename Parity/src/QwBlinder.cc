@@ -534,8 +534,8 @@ Int_t QwBlinder::ReadRandomSeed()
   // Initialize random number generator.
   srand(time(0));
   //get  a "random" positive integer
-
-  for (int i = 0; i < length; ++i) {
+  
+  for (size_t i = 0; i < length; ++i) {
     randomchar[i] = alphanum[rand() % strLen];
   }
   fSeedID=rand();
