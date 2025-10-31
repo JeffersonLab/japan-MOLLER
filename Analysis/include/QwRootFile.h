@@ -744,6 +744,11 @@ class QwRootNTuple {
       // Just here for compatibility with the tree interface
     }
 
+    /// Get the model of the RNTuple
+    ROOT::RNTupleModel* GetModel() const { return fModel.get(); }
+    /// Get the writer of the RNTuple
+    ROOT::RNTupleWriter* GetWriter() const { return fWriter.get(); }
+
     /// Get the name of the RNTuple
     const std::string& GetName() const { return fName; }
     /// Get the description of the RNTuple
@@ -924,9 +929,14 @@ class QwRootFile {
 #ifdef HAS_RNTUPLE_SUPPORT
     /// Create a new RNTuple with name and description
     void NewNTuple(const std::string& name, const std::string& desc) {
-      if (IsTreeDisabled(name) || !fEnableRNTuples) return;
+      // TODO this should also check for IsTreeDisabled(name) as in NewTree(),
+      // --disable-trees sets IsTreeDisabled for all possible trees, and that
+      // is required for RNTuples to be enabled
+      if (!fEnableRNTuples) return;
       QwRootNTuple *ntuple = 0;
       if (! HasNTupleByName(name)) {
+        QwMessage << "Creating new RNTuple: " << name << ", " << desc << QwLog::endl;
+        // Create new RNTuple
         ntuple = new QwRootNTuple(name, desc);
         // Initialize the writer with our file
         ntuple->InitializeWriter(fRootFile);
@@ -961,6 +971,14 @@ class QwRootFile {
       }
       return retval;
     }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+    /// Get the RNTuple with name
+    QwRootNTuple* GetNTuple(const std::string& name) {
+      if (! HasNTupleByName(name)) return 0;
+      else return fNTupleByName[name].front();
+    }
+#endif
 
 #ifdef HAS_RNTUPLE_SUPPORT
     /// Fill the RNTuple with name
