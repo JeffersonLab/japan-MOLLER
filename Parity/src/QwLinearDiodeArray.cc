@@ -573,6 +573,10 @@ void QwLinearDiodeArray::Ratio(QwLinearDiodeArray &numer, QwLinearDiodeArray &de
   return;
 }
 
+void QwLinearDiodeArray::Ratio(VQwBPM &numer, VQwBPM &denom)
+{
+  Ratio(*(dynamic_cast<QwLinearDiodeArray*>(&numer)), *(dynamic_cast<QwLinearDiodeArray*>(&denom)));
+}
 
 
 void QwLinearDiodeArray::Scale(Double_t factor)
