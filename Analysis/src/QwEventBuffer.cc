@@ -600,7 +600,7 @@ Int_t QwEventBuffer::GetEtEvent(){
 }
 
 
-Int_t QwEventBuffer::WriteEvent(int* buffer)
+Int_t QwEventBuffer::WriteEvent(int* buffer, int* control, int num_control)
 {
   Int_t status = kFileHandleNotConfigured;
   ResetFlags();
@@ -642,7 +642,7 @@ Int_t QwEventBuffer::WriteEvent(int* buffer)
   if (fEvStreamMode==fEvStreamFile){
     status = WriteFileEvent(buffer);
   } else if (fEvStreamMode==fEvStreamET) {
-    status = WriteEtEvent(buffer);
+    status = WriteEtEvent(buffer, control, num_control);
   }
 
   if (globalEXIT == 1) {
@@ -661,7 +661,7 @@ Int_t QwEventBuffer::WriteFileEvent(int* buffer)
   return status;
 }
 
-Int_t QwEventBuffer::WriteEtEvent(int* buffer)
+Int_t QwEventBuffer::WriteEtEvent(int* buffer, int* control, int num_control)
 {
   Int_t status = CODA_OK;
   //  fEvStream is of inherited type THaCodaData,
@@ -676,7 +676,7 @@ Int_t QwEventBuffer::WriteEtEvent(int* buffer)
     return CODA_ERROR;
   }
   
-  status = ((THaEtClient*)fEvStream)->codaWrite(ubuffer, event_length);
+  status = ((THaEtClient*)fEvStream)->codaWrite(ubuffer, event_length, control, num_control);
   if( status != CODA_OK ) {
     QwError << "WriteEtEvent: codaWrite failed with status " << status << QwLog::endl;
   }
@@ -688,7 +688,7 @@ Int_t QwEventBuffer::WriteEtEvent(int* buffer)
 }
 
 
-Int_t QwEventBuffer::EncodeSubsystemData(QwSubsystemArray &subsystems)
+Int_t QwEventBuffer::EncodeSubsystemData(QwSubsystemArray &subsystems, int* control, int num_control)
 {
   // Encode the data in the elements of the subsystem array
   std::vector<UInt_t> buffer;
@@ -711,7 +711,7 @@ Int_t QwEventBuffer::EncodeSubsystemData(QwSubsystemArray &subsystems)
     codabuffer[k++] = buffer.at(i);
 
   // Now write the buffer to the stream
-  Int_t status = WriteEvent(codabuffer);
+  Int_t status = WriteEvent(codabuffer, control, num_control);
   // delete the buffer
   delete[] codabuffer;
   // and report success or fail
@@ -1288,11 +1288,26 @@ Int_t QwEventBuffer::OpenETStream(TString computer, TString session, int mode,
   Int_t status = CODA_OK;
   if (fEvStreamMode==fEvStreamNull){
 #ifdef __CODA_ET
+    THaEtClient* et_stream{nullptr};
     if (stationname != ""){
-      fEvStream = new THaEtClient(computer, session, mode, stationname.Data());
+      et_stream = new THaEtClient(computer, session, mode, stationname.Data());
     } else {
-      fEvStream = new THaEtClient(computer, session, mode);
+      et_stream = new THaEtClient(computer, session, mode);
     }
+
+    // In ET_STATION_SELECT_MATCH mode each element of the station's selection array is
+    // checked to see if the is equal to -1. If it is, then the corresponding element of the
+    // event's control array is ignored. Thus, if all elements of a station's selection array
+    // are set to -1, the event will NOT be selected. If the first element of the station's
+    // selection array is not -1 but is equal to the first element of the event's control array,
+    // then the event is selected. Likewise if the second element of the selection array is
+    // not -1 and if the bitwise AND (&) of the select and control second elements is true,
+    // then the event is selected.
+    const std::uint32_t station_mask = 0x3fffffff;
+    int selectwords[ET_STATION_SELECT_INTS] = {-1, -1 ,-1, -1, -1, static_cast<int>(station_mask)};
+    et_stream->codaSetSelect(selectwords);
+
+    fEvStream = et_stream;
     fEvStreamMode = fEvStreamET;
 #endif
   }
