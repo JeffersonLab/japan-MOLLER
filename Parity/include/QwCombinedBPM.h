@@ -124,7 +124,7 @@ class QwCombinedBPM : public VQwBPM {
   void UpdateErrorFlag(const VQwBPM *ev_error) override;
 
   // Polymorphic burp-failure check when called via VQwBPM*
-  Bool_t  CheckForBurpFail(const VQwDataElement *ev_error);
+  Bool_t  CheckForBurpFail(const VQwDataElement *ev_error) override;
 
 
   void    SetBPMForCombo(const VQwBPM* bpm, Double_t charge_weight,  Double_t x_weight, Double_t y_weight,Double_t sumqw) override;
@@ -187,8 +187,8 @@ class QwCombinedBPM : public VQwBPM {
 
 
 #ifdef __USE_DATABASE__
-  std::vector<QwDBInterface> GetDBEntry();
-  std::vector<QwErrDBInterface> GetErrDBEntry();
+  std::vector<QwDBInterface> GetDBEntry() override;
+  std::vector<QwErrDBInterface> GetErrDBEntry() override;
 #endif // __USE_DATABASE__
 
  protected:

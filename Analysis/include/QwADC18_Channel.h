@@ -257,7 +257,7 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
 #ifdef __USE_DATABASE__
   // Error Counters exist in QwADC18_Channel, not in VQwHardwareChannel
   //
-  void AddErrEntriesToList(std::vector<QwErrDBInterface> &row_list);
+  void AddErrEntriesToList(std::vector<QwErrDBInterface> &row_list) override;
 #endif
 
  protected:
@@ -297,9 +297,6 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   /// Pointer to the running sum for this channel
   QwADC18_Channel* fRunningSum;
 
-  /// Pointer to the DAC channel for this channel
-  QwADC18_Channel* fDAC;
-
   /*! \name ADC Calibration                    */
   // @{
   static const Double_t kADC18_VoltsPerBit;
@@ -331,7 +328,6 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   Int_t fADC_Same_NumEvt; ///< Keep track of how many events with same ADC value returned
   Int_t fSequenceNo_Prev; ///< Keep the sequence number of the last event
   Int_t fSequenceNo_Counter; ///< Internal counter to keep track of the sequence number
-  Double_t fPrev_HardwareBlockSum; ///< Previous Module-based sum of the four sub-blocks
 
 
 
@@ -339,14 +335,5 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
 
 
   const static Bool_t bDEBUG=kFALSE;///<debugging display purposes
-
-  ///<For ADC18 data element trimming uses
-  Bool_t bHw_sum;
-  Bool_t bHw_sum_raw;
-  Bool_t bBlock;
-  Bool_t bBlock_raw;
-  Bool_t bNum_samples;
-  Bool_t bDevice_Error_Code;
-  Bool_t bSequence_number;
 
 };

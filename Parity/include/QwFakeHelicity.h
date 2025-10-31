@@ -32,6 +32,9 @@ class QwFakeHelicity: public QwHelicity {
 
     ~QwFakeHelicity() override { };
 
+    /// Inherit assignment operator on base class
+    using QwHelicity::operator=;
+
     void    ClearEventData() override;
     Bool_t  IsGoodHelicity() override;
     void    ProcessEvent() override;

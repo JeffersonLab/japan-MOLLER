@@ -111,6 +111,7 @@ class QwLinearDiodeArray : public VQwBPM {
   void    SetSubElementPedestal(Int_t j, Double_t value) override;
   void    SetSubElementCalibrationFactor(Int_t j, Double_t value) override;
 
+  void    Ratio(VQwBPM &numer, VQwBPM &denom) override;
   void    Ratio(QwLinearDiodeArray &numer, QwLinearDiodeArray &denom);
   void    Scale(Double_t factor) override;
 
@@ -143,8 +144,8 @@ class QwLinearDiodeArray : public VQwBPM {
 
 
 
-  std::vector<QwDBInterface> GetDBEntry();
-  std::vector<QwErrDBInterface> GetErrDBEntry();
+  std::vector<QwDBInterface> GetDBEntry() override;
+  std::vector<QwErrDBInterface> GetErrDBEntry() override;
 
   void    MakeLinearArrayList();
 

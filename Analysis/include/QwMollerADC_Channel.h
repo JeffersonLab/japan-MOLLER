@@ -292,7 +292,7 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
 #ifdef __USE_DATABASE__
   // Error Counters exist in QwMollerADC_Channel, not in VQwHardwareChannel
   //
-  void AddErrEntriesToList(std::vector<QwErrDBInterface> &row_list);
+  void AddErrEntriesToList(std::vector<QwErrDBInterface> &row_list) override;
 #endif
 
  protected:
@@ -343,7 +343,6 @@ private:
   Long64_t fBlockSumSq_raw[5];
   Int_t fBlock_min[5];
   Int_t fBlock_max[5];
-  Short_t fBlock_numSamples[5];
   // @}
 
   /*! \name Event data members---Potentially calibrated values*/

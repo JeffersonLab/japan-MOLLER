@@ -11,7 +11,7 @@
 #include "QwSubsystemArrayParity.h"
 #include "QwParameterFile.h"
 
-REGISTER_SUBSYSTEM_FACTORY(QwCombinerSubsystem);
+//REGISTER_SUBSYSTEM_FACTORY(QwCombinerSubsystem);
 
 
 QwCombinerSubsystem::~QwCombinerSubsystem()
@@ -193,25 +193,24 @@ void QwCombinerSubsystem::UpdateErrorFlag(const VQwSubsystem *ev_error){
 
 
 
-Int_t QwCombinerSubsystem::LoadChannelMap(TString)
+Int_t QwCombinerSubsystem::LoadChannelMap(const TString&)
 {
   Int_t sample = 0;
   return sample;
 }
 
 
-Int_t QwCombinerSubsystem::LoadInputParameters(TString)
+Int_t QwCombinerSubsystem::LoadInputParameters(const TString&)
 {
   Int_t sample = 0;
   return sample;
 }
 
 
-Int_t QwCombinerSubsystem::LoadEventCuts(TString)
+Int_t QwCombinerSubsystem::LoadEventCuts(const TString&)
 {
   Int_t sample = 0;
   return sample;
-
 }
 
 Int_t QwCombinerSubsystem::ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words)

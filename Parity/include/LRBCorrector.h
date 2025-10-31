@@ -27,7 +27,7 @@ class LRBCorrector : public VQwDataHandler, public MQwDataHandlerCloneable<LRBCo
 
     void ParseConfigFile(QwParameterFile& file) override;
 
-    Int_t LoadChannelMap(const std::string& mapfile) override;
+    Int_t LoadChannelMap(const TString& mapfile) override;
 
     Int_t ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff) override;
 
@@ -67,3 +67,5 @@ class LRBCorrector : public VQwDataHandler, public MQwDataHandlerCloneable<LRBCo
     std::map<Short_t,std::vector<std::vector<Double_t>>> fSensitivity;
 
 };
+
+REGISTER_DATA_HANDLER_FACTORY(LRBCorrector);

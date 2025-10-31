@@ -114,6 +114,7 @@ class QwBPMCavity : public VQwBPM {
   void    SetSubElementPedestal(Int_t j, Double_t value) override;
   void    SetSubElementCalibrationFactor(Int_t j, Double_t value) override;
 
+  void    Ratio(VQwBPM &numer, VQwBPM &denom) override;
   void    Ratio(QwBPMCavity &numer, QwBPMCavity &denom);
   void    Scale(Double_t factor) override;
 
@@ -144,8 +145,8 @@ class QwBPMCavity : public VQwBPM {
 #endif
 
 
-  std::vector<QwDBInterface> GetDBEntry();
-  std::vector<QwErrDBInterface> GetErrDBEntry();
+  std::vector<QwDBInterface> GetDBEntry() override;
+  std::vector<QwErrDBInterface> GetErrDBEntry() override;
 
   protected:
   VQwHardwareChannel* GetSubelementByName(TString ch_name) override;

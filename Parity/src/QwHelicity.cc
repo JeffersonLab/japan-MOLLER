@@ -34,7 +34,7 @@ extern QwHistogramHelper gQwHists;
 //**************************************************//
 
 // Register this subsystem with the factory
-REGISTER_SUBSYSTEM_FACTORY(QwHelicity);
+//REGISTER_SUBSYSTEM_FACTORY(QwHelicity);
 
 
 /// Default helicity bit pattern of 0x69 represents a -++-+--+ octet
@@ -416,7 +416,7 @@ Int_t QwHelicity::ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_
   return 0;
 }
 
-Int_t QwHelicity::LoadInputParameters(TString pedestalfile)
+Int_t QwHelicity::LoadInputParameters(const TString& pedestalfile)
 {
   return 0;
 }
@@ -881,7 +881,7 @@ void QwHelicity::Print() const
 }
 
 
-Int_t QwHelicity::LoadChannelMap(TString mapfile)
+Int_t QwHelicity::LoadChannelMap(const TString& mapfile)
 {
   Bool_t ldebug=kFALSE;
 
@@ -1083,7 +1083,7 @@ std::cout << fHelicityBitPattern.size() << std::endl;
 }
 
 
-Int_t QwHelicity::LoadEventCuts(TString filename){
+Int_t QwHelicity::LoadEventCuts(const TString& filename){
   return 0;
 }
 
@@ -1171,13 +1171,14 @@ void QwHelicity::SetFirstBits(UInt_t nbits, UInt_t seed)
   if (nbits != 24)
 	throw std::invalid_argument("SetFirstBits currently only supports 24 bits.");
   // Allocate nbits+1 elements as GetRandomSeed expects Fortran indexing (1-nbits)
-  UShort_t firstbits[nbits+1];  // NB firstbits[0] is never used
+  UShort_t* firstbits = new UShort_t[nbits+1];  // NB firstbits[0] is never used
   for (unsigned int i = 0; i < nbits+1; i++) firstbits[i] = (seed >> i) & 0x1;
   // Set delayed seed
   iseed_Delayed = GetRandomSeed(firstbits);
   // Progress actual seed by the helicity delay
   iseed_Actual = iseed_Delayed;
   for (int i = 0; i < fHelicityDelay; i++) GetRandbit(iseed_Actual);
+  delete[] firstbits;
 }
 
 void QwHelicity::SetHistoTreeSave(const TString &prefix)
@@ -1839,7 +1840,8 @@ void QwHelicity::RunPredictor()
 
   Int_t localphase = fPatternPhaseNumber-fMinPatternPhase;//Paul's modifications
 
-  Int_t localbit,indexnum,shiftnum;
+  UInt_t localbit;
+  Int_t indexnum,shiftnum;
   indexnum = TMath::FloorNint(localphase/32.);
   shiftnum = localphase - indexnum*32;
   //std::cout << localphase << " " << indexnum << " " << shiftnum << " "<< fHelicityBitPattern.size() << std::endl;

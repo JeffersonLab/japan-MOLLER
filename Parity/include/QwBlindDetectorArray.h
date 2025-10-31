@@ -52,7 +52,6 @@ class QwBlindDetectorArray:
  public:
 
   /// Constructor with name
-
   QwBlindDetectorArray(const TString& name)
   : VQwSubsystem(name), VQwSubsystemParity(name), VQwDetectorArray(name) {};
 
@@ -64,6 +63,9 @@ class QwBlindDetectorArray:
 
   /// Virtual destructor
   ~QwBlindDetectorArray() override{};
+
+  /// Inherit assignment operator on base class
+  using VQwDetectorArray::operator=;
 
   public:
 
@@ -80,3 +82,5 @@ class QwBlindDetectorArray:
 #endif // HAS_RNTUPLE_SUPPORT
 
 };
+
+REGISTER_SUBSYSTEM_FACTORY(QwBlindDetectorArray);
