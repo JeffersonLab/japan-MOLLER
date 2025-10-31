@@ -100,3 +100,39 @@ Double_t MQwMockable::GetRandomValue(){
     random_variable = fNormalRandomVariable();
   return random_variable;
 }
+
+std::valarray<Double_t> MQwMockable::GetRandomValue(size_t length){
+  std::valarray<Double_t> random_values(length);
+  if (fUseExternalRandomVariable) {
+    // Check if we have an external random variable array set
+    if (fExternalRandomVariableArray.size() > 0) {
+      // Use external random variable array
+      if (fExternalRandomVariableArray.size() >= length) {
+        // Array has enough elements, use a slice of the specified length
+        random_values = fExternalRandomVariableArray[std::slice(0, length, 1)];
+      } else {
+        // Array is smaller than requested length, copy what we have and repeat the last value
+        for (size_t i = 0; i < length; ++i) {
+          if (i < fExternalRandomVariableArray.size()) {
+            random_values[i] = fExternalRandomVariableArray[i];
+          } else {
+            random_values[i] = fExternalRandomVariableArray[fExternalRandomVariableArray.size() - 1];
+          }
+        }
+      }
+    } else {
+      // Fall back to generating independent random values for each element
+      // instead of using the same scalar value for all elements
+      for (size_t i = 0; i < length; ++i) {
+        random_values[i] = fNormalRandomVariable();
+      }
+    }
+  } else {
+    // Generate independent random values for each element
+    for (size_t i = 0; i < length; ++i) {
+      random_values[i] = fNormalRandomVariable();
+    }
+  }
+  return random_values;
+}
+
