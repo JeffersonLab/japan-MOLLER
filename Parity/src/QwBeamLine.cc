@@ -2130,6 +2130,7 @@ VQwSubsystem&  QwBeamLine::operator=  (VQwSubsystem *value)
   if(Compare(value))
     {
 
+      VQwSubsystem::operator=(value);
       QwBeamLine* input = dynamic_cast<QwBeamLine*>(value);
 
       for(size_t i=0;i<input->fClock.size();i++)
