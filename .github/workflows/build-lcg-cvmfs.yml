@@ -114,12 +114,18 @@ jobs:
             echo "::endgroup::"
 
             echo "::group::Compilation with ccache"
+            if [ "${{ matrix.submodules }}" == "true" ] ; then
+              SQLPP_OPTIONS="\
+                -DBUILD_MARIADB_CONNECTOR=ON \
+                -DBUILD_MYSQL_CONNECTOR=ON \
+                -DBUILD_POSTGRESQL_CONNECTOR=ON \
+                -DBUILD_SQLITE3_CONNECTOR=ON"
+            else
+              SQLPP_OPTIONS=""
+            fi
             cmake -Bbuild -S. \
               -Wdev -Werror=dev \
-              -DBUILD_MARIADB_CONNECTOR=ON \
-              -DBUILD_MYSQL_CONNECTOR=ON \
-              -DBUILD_POSTGRESQL_CONNECTOR=ON \
-              -DBUILD_SQLITE3_CONNECTOR=ON \
+              ${SQLPP_OPTIONS} \
               -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache \
               -DCMAKE_INSTALL_PREFIX=install \
               -DCMAKE_CXX_FLAGS="${{ matrix.cxxflags }}" 2>&1 | tee cmake.txt
