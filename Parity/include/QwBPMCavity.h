@@ -143,9 +143,10 @@ class QwBPMCavity : public VQwBPM {
   void    FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif
 
-
+#ifdef __USE_DATABASE__
   std::vector<QwDBInterface> GetDBEntry() override;
   std::vector<QwErrDBInterface> GetErrDBEntry() override;
+#endif
 
   protected:
   VQwHardwareChannel* GetSubelementByName(TString ch_name) override;
