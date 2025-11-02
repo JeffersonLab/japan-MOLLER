@@ -17,6 +17,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Build without submodules
+          - release: "LCG_106"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc13"
+            opt: "dbg"
+            cxxflags: ""
+            submodules: false
           # Standard builds without sanitizers
           - release: "LCG_106"
             arch: "x86_64"
@@ -24,28 +32,32 @@ jobs:
             compiler: "gcc13"
             opt: "opt"
             cxxflags: "-g -pg"
+            submodules: true
           - release: "LCG_107"
             arch: "x86_64"
             os: "el9"
             compiler: "gcc14"
             opt: "opt"
             cxxflags: ""
+            submodules: true
           - release: "LCG_108"
             arch: "x86_64"
             os: "el9"
             compiler: "clang19"
             opt: "opt"
             cxxflags: ""
+            submodules: true
           - release: "LCG_108"
             arch: "x86_64"
             os: "el9"
             compiler: "gcc15"
             opt: "opt"
             cxxflags: ""
+            submodules: true
     steps:
       - uses: actions/checkout@v5
         with:
-          submodules: true
+          submodules: ${{ matrix.submodules }}  
           fetch-depth: 0
       - uses: cvmfs-contrib/github-action-cvmfs@v5
         with:
