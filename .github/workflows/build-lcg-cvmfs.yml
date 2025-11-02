@@ -114,7 +114,7 @@ jobs:
             echo "::endgroup::"
 
             echo "::group::Compilation with ccache"
-            if [ "${{ matrix.submodules }}" == "true" ] ; then
+            if [[ "${{ matrix.submodules }}" == "true" ]] ; then
               SQLPP_OPTIONS="\
                 -DBUILD_MARIADB_CONNECTOR=ON \
                 -DBUILD_MYSQL_CONNECTOR=ON \
