@@ -219,7 +219,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v5
         with:
-          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: build.tar.zst
           retention-days: 7
           if-no-files-found: error
@@ -227,7 +227,7 @@ jobs:
       - name: Upload profiling analysis
         uses: actions/upload-artifact@v5
         with:
-          name: gprof-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: gprof-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: |
             qwparity.txt
           retention-days: 7
@@ -236,7 +236,7 @@ jobs:
       - name: Upload prompt summary
         uses: actions/upload-artifact@v5
         with:
-          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: |
             trees/summary_*.txt
             rntuples/summary_*.txt
@@ -246,7 +246,7 @@ jobs:
       - name: Upload database dumps
         uses: actions/upload-artifact@v5
         with:
-          name: qwparity-sql-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: qwparity-sql-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: |
             qwparity-*.sql
           retention-days: 7
@@ -255,7 +255,7 @@ jobs:
       - name: Upload regression alias definitions
         uses: actions/upload-artifact@v5
         with:
-          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: |
             *regalias*.C
           retention-days: 7
@@ -267,7 +267,7 @@ jobs:
         with:
           workflow: build-lcg-cvmfs.yml
           branch: ${{ github.event.pull_request.base.ref }}
-          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: ./target
           if_no_artifact_found: warn
 
@@ -277,7 +277,7 @@ jobs:
         with:
           workflow: build-lcg-cvmfs.yml
           branch: ${{ github.event.pull_request.base.ref }}
-          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: ./target
           if_no_artifact_found: warn
 
@@ -362,7 +362,7 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v6
         with:
-          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: .
       - name: Uncompress build artifact
         run: tar -xaf build.tar.zst
@@ -416,7 +416,7 @@ jobs:
       - name: Upload callgrind analysis
         uses: actions/upload-artifact@v5
         with:
-          name: callgrind-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: callgrind-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: |
             callgrind*.txt
           retention-days: 7
