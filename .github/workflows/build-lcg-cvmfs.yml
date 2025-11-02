@@ -132,7 +132,7 @@ jobs:
             build/qwmockdatagenerator -r 4 -e 1:20000 \
               --config qwparity_simple.conf \
               --detectors mock_newdets.map \
-              --data .
+              --data . | tee qwmockdataenerator.log
             echo "::endgroup::"
 
             echo "::group::Create database (sqlite3)"
@@ -162,7 +162,7 @@ jobs:
               --write-promptsummary \
               --QwDatabase.accesslevel RW \
               --QwDatabase.dbtype sqlite3 \
-              --QwDatabase.dbname qwparity.db
+              --QwDatabase.dbname qwparity.db | tee qwparity-trees.log
             echo "::endgroup::"
 
             if printf "%s\n%s" 6.36.00 $(root-config --version) | sort -V -C ; then
@@ -181,7 +181,7 @@ jobs:
                 --QwDatabase.dbtype sqlite3 \
                 --QwDatabase.dbname qwparity.db \
                 --enable-rntuples \
-                --disable-trees
+                --disable-trees | tee qwparity-rntuples.log
               echo "::endgroup::"
             fi
 
@@ -192,7 +192,7 @@ jobs:
 
             echo "::group:: Profile analysis"
             if [ -f gmon.out ] ; then
-              gprof build/qwparity | tee qwparity.txt
+              gprof build/qwparity | tee qwparity-profile.txt
             fi
             echo "::endgroup::"
 
@@ -206,12 +206,22 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
+      - name: Upload logs
+        uses: actions/upload-artifact@v5
+        with:
+          name: logs-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          path: |
+            qwmockdatagenerator.log
+            qwparity-*.log
+          retention-days: 7
+          if-no-files-found: ignore
+
       - name: Upload profiling analysis
         uses: actions/upload-artifact@v5
         with:
           name: gprof-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
           path: |
-            qwparity.txt
+            qwparity-profile.txt
           retention-days: 7
           if-no-files-found: ignore
 
