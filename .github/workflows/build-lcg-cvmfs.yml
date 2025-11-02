@@ -17,14 +17,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Build without submodules
-          - release: "LCG_106"
-            arch: "x86_64"
-            os: "el9"
-            compiler: "gcc13"
-            opt: "dbg"
-            cxxflags: ""
-            submodules: false
           # Standard builds without sanitizers
           - release: "LCG_106"
             arch: "x86_64"
@@ -54,6 +46,14 @@ jobs:
             opt: "opt"
             cxxflags: ""
             submodules: true
+          # Build without submodules
+          - release: "LCG_108"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc15"
+            opt: "dbg"
+            cxxflags: ""
+            submodules: false
     steps:
       - uses: actions/checkout@v5
         with:
