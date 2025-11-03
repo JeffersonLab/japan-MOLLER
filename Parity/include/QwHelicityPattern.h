@@ -273,9 +273,9 @@ class QwHelicityPattern {
   QwSubsystemArrayParity fPositiveHelicitySum;
   QwSubsystemArrayParity fNegativeHelicitySum;
 
-  Long_t fLastWindowNumber;
-  Long_t fLastPatternNumber;
-  Int_t  fLastPhaseNumber;
+  ULong_t fLastWindowNumber;
+  ULong_t fLastPatternNumber;
+  UInt_t  fLastPhaseNumber;
 
   size_t  fNextPair;
   Bool_t fPairIsGood;
