@@ -24,28 +24,40 @@ jobs:
             compiler: "gcc13"
             opt: "opt"
             cxxflags: "-g -pg"
+            submodules: true
           - release: "LCG_107"
             arch: "x86_64"
             os: "el9"
             compiler: "gcc14"
             opt: "opt"
             cxxflags: ""
+            submodules: true
           - release: "LCG_108"
             arch: "x86_64"
             os: "el9"
             compiler: "clang19"
             opt: "opt"
             cxxflags: ""
+            submodules: true
           - release: "LCG_108"
             arch: "x86_64"
             os: "el9"
             compiler: "gcc15"
             opt: "opt"
             cxxflags: ""
+            submodules: true
+          # Build without submodules
+          - release: "LCG_108"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "gcc15"
+            opt: "dbg"
+            cxxflags: ""
+            submodules: false
     steps:
       - uses: actions/checkout@v5
         with:
-          submodules: true
+          submodules: ${{ matrix.submodules }}  
           fetch-depth: 0
       - uses: cvmfs-contrib/github-action-cvmfs@v5
         with:
@@ -102,12 +114,18 @@ jobs:
             echo "::endgroup::"
 
             echo "::group::Compilation with ccache"
+            if [[ "${{ matrix.submodules }}" == "true" ]] ; then
+              SQLPP_OPTIONS="\
+                -DBUILD_MARIADB_CONNECTOR=ON \
+                -DBUILD_MYSQL_CONNECTOR=ON \
+                -DBUILD_POSTGRESQL_CONNECTOR=ON \
+                -DBUILD_SQLITE3_CONNECTOR=ON"
+            else
+              SQLPP_OPTIONS=""
+            fi
             cmake -Bbuild -S. \
               -Wdev -Werror=dev \
-              -DBUILD_MARIADB_CONNECTOR=ON \
-              -DBUILD_MYSQL_CONNECTOR=ON \
-              -DBUILD_POSTGRESQL_CONNECTOR=ON \
-              -DBUILD_SQLITE3_CONNECTOR=ON \
+              ${SQLPP_OPTIONS} \
               -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache \
               -DCMAKE_INSTALL_PREFIX=install \
               -DCMAKE_CXX_FLAGS="${{ matrix.cxxflags }}" 2>&1 | tee cmake.txt
@@ -201,7 +219,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v5
         with:
-          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: build.tar.zst
           retention-days: 7
           if-no-files-found: error
@@ -209,7 +227,7 @@ jobs:
       - name: Upload profiling analysis
         uses: actions/upload-artifact@v5
         with:
-          name: gprof-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: gprof-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: |
             qwparity.txt
           retention-days: 7
@@ -218,7 +236,7 @@ jobs:
       - name: Upload prompt summary
         uses: actions/upload-artifact@v5
         with:
-          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: |
             trees/summary_*.txt
             rntuples/summary_*.txt
@@ -228,7 +246,7 @@ jobs:
       - name: Upload database dumps
         uses: actions/upload-artifact@v5
         with:
-          name: qwparity-sql-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: qwparity-sql-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: |
             qwparity-*.sql
           retention-days: 7
@@ -237,7 +255,7 @@ jobs:
       - name: Upload regression alias definitions
         uses: actions/upload-artifact@v5
         with:
-          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: |
             *regalias*.C
           retention-days: 7
@@ -249,7 +267,7 @@ jobs:
         with:
           workflow: build-lcg-cvmfs.yml
           branch: ${{ github.event.pull_request.base.ref }}
-          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: ./target
           if_no_artifact_found: warn
 
@@ -259,7 +277,7 @@ jobs:
         with:
           workflow: build-lcg-cvmfs.yml
           branch: ${{ github.event.pull_request.base.ref }}
-          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: ./target
           if_no_artifact_found: warn
 
@@ -344,7 +362,7 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v6
         with:
-          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: .
       - name: Uncompress build artifact
         run: tar -xaf build.tar.zst
@@ -398,7 +416,7 @@ jobs:
       - name: Upload callgrind analysis
         uses: actions/upload-artifact@v5
         with:
-          name: callgrind-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: callgrind-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: |
             callgrind*.txt
           retention-days: 7
