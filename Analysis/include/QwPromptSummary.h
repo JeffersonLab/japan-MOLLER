@@ -37,8 +37,8 @@ class PromptSummaryElement :  public TObject
   void FillData(Double_t yield, Double_t yield_err, Double_t yield_width, TString yield_unit,
 		Double_t asym_diff, Double_t asym_diff_err,  Double_t asym_diff_width, TString asym_diff_unit);
 
-  void    SetName (const TString in)  {fElementName=in;};
-  TString GetName ()                  {return fElementName;};
+  void    SetElementName (const TString in)  {fElementName=in;};
+  TString GetElementName ()                  {return fElementName;};
 
 
   // Yield      : fHardwareBlockSumM2
