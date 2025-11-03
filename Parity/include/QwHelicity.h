@@ -50,12 +50,7 @@ class QwHelicity: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicity
     return kFALSE;
   };
 
-//  void IncrementErrorCounters();
-//  void PrintErrorCounters() const;// report number of events failed due to HW and event cut failure, derived from VQwSubsystemParity
-//  UInt_t  GetEventcutErrorFlag();//return the error flag
-  //update the error flag in the subsystem level from the top level routines related to stability checks. This will uniquely update the errorflag at each channel based on the error flag in the corresponding channel in the ev_error subsystem
-  void UpdateErrorFlag(const VQwSubsystem *ev_error){
-  };
+  void UpdateErrorFlag(const VQwSubsystem *ev_error){ };
 
   Int_t  ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id,
 				   UInt_t* buffer, UInt_t num_words);
@@ -77,7 +72,6 @@ class QwHelicity: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicity
   UInt_t GetRandomSeedDelayed() { return iseed_Delayed; };
 
   void   PredictHelicity();
-//  void   RunPredictor();
   void   SetHelicityDelay(Int_t delay);
   void   SetHelicityBitPattern(TString hex);
 
@@ -101,19 +95,14 @@ class QwHelicity: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicity
 
   //the following functions do nothing really : adding and subtracting helicity doesn't mean anything
   VQwSubsystem& operator-= (VQwSubsystem *value) {return *this;};
-//  void  Scale(Double_t factor) {return;};
   void  Ratio(VQwSubsystem *numer, VQwSubsystem *denom);
-  // end of "empty" functions
-
   void  AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
   //remove one entry from the running sums for devices
   void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF){
   };
-//  void  CalculateRunningAverage() { };
 
   using VQwSubsystem::ConstructHistograms;
   void  ConstructHistograms(TDirectory *folder, TString &prefix);
-//  void  FillHistograms();
 
   using VQwSubsystem::ConstructBranchAndVector;
 
@@ -128,7 +117,6 @@ class QwHelicity: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicity
 
   virtual Bool_t IsGoodHelicity();
 
-/////
  protected:
   void CheckPatternNum(VQwSubsystem *value);
   void MergeCounters(VQwSubsystem *value);
@@ -163,53 +151,10 @@ class QwHelicity: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicity
   std::vector <QwWord> fWord;
   std::vector < std::pair<Int_t, Int_t> > fWordsPerSubbank;  // The indices of the first & last word in each subbank
 
-//  Int_t fHelicityDecodingMode;
-
-//  Int_t kUserbit;
-//  Int_t kInputRegister, kPatternCounter, kMpsCounter, kPatternPhase;
-
-//  UInt_t kEventTypeHelPlus, kEventTypeHelMinus;
-
-  Int_t fEventNumberOld, fEventNumber;
-  Int_t fPatternPhaseNumberOld, fPatternPhaseNumber;
-  Int_t fPatternNumberOld, fPatternNumber;
-  Int_t fPatternSeed;
-  Int_t fActualPatternPolarity;   ///<  True polarity of the current pattern
-  Int_t fDelayedPatternPolarity;  ///<  Reported polarity of the current pattern
-  Int_t fPreviousPatternPolarity; ///<  True polarity of the previous pattern.
-  Int_t fHelicityReported, fHelicityActual, fHelicityDelayed;
-  // reported is what is registered in the coda file (it is the actual beam helicity fHelicityDelay pattern before this event)
-  // actual is the helicity of the beam for this event
-  // delayed is the expected reported helicity predicted by the random generator
-  Bool_t fHelicityBitPlus;
-  Bool_t fHelicityBitMinus;
-  Bool_t fGoodHelicity;
-  Bool_t fGoodPattern;
-
-  Int_t fHistoType;
-  //allow one to select which types of histograms are created and filled
- // void SetHistoTreeSave(const TString &prefix);
-
-  static const Bool_t kDEBUG=kFALSE;
-  // local helicity is a special mode for encoding helicity info
-  // it is not the fullblown helicity encoding we want to use for the main
   // data taking. For example this was used during the injector data taking
   // in winter 2008-09 injector tests
   static const Int_t kUndefinedHelicity= -9999;
 
-
- /*  Ntuple array indices */
-  size_t fTreeArrayIndex;
-  size_t fTreeArrayNumEntries;
-  UInt_t n_ranbits; //counts how many ranbits we have collected
-  UInt_t iseed_Actual; //stores the random seed for the helicity predictor
-  UInt_t iseed_Delayed;
-  //stores the random seed to predict the reported helicity
-  Int_t fHelicityDelay;
-  //number of events the helicity is delayed by before being reported
-  //static const Int_t MaxPatternPhase =4;
-  Int_t fMaxPatternPhase;
-  Int_t fMinPatternPhase;
   Bool_t IsGoodPatternNumber();
   Bool_t IsGoodEventNumber();
   Bool_t MatchActualHelicity(Int_t actual);
@@ -226,31 +171,6 @@ class QwHelicity: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicity
   void   ResetPredictor();
 
   Bool_t Compare(VQwSubsystem *source);
-
-  Int_t  fRandBits;//sets the random seed size 24bit/30bits
-  Bool_t fUsePredictor;
-  Bool_t fHelicityInfoOK;
-  Int_t  fPatternPhaseOffset;
-
-  Bool_t fIgnoreHelicity;
-
-  UInt_t fEventType;
-
-
-  Int_t fEventNumberFirst;
-  Int_t fPatternNumberFirst;
-
-  //  Error counters
-  Int_t  fNumMissedGates;      // Total number of missed events
-  Int_t  fNumMissedEventBlocks; // Number of groups of missed events
-  Int_t  fNumMultSyncErrors;    // Number of errors reading the multiplet sync
-  Int_t  fNumHelicityErrors;    // Number of errors predicting the helicity
-
-  UInt_t fErrorFlag;
-
-  /// Flag to disable the printing os missed MPS error messags during
-  /// online running
-  Bool_t fSuppressMPSErrorMsgs;
 
 };
 

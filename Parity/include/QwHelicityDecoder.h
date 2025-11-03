@@ -119,10 +119,10 @@ class QwHelicityDecoder: public QwHelicityBase, public MQwSubsystemCloneable<QwH
 
   static const std::vector<UInt_t> kDefaultHelicityBitPattern;
 
-  std::vector<UInt_t> fHelicityBitPattern;
+//  std::vector<UInt_t> fHelicityBitPattern;
 
-  std::vector <QwWord> fWord;
-  std::vector < std::pair<Int_t, Int_t> > fWordsPerSubbank;  // The indices of the first & last word in each subbank
+//  std::vector <QwWord> fWord;
+//  std::vector < std::pair<Int_t, Int_t> > fWordsPerSubbank;  // The indices of the first & last word in each subbank
 
   void SetHistoTreeSave(const TString &prefix);
 
@@ -136,19 +136,8 @@ class QwHelicityDecoder: public QwHelicityBase, public MQwSubsystemCloneable<QwH
   static const Int_t kUndefinedHelicity= -9999;
 
 
- /*  Ntuple array indices */
-  size_t fTreeArrayNumEntries;
-
   Bool_t Compare(VQwSubsystem *source);
 
- //  Error counters
-  Int_t  fNumMissedGates;      // Total number of missed events
-  Int_t  fNumMissedEventBlocks; // Number of groups of missed events
-  Int_t  fNumMultSyncErrors;    // Number of errors reading the multiplet sync
-  Int_t  fNumHelicityErrors;    // Number of errors predicting the helicity
-
-  UInt_t fErrorFlag;
-  Bool_t fSuppressMPSErrorMsgs;
 
 //----------------------------------
 

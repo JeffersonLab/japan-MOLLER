@@ -135,11 +135,13 @@ QwHelicityPattern::QwHelicityPattern(QwSubsystemArrayParity &event, const TStrin
     fIsDataLoaded(false)
 {
   // Retrieve the helicity subsystem to query for
-  std::vector<VQwSubsystem*> subsys_helicity = event.GetSubsystemByType("QwHelicityDecoder");
+  std::vector<VQwSubsystem*> subsys_helicity = event.GetSubsystemByType("QwHelicity");
+  if (subsys_helicity.size()==0) {
+  subsys_helicity = event.GetSubsystemByType("QwHelicityDecoder");
+  }; 
   if (subsys_helicity.size() > 0) {
 
     // Take the first helicity subsystem
-    //    fHelicitySubsystem = dynamic_cast<QwHelicity*>(subsys_helicity.at(0));
     QwHelicityBase* helicity = dynamic_cast<QwHelicityBase*>(subsys_helicity.at(0));
 
     // Get the maximum pattern phase (i.e. pattern size)
@@ -247,7 +249,10 @@ void QwHelicityPattern::LoadEventData(QwSubsystemArrayParity &event)
   
   // Get the list of helicity subsystems
   if (! fHelicityIsMissing){
-    std::vector<VQwSubsystem*> subsys_helicity = event.GetSubsystemByType("QwHelicityDecoder");
+    std::vector<VQwSubsystem*> subsys_helicity = event.GetSubsystemByType("QwHelicity");
+    if (subsys_helicity.size()==0) {
+    subsys_helicity = event.GetSubsystemByType("QwHelicityDecoder");
+    }
     QwHelicityBase* helicity = 0;
     
     if (subsys_helicity.size() > 0) {

@@ -600,9 +600,8 @@ void  QwHelicity::ProcessEvent()
 
 
   }
-  //std::cout << fPatternPhaseNumber << " " << fHelicityReported << " LOOK HERE !!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-  return;
 
+  return;
 }
 
 
