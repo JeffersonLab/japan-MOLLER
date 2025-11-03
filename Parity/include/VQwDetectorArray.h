@@ -182,8 +182,8 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
 #endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
-    void  FillDB(QwParityDB *db, TString datatype);
-    void  FillErrDB(QwParityDB *db, TString datatype);
+    void  FillDB(QwParityDB *db, TString datatype) override;
+    void  FillErrDB(QwParityDB *db, TString datatype) override;
 #endif // __USE_DATABASE__
 
     const QwIntegrationPMT* GetChannel(const TString name) const;

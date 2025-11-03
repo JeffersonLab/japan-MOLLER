@@ -191,9 +191,9 @@ class QwBeamMod: public VQwSubsystemParity, public MQwSubsystemCloneable<QwBeamM
 #endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
-  void FillDB_MPS(QwParityDB *db, TString datatype);
-  void FillDB(QwParityDB *db, TString datatype);
-  void FillErrDB(QwParityDB *db, TString datatype);
+  void FillDB_MPS(QwParityDB *db, TString datatype) override;
+  void FillDB(QwParityDB *db, TString datatype) override;
+  void FillErrDB(QwParityDB *db, TString datatype) override;
 #endif // __USE_DATABASE__
   void WritePromptSummary(QwPromptSummary *ps, TString type) override;
 

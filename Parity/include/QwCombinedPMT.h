@@ -143,8 +143,10 @@ class QwCombinedPMT : public VQwDataElement {
   void  FillNTupleVector(std::vector<Double_t>& values) const;
 #endif // HAS_RNTUPLE_SUPPORT
 
+#ifdef __USE_DATABASE__
   std::vector<QwDBInterface>  GetDBEntry();
   std::vector<QwErrDBInterface> GetErrDBEntry();
+#endif
 
  protected:
 
