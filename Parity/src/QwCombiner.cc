@@ -20,9 +20,6 @@
 #include "QwHelicityPattern.h"
 #include "QwPromptSummary.h"
 
-// Register this handler with the factory
-REGISTER_DATA_HANDLER_FACTORY(QwCombiner);
-
 
 /// \brief Constructor with name
 QwCombiner::QwCombiner(const TString& name)

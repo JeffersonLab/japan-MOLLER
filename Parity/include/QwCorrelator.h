@@ -138,3 +138,8 @@ class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCor
   QwCorrelator();
 
 };
+
+// Register this handler with the factory
+REGISTER_DATA_HANDLER_FACTORY(QwCorrelator);
+
+

@@ -27,7 +27,7 @@ class QwOmnivore: public VQwSubsystem_t {
     : VQwSubsystem(source),VQwSubsystem_t(source)
     { }
     /// Virtual destructor
-    ~QwOmnivore() override { };
+    ~QwOmnivore() override;
 
     /// Map file definition
     Int_t LoadChannelMap(TString mapfile) override { return 0; };
@@ -126,3 +126,6 @@ class QwOmnivore: public VQwSubsystem_t {
     /// \brief Calculate the average for all good events
     void CalculateRunningAverage() override { };
 };
+
+// Register this subsystem with the factory
+REGISTER_SUBSYSTEM_FACTORY(QwOmnivore<VQwSubsystemParity>);

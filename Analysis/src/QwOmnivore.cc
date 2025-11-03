@@ -5,5 +5,8 @@
 
 #include "QwOmnivore.h"
 
-// Register this subsystem with the factory
-REGISTER_SUBSYSTEM_FACTORY(QwOmnivore<VQwSubsystemParity>);
+/**
+ * Virtual destructor to ensure creation of VTT
+ */
+template<typename VQwSubsystem_t>
+QwOmnivore<VQwSubsystem_t>::~QwOmnivore() { }
