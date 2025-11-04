@@ -43,6 +43,7 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
 
       /// \brief Update the running sums
       void AccumulateRunningSum(VQwSubsystem* input, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override;
+      void AccumulateRunningSum(VQwDataHandler& input, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override { };
       void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF) override;
       /// \brief Calculate the average for all good events
       void CalculateRunningAverage() override;
@@ -93,9 +94,9 @@ class QwCombinerSubsystem: public VQwSubsystemParity,
 
       /// \brief Derived functions
       // not sure if there should be empty definition, no definition or defined
-      Int_t LoadChannelMap(TString) override;
-      Int_t LoadInputParameters(TString) override;
-      Int_t LoadEventCuts(TString) override;
+      Int_t LoadChannelMap(const TString&) override;
+      Int_t LoadInputParameters(const TString&) override;
+      Int_t LoadEventCuts(const TString&) override;
       void ClearEventData() override{
         for (size_t i = 0; i < fOutputVar.size(); ++i) {
           if (fOutputVar.at(i) != NULL) {

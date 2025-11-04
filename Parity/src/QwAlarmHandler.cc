@@ -64,10 +64,10 @@ std::pair<std::string,std::string> QwAlarmHandler::ParseAlarmMapVariable(const s
  * @param mapfile Filename of map file
  * @return Zero when success
  */
-Int_t QwAlarmHandler::LoadChannelMap(const std::string& mapfile)
+Int_t QwAlarmHandler::LoadChannelMap(const TString& mapfile)
 {
   // Open the file
-  QwParameterFile map(mapfile);
+  QwParameterFile map(mapfile.Data());
 
   // Read the sections of dependent variables
   std::pair<EQwHandleType,std::string> type_name;

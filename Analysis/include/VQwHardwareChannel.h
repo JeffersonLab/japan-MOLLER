@@ -162,7 +162,7 @@ public:
 
   virtual Bool_t ApplySingleEventCuts() = 0;//check values read from modules are at desired level
 
-  virtual Bool_t CheckForBurpFail(const VQwHardwareChannel *event){
+  Bool_t CheckForBurpFail(const VQwHardwareChannel *event){
     Bool_t foundburp = kFALSE;
     if (fBurpThreshold>0){
       Double_t diff = this->GetValue() - event->GetValue();
@@ -239,14 +239,10 @@ public:
 
 
   virtual void AccumulateRunningSum(const VQwHardwareChannel *value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF){
-    if(count==0){
-      count = value->fGoodEventCount;
-    }
-    if(ErrorMask ==  kPreserveError){QwError << "VQwHardwareChannel count=" << count << QwLog::endl;}
-    AccumulateRunningSum(value, count, ErrorMask);
+    throw std::runtime_error("VQwHardwareChannel::AccumulateRunningSum called on base class - derived class must override this method");
   };
   virtual void DeaccumulateRunningSum(const VQwHardwareChannel *value, Int_t ErrorMask=0xFFFFFFF){
-    AccumulateRunningSum(value, -1, ErrorMask);
+    throw std::runtime_error("VQwHardwareChannel::DeaccumulateRunningSum called on base class - derived class must override this method");
   };
 
   virtual void AddValueFrom(const VQwHardwareChannel* valueptr) = 0;

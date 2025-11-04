@@ -61,7 +61,7 @@ QwScaler::~QwScaler()
  * @param mapfile Path to the channel map file.
  * @return 0 on success.
  */
-Int_t QwScaler::LoadChannelMap(TString mapfile)
+Int_t QwScaler::LoadChannelMap(const TString& mapfile)
 {
   // Normalization channel (register default token "1")
   const TString default_norm_channel = "1";
@@ -240,7 +240,7 @@ Int_t QwScaler::LoadChannelMap(TString mapfile)
  *
  * @return 0 on success.
  */
-Int_t QwScaler::LoadInputParameters(TString mapfile)
+Int_t QwScaler::LoadInputParameters(const TString& mapfile)
 {
   // Open the file
   QwParameterFile mapstr(mapfile.Data());
@@ -505,7 +505,7 @@ void QwScaler::CalculateRunningAverage()
   }
 }
 
-Int_t QwScaler::LoadEventCuts(TString /*filename*/)
+Int_t QwScaler::LoadEventCuts(const TString& /*filename*/)
 {
   return 0;
 }
