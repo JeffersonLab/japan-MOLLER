@@ -17,12 +17,24 @@
 // Qweak headers
 #include "QwLog.h"
 #ifdef __USE_DATABASE__
-#define MYSQLPP_SSQLS_NO_STATICS
-#include "QwParitySSQLS.h"
+#include "QwParitySchema.h"
 #include "QwParityDB.h"
 #endif // __USE_DATABASE__
 #include "QwVQWK_Channel.h"
 #include "QwParameterFile.h"
+
+///  Run table aliases for seed query
+///  (these types must be defined outside function scope)
+#ifdef __USE_DATABASE__
+#ifdef __USE_SQLPP11__
+SQLPP_ALIAS_PROVIDER(run_first);
+SQLPP_ALIAS_PROVIDER(run_last);
+#endif // __USE_SQLPP11__
+#ifdef __USE_SQLPP23__
+SQLPP_CREATE_NAME_TAG(run_first);
+SQLPP_CREATE_NAME_TAG(run_last);
+#endif // __USE_SQLPP23__
+#endif // __USE_DATABASE__
 
 ///  Blinder event counter indices
 enum EQwBlinderErrorCounterIndices{
@@ -109,7 +121,7 @@ QwBlinder::QwBlinder(const EQwBlindingStrategy blinding_strategy):
     if (tgt_index>=kCREXTgtIndexMin && tgt_index<=kCREXTgtIndexMax){
       fCREXTargetIndex = tgt_index;
     } else {
-      QwError << "Invalid CREX target index for blindable events!  Exiting!" 
+      QwError << "Invalid CREX target index for blindable events!  Exiting!"
 	      << QwLog::endl;
       exit(100);
     }
@@ -123,7 +135,7 @@ QwBlinder::QwBlinder(const EQwBlindingStrategy blinding_strategy):
   if (blinder.FileHasVariablePair("=", "strategy", strategy)) {
     std::transform(strategy.begin(), strategy.end(), strategy.begin(), ::tolower);
     QwVerbose << "Using blinding strategy from file: " << strategy << QwLog::endl;
-    if (strategy == "diabled") fBlindingStrategy = kDisabled;
+    if (strategy == "disabled") fBlindingStrategy = kDisabled;
     else if (strategy == "additive") fBlindingStrategy = kAdditive;
     else if (strategy == "multiplicative") fBlindingStrategy = kMultiplicative;
     else if (strategy == "additivemultiplicative") fBlindingStrategy = kAdditiveMultiplicative;
@@ -158,7 +170,7 @@ QwBlinder::QwBlinder(const EQwBlindingStrategy blinding_strategy):
 	      << "force-spin-direction==" << spin_direction << ".  Exit and correct the file."
 	      << QwLog::endl;
       exit(10);
-    } 
+    }
   }
 
   std::string target_type;
@@ -177,7 +189,7 @@ QwBlinder::QwBlinder(const EQwBlindingStrategy blinding_strategy):
 	      << "force-target-type==" << target_type << ".  Exit and correct the file."
 	      << QwLog::endl;
       exit(10);
-    } 
+    }
   }
 
   // Initialize blinder from seed
@@ -213,7 +225,6 @@ QwBlinder::~QwBlinder()
 
 /**
  * Update the blinder status with new external information
- *
  * @param options Qweak option handler
  */
 void QwBlinder::ProcessOptions(QwOptions& options)
@@ -237,12 +248,12 @@ void QwBlinder::ProcessOptions(QwOptions& options)
   fBeamCurrentThreshold = options.GetValue<double>("blinder.beam-current-threshold");
 }
 
+#ifdef __USE_DATABASE__
 /**
  * Update the blinder status with new external information
  *
  * @param db Database connection
  */
-#ifdef __USE_DATABASE__
 void QwBlinder::Update(QwParityDB* db)
 {
   //  Update the seed ID then tell us if it has changed.
@@ -261,7 +272,6 @@ void QwBlinder::Update(QwParityDB* db)
 
 /**
  * Update the blinder status using a random number
- *
  */
 void QwBlinder::Update()
 {
@@ -290,21 +300,18 @@ void QwBlinder::Update()
  */
 void QwBlinder::Update(const QwSubsystemArrayParity& detectors)
 {
-  static QwVQWK_Channel q_targ("q_targ");
+  // Check for the target blindability flag
   if (fBlindingStrategy != kDisabled && fTargetBlindability==kBlindable) {
-    // Check for the target blindability flag
     
-
     // Check that the current on target is above acceptable limit
     Bool_t tmp_beam = kFALSE;
-    //    if (detectors.RequestExternalValue(q_targ.GetElementName(), &q_targ)) {
-    if (detectors.RequestExternalValue("q_targ", &q_targ)) {
-      if (q_targ.GetValue() > fBeamCurrentThreshold){
-	// 	std::cerr << "q_targ.GetValue()==" 
-	// 		  << q_targ.GetValue() << std::endl;
-	tmp_beam = kTRUE;
+    const VQwHardwareChannel* q_targ = detectors.RequestExternalPointer("q_targ");
+    if (q_targ != nullptr) {
+      if (q_targ->GetValue() > fBeamCurrentThreshold) {
+        tmp_beam = kTRUE;
       }
     }
+
     fBeamIsPresent &= tmp_beam;
   }
 }
@@ -344,7 +351,7 @@ void QwBlinder::Update(const QwEPICSEvent& epics)
       //  Reasonable non-calcium-48 target positions
       SetTargetBlindability(QwBlinder::kNotBlindable);
 
-     
+
       //
       // ****  Target index 2:  After 20January change in target location
     } else if (fCREXTargetIndex==2 &&
@@ -360,9 +367,9 @@ void QwBlinder::Update(const QwEPICSEvent& epics)
 
       //
       //  ****  Target index -1:  These are the PREX positions
-    } else if ( fCREXTargetIndex==-1 && 
+    } else if ( fCREXTargetIndex==-1 &&
 		(/*  Target positions before 1 August 2019.*/
-		 ( (tgt_pos > 3e6 && tgt_pos < 6.9e6) 
+		 ( (tgt_pos > 3e6 && tgt_pos < 6.9e6)
 		   || (tgt_pos > 7.3e6 && tgt_pos < 7.7e6))
 		 /*  Target positions after 1 August 2019.*/
 		 ||( (tgt_pos>30.e6 && tgt_pos<69e6)
@@ -371,9 +378,9 @@ void QwBlinder::Update(const QwEPICSEvent& epics)
       //  Lead-208 target positions
       SetTargetBlindability(QwBlinder::kBlindable);
 
-    } else if  ( fCREXTargetIndex==-1 && 
+    } else if  ( fCREXTargetIndex==-1 &&
 		 (/*  Target positions before 1 August 2019.*/
-		  ((tgt_pos > -1e3 && tgt_pos < 3e6) 
+		  ((tgt_pos > -1e3 && tgt_pos < 3e6)
 		   || (tgt_pos > 6.8e6 && tgt_pos < 7.2e6)
 		   || (tgt_pos > 7.7e6 && tgt_pos < 10e6))
 		  /*  Target positions after 1 August 2019.*/
@@ -402,7 +409,7 @@ void QwBlinder::Update(const QwEPICSEvent& epics)
     //  Wien mode and IHWP polarity.
     SetWienState(epics.DetermineWienMode());
     SetIHWPPolarity(epics.DetermineIHWPPolarity());
-    
+
     if (fWienMode == kWienForward){
       fBlindingOffset = fBlindingOffset_Base * fIHWPPolarity;
     } else if (fWienMode == kWienBackward){
@@ -419,7 +426,7 @@ void QwBlinder::Update(const QwEPICSEvent& epics)
  *
  * Parameters:
  *
- * Return: Int_t 
+ * Return: Int_t
  *
  *------------------------------------------------------------
  *------------------------------------------------------------*/
@@ -433,67 +440,70 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db)
     fSeed   = "Default seed, No database specified";
     return 0;
   }
+  if (! db->AllowsReadAccess()){
+    QwDebug << "QwBlinder::ReadSeed(): Database access is turned off.  Don't update the blinder." << QwLog::endl;
+    return 0;
+  }
 
   // Try to connect to the database
-  if (db->Connect()) {
+  try {
+    auto c = db->GetScopedConnection();
 
     QwError << "QwBlinder::ReadSeed  db->GetRunNumber() returns "
 	    <<  db->GetRunNumber() << QwLog::endl;
-    // Build up query
-    string s_sql = "SELECT seed_id, seed FROM seeds, run as rf, run as rl WHERE seeds.first_run_id = rf.run_id AND seeds.last_run_id = rl.run_id ";
-    s_sql += "AND rf.run_number <= ";
-    s_sql += Form("%d",db->GetRunNumber());
-    s_sql += " AND rl.run_number >= ";
-    s_sql += Form("%d",db->GetRunNumber());
-    s_sql += " AND seed_id>2";
 
-    QwError << "QwBlinder::ReadSeed s_sql contains \'"
-	    << s_sql  << "\'" << QwLog::endl;
+    // Convert to sqlpp11 query with JOINs
+    QwParitySchema::seeds seeds{};
+    QwParitySchema::run first_run{};
+    QwParitySchema::run last_run{};
 
-    // Send query
-    mysqlpp::Query query = db->Query();
-    query << s_sql;
-    mysqlpp::StoreQueryResult res = query.store();
+    // Create aliases for the run table
+    auto rf_alias = first_run.as(run_first);
+    auto rl_alias = last_run.as(run_last);
+    auto query = sqlpp::select(seeds.seed_id, seeds.seed)
+                 .from(seeds
+                       .join(rf_alias).on(seeds.first_run_id == rf_alias.run_id)
+                       .join(rl_alias).on(seeds.last_run_id == rl_alias.run_id))
+                 .where(rf_alias.run_number <= db->GetRunNumber()
+                        and rl_alias.run_number >= db->GetRunNumber()
+                        and seeds.seed_id > 2);
 
-    // Store seed_id and seed value in fSeedID and fSeed (want to store actual seed_id in those
-    // cases where only the most recent was requested (fSeedID = 0))
-    // There should be one and only one seed_id for each seed.
-    if (res.size() == 1) {
-      // Store seed_id in fSeedID (want to store actual seed_id in those
-      // cases where only the most recent was requested (fSeedID = 0))
-      fSeedID = res[0]["seed_id"];
+    QwError << "QwBlinder::ReadSeed executing sqlpp11 query for run number "
+            << db->GetRunNumber() << QwLog::endl;
 
-      // Store seed value
-      if (!res[0]["seed"].is_null()) {
-        fSeed = res[0]["seed"].data();
-      } else {
-        QwError << "QwBlinder::ReadSeed(): Seed value came back NULL from the database." << QwLog::endl;
-        fSeedID = 0;
-        fSeed = kDefaultSeed;
-      }
+    auto results = c->QuerySelect(query);
+    size_t result_count = c->CountResults(results);
+    if (result_count == 1) {
+      // Analyze the single result using database-agnostic interface
+      c->ForFirstResult(results, [this](const auto& row) {
+        // Process first (and only) row
+        fSeedID = row.seed_id;
+        if (!is_null(row.seed)) {
+          fSeed = row.seed.value();
+        } else {
+          QwError << "QwBlinder::ReadSeed(): Seed value came back NULL from the database." << QwLog::endl;
+          fSeedID = 0;
+          fSeed = kDefaultSeed;
+        }
+      });
 
       std::cout << "QwBlinder::ReadSeed():  Successfully read "
-      << Form("the fSeed with ID %d from the database.", fSeedID)
-      << std::endl;
+        << Form("the fSeed with ID %d from the database.", fSeedID)
+        << std::endl;
 
     } else {
       // Error Condition.
       // There should be one and only one seed_id for each seed.
       fSeedID = 0;
       fSeed   = Form("ERROR:  There should be one and only one seed_id for each seed, but this had %zu.",
-                     res.size());
+                     result_count);
       std::cerr << "QwBlinder::ReadSeed(): "<<fSeed<<std::endl;
     }
-
-    // Disconnect from database
-    db->Disconnect();
-
-  } else {
-
+  } catch (const std::exception& er) {
     //  We were unable to open the connection.
     fSeedID = 0;
     fSeed   = "ERROR:  Unable to open the connection to the database.";
-    QwError << "QwBlinder::ReadSeed(): Unable to open connection to database." << QwLog::endl;
+    QwError << "QwBlinder::ReadSeed(): Unable to open connection to database: " << er.what() << QwLog::endl;
   }
 
   return fSeedID;
@@ -506,7 +516,7 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db)
  *
  * Parameters: none
  *
- * Return: Int_t 
+ * Return: Int_t
  *
  *------------------------------------------------------------
  *------------------------------------------------------------*/
@@ -519,16 +529,17 @@ Int_t QwBlinder::ReadRandomSeed()
     "abcdefghijklmnopqrstuvwxyz";
 
   Int_t strLen = sizeof(alphanum) - 1;
-  Char_t randomchar[20];
+  const size_t length = 20;
+  Char_t randomchar[length];
   // Initialize random number generator.
   srand(time(0));
-  //get  a "random" positive integer 
+  //get  a "random" positive integer
   
-  for (int i = 0; i < 20; ++i) {
+  for (size_t i = 0; i < length; ++i) {
     randomchar[i] = alphanum[rand() % strLen];
   }
   fSeedID=rand();
-  TString frandomSeed(randomchar);
+  TString frandomSeed(randomchar, length);
   fSeed=frandomSeed;//a random string
   return fSeedID;
 }
@@ -556,66 +567,93 @@ Int_t QwBlinder::ReadSeed(QwParityDB* db, const UInt_t seed_id)
   }
 
   // Try to connect to the database
-  if (db->Connect()) {
+  try {
+    auto c = db->GetScopedConnection();
 
-    // Build up query
-    string s_sql = "SELECT * FROM seeds ";
+    // Convert to sqlpp11 query
+    QwParitySchema::seeds seeds{};
     if (fSeedID > 0) {
       // Use specified seed
-      Char_t s_seed_id[10];
-      sprintf(s_seed_id, "%d", seed_id);
-      s_sql += "WHERE seed_id = ";
-      s_sql += string(s_seed_id);
+      auto query = sqlpp::select(sqlpp::all_of(seeds))
+                   .from(seeds)
+                   .where(seeds.seed_id == seed_id);
+      auto results = db->QuerySelect(query);
+
+      // Process results using database-agnostic interface
+      UInt_t found_seed_id = 0;
+      TString found_seed = "";
+      size_t result_count = db->CountResults(results);
+
+      db->ForFirstResult(results, [&](const auto& row) {
+        found_seed_id = row.seed_id;
+        if (!is_null(row.seed)) {
+          found_seed = row.seed.value();
+        } else {
+          QwError << "QwBlinder::ReadSeed(): Seed value came back NULL from the database." << QwLog::endl;
+          found_seed_id = 0;
+          found_seed = kDefaultSeed;
+        }
+      });
+
+      // Process result for specified seed
+      if (result_count == 1) {
+        fSeedID = found_seed_id;
+        fSeed = found_seed;
+        std::cout << "QwBlinder::ReadSeed():  Successfully read "
+        << Form("the fSeed with ID %d from the database.", fSeedID)
+        << std::endl;
+      } else {
+        fSeedID = 0;
+        fSeed = Form("ERROR:  There should be one and only one seed_id for each seed, but this had %zu.",
+                     result_count);
+        std::cerr << "QwBlinder::ReadSeed(): " << fSeed << std::endl;
+      }
     } else {
       // Use most recent seed
-      s_sql += "ORDER BY seed_id DESC LIMIT 1";
-    }
+      auto query = sqlpp::select(sqlpp::all_of(seeds))
+                   .from(seeds)
+                   .order_by(seeds.seed_id.desc())
+                   .limit(1u)
+                   .where(sqlpp::value(true));
+      auto results = db->QuerySelect(query);
 
-    // Send query
-    mysqlpp::Query query = db->Query();
-    query << s_sql;
-    std::vector<QwParitySSQLS::seeds> res;
-    query.storein(res);
+      // Process results using database-agnostic interface
+      UInt_t found_seed_id2 = 0;
+      TString found_seed2 = "";
 
-    // Store seed_id and seed value in fSeedID and fSeed (want to store actual seed_id in those
-    // cases where only the most recent was requested (fSeedID = 0))
-    // There should be one and only one seed_id for each seed.
-    if (res.size() == 1) {
-      // Store seed_id in fSeedID (want to store actual seed_id in those
-      // cases where only the most recent was requested (fSeedID = 0))
-      fSeedID = res[0].seed_id;
+      size_t result_count2 = db->CountResults(results);
 
-      // Store seed value
-      if (!res[0].seed.is_null) {
-        fSeed = res[0].seed.data;
+      db->ForFirstResult(results, [&](const auto& row) {
+        found_seed_id2 = row.seed_id;
+        if (!is_null(row.seed)) {
+          found_seed2 = row.seed.value();
+        } else {
+          QwError << "QwBlinder::ReadSeed(): Seed value came back NULL from the database." << QwLog::endl;
+          found_seed_id2 = 0;
+          found_seed2 = kDefaultSeed;
+        }
+      });
+
+      // Process result for most recent seed
+      if (result_count2 == 1) {
+        fSeedID = found_seed_id2;
+        fSeed = found_seed2;
+        std::cout << "QwBlinder::ReadSeed():  Successfully read "
+        << Form("the fSeed with ID %d from the database.", fSeedID)
+        << std::endl;
       } else {
-        QwError << "QwBlinder::ReadSeed(): Seed value came back NULL from the database." << QwLog::endl;
         fSeedID = 0;
-        fSeed = kDefaultSeed;
+        fSeed = Form("ERROR:  There should be one and only one seed_id for each seed, but this had %zu.",
+                     result_count2);
+        std::cerr << "QwBlinder::ReadSeed(): " << fSeed << std::endl;
       }
-
-      std::cout << "QwBlinder::ReadSeed():  Successfully read "
-      << Form("the fSeed with ID %d from the database.", fSeedID)
-      << std::endl;
-
-    } else {
-      // Error Condition.
-      // There should be one and only one seed_id for each seed.
-      fSeedID = 0;
-      fSeed   = Form("ERROR:  There should be one and only one seed_id for each seed, but this had %zu.",
-                     res.size());
-      std::cerr << "QwBlinder::ReadSeed(): "<<fSeed<<std::endl;
     }
-
-    // Disconnect from database
-    db->Disconnect();
-
-  } else {
+  } catch (const std::exception& er) {
 
     //  We were unable to open the connection.
     fSeedID = 0;
     fSeed   = "ERROR:  Unable to open the connection to the database.";
-    QwError << "QwBlinder::ReadSeed(): Unable to open connection to database." << QwLog::endl;
+    QwError << "QwBlinder::ReadSeed(): Unable to open connection to database: " << er.what() << QwLog::endl;
   }
 
   return fSeedID;
@@ -660,12 +698,12 @@ void QwBlinder::InitBlinders(const UInt_t seed_id)
     Double_t tmp1 = maximum_asymmetry_sqrt * (newtempout / Int_t(0x7FFFFFFF));
     fBlindingOffset = tmp1 * fabs(tmp1) * 0.000001;
 
-    //  Do another little calulation to round off the blinding asymmetry
+    //  Do another little calculation to round off the blinding asymmetry
     Double_t tmp2;
     tmp1 = fBlindingOffset * 4;    // Exactly shifts by two binary places
     tmp2 = tmp1 + fBlindingOffset; // Rounds 5*fBlindingOffset
     fBlindingOffset = tmp2 - tmp1; // fBlindingOffset has been rounded.
-    
+
     //  Set the base blinding offset.
     fBlindingOffset_Base = fBlindingOffset;
 
@@ -760,7 +798,7 @@ void QwBlinder::InitTestValues(const int n)
 Int_t QwBlinder::UseStringManip(const TString& barestring)
 {
   std::vector<UInt_t> choppedwords;
-  UInt_t tmpword;
+  UInt_t tmpword = 0;
   Int_t finalseed = 0;
 
   for (Int_t i = 0; i < barestring.Length(); i++)
@@ -913,26 +951,18 @@ Int_t QwBlinder::UseMD5(const TString& barestring)
 void QwBlinder::WriteChecksum(QwParityDB* db)
 {
   //----------------------------------------------------------
-  // Construct SQL
+  // Construct and execute sqlpp11 UPDATE query
   //----------------------------------------------------------
-  Char_t s_number[20];
-  string s_sql = "UPDATE analysis SET seed_id = ";
-  sprintf(s_number, "%d", fSeedID);
-  s_sql += string(s_number);
-  s_sql += ", bf_checksum = ";
-  s_sql += "\'" + fChecksum + "\'";
-  s_sql += " WHERE analysis_id = ";
-  sprintf(s_number, "%d", db->GetAnalysisID());
-  s_sql += string(s_number);
-
+  QwParitySchema::analysis analysis{};
+  auto update_query = sqlpp::update(analysis)
+                      .set(analysis.seed_id = fSeedID,
+                           analysis.bf_checksum = fChecksum)
+                      .where(analysis.analysis_id == db->GetAnalysisID());
   //----------------------------------------------------------
   // Execute SQL
   //----------------------------------------------------------
-  db->Connect();
-  mysqlpp::Query query = db->Query();
-  query <<s_sql;
-  query.execute();
-  db->Disconnect();
+  auto c = db->GetScopedConnection();
+  db->QueryExecute(update_query);
 } //End QwBlinder::WriteChecksum
 
 /*!------------------------------------------------------------
@@ -947,40 +977,24 @@ void QwBlinder::WriteChecksum(QwParityDB* db)
 void QwBlinder::WriteTestValues(QwParityDB* db)
 {
   //----------------------------------------------------------
-  // Construct Initial SQL
+  // Use sqlpp11 INSERT for bf_test table
   //----------------------------------------------------------
-  Char_t s_number[20];
-
-  string s_sql_pre = "INSERT INTO bf_test (analysis_id, test_number, test_value) VALUES (";
-  // analysis_id
-  sprintf(s_number, "%d", db->GetAnalysisID());
-  s_sql_pre += string(s_number);
-  s_sql_pre += ", ";
+  QwParitySchema::bf_test bf_test{};
 
   //----------------------------------------------------------
-  // Construct Individual SQL and Execute
+  // Insert test values using sqlpp11
   //----------------------------------------------------------
   // Loop over all test values
   for (size_t i = 0; i < fTestValues.size(); i++)
     {
-      string s_sql = s_sql_pre;
-
-      // test_number
-      sprintf(s_number, "%d", (int) i);
-      s_sql += string(s_number);
-      s_sql += ", ";
-
-      // test_value
-      sprintf(s_number, "%9g", fBlindTestValues[i]);
-      s_sql += s_number;
-      s_sql += ")";
+      auto insert_query = sqlpp::insert_into(bf_test)
+                          .set(bf_test.analysis_id = db->GetAnalysisID(),
+                               bf_test.test_number = static_cast<int>(i),
+                               bf_test.test_value = fBlindTestValues[i]);
 
       // Execute SQL
-      db->Connect();
-      mysqlpp::Query query = db->Query();
-      query <<s_sql;
-      query.execute();
-      db->Disconnect();
+      auto c = db->GetScopedConnection();
+      db->QueryExecute(insert_query);
     }
 }
 #endif // __USE_DATABASE__
@@ -1012,7 +1026,7 @@ Bool_t QwBlinder::CheckTestValues()
               << i
               << " does not agree with original test value, "
               << "with a difference of "
-              << (test1 - test2) 
+              << (test1 - test2)
 	      << " (epsilon==" << epsilon << ")"
 	      << "." << QwLog::endl;
       status = kFALSE;
@@ -1072,7 +1086,7 @@ void QwBlinder::PrintFinalValues(Int_t kVerbosity)
     total_count += fPatternCounters.at(i);
   }
   if (total_count<=0) return;
-  
+
   QwMessage << "QwBlinder::PrintFinalValues():  Begin summary"    << QwLog::endl;
   QwMessage << "================================================" << QwLog::endl;
   PrintCountersValues(fPatternCounters, "Patterns");
@@ -1095,7 +1109,7 @@ void QwBlinder::PrintFinalValues(Int_t kVerbosity)
             << std::setw(22) << "Orig.-Unblind value"
             << QwLog::endl;
   for (size_t i = 0; i < fTestValues.size(); i++) {
-    if ((fTestValues[i]-fUnBlindTestValues[i]) < -epsilon 
+    if ((fTestValues[i]-fUnBlindTestValues[i]) < -epsilon
 	|| (fTestValues[i]-fUnBlindTestValues[i]) > epsilon )
       diff = Form("% 9g ppb", fTestValues[i]-fUnBlindTestValues[i]*1e9);
     else
@@ -1113,9 +1127,9 @@ void QwBlinder::PrintFinalValues(Int_t kVerbosity)
 void QwBlinder::PrintCountersValues(std::vector<Int_t> fCounters, TString counter_type)
 {
   QwMessage << "Blinder Passed " << counter_type  << QwLog::endl;
-  QwMessage << "\t" << counter_type 
+  QwMessage << "\t" << counter_type
 	    << " with blinding disabled: " << fCounters.at(kBlinderCount_Disabled) << QwLog::endl;
-  QwMessage << "\t" << counter_type 
+  QwMessage << "\t" << counter_type
 	    << " on a non-blindable target: " << fCounters.at(kBlinderCount_NonBlindable) << QwLog::endl;
   QwMessage << "\t" << counter_type
 	    << " with transverse beam: " << fCounters.at(kBlinderCount_Transverse) << QwLog::endl;
@@ -1124,9 +1138,9 @@ void QwBlinder::PrintCountersValues(std::vector<Int_t> fCounters, TString counte
   QwMessage << "Blinder Failed " << counter_type  << QwLog::endl;
   QwMessage << "\t" << counter_type
 	    << " with unknown target position: " << fCounters.at(kBlinderCount_UnknownTarget) << QwLog::endl;
-  QwMessage << "\t" << counter_type 
+  QwMessage << "\t" << counter_type
 	    << " with changed target position: " << fCounters.at(kBlinderCount_ChangedTarget) << QwLog::endl;
-  QwMessage << "\t" << counter_type 
+  QwMessage << "\t" << counter_type
 	    << " with an undefined Wien setting: " << fCounters.at(kBlinderCount_UndefinedWien) << QwLog::endl;
   QwMessage << "\t" << counter_type
 	    << " with a changed Wien setting: " << fCounters.at(kBlinderCount_ChangedWien) << QwLog::endl;
@@ -1144,8 +1158,6 @@ void QwBlinder::PrintCountersValues(std::vector<Int_t> fCounters, TString counte
 
 /**
  * Write the blinding parameters to the database
- * @param db Database connection
- * @param datatype Datatype
  *
  * For each analyzed run the database contains a digest of the blinding parameters
  * and a number of blinded test entries.
@@ -1160,7 +1172,7 @@ void QwBlinder::FillDB(QwParityDB *db, TString datatype)
   // Get the analysis ID
   UInt_t analysis_id = db->GetAnalysisID();
 
-  // Fill the rows of the QwParitySSQLS::bf_test table
+  // Fill the test values for database insertion
   if (! CheckTestValues()) {
     QwError << "QwBlinder::FillDB():  "
             << "Blinded test values have changed; "
@@ -1168,64 +1180,46 @@ void QwBlinder::FillDB(QwParityDB *db, TString datatype)
             << QwLog::endl;
   }
 
-  QwParitySSQLS::bf_test bf_test_row(0);
-  std::vector<QwParitySSQLS::bf_test> bf_test_list;
-  for (size_t i = 0; i < fTestValues.size(); i++) {
-    bf_test_row.bf_test_id = 0;
-    bf_test_row.analysis_id = analysis_id;
-    bf_test_row.test_number = i;
-    bf_test_row.test_value  = fBlindTestValues[i];
-    bf_test_list.push_back(bf_test_row);
-  }
-
 
   // Connect to the database
-  db->Connect();
+  auto c = db->GetScopedConnection();
 
   // Modify the seed_id and bf_checksum in the analysis table
   try {
-    // Get the rows of the QwParitySSQLS::analysis table
-    mysqlpp::Query query = db->Query();
-    query << "select * from analysis where analysis_id = " 
-	  << analysis_id;
-    std::vector<QwParitySSQLS::analysis> analysis_res;
-    QwDebug << "Query: " << query.str() << QwLog::endl;
-    query.storein(analysis_res);
-    if (analysis_res.size() == 1) {
-      QwParitySSQLS::analysis analysis_row_new  = analysis_res[0];
-      // Modify the seed_id and bf_checksum
-      analysis_row_new.seed_id = fSeedID;
-      analysis_row_new.bf_checksum = fChecksum;
-      // Update the analysis table
-      query.update(analysis_res[0], analysis_row_new);
-      QwDebug << "Query: " << query.str() << QwLog::endl;
-      query.execute();
-    } else {
-      QwError << "Unable to update analysis table with blinder information. "
-	      << QwLog::endl;
-    }
-  } catch (const mysqlpp::Exception& err) {
-    QwError << err.what() << QwLog::endl;
+    QwParitySchema::analysis analysis{};
+
+    auto update_query = sqlpp::update(analysis)
+                        .set(analysis.seed_id = fSeedID,
+                             analysis.bf_checksum = fChecksum)
+                        .where(analysis.analysis_id == analysis_id);
+
+    QwDebug << "Updating analysis table with blinder information" << QwLog::endl;
+    db->QueryExecute(update_query);
+
+  } catch (const std::exception& err) {
+    QwError << "Failed to update analysis table: " << err.what() << QwLog::endl;
   }
 
   // Add the bf_test rows
   try {
-    if (bf_test_list.size()) {
-      mysqlpp::Query query = db->Query();
-      query.insert(bf_test_list.begin(), bf_test_list.end());
-      QwDebug << "Query: " << query.str() << QwLog::endl;
-      query.execute();
+    if (fTestValues.size() > 0) {
+      QwParitySchema::bf_test bf_test{};
+      for (size_t i = 0; i < fTestValues.size(); i++) {
+        auto insert_query = sqlpp::insert_into(bf_test)
+                            .set(bf_test.analysis_id = analysis_id,
+                                 bf_test.test_number = static_cast<int>(i),
+                                 bf_test.test_value = fBlindTestValues[i]);
+
+        db->QueryExecute(insert_query);
+      }
+      QwDebug << "Inserted " << fTestValues.size() << " bf_test entries" << QwLog::endl;
     } else {
-      QwMessage << "QwBlinder::FillDB(): No bf_test entries to write." 
+      QwMessage << "QwBlinder::FillDB(): No bf_test entries to write."
 		<< QwLog::endl;
     }
-  } catch (const mysqlpp::Exception& err) {
-    QwError << err.what() << QwLog::endl;
+  } catch (const std::exception& err) {
+    QwError << "Failed to insert bf_test entries: " << err.what() << QwLog::endl;
   }
-
-  // Disconnect from database
-  db->Disconnect();
-
 }
 
 void QwBlinder::FillErrDB(QwParityDB *db, TString datatype)
@@ -1233,29 +1227,29 @@ void QwBlinder::FillErrDB(QwParityDB *db, TString datatype)
   QwDebug << " --------------------------------------------------------------- " << QwLog::endl;
   QwDebug << "                     QwBlinder::FillErrDB                        " << QwLog::endl;
   QwDebug << " --------------------------------------------------------------- " << QwLog::endl;
-  QwErrDBInterface row;
-  std::vector<QwParitySSQLS::general_errors> entrylist;
 
   UInt_t analysis_id = db->GetAnalysisID();
+  QwParitySchema::general_errors general_errors{};
 
-  row.SetAnalysisID(analysis_id);
-  row.SetDeviceID(kMaxUInt);
-  for (size_t index=0; index<kBlinderCount_NumCounters; index++){
-    row.SetErrorCodeId(index+20); 
-    row.SetN(fPatternCounters.at(index));
-    row.AddThisEntryToList( entrylist );
+  auto c = db->GetScopedConnection();
+
+  try {
+    // Insert error counter entries for each blinder counter type
+    for (size_t index = 0; index < kBlinderCount_NumCounters; index++) {
+      if (fPatternCounters.at(index) > 0) {  // Only insert non-zero counters
+        auto insert_query = sqlpp::insert_into(general_errors)
+                            .set(general_errors.analysis_id = analysis_id,
+                                 general_errors.error_code_id = index + 20,  // error codes 20+
+                                 general_errors.n = fPatternCounters.at(index));
+
+        db->QueryExecute(insert_query);
+      }
+    }
+    QwDebug << "Inserted blinder error counters for analysis " << analysis_id << QwLog::endl;
+
+  } catch (const std::exception& err) {
+    QwError << "Failed to insert blinder error counters: " << err.what() << QwLog::endl;
   }
-
-  db->Connect();
-  // Check the entrylist size, if it isn't zero, start to query..
-  if( entrylist.size() ) {
-    mysqlpp::Query query= db->Query();
-    query.insert(entrylist.begin(), entrylist.end());
-    query.execute();
-  }
-  db->Disconnect();
-
-  return;
 };
 #endif // __USE_DATABASE__
 
@@ -1266,7 +1260,7 @@ void QwBlinder::SetTargetBlindability(QwBlinder::EQwBlinderStatus status)
   if (fTargetBlindability_firstread == QwBlinder::kIndeterminate
       && fTargetBlindability != QwBlinder::kIndeterminate){
     fTargetBlindability_firstread = fTargetBlindability;
-    QwMessage << "QwBlinder:  First set target blindability to " 
+    QwMessage << "QwBlinder:  First set target blindability to "
 	      << fStatusName[fTargetBlindability] << QwLog::endl;
   }
 }
@@ -1277,7 +1271,7 @@ void QwBlinder::SetWienState(EQwWienMode wienmode)
   if (fWienMode_firstread == kWienIndeterminate
       && fWienMode != kWienIndeterminate){
     fWienMode_firstread = fWienMode;
-    QwMessage << "QwBlinder:  First set Wien state to " 
+    QwMessage << "QwBlinder:  First set Wien state to "
 	      << WienModeName(fWienMode) << QwLog::endl;
   }
 }
@@ -1287,7 +1281,7 @@ void QwBlinder::SetIHWPPolarity(Int_t ihwppolarity)
   fIHWPPolarity = ihwppolarity;
   if (fIHWPPolarity_firstread == 0 && fIHWPPolarity != 0){
     fIHWPPolarity_firstread = fIHWPPolarity;
-    QwMessage << "QwBlinder:  First set IHWP state to " 
+    QwMessage << "QwBlinder:  First set IHWP state to "
 	      << fIHWPPolarity << QwLog::endl;
   }
 }
@@ -1303,7 +1297,7 @@ QwBlinder::EQwBlinderStatus QwBlinder::CheckBlindability(std::vector<Int_t> &fCo
     QwDebug  << "QwBlinder::CheckBlindability:  The target blindability is not determined.  "
 	     << "Fail this pattern." << QwLog::endl;
     status = QwBlinder::kBlindableFail;
-    fCounters.at(kBlinderCount_UnknownTarget)++;    
+    fCounters.at(kBlinderCount_UnknownTarget)++;
   } else if (fTargetBlindability!=fTargetBlindability_firstread
 	     && !fTargetPositionForced) {
     QwDebug << "QwBlinder::CheckBlindability:  The target blindability has changed.  "
@@ -1339,14 +1333,14 @@ QwBlinder::EQwBlinderStatus QwBlinder::CheckBlindability(std::vector<Int_t> &fCo
     //  We don't have longitudinal beam, so don't blind.
     status = QwBlinder::kNotBlindable;
     fCounters.at(kBlinderCount_Transverse)++;
-  } else if (fTargetBlindability==kBlindable 
+  } else if (fTargetBlindability==kBlindable
 	     && fBeamIsPresent) {
-    //  This is a blindable target and the beam is sufficent.
+    //  This is a blindable target and the beam is sufficient.
     status = QwBlinder::kBlindable;
     fCounters.at(kBlinderCount_Blindable)++;
-  } else if (fTargetBlindability==kBlindable 
+  } else if (fTargetBlindability==kBlindable
 	     && (! fBeamIsPresent) ) {
-    //  This is a blindable target but there is insufficent beam present
+    //  This is a blindable target but there is insufficient beam present
     status = QwBlinder::kNotBlindable;
     fCounters.at(kBlinderCount_NoBeam)++;
   } else {

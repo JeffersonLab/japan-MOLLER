@@ -28,9 +28,6 @@ const Int_t QwHelicityDecoder::fNumDecoderWords=14;
 
 //**************************************************//
 
-// Register this subsystem with the factory
-RegisterSubsystemFactory(QwHelicityDecoder);
-
 const std::vector<UInt_t> QwHelicityDecoder::kDefaultHelicityBitPattern{0x69};
 
 /// constructor

@@ -10,7 +10,7 @@ void copytree_cameron(TString oldFileName = "grand_aggregator.root" , int entry 
      TTree *oldtree;
      oldfile.GetObject("agg", oldtree);
      const auto nentries = oldtree->GetEntries();
-     
+
      TFile newfile("grand_prototype.root", "recreate");
      auto newtree = oldtree->CloneTree(0);
      if (goal == 1){
@@ -31,4 +31,4 @@ void copytree_cameron(TString oldFileName = "grand_aggregator.root" , int entry 
      }
      newtree->Write("agg",TObject::kOverwrite);
      newfile.Close();
- }                                                                           
+ }

@@ -1,13 +1,13 @@
 //#include <string>
-//Gives FFTs of BCM data/BCM asymmetries on one canvas 
+//Gives FFTs of BCM data/BCM asymmetries on one canvas
 
 void FFT_Tree(int run, int run2, string tree_input) {
 
- //setup tree, pull and cut data 
+ //setup tree, pull and cut data
   TFile *file = new TFile(Form("/adaq1/work1/apar/japanOutput/prexPrompt_pass1_%d.000.root", run));
   TFile *file2 = new TFile(Form("/adaq1/work1/apar/japanOutput/prexPrompt_pass1_%d.000.root", run2));
-  TTree *tree = (TTree*) file->Get(Form("%s", tree_input.c_str())); 
-  TTree *tree2 = (TTree*) file2->Get(Form("%s", tree_input.c_str())); 
+  TTree *tree = (TTree*) file->Get(Form("%s", tree_input.c_str()));
+  TTree *tree2 = (TTree*) file2->Get(Form("%s", tree_input.c_str()));
   TString TStree = tree_input;
   TString TSevt = "evt";
   TString TSmul = "mul";
@@ -40,11 +40,11 @@ void FFT_Tree(int run, int run2, string tree_input) {
   }
   cout << "Calculating FFT with frequency of " << frequency << endl;
 
-  
-  //initialize important variables 
+
+  //initialize important variables
   TString evcut = "ErrorFlag==0";
-  int numevents = tree->Draw(Form("%s", plot1.c_str()), evcut, "goff"); 
-  int numevents2 = tree2->Draw(Form("%s", plot1.c_str()), evcut, "goff"); 
+  int numevents = tree->Draw(Form("%s", plot1.c_str()), evcut, "goff");
+  int numevents2 = tree2->Draw(Form("%s", plot1.c_str()), evcut, "goff");
   cout << "got number of events.." << endl;
   //float dataarray[4][numevents*4];
   //float dataarray2[4][numevents2*4];
@@ -60,7 +60,7 @@ void FFT_Tree(int run, int run2, string tree_input) {
   }
   */
 
-  
+
   //make and fill the data histogram
   TCanvas *fftdata = new TCanvas();
   //fftdata->Divide(2, 2);
@@ -115,7 +115,7 @@ void FFT_Tree(int run, int run2, string tree_input) {
   Double_t nbins2;
   Double_t scale = 1.0/sqrt(numevents);
   Double_t scale2 = 1.0/sqrt(numevents2);
-  
+
   for (int canv=0; canv<1; canv++) {
     ffthist[canv] = datahist[canv]->FFT(ffthist[canv], "MAG");
     ffthist_t2[canv] = datahist_t2[canv]->FFT(ffthist_t2[canv], "MAG");
@@ -135,20 +135,20 @@ void FFT_Tree(int run, int run2, string tree_input) {
   */
   nbins = xa1->GetNbins();
   nbins2 = xa1_t2->GetNbins();
-  
- 
-  TH1D *scaled1 = new TH1D("scaled1", Form("%s", plot1.c_str()) ,nbins,1,frequency); 
-  TH1D *scaled1_t2 = new TH1D("scaled1", Form("%s", plot1.c_str()) ,nbins2,1,frequency); 
-  TH1D *scaled2 = new TH1D("scaled2", Form("%s", plot2.c_str()) ,nbins,1,frequency); 
+
+
+  TH1D *scaled1 = new TH1D("scaled1", Form("%s", plot1.c_str()) ,nbins,1,frequency);
+  TH1D *scaled1_t2 = new TH1D("scaled1", Form("%s", plot1.c_str()) ,nbins2,1,frequency);
+  TH1D *scaled2 = new TH1D("scaled2", Form("%s", plot2.c_str()) ,nbins,1,frequency);
   TH1D *scaled3 = new TH1D("scaled3", Form("%s", plot3.c_str()) ,nbins,1,frequency);
-  TH1D *scaled4 = new TH1D("scaled4", Form("%s", plot4.c_str()) ,nbins,1,frequency); 
-  TH1D *scaled2_t2 = new TH1D("scaled2", Form("%s", plot2.c_str()) ,nbins2,1,frequency); 
+  TH1D *scaled4 = new TH1D("scaled4", Form("%s", plot4.c_str()) ,nbins,1,frequency);
+  TH1D *scaled2_t2 = new TH1D("scaled2", Form("%s", plot2.c_str()) ,nbins2,1,frequency);
   TH1D *scaled3_t2 = new TH1D("scaled3", Form("%s", plot3.c_str()) ,nbins2,1,frequency);
-  TH1D *scaled4_t2 = new TH1D("scaled4", Form("%s", plot4.c_str()) ,nbins2,1,frequency); 
+  TH1D *scaled4_t2 = new TH1D("scaled4", Form("%s", plot4.c_str()) ,nbins2,1,frequency);
   TH1D *scaled[4] = {scaled1, scaled2, scaled3, scaled4};
   TH1D *scaled_t2[4] = {scaled1_t2, scaled2_t2, scaled3_t2, scaled4_t2};
-  
-  
+
+
   for(int canv=0; canv<1; canv++) {
     for(int event=0; event<nbins; event++ ) {
       scaled[canv]->SetBinContent(event+1, scale*ffthist[canv]->GetBinContent(event+1));
@@ -206,12 +206,9 @@ void FFT_Tree(int run, int run2, string tree_input) {
 
 
 
-  
 
-  
+
+
 
 
 }
-  
-  
- 

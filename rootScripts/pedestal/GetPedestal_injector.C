@@ -1,13 +1,13 @@
 // jaPAN Macro Script - BPM Pedestal Scan for injector
 void GetPedestal_injector(int run_num = 1, TString user_cut ="1",Double_t lowcurrent=0){
   gROOT->SetStyle("Plain");
-  // define style here 
+  // define style here
   // general parameters
   gStyle->SetOptDate(0);
   gStyle->SetStatColor(10);
   gStyle->SetStatH(0.2);
   gStyle->SetStatW(0.3);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(1011);
   gStyle->SetStatX(0.7);
   gStyle->SetStatY(0.9);
@@ -15,8 +15,8 @@ void GetPedestal_injector(int run_num = 1, TString user_cut ="1",Double_t lowcur
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
   // pads parameters
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -25,22 +25,22 @@ void GetPedestal_injector(int run_num = 1, TString user_cut ="1",Double_t lowcur
   gStyle->SetLabelSize(0.035,"x");
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.06,"hxyz");
-  gROOT->ForceStyle();  
-  
+  gROOT->ForceStyle();
+
   TString rf_name =Form("../rootfiles/prexinj_%d.root",run_num);
   TFile *rootfile = TFile::Open(rf_name);
   TTree *mps = rootfile->Get("Mps_Tree");
 
   user_cut += "&& cleandata";
-  
+
   // Extract scandata1
   mps->Draw("scandata1>>htemp",user_cut.Data(),"goff");
   int nbinx = (int)htemp->GetXaxis()->GetXmax();
 
   vector<int> vec_scandata;
-  TH1D *hsd = new TH1D("hsd","scan data",nbinx,-0.5,nbinx-0.5); 
+  TH1D *hsd = new TH1D("hsd","scan data",nbinx,-0.5,nbinx-0.5);
   mps->Draw("scandata1>>hsd",user_cut.Data(),"goff");
-  int bin_content; 
+  int bin_content;
   double bin_center;
   for(int ibin=0;ibin<nbinx;ibin++){
     bin_content = hsd->GetBinContent(ibin+1); // Histogram bin number starts from 1
@@ -60,7 +60,7 @@ void GetPedestal_injector(int run_num = 1, TString user_cut ="1",Double_t lowcur
       ndata_fit++;
   }
   int startpt = ndata - ndata_fit;  //starting point in a data array for fitting
-  
+
   // BPM device array for injector data, August 2018
   const int nBPM=21;
   TString device_name[nBPM]={"0i01a","1i04", //ADC0
@@ -74,7 +74,7 @@ void GetPedestal_injector(int run_num = 1, TString user_cut ="1",Double_t lowcur
 			     "0l08","0l09", //ADC8
 			     "0l10","2i02", //ADC9
 			     "2i01"}; //ADC10
-  
+
   TString ch_name[4]={"XP","XM","YP","YM"};
 
   TCanvas *c_fit = new TCanvas("c_fit","c_fit",800,800);
@@ -82,17 +82,17 @@ void GetPedestal_injector(int run_num = 1, TString user_cut ="1",Double_t lowcur
 
   TCanvas *c_res = new TCanvas("c_res","c_res",800,800);
   c_res->Divide(2,2);
-  
+
   TF1 *f_zero = new TF1("f_zero","0",0,100);
   f_zero->SetLineWidth(2);
   f_zero->SetLineColor(kRed);
   f_zero->SetLineStyle(9);
-  
+
   TString branch_name;
   TString num_samples_name;
-  
+
   TString my_cut; // cut for extracting each scan data point
-  
+
   double adc_mean[4][ndata];
   double adc_error[4][ndata];
   double adc_res[4][ndata]; // residual
@@ -105,15 +105,15 @@ void GetPedestal_injector(int run_num = 1, TString user_cut ="1",Double_t lowcur
   double slope[nBPM][4];
 
   TGraphErrors *g_res[4];
-  TGraphErrors *g_fit[4];  
+  TGraphErrors *g_fit[4];
   TGraphErrors *g_res_ref[4];
   TGraphErrors *g_fit_ref[4];
   TMultiGraph *mg_res[4];
   TMultiGraph *mg_fit[4];
-  
+
   for(int ibpm=0;ibpm<nBPM;ibpm++){
     for(int ich=0;ich<4;ich++){
-      
+
       branch_name = Form("bpm%s%s.hw_sum_raw/bpm%s%s.num_samples",
 			 device_name[ibpm].Data(),ch_name[ich].Data(),
       			 device_name[ibpm].Data(),ch_name[ich].Data());
@@ -127,7 +127,7 @@ void GetPedestal_injector(int run_num = 1, TString user_cut ="1",Double_t lowcur
 	adc_error[ich][i] = h_stat->GetRMS()/TMath::Sqrt(h_stat->GetEntries());
       }
       c_fit->cd(ich+1);
-      
+
       mg_fit[ich] = new TMultiGraph();
       g_fit[ich] = new TGraphErrors(ndata-startpt,scandata+startpt,adc_mean[ich]+startpt,scandata_error+startpt,adc_error[ich]+startpt);
       g_fit_ref[ich] = new TGraphErrors(startpt,scandata,adc_mean[ich],scandata_error,adc_error[ich]);
@@ -139,7 +139,7 @@ void GetPedestal_injector(int run_num = 1, TString user_cut ="1",Double_t lowcur
       mg_fit[ich]->Draw("AP");
       gfit_title[ich] = Form("%s;scandata1; Raw ADC",branch_name.Data());
       mg_fit[ich]->SetTitle(gfit_title[ich].Data());
-      
+
       g_fit[ich]->Fit("pol1","Q");
       f_fit = g_fit[ich]->GetFunction("pol1");
       f_fit->SetLineColor(kRed);
@@ -147,7 +147,7 @@ void GetPedestal_injector(int run_num = 1, TString user_cut ="1",Double_t lowcur
       f_fit->Draw("same");
       ped[ibpm][ich] = f_fit->GetParameter(0);
       slope[ibpm][ich] = f_fit->GetParameter(1);
-      
+
       for(int i=0;i<ndata;i++){
 	adc_res[ich][i] = adc_mean[ich][i] - f_fit(scandata[i]);
       }

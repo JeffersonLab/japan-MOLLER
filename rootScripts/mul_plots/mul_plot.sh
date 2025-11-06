@@ -25,7 +25,7 @@ check_file_existance() {
       fi
 
       if [ -f "$1" ]; then
-        read -p "file $1 already exist, do you want to remove it? [yn] " yesno 
+        read -p "file $1 already exist, do you want to remove it? [yn] " yesno
         case $yesno in
         [yY*])
           echo "removing $1 now..."
@@ -197,4 +197,4 @@ echo "Find valid run list: " ${runs[@]}
 check_file_existance "${name_prefix}_mul_tree.root"
 ./make_mul_tree -n "$name_prefix" ${runs[@]}
 mv "${name_prefix}_mul_tree.root" results/
-# ./draw_mul_plots_sign_corredted "$name_prefix" "reg_results/${start_run}-${end_run}_regress_postpan.root" 
+# ./draw_mul_plots_sign_corredted "$name_prefix" "reg_results/${start_run}-${end_run}_regress_postpan.root"

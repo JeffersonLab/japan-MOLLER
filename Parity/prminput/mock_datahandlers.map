@@ -18,8 +18,12 @@
   slope-file-suff = new.slope.root
   slope-path = .
   alias-file-base = regalias_
-  alias-file-suff = 
+  alias-file-suff =
   alias-path = .
   disable-histos = true
   tree-name  = lrb_std
- tree-comment = Correlations
+  tree-comment = Correlations
+
+[QwCombiner]
+  name = beamline_combiner
+  map  = mock_beamline_combiner.map

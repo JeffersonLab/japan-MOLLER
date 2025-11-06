@@ -5,8 +5,7 @@
 * Time-stamp:                                             *
 \**********************************************************/
 
-#ifndef __QwHELICITYBASE__
-#define __QwHELICITYBASE__
+#pragma once
 
 // System headers
 #include <vector>
@@ -59,11 +58,11 @@ class QwHelicityBase: public VQwSubsystemParity{
     return kFALSE;
   };
 
-  void IncrementErrorCounters();
-  void PrintErrorCounters() const;// report number of events failed due to HW and event cut failure, derived from VQwSubsystemParity
-  UInt_t  GetEventcutErrorFlag();//return the error flag
+  void IncrementErrorCounters() override;
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure, derived from VQwSubsystemParity
+  UInt_t  GetEventcutErrorFlag() override;//return the error flag
   //update the error flag in the subsystem level from the top level routines related to stability checks. This will uniquely update the errorflag at each channel based on the error flag in the corresponding channel in the ev_error subsystem
-  void UpdateErrorFlag(const VQwSubsystem *ev_error){
+  void UpdateErrorFlag(const VQwSubsystem *ev_error) override{
   };
 
   Int_t  ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id,
@@ -98,30 +97,37 @@ class QwHelicityBase: public VQwSubsystemParity{
   void SetFirstBits(UInt_t nbits, UInt_t firstbits);
   void SetEventPatternPhase(Int_t event, Int_t pattern, Int_t phase);
 
-virtual  VQwSubsystem&  operator=  (VQwSubsystem *value);
-virtual  VQwSubsystem&  operator+=  (VQwSubsystem *value);
+ VQwSubsystem&  operator=  (VQwSubsystem *value) override;
+ VQwSubsystem&  operator+=  (VQwSubsystem *value) override;
 
   //the following functions do nothing really : adding and subtracting helicity doesn't mean anything
-virtual  VQwSubsystem& operator-= (VQwSubsystem *value) {return *this;};
-  void  Scale(Double_t factor) {return;};
-  void  Ratio(VQwSubsystem *numer, VQwSubsystem *denom);
+virtual  VQwSubsystem& operator-= (VQwSubsystem *value) override {return *this;};
+  void  Scale(Double_t factor) override {return;};
+  void  Ratio(VQwSubsystem *numer, VQwSubsystem *denom) override;
   // end of "empty" functions
 
-  void  AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
+  void  AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override;
   //remove one entry from the running sums for devices
-  void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF){
+  void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF) override{
   };
-  void  CalculateRunningAverage() { };
+  void  CalculateRunningAverage() override { };
 
   using VQwSubsystem::ConstructHistograms;
-  void  ConstructHistograms(TDirectory *folder, TString &prefix);
-  void  FillHistograms();
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
+  void  FillHistograms() override;
+
 
   using VQwSubsystem::ConstructBranchAndVector;
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
-  void  ConstructBranch(TTree *tree, TString &prefix);
-  void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file);
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override;
+  void  ConstructBranch(TTree *tree, TString &prefix) override;
+  void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file) override;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const override;
+
+#ifdef HAS_RNTUPLE_SUPPORT
+  using VQwSubsystem::ConstructNTupleAndVector;
+  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
+  void  FillNTupleVector(std::vector<Double_t>& values) const override;
+#endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
   void  FillDB(QwParityDB *db, TString type);
@@ -280,8 +286,3 @@ virtual  VQwSubsystem& operator-= (VQwSubsystem *value) {return *this;};
   }
 
 };
-
-
-#endif
-
-

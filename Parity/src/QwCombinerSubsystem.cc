@@ -1,8 +1,8 @@
-/*
- * QwCombinerSubsystem.cc
- *
- *  Created on: Aug 11, 2011
- *      Author: meeker
+/*!
+ * \file   QwCombinerSubsystem.cc
+ * \brief  Implementation of combiner subsystem for parity analysis
+ * \author meeker
+ * \date   2011-08-11
  */
 
 #include "QwCombinerSubsystem.h"
@@ -11,19 +11,17 @@
 #include "QwSubsystemArrayParity.h"
 #include "QwParameterFile.h"
 
-RegisterSubsystemFactory(QwCombinerSubsystem);
-
 
 QwCombinerSubsystem::~QwCombinerSubsystem()
 {
 }
 
-struct null_deleter { 
+struct null_deleter {
   void operator()(void const *) const { }
 };
 
-boost::shared_ptr<VQwSubsystem> QwCombinerSubsystem::GetSharedPointerToStaticObject(){
-  boost::shared_ptr<VQwSubsystem> px(this, null_deleter());
+std::shared_ptr<VQwSubsystem> QwCombinerSubsystem::GetSharedPointerToStaticObject(){
+  std::shared_ptr<VQwSubsystem> px(this, null_deleter());
   return px;
 }
 
@@ -91,12 +89,12 @@ void QwCombinerSubsystem::Ratio(VQwSubsystem* value1, VQwSubsystem* value2)
 
 
 void QwCombinerSubsystem::Scale(Double_t value)
-{ 
+{
   for(size_t i = 0; i < this->fDependentVar.size(); i++)
   {
     this->fOutputVar.at(i)->Scale(value);
   }
-  
+
 };
 
 void QwCombinerSubsystem::AccumulateRunningSum(VQwSubsystem* input, Int_t count, Int_t ErrorMask)
@@ -158,7 +156,7 @@ void QwCombinerSubsystem::ConstructBranch(TTree *tree, TString & prefix)
 void QwCombinerSubsystem::ConstructBranch(TTree *tree, TString & prefix, QwParameterFile& trim_file)
 {
   TString tmp;
-  QwParameterFile* nextmodule;
+  std::unique_ptr<QwParameterFile> nextmodule;
   trim_file.RewindToFileStart();
   tmp="Combiner";
   trim_file.RewindToFileStart();
@@ -180,15 +178,15 @@ void QwCombinerSubsystem::UpdateErrorFlag(const VQwSubsystem *ev_error){
   /// TODO:  Write QwCombinerSubsystem::UpdateErrorFlag
   //if (Compare(ev_error)){
   //QwCombinerSubsystem* input = dynamic_cast<QwCombinerSubsystem*> (ev_error);
-  //}  
+  //}
 };
 
 
-/// DERIVED FUNCTIONS /// 
+/// DERIVED FUNCTIONS ///
 
 
 /*  All of the functions below are using generic
- * returns for testing purposes. 
+ * returns for testing purposes.
  */
 
 
@@ -211,7 +209,7 @@ Int_t QwCombinerSubsystem::LoadEventCuts(TString)
 {
   Int_t sample = 0;
   return sample;
-  
+
 }
 
 Int_t QwCombinerSubsystem::ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words)
@@ -240,9 +238,5 @@ void QwCombinerSubsystem::PrintErrorCounters() const
 UInt_t QwCombinerSubsystem::GetEventcutErrorFlag()
 {
     return 0;
-  
+
 }
-
-
-
-

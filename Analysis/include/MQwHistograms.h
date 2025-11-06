@@ -1,5 +1,9 @@
-#ifndef __MQWHISTOGRAMS__
-#define __MQWHISTOGRAMS__
+/*!
+ * \file   MQwHistograms.h
+ * \brief  Mix-in class for histogram management functionality
+ */
+
+#pragma once
 
 // System headers
 #include <vector>
@@ -10,11 +14,20 @@
 // Qweak headers
 #include "QwLog.h"
 
+/**
+ * \class MQwHistograms
+ * \ingroup QwAnalysis
+ * \brief Mix-in class providing histogram management functionality
+ *
+ * Provides a common interface for data elements that need to create
+ * and fill ROOT histograms. Manages histogram pointers and provides
+ * utilities for histogram registration and sharing between objects.
+ */
 class MQwHistograms {
 
     /// Regular pointers for the histograms
     typedef TH1* TH1_ptr;
-    // Shared pointers (boost::shared_ptr) are not advisable
+    // Shared pointers (std::shared_ptr) are not advisable
     // because ROOT keep ownership of all histograms.  They
     // are automatically deleted when ROOT closes the file.
     // If we put them in a shared_ptr here, they would be
@@ -31,13 +44,16 @@ class MQwHistograms {
 
     /// Arithmetic assignment operator:  Should only copy event-based data.
     /// In this particular class, there is no event-based data.
-    virtual MQwHistograms& operator=(const MQwHistograms& value) {
+    MQwHistograms& operator=(const MQwHistograms& value) {
+      if (this != &value) {
+        // No event-based data to copy in this class
+      }
       return *this;
     }
 
     inline void Fill_Pointer(TH1_ptr hist_ptr, Double_t value){
-      if (hist_ptr != NULL){
-	hist_ptr->Fill(value);
+      if (hist_ptr != nullptr){
+        hist_ptr->Fill(value);
       }
     }
 
@@ -49,6 +65,7 @@ class MQwHistograms {
     /// Register a histogram
     void AddHistogram(TH1* h) {
       fHistograms.push_back(TH1_ptr(h));
+	  fHistograms.back()->SetBuffer(1000);
     }
 
   public:
@@ -57,7 +74,4 @@ class MQwHistograms {
       if (source) fHistograms = source->fHistograms;
     }
 
-
 }; // class MQwHistograms
-
-#endif // __MQWHISTOGRAMS__

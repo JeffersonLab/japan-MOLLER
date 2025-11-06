@@ -1,15 +1,31 @@
+/*!
+ * \file   VQwDataserver.h
+ * \brief  Virtual base class for data server implementations
+ */
+
 #ifndef __VQwDataserver_h__
 #define __VQwDataserver_h__
 
 #include <iostream>
 
 #include "VQwSystem.h"
-//#include "QwHitContainer.h"
 
+/**
+ * \class VQwDataserver
+ * \ingroup QwAnalysis
+ * \brief Abstract base for data server implementations
+ *
+ * Provides the interface for data server classes that handle external
+ * data communication and publishing. Extends VQwSystem with server-specific
+ * functionality for data distribution and client management.
+ */
 class VQwDataserver : public VQwSystem {
 
   private:
     VQwDataserver& operator= (const VQwDataserver &value) {
+      if (this != &value) {
+        // Private assignment operator - no implementation needed
+      }
       return *this;
     };
 

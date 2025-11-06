@@ -1,3 +1,8 @@
+/*!
+ * \file   Coda2EventDecoder.cc
+ * \brief  CODA version 2 event decoder implementation
+ */
+
 #include "Coda2EventDecoder.h"
 #include "THaCodaFile.h"
 #include "QwOptions.h"
@@ -5,11 +10,7 @@
 #include <vector>
 #include <ctime>
 
-/**
- * @brief Creates PHYS Event EVIO Header
- * @param ROCList List of ROCS. Unused in Coda2 headers.
- * @return PHYS Event Header
- */
+// Creates PHYS Event EVIO Header. See header for parameters and return value.
 std::vector<UInt_t> Coda2EventDecoder::EncodePHYSEventHeader(std::vector<ROCID_t> &ROCList)
 {
 	std::vector<UInt_t> header;
@@ -24,13 +25,7 @@ std::vector<UInt_t> Coda2EventDecoder::EncodePHYSEventHeader(std::vector<ROCID_t
 	return header;
 }
 
-/**
- * @brief Creates Prestart Event EVIO Header
- * @param buffer Array of size 5 to store the Prestart Header
- * @param runnumber Number of the run
- * @param runtype Run type
- * @param localtime Event time
- */
+// Creates PRESTART Event EVIO Header. See header for parameters.
 void Coda2EventDecoder::EncodePrestartEventHeader(int* buffer, int runnumber, int runtype, int localtime)
 {
 	buffer[0] = 4; // Prestart event length
@@ -41,12 +36,7 @@ void Coda2EventDecoder::EncodePrestartEventHeader(int* buffer, int runnumber, in
   ProcessPrestart(localtime, runnumber, runtype);
 }
 
-/**
- * @brief Creates Go Event EVIO Header
- * @param buffer Array of size 5 to store the Go Header
- * @param eventcount Number of events 
- * @param localtime Event time
- */
+// Creates GO Event EVIO Header. See header for parameters.
 void Coda2EventDecoder::EncodeGoEventHeader(int* buffer, int eventcount, int localtime)
 {
 	buffer[0] = 4; // Go event length
@@ -57,12 +47,7 @@ void Coda2EventDecoder::EncodeGoEventHeader(int* buffer, int eventcount, int loc
   ProcessGo(localtime, eventcount);
 }
 
-/**
- * @brief Creates Pause Event EVIO Header
- * @param buffer Array of size 5 to store the Go Header
- * @param eventcount Number of events 
- * @param localtime Event time
- */
+// Creates PAUSE Event EVIO Header. See header for parameters.
 void Coda2EventDecoder::EncodePauseEventHeader(int* buffer, int eventcount, int localtime)
 {
 	buffer[0] = 4; // Pause event length
@@ -72,28 +57,19 @@ void Coda2EventDecoder::EncodePauseEventHeader(int* buffer, int eventcount, int 
 	buffer[4] = eventcount;
   ProcessPause(localtime, eventcount);
 }
- 
-/**
- * @brief Creates End Event EVIO Header
- * @param buffer Array of size 5 to store the End Header
- * @param eventcount Number of events 
- * @param localtime Event time
- */
+
+// Creates END Event EVIO Header. See header for parameters.
 void Coda2EventDecoder::EncodeEndEventHeader(int* buffer, int eventcount, int localtime)
 {
 	buffer[0] = 4; // End event length
 	buffer[1] = ((kEND_EVENT << 16) | (0x01 << 8) | 0xCC);
 	buffer[2] = localtime;
 	buffer[3] = 0; // unused
-	buffer[4] = eventcount; 
+	buffer[4] = eventcount;
   ProcessEnd(localtime, eventcount);
 }
 
-/**
- * @brief Determines if a buffer contains a PHYS event, Control Event, or some other event
- * @param buffer Event buffer to decode
- * @return CODA_OK
- */
+// Determine if a buffer contains a PHYS event, control event, or other event.
 Int_t Coda2EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 {
 
@@ -107,7 +83,7 @@ Int_t Coda2EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 			<< buffer[1] << " "
 			<< buffer[2] << " "
 			<< buffer[3] << " "
-			<< buffer[4] << std::dec 
+			<< buffer[4] << std::dec
 			<< QwLog::endl;
 
 	if ( buffer[0] == 0 ){
@@ -175,7 +151,7 @@ Int_t Coda2EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 			fWordsSoFar = (2);
 		}
 	}
-	//  Initialize the fragment size to the event size, in case the 
+	//  Initialize the fragment size to the event size, in case the
 	//  event is not subbanked.
 	fFragLength = fEvtLength-fWordsSoFar;
 	QwDebug << Form("buffer[0-1] 0x%x 0x%x ; ",
@@ -191,10 +167,7 @@ Int_t Coda2EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 	return CODA_OK;
 }
 
-/**
- * @brief Prints Internal Decoder Information
- * @param out Output buffer to use to dispay internal Decoder Information.\nCan be QwMessage, QwVerbose, QwWarning, or QwErrror.
- */
+// Print internal decoder information. See header for details.
 void Coda2EventDecoder::PrintDecoderInfo(QwLog& out)
 {
 

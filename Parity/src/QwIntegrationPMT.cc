@@ -10,6 +10,11 @@
 // System headers
 #include <stdexcept>
 
+// ROOT headers
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #ifdef __USE_DATABASE__
@@ -17,6 +22,10 @@
 #endif
 
 /********************************************************/
+/**
+ * \brief Set the pedestal value and propagate to the underlying ADC channel.
+ * \param pedestal Pedestal offset to apply to the raw signal.
+ */
 void QwIntegrationPMT::SetPedestal(Double_t pedestal)
 {
 	fPedestal=pedestal;
@@ -24,6 +33,10 @@ void QwIntegrationPMT::SetPedestal(Double_t pedestal)
 	return;
 }
 
+/**
+ * \brief Set the calibration factor and propagate to the underlying ADC channel.
+ * \param calib Multiplicative calibration factor.
+ */
 void QwIntegrationPMT::SetCalibrationFactor(Double_t calib)
 {
 	fCalibration=calib;
@@ -31,6 +44,11 @@ void QwIntegrationPMT::SetCalibrationFactor(Double_t calib)
 	return;
 }
 /********************************************************/
+/**
+ * \brief Initialize the PMT channel with a name and data-saving mode.
+ * \param name Detector name used for branches and histograms.
+ * \param datatosave Storage mode (e.g., "raw" or "derived").
+ */
 void  QwIntegrationPMT::InitializeChannel(TString name, TString datatosave)
 {
   SetPedestal(0.);
@@ -42,6 +60,12 @@ void  QwIntegrationPMT::InitializeChannel(TString name, TString datatosave)
   return;
 }
 /********************************************************/
+/**
+ * \brief Initialize the PMT channel with subsystem and name.
+ * \param subsystem Subsystem identifier for foldering.
+ * \param name Detector name used for branches and histograms.
+ * \param datatosave Storage mode (e.g., "raw" or "derived").
+ */
 void  QwIntegrationPMT::InitializeChannel(TString subsystem, TString name, TString datatosave)
 {
   SetPedestal(0.);
@@ -53,6 +77,13 @@ void  QwIntegrationPMT::InitializeChannel(TString subsystem, TString name, TStri
   return;
 }
 /********************************************************/
+/**
+ * \brief Initialize the PMT channel including an intermediate module tag.
+ * \param subsystem Subsystem identifier.
+ * \param module Module type tag used in ROOT foldering.
+ * \param name Detector name used for branches and histograms.
+ * \param datatosave Storage mode (e.g., "raw" or "derived").
+ */
 void  QwIntegrationPMT::InitializeChannel(TString subsystem, TString module, TString name, TString datatosave)
 {
   SetPedestal(0.);
@@ -64,52 +95,85 @@ void  QwIntegrationPMT::InitializeChannel(TString subsystem, TString module, TSt
   return;
 }
 /********************************************************/
+/** \brief Clear event-scoped data in the underlying ADC channel. */
 void QwIntegrationPMT::ClearEventData()
 {
   fTriumf_ADC.ClearEventData();
   return;
 }
 /********************************************************/
+/** \brief Print accumulated error counters for this PMT. */
 void QwIntegrationPMT::PrintErrorCounters(){
   fTriumf_ADC.PrintErrorCounters();
 }
 /********************************************************/
+/** \brief Use an external random variable source for mock data. */
 void QwIntegrationPMT::UseExternalRandomVariable()
 {
   fTriumf_ADC.UseExternalRandomVariable();
   return;
 }
 /********************************************************/
+/**
+ * \brief Set the external random variable to drive mock data.
+ * \param random_variable External random value.
+ */
 void QwIntegrationPMT::SetExternalRandomVariable(double random_variable)
 {
   fTriumf_ADC.SetExternalRandomVariable(random_variable);
   return;
 }
 /********************************************************/
+/**
+ * \brief Configure deterministic drift parameters applied per event.
+ * \param amplitude Drift amplitude.
+ * \param phase Drift phase in radians.
+ * \param frequency Drift frequency.
+ */
 void QwIntegrationPMT::SetRandomEventDriftParameters(Double_t amplitude, Double_t phase, Double_t frequency)
 {
   fTriumf_ADC.SetRandomEventDriftParameters(amplitude, phase, frequency);
   return;
 }
 /********************************************************/
+/**
+ * \brief Add additional drift parameters to the existing drift model.
+ * \param amplitude Drift amplitude.
+ * \param phase Drift phase in radians.
+ * \param frequency Drift frequency.
+ */
 void QwIntegrationPMT::AddRandomEventDriftParameters(Double_t amplitude, Double_t phase, Double_t frequency)
 {
   fTriumf_ADC.AddRandomEventDriftParameters(amplitude, phase, frequency);
   return;
 }
 /********************************************************/
+/**
+ * \brief Configure Gaussian mock data parameters.
+ * \param mean Mean of the generated distribution.
+ * \param sigma Standard deviation of the distribution.
+ */
 void QwIntegrationPMT::SetRandomEventParameters(Double_t mean, Double_t sigma)
 {
   fTriumf_ADC.SetRandomEventParameters(mean, sigma);
   return;
 }
 /********************************************************/
+/**
+ * \brief Set an asymmetry parameter applied to helicity states.
+ * \param asymmetry Fractional asymmetry to apply.
+ */
 void QwIntegrationPMT::SetRandomEventAsymmetry(Double_t asymmetry)
 {
   fTriumf_ADC.SetRandomEventAsymmetry(asymmetry);
   return;
 }
 /********************************************************/
+/**
+ * \brief Generate mock data for a single event.
+ * \param helicity Helicity state indicator.
+ * \param time Event time or timestamp proxy.
+ */
 void QwIntegrationPMT::RandomizeEventData(int helicity, double time)
 {
   fTriumf_ADC.RandomizeEventData(helicity, time);
@@ -117,6 +181,16 @@ void QwIntegrationPMT::RandomizeEventData(int helicity, double time)
 }
 
 /********************************************************/
+/**
+ * \brief Generate a mock MOLLER detector event using beam parameters.
+ * \param helicity Helicity state indicator.
+ * \param charge Beam charge reference.
+ * \param xpos Beam X position.
+ * \param ypos Beam Y position.
+ * \param xprime Beam X angle.
+ * \param yprime Beam Y angle.
+ * \param energy Beam energy reference.
+ */
 void QwIntegrationPMT::RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeamPosition& xpos, const QwBeamPosition& ypos, const QwBeamAngle& xprime, const QwBeamAngle& yprime, const QwBeamEnergy& energy)
 {
   QwMollerADC_Channel temp(this->fTriumf_ADC);
@@ -155,34 +229,51 @@ void QwIntegrationPMT::RandomizeMollerEvent(int helicity, const QwBeamCharge& ch
 
 
 /********************************************************/
+/**
+ * \brief Set the hardware-level sum measurement for a sequence.
+ * \param hwsum Hardware sum value.
+ * \param sequencenumber Sequence identifier.
+ */
 void QwIntegrationPMT::SetHardwareSum(Double_t hwsum, UInt_t sequencenumber)
 {
   fTriumf_ADC.SetHardwareSum(hwsum, sequencenumber);
   return;
 }
 
+/** \brief Get the integrated value over the current event window. */
 Double_t QwIntegrationPMT::GetValue()
 {
   return fTriumf_ADC.GetValue();
 }
 
+/**
+ * \brief Get the integrated value for a specific block.
+ * \param blocknum Block index within the event.
+ */
 Double_t QwIntegrationPMT::GetValue(Int_t blocknum)
 {
   return fTriumf_ADC.GetValue(blocknum);
 }
 
 /********************************************************/
+/**
+ * \brief Set the block data for the current event sequence.
+ * \param block Pointer to block data.
+ * \param sequencenumber Sequence identifier.
+ */
 void QwIntegrationPMT::SetEventData(Double_t* block, UInt_t sequencenumber)
 {
   fTriumf_ADC.SetEventData(block, sequencenumber);
   return;
 }
 /********************************************************/
+/** \brief Encode current event data into an output buffer. */
 void QwIntegrationPMT::EncodeEventData(std::vector<UInt_t> &buffer)
 {
   fTriumf_ADC.EncodeEventData(buffer);
 }
 /********************************************************/
+/** \brief Apply hardware checks and process the event for this PMT. */
 void  QwIntegrationPMT::ProcessEvent()
 {
   ApplyHWChecks();//first apply HW checks and update HW  error flags.
@@ -191,11 +282,15 @@ void  QwIntegrationPMT::ProcessEvent()
   return;
 }
 /********************************************************/
+/**
+ * \brief Apply hardware checks and return whether the event is valid.
+ * \return kTRUE if no hardware error was detected; otherwise kFALSE.
+ */
 Bool_t QwIntegrationPMT::ApplyHWChecks()
 {
   Bool_t eventokay=kTRUE;
 
-  UInt_t deviceerror=fTriumf_ADC.ApplyHWChecks();//will check for consistancy between HWSUM and SWSUM also check for sample size
+  UInt_t deviceerror=fTriumf_ADC.ApplyHWChecks();//will check for consistency between HWSUM and SWSUM also check for sample size
   eventokay=(deviceerror & 0x0);//if no HW error return true
 
 
@@ -203,12 +298,26 @@ Bool_t QwIntegrationPMT::ApplyHWChecks()
 }
 /********************************************************/
 
-Int_t QwIntegrationPMT::SetSingleEventCuts(Double_t LL=0, Double_t UL=0){//std::vector<Double_t> & dEventCuts){//two limts and sample size
+/**
+ * \brief Set basic single-event cut limits.
+ * \param LL Lower limit.
+ * \param UL Upper limit.
+ * \return 1 on success.
+ */
+Int_t QwIntegrationPMT::SetSingleEventCuts(Double_t LL=0, Double_t UL=0){//std::vector<Double_t> & dEventCuts){//two limits and sample size
   fTriumf_ADC.SetSingleEventCuts(LL,UL);
   return 1;
 }
 
 /********************************************************/
+/**
+ * \brief Configure detailed single-event cuts for this PMT.
+ * \param errorflag Device-specific error flag mask to set.
+ * \param LL Lower limit.
+ * \param UL Upper limit.
+ * \param stability Stability threshold.
+ * \param burplevel Burp detection threshold.
+ */
 void QwIntegrationPMT::SetSingleEventCuts(UInt_t errorflag, Double_t LL=0, Double_t UL=0, Double_t stability=0, Double_t burplevel=0){
   //set the unique tag to identify device type (bcm,bpm & etc)
   errorflag|=kPMTErrorFlag;
@@ -219,17 +328,23 @@ void QwIntegrationPMT::SetSingleEventCuts(UInt_t errorflag, Double_t LL=0, Doubl
 
 /********************************************************/
 
+/** \brief Set the default sample size used by the ADC channel. */
 void QwIntegrationPMT::SetDefaultSampleSize(Int_t sample_size){
  fTriumf_ADC.SetDefaultSampleSize((size_t)sample_size);
 }
 
 /********************************************************/
+/** \brief Set the saturation voltage limit for the ADC front-end. */
 void QwIntegrationPMT::SetSaturationLimit(Double_t saturation_volt){
   fTriumf_ADC.SetMollerADCSaturationLimt(saturation_volt);
 }
 //*/
 
 /********************************************************/
+/**
+ * \brief Apply single-event cuts for this PMT and return pass/fail.
+ * \return kTRUE if event passes, otherwise kFALSE.
+ */
 Bool_t QwIntegrationPMT::ApplySingleEventCuts(){
 
 
@@ -250,12 +365,18 @@ Bool_t QwIntegrationPMT::ApplySingleEventCuts(){
 
 /********************************************************/
 
-void QwIntegrationPMT::PrintErrorCounters() const{// report number of events failed due to HW and event cut faliure
+/** \brief Print error counters (const overload). */
+void QwIntegrationPMT::PrintErrorCounters() const{// report number of events failed due to HW and event cut failure
   fTriumf_ADC.PrintErrorCounters();
 }
 
 /*********************************************************/
 
+/**
+ * \brief Check for burp failures by comparing against a reference PMT.
+ * \param ev_error Reference PMT to compare error conditions.
+ * \return kTRUE if a burp failure was detected; otherwise kFALSE.
+ */
 Bool_t QwIntegrationPMT::CheckForBurpFail(const VQwDataElement *ev_error){
   Bool_t burpstatus = kFALSE;
   try {
@@ -263,7 +384,7 @@ Bool_t QwIntegrationPMT::CheckForBurpFail(const VQwDataElement *ev_error){
       //std::cout<<" Here in QwIntegrationPMT::CheckForBurpFail \n";
       if (this->GetElementName()!="") {
         const QwIntegrationPMT* value_pmt = dynamic_cast<const QwIntegrationPMT* >(ev_error);
-        burpstatus |= fTriumf_ADC.CheckForBurpFail(&(value_pmt->fTriumf_ADC)); 
+        burpstatus |= fTriumf_ADC.CheckForBurpFail(&(value_pmt->fTriumf_ADC));
       }
     } else {
       TString loc="Standard exception from QwIntegrationPMT::CheckForBurpFail :"+
@@ -278,6 +399,10 @@ Bool_t QwIntegrationPMT::CheckForBurpFail(const VQwDataElement *ev_error){
 };
 
 /********************************************************/
+/**
+ * \brief Merge error flags from a reference PMT into this instance.
+ * \param ev_error Reference PMT whose flags are merged.
+ */
 void QwIntegrationPMT::UpdateErrorFlag(const QwIntegrationPMT* ev_error){
   try {
     if(typeid(*ev_error)==typeid(*this)) {
@@ -293,12 +418,16 @@ void QwIntegrationPMT::UpdateErrorFlag(const QwIntegrationPMT* ev_error){
     }
   } catch (std::exception& e) {
     std::cerr<< e.what()<<std::endl;
-  }  
+  }
 };
 
 /********************************************************/
 
 
+/**
+ * \brief Process the raw event buffer and decode into the ADC channel.
+ * \return The updated buffer word position.
+ */
 Int_t QwIntegrationPMT::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement)
 {
   fTriumf_ADC.ProcessEvBuffer(buffer,word_position_in_buffer);
@@ -307,6 +436,7 @@ Int_t QwIntegrationPMT::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_
 }  Double_t fULimit, fLLimit;
 
 /********************************************************/
+/** \brief Copy-assign from another PMT (event-scoped data). */
 QwIntegrationPMT& QwIntegrationPMT::operator= (const QwIntegrationPMT &value)
 {
 //   std::cout<<" Here in QwIntegrationPMT::operator= \n";
@@ -324,6 +454,7 @@ QwIntegrationPMT& QwIntegrationPMT::operator= (const QwIntegrationPMT &value)
   return *this;
 }
 
+/** \brief Add-assign from another PMT (sum raw channels). */
 QwIntegrationPMT& QwIntegrationPMT::operator+= (const QwIntegrationPMT &value)
 {
   if (GetElementName()!="")
@@ -344,6 +475,16 @@ QwIntegrationPMT& QwIntegrationPMT::operator-= (const QwIntegrationPMT &value)
       this->fCalibration=0;
     }
   return *this;
+}
+
+void QwIntegrationPMT::Sum(const QwIntegrationPMT &value1, const QwIntegrationPMT &value2) {
+  *this = value1;
+  *this += value2;
+}
+
+void QwIntegrationPMT::Difference(const QwIntegrationPMT &value1, const QwIntegrationPMT &value2) {
+  *this = value1;
+  *this -= value2;
 }
 
 void QwIntegrationPMT::Ratio(QwIntegrationPMT &numer, QwIntegrationPMT &denom)
@@ -385,13 +526,13 @@ void QwIntegrationPMT::PrintInfo() const
   //std::cout<<" Running AVG "<<GetElementName()<<" current running AVG "<<IntegrationPMT_Running_AVG<<std::endl;
   std::cout<<"QwMollerADC_Channel Info " <<std::endl;
   fTriumf_ADC.PrintInfo();
-  std::cout<< "Blindability is "    << (fIsBlindable?"TRUE":"FALSE") 
+  std::cout<< "Blindability is "    << (fIsBlindable?"TRUE":"FALSE")
 	   <<std::endl;
   std::cout<< "Normalizability is " << (fIsNormalizable?"TRUE":"FALSE")
 	   <<std::endl;
-  std::cout << "fNormRate=" << fNormRate << "fVoltPerHz=" << fVoltPerHz 
-            << " Asym=" << fAsym << " C_x=" << fCoeff_x << " C_y=" << fCoeff_y 
-            << " C_xp=" << fCoeff_xp << " C_yp=" << fCoeff_yp 
+  std::cout << "fNormRate=" << fNormRate << "fVoltPerHz=" << fVoltPerHz
+            << " Asym=" << fAsym << " C_x=" << fCoeff_x << " C_y=" << fCoeff_y
+            << " C_xp=" << fCoeff_xp << " C_yp=" << fCoeff_yp
             << " C_e=" << fCoeff_e << std::endl;
   return;
 }
@@ -425,7 +566,7 @@ void  QwIntegrationPMT::FillHistograms()
   return;
 }
 
-void  QwIntegrationPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwIntegrationPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
@@ -465,7 +606,7 @@ void  QwIntegrationPMT::ConstructBranch(TTree *tree, TString &prefix, QwParamete
 }
 
 
-void  QwIntegrationPMT::FillTreeVector(std::vector<Double_t> &values) const
+void  QwIntegrationPMT::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
@@ -473,6 +614,27 @@ void  QwIntegrationPMT::FillTreeVector(std::vector<Double_t> &values) const
     fTriumf_ADC.FillTreeVector(values);
   }
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwIntegrationPMT::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip RNTuple construction.
+  } else
+    {
+      fTriumf_ADC.ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+    }
+}
+
+void QwIntegrationPMT::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip filling the RNTuple.
+  } else {
+    fTriumf_ADC.FillNTupleVector(values);
+  }
+}
+#endif // HAS_RNTUPLE_SUPPORT
 
 void QwIntegrationPMT::CalculateRunningAverage()
 {

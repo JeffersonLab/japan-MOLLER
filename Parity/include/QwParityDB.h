@@ -6,22 +6,15 @@
  * \date   2010-01-07
  */
 
+#pragma once
+
 #ifdef __USE_DATABASE__
-#ifndef QWPARITYDB_HH
-#define QWPARITYDB_HH
 
 // System headers
 #include <map>
 #include <vector>
 #include <string>
 #include <typeinfo>
-
-// Third Party Headers
-#ifdef __USE_DATABASE__
-#pragma GCC diagnostic ignored "-Wdeprecated"
-#include <mysql++.h>
-#pragma GCC diagnostic pop
-#endif // __USE_DATABASE__
 
 // ROOT headers
 #include "TString.h"
@@ -33,8 +26,6 @@
 #include "QwOptions.h"
 #include "QwDatabase.h"
 #include "QwSubsystemArrayParity.h"
-
-//#include "QwParitySSQLS.h"
 #include "QwDBInterface.h"
 
 // Forward declarations
@@ -51,6 +42,15 @@ class QwEventBuffer;
  *
  */
 
+/**
+ * \class QwParityDB
+ * \ingroup QwAnalysis_BL
+ * \brief Database interface specialized for parity analysis metadata
+ *
+ * Extends QwDatabase to provide convenience getters for detector IDs,
+ * run/runlet/analysis identifiers, and to populate parameter files
+ * for the parity analyzer subsystems.
+ */
 class QwParityDB: public QwDatabase {
   public:
 
@@ -68,7 +68,7 @@ class QwParityDB: public QwDatabase {
     const string GetMeasurementID(const Int_t index);
     UInt_t GetSlowControlDetectorID(const string& name);         //<! Get slow_controls_data_id for epics name
     UInt_t GetErrorCodeID(const string& name);         //<! Get error_code_id for error code name
-    
+
     UInt_t GetRunNumber() {return fRunNumber;}       //<! Run number getter
     UInt_t GetSegmentNumber() {return fSegmentNumber;}       //<! CODA File segment number getter
     UInt_t GetRunID()     {return fRunID;}           //<! Run ID getter
@@ -118,7 +118,4 @@ class QwParityDB: public QwDatabase {
     friend class StoreErrorCodeID;
 };
 
-
-#endif
-
-#endif // #ifdef __USE_DATABASE__                                                                                                         
+#endif // #ifdef __USE_DATABASE__

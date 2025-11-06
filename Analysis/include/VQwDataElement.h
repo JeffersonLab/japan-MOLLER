@@ -6,12 +6,13 @@
  * \date   2007-05-08 15:40
  */
 
-#ifndef __VQWDATAELEMENT__
-#define __VQWDATAELEMENT__
+#pragma once
 
 // System headers
 #include <vector>
 #include <iostream>
+#include <stdexcept>
+#include <string>
 
 // Root headers
 #include "Rtypes.h"
@@ -25,26 +26,53 @@
 
 class QwParameterFile;
 class VQwHardwareChannel;
+class QwRootTreeBranchVector;
 
 /**
  *  \class   VQwDataElement
  *  \ingroup QwAnalysis
  *  \brief   The pure virtual base class of all data elements
  *
- * Each stream of data inherits from this virtual base class, which requires
- * some standard operations on it such as ratios, summing, subtraction.  The
- * specific implementation of those operation is left to be implemented by the
- * implemented inherited classes, but this class sets up the structure.
+ * This abstract base defines the fundamental interface for all data-carrying
+ * objects in the JAPAN-MOLLER framework. It establishes the dual-operator
+ * architectural pattern where derived classes must implement both type-specific
+ * and polymorphic versions of arithmetic operations.
  *
- * As an example, all individual VQWK channels inherit from this class and
- * implement the pure virtual functions of VQwDataElement.
+ * \par Architectural Design - Dual-Operator Pattern:
+ * VQwDataElement enforces a specific design where operators, Sum, Difference,
+ * Ratio, SetSingleEventCuts, and CheckForBurpFail are **non-virtual and throw
+ * runtime errors** in the base class. This forces derived classes to implement
+ * the complete dual-operator pattern:
+ *
+ * - **Type-specific operators**: `Derived& operator+=(const Derived&)`
+ * - **Polymorphic operators**: `Base& operator+=(const Base&)` that delegate
+ *   via dynamic_cast to the type-specific version
+ *
+ * \par Implementation Requirements:
+ * Derived classes must override:
+ * - `operator+=`, `operator-=` (both type-specific and polymorphic versions)
+ * - `Sum()`, `Difference()`, `Ratio()` (both versions)
+ * - `SetSingleEventCuts()`, `CheckForBurpFail()` (both versions)
+ * - `UpdateErrorFlag()` (with appropriate delegation)
+ *
+ * \par Representative Example:
+ * See QwVQWK_Channel for the canonical implementation of this pattern.
+ * It demonstrates the complete dual-operator approach with proper
+ * dynamic_cast delegation and error handling.
+ *
+ * \par Error Handling Strategy:
+ * Base class methods throw std::runtime_error to catch implementation
+ * gaps early during development. This prevents silent fallbacks and
+ * ensures all derived classes implement the required functionality.
  *
  * \dot
  * digraph example {
  *   node [shape=box, fontname=Helvetica, fontsize=10];
- *   VQwDataElement [ label="VQwDataElement" URL="\ref VQwDataElement"];
- *   QwVQWK_Channel [ label="QwVQWK_Channel" URL="\ref QwVQWK_Channel"];
+ *   VQwDataElement [ label="VQwDataElement\n(throws on operators)" URL="\ref VQwDataElement"];
+ *   QwVQWK_Channel [ label="QwVQWK_Channel\n(canonical example)" URL="\ref QwVQWK_Channel"];
+ *   QwMollerADC_Channel [ label="QwMollerADC_Channel" URL="\ref QwMollerADC_Channel"];
  *   VQwDataElement -> QwVQWK_Channel;
+ *   VQwDataElement -> QwMollerADC_Channel;
  * }
  * \enddot
  */
@@ -80,9 +108,9 @@ class VQwDataElement: public MQwHistograms {
     fErrorConfigFlag(value.fErrorConfigFlag)
     { };
   /// Virtual destructor
-  virtual ~VQwDataElement() { };
+  ~VQwDataElement() override { };
 
-  virtual void CopyFrom(const VQwDataElement& value){
+  void CopyFrom(const VQwDataElement& value){
     fElementName       = value.fElementName;
     //    fNumberOfDataWords = value.fNumberOfDataWords;
     fGoodEventCount    = value.fGoodEventCount;
@@ -99,9 +127,9 @@ class VQwDataElement: public MQwHistograms {
   /*! \brief Get the name of this element */
   virtual const TString& GetElementName() const { return fElementName; }
 
-  virtual void LoadChannelParameters(QwParameterFile &paramfile){};
+  virtual void LoadChannelParameters(QwParameterFile & /*paramfile*/){};
 
-  virtual void LoadMockDataParameters(QwParameterFile &paramfile) {
+  virtual void LoadMockDataParameters(QwParameterFile & /*paramfile*/) {
   std::cerr << "LoadMockDataParameters is not defined!" << std::endl;
   };
 
@@ -117,35 +145,27 @@ class VQwDataElement: public MQwHistograms {
 
   UInt_t GetGoodEventCount() const { return fGoodEventCount; };
 
-  
-  virtual void AssignValueFrom(const VQwDataElement* valueptr){
+
+  virtual void AssignValueFrom(const VQwDataElement* /*valueptr*/){
     std::cerr << "Operation AssignValueFrom not defined!" << std::endl;
   };
 
   /*! \brief Addition-assignment operator */
-  virtual VQwDataElement& operator+= (const VQwDataElement &value)
-    { std::cerr << "Operation += not defined!" << std::endl; return *this; }
+  VQwDataElement& operator+= (const VQwDataElement & /*value*/)
+    { throw std::runtime_error(std::string("VQwDataElement::operator+= not implemented for ") + GetElementName().Data()); }
   /*! \brief Subtraction-assignment operator */
-  virtual VQwDataElement& operator-= (const VQwDataElement &value)
-    { std::cerr << "Operation -= not defined!" << std::endl; return *this; }
+  VQwDataElement& operator-= (const VQwDataElement & /*value*/)
+    { throw std::runtime_error(std::string("VQwDataElement::operator-= not implemented for ") + GetElementName().Data()); }
 
-  /*! \brief Sum operator */
-  virtual void Sum(const VQwDataElement &value1, const VQwDataElement &value2)
-    { 
-      //std::cerr << "Sum not defined!" << std::endl; 
-      *this =  value1;
-      *this += value2;
-    }
-  /*! \brief Difference operator */
-  virtual void Difference(const VQwDataElement &value1, const VQwDataElement &value2)
-    { 
-      //std::cerr << "Difference not defined!" << std::endl; 
-      *this =  value1;
-      *this -= value2;
-    }
-  /*! \brief Ratio operator */
-  virtual void Ratio(const VQwDataElement &numer, const VQwDataElement &denom)
-  { std::cerr << "Ratio not defined for element"<< fElementName<< "!" << std::endl; }
+  /*! \brief Sum operator (base class fallback throws runtime error) */
+  void Sum(const VQwDataElement & /*value1*/, const VQwDataElement & /*value2*/)
+    { throw std::runtime_error("Sum not implemented for this data element type"); }
+  /*! \brief Difference operator (base class fallback throws runtime error) */
+  void Difference(const VQwDataElement & /*value1*/, const VQwDataElement & /*value2*/)
+    { throw std::runtime_error("Difference not implemented for this data element type"); }
+  /*! \brief Ratio operator (base class fallback throws runtime error) */
+  void Ratio(const VQwDataElement & /*numer*/, const VQwDataElement & /*denom*/)
+  { throw std::runtime_error("Ratio not implemented for this data element type"); }
 
   /*! \brief Construct the histograms for this data element */
   virtual void  ConstructHistograms(TDirectory *folder, TString &prefix) = 0;
@@ -159,12 +179,12 @@ class VQwDataElement: public MQwHistograms {
 
 
   /*! \brief set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
-  virtual void SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability){std::cerr << "SetSingleEventCuts not defined!" << std::endl; };
+  void SetSingleEventCuts(UInt_t /*errorflag*/,Double_t /*min*/, Double_t /*max*/, Double_t /*stability*/){throw std::runtime_error("SetSingleEventCuts not implemented for this data element type");};
   /*! \brief report number of events failed due to HW and event cut failure */
   virtual void PrintErrorCounters() const {};
 
-  virtual Bool_t  CheckForBurpFail(const VQwDataElement *ev_error){
-    return kFALSE;
+  Bool_t  CheckForBurpFail(const VQwDataElement * /*ev_error*/){
+    throw std::runtime_error(std::string("CheckForBurpFail not implemented for this data element type ") + typeid(*this).name());
   };
 
   /*! \brief return the error flag on this channel/device*/
@@ -180,20 +200,20 @@ class VQwDataElement: public MQwHistograms {
 
   /// \brief Update the error flag based on the error flags of internally
   ///        contained objects
-  ///        Return paramter is the "Eventcut Error Flag".
+  ///        Return parameter is the "Eventcut Error Flag".
   virtual UInt_t UpdateErrorFlag() {return GetEventcutErrorFlag();};
 
   // These are related to those hardware channels that need to normalize
   // to an external clock
-  virtual void SetNeedsExternalClock(Bool_t needed) {};   // Default is No!
+  virtual void SetNeedsExternalClock(Bool_t /*needed*/) {};   // Default is No!
   virtual Bool_t NeedsExternalClock() { return kFALSE; }; // Default is No!
   virtual std::string GetExternalClockName() {  return ""; }; // Default is none
-  virtual void SetExternalClockPtr( const VQwHardwareChannel* clock) {};
-  virtual void SetExternalClockName( const std::string name) {};
+  virtual void SetExternalClockPtr( const VQwHardwareChannel* /*clock*/) {};
+  virtual void SetExternalClockName( const std::string /*name*/) {};
   virtual Double_t GetNormClockValue() { return 1.;}
 
-  
-  
+
+
   /*! \brief Return the name of the inheriting subsystem name*/
   TString GetSubsystemName() const {
     return fSubsystemName;
@@ -203,7 +223,7 @@ class VQwDataElement: public MQwHistograms {
   void SetSubsystemName(TString sysname){
     fSubsystemName=sysname;
   }
-  
+
    /*! \brief Return the type of the beam instrument*/
   TString GetModuleType() const {
     return fModuleType;
@@ -219,7 +239,7 @@ class VQwDataElement: public MQwHistograms {
   void SetNumberOfDataWords(const UInt_t &numwords) {fNumberOfDataWords = numwords;}
 
   /// Arithmetic assignment operator:  Should only copy event-based data
-  virtual VQwDataElement& operator=(const VQwDataElement& value) {
+  VQwDataElement& operator=(const VQwDataElement& value) {
     if(this != &value){
       MQwHistograms::operator=(value);
       fGoodEventCount    = value.fGoodEventCount;
@@ -230,12 +250,14 @@ class VQwDataElement: public MQwHistograms {
 
   //  The most basic version of UpdateErrorFlag, which should get hidden
   //  by all the derived class versions.
-  virtual void UpdateErrorFlag(const UInt_t& error){fErrorFlag |= (error);};
+  void UpdateErrorFlag(const UInt_t& error){
+    fErrorFlag |= (error);
+  };
 
  protected:
   TString fElementName; ///< Name of this data element
   UInt_t  fNumberOfDataWords; ///< Number of raw data words in this data element
-  Int_t fGoodEventCount; ///< Number of good events accumulated in this element
+  UInt_t  fGoodEventCount; ///< Number of good events accumulated in this element
 
 
   // Name of the inheriting subsystem
@@ -250,5 +272,3 @@ class VQwDataElement: public MQwHistograms {
   UInt_t fErrorConfigFlag; ///<contains the global/local/stability flags
 //@}
 }; // class VQwDataElement
-
-#endif // __VQWDATAELEMENT__

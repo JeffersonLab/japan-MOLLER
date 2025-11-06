@@ -7,4 +7,3 @@ if(IS_DIRECTORY "@PACKAGE_EVIO_INSTALL_CONFIGDIR@/Modules")
 endif()
 
 include("@PACKAGE_TARGETS_FILE@")
-

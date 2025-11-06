@@ -1,3 +1,8 @@
+/*!
+ * \file   MQwMockable.cc
+ * \brief  Mix-in class implementation for mock data generation
+ */
+
 #include "MQwMockable.h"
 #include "QwParameterFile.h"
 
@@ -31,18 +36,18 @@ void MQwMockable::LoadMockDataParameters(QwParameterFile &paramfile){
     frequency = paramfile.GetTypedNextToken<Double_t>();  //  The frequency we read in should be in Hz.
     this->AddRandomEventDriftParameters(amplitude, phase, frequency*Qw::Hz);
     // std::cout << "In MQwMockable::LoadMockDataParameters: amp = " << amplitude << "\t phase = " << phase << "\t freq = " << frequency << std::endl;
-  } 
+  }
   else {
     asym  = paramfile.GetTypedNextToken<Double_t>();
-    mean  = paramfile.GetTypedNextToken<Double_t>(); 
-    sigma = paramfile.GetTypedNextToken<Double_t>();      
+    mean  = paramfile.GetTypedNextToken<Double_t>();
+    sigma = paramfile.GetTypedNextToken<Double_t>();
     if (ldebug==1) {
       std::cout << "#################### \n";
       std::cout << "asym, mean, sigma \n" << std::endl;
       std::cout << asym                   << " / "
   	        << mean                   << " / "
 	        << sigma                  << " / "
-                << std::endl;  
+                << std::endl;
     }
     this->SetRandomEventParameters(mean, sigma);
     this->SetRandomEventAsymmetry(asym);
@@ -95,4 +100,3 @@ Double_t MQwMockable::GetRandomValue(){
     random_variable = fNormalRandomVariable();
   return random_variable;
 }
-

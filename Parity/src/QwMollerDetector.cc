@@ -16,13 +16,16 @@
 #include <stdexcept>
 #include <iomanip>
 
+// ROOT headers
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
+
 // Qweak headers
 #include "QwLog.h"
 #include "QwParameterFile.h"
 #include "QwScaler_Channel.h"
-
-// Register this subsystem with the factory
-RegisterSubsystemFactory(QwMollerDetector);
 
 /**
  * Load the channel map
@@ -37,7 +40,7 @@ Int_t QwMollerDetector::LoadChannelMap(TString mapfile)
   Int_t modnum, channum;
   Int_t wordsofar = 0;
   Int_t currentsubbankindex = -1;
-  
+
   QwParameterFile mapstr(mapfile.Data());  // Open the file
   fDetectorMapsNames.push_back(mapstr.GetParamFilename());
   while (mapstr.ReadNextLine()) {
@@ -47,9 +50,8 @@ Int_t QwMollerDetector::LoadChannelMap(TString mapfile)
 
     if (mapstr.HasVariablePair("=", varname, varvalue)) {
       // This is a declaration line.  Decode it.
-      
+
       varname.ToLower();
-      UInt_t value = QwParameterFile::GetUInt(varvalue);
 
       RegisterRocBankMarker(mapstr);
       if(currentsubbankindex != GetSubbankIndex(fCurrentROC_ID,fCurrentBank_ID)){
@@ -74,7 +76,7 @@ Int_t QwMollerDetector::LoadChannelMap(TString mapfile)
       newChannelID.fDetectorType  = dettype;
       newChannelID.fChannelNumber = channum;
       newChannelID.fWordInSubbank = wordsofar;
-       
+
       if (modtype == "SIS3801"){
         wordsofar += 1;
       }else if(modtype == "SIS7200"){
@@ -90,7 +92,7 @@ Int_t QwMollerDetector::LoadChannelMap(TString mapfile)
         lineok = kFALSE;
       }
 
-//    add new modules until current number (modnum) is reached 
+//    add new modules until current number (modnum) is reached
       std::size_t chan_size;
       chan_size = fSTR7200_Channel.size();
       while ((Int_t) chan_size <= modnum) {
@@ -98,7 +100,7 @@ Int_t QwMollerDetector::LoadChannelMap(TString mapfile)
         fSTR7200_Channel.push_back(new_module);
       }
 
-      //change this line if names are supposed to be exclusive, as of now, 
+      //change this line if names are supposed to be exclusive, as of now,
       newChannelID.fIndex = -1; // GetChannelIndex(name, modnum);
 
       if (newChannelID.fIndex == -1 && lineok){
@@ -191,9 +193,9 @@ void QwMollerDetector::ProcessEvent()
       tempscaler = fSTR7200_Channel[i][j];
       fSTR7200_Channel[i][j] -= fPrevious_STR7200_Channel[i][j];
       fPrevious_STR7200_Channel[i][j] = tempscaler;
-      // Store a temproary copy of this channel's raw value as a scaler channel
+      // Store a temporary copy of this channel's raw value as a scaler channel
       // Subtract the corresponding fPrevious_STR7200_Channel from this scaler channel
-      // Put the temprary copy into the fPrevious_STR7200_Channel
+      // Put the temporary copy into the fPrevious_STR7200_Channel
     }
   }
 }
@@ -215,7 +217,7 @@ void QwMollerDetector::FillHistograms(){
   }
 }
 
-void QwMollerDetector::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values){
+void QwMollerDetector::ConstructBranchAndVector(TTree *tree, TString & prefix, QwRootTreeBranchVector &values){
   for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
     for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
       fSTR7200_Channel[i][j].ConstructBranchAndVector(tree, prefix, values);
@@ -223,7 +225,7 @@ void QwMollerDetector::ConstructBranchAndVector(TTree *tree, TString & prefix, s
   }
 }
 
-void QwMollerDetector::FillTreeVector(std::vector<Double_t> &values) const {
+void QwMollerDetector::FillTreeVector(QwRootTreeBranchVector &values) const {
   for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
     for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
       fSTR7200_Channel[i][j].FillTreeVector(values);
@@ -231,9 +233,29 @@ void QwMollerDetector::FillTreeVector(std::vector<Double_t> &values) const {
   }
 }
 
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwMollerDetector::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
+    for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
+      fSTR7200_Channel[i][j].ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+    }
+  }
+}
+
+void QwMollerDetector::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  for(size_t i = 0; i < fSTR7200_Channel.size(); i++){
+    for(size_t j = 0; j < fSTR7200_Channel[i].size(); j++){
+      fSTR7200_Channel[i][j].FillNTupleVector(values);
+    }
+  }
+}
+#endif // HAS_RNTUPLE_SUPPORT
+
 VQwSubsystem&  QwMollerDetector::operator=(VQwSubsystem *value){
   // std::cout << "QwMollerDetector assignment (operator=)" << std::endl;
-  if(Compare(value)){
+  if(this != value && Compare(value)){
     //VQwSubsystem::operator=(value);
     QwMollerDetector* input = dynamic_cast<QwMollerDetector *> (value);
     for(size_t i = 0; i < input->fSTR7200_Channel.size(); i++){
@@ -242,7 +264,7 @@ VQwSubsystem&  QwMollerDetector::operator=(VQwSubsystem *value){
       }
     }
   }
-  return *this; 
+  return *this;
 }
 
 VQwSubsystem&  QwMollerDetector::operator+=(VQwSubsystem *value){
@@ -356,7 +378,7 @@ float* QwMollerDetector::GetRawChannelArray(){
     }
   }
   float *result = new float[len];
-  
+
   //float result[96];
 
   int n = 0;
@@ -366,7 +388,7 @@ float* QwMollerDetector::GetRawChannelArray(){
     }
     n=fSTR7200_Channel[i].size();
   }
- 
+
   return result;
 }
 
@@ -397,7 +419,7 @@ Int_t QwMollerDetector::GetChannelIndex(TString channelName, UInt_t module_numbe
 
 Bool_t QwMollerDetector::Compare(VQwSubsystem *source){
   //std::cout << "Beginning QwMollerDetector::Compare" << std::endl;
-  
+
   if (source == 0) return kFALSE;
 
   Bool_t result = kTRUE;

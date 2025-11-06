@@ -1,13 +1,13 @@
-// Hallector BPMs Plot Macro 
+// Hallector BPMs Plot Macro
 // Source from Caryn Palatchi
-// Adapted by Tao Ye for JAPAN 
+// Adapted by Tao Ye for JAPAN
 // Last Update : 05-2019
 
 #include "device_list_Caryn.h"
 
 //FIXME : IHWPstatus should be able to obtain from slow tree. -TY
 
-void PlotHallBPMSAq(vector<const char*> &vBPM , 
+void PlotHallBPMSAq(vector<const char*> &vBPM ,
 		 Int_t IHWPstatus, TString ucut);  // Generic function
 void PlotHallBPMSAq(Int_t IHWPstatus, TString ucut); // interface to panguin
 void PlotHallBPMSAq();// interface to summary plots
@@ -25,9 +25,9 @@ void PlotHallBPMSAq(Int_t docaryn=1, Int_t run_number=0, Int_t IHWPstatus=0, TSt
 
 void PlotHallBPMSAq( Int_t IHWPstatus, TString ucut){
   PlotHallBPMSAq(vBPM,IHWPstatus,ucut);
-} 
+}
 
-void PlotHallBPMSAq(vector<const char*> &vBPM , 
+void PlotHallBPMSAq(vector<const char*> &vBPM ,
 		 Int_t IHWPstatus, TString ucut){
 
   //collect data points from first run file
@@ -71,7 +71,7 @@ void PlotHallBPMSAq(vector<const char*> &vBPM ,
 
   Aqgraph = new TGraphErrors(numchains,chain,&(Aq[0]),chainerr,&(eAq[0]));
   Aqrmsgraph = new TGraphErrors(numchains,chain,&(rmsAq[0]),chainerr,&(zero[0]));
-  
+
   TMultiGraph *xygraph = new TMultiGraph();
   TMultiGraph *xyrmsgraph = new TMultiGraph();
 
@@ -118,4 +118,3 @@ void PlotHallBPMSAq(vector<const char*> &vBPM ,
   Aqrmsgraph->GetYaxis()->SetTitle("RMS ppm");
   pad1->SetGrid();
 }
-

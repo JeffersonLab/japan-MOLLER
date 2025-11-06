@@ -1,14 +1,18 @@
-/********************************************************\
-* File: QwClock.h                                        *
-*                                                        *
-* Author: Juan Carlos Cornejo <cornejo@jlab.org>         *
-* Time-stamp: <2011-06-16>                               *
-\********************************************************/
+/*!
+ * \file   QwClock.cc
+ * \brief  Clock channel template class implementation
+ * \author Juan Carlos Cornejo
+ * \date   2011-06-16
+ */
 
 #include "QwClock.h"
 
 // System headers
 #include <stdexcept>
+
+// ROOT headers
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
 
 // Qweak database headers
 #ifdef __USE_DATABASE__
@@ -86,7 +90,7 @@ Bool_t QwClock<T>::ApplyHWChecks()
 {
   Bool_t eventokay=kTRUE;
 
-  UInt_t deviceerror=fClock.ApplyHWChecks();//will check for HW consistancy and return the error code (=0 is HW good)
+  UInt_t deviceerror=fClock.ApplyHWChecks();//will check for HW consistency and return the error code (=0 is HW good)
   eventokay=(deviceerror & 0x0);//if no HW error return true
 
   return eventokay;
@@ -119,7 +123,7 @@ Bool_t QwClock<T>::ApplySingleEventCuts(){
   }
   else{
 
-    if (bDEBUG) std::cout<<" evnt cut failed:-> set limit "<<fULimit<<" harware sum  "<<fClock.GetValue();
+    if (bDEBUG) std::cout<<" evnt cut failed:-> set limit "<<fULimit<<" hardware sum  "<<fClock.GetValue();
     status&=kFALSE;
   }
   return status;
@@ -128,7 +132,7 @@ Bool_t QwClock<T>::ApplySingleEventCuts(){
 /********************************************************/
 
 template<typename T>
-void QwClock<T>::PrintErrorCounters() const{// report number of events failed due to HW and event cut faliure
+void QwClock<T>::PrintErrorCounters() const{// report number of events failed due to HW and event cut failure
   fClock.PrintErrorCounters();
 }
 
@@ -174,7 +178,7 @@ VQwClock& QwClock<T>::operator= (const VQwClock &value)
         this_cast->fCalibration=value_bcm->fCalibration;
       }
     } else {
-      TString loc="Standard exception from QwClock::operato= :"+
+      TString loc="Standard exception from QwClock::operator= :"+
         value.GetElementName()+" "+this->GetElementName()+" are not of the "
         +"same type";
       throw std::invalid_argument(loc.Data());
@@ -358,7 +362,7 @@ void QwClock<T>::FillHistograms()
 }
 
 template<typename T>
-void QwClock<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void QwClock<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip
@@ -405,7 +409,7 @@ void  QwClock<T>::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile&
 }
 
 template<typename T>
-void QwClock<T>::FillTreeVector(std::vector<Double_t> &values) const
+void QwClock<T>::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
@@ -416,6 +420,31 @@ void QwClock<T>::FillTreeVector(std::vector<Double_t> &values) const
     }
   return;
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+template<typename T>
+void QwClock<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  if (this->GetElementName()==""){
+    //  This channel is not used, so skip RNTuple construction
+  } else
+    {
+      fClock.ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+    }
+}
+
+template<typename T>
+void QwClock<T>::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (this->GetElementName()==""){
+    //  This channel is not used, so skip filling the RNTuple.
+  } else
+    {
+      fClock.FillNTupleVector(values);
+      // this functions doesn't do anything yet
+    }
+}
+#endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
 /********************************************************/
@@ -428,6 +457,6 @@ std::vector<QwDBInterface> QwClock<T>::GetDBEntry()
 }
 #endif // __USE_DATABASE__
 
-template class QwClock<QwVQWK_Channel>; 
-template class QwClock<QwSIS3801_Channel>; 
-template class QwClock<QwSIS3801D24_Channel>; 
+template class QwClock<QwVQWK_Channel>;
+template class QwClock<QwSIS3801_Channel>;
+template class QwClock<QwSIS3801D24_Channel>;

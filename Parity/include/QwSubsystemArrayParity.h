@@ -5,8 +5,12 @@
 * Time-stamp: <2009-02-04 10:30>                           *
 \**********************************************************/
 
-#ifndef __QWSUBSYSTEMARRAYPARITY__
-#define __QWSUBSYSTEMARRAYPARITY__
+/*!
+ * \file   QwSubsystemArrayParity.h
+ * \brief  Subsystem array container for parity analysis with asymmetry calculations
+ */
+
+#pragma once
 
 #include <vector>
 #include <TTree.h>
@@ -22,14 +26,12 @@ class QwPromptSummary;
 /**
  * \class QwSubsystemArrayParity
  * \ingroup QwAnalysis
+ * \brief Subsystem array container specialized for parity analysis with asymmetry calculations
  *
- * \brief Virtual base class for the parity subsystems
- *
- *   Virtual base class for the classes containing the
- *   event-based information from each parity subsystem.
- *   This will define the interfaces used in communicating
- *   with the CODA routines.
- *
+ * Extends QwSubsystemArray to provide parity-specific operations such as
+ * asymmetry formation, helicity-based accumulation, blinding support, and
+ * database output for parity measurements. Manages collections of
+ * VQwSubsystemParity objects with coordinated event processing.
  */
 class QwSubsystemArrayParity: public QwSubsystemArray {
 
@@ -52,14 +54,14 @@ class QwSubsystemArrayParity: public QwSubsystemArray {
     /// Copy constructor by reference
     QwSubsystemArrayParity(const QwSubsystemArrayParity& source);
     /// Default destructor
-    virtual ~QwSubsystemArrayParity();
+    ~QwSubsystemArrayParity() override;
 
     /// \brief Get the subsystem with the specified name
-    VQwSubsystemParity* GetSubsystemByName(const TString& name);
+    VQwSubsystemParity* GetSubsystemByName(const TString& name) override;
     /// \brief Construct a branch and vector for this subsystem with a prefix
-    void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector <Double_t> &values);
+    void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values);
     /// \brief Fill the vector for this subsystem
-    void FillTreeVector(std::vector<Double_t>& values) const;
+    void FillTreeVector(QwRootTreeBranchVector &values) const;
     /// \brief Fill the histograms for this subsystem
     void FillHistograms();
 
@@ -99,12 +101,12 @@ class QwSubsystemArrayParity: public QwSubsystemArray {
     /// \brief Blind the asymmetry of this subsystem
     void Blind(const QwBlinder* blinder);
     /// \brief Unblind the asymmetry of this subsystem
-    void UnBlind(const QwBlinder* blinder)
+    void UnBlind(const QwBlinder* /*blinder*/)
       { /* Not yet implemented */ };
     /// \brief Blind the difference of this subsystem
     void Blind(const QwBlinder* blinder, const QwSubsystemArrayParity& yield);
     /// \brief Unblind the difference of this subsystem
-    void UnBlind(const QwBlinder* blinder, const QwSubsystemArrayParity& yield)
+    void UnBlind(const QwBlinder* /*blinder*/, const QwSubsystemArrayParity& /*yield*/)
       { /* Not yet implemented */ };
 
 
@@ -154,5 +156,3 @@ class QwSubsystemArrayParity: public QwSubsystemArray {
     Int_t  fErrorFlagTreeIndex;
 
 }; // class QwSubsystemArrayParity
-
-#endif // __QWSUBSYSTEMARRAYPARITY__

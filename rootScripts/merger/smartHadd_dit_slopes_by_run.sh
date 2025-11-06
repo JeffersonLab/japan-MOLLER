@@ -3,7 +3,7 @@ if [[ "$CAM_OUTPUTDIR" == "" ]]; then
   # Default case, no environment set up yet
   export CAM_OUTPUTDIR="/chafs2/work1/apar/aggRootfiles"
 fi
-if [[ "$COILS" == "" ]]; then 
+if [[ "$COILS" == "" ]]; then
   export COILS="13746"
 fi
 # Default assumed outputs

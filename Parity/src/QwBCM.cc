@@ -1,14 +1,18 @@
-/**********************************************************\
-* File: QwBCM.h                                          *
-*                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
-\**********************************************************/
+/*!
+ * \file   QwBCM.cc
+ * \brief  Beam current monitor template class implementation
+ */
 
 #include "QwBCM.h"
 
 // System headers
 #include <stdexcept>
+
+// ROOT headers for RNTuple support
+#ifdef HAS_RNTUPLE_SUPPORT
+#include <ROOT/RNTupleModel.hxx>
+#include <ROOT/RNTupleWriter.hxx>
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak database headers
 #ifdef __USE_DATABASE__
@@ -21,18 +25,31 @@
 #include "QwScaler_Channel.h"
 #include "QwMollerADC_Channel.h"
 /********************************************************/
+/**
+ * \brief Set the pedestal value for the beam current monitor.
+ * \param pedestal Pedestal offset to apply to the raw signal.
+ */
 template<typename T>
 void QwBCM<T>::SetPedestal(Double_t pedestal)
 {
   fBeamCurrent.SetPedestal(pedestal);
 }
 
+/**
+ * \brief Set the calibration factor for the beam current monitor.
+ * \param calibration Multiplicative calibration factor.
+ */
 template<typename T>
 void QwBCM<T>::SetCalibrationFactor(Double_t calibration)
 {
   fBeamCurrent.SetCalibrationFactor(calibration);
 }
 /********************************************************/
+/**
+ * \brief Initialize the BCM with a name and data-saving mode.
+ * \param name Detector name used for branches and histograms.
+ * \param datatosave Storage mode (e.g., "raw" or "derived").
+ */
 template<typename T>
 void QwBCM<T>::InitializeChannel(TString name, TString datatosave)
 {
@@ -43,6 +60,12 @@ void QwBCM<T>::InitializeChannel(TString name, TString datatosave)
   this->SetElementName(name);
 }
 /********************************************************/
+/**
+ * \brief Initialize the BCM with subsystem and name.
+ * \param subsystem Subsystem identifier.
+ * \param name Detector name used for branches and histograms.
+ * \param datatosave Storage mode (e.g., "raw" or "derived").
+ */
 template<typename T>
 void QwBCM<T>::InitializeChannel(TString subsystem, TString name, TString datatosave){
   SetPedestal(0.);
@@ -52,6 +75,13 @@ void QwBCM<T>::InitializeChannel(TString subsystem, TString name, TString datato
   SetElementName(name);
 }
 /********************************************************/
+/**
+ * \brief Initialize the BCM with subsystem, module type, and name.
+ * \param subsystem Subsystem identifier.
+ * \param name Detector name used for branches and histograms.
+ * \param type Module type tag used in ROOT foldering.
+ * \param datatosave Storage mode (e.g., "raw" or "derived").
+ */
 template<typename T>
 void QwBCM<T>::InitializeChannel(TString subsystem, TString name, TString type, TString datatosave){
   SetPedestal(0.);
@@ -62,6 +92,10 @@ void QwBCM<T>::InitializeChannel(TString subsystem, TString name, TString type, 
   SetElementName(name);
 }
 /********************************************************/
+/**
+ * \brief Load mock-data configuration for the underlying channel.
+ * \param paramfile Parameter file reader positioned at channel section.
+ */
 template<typename T>
 void QwBCM<T>::LoadMockDataParameters(QwParameterFile &paramfile) {
 /*
@@ -77,9 +111,9 @@ void QwBCM<T>::LoadMockDataParameters(QwParameterFile &paramfile) {
   } else {
 /*
     asym    = paramfile.GetTypedNextToken<Double_t>();
-    mean    = paramfile.GetTypedNextToken<Double_t>(); 
+    mean    = paramfile.GetTypedNextToken<Double_t>();
     sigma   = paramfile.GetTypedNextToken<Double_t>();
-    
+
     if (ldebug==1) {
       std::cout << "#################### \n";
       std::cout << "asym, mean, sigma \n" << std::endl;
@@ -93,10 +127,11 @@ void QwBCM<T>::LoadMockDataParameters(QwParameterFile &paramfile) {
 */
     //std::cout << "In QwBCM: ChannelName = " << GetElementName() << std::endl;
     fBeamCurrent.SetMockDataAsDiff();
-    fBeamCurrent.LoadMockDataParameters(paramfile);    
+    fBeamCurrent.LoadMockDataParameters(paramfile);
   }
 }
 /********************************************************/
+/** \brief Clear event-scoped data in the underlying channel. */
 template<typename T>
 void QwBCM<T>::ClearEventData()
 {
@@ -104,52 +139,70 @@ void QwBCM<T>::ClearEventData()
 }
 
 /********************************************************/
+/** \brief Use an external random variable source for mock data. */
 template<typename T>
 void QwBCM<T>::UseExternalRandomVariable()
 {
   fBeamCurrent.UseExternalRandomVariable();
 }
 /********************************************************/
+/**
+ * \brief Set the external random variable to drive mock data.
+ * \param random_variable External random value.
+ */
 template<typename T>
 void QwBCM<T>::SetExternalRandomVariable(double random_variable)
 {
   fBeamCurrent.SetExternalRandomVariable(random_variable);
 }
 /********************************************************/
+/**
+ * \brief Configure deterministic drift parameters applied per event.
+ */
 template<typename T>
 void QwBCM<T>::SetRandomEventDriftParameters(Double_t amplitude, Double_t phase, Double_t frequency)
 {
   fBeamCurrent.SetRandomEventDriftParameters(amplitude, phase, frequency);
 }
 /********************************************************/
+/** \brief Add additional drift parameters to the drift model. */
 template<typename T>
 void QwBCM<T>::AddRandomEventDriftParameters(Double_t amplitude, Double_t phase, Double_t frequency)
 {
   fBeamCurrent.AddRandomEventDriftParameters(amplitude, phase, frequency);
 }
 /********************************************************/
+/** \brief Configure Gaussian mock data parameters. */
 template<typename T>
 void QwBCM<T>::SetRandomEventParameters(Double_t mean, Double_t sigma)
 {
   fBeamCurrent.SetRandomEventParameters(mean, sigma);
 }
 /********************************************************/
+/** \brief Set an asymmetry parameter applied to helicity states. */
 template<typename T>
 void QwBCM<T>::SetRandomEventAsymmetry(Double_t asymmetry)
 {
   fBeamCurrent.SetRandomEventAsymmetry(asymmetry);
 }
 /********************************************************/
+/** \brief Smear the channel by the configured resolution. */
 template<typename T>
 void QwBCM<T>::ApplyResolutionSmearing(){
    fBeamCurrent.SmearByResolution(fResolution);
 }
+/** \brief Materialize the current event state as raw event data. */
 template<typename T>
 void QwBCM<T>::FillRawEventData()
 {
   fBeamCurrent.SetRawEventData();
 }
 
+/**
+ * \brief Generate mock event data for this BCM.
+ * \param helicity Helicity state indicator.
+ * \param time Event time or timestamp proxy.
+ */
 template<typename T>
 void QwBCM<T>::RandomizeEventData(int helicity, double time)
 {
@@ -158,6 +211,7 @@ void QwBCM<T>::RandomizeEventData(int helicity, double time)
 
 }
 /********************************************************/
+/** \brief Encode current event data into an output buffer. */
 template<typename T>
 void QwBCM<T>::EncodeEventData(std::vector<UInt_t> &buffer)
 {
@@ -165,31 +219,40 @@ void QwBCM<T>::EncodeEventData(std::vector<UInt_t> &buffer)
 }
 
 /********************************************************/
+/** \brief Apply hardware checks and process the event for this BCM. */
 template<typename T>
 void QwBCM<T>::ProcessEvent()
 {
-  this->ApplyHWChecks();//first apply HW checks and update HW  error flags. Calling this routine either in ApplySingleEventCuts or here do not make any difference for a BCM but do for a BPMs because they have derrived devices.
+  this->ApplyHWChecks();//first apply HW checks and update HW  error flags. Calling this routine either in ApplySingleEventCuts or here do not make any difference for a BCM but do for a BPMs because they have derived devices.
   fBeamCurrent.ProcessEvent();
 }
 /********************************************************/
+/**
+ * \brief Apply hardware checks and return whether the event is valid.
+ * \return kTRUE if no hardware error was detected; otherwise kFALSE.
+ */
 template<typename T>
 Bool_t QwBCM<T>::ApplyHWChecks()
 {
   Bool_t eventokay=kTRUE;
 
-  UInt_t deviceerror=fBeamCurrent.ApplyHWChecks();//will check for HW consistancy and return the error code (=0 is HW good)
+  UInt_t deviceerror=fBeamCurrent.ApplyHWChecks();//will check for HW consistency and return the error code (=0 is HW good)
   eventokay=(deviceerror & 0x0);//if no HW error return true
 
   return eventokay;
 }
 /********************************************************/
 
+/** \brief Set basic single-event cut limits. */
 template<typename T>
-Int_t QwBCM<T>::SetSingleEventCuts(Double_t LL, Double_t UL){//std::vector<Double_t> & dEventCuts){//two limts and sample size
+Int_t QwBCM<T>::SetSingleEventCuts(Double_t LL, Double_t UL){//std::vector<Double_t> & dEventCuts){//two limits and sample size
   fBeamCurrent.SetSingleEventCuts(LL,UL);
   return 1;
 }
 
+/**
+ * \brief Configure detailed single-event cuts for this BCM.
+ */
 template<typename T>
 void QwBCM<T>::SetSingleEventCuts(UInt_t errorflag, Double_t LL, Double_t UL, Double_t stability, Double_t burplevel){
   //set the unique tag to identify device type (bcm,bpm & etc)
@@ -200,6 +263,7 @@ void QwBCM<T>::SetSingleEventCuts(UInt_t errorflag, Double_t LL, Double_t UL, Do
 
 }
 
+/** \brief Set the default sample size used by the channel. */
 template<typename T>
 void QwBCM<T>::SetDefaultSampleSize(Int_t sample_size){
   fBeamCurrent.SetDefaultSampleSize((size_t)sample_size);
@@ -207,6 +271,10 @@ void QwBCM<T>::SetDefaultSampleSize(Int_t sample_size){
 
 
 /********************************************************/
+/**
+ * \brief Apply single-event cuts for this BCM and return pass/fail.
+ * \return kTRUE if event passes, otherwise kFALSE.
+ */
 template<typename T>
 Bool_t QwBCM<T>::ApplySingleEventCuts()
 {
@@ -223,19 +291,22 @@ Bool_t QwBCM<T>::ApplySingleEventCuts()
 
 /********************************************************/
 
+/** \brief Increment error counters (number of failed events). */
 template<typename T>
 void QwBCM<T>::IncrementErrorCounters()
-{// report number of events failed due to HW and event cut faliure
+{// report number of events failed due to HW and event cut failure
   fBeamCurrent.IncrementErrorCounters();
 }
 
+/** \brief Print error counters (const overload). */
 template<typename T>
 void QwBCM<T>::PrintErrorCounters() const
-{// report number of events failed due to HW and event cut faliure
+{// report number of events failed due to HW and event cut failure
   fBeamCurrent.PrintErrorCounters();
 }
 
 /********************************************************/
+/** \brief Merge error flags from a reference BCM into this instance. */
 template<typename T>
 void QwBCM<T>::UpdateErrorFlag(const VQwBCM *ev_error){
   try {
@@ -252,12 +323,16 @@ void QwBCM<T>::UpdateErrorFlag(const VQwBCM *ev_error){
       throw std::invalid_argument(loc.Data());
     }
   } catch (std::exception& e) {
-    std::cerr<< e.what()<<std::endl; 
+    std::cerr<< e.what()<<std::endl;
   }
 };
 
 
 /********************************************************/
+/**
+ * \brief Process the raw event buffer and decode into the channel.
+ * \return The updated buffer word position.
+ */
 template<typename T>
 Int_t QwBCM<T>::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement)
 {
@@ -266,6 +341,7 @@ Int_t QwBCM<T>::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, 
   return word_position_in_buffer;
 }
 /********************************************************/
+/** \brief Copy-assign from another BCM (event-scoped data). */
 template<typename T>
 QwBCM<T>& QwBCM<T>::operator= (const QwBCM<T> &value)
 {
@@ -282,6 +358,7 @@ QwBCM<T>& QwBCM<T>::operator= (const QwBCM<T> &value)
   return *this;
 }
 
+/** \brief Polymorphic copy-assign from VQwBCM if types match. */
 template<typename T>
 VQwBCM& QwBCM<T>::operator= (const VQwBCM &value)
 {
@@ -294,7 +371,7 @@ VQwBCM& QwBCM<T>::operator= (const VQwBCM &value)
         this_cast->fBeamCurrent= value_bcm->fBeamCurrent;
       }
     } else {
-      TString loc="Standard exception from QwBCM::operato= :"+
+      TString loc="Standard exception from QwBCM::operator= :"+
         value.GetElementName()+" "+this->GetElementName()+" are not of the "
         +"same type";
       throw std::invalid_argument(loc.Data());
@@ -310,6 +387,7 @@ VQwBCM& QwBCM<T>::operator= (const VQwBCM &value)
   return *this;
 }
 
+/** \brief Add-assign from another BCM (sum raw channels). */
 template<typename T>
 QwBCM<T>& QwBCM<T>::operator+= (const QwBCM<T> &value)
 {
@@ -320,6 +398,7 @@ QwBCM<T>& QwBCM<T>::operator+= (const QwBCM<T> &value)
   return *this;
 }
 
+/** \brief Polymorphic add-assign from VQwBCM if types match. */
 template<typename T>
 VQwBCM& QwBCM<T>::operator+= (const VQwBCM &value)
 {
@@ -344,6 +423,7 @@ VQwBCM& QwBCM<T>::operator+= (const VQwBCM &value)
  return *this;
 }
 
+/** \brief Polymorphic subtract-assign from VQwBCM. */
 template<typename T>
 VQwBCM& QwBCM<T>::operator-= (const VQwBCM &value)
 {
@@ -356,6 +436,7 @@ VQwBCM& QwBCM<T>::operator-= (const VQwBCM &value)
   return *this;
 }
 
+/** \brief Subtract-assign from another BCM (difference raw channels). */
 template<typename T>
 QwBCM<T>& QwBCM<T>::operator-= (const QwBCM<T> &value)
 {
@@ -379,6 +460,7 @@ QwBCM<T>& QwBCM<T>::operator-= (const QwBCM<T> &value)
   return *this;
 }
 
+/** \brief Polymorphic ratio formation for BCM. */
 template<typename T>
 void QwBCM<T>::Ratio(const VQwBCM &numer, const VQwBCM &denom)
 {
@@ -386,6 +468,7 @@ void QwBCM<T>::Ratio(const VQwBCM &numer, const VQwBCM &denom)
       *dynamic_cast<const QwBCM<T>* >(&denom));
 }
 
+/** \brief Type-specific ratio formation for BCM. */
 template<typename T>
 void QwBCM<T>::Ratio(const QwBCM<T> &numer, const QwBCM<T> &denom)
 {
@@ -397,21 +480,27 @@ void QwBCM<T>::Ratio(const QwBCM<T> &numer, const QwBCM<T> &denom)
     }
 }
 
+/** \brief Scale the underlying channel by a constant factor. */
 template<typename T>
 void QwBCM<T>::Scale(Double_t factor)
 {
   fBeamCurrent.Scale(factor);
 }
 
+/** \brief Update running averages for the underlying channel. */
 template<typename T>
 void QwBCM<T>::CalculateRunningAverage()
 {
   fBeamCurrent.CalculateRunningAverage();
 }
 
+/**
+ * \brief Check for burp failures by delegating to the underlying channel.
+ * \param ev_error Reference BCM to compare against.
+ * \return kTRUE if a burp failure was detected; otherwise kFALSE.
+ */
 template<typename T>
 Bool_t QwBCM<T>::CheckForBurpFail(const VQwDataElement *ev_error){
-  Short_t i=0;
   Bool_t burpstatus = kFALSE;
   //QwError << "************* " << this->GetElementName() << "  <<<this, event>>>  " << ev_error->GetElementName() << " *****************" << QwLog::endl;
   try {
@@ -419,7 +508,7 @@ Bool_t QwBCM<T>::CheckForBurpFail(const VQwDataElement *ev_error){
       //std::cout<<" Here in VQwBCM::CheckForBurpFail \n";
       if (this->GetElementName()!="") {
         const QwBCM<T>* value_bcm = dynamic_cast<const QwBCM<T>* >(ev_error);
-        burpstatus |= fBeamCurrent.CheckForBurpFail(&(value_bcm->fBeamCurrent)); 
+        burpstatus |= fBeamCurrent.CheckForBurpFail(&(value_bcm->fBeamCurrent));
       }
     } else {
       TString loc="Standard exception from QwBCM::CheckForBurpFail :"+
@@ -433,22 +522,26 @@ Bool_t QwBCM<T>::CheckForBurpFail(const VQwDataElement *ev_error){
   return burpstatus;
 }
 
+/** \brief Accumulate running sums from another BCM into this one. */
 template<typename T>
 void QwBCM<T>::AccumulateRunningSum(const VQwBCM& value, Int_t count, Int_t ErrorMask) {
   fBeamCurrent.AccumulateRunningSum(
       dynamic_cast<const QwBCM<T>* >(&value)->fBeamCurrent, count, ErrorMask);
 }
 
+/** \brief Remove a single entry from the running sums using a source value. */
 template<typename T>
 void QwBCM<T>::DeaccumulateRunningSum(VQwBCM& value, Int_t ErrorMask) {
   fBeamCurrent.DeaccumulateRunningSum(dynamic_cast<QwBCM<T>* >(&value)->fBeamCurrent, ErrorMask);
 }
+/** \brief Print a compact value summary for this BCM. */
 template<typename T>
 void QwBCM<T>::PrintValue() const
 {
   fBeamCurrent.PrintValue();
 }
 
+/** \brief Print detailed information for this BCM. */
 template<typename T>
 void QwBCM<T>::PrintInfo() const
 {
@@ -457,6 +550,11 @@ void QwBCM<T>::PrintInfo() const
 }
 
 /********************************************************/
+/**
+ * \brief Define histograms for this BCM (delegated to underlying channel).
+ * \param folder ROOT folder to contain histograms.
+ * \param prefix Histogram name prefix.
+ */
 template<typename T>
 void QwBCM<T>::ConstructHistograms(TDirectory *folder, TString &prefix)
 {
@@ -470,6 +568,7 @@ void QwBCM<T>::ConstructHistograms(TDirectory *folder, TString &prefix)
     }
 }
 
+/** \brief Fill histograms for this BCM if enabled. */
 template<typename T>
 void QwBCM<T>::FillHistograms()
 {
@@ -483,8 +582,14 @@ void QwBCM<T>::FillHistograms()
     }
 }
 
+/**
+ * \brief Construct ROOT branches and value vector entries.
+ * \param tree Output tree.
+ * \param prefix Branch name prefix.
+ * \param values Output value vector to be appended.
+ */
 template<typename T>
-void QwBCM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void QwBCM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip
@@ -494,6 +599,7 @@ void QwBCM<T>::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vecto
     }
 }
 
+/** \brief Construct ROOT branches for this BCM (if enabled). */
 template<typename T>
 void  QwBCM<T>::ConstructBranch(TTree *tree, TString &prefix)
 {
@@ -506,6 +612,7 @@ void  QwBCM<T>::ConstructBranch(TTree *tree, TString &prefix)
     }
 }
 
+/** \brief Construct ROOT branches for this BCM using a trim file filter. */
 template<typename T>
 void  QwBCM<T>::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist)
 {
@@ -527,8 +634,9 @@ void  QwBCM<T>::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& m
     }
 }
 
+/** \brief Fill tree vector entries for this BCM. */
 template<typename T>
-void QwBCM<T>::FillTreeVector(std::vector<Double_t> &values) const
+void QwBCM<T>::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip filling the histograms.
@@ -539,7 +647,34 @@ void QwBCM<T>::FillTreeVector(std::vector<Double_t> &values) const
     }
 }
 
+#ifdef HAS_RNTUPLE_SUPPORT
+/** \brief Construct RNTuple fields and append values vector entries. */
+template<typename T>
+void QwBCM<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  if (this->GetElementName()==""){
+    //  This channel is not used, so skip
+  } else
+    {
+      fBeamCurrent.ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+    }
+}
+
+/** \brief Fill RNTuple values for this BCM. */
+template<typename T>
+void QwBCM<T>::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (this->GetElementName()==""){
+    //  This channel is not used, so skip filling.
+  } else
+    {
+      fBeamCurrent.FillNTupleVector(values);
+    }
+}
+#endif
+
 #ifdef __USE_DATABASE__
+/** \brief Collect database entries for this BCM. */
 template<typename T>
 std::vector<QwDBInterface> QwBCM<T>::GetDBEntry()
 {
@@ -548,6 +683,7 @@ std::vector<QwDBInterface> QwBCM<T>::GetDBEntry()
   return row_list;
 }
 
+/** \brief Collect error database entries for this BCM. */
 template<typename T>
 std::vector<QwErrDBInterface> QwBCM<T>::GetErrDBEntry()
 {
@@ -557,6 +693,7 @@ std::vector<QwErrDBInterface> QwBCM<T>::GetErrDBEntry()
 }
 #endif // __USE_DATABASE__
 
+/** \brief Get the current value of the beam current. */
 template<typename T>
 Double_t QwBCM<T>::GetValue()
 {
@@ -564,12 +701,14 @@ Double_t QwBCM<T>::GetValue()
 }
 
 
+/** \brief Get the statistical error on the beam current. */
 template<typename T>
 Double_t QwBCM<T>::GetValueError()
 {
   return fBeamCurrent.GetValueError();
 }
 
+/** \brief Get the width of the beam current distribution. */
 template<typename T>
 Double_t QwBCM<T>::GetValueWidth()
 {

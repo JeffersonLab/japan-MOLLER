@@ -1,18 +1,22 @@
 /**********************************************************\
 * File: QwHelicity.h                                      *
-*                                                         *
-* Contributor: Arindam Sen (asen@jlab.org)                                                 *
+* brief  Helicity state management and pattern recognition*
+* Contributor: Arindam Sen (asen@jlab.org)                *
 * Time-stamp:                                             *
 \**********************************************************/
 
-#ifndef __QwHELICITY__
-#define __QwHELICITY__
+#pragma once
 
 // System headers
 #include <vector>
 
 // ROOT headers
 #include "TTree.h"
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RNTupleWriter.hxx"
+#include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "QwWord.h"
@@ -23,10 +27,16 @@
 class QwParityDB;
 #endif
 
-/*****************************************************************
-*  Class:
-******************************************************************/
-
+/**
+ * \class QwHelicity
+ * \ingroup QwAnalysis_BeamLine
+ * \brief Subsystem for helicity state management and pattern recognition
+ *
+ * Manages helicity information from the polarized electron beam, including
+ * helicity state determination, pattern recognition, delayed helicity decoding,
+ * and helicity-correlated systematic checks. Supports multiple helicity
+ * encoding modes and provides helicity information to other subsystems.
+ */
 class QwHelicity: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicity> {
 
  private:
@@ -36,44 +46,39 @@ class QwHelicity: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicity
 
   QwHelicity(const TString& name);
   QwHelicity(const QwHelicity& source);
+  /// Virtual destructor
 
-  virtual ~QwHelicity() { }
+  ~QwHelicity() override { }
 
   static void DefineOptions(QwOptions &options);
-  void ProcessOptions(QwOptions &options);
-  Int_t LoadChannelMap(TString mapfile);
-  Int_t LoadInputParameters(TString pedestalfile);
-  Int_t LoadEventCuts(TString  filename);//Loads event cuts applicable to QwHelicity class, derived from VQwSubsystemParity
-  Bool_t ApplySingleEventCuts();//Apply event cuts in the QwHelicity class, derived from VQwSubsystemParity
+  void ProcessOptions(QwOptions &options) override;
+  Int_t LoadChannelMap(TString mapfile) override;
+  Int_t LoadInputParameters(TString pedestalfile) override;
+  Int_t LoadEventCuts(TString  filename) override;//Loads event cuts applicable to QwHelicity class, derived from VQwSubsystemParity
+  Bool_t ApplySingleEventCuts() override;//Apply event cuts in the QwHelicity class, derived from VQwSubsystemParity
 
-  Bool_t  CheckForBurpFail(const VQwSubsystem *ev_error){
+  Bool_t  CheckForBurpFail(const VQwSubsystem *ev_error) override{
     return kFALSE;
   };
 
-  void UpdateErrorFlag(const VQwSubsystem *ev_error){ };
-
   Int_t  ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id,
-				   UInt_t* buffer, UInt_t num_words);
-  Int_t  ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) {
+				   UInt_t* buffer, UInt_t num_words) override;
+  Int_t  ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override {
     return ProcessEvBuffer(0x1,roc_id,bank_id,buffer,num_words);
   };
-  Int_t  ProcessEvBuffer(UInt_t ev_type, const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
+  Int_t  ProcessEvBuffer(UInt_t ev_type, const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override;
   void   ProcessEventUserbitMode();//ProcessEvent has two modes Userbit and Inputregister modes
   void   ProcessEventInputRegisterMode();
   void   ProcessEventInputMollerMode();
 
-  void   EncodeEventData(std::vector<UInt_t> &buffer);
+  void   EncodeEventData(std::vector<UInt_t> &buffer) override;
 
 
-  virtual void  ClearEventData();
-  virtual void  ProcessEvent();
+  void  ClearEventData() override;
+  void  ProcessEvent() override;
 
   UInt_t GetRandomSeedActual() { return iseed_Actual; };
   UInt_t GetRandomSeedDelayed() { return iseed_Delayed; };
-
-  void   PredictHelicity();
-  void   SetHelicityDelay(Int_t delay);
-  void   SetHelicityBitPattern(TString hex);
 
   Int_t  GetHelicityReported();
   Int_t  GetHelicityActual();
@@ -90,25 +95,14 @@ class QwHelicity: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicity
   void SetFirstBits(UInt_t nbits, UInt_t firstbits);
   void SetEventPatternPhase(Int_t event, Int_t pattern, Int_t phase);
 
-  VQwSubsystem&  operator=  (VQwSubsystem *value);
-  VQwSubsystem&  operator+=  (VQwSubsystem *value);
-
-  //the following functions do nothing really : adding and subtracting helicity doesn't mean anything
-  VQwSubsystem& operator-= (VQwSubsystem *value) {return *this;};
-  void  Ratio(VQwSubsystem *numer, VQwSubsystem *denom);
-  void  AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
-  //remove one entry from the running sums for devices
-  void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF){
-  };
-
   using VQwSubsystem::ConstructHistograms;
-  void  ConstructHistograms(TDirectory *folder, TString &prefix);
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
 
   using VQwSubsystem::ConstructBranchAndVector;
 
 #ifdef __USE_DATABASE__
-  void  FillDB(QwParityDB *db, TString type);
-  void  FillErrDB(QwParityDB *db, TString datatype);
+  void  FillDB(QwParityDB *db, TString type) override;
+  void  FillErrDB(QwParityDB *db, TString datatype) override;
 #endif // __USE_DATABASE__
 
   void  Print() const;
@@ -120,7 +114,7 @@ class QwHelicity: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicity
  protected:
   void CheckPatternNum(VQwSubsystem *value);
   void MergeCounters(VQwSubsystem *value);
-  
+
   Bool_t CheckIORegisterMask(const UInt_t& ioregister, const UInt_t& mask) const {
     return ((mask != 0)&&((ioregister & mask) == mask));
   };
@@ -161,19 +155,9 @@ class QwHelicity: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicity
   Bool_t IsGoodPhaseNumber();
   Bool_t IsContinuous();
 
-  UInt_t GetRandbit24(UInt_t& ranseed);//for 24bit pattern
-  UInt_t GetRandomSeed(UShort_t* first24randbits);
-  virtual Bool_t CollectRandBits();
-  Bool_t CollectRandBits24();//for 24bit pattern
-  Bool_t CollectRandBits30();//for 30bit pattern
-
-
-  void   ResetPredictor();
-
   Bool_t Compare(VQwSubsystem *source);
 
 };
 
-#endif
-
-
+// Register this subsystem with the factory
+REGISTER_SUBSYSTEM_FACTORY(QwHelicity);

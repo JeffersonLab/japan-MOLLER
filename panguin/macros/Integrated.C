@@ -7,7 +7,7 @@
 //   a given parameter (branch of a tree) vs time.
 //
 //  *** This macro assumes that there is a perfect correlation between
-//      the branch entry number and m_ev_num/2 (or ev_num/2.). 
+//      the branch entry number and m_ev_num/2 (or ev_num/2.).
 //      (Always the case??)
 //
 //  Requires:
@@ -15,11 +15,11 @@
 //  Output:
 //     TGraphErrors object
 //  Usage:
-//     TGraphErrors *gr = 
+//     TGraphErrors *gr =
 //        Integrated("TreeName","Parameter",TCut usercut,UInt_t nbins);
 //
 
-TGraphErrors *Integrated(TTree *tree, 
+TGraphErrors *Integrated(TTree *tree,
 			 TString parameter,
 			 TCut usercut= "1",
 			 UInt_t nbins=20) {
@@ -32,20 +32,20 @@ TGraphErrors *Integrated(TTree *tree,
   }
   if(!tree->FindBranch(parameter)) {
     cout << "Integrated: " << endl
-	 << "\t Input parameter (" << parameter 
+	 << "\t Input parameter (" << parameter
 	 << ") does not exist in tree." << endl;
     return 0;
   }
-  
+
   // Make sure nbins!=0
   if(nbins==0) return 0;
 
   // Grab the parameter entries from the tree
-  
+
   Long64_t total_entries = tree->Draw(parameter,usercut,"goff");
   if(total_entries==-1) {
     cout << "Integrated: " << endl
-	 << "\t Could not process.  Check variables within provided cut:" 
+	 << "\t Could not process.  Check variables within provided cut:"
 	 << endl
 	 << "\t\t" << usercut.GetTitle() << endl;
     return 0;
@@ -62,7 +62,7 @@ TGraphErrors *Integrated(TTree *tree,
 
   TGraphErrors *graph = new TGraphErrors(nbins);
 
-  // Go through each bin (accumulating statistics), 
+  // Go through each bin (accumulating statistics),
   // and add it to the TGraphErrors
   //  TaStatistics  *stat = new TaStatistics(1,kFALSE);
   Double_t xval = 0;
@@ -79,7 +79,7 @@ TGraphErrors *Integrated(TTree *tree,
     xval = (xval*entries_in_bin + value)/(entries_in_bin+1);
     entries_in_bin++;
   }
-    
+
   // Set default titles for graph, x-axis, y-axis
   graph->SetTitle(parameter+" Integrated Convergence;time ;"+parameter);
 

@@ -5,8 +5,7 @@
 * Date:   Tue Mar 29 13:08:12 EDT 2011                     *
 \**********************************************************/
 
-#ifndef __MQWMOCKABLE__
-#define __MQWMOCKABLE__
+#pragma once
 
 // Boost math library for random number generation
 #include "boost/random.hpp"
@@ -17,6 +16,17 @@
 
 class QwParameterFile;
 
+/**
+ * \class MQwMockable
+ * \ingroup QwAnalysis
+ * \brief Mix-in class enabling mock data generation for hardware channels
+ *
+ * Provides infrastructure for generating simulated data with configurable
+ * asymmetries, noise characteristics, and harmonic drifts. Supports both
+ * internal random number generation and external random variables.
+ * Used by hardware channel classes to enable Monte Carlo studies and
+ * testing without real data acquisition hardware.
+ */
 class MQwMockable {
 /****************************************************************//**
  *  Class: MQwMockable
@@ -71,7 +81,7 @@ public:
 
   virtual void  SetRawEventData() = 0;
 
-  /// Encode the event data into a CODA buffer  
+  /// Encode the event data into a CODA buffer
   virtual void EncodeEventData(std::vector<UInt_t> &buffer) = 0;
 
   /// Set the flag to use an externally provided random variable
@@ -112,5 +122,3 @@ public:
   std::vector<Double_t> fMockDriftPhase;     ///< Harmonic drift phase
   // @}
 };
-
-#endif

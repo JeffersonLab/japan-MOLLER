@@ -1,5 +1,10 @@
+/*!
+ * \file   QwMollerADC_Channel.cc
+ * \brief  Implementation for Moller ADC channel decoding and management
+ */
+
 #include "QwMollerADC_Channel.h"
- 
+
 // System headers
 #include <stdexcept>
 
@@ -111,13 +116,13 @@ Int_t QwMollerADC_Channel::ApplyHWChecks()
     if (GetRawHardwareSum()==0){
       fErrorFlag|=kErrorFlag_ZeroHW;
     }
-    if (!fEventIsGood)    
+    if (!fEventIsGood)
       fSequenceNo_Counter=0;//resetting the counter after ApplyHWChecks() a failure
 
     if ((TMath::Abs(GetRawHardwareSum())*kMollerADC_VoltsPerBit/fNumberOfSamples) > GetMollerADCSaturationLimt()){
-      if (bDEBUG) 
+      if (bDEBUG)
         QwWarning << this->GetElementName()<<" "<<GetRawHardwareSum() << "Saturating MollerADC invoked! " <<TMath::Abs(GetRawHardwareSum())*kMollerADC_VoltsPerBit/fNumberOfSamples<<" Limit "<<GetMollerADCSaturationLimt() << QwLog::endl;
-      fErrorFlag|=kErrorFlag_VQWK_Sat; 
+      fErrorFlag|=kErrorFlag_VQWK_Sat;
     }
 
   }
@@ -144,7 +149,7 @@ void QwMollerADC_Channel::IncrementErrorCounters(){
     fErrorCount_ZeroHW++; //increment the hw error counter
   if ( (kErrorFlag_VQWK_Sat &  fErrorFlag)==kErrorFlag_VQWK_Sat)
     fErrorCount_HWSat++; //increment the hw saturation error counter
-  if ( ((kErrorFlag_EventCut_L &  fErrorFlag)==kErrorFlag_EventCut_L) 
+  if ( ((kErrorFlag_EventCut_L &  fErrorFlag)==kErrorFlag_EventCut_L)
        || ((kErrorFlag_EventCut_U &  fErrorFlag)==kErrorFlag_EventCut_U)){
     fNumEvtsWithEventCutsRejected++; //increment the event cut error counter
   }
@@ -313,7 +318,7 @@ void QwMollerADC_Channel::SmearByResolution(double resolution){
   for (Int_t i = 0; i < fBlocksPerEvent; i++) {
 
     fBlock[i] += resolution*sqrt(fBlocksPerEvent) * GetRandomValue();
- 
+
     fBlockM2[i] = 0.0; // second moment is zero for single events
     fHardwareBlockSum += fBlock[i];
   }
@@ -332,7 +337,7 @@ void QwMollerADC_Channel::SetHardwareSum(Double_t hwsum, UInt_t sequencenumber)
     block[i] = hwsum / fBlocksPerEvent;
   }
   SetEventData(block);
-  delete block;
+  delete[] block;
   return;
 }
 
@@ -362,22 +367,36 @@ void QwMollerADC_Channel::SetEventData(Double_t* block, UInt_t sequencenumber)
   return;
 }
 
+__attribute__((no_sanitize("signed-integer-overflow")))
 void QwMollerADC_Channel::SetRawEventData(){
   fNumberOfSamples = fNumberOfSamples_map;
   fHardwareBlockSum_raw = 0;
 //  Double_t hwsum_test = 0.0;
 //  std::cout <<  "*******In QwMollerADC_Channel::SetRawEventData for channel:\t" << this->GetElementName() << std::endl;
-  for (Int_t i = 0; i < fBlocksPerEvent; i++) 
+  for (Int_t i = 0; i < fBlocksPerEvent; i++)
     {
-     fBlock_raw[i] = Int_t((fBlock[i] / fCalibrationFactor + fPedestal) * fNumberOfSamples / (fBlocksPerEvent * 1.0));
+     Double_t block_raw = (fBlock[i] / fCalibrationFactor + fPedestal) * fNumberOfSamples / (fBlocksPerEvent * 1.0);
+     if (std::abs(block_raw) >= pow(2,29)) {
+      block_raw = std::copysign(pow(2,29)-1, block_raw);
+      QwWarning << "QwMollerADC_Channel::SetRawEventData: Overflow in conversion to raw data for channel "
+                << this->GetElementName() << ": ("
+                << "fBlock[i] = " << fBlock[i] << " / "
+                << "fCalibrationFactor = " << fCalibrationFactor << " + "
+                << "fPedestal = " << fPedestal << ") * "
+                << "fNumberOfSamples = " << fNumberOfSamples << " / "
+                << "fBlocksPerEvent = " << fBlocksPerEvent << ". "
+                << "Capping value to " << block_raw << "."
+                << QwLog::endl;
+     }
+     fBlock_raw[i] = Int_t(block_raw);
      fHardwareBlockSum_raw += fBlock_raw[i];
-     
+
     double_t block = fBlock[i] / fCalibrationFactor;
     double_t sigma = fMockGaussianSigma / fCalibrationFactor;
     fBlockSumSq_raw[i] = (sigma*sigma + block*block)*fNumberOfSamples_map / (fBlocksPerEvent * 1.0);
     fBlock_min[i] = (block - 3.0 * sigma) * double_t(fNumberOfSamples_map) / (fBlocksPerEvent * 1.0);
     fBlock_max[i] = (block + 3.0 * sigma) * double_t(fNumberOfSamples_map) / (fBlocksPerEvent * 1.0);
-    
+
     fBlockSumSq_raw[4] += fBlockSumSq_raw[i];
     fBlock_min[4] = TMath::Min(fBlock_min[i],fBlock_min[4]);
     fBlock_max[4] = TMath::Max(fBlock_max[i],fBlock_max[4]);
@@ -405,7 +424,7 @@ void QwMollerADC_Channel::EncodeEventData(std::vector<UInt_t> &buffer)
       localbuf[i*5+2] = fBlockSumSq_raw[i] >> 32;
       localbuf[i*5+3] = fBlock_min[i];
       localbuf[i*5+4] = fBlock_max[i];
-      
+
       //        localbuf[4] += localbuf[i]; // fHardwareBlockSum_raw
     }
     // The following causes many rounding errors and skips due to the check
@@ -604,7 +623,7 @@ void  QwMollerADC_Channel::ConstructHistograms(TDirectory *folder, TString &pref
 void  QwMollerADC_Channel::FillHistograms()
 {
   Int_t index=0;
-  
+
   if (IsNameEmpty())
     {
       //  This channel is not used, so skip creating the histograms.
@@ -638,7 +657,7 @@ void  QwMollerADC_Channel::FillHistograms()
               }
             if (fHistograms[index] != NULL && (fErrorFlag)==0)
               fHistograms[index]->Fill(this->GetHardwareSum());
-            index+=1; 
+            index+=1;
             if (fHistograms[index] != NULL){
               if ( (kErrorFlag_sample &  fErrorFlag)==kErrorFlag_sample)
                 fHistograms[index]->Fill(kErrorFlag_sample);
@@ -653,13 +672,13 @@ void  QwMollerADC_Channel::FillHistograms()
               if ( (kErrorFlag_SameHW &  fErrorFlag)==kErrorFlag_SameHW)
                 fHistograms[index]->Fill(kErrorFlag_SameHW);
             }
-            
+
           }
- 
+
     }
 }
 
-void  QwMollerADC_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwMollerADC_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   //  This channel is not used, so skip setting up the tree.
   if (IsNameEmpty()) return;
@@ -681,71 +700,53 @@ void  QwMollerADC_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix
   bSequence_number = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "sequence_number");
 
   if (bHw_sum) {
-    values.push_back(0.0);
-    list += "hw_sum/D";
+    values.push_back("hw_sum", 'D');
     if (fDataToSave == kMoments) {
-      values.push_back(0.0);
-      list += ":hw_sum_m2/D";
-      values.push_back(0.0);
-      list += ":hw_sum_err/D";
+      values.push_back("hw_sum_m2", 'D');
+      values.push_back("hw_sum_err", 'D');
     }
   }
 
   if (bBlock) {
-    values.push_back(0.0);
-    list += ":block0/D";
-    values.push_back(0.0);
-    list += ":block1/D";
-    values.push_back(0.0);
-    list += ":block2/D";
-    values.push_back(0.0);
-    list += ":block3/D";
+    values.push_back("block0", 'D');
+    values.push_back("block1", 'D');
+    values.push_back("block2", 'D');
+    values.push_back("block3", 'D');
   }
 
   if (bNum_samples) {
-    values.push_back(0.0);
-    list += ":num_samples/D";
+    values.push_back("num_samples", 'i');
   }
 
   if (bDevice_Error_Code) {
-    values.push_back(0.0);
-    list += ":Device_Error_Code/D";
+    values.push_back("Device_Error_Code", 'i');
   }
 
   if (fDataToSave == kRaw) {
     if (bHw_sum_raw) {
-      values.push_back(0.0);
-      list += ":hw_sum_raw/D";
+      values.push_back("hw_sum_raw", 'I');
     }
     if (bBlock_raw) {
-      values.push_back(0.0);
-      list += ":block0_raw/D";
-      values.push_back(0.0);
-      list += ":block1_raw/D";
-      values.push_back(0.0);
-      list += ":block2_raw/D";
-      values.push_back(0.0);
-      list += ":block3_raw/D";
+      values.push_back("block0_raw", 'I');
+      values.push_back("block1_raw", 'I');
+      values.push_back("block2_raw", 'I');
+      values.push_back("block3_raw", 'I');
     }
 
-    for(int i = 0; i < 4; i++){
-     if (bBlock_raw) {
-      values.push_back(0.0);
-      list += Form(":SumSq1_%d/D",i);
-      values.push_back(0.0);
-      list += Form(":SumSq2_%d/D",i);
-      values.push_back(0.0);
-      list += Form(":RawMin_%d/D",i);
-      values.push_back(0.0);
-      list += Form(":RawMax_%d/D",i);
-     }
+    for (int i = 0; i < 4; i++) {
+      if (bBlock_raw) {
+        values.push_back(Form("SumSq_%d", i), 'L');
+        values.push_back(Form("RawMin_%d", i), 'I');
+        values.push_back(Form("RawMax_%d", i), 'I');
+      }
     }
 
     if (bSequence_number) {
-      values.push_back(0.0);
-      list += ":sequence_number/D";
+      values.push_back("sequence_number", 'i');
     }
   }
+
+  std::string leaf_list = values.LeafList(fTreeArrayIndex);
 
   fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
 
@@ -754,20 +755,20 @@ void  QwMollerADC_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix
         bHw_sum_raw || bBlock_raw || bSequence_number)) {
 
     // This is for the RT mode
-    if (list == "hw_sum/D")
-      list = basename+"/D";
+    if (leaf_list == "hw_sum/D")
+      leaf_list = basename+"/D";
 
     if (kDEBUG)
-      QwMessage << "base name " << basename << " List " << list << QwLog::endl;
+      QwMessage << "base name " << basename << " List " << leaf_list << QwLog::endl;
 
-    tree->Branch(basename, &(values[fTreeArrayIndex]), list);
+    tree->Branch(basename, &(values[fTreeArrayIndex]), leaf_list.c_str());
   }
 
   if (kDEBUG) {
     std::cerr << "QwMollerADC_Channel::ConstructBranchAndVector: fTreeArrayIndex==" << fTreeArrayIndex
               << "; fTreeArrayNumEntries==" << fTreeArrayNumEntries
               << "; values.size()==" << values.size()
-              << "; list==" << list
+              << "; list==" << leaf_list
               << std::endl;
   }
 }
@@ -787,7 +788,7 @@ void  QwMollerADC_Channel::ConstructBranch(TTree *tree, TString &prefix)
 }
 
 
-void  QwMollerADC_Channel::FillTreeVector(std::vector<Double_t> &values) const
+void  QwMollerADC_Channel::FillTreeVector(QwRootTreeBranchVector& values) const
 {
   if (IsNameEmpty()) {
     //  This channel is not used, so skip filling the tree vector.
@@ -806,11 +807,229 @@ void  QwMollerADC_Channel::FillTreeVector(std::vector<Double_t> &values) const
 
     // hw_sum
     if (bHw_sum) {
-      values[index++] = this->GetHardwareSum();
+      values.SetValue(index++, this->GetHardwareSum());
       if (fDataToSave == kMoments) {
-        values[index++] = this->GetHardwareSumM2();
-        values[index++] = this->GetHardwareSumError();
+        values.SetValue(index++, this->GetHardwareSumM2());
+        values.SetValue(index++, this->GetHardwareSumError());
       }
+    }
+
+    if (bBlock) {
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        // blocki
+        values.SetValue(index++, this->GetBlockValue(i));
+      }
+    }
+
+    // num_samples
+    if (bNum_samples)
+      values.SetValue(index++, (fDataToSave == kMoments)? this->fGoodEventCount: this->fNumberOfSamples);
+    // Device_Error_Code
+    if (bDevice_Error_Code)
+      values.SetValue(index++, this->fErrorFlag);
+
+    if (fDataToSave == kRaw)
+      {
+        // hw_sum_raw
+        if (bHw_sum_raw)
+          values.SetValue(index++, this->GetRawHardwareSum());
+
+        if (bBlock_raw) {
+          for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+            // blocki_raw
+            values.SetValue(index++, this->GetRawBlockValue(i));
+          }
+        }
+
+        if (bBlock_raw) {
+          for (int i = 0; i < 4; i++) {
+            values.SetValue(index++, fBlockSumSq_raw[i]);
+            values.SetValue(index++, fBlock_min[i]);
+            values.SetValue(index++, fBlock_max[i]);
+          }
+        }
+        // sequence_number
+        if (bSequence_number)
+          values.SetValue(index++, this->fSequenceNumber);
+      }
+  }
+}
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  //For rntuple
+  if (IsNameEmpty()) {
+    //  This channel is not used, so skip setting up the RNTuple.
+  } else {
+    //  Decide what to store based on prefix
+    SetDataToSaveByPrefix(prefix);
+
+    // Set the boolean flags just like in ConstructBranchAndVector
+    bHw_sum =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum");
+    bHw_sum_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum_raw");
+    bBlock =      gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block");
+    bBlock_raw =  gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block_raw");
+    bNum_samples = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "num_samples");
+    bDevice_Error_Code = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "Device_Error_Code");
+    bSequence_number = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "sequence_number");
+
+    // For kMoments mode (running sum trees), enable all statistical fields regardless of histogram configuration
+    if (fDataToSave == kMoments) {
+      bHw_sum = true;
+      bBlock = true;
+      bNum_samples = true;
+      bDevice_Error_Code = true;
+    }
+
+    TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
+    fTreeArrayIndex  = values.size();
+
+    // For derived data (yield_, asym_, diff_), only store the main value to match TTree format
+    if (fDataToSave == kDerived) {
+      // Only store the main hardware sum value, just like the original tree
+      values.resize(values.size() + 1, 0.0);
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      fTreeArrayNumEntries = 1;
+      return;
+    }
+
+    // For moments data (stat prefix), use the same structure as TTree to get exact field count match
+    if (fDataToSave == kMoments) {
+      // Create the same structure as TTree kMoments mode
+      if (bHw_sum) {
+        values.push_back(0.0);
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum").Data()));
+        values.push_back(0.0);
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum_m2").Data()));
+        values.push_back(0.0);
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum_err").Data()));
+      }
+
+      if (bBlock) {
+        for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+          values.push_back(0.0);
+          fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_block%d", i)).Data()));
+        }
+      }
+
+      if (bNum_samples) {
+        values.push_back(0.0);
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_num_samples").Data()));
+      }
+
+      if (bDevice_Error_Code) {
+        values.push_back(0.0);
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_Device_Error_Code").Data()));
+      }
+
+      fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
+      return;
+    }
+
+    // For raw data, use the full detailed format
+    // Calculate how many elements we need to avoid multiple push_back calls
+    size_t numElements = 0;
+
+    // Count elements based on what will be saved
+    if (bHw_sum) {
+      numElements += 1; // hw_sum
+    }
+    if (bBlock) numElements += fBlocksPerEvent; // blocks
+    if (bNum_samples) numElements += 1; // num_samples
+    if (bDevice_Error_Code) numElements += 1; // error code
+
+    if (fDataToSave == kRaw) {
+      if (bHw_sum_raw) numElements += 1; // hw_sum_raw
+      if (bBlock_raw) numElements += fBlocksPerEvent; // block_raw
+      numElements += 16; // fBlockSumSq_raw (4*4)
+      if (bSequence_number) numElements += 1; // sequence_number
+    }
+
+    // Resize vectors once to avoid reallocation
+    size_t oldSize = values.size();
+    values.resize(oldSize + numElements, 0.0);
+    fieldPtrs.reserve(fieldPtrs.size() + numElements);
+
+    // Add fields in the same order as FillTreeVector
+    // hw_sum
+    if (bHw_sum) {
+      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+    }
+
+    if (bBlock) {
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_block%d", i)).Data()));
+      }
+    }
+
+    // num_samples
+    if (bNum_samples) {
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_num_samples").Data()));
+    }
+
+    // Device_Error_Code
+    if (bDevice_Error_Code) {
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_Device_Error_Code").Data()));
+    }
+
+    if (fDataToSave == kRaw) {
+      // hw_sum_raw
+      if (bHw_sum_raw) {
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_raw").Data()));
+      }
+
+      if (bBlock_raw) {
+        for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+          fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_block%d_raw", i)).Data()));
+        }
+      }
+
+      for(int i = 0; i < 4; i++){
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_sumsq%d_low", i)).Data()));
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_sumsq%d_high", i)).Data()));
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_min%d", i)).Data()));
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_max%d", i)).Data()));
+      }
+
+      // sequence_number
+      if (bSequence_number) {
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_sequence_number").Data()));
+      }
+    }
+
+    fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
+  }
+}
+
+void  QwMollerADC_Channel::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (IsNameEmpty()) {
+    //  This channel is not used, so skip filling.
+  } else if (fTreeArrayNumEntries <= 0) {
+    if (bDEBUG) std::cerr << "QwMollerADC_Channel::FillNTupleVector:  fTreeArrayNumEntries=="
+              << fTreeArrayNumEntries << std::endl;
+  } else if (values.size() < fTreeArrayIndex+fTreeArrayNumEntries){
+    if (bDEBUG) std::cerr << "QwMollerADC_Channel::FillNTupleVector:  values.size()=="
+              << values.size()
+              << "; fTreeArrayIndex+fTreeArrayNumEntries=="
+              << fTreeArrayIndex+fTreeArrayNumEntries
+              << std::endl;
+  } else {
+
+    UInt_t index = fTreeArrayIndex;
+
+    // For derived data (yield_, asym_, diff_), only fill the main value to match TTree format
+    if (fDataToSave == kDerived) {
+      values[index] = this->GetHardwareSum();
+      return;
+    }
+
+
+    // For raw data, use the full detailed format
+    // hw_sum
+    if (bHw_sum) {
+      values[index++] = this->GetHardwareSum();
     }
 
     if (bBlock) {
@@ -822,8 +1041,7 @@ void  QwMollerADC_Channel::FillTreeVector(std::vector<Double_t> &values) const
 
     // num_samples
     if (bNum_samples)
-      values[index++] =
-          (fDataToSave == kMoments)? this->fGoodEventCount: this->fNumberOfSamples;
+      values[index++] = fDataToSave == kMoments ? this->fGoodEventCount : this->fNumberOfSamples;
 
     // Device_Error_Code
     if (bDevice_Error_Code)
@@ -854,6 +1072,7 @@ void  QwMollerADC_Channel::FillTreeVector(std::vector<Double_t> &values) const
       }
   }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 QwMollerADC_Channel& QwMollerADC_Channel::operator= (const QwMollerADC_Channel &value)
 {
@@ -862,22 +1081,25 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator= (const QwMollerADC_Channel &
   if (!IsNameEmpty()) {
     VQwHardwareChannel::operator=(value);
     for (Int_t i=0; i<fBlocksPerEvent; i++){
-      this->fBlock_raw[i] = value.fBlock_raw[i];
       this->fBlock[i]     = value.fBlock[i];
       this->fBlockM2[i]   = value.fBlockM2[i];
-      this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
-      this->fBlock_min[i]     = value.fBlock_min[i];
-      this->fBlock_max[i]     = value.fBlock_max[i];
     }
-    this->fHardwareBlockSum_raw = value.fHardwareBlockSum_raw;
-    this->fSoftwareBlockSum_raw = value.fSoftwareBlockSum_raw;
     this->fHardwareBlockSum = value.fHardwareBlockSum;
     this->fHardwareBlockSumM2 = value.fHardwareBlockSumM2;
     this->fHardwareBlockSumError = value.fHardwareBlockSumError;
     this->fNumberOfSamples = value.fNumberOfSamples;
     this->fSequenceNumber  = value.fSequenceNumber;
-   
 
+    if (this->fDataToSave == kRaw){
+      for (Int_t i=0; i<fBlocksPerEvent; i++){
+       this->fBlock_raw[i] = value.fBlock_raw[i];
+       this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
+       this->fBlock_min[i]     = value.fBlock_min[i];
+       this->fBlock_max[i]     = value.fBlock_max[i];
+      }
+      this->fHardwareBlockSum_raw = value.fHardwareBlockSum_raw;
+      this->fSoftwareBlockSum_raw = value.fSoftwareBlockSum_raw;
+    }
   }
   return *this;
 }
@@ -889,16 +1111,10 @@ void QwMollerADC_Channel::AssignScaledValue(const QwMollerADC_Channel &value,
 
   if (!IsNameEmpty()) {
     for (Int_t i=0; i<fBlocksPerEvent; i++){
-      this->fBlock_raw[i] = value.fBlock_raw[i];   // Keep this?
       this->fBlock[i]   = value.fBlock[i]   * scale;
       this->fBlockM2[i] = value.fBlockM2[i] * scale * scale;
-      this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
-      this->fBlock_min[i]     = value.fBlock_min[i];
-      this->fBlock_max[i]     = value.fBlock_max[i];
 
     }
-    this->fHardwareBlockSum_raw = value.fHardwareBlockSum_raw;  // Keep this?
-    this->fSoftwareBlockSum_raw = value.fSoftwareBlockSum_raw;  // Keep this?
     this->fHardwareBlockSum   = value.fHardwareBlockSum * scale;
     this->fHardwareBlockSumM2 = value.fHardwareBlockSumM2 * scale * scale;
     this->fHardwareBlockSumError = value.fHardwareBlockSumError;   // Keep this?
@@ -917,7 +1133,7 @@ void QwMollerADC_Channel::AssignValueFrom(const  VQwDataElement* valueptr)
     *this = *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::AssignValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -929,7 +1145,7 @@ void QwMollerADC_Channel::AddValueFrom(const  VQwHardwareChannel* valueptr)
     *this += *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::AddValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -941,7 +1157,7 @@ void QwMollerADC_Channel::SubtractValueFrom(const  VQwHardwareChannel* valueptr)
     *this -= *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::SubtractValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -953,7 +1169,7 @@ void QwMollerADC_Channel::MultiplyBy(const VQwHardwareChannel* valueptr)
     *this *= *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::MultiplyBy = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -965,7 +1181,7 @@ void QwMollerADC_Channel::DivideBy(const VQwHardwareChannel* valueptr)
     *this /= *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::DivideBy = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -984,15 +1200,8 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator+= (const QwMollerADC_Channel 
   if (!IsNameEmpty()) {
     for (Int_t i = 0; i < fBlocksPerEvent; i++) {
       this->fBlock[i] += value.fBlock[i];
-      this->fBlock_raw[i] += value.fBlock_raw[i];
-
-      this->fBlock_min[i] = TMath::Min(fBlock_min[i],value.fBlock_min[i]);
-      this->fBlock_max[i] = TMath::Max(fBlock_max[i],value.fBlock_max[i]);    
-      this->fBlockSumSq_raw[i] += value.fBlockSumSq_raw[i];
       this->fBlockM2[i] = 0.0;
     }
-    this->fHardwareBlockSum_raw = value.fHardwareBlockSum_raw;
-    this->fSoftwareBlockSum_raw = value.fSoftwareBlockSum_raw;
     this->fHardwareBlockSum    += value.fHardwareBlockSum;
     this->fHardwareBlockSumM2   = 0.0;
     this->fNumberOfSamples     += value.fNumberOfSamples;
@@ -1016,14 +1225,8 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator-= (const QwMollerADC_Channel 
   if (!IsNameEmpty()){
     for (Int_t i=0; i<fBlocksPerEvent; i++){
       this->fBlock[i] -= value.fBlock[i];
-      this->fBlock_raw[i] = 0;
-      this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
-      this->fBlock_min[i] = TMath::Min(fBlock_min[i],value.fBlock_min[i]);
-      this->fBlock_max[i] = TMath::Max(fBlock_max[i],value.fBlock_max[i]);  
       this->fBlockM2[i] = 0.0;
     }
-    this->fHardwareBlockSum_raw = 0;
-    this->fSoftwareBlockSum_raw = 0;
     this->fHardwareBlockSum    -= value.fHardwareBlockSum;
     this->fHardwareBlockSumM2   = 0.0;
     this->fNumberOfSamples     += value.fNumberOfSamples;
@@ -1046,20 +1249,8 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator*= (const QwMollerADC_Channel 
   if (!IsNameEmpty()){
     for (Int_t i=0; i<fBlocksPerEvent; i++){
       this->fBlock[i] *= value.fBlock[i];
-      this->fBlock_raw[i] *= value.fBlock_raw[i];
-      if(fBlockSumSq_raw[i] != 0){
-        this->fBlockSumSq_raw[i] *= value.fBlockSumSq_raw[i];
-        this->fBlock_min[i] *= value.fBlock_min[i];
-        this->fBlock_max[i] *= value.fBlock_max[i];
-      } else {
-        this->fBlockSumSq_raw[i] = value.fBlockSumSq_raw[i];
-        this->fBlock_min[i] = value.fBlock_min[i];
-        this->fBlock_max[i] = value.fBlock_max[i];
-      }
       this->fBlockM2[i] = 0.0;
     }
-    this->fHardwareBlockSum_raw *= value.fHardwareBlockSum_raw;
-    this->fSoftwareBlockSum_raw *= value.fSoftwareBlockSum_raw;
     this->fHardwareBlockSum     *= value.fHardwareBlockSum;
     this->fHardwareBlockSumM2    = 0.0;
     this->fNumberOfSamples      *= value.fNumberOfSamples;
@@ -1070,57 +1261,57 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator*= (const QwMollerADC_Channel 
   return *this;
 }
 
-VQwHardwareChannel& QwMollerADC_Channel::operator+=(const VQwHardwareChannel *source)
+VQwHardwareChannel& QwMollerADC_Channel::operator+=(const VQwHardwareChannel &source)
 {
   const QwMollerADC_Channel* tmpptr;
-  tmpptr = dynamic_cast<const QwMollerADC_Channel*>(source);
+  tmpptr = dynamic_cast<const QwMollerADC_Channel*>(&source);
   if (tmpptr!=NULL){
     *this += *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::operator+= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
   return *this;
 }
-VQwHardwareChannel& QwMollerADC_Channel::operator-=(const VQwHardwareChannel *source)
+VQwHardwareChannel& QwMollerADC_Channel::operator-=(const VQwHardwareChannel &source)
 {
   const QwMollerADC_Channel* tmpptr;
-  tmpptr = dynamic_cast<const QwMollerADC_Channel*>(source);
+  tmpptr = dynamic_cast<const QwMollerADC_Channel*>(&source);
   if (tmpptr!=NULL){
     *this -= *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::operator-= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
   return *this;
 }
-VQwHardwareChannel& QwMollerADC_Channel::operator*=(const VQwHardwareChannel *source)
+VQwHardwareChannel& QwMollerADC_Channel::operator*=(const VQwHardwareChannel &source)
 {
   const QwMollerADC_Channel* tmpptr;
-  tmpptr = dynamic_cast<const QwMollerADC_Channel*>(source);
+  tmpptr = dynamic_cast<const QwMollerADC_Channel*>(&source);
   if (tmpptr!=NULL){
     *this *= *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::operator*= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
   return *this;
 }
-VQwHardwareChannel& QwMollerADC_Channel::operator/=(const VQwHardwareChannel *source)
+VQwHardwareChannel& QwMollerADC_Channel::operator/=(const VQwHardwareChannel &source)
 {
   const QwMollerADC_Channel* tmpptr;
-  tmpptr = dynamic_cast<const QwMollerADC_Channel*>(source);
+  tmpptr = dynamic_cast<const QwMollerADC_Channel*>(&source);
   if (tmpptr!=NULL){
     *this /= *tmpptr;
   } else {
     TString loc="Standard exception from QwMollerADC_Channel::operator/= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
@@ -1146,11 +1337,6 @@ void QwMollerADC_Channel::Ratio(const QwMollerADC_Channel &numer, const QwMoller
     *this  = numer;
     *this /= denom;
 
-    //  Set the raw values to zero.
-    for (Int_t i = 0; i < fBlocksPerEvent; i++) fBlock_raw[i] = 0;
-    fHardwareBlockSum_raw = 0;
-    fSoftwareBlockSum_raw = 0;
-    // Remaining variables
     fNumberOfSamples      = denom.fNumberOfSamples;
     fSequenceNumber       = 0;
     fGoodEventCount       = denom.fGoodEventCount;
@@ -1161,7 +1347,7 @@ void QwMollerADC_Channel::Ratio(const QwMollerADC_Channel &numer, const QwMoller
 QwMollerADC_Channel& QwMollerADC_Channel::operator/= (const QwMollerADC_Channel &denom)
 {
   //  In this function, leave the "raw" variables untouched.
-  //  
+  //
   Double_t ratio;
   Double_t variance;
   if (!IsNameEmpty()) {
@@ -1182,7 +1368,7 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator/= (const QwMollerADC_Channel 
         this->fBlock[i]   = 0.0;
         this->fBlockM2[i] = 0.0;
       } else {
-        QwVerbose << "Attempting to divide by zero block in " 
+        QwVerbose << "Attempting to divide by zero block in "
                   << GetElementName() << QwLog::endl;
         fBlock[i]   = 0.0;
         fBlockM2[i] = 0.0;
@@ -1199,7 +1385,7 @@ QwMollerADC_Channel& QwMollerADC_Channel::operator/= (const QwMollerADC_Channel 
       fHardwareBlockSum   = 0.0;
       fHardwareBlockSumM2 = 0.0;
     } else {
-      QwVerbose << "Attempting to divide by zero sum in " 
+      QwVerbose << "Attempting to divide by zero sum in "
                 << GetElementName() << QwLog::endl;
       fHardwareBlockSumM2 = 0.0;
     }
@@ -1238,25 +1424,12 @@ void QwMollerADC_Channel::Product(const QwMollerADC_Channel &value1, const QwMol
   if (!IsNameEmpty()){
     for (Int_t i = 0; i < fBlocksPerEvent; i++) {
       this->fBlock[i] = (value1.fBlock[i]) * (value2.fBlock[i]);
-      this->fBlock_raw[i] = 0;
       // For a single event the second moment is still zero
       this->fBlockM2[i] = 0.0;
-      if(value1.fBlockSumSq_raw[i] != 0){
-        this->fBlockSumSq_raw[i] = value1.fBlockSumSq_raw[i];
-        this->fBlock_min[i]     = value1.fBlock_min[i];
-        this->fBlock_max[i]     = value1.fBlock_max[i];
-      } else {
-        this->fBlockSumSq_raw[i] = value2.fBlockSumSq_raw[i];
-        this->fBlock_min[i]     = value2.fBlock_min[i];
-        this->fBlock_max[i]     = value2.fBlock_max[i];
-      }
     }
 
     // For a single event the second moment is still zero
     this->fHardwareBlockSumM2 = 0.0;
-
-    this->fSoftwareBlockSum_raw = 0;
-    this->fHardwareBlockSum_raw = value1.fHardwareBlockSum_raw * value2.fHardwareBlockSum_raw;
     this->fHardwareBlockSum = value1.fHardwareBlockSum * value2.fHardwareBlockSum;
     this->fNumberOfSamples = value1.fNumberOfSamples;
     this->fSequenceNumber  = 0;
@@ -1272,7 +1445,7 @@ void QwMollerADC_Channel::AddChannelOffset(Double_t offset)
 {
   if (!IsNameEmpty()){
     fHardwareBlockSum += offset;
-    for (Int_t i=0; i<fBlocksPerEvent; i++) 
+    for (Int_t i=0; i<fBlocksPerEvent; i++)
       fBlock[i] += offset;
   }
   return;
@@ -1345,11 +1518,8 @@ void QwMollerADC_Channel::DivideBy(const QwMollerADC_Channel &denom)
  * We use the formulas provided there for the calculation of the first and
  * second moments (i.e. average and variance).
  */
-/**
- * Accumulate the running moments M1 and M2
- * @param value Object (single event or accumulated) to add to running moments
- * @param count Number of good events in value
- */
+// Accumulate the running moments M1 and M2.
+// See header for parameter and return documentation.
 void QwMollerADC_Channel::AccumulateRunningSum(const QwMollerADC_Channel& value, Int_t count, Int_t ErrorMask)
 {
   /*
@@ -1364,7 +1534,7 @@ void QwMollerADC_Channel::AccumulateRunningSum(const QwMollerADC_Channel& value,
     the kBeamStabilityError flag (+ configuration flags for global errors) and
     need to make sure we remove this flag and any configuration flags before
     checking the (fErrorFlag != 0) condition
-    
+
     See how the stability check is implemented in the QwEventRing class
 
     Rakitha
@@ -1686,7 +1856,7 @@ Bool_t QwMollerADC_Channel::ApplySingleEventCuts()//This will check the limits a
   }
   else{
     status=kTRUE;
-    //fErrorFlag=0;//we need to keep the device error codes 
+    //fErrorFlag=0;//we need to keep the device error codes
   }
 
   return status;
@@ -1704,7 +1874,7 @@ void  QwMollerADC_Channel::PrintErrorCounterHead()
   message += Form("%9s", "ZeroHW");
   message += Form("%9s", "EventCut");
   QwMessage << "---------------------------------------------------------------------------------------------" << QwLog::endl;
-  QwMessage << message << QwLog::endl; 
+  QwMessage << message << QwLog::endl;
   QwMessage << "---------------------------------------------------------------------------------------------" << QwLog::endl;
   return;
 }
@@ -1727,7 +1897,7 @@ void  QwMollerADC_Channel::PrintErrorCounters() const
     message += Form("%9d", fErrorCount_SameHW);
     message += Form("%9d", fErrorCount_ZeroHW);
     message += Form("%9d", fNumEvtsWithEventCutsRejected);
-    
+
     if((fDataToSave == kRaw) && (!kFoundPedestal||!kFoundGain)){
       message += " >>>>> No Pedestal or Gain in map file";
     }
@@ -1740,7 +1910,7 @@ void  QwMollerADC_Channel::PrintErrorCounters() const
 void QwMollerADC_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *value)
 {
   const QwMollerADC_Channel* input = dynamic_cast<const QwMollerADC_Channel*>(value);
-  
+
   // follows same steps as += but w/ scaling factor
   if(input!=NULL && !IsNameEmpty()){
     //     QwWarning << "Adding " << input->GetElementName()
@@ -1751,22 +1921,19 @@ void QwMollerADC_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *va
     //     input->PrintValue();
     for(Int_t i = 0; i < fBlocksPerEvent; i++){
       this -> fBlock[i] += scale * input->fBlock[i];
-      this->fBlock_raw[i] = 0;
       this -> fBlockM2[i] = 0.0;
-      this->fBlockSumSq_raw[i] = input->fBlockSumSq_raw[i];
-      this->fBlock_min[i]     = input->fBlock_min[i];
-      this->fBlock_max[i]     = input->fBlock_max[i];
     }
-    this->fHardwareBlockSum_raw = 0;
-    this->fSoftwareBlockSum_raw = 0;
     this -> fHardwareBlockSum += scale * input->fHardwareBlockSum;
     this -> fHardwareBlockSumM2 = 0.0;
     this -> fNumberOfSamples += input->fNumberOfSamples;
     this -> fSequenceNumber  =  0;
-    this -> fErrorFlag       |= (input->fErrorFlag);   
+    this -> fErrorFlag       |= (input->fErrorFlag);
+  } else if (input == NULL && value != NULL) {
+    TString loc="Standard exception from QwMollerADC_Channel::ScaledAdd "
+        +value->GetElementName()+" "
+        +this->GetElementName()+" are not of the same type";
+    throw(std::invalid_argument(loc.Data()));
   }
-  //   QwWarning << "Finsihed with addition"  << QwLog::endl;
-  //   PrintValue();
 }
 
 void QwMollerADC_Channel::CopyParameters(const VQwHardwareChannel* valueptr){
@@ -1790,52 +1957,52 @@ void QwMollerADC_Channel::AddErrEntriesToList(std::vector<QwErrDBInterface> &row
 
   QwErrDBInterface row;
   TString name    = GetElementName();
-  
+
   row.Reset();
   row.SetDeviceName(name);
-  row.SetErrorCodeId(1); 
+  row.SetErrorCodeId(1);
   row.SetN(fErrorCount_HWSat);
   row_list.push_back(row);
-  
+
   row.Reset();
   row.SetDeviceName(name);
   row.SetErrorCodeId(2);
   row.SetN(fErrorCount_sample);
   row_list.push_back(row);
-  
+
   row.Reset();
   row.SetDeviceName(name);
   row.SetErrorCodeId(3);
   row.SetN(fErrorCount_SW_HW);
   row_list.push_back(row);
-  
-  
+
+
   row.Reset();
   row.SetDeviceName(name);
   row.SetErrorCodeId(4);
   row.SetN(fErrorCount_Sequence);
   row_list.push_back(row);
-  
-  
+
+
   row.Reset();
   row.SetDeviceName(name);
-  row.SetErrorCodeId(5); 
+  row.SetErrorCodeId(5);
   row.SetN(fErrorCount_SameHW);
   row_list.push_back(row);
-  
+
   row.Reset();
   row.SetDeviceName(name);
-  row.SetErrorCodeId(6); 
+  row.SetErrorCodeId(6);
   row.SetN(fErrorCount_ZeroHW);
   row_list.push_back(row);
 
 
   row.Reset();
   row.SetDeviceName(name);
-  row.SetErrorCodeId(7); 
+  row.SetErrorCodeId(7);
   row.SetN(fNumEvtsWithEventCutsRejected);
   row_list.push_back(row);
   return;
-  
+
 }
 #endif

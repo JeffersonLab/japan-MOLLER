@@ -5,8 +5,7 @@
 * Time-stamp:                                             *
 \**********************************************************/
 
-#ifndef __QwHELICITYDECODER__
-#define __QwHELICITYDECODER__
+#pragma once
 
 // System headers
 #include <vector>
@@ -165,8 +164,6 @@ static const Int_t  fNumDecoderWords;
 void   FillHDVariables(uint32_t data, uint32_t index);
 
 };
-
-
-#endif
-
-
+//
+// Register this subsystem with the factory
+REGISTER_SUBSYSTEM_FACTORY(QwHelicityDecoder);

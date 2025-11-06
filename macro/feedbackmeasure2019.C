@@ -1,11 +1,11 @@
 void feedbackmeasure2019(Int_t runnum, TString mon, TString ucut="1", Int_t N = 1, Double_t PITAslp = 0, Int_t ev0=0, Int_t freq = 120, Int_t helpattern =4 )
 {//N is interval in number of events
-  //freq is helicity flip rate: i.e. 30Hz. 
+  //freq is helicity flip rate: i.e. 30Hz.
   //helpattern =2 for pairs, =4 for quad, =8 for octet.
-  //mon is actual full name "asym_bpm1i02WS" or "diff_bpm1i02WS". 
+  //mon is actual full name "asym_bpm1i02WS" or "diff_bpm1i02WS".
   //usage example
-  //be sure to do evt_scanclean[0]==4,1,etc. with the [0] or else will get wrong. 
-  //also be sure to do evt_scandata1[0]>.... or else will get wrong. 
+  //be sure to do evt_scanclean[0]==4,1,etc. with the [0] or else will get wrong.
+  //also be sure to do evt_scandata1[0]>.... or else will get wrong.
   //.x macro/makefeedbackplot2018.C(4883,"evt_scanclean[0]==1&&ok_cut&&avg_qpd1sum>260&&abs(asym_qpd1sum)<50e3",60*30,1698*0.525/100.)
 
   //TFile *_file0 = TFile::Open(Form("$QW_ROOTFILES/prexALL_%d.000.root",runnum));
@@ -24,7 +24,7 @@ void feedbackmeasure2019(Int_t runnum, TString mon, TString ucut="1", Int_t N = 
    ev0 =floor(h1->GetMean()-Nevents/2);
   }
   c1->cd(1);
-  
+
   const Int_t Ntemp=floor(Nevents/N);
   const Int_t Nintervals = Ntemp;
   Double_t Aq[Nintervals];
@@ -45,9 +45,9 @@ void feedbackmeasure2019(Int_t runnum, TString mon, TString ucut="1", Int_t N = 
   TH1* thishist;
   TString objnam;
   c1->cd(1);
- 
+
   for(Int_t ii=0; ii<Nintervals; ii++ ){
-  
+
         m->Draw(Form("%s*1e6>>hAq%d",mon.Data(),ii),Form("CodaEventNumber>(%d+%d)&&CodaEventNumber<(%d+%d)&&%s",ev0,ii*N,ev0,(ii+1)*N,ucut.Data()));
     objnam=Form("hAq%d",ii);
     thishist = (TH1*)c1->FindObject(objnam.Data());
@@ -70,7 +70,7 @@ void feedbackmeasure2019(Int_t runnum, TString mon, TString ucut="1", Int_t N = 
     rootN[ii]=AqRMSavg[ii]/sqrt(ii+1-1);
     N_1m[ii]=-N_1[ii];
     rootNm[ii]=-rootN[ii];
-   
+
     //    N_1[ii]=AqRMS[ii]/(ii+1-1);
     // rootN[ii]=AqRMS[ii]/sqrt(ii+1-1);
     // N_1m[ii]=-AqRMS[ii]/(ii+1-1);
@@ -100,7 +100,7 @@ void feedbackmeasure2019(Int_t runnum, TString mon, TString ucut="1", Int_t N = 
 
   // TGraphErrors *gcorr = new TGraphErrors(Nintervals-1, &(dset[1]), &(Aqcorr[1]), &(edset[1]),&(AqRMS[1]));
  TGraphErrors *gcorr = new TGraphErrors(Nintervals-1, &(dset[1]), &(Aqcorr[1]), &(edset[1]),&(eAq[1]));
-  
+
   TGraph *gcorrpnts = new TGraph(Nintervals-1, &(dset[1]), &(Aqcorr[1]));
   TGraphErrors *gavg = new TGraphErrors(Nintervals-1, &(dset[1]),  &(Aqavg[1]),  &(edset[1]),  &(rootN[1]));
   TGraph *gavgpnts = new TGraph(Nintervals-1, &(dset[1]),  &(Aqavg[1]));
@@ -123,7 +123,7 @@ void feedbackmeasure2019(Int_t runnum, TString mon, TString ucut="1", Int_t N = 
   //g->SetMinimum(-AqRMS[0]);
   //g->SetMaximum(AqRMS[0]);
   g->Draw("PL&&same");
-  
+
   c1->cd(4);
   gPITA->SetTitle("Correcting Voltage vs time(min)");
   gPITA->SetLineColor(4);
@@ -147,7 +147,7 @@ void feedbackmeasure2019(Int_t runnum, TString mon, TString ucut="1", Int_t N = 
   gcorrpnts->SetMarkerSize(2);
   gcorrpnts->SetLineWidth(1);
   gcorrpnts->SetTitle(Form("%s vs interval#",mon.Data()));
-  gcorrpnts->Draw("APL"); 
+  gcorrpnts->Draw("APL");
 
 
   c1->cd(2);
@@ -219,6 +219,6 @@ void feedbackmeasure2019(Int_t runnum, TString mon, TString ucut="1", Int_t N = 
   grootNm->Draw("PL&&same");
 
 
- 
+
 
 }

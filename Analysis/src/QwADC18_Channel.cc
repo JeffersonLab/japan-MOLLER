@@ -1,3 +1,8 @@
+/*!
+ * \file   QwADC18_Channel.cc
+ * \brief  Implementation for HAPPEX 18-bit ADC channel decoding
+ */
+
 #include "QwADC18_Channel.h"
 
 // System headers
@@ -11,6 +16,7 @@
 #include "QwUnits.h"
 #include "QwBlinder.h"
 #include "QwHistogramHelper.h"
+#include "QwRootFile.h"
 #ifdef __USE_DATABASE__
 #include "QwDBInterface.h"
 #endif
@@ -86,7 +92,6 @@ Int_t QwADC18_Channel::GetBufferOffset(Int_t moduleindex, Int_t channelindex)
 /********************************************************/
 Int_t QwADC18_Channel::ApplyHWChecks()
 {
-  Bool_t fEventIsGood=kTRUE;
   Bool_t bStatus;
   if (bEVENTCUTMODE>0){//Global switch to ON/OFF event cuts set at the event cut file
 
@@ -106,7 +111,6 @@ Int_t QwADC18_Channel::ApplyHWChecks()
     }
 
     if (!MatchSequenceNumber(fSequenceNo_Prev)){//we have a sequence number error
-      fEventIsGood=kFALSE;
       fErrorFlag|=kErrorFlag_Sequence;
       if (bDEBUG)       QwWarning<<" QwQWVK_Channel "<<GetElementName()<<" Sequence number previous value = "<<fSequenceNo_Prev<<" Current value= "<< GetSequenceNumber()<<QwLog::endl;
     }
@@ -132,7 +136,7 @@ void QwADC18_Channel::IncrementErrorCounters(){
     fErrorCount_SameHW++; //increment the hw error counter
   if ( (kErrorFlag_ZeroHW &  fErrorFlag)==kErrorFlag_ZeroHW)
     fErrorCount_ZeroHW++; //increment the hw error counter
-  if ( ((kErrorFlag_EventCut_L &  fErrorFlag)==kErrorFlag_EventCut_L) 
+  if ( ((kErrorFlag_EventCut_L &  fErrorFlag)==kErrorFlag_EventCut_L)
        || ((kErrorFlag_EventCut_U &  fErrorFlag)==kErrorFlag_EventCut_U)){
     fNumEvtsWithEventCutsRejected++; //increment the event cut error counter
   }
@@ -330,6 +334,7 @@ Int_t QwADC18_Channel::ProcessDataWord(UInt_t rawd)
 {
   // "Actual" values from data word
   UInt_t act_dtype  = (rawd & mask2422x) >> 22;
+  [[maybe_unused]]
   UInt_t act_chan   = (act_dtype != 4) ?
                       ((rawd & mask3029x) >> 29) : 0;
   UInt_t act_dvalue = (rawd & mask2625x) >> 25;
@@ -383,7 +388,7 @@ Int_t QwADC18_Channel::ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UI
   // Print buffer
   if (debug) {
     QwOut << GetElementName() << " : " << QwLog::endl << std::hex;
-    Int_t n = 25;
+    UInt_t n = 25;
     for (size_t i = 0; i < num_words_left; i++) {
       QwOut << "0x" << std::setfill('0') << std::setw(8) << buffer[i] << " ";
       if (i % n == n - 1) QwOut << QwLog::endl;
@@ -564,7 +569,7 @@ void  QwADC18_Channel::FillHistograms()
     }
 }
 
-void  QwADC18_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwADC18_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (IsNameEmpty()){
     //  This channel is not used, so skip setting up the tree.
@@ -575,34 +580,23 @@ void  QwADC18_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, st
     TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
     fTreeArrayIndex  = values.size();
 
-    TString list;
-
-    values.push_back(0.0);
-    list = "value/D";
+    values.push_back("value", 'D');
     if (fDataToSave == kMoments) {
-      values.push_back(0.0);
-      list += ":value_m2/D";
-      values.push_back(0.0);
-      list += ":value_err/D";
+      values.push_back("value_m2", 'D');
+      values.push_back("value_err", 'D');
     }
 
-    values.push_back(0.0);
-    list += ":Device_Error_Code/D";
-
+    values.push_back("Device_Error_Code", 'i');
     if (fDataToSave == kRaw){
-      values.push_back(0.0);
-      list += ":raw/D";
-      values.push_back(0.0);
-      list += ":diff/D";
-      values.push_back(0.0);
-      list += ":peak/D";
-      values.push_back(0.0);
-      list += ":base/D";
+      values.push_back("raw", 'I');
+      values.push_back("diff", 'I');
+      values.push_back("peak", 'I');
+      values.push_back("base", 'I');
     }
 
     fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
     if (gQwHists.MatchDeviceParamsFromList(basename.Data()))
-      tree->Branch(basename, &(values[fTreeArrayIndex]), list);
+      tree->Branch(basename, &(values[fTreeArrayIndex]), values.LeafList(fTreeArrayIndex).c_str());
   }
 }
 
@@ -616,14 +610,10 @@ void  QwADC18_Channel::ConstructBranch(TTree *tree, TString &prefix)
   }
 }
 
-
-void  QwADC18_Channel::FillTreeVector(std::vector<Double_t> &values) const
+void  QwADC18_Channel::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (IsNameEmpty()) {
     //  This channel is not used, so skip setting up the tree.
-  } else if (fTreeArrayNumEntries < 0) {
-    QwError << "QwADC18_Channel::FillTreeVector:  fTreeArrayNumEntries=="
-            << fTreeArrayNumEntries << QwLog::endl;
   } else if (fTreeArrayNumEntries == 0) {
     static bool warned = false;
     if (!warned) {
@@ -634,6 +624,89 @@ void  QwADC18_Channel::FillTreeVector(std::vector<Double_t> &values) const
     }
   } else if (values.size() < fTreeArrayIndex+fTreeArrayNumEntries) {
     QwError << "QwADC18_Channel::FillTreeVector:  values.size()=="
+            << values.size() << " name: " << fElementName
+            << "; fTreeArrayIndex+fTreeArrayNumEntries=="
+            << fTreeArrayIndex << '+' << fTreeArrayNumEntries << '='
+            << fTreeArrayIndex+fTreeArrayNumEntries
+            << QwLog::endl;
+  } else {
+    size_t index = fTreeArrayIndex;
+    values.SetValue(index++, this->fValue);
+    if (fDataToSave == kMoments) {
+      values.SetValue(index++, fValueM2);
+      values.SetValue(index++, fValueError);
+    }
+    values.SetValue(index++, this->fErrorFlag);
+    if(fDataToSave==kRaw){
+      values.SetValue(index++, this->fValue_Raw);
+      values.SetValue(index++, this->fDiff_Raw);
+      values.SetValue(index++, this->fPeak_Raw);
+      values.SetValue(index++, this->fBase_Raw);
+    }
+  }
+}
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void  QwADC18_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  if (IsNameEmpty()){
+    //  This channel is not used, so skip setting up the RNTuple.
+  } else {
+    //  Decide what to store based on prefix
+    SetDataToSaveByPrefix(prefix);
+
+    TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
+    fTreeArrayIndex  = values.size();
+
+    // Calculate how many elements we need to avoid multiple push_back calls
+    size_t numElements = 2; // value + Device_Error_Code
+    if (fDataToSave == kMoments) numElements += 2; // _m2 + _err
+    if (fDataToSave == kRaw) numElements += 4; // _raw + _diff + _peak + _base
+
+    // Resize vectors once to avoid reallocation
+    size_t oldSize = values.size();
+    values.resize(oldSize + numElements, 0.0);
+    fieldPtrs.reserve(fieldPtrs.size() + numElements);
+
+    // Main value
+    fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+
+    if (fDataToSave == kMoments) {
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_m2").Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_err").Data()));
+    }
+
+    // Device error code
+    fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_Device_Error_Code").Data()));
+
+    if (fDataToSave == kRaw){
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_raw").Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_diff").Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_peak").Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_base").Data()));
+    }
+
+    fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
+  }
+}
+
+void  QwADC18_Channel::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (IsNameEmpty()) {
+    //  This channel is not used, so skip filling.
+  } else if (fTreeArrayNumEntries < 0) {
+    QwError << "QwADC18_Channel::FillNTupleVector:  fTreeArrayNumEntries=="
+            << fTreeArrayNumEntries << QwLog::endl;
+  } else if (fTreeArrayNumEntries == 0) {
+    static bool warned = false;
+    if (!warned) {
+      QwError << "QwADC18_Channel::FillNTupleVector:  fTreeArrayNumEntries=="
+              << fTreeArrayNumEntries << " (no construction done?)" << QwLog::endl;
+      QwError << "Offending element is " << GetElementName() << QwLog::endl;
+      warned = true;
+    }
+  } else if (values.size() < fTreeArrayIndex+fTreeArrayNumEntries) {
+    QwError << "QwADC18_Channel::FillNTupleVector:  values.size()=="
             << values.size() << " name: " << fElementName
             << "; fTreeArrayIndex+fTreeArrayNumEntries=="
             << fTreeArrayIndex << '+' << fTreeArrayNumEntries << '='
@@ -655,6 +728,7 @@ void  QwADC18_Channel::FillTreeVector(std::vector<Double_t> &values) const
     }
   }
 }
+#endif // HAS_RNTUPLE_SUPPORT
 
 
 QwADC18_Channel& QwADC18_Channel::operator= (const QwADC18_Channel &value)
@@ -696,7 +770,7 @@ void QwADC18_Channel::AssignValueFrom(const  VQwDataElement* valueptr)
     *this = *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::AssignValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -708,7 +782,7 @@ void QwADC18_Channel::AddValueFrom(const  VQwHardwareChannel* valueptr)
     *this += *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::AddValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -720,7 +794,7 @@ void QwADC18_Channel::SubtractValueFrom(const  VQwHardwareChannel* valueptr)
     *this -= *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::SubtractValueFrom = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -732,7 +806,7 @@ void QwADC18_Channel::MultiplyBy(const VQwHardwareChannel* valueptr)
     *this *= *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::MultiplyBy = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -744,7 +818,7 @@ void QwADC18_Channel::DivideBy(const VQwHardwareChannel* valueptr)
     *this /= *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::DivideBy = "
-      +valueptr->GetElementName()+" is an incompatable type.";
+      +valueptr->GetElementName()+" is an incompatible type.";
     throw std::invalid_argument(loc.Data());
   }
 }
@@ -804,60 +878,60 @@ QwADC18_Channel& QwADC18_Channel::operator*= (const QwADC18_Channel &value)
   return *this;
 }
 
-VQwHardwareChannel& QwADC18_Channel::operator+=(const VQwHardwareChannel *source)
+VQwHardwareChannel& QwADC18_Channel::operator+=(const VQwHardwareChannel &source)
 {
   const QwADC18_Channel* tmpptr;
-  tmpptr = dynamic_cast<const QwADC18_Channel*>(source);
+  tmpptr = dynamic_cast<const QwADC18_Channel*>(&source);
   if (tmpptr!=NULL){
     *this += *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::operator+= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
   return *this;
 }
 
-VQwHardwareChannel& QwADC18_Channel::operator-=(const VQwHardwareChannel *source)
+VQwHardwareChannel& QwADC18_Channel::operator-=(const VQwHardwareChannel &source)
 {
   const QwADC18_Channel* tmpptr;
-  tmpptr = dynamic_cast<const QwADC18_Channel*>(source);
+  tmpptr = dynamic_cast<const QwADC18_Channel*>(&source);
   if (tmpptr!=NULL){
     *this -= *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::operator-= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
   return *this;
 }
 
-VQwHardwareChannel& QwADC18_Channel::operator*=(const VQwHardwareChannel *source)
+VQwHardwareChannel& QwADC18_Channel::operator*=(const VQwHardwareChannel &source)
 {
   const QwADC18_Channel* tmpptr;
-  tmpptr = dynamic_cast<const QwADC18_Channel*>(source);
+  tmpptr = dynamic_cast<const QwADC18_Channel*>(&source);
   if (tmpptr!=NULL){
     *this *= *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::operator*= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
   return *this;
 }
 
-VQwHardwareChannel& QwADC18_Channel::operator/=(const VQwHardwareChannel *source)
+VQwHardwareChannel& QwADC18_Channel::operator/=(const VQwHardwareChannel &source)
 {
   const QwADC18_Channel* tmpptr;
-  tmpptr = dynamic_cast<const QwADC18_Channel*>(source);
+  tmpptr = dynamic_cast<const QwADC18_Channel*>(&source);
   if (tmpptr!=NULL){
     *this /= *tmpptr;
   } else {
     TString loc="Standard exception from QwADC18_Channel::operator/= "
-        +source->GetElementName()+" "
+        +source.GetElementName()+" "
         +this->GetElementName()+" are not of the same type";
     throw(std::invalid_argument(loc.Data()));
   }
@@ -916,7 +990,7 @@ QwADC18_Channel& QwADC18_Channel::operator/= (const QwADC18_Channel &denom)
       fValue   = 0.0;
       fValueM2 = 0.0;
     } else {
-      QwVerbose << "Attempting to divide by zero in " 
+      QwVerbose << "Attempting to divide by zero in "
                 << GetElementName() << QwLog::endl;
       fValue   = 0.0;
       fValueM2 = 0.0;
@@ -1029,18 +1103,15 @@ void QwADC18_Channel::DivideBy(const QwADC18_Channel &denom)
  * We use the formulas provided there for the calculation of the first and
  * second moments (i.e. average and variance).
  */
-/**
- * Accumulate the running moments M1 and M2
- * @param value Object (single event or accumulated) to add to running moments
- * @param count Number of good events in value
- */
+// Accumulate the running moments M1 and M2.
+// See header for parameter and return documentation.
 void QwADC18_Channel::AccumulateRunningSum(const QwADC18_Channel& value, Int_t count, Int_t ErrorMask)
 {
 
   if(count==0){
     count = value.fGoodEventCount;
   }
-  
+
   // Moment calculations
   Int_t n1 = fGoodEventCount;
   Int_t n2 = count;
@@ -1227,7 +1298,7 @@ Bool_t QwADC18_Channel::ApplySingleEventCuts()//This will check the limits and u
   }
   else{
     status=kTRUE;
-    //fErrorFlag=0;//we need to keep the device error codes 
+    //fErrorFlag=0;//we need to keep the device error codes
   }
 
   return status;
@@ -1245,7 +1316,7 @@ void  QwADC18_Channel::PrintErrorCounterHead()
   message += Form("%9s", "ZeroHW");
   message += Form("%9s", "EventCut");
   QwMessage << "---------------------------------------------------------------------------------------------" << QwLog::endl;
-  QwMessage << message << QwLog::endl; 
+  QwMessage << message << QwLog::endl;
   QwMessage << "---------------------------------------------------------------------------------------------" << QwLog::endl;
 }
 
@@ -1294,10 +1365,13 @@ void QwADC18_Channel::ScaledAdd(Double_t scale, const VQwHardwareChannel *value)
     this->fValueM2 = 0.0;
     this->fNumberOfSamples += input->fNumberOfSamples;
     this->fSequenceNumber  =  0;
-    this->fErrorFlag       |= (input->fErrorFlag);   
+    this->fErrorFlag       |= (input->fErrorFlag);
+  } else if (input == NULL && value != NULL) {
+    TString loc="Standard exception from QwADC18_Channel::ScaledAdd "
+        +value->GetElementName()+" "
+        +this->GetElementName()+" are not of the same type";
+    throw(std::invalid_argument(loc.Data()));
   }
-  //   QwWarning << "Finsihed with addition"  << QwLog::endl;
-  //   PrintValue();
 }
 
 #ifdef __USE_DATABASE__
@@ -1354,52 +1428,52 @@ void QwADC18_Channel::AddErrEntriesToList(std::vector<QwErrDBInterface> &row_lis
 
   QwErrDBInterface row;
   TString name    = GetElementName();
-  
+
   row.Reset();
   row.SetDeviceName(name);
-  row.SetErrorCodeId(1); 
+  row.SetErrorCodeId(1);
   row.SetN(fErrorCount_HWSat);
   row_list.push_back(row);
-  
+
   row.Reset();
   row.SetDeviceName(name);
   row.SetErrorCodeId(2);
   row.SetN(fErrorCount_sample);
   row_list.push_back(row);
-  
+
   row.Reset();
   row.SetDeviceName(name);
   row.SetErrorCodeId(3);
   row.SetN(fErrorCount_SW_HW);
   row_list.push_back(row);
-  
-  
+
+
   row.Reset();
   row.SetDeviceName(name);
   row.SetErrorCodeId(4);
   row.SetN(fErrorCount_Sequence);
   row_list.push_back(row);
-  
-  
+
+
   row.Reset();
   row.SetDeviceName(name);
-  row.SetErrorCodeId(5); 
+  row.SetErrorCodeId(5);
   row.SetN(fErrorCount_SameHW);
   row_list.push_back(row);
-  
+
   row.Reset();
   row.SetDeviceName(name);
-  row.SetErrorCodeId(6); 
+  row.SetErrorCodeId(6);
   row.SetN(fErrorCount_ZeroHW);
   row_list.push_back(row);
 
 
   row.Reset();
   row.SetDeviceName(name);
-  row.SetErrorCodeId(7); 
+  row.SetErrorCodeId(7);
   row.SetN(fNumEvtsWithEventCutsRejected);
   row_list.push_back(row);
   return;
-  
+
 }
 #endif

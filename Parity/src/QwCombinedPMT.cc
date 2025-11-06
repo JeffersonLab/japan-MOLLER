@@ -1,14 +1,28 @@
 
+/*!
+ * \file   QwCombinedPMT.cc
+ * \brief  Combined PMT detector implementation using Moller ADC channels
+ */
+
 #include "QwCombinedPMT.h"
 
 // System headers
 #include <stdexcept>
+
+// ROOT headers
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
 
 // Qweak headers
 #ifdef __USE_DATABASE__
 #include "QwDBInterface.h"
 #endif
 
+/**
+ * \brief Add a PMT channel to this combination with a weight.
+ * \param pmt Pointer to the PMT to include.
+ * \param weight Weight applied to the PMT in the sum/average.
+ */
 void QwCombinedPMT::Add(QwIntegrationPMT* pmt, Double_t weight  )
 {
   //std::cout<<"QwCombinedPMT: Got "<<pmt->GetElementName()<<"  and weight ="<<weight<<"\n";
@@ -17,6 +31,11 @@ void QwCombinedPMT::Add(QwIntegrationPMT* pmt, Double_t weight  )
 }
 
 
+/**
+ * \brief Initialize the combined PMT with a name and data-saving mode.
+ * \param name Detector name used for branches and histograms.
+ * \param datatosave Storage mode (e.g., "raw" or "derived").
+ */
 void  QwCombinedPMT::InitializeChannel(TString name, TString datatosave)
 {
   SetElementName(name);
@@ -31,6 +50,12 @@ void  QwCombinedPMT::InitializeChannel(TString name, TString datatosave)
   return;
 }
 
+/**
+ * \brief Initialize the combined PMT with subsystem and name.
+ * \param subsystemname Subsystem identifier.
+ * \param name Detector name used for branches and histograms.
+ * \param datatosave Storage mode (e.g., "raw" or "derived").
+ */
 void  QwCombinedPMT::InitializeChannel(TString subsystemname, TString name, TString datatosave)
 {
   SetElementName(name);
@@ -46,6 +71,7 @@ void  QwCombinedPMT::InitializeChannel(TString subsystemname, TString name, TStr
   return;
 }
 
+/** \brief Link internal sum channel names to the given detector name. */
 void  QwCombinedPMT::LinkChannel(TString name)
 {
   Bool_t local_debug = false;
@@ -58,6 +84,7 @@ void  QwCombinedPMT::LinkChannel(TString name)
   if(local_debug) std::cout<<"linked combined PMT channel "<< GetElementName()<<std::endl;
 }
 
+/** \brief Clear event-scoped data for the sum channel. */
 void QwCombinedPMT::ClearEventData()
 {
   fSumADC.ClearEventData();
@@ -65,17 +92,20 @@ void QwCombinedPMT::ClearEventData()
 }
 
 
+/** \brief Set the hardware-level sum for a sequence (unused for combo). */
 void QwCombinedPMT::SetHardwareSum(Double_t hwsum, UInt_t sequencenumber)
 {
 
 }
 
+/** \brief Set the block data for the current event sequence. */
 void QwCombinedPMT::SetEventData(Double_t* block, UInt_t sequencenumber)
 {
   fSumADC.SetEventData(block, sequencenumber);
 //  fAvgADC.SetEventData(block, sequencenumber);
 }
 
+/** \brief Compute the weighted sum (and average) from member PMTs. */
 void QwCombinedPMT::CalculateSumAndAverage()
 {
 
@@ -125,24 +155,27 @@ void QwCombinedPMT::CalculateSumAndAverage()
 }
 
 /********************************************************/
+/** \brief Apply hardware checks (none needed at combiner level). */
 Bool_t QwCombinedPMT::ApplyHWChecks()
 {
   Bool_t eventokay=kTRUE;
 
- 
+
   return eventokay;
 }
 /********************************************************/
 
+/** \brief Configure detailed single-event cuts forwarded to the sum ADC. */
 void QwCombinedPMT::SetSingleEventCuts(UInt_t errorflag, Double_t LL=0, Double_t UL=0, Double_t stability=0, Double_t burplevel=0){
   //set the unique tag to identify device type (Int.PMT & Comb. PMT)
   //errorflag|=kPMTErrorFlag;
   QwMessage<<"QwCombinedPMT Error Code passing to QwIntegrationPMT "<<errorflag<<QwLog::endl;
   fSumADC.SetSingleEventCuts(errorflag,LL,UL,stability,burplevel);
-  
+
 }
 
 
+/** \brief Process event by computing the weighted average of members. */
 void  QwCombinedPMT::ProcessEvent()
 {
 //Calculate the weigted averages of the hardware sum and each of the four blocks.
@@ -153,17 +186,24 @@ void  QwCombinedPMT::ProcessEvent()
 }
 
 
+/** \brief Set default sample size on the sum ADC. */
 void QwCombinedPMT::SetDefaultSampleSize(Int_t sample_size)
 {
   fSumADC.SetDefaultSampleSize((size_t)sample_size);
 }
 
-// report number of events failed due to HW and event cut faliure
+// report number of events failed due to HW and event cut failure
+/** \brief Print error counters aggregated by the sum ADC. */
 void QwCombinedPMT::PrintErrorCounters() const
 {
   fSumADC.PrintErrorCounters();
 }
 /*********************************************************/
+/**
+ * \brief Check for burp failures by delegating to the sum ADC channel.
+ * \param ev_error Reference combined PMT to compare against.
+ * \return kTRUE if a burp failure was detected; otherwise kFALSE.
+ */
 Bool_t QwCombinedPMT::CheckForBurpFail(const VQwDataElement *ev_error){
   Bool_t burpstatus = kFALSE;
   try {
@@ -171,7 +211,7 @@ Bool_t QwCombinedPMT::CheckForBurpFail(const VQwDataElement *ev_error){
       //std::cout<<" Here in QwCombinedPMT::CheckForBurpFail \n";
       if (this->GetElementName()!="") {
         const QwCombinedPMT* value_pmt = dynamic_cast<const QwCombinedPMT* >(ev_error);
-        burpstatus |= fSumADC.CheckForBurpFail(&(value_pmt->fSumADC)); 
+        burpstatus |= fSumADC.CheckForBurpFail(&(value_pmt->fSumADC));
       }
     } else {
       TString loc="Standard exception from QwCombinedPMT::CheckForBurpFail :"+
@@ -187,6 +227,7 @@ Bool_t QwCombinedPMT::CheckForBurpFail(const VQwDataElement *ev_error){
 
 
 /********************************************************/
+/** \brief Update the sum ADC error flag from member PMTs. */
 UInt_t QwCombinedPMT::UpdateErrorFlag()
 {
   for (size_t i=0;i<fElement.size();i++) {
@@ -196,6 +237,7 @@ UInt_t QwCombinedPMT::UpdateErrorFlag()
 }
 
 /********************************************************/
+/** \brief Merge error flags from a reference combined PMT. */
 void QwCombinedPMT::UpdateErrorFlag(const QwCombinedPMT *ev_error){
   try {
     if(typeid(*ev_error)==typeid(*this)) {
@@ -211,7 +253,7 @@ void QwCombinedPMT::UpdateErrorFlag(const QwCombinedPMT *ev_error){
     }
   } catch (std::exception& e) {
     std::cerr<< e.what()<<std::endl;
-  }  
+  }
 };
 
 
@@ -293,6 +335,16 @@ QwCombinedPMT& QwCombinedPMT::operator-= (const QwCombinedPMT &value)
     }
 
   return *this;
+}
+
+void QwCombinedPMT::Sum(const QwCombinedPMT &value1, const QwCombinedPMT &value2) {
+  *this = value1;
+  *this += value2;
+}
+
+void QwCombinedPMT::Difference(const QwCombinedPMT &value1, const QwCombinedPMT &value2) {
+  *this = value1;
+  *this -= value2;
 }
 
 void QwCombinedPMT::AccumulateRunningSum(const QwCombinedPMT& value, Int_t count, Int_t ErrorMask)
@@ -391,7 +443,7 @@ void  QwCombinedPMT::FillHistograms()
   return;
 }
 
-void  QwCombinedPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwCombinedPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (GetElementName()=="")
     {
@@ -441,7 +493,7 @@ void  QwCombinedPMT::ConstructBranch(TTree *tree, TString &prefix, QwParameterFi
 }
 
 
-void  QwCombinedPMT::FillTreeVector(std::vector<Double_t> &values) const
+void  QwCombinedPMT::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()=="") {
     //  This channel is not used, so skip filling the histograms.
@@ -450,6 +502,31 @@ void  QwCombinedPMT::FillTreeVector(std::vector<Double_t> &values) const
 //  fAvgADC.FillTreeVector(values);
   }
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwCombinedPMT::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  if (GetElementName()=="")
+    {
+      //  This channel is not used, so skip
+    }
+  else
+    {
+      TString sumprefix =  prefix+"";
+      fSumADC.ConstructNTupleAndVector(model, sumprefix, values, fieldPtrs);
+    }
+}
+
+void QwCombinedPMT::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (GetElementName()=="") {
+    //  This channel is not used, so skip filling the RNTuple.
+  } else {
+    fSumADC.FillNTupleVector(values);
+//  fAvgADC.FillNTupleVector(values);
+  }
+}
+#endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
 /********************************************************/

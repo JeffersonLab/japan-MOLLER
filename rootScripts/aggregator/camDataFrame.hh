@@ -5,7 +5,7 @@ using namespace ROOT;
 // Best in root >= 6.16
 
 class Channel{
-  public: 
+  public:
     /* Minirun update:
     std::vector <TH1D> histos;
     TString name;
@@ -92,11 +92,11 @@ class Source {
     Source(TString run_n, TString n_runs, TString n_minirun, TString n_split, TString in, TString base_name): run(run_n), nruns(n_runs), minirun(n_minirun), split(n_split), input(in), basename(base_name) {}
     RDataFrame readSource();
     std::vector<TString> rcdbNames;
-    void printInfo() { std::cout << "Processing run  " << run  << ". " << std::endl;} 
+    void printInfo() { std::cout << "Processing run  " << run  << ". " << std::endl;}
     void drawAll();
     void getSlopes(std::vector<Channel>&, Int_t, Int_t, Int_t, Double_t);
     void getRCDB(std::vector<Channel>&, Int_t, Int_t, Int_t, Double_t);
-    Channel GetChannelByName(TString name);    
+    Channel GetChannelByName(TString name);
 };
 
 void Source::getRCDB(std::vector<Channel> &channels, Int_t runNumber = 0, Int_t minirunNumber = -2, Int_t splitNumber = -1, Double_t nRuns = -1){
@@ -121,7 +121,7 @@ void Source::getRCDB(std::vector<Channel> &channels, Int_t runNumber = 0, Int_t 
     "energy_sig",     // = 1.4e-6
   };
   Int_t success = 0;
-  // Experimenting Function to Get slug number based on run number 
+  // Experimenting Function to Get slug number based on run number
   // Author : Tao Ye
 
   TSQLResult* res;
@@ -359,7 +359,7 @@ void Source::getSlopes(std::vector<Channel> &channels, Int_t runNumber = 0, Int_
         outname = "dit_"+(TString)slopes->GetName()+"_mean";
         tmpChan.type = "meanrms";
         tmpChan.name = "dit_"+(TString)slopes->GetName();
-        if (nen == 0) { 
+        if (nen == 0) {
           tmpChan.avg = -1.0e6;
           tmpChan.avgErr = -1.0e6;
           tmpChan.rms = -1.0e6;
@@ -431,8 +431,8 @@ void Source::getSlopes(std::vector<Channel> &channels, Int_t runNumber = 0, Int_
         continue;
       }
       else {
-        // Do slug averaging 
-        // // FIXME This "slug averaging" assumes that the root file passed in is itself 1 slug at once. 
+        // Do slug averaging
+        // // FIXME This "slug averaging" assumes that the root file passed in is itself 1 slug at once.
         // // In fact it could have been 1 slug with segments (correction is applied segmentwise), and for CREX respin1 I am now using 1 big giant rootfile with segments as the delimeter, rather than slug number
         // // Therefore let's adjust this algorithm to match the slope calculation used in segment-wise averaging
         /*
@@ -460,7 +460,7 @@ void Source::getSlopes(std::vector<Channel> &channels, Int_t runNumber = 0, Int_
               }
             }
           }
-          if (localSegment==0) // Special case for broken rootfile... find the nearest segment number 
+          if (localSegment==0) // Special case for broken rootfile... find the nearest segment number
           {
             localSegment=1;
             // Just do the whole slug and use the largest segment number for runs >= the current run number
@@ -549,7 +549,7 @@ void Source::getSlopes(std::vector<Channel> &channels, Int_t runNumber = 0, Int_
           // FIXME This method assumes the run and cycle exist in the slopes file (not true if it failed at slope calculation)
           //if (debug>5) Printf("Adding to agg: %s = %f",outname.Data(),(Double_t)slopes->GetValue(0));
           //tmpChan.slopeError = 0.0001; // Dithering has no errors?
-          //if (abs((Double_t)slopes->GetValue(0))<200.0) { 
+          //if (abs((Double_t)slopes->GetValue(0))<200.0) {
           //  tmpChan.slope = 1e-3*(Double_t)slopes->GetValue(0);
           //  tmpChan.slopeError = -1.0e6;
           //}
@@ -560,7 +560,7 @@ void Source::getSlopes(std::vector<Channel> &channels, Int_t runNumber = 0, Int_
   }
   if(minirunNumber<0){
     TString lrbFileNameBase = gSystem->Getenv("LRB_ROOTFILES");
-    TString lrbFileName = lrbFileNameBase + "/blueR"+runNumber+".000new.slope.root";  
+    TString lrbFileName = lrbFileNameBase + "/blueR"+runNumber+".000new.slope.root";
     if ( !gSystem->AccessPathName(lrbFileName)) {
       TFile f(lrbFileName);
 
@@ -582,7 +582,7 @@ void Source::getSlopes(std::vector<Channel> &channels, Int_t runNumber = 0, Int_
 
       TMatrixT<double> slopes=*(TMatrixT<double>*) f.Get("slopes");
       TMatrixT<double> sigSlopes=*(TMatrixT<double>*) f.Get("sigSlopes");
-      for (auto& i: DVname){ 
+      for (auto& i: DVname){
         for (auto& j: IVname){
           Channel tmpChan;
           tmpChan.type = "slopes";
@@ -627,9 +627,9 @@ void Source::getSlopes(std::vector<Channel> &channels, Int_t runNumber = 0, Int_
         channels.push_back(tmpChan);
         count++;
       }
-      mini++; 
+      mini++;
     }
-  }	
+  }
 };
 
 RDataFrame Source::readSource(){
@@ -670,7 +670,7 @@ RDataFrame Source::readSource(){
   if ( gSystem->AccessPathName(base_file_name) ) {
     Printf("%s not found!",base_file_name.Data());
     TString stemlist[5] = {"prexPrompt_pass2_",
-      "prexPrompt_pass1_", 
+      "prexPrompt_pass1_",
       "prexALL_",
       "prexALLminusR_",
       "prexinj_"};
@@ -682,7 +682,7 @@ RDataFrame Source::readSource(){
     if (!gSystem->AccessPathName(base_file_name)) {
       std::cerr << "Opened file "<< base_file_name << std::endl;
     } else {
-      std::cerr << "No file found for run " << run << " in path " 
+      std::cerr << "No file found for run " << run << " in path "
           << baseDir << std::endl;
       return NULL;
     }
@@ -814,7 +814,7 @@ RDataFrame Source::readSource(){
   tsw.Start();
   Int_t test = 0;
   // c++ 11 lambda function - drdobbs.com/cpp/lambdas-in-c11/240168241
-  //    [capture section] using = instead of test,cutChoice auto-grabs all values referenced. 
+  //    [capture section] using = instead of test,cutChoice auto-grabs all values referenced.
   //    "-> int" is optional type casting for compiler simplicity
   auto metCut = [test,cutChoice](Double_t c) -> bool {
     if (cutChoice=="" || cutChoice=="Default" || cutChoice=="ErrorFlag") {
@@ -898,9 +898,9 @@ RDataFrame Source::readSource(){
           name = device;
         }
       }
-      else { 
+      else {
         Printf("Error: invalid input file");
-        return 1; 
+        return 1;
       }
       if (tokens.size() > 2){
         type=tokens.at(2);
@@ -924,9 +924,9 @@ RDataFrame Source::readSource(){
           //}
           //else {
           if (debug > 1) Printf("Executing \"tmpChan.histo = d_good.Define("+tmpChan.branchName+","+tmpChan.draw+").Filter(Form(\"reg.minirun==%s\".Histo1D("+tmpChan.branchName+")",minirun.Data());
-          // FIXME Original Postpan dependent minirun numbering//  
+          // FIXME Original Postpan dependent minirun numbering//
           //tmpChan.histo = d_good.Define(tmpChan.branchName.Data(),tmpChan.draw.Data()).Filter(Form("reg.minirun==%s",minirun.Data())).Histo1D(tmpChan.branchName.Data());
-          // FIXME NEW JAPAN BASED 
+          // FIXME NEW JAPAN BASED
           tmpChan.histo = d_good.Define(tmpChan.branchName.Data(),tmpChan.draw.Data()).Filter(Form("BurstCounter==%s",minirun.Data())).Histo1D(tmpChan.branchName.Data());
           /*tmpChan.histo = d_good.Define(tmpChan.branchName.Data(),tmpChan.draw.Data()).Filter([minirun.Data()](Double_t b) {
           *    return (((Int_t)b)==(Int_t)atoi(minirun.c_str()));
@@ -1012,7 +1012,7 @@ RDataFrame Source::readSource(){
   TFile *aggregatorFile = new TFile(aggregatorFileName,"UPDATE");
   aggregatorFile->cd();
   TTree * outputTree = new TTree("agg","Aggregator Tree");
-  // Intentionally not using a struct here to match prior aggregator output definition 
+  // Intentionally not using a struct here to match prior aggregator output definition
   // and to simplify life for other people, and to allow for non-mean kinds of variables to be used
   outputTree->Branch("run_number", &tmpRunN);
   outputTree->Branch("n_runs", &tmpNRuns);
@@ -1022,7 +1022,7 @@ RDataFrame Source::readSource(){
   if (debug > 1) {cout << "Done setting up output tree --"; tsw.Print(); cout << endl;}
   tsw.Start();
 
-  //for (auto tmpChan:channels) 
+  //for (auto tmpChan:channels)
   for (Int_t loop = 0 ; loop<channels.size() ; loop++) {
     channels.at(loop).storeData(outputTree);
   }

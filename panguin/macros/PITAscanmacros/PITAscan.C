@@ -3,15 +3,15 @@ void PITAscan(TString device="det1", TString ucut ="1", Int_t myii =0){
   gROOT->Reset();
 gStyle->SetOptFit(0001);
  gStyle -> SetOptStat(0);
-  // define style here 
-  // general parameters 
+  // define style here
+  // general parameters
 
    TPad *a1 = new TPad("a1", "a1",
   		    0,0,1,1);
      a1->Draw();
 
      //static Int_t myii;
-     //new (Form(...",)) = 
+     //new (Form(...",)) =
      //Nr++
   TString *bpmNam13 = new TString(device);
   TString tmpname13;
@@ -39,7 +39,7 @@ gStyle->SetOptFit(0001);
      //cout<<plotcommand13.Data()<<","<<scut13.Data()<<endl;
     a1->cd();
      p->Draw(plotcommand13.Data(),scut13.Data(),"prof");
-    
+
       TH1D* thishist13;
       thishist13 = (TH1D*)gDirectory->FindObject(Form("hAq%d",myii));
 
@@ -65,5 +65,3 @@ gStyle->SetOptFit(0001);
 
     //    myii++;
 }
-
-

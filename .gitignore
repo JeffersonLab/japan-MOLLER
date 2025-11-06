@@ -38,8 +38,10 @@ qwparity_simple
 qwroot
 
 # Directories
-lib
-*build
+/bin
+/lib
+*build*
+/include
 *test*
 output
 Doxygen/html
@@ -62,3 +64,6 @@ SetupFiles/SET_ME_UP.*
 
 # Max burst indices
 Parity/prminput/max_burst_index.*
+
+# Generated database schema headers
+Parity/include/QwParitySchema.h

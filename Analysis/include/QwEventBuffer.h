@@ -1,14 +1,14 @@
-/**********************************************************\
-* File: QwEventBuffer.h                                    *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2008-07-22 15:40>                           *
-\**********************************************************/
 
-#ifndef __QWEVENTBUFFER__
-#define __QWEVENTBUFFER__
+/*!
+ * \file   QwEventBuffer.h
+ * \brief  Event buffer management for reading and processing CODA data
+ * \author P. M. King
+ * \date   2008-07-22
+ */
 
+#pragma once
 
+#include <chrono>
 #include <string>
 #include <vector>
 #include "Rtypes.h"
@@ -34,9 +34,16 @@ class QwSubsystemArray;
 //////////////////////////////////////////////////////////////////////
 
 
-///
-/// \ingroup QwAnalysis
-// class QwEventBuffer: public MQwCodaControlEvent{
+/**
+ * \class QwEventBuffer
+ * \ingroup QwAnalysis
+ * \brief Event buffer management for reading and processing CODA data
+ *
+ * Manages the reading of CODA event data files, including support for
+ * segmented files, run lists, and event stream processing. Handles
+ * event decoding via pluggable decoder classes and provides iteration
+ * over events and runs.
+ */
 class QwEventBuffer {
  public:
   static void DefineOptions(QwOptions &options);
@@ -66,11 +73,6 @@ class QwEventBuffer {
     if (fEvStream != NULL) {
       delete fEvStream;
       fEvStream = NULL;
-    }
-    // Delete run list file
-    if (fRunListFile != NULL) {
-      delete fRunListFile;
-      fRunListFile = NULL;
     }
 	  // Delete Decoder
 	  if(decoder != NULL) {
@@ -179,11 +181,11 @@ class QwEventBuffer {
 
   Bool_t FillSubsystemConfigurationData(std::vector<VQwSubsystem*> &subsystems);
   Bool_t FillSubsystemData(std::vector<VQwSubsystem*> &subsystems);
-	
-	// Coda Version that is set by void VerifyCodaVersion( ) 
+
+	// Coda Version that is set by void VerifyCodaVersion( )
 	// Compared against the user-input coda version
 	Int_t fDataVersionVerify = 0;
-  Int_t fDataVersion; // User-input Coda Version	
+  Int_t fDataVersion; // User-input Coda Version
 
  protected:
   ///
@@ -194,16 +196,22 @@ class QwEventBuffer {
   Int_t   fETWaitMode;
   Bool_t  fExitOnEnd;
 
+  // Event rate limiting
+  Bool_t fEventRateLimitEnabled{false};
+  Double_t fMaxEventRate{0.0};
+  std::chrono::duration<double> fMinEventInterval;
+  std::chrono::duration<double> fAccumulatedDelay{0.0};
+  std::chrono::steady_clock::time_point fLastEventTime;
 
   Bool_t fChainDataFiles;
   std::pair<Int_t, Int_t> fRunRange;
   std::string fRunListFileName;
-  QwParameterFile* fRunListFile;
+  std::unique_ptr<QwParameterFile> fRunListFile;
   std::vector<Int_t> fRunRangeMinList, fRunRangeMaxList;
 
   std::pair<UInt_t, UInt_t> fEventRange;
   std::string fEventListFileName;
-  QwParameterFile* fEventListFile;
+  std::unique_ptr<QwParameterFile> fEventListFile;
   std::vector<UInt_t> fEventList;
 
   std::pair<Int_t, Int_t> fSegmentRange;
@@ -228,6 +236,7 @@ class QwEventBuffer {
   Int_t  GetEtEvent();
 
   Int_t WriteFileEvent(int* buffer);
+  Int_t WriteEtEvent(int* buffer);
 
   Bool_t DataFileIsSegmented();
 
@@ -268,7 +277,7 @@ class QwEventBuffer {
   std::unordered_map<RocBankLabel_t, std::vector<UInt_t> > fMarkerList;
   std::unordered_map<RocBankLabel_t, std::vector<UInt_t> > fOffsetList;
 
-  Int_t CheckForMarkerWords(QwSubsystemArray &subsystems);
+  std::size_t CheckForMarkerWords(QwSubsystemArray &subsystems);
   RocBankLabel_t fThisRocBankLabel;
   UInt_t FindMarkerWord(UInt_t markerID, UInt_t* buffer, UInt_t num_words);
   UInt_t GetMarkerWord(UInt_t markerID);
@@ -292,7 +301,7 @@ template < class T > Bool_t QwEventBuffer::FillObjectWithEventData(T &object){
   ///  - Bool_t T::CanUseThisEventType(const UInt_t event_type);
   ///  - Bool_t T::ClearEventData(const UInt_t event_type);
   ///  - Int_t  T::ProcessBuffer(const UInt_t event_type,
-  ///       const ROCID_t roc_id, const BankID_t bank_id, 
+  ///       const ROCID_t roc_id, const BankID_t bank_id,
   ///       const UInt_t banktype, UInt_t* buffer, UInt_t num_words);
   ///
   Bool_t okay = kFALSE;
@@ -329,7 +338,3 @@ template < class T > Bool_t QwEventBuffer::FillObjectWithEventData(T &object){
   }
   return okay;
 }
-
-
-
-#endif

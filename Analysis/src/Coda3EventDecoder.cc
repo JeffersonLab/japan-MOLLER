@@ -1,17 +1,19 @@
+/*!
+ * \file   Coda3EventDecoder.cc
+ * \brief  CODA version 3 event decoder implementation
+ */
+
 #include "Coda3EventDecoder.h"
 #include "THaCodaFile.h"
 #include "QwOptions.h"
 
 #include <vector>
 #include <ctime>
+#include <cstring>
 
 #include "TError.h"
 
-/**
- * @brief Creates PHYS Event EVIO Header
- * @param ROCList List of ROCS
- * @return PHYS Event Header
- */
+// Creates PHYS Event EVIO Header. See header for parameters and return value.
 std::vector<UInt_t> Coda3EventDecoder::EncodePHYSEventHeader(std::vector<ROCID_t> &ROCList)
 {
 	int localtime = (int) time(0);
@@ -20,15 +22,15 @@ std::vector<UInt_t> Coda3EventDecoder::EncodePHYSEventHeader(std::vector<ROCID_t
 	std::vector<UInt_t> header;
 	header.push_back(0xFF501001);
 	header.push_back(wordcount); 						 // word count for Trigger Bank
-	header.push_back(0xFF212000 | ROCCount); // # of ROCs 
-	
-	header.push_back(0x010a0004); 
+	header.push_back(0xFF212000 | ROCCount); // # of ROCs
+
+	header.push_back(0x010a0004);
 	// evtnum is held by a 64 bit ... for now we set the upper 32 bits to 0
 	header.push_back(++fEvtNumber );
 	header.push_back(0x0);
 
 	// evttime is held by a 64 bit (bits 0-48 is the time) ... for now we set the upper 32 bits to 0
-	header.push_back(localtime); 
+	header.push_back(localtime);
 	header.push_back(0x0);
 
 	header.push_back(0x1850001);
@@ -45,13 +47,7 @@ std::vector<UInt_t> Coda3EventDecoder::EncodePHYSEventHeader(std::vector<ROCID_t
 }
 
 
-/**
- * @brief Creates Prestart Event EVIO Header
- * @param buffer Array of size 5 to store the Prestart Header
- * @param runnumber Number of the run
- * @param runtype Run type
- * @param localtime Event time
- */
+// Creates PRESTART Event EVIO Header. See header for parameters.
 void Coda3EventDecoder::EncodePrestartEventHeader(int* buffer, int runnumber, int runtype, int localtime)
 {
 	buffer[0] = 4; // Prestart event length
@@ -62,12 +58,7 @@ void Coda3EventDecoder::EncodePrestartEventHeader(int* buffer, int runnumber, in
   ProcessPrestart(localtime, runnumber, runtype);
 }
 
-/**
- * @brief Creates Go Event EVIO Header
- * @param buffer Array of size 5 to store the Go Header
- * @param eventcount Number of events 
- * @param localtime Event time
- */
+// Creates GO Event EVIO Header. See header for parameters.
 void Coda3EventDecoder::EncodeGoEventHeader(int* buffer, int eventcount, int localtime)
 {
 	buffer[0] = 4; // Go event length
@@ -78,12 +69,7 @@ void Coda3EventDecoder::EncodeGoEventHeader(int* buffer, int eventcount, int loc
   ProcessGo(localtime, eventcount);
 }
 
-/**
- * @brief Creates Pause Event EVIO Header
- * @param buffer Array of size 5 to store the Go Header
- * @param eventcount Number of events 
- * @param localtime Event time
- */
+// Creates PAUSE Event EVIO Header. See header for parameters.
 void Coda3EventDecoder::EncodePauseEventHeader(int* buffer, int eventcount, int localtime)
 {
 	buffer[0] = 4; // Pause event length
@@ -94,27 +80,18 @@ void Coda3EventDecoder::EncodePauseEventHeader(int* buffer, int eventcount, int 
   ProcessPause(localtime, eventcount);
 }
 
-/**
- * @brief Creates End Event EVIO Header
- * @param buffer Array of size 5 to store the End Header
- * @param eventcount Number of events 
- * @param localtime Event time
- */
+// Creates END Event EVIO Header. See header for parameters.
 void Coda3EventDecoder::EncodeEndEventHeader(int* buffer, int eventcount, int localtime)
 {
 	buffer[0] = 4; // End event length
 	buffer[1] = ((0xffd4 << 16) | (0x01 << 8) );
 	buffer[2] = localtime;
 	buffer[3] = 0; // unused
-	buffer[4] = eventcount; 
+	buffer[4] = eventcount;
   ProcessEnd(localtime, eventcount);
 }
 
-/**
- * @brief Determines if a buffer contains a PHYS event, Control Event, or some other event
- * @param buffer Event buffer to decode
- * @return CODA_OK
- */
+// Determine if a buffer contains a PHYS event, control event, or other event.
 Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 {
 	fPhysicsEventFlag = kFALSE;
@@ -141,7 +118,7 @@ Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 	// Start Filling Data
 	fEvtTag     = (buffer[1] & 0xffff0000) >> 16;
 	fBankDataType = (buffer[1] & 0xff00) >> 8;
-	block_size  =	(buffer[1] & 0xff); 
+	block_size  =	(buffer[1] & 0xff);
 
 	if(block_size > 1) {
 		QwWarning << "MultiBlock is not properly supported! block_size = "
@@ -149,24 +126,24 @@ Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 	}
 
 	// Determine the event type by the evt tag
-	fEvtType = InterpretBankTag(fEvtTag);		
+	fEvtType = InterpretBankTag(fEvtTag);
 	fWordsSoFar = (2);
-	if(fEvtTag < 0xff00) { 
+	if(fEvtTag < 0xff00) {
 		// User Event
 		printUserEvent(buffer);
 	}
 	else if(fControlEventFlag) {
 		fEvtNumber = 0;	ProcessControlEvent(fEvtType, &buffer[fWordsSoFar]);
 	}
-	else if(fPhysicsEventFlag) { 
+	else if(fPhysicsEventFlag) {
 		ret = trigBankDecode( buffer );
 		if(ret != HED_OK) { trigBankErrorHandler( ret ); }
-		else { 
+		else {
 			fEvtNumber = tbank.evtNum;
 			fWordsSoFar = 2 + tbank.len;
 		}
 	}
-	else { 
+	else {
 		// Not a control event, user event, nor physics event. Not sure what it is
 		//  Arbitrarily set the event type to "fEvtTag".
 		//  The first two words have been examined.
@@ -174,24 +151,20 @@ Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 		for(size_t index = 0; fEvtLength; index++){
 			QwVerbose << "\t" << buffer[index];
 			if(index % 4 == 0){ QwVerbose << QwLog::endl; }
-		}	
+		}
 		fEvtType = fEvtTag;	fEvtNumber = 0;
 	}
 
-	fFragLength = fEvtLength - fWordsSoFar;	
+	fFragLength = fEvtLength - fWordsSoFar;
 	QwDebug << Form("buffer[0-1] 0x%x 0x%x ; ", buffer[0], buffer[1]);
-	PrintDecoderInfo(QwDebug);
+	if (gQwLog.GetLogLevel() >= QwLog::kDebug) {
+  	  PrintDecoderInfo(gQwLog(QwLog::kDebug,__PRETTY_FUNCTION__));
+	}
 
 	return CODA_OK;
 }
 
-/**
- * @brief Determines the Event Type (PHYS, CONTROL, OTHER) 
- * @param tag Event Tag used to determine the Event Type
- * @return 1: PHYS Event
- * @return Control Keyword: Control Event
- * @return tag: Other (User) Event
- */
+// Determine the Event Type (PHYS, CONTROL, OTHER). See header for details.
 UInt_t Coda3EventDecoder::InterpretBankTag( UInt_t tag )
 {
 	UInt_t evtyp{};
@@ -230,10 +203,7 @@ UInt_t Coda3EventDecoder::InterpretBankTag( UInt_t tag )
 }
 
 
-/**
- * @brief Prints User events (non-PHYS and non-Control)
- * @param buffer Event buffer
- */
+// Print user events (non-PHYS and non-control). See header for details.
 void Coda3EventDecoder::printUserEvent(const UInt_t *buffer)
 {
 	// checks of ET-inserted data
@@ -288,10 +258,7 @@ void Coda3EventDecoder::printUserEvent(const UInt_t *buffer)
 	}
 }
 
-/**
- * @brief Prints Internal Decoder Information
- * @param out Output buffer to use to dispay internal Decoder Information.\nCan be QwMessage, QwVerbose, QwWarning, or QwErrror.
- */
+// Print internal decoder information. See header for details.
 void Coda3EventDecoder::PrintDecoderInfo(QwLog& out)
 {
 
@@ -302,12 +269,7 @@ void Coda3EventDecoder::PrintDecoderInfo(QwLog& out)
 		<< QwLog::endl;
 }
 
-/**
- * @brief Decodes the TI Trigger Bank for PHYS Events
- * @param buffer PHYS Event buffer
- * @return HED_OK: Success
- * @return HED_ERROR: Error
- */
+// Decode the TI Trigger Bank for PHYS events. See header for parameters and returns.
 Int_t Coda3EventDecoder::trigBankDecode( UInt_t* buffer)
 {
 	const char* const HERE = "Coda3EventDecoder::trigBankDecode";
@@ -319,7 +281,7 @@ Int_t Coda3EventDecoder::trigBankDecode( UInt_t* buffer)
 	// Set up exception handling for the PHYS Bank
 	try {
 		tbank.Fill(&buffer[fWordsSoFar], block_size, TSROCNumber);
-	} 
+	}
 	catch( const coda_format_error& e ) {
 		Error(HERE, "CODA 3 format error: %s", e.what() );
 		return HED_ERR;
@@ -330,13 +292,7 @@ Int_t Coda3EventDecoder::trigBankDecode( UInt_t* buffer)
 }
 
 
-/**
- * @brief Extracts TI Header information
- * @param evbuffer Event Buffer
- * @param blkSize Block Size (JAPAN expects a Block Size of 1)
- * @param tsroc Roc Number of the Trigger supervisor.
- * @return Total length of the trigger bank
- */
+// Extract TI header information. See header for parameters and returns.
 uint32_t Coda3EventDecoder::TBOBJ::Fill( const uint32_t* evbuffer,
 		uint32_t blkSize, uint32_t tsroc )
 {
@@ -357,10 +313,19 @@ uint32_t Coda3EventDecoder::TBOBJ::Fill( const uint32_t* evbuffer,
 		uint32_t slen = *p & 0xffff;
 		if( slen != 2*(1 + (withRunInfo() ? 1 : 0) + (withTimeStamp() ? blkSize : 0)))
 			throw coda_format_error("Invalid length for Trigger Bank seg 1");
-		const auto* q = (const uint64_t*) (p + 1);
-		evtNum  = *q++;
-		runInfo = withRunInfo()   ? *q++ : 0;
-		evTS    = withTimeStamp() ? q    : nullptr;
+        const uint32_t *q = (p+1);
+		memcpy(&evtNum, q++, sizeof(evtNum)); // uint64_t
+		if (withTimeStamp()) {
+			evTS = reinterpret_cast<const uint64_t*>(++q); // uint64_t[blkSize]
+			q += 2*(blksize-1);
+		} else {
+		    evTS = nullptr;
+		}
+	    if (withRunInfo()) {
+			memcpy(&runInfo, q+=2, sizeof(runInfo)); // uint64_t
+		} else {
+			runInfo = 0;
+		}
 		p += slen + 1;
 	}
 	if( p-evbuffer >= len )
@@ -405,12 +370,7 @@ uint32_t Coda3EventDecoder::TBOBJ::Fill( const uint32_t* evbuffer,
 	return len;
 }
 
-/**
- * @brief Loads the Trigger Bank information of an event
- * @param i Event whose information will be loaded
- * @return -1: Error
- * @return 1: Success
- */
+// Load trigger bank information of an event. See header for parameters and returns.
 Int_t Coda3EventDecoder::LoadTrigBankInfo( UInt_t i )
 {
 	// CODA3: Load tsEvType, evt_time, and trigger_bits for i-th event
@@ -420,26 +380,32 @@ Int_t Coda3EventDecoder::LoadTrigBankInfo( UInt_t i )
 	if( i >= tbank.blksize )
 		return -1;
 	tsEvType = tbank.evType[i];      // event type (configuration-dependent)
-	if( tbank.evTS )
-		evt_time = tbank.evTS[i];      // event time (4ns clock, I think)
+	if( tbank.evTS ) {
+		// Use memcpy to safely read potentially unaligned 64-bit timestamp
+		uint64_t timestamp;
+		memcpy(&timestamp, &tbank.evTS[i], sizeof(timestamp));
+		evt_time = timestamp;        // event time (4ns clock, I think)
+	}
 	else if( tbank.TSROC ) {
 		UInt_t struct_size = tbank.withTriggerBits() ? 3 : 2;
-		evt_time = *(const uint64_t*) (tbank.TSROC + struct_size * i);
+		// Use memcpy to safely read potentially unaligned 64-bit value
+		uint64_t timestamp;
+		memcpy(&timestamp, tbank.TSROC + struct_size * i, sizeof(timestamp));
+		evt_time = timestamp;
 		// Only the lower 48 bits seem to contain the time
 		evt_time &= 0x0000FFFFFFFFFFFF;
 	}
 	if( tbank.withTriggerBits() ){
 		// Trigger bits. Only the lower 6 bits seem to contain the actual bits
-		trigger_bits = tbank.TSROC[2 + 3 * i] & 0x3F;
+		uint32_t trigger_word;
+		memcpy(&trigger_word, &tbank.TSROC[2 + 3 * i], sizeof(trigger_word));
+		trigger_bits = trigger_word & 0x3F;
 	}
 	return 0;
 }
 
 
-/**
- * @brief Displays warning given a trigBank Error flag
- * @param flag Trig Bank Error
- */
+// Display warning given a trigBank error flag. See header for details.
 void Coda3EventDecoder::trigBankErrorHandler( Int_t flag )
 {
 	switch(flag){
@@ -475,6 +441,3 @@ void Coda3EventDecoder::trigBankErrorHandler( Int_t flag )
 
 	fWordsSoFar = fEvtLength;
 }
-
-
-

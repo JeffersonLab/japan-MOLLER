@@ -1,3 +1,8 @@
+/*!
+ * \file   QwRootFile.cc
+ * \brief  Implementation for ROOT file and tree management wrapper classes
+ */
+
 #include "QwRootFile.h"
 #include "QwRunCondition.h"
 #include "TH1.h"
@@ -21,6 +26,9 @@ QwRootFile::QwRootFile(const TString& run_label)
   : fRootFile(0), fMakePermanent(0),
     fMapFile(0), fEnableMapFile(kFALSE),
     fUpdateInterval(-1)
+#ifdef HAS_RNTUPLE_SUPPORT
+    , fEnableRNTuples(kFALSE)
+#endif // HAS_RNTUPLE_SUPPORT
 {
   // Process the configuration options
   ProcessOptions(gQwOptions);
@@ -88,6 +96,7 @@ QwRootFile::QwRootFile(const TString& run_label)
       );
     }
 
+    fRootFile->SetCompressionAlgorithm(fCompressionAlgorithm);
     fRootFile->SetCompressionLevel(fCompressionLevel);
   }
 }
@@ -201,6 +210,13 @@ void QwRootFile::DefineOptions(QwOptions &options)
     ("disable-slow-tree", po::value<bool>()->default_bool_value(false),
      "disable slow control tree");
 
+#ifdef HAS_RNTUPLE_SUPPORT
+  // Define the RNTuple options
+  options.AddOptions("ROOT output options")
+    ("enable-rntuples", po::value<bool>()->default_bool_value(false),
+     "enable RNTuple output");
+#endif // HAS_RNTUPLE_SUPPORT
+
   // Define the tree output prescaling options
   options.AddOptions("ROOT output options")
     ("num-mps-accepted-events", po::value<int>()->default_value(0),
@@ -232,8 +248,11 @@ void QwRootFile::DefineOptions(QwOptions &options)
     ("circular-buffer", po::value<int>()->default_value(0),
      "TTree circular buffer");
   options.AddOptions("ROOT performance options")
+    ("compression-algorithm", po::value<int>()->default_value(1),
+     "TFile compression algorithm (default = 1 ZLIB)");
+  options.AddOptions("ROOT performance options")
     ("compression-level", po::value<int>()->default_value(1),
-     "TFile compression level");
+     "TFile compression level (default = 1, no compression = 0)");
 }
 
 
@@ -263,6 +282,11 @@ void QwRootFile::ProcessOptions(QwOptions &options)
 #endif
   fUseTemporaryFile = options.GetValue<bool>("write-temporary-rootfiles");
 
+#ifdef HAS_RNTUPLE_SUPPORT
+  // Option 'enable-rntuples' to enable RNTuple output
+  fEnableRNTuples = options.GetValue<bool>("enable-rntuples");
+#endif // HAS_RNTUPLE_SUPPORT
+
   // Options 'disable-trees' and 'disable-histos' for disabling
   // tree and histogram output
   auto v = options.GetValueVector<std::string>("disable-tree");
@@ -288,6 +312,7 @@ void QwRootFile::ProcessOptions(QwOptions &options)
   // Update interval for the map file
   fCircularBufferSize = options.GetValue<int>("circular-buffer");
   fUpdateInterval = options.GetValue<int>("mapfile-update-interval");
+  fCompressionAlgorithm = options.GetValue<int>("compression-algorithm");
   fCompressionLevel = options.GetValue<int>("compression-level");
   fBasketSize = options.GetValue<int>("basket-size");
 
@@ -312,33 +337,81 @@ Bool_t QwRootFile::HasAnyFilled(void) {
   return this->HasAnyFilled(fRootFile);
 }
 Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
-  if (!d) return false;
+  if (!d) {
+
+    return false;
+  }
+
+  // First check if any in-memory trees have been filled
+  for (auto& pair : fTreeByName) {
+    for (auto& tree : pair.second) {
+      if (tree && tree->GetTree()) {
+        Long64_t entries = tree->GetTree()->GetEntries();
+        if (entries > 0) {
+
+          return true;
+        }
+      }
+    }
+  }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+  // Then check if any RNTuples have been filled
+  for (auto& pair : fNTupleByName) {
+    for (auto& ntuple : pair.second) {
+      if (ntuple && ntuple->fCurrentEvent > 0) {
+
+        return true;
+      }
+    }
+  }
+#endif // HAS_RNTUPLE_SUPPORT
+
   TList* l = d->GetListOfKeys();
+
 
   for( int i=0; i < l->GetEntries(); ++i) {
     const char* name = l->At(i)->GetName();
     TObject* obj = d->FindObjectAny(name);
 
+
+
     // Objects which can't be found don't count.
-    if (!obj) continue;
+    if (!obj) {
+
+      continue;
+    }
 
     // Lists of parameter files, map files, and job conditions don't count.
-    if ( TString(name).Contains("parameter_file") ) continue;
-    if ( TString(name).Contains("mapfile") ) continue;
-    if ( TString(name).Contains("_condition") ) continue;
+    if ( TString(name).Contains("parameter_file") ) {
+
+      continue;
+    }
+    if ( TString(name).Contains("mapfile") ) {
+      continue;
+    }
+    if ( TString(name).Contains("_condition") ) {
+      continue;
+    }
     //  The EPICS tree doesn't count
-    if ( TString(name).Contains("slow") ) continue;
+    if ( TString(name).Contains("slow") ) {
+      continue;
+    }
 
     // Recursively check subdirectories.
-    if (obj->IsA()->InheritsFrom( "TDirectory" ))
+    if (obj->IsA()->InheritsFrom( "TDirectory" )) {
       if (this->HasAnyFilled( (TDirectory*)obj )) return true;
+    }
 
-    if (obj->IsA()->InheritsFrom( "TTree" ))
-      if ( ((TTree*) obj)->GetEntries() ) return true;
+    if (obj->IsA()->InheritsFrom( "TTree" )) {
+      Long64_t entries = ((TTree*) obj)->GetEntries();
+      if ( entries ) return true;
+    }
 
-    if (obj->IsA()->InheritsFrom( "TH1" ))
-      if ( ((TH1*) obj)->GetEntries() ) return true;
+    if (obj->IsA()->InheritsFrom( "TH1" )) {
+      Double_t entries = ((TH1*) obj)->GetEntries();
+      if ( entries ) return true;
+    }
   }
-
   return false;
 }

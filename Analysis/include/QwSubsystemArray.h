@@ -1,23 +1,23 @@
-/**********************************************************\
-* File: QwSubsystemArray.h                                 *
-*                                                          *
-* Author: P. M. King,  Rakitha Beminiwattha                *
-* Time-stamp: <2008-07-22 15:50>                           *
-\**********************************************************/
+/*!
+ * \file   QwSubsystemArray.h
+ * \brief  Array container for managing multiple subsystems
+ * \author P. M. King, Rakitha Beminiwattha
+ * \date   2008-07-22
+ */
 
-#ifndef __QWSUBSYSTEMARRAY__
-#define __QWSUBSYSTEMARRAY__
+#pragma once
 
 #include <vector>
 #include <map>
+#include <memory>
+
 #include "Rtypes.h"
 #include "TString.h"
 #include "TDirectory.h"
 #include "TTree.h"
 
-
-#include <boost/shared_ptr.hpp>
-#include <boost/mem_fn.hpp>
+// RNTuple headers
+#include "ROOT/RNTupleModel.hxx"
 
 // Qweak headers
 #include "MQwPublishable.h"
@@ -27,15 +27,24 @@
 // Forward declarations
 class VQwHardwareChannel;
 class QwParameterFile;
+class QwRootTreeBranchVector;
 
-///
-/// \ingroup QwAnalysis
+/**
+ * \class QwSubsystemArray
+ * \ingroup QwAnalysis
+ * \brief Container for managing multiple subsystems with common operations
+ *
+ * Extends std::vector to provide subsystem-level operations such as
+ * event processing, accumulation, tree/histogram construction, and
+ * publishing. Uses container-delegation pattern to forward arithmetic
+ * operations to individual subsystems while maintaining type safety.
+ */
 class QwSubsystemArray:
-    public std::vector<boost::shared_ptr<VQwSubsystem>>,
+    public std::vector<std::shared_ptr<VQwSubsystem>>,
     public MQwPublishable<QwSubsystemArray, VQwSubsystem> {
 
  private:
-  typedef std::vector<boost::shared_ptr<VQwSubsystem> >  SubsysPtrs;
+  typedef std::vector<std::shared_ptr<VQwSubsystem> >  SubsysPtrs;
  public:
   using SubsysPtrs::const_iterator;
   using SubsysPtrs::iterator;
@@ -58,7 +67,7 @@ class QwSubsystemArray:
   /// \brief Copy constructor by reference
   QwSubsystemArray(const QwSubsystemArray& source);
   /// \brief Virtual destructor
-  virtual ~QwSubsystemArray() { };
+  ~QwSubsystemArray() override { };
 
   /// \brief Assignment operator
   QwSubsystemArray& operator=(const QwSubsystemArray& value);
@@ -98,7 +107,7 @@ class QwSubsystemArray:
       VQwSubsystem* subsys = dynamic_cast<VQwSubsystem*>(subsys_iter->get());
       fEventTypeMask |= subsys->GetEventTypeMask();
     }
-    return fEventTypeMask; 
+    return fEventTypeMask;
   };
 
 
@@ -116,7 +125,7 @@ class QwSubsystemArray:
   /// \brief Process configuration options (default behavior)
   void ProcessOptions(QwOptions &options) { ProcessOptionsSubsystems(options); };
   void LoadAllEventRanges(QwOptions &options);
-  
+
   /// \brief Add the subsystem to this array
   void push_back(VQwSubsystem* subsys);
 
@@ -198,18 +207,30 @@ class QwSubsystemArray:
   /// \name Tree and vector construction and maintenance
   // @{
   /// Construct the tree and vector for this subsystem
-  void ConstructBranchAndVector(TTree *tree, std::vector <Double_t> &values) {
+  void ConstructBranchAndVector(TTree *tree, QwRootTreeBranchVector &values) {
     TString tmpstr("");
     ConstructBranchAndVector(tree,tmpstr,values);
   };
   /// \brief Construct a branch and vector for this subsystem with a prefix
-  void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector <Double_t> &values);
+  void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values);
   /// \brief Construct a branch for this subsystem with a prefix
   void ConstructBranch(TTree *tree, TString& prefix);
   /// \brief Construct a branch for this subsystem with a prefix after tree leave trimming
   void ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file);
   /// \brief Fill the vector for this subsystem
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const;
+
+#ifdef HAS_RNTUPLE_SUPPORT
+  /// \brief Construct RNTuple fields and vector for this subsystem
+  void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) {
+    TString tmpstr("");
+    ConstructNTupleAndVector(model, tmpstr, values, fieldPtrs);
+  };
+  /// \brief Construct RNTuple fields and vector for this subsystem with a prefix
+  void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+  /// \brief Fill the RNTuple vector for this subsystem
+  void FillNTupleVector(std::vector<Double_t>& values) const;
+#endif // HAS_RNTUPLE_SUPPORT
   // @}
 
 
@@ -239,8 +260,8 @@ class QwSubsystemArray:
 
   /// \brief Print some information about the subsystem
   void PrintInfo() const;
-  
-  void push_back(boost::shared_ptr<VQwSubsystem> subsys);
+
+  void push_back(std::shared_ptr<VQwSubsystem> subsys);
 
  protected:
   void LoadSubsystemsFromParameterFile(QwParameterFile& detectors);
@@ -274,7 +295,7 @@ class QwSubsystemArray:
     return kFALSE;
   };
 
-  std::vector< std::pair<UInt_t,UInt_t> > fBadEventRange; 
+  std::vector< std::pair<UInt_t,UInt_t> > fBadEventRange;
 
  private:
   /// Filename of the global detector map
@@ -294,9 +315,6 @@ public:
 
 protected:
   double fWindowPeriod;
-  
+
 
 }; // class QwSubsystemArray
-
-
-#endif // __QWSUBSYSTEMARRAY__
