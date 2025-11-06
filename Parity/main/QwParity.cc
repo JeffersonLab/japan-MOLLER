@@ -49,7 +49,6 @@
 #include "QwFakeHelicity.h"
 #include "QwBeamLine.h"
 #include "QwBeamMod.h"
-#include "QwIntegratedRaster.h"
 
 // Valgrind headers
 #if __has_include(<valgrind/callgrind.h>)
@@ -141,13 +140,13 @@ Int_t main(Int_t argc, Char_t* argv[])
     //    TString name = "EvtCorrector";
     //    QwCombinerSubsystem corrector_sub(gQwOptions, detectors, name);
     //    detectors.push_back(corrector_sub.GetSharedPointerToStaticObject());
-    
+
     /// Create the helicity pattern
     //    Instead of having run_label in the constructor of helicitypattern, it might
     //    make since to have it be an option for use globally
     QwHelicityPattern helicitypattern(detectors,run_label);
     helicitypattern.ProcessOptions(gQwOptions);
-    
+
     ///  Create the event ring with the subsystem array
     QwEventRing eventring(gQwOptions,detectors);
     //  Make a copy of the detectors object to hold the
@@ -271,15 +270,15 @@ Int_t main(Int_t argc, Char_t* argv[])
 
 
     //  Load the blinder seed from a random number generator for online mode
-    if (eventbuffer.IsOnline() ){      
+    if (eventbuffer.IsOnline() ){
       helicitypattern.UpdateBlinder();//this routine will call update blinder mechanism using a random number
     }else{
       //  Load the blinder seed from the database for this runlet.
 #ifdef __USE_DATABASE__
       helicitypattern.UpdateBlinder(&database);
-#endif // __USE_DATABASE__      
+#endif // __USE_DATABASE__
     }
-    
+
 
     //  Find the first EPICS event and try to initialize
     //  the blinder, but only for disk files, not online.
@@ -326,10 +325,10 @@ Int_t main(Int_t argc, Char_t* argv[])
 	if (epicsevent.HasDataLoaded()){
 	  epicsevent.CalculateRunningValues();
 	  helicitypattern.UpdateBlinder(epicsevent);
-	
+
 	  treerootfile->FillTreeBranches(epicsevent);
 	  treerootfile->FillTree("slow");
-	  
+
 	  // Fill RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
 	  treerootfile->FillNTupleFields(epicsevent);
@@ -352,7 +351,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 
       // The event pass the event cut constraints
       if (detectors.ApplySingleEventCuts()) {
-	
+
         // Add event to the ring
         eventring.push(detectors);
 
@@ -403,7 +402,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 	    treerootfile->FillTreeBranches(helicitypattern.GetPairAsymmetry());
 	    treerootfile->FillTreeBranches(helicitypattern.GetPairDifference());
 	    treerootfile->FillTree("pr");
-	    
+
 	    // Fill pair RNTuples if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
 	    burstrootfile->FillNTupleFields("pr_yield", helicitypattern.GetPairYield());
@@ -411,7 +410,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 	    burstrootfile->FillNTuple("pr_yield");
 	    burstrootfile->FillNTuple("pr_asym");
 #endif
-	    
+
 	    // Clear the data
 	    helicitypattern.ClearPairData();
 	  }
@@ -514,7 +513,7 @@ Int_t main(Int_t argc, Char_t* argv[])
       } // detectors.ApplySingleEventCuts()
 
     } // end of loop over events
-    
+
     // Unwind event ring
     QwMessage << "Unwinding event ring" << QwLog::endl;
     eventring.Unwind();
@@ -549,13 +548,13 @@ Int_t main(Int_t argc, Char_t* argv[])
       // Fill burst tree branches
       burstrootfile->FillTreeBranches(patternsum_per_burst);
       burstrootfile->FillTree("burst");
-    
+
       // Fill burst RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
       burstrootfile->FillNTupleFields(patternsum_per_burst);
       burstrootfile->FillNTuple("burst");
 #endif
-    
+
       // Finish data handler for burst
       datahandlerarray_burst.FinishDataHandler();
 
@@ -689,7 +688,7 @@ Int_t main(Int_t argc, Char_t* argv[])
       QwMessage << " ------------ error counters ------------------ " << QwLog::endl;
       ringoutput.PrintErrorCounters();
     }
-    
+
     if (gQwOptions.GetValue<bool>("write-promptsummary")) {
       //      runningsum.WritePromptSummary(&promptsummary, "yield");
       // runningsum.WritePromptSummary(&promptsummary, "asymmetry");
@@ -709,8 +708,8 @@ Int_t main(Int_t argc, Char_t* argv[])
       epicsevent.FillDB(&database);
       ringoutput.FillDB_MPS(&database, "optics");
     }
-    #endif // __USE_DATABASE__    
-  
+    #endif // __USE_DATABASE__
+
     //epicsevent.WriteEPICSStringValues();
 
     //  Close event buffer stream
@@ -727,4 +726,3 @@ Int_t main(Int_t argc, Char_t* argv[])
 
   return 0;
 }
-

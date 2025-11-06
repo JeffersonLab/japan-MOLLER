@@ -12,6 +12,7 @@
 
 // Qweak headers
 #include "QwLog.h"
+#include "QwConcepts.h"
 
 // Forward declarations
 class VQwSubsystem;
@@ -87,7 +88,7 @@ class VQwFactory {
         ListRegisteredTypes();
         QwWarning << "To register this type, add the following line to the top "
                   << "of the source file:" << QwLog::endl;
-        QwWarning << "  RegisterSomethingFactory(" << type << ");" << QwLog::endl;
+        QwWarning << "  REGISTER_SOMETHING_FACTORY(" << type << ");" << QwLog::endl;
         QwWarning << "Ensure that the dynamic library contains the factory object."
                   << QwLog::endl;
         throw QwException_TypeUnknown();
@@ -256,14 +257,23 @@ template <class dataelement_t>
 class MQwDataElementCloneable: public MQwCloneable<VQwDataElement,dataelement_t> { };
 
 
-/// Macros to create and register the subsystem factory of type A
+/// Macros to create and register the data handler factory of type A
 /// Note: a call to this macro should be followed by a semi-colon!
-#define RegisterHandlerFactory(A) template<> const VQwDataHandlerFactory* MQwCloneable<VQwDataHandler,A>::fFactory = new QwFactory<VQwDataHandler,A>(#A)
+/// Includes automatic architectural validation for VQwDataHandler derivatives
+#define REGISTER_DATA_HANDLER_FACTORY(A) \
+  VALIDATE_DATA_HANDLER_PATTERN(A); \
+  template<> inline const VQwDataHandlerFactory* MQwCloneable<VQwDataHandler,A>::fFactory = new QwFactory<VQwDataHandler,A>(#A)
 
 /// Macros to create and register the subsystem factory of type A
 /// Note: a call to this macro should be followed by a semi-colon!
-#define RegisterSubsystemFactory(A) template<> const VQwSubsystemFactory* MQwCloneable<VQwSubsystem,A>::fFactory = new QwFactory<VQwSubsystem,A>(#A)
+/// Includes automatic architectural validation for VQwSubsystem derivatives
+#define REGISTER_SUBSYSTEM_FACTORY(A) \
+  VALIDATE_SUBSYSTEM_PATTERN(A); \
+  template<> inline const VQwSubsystemFactory* MQwCloneable<VQwSubsystem,A>::fFactory = new QwFactory<VQwSubsystem,A>(#A)
 
 /// Macros to create and register the data element factory of type A
 /// Note: a call to this macro should be followed by a semi-colon!
-#define RegisterDataElementFactory(A) template<> const VQwDataElementFactory* MQwCloneable<VQwDataElement,A>::fFactory = new QwFactory<VQwDataElement,A>(#A)
+/// Includes automatic architectural validation for VQwDataElement derivatives
+#define REGISTER_DATA_ELEMENT_FACTORY(A) \
+  VALIDATE_DATA_ELEMENT_PATTERN(A); \
+  template<> inline const VQwDataElementFactory* MQwCloneable<VQwDataElement,A>::fFactory = new QwFactory<VQwDataElement,A>(#A)

@@ -104,18 +104,18 @@ class QwDataHandlerArray:
         const std::string& branchprefix = "");
 
     /// \brief Construct a branch and vector for this handler with a prefix
-    void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector <Double_t> &values);
+    void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values);
 
     void FillTreeBranches(QwRootFile *treerootfile);
     /// \brief Fill the vector for this handler
-    void FillTreeVector(std::vector<Double_t>& values) const;
+    void FillTreeVector(QwRootTreeBranchVector &values) const;
 
     /// RNTuple methods
     void ConstructNTupleFields(
         QwRootFile *treerootfile,
         const std::string& treeprefix = "",
         const std::string& branchprefix = "");
-    
+
     void FillNTupleFields(QwRootFile *treerootfile);
 
     /// Construct the histograms for this subsystem
@@ -180,10 +180,10 @@ class QwDataHandlerArray:
     /// \brief Print value of all channels
     void PrintValue() const;
 
-    
+
     void WritePromptSummary(QwPromptSummary *ps, TString type);
-    
-    
+
+
     void ProcessDataHandlerEntry();
 
     void FinishDataHandler();

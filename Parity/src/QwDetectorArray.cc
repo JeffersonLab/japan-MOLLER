@@ -7,7 +7,7 @@
 
 #include "QwDetectorArray.h"
 
-// Register this subsystem with the factory
-RegisterSubsystemFactory(QwDetectorArray);
-
-
+/**
+ * Virtual destructor to ensure creation of VTT
+ */
+QwDetectorArray::~QwDetectorArray() { }

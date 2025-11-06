@@ -11,7 +11,7 @@
 #include <iostream>
 
 // This header contains the terminals color codes.
-// This might be useful to distingush many output of QwAnalysis into
+// This might be useful to distinguish many output of QwAnalysis into
 // terminals.
 
 // Simply use printf function

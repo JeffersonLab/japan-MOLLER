@@ -32,8 +32,8 @@ class QwBlindDetectorArrayID;
  * apply blinding strategies consistently to yields, differences,
  * and asymmetries. Used for parity-violating detector analysis.
  */
-class QwBlindDetectorArray: 
- public VQwDetectorArray, 
+class QwBlindDetectorArray:
+ public VQwDetectorArray,
  virtual public VQwSubsystemParity,
  public MQwSubsystemCloneable<QwBlindDetectorArray>{
 
@@ -52,7 +52,6 @@ class QwBlindDetectorArray:
  public:
 
   /// Constructor with name
-
   QwBlindDetectorArray(const TString& name)
   : VQwSubsystem(name), VQwSubsystemParity(name), VQwDetectorArray(name) {};
 
@@ -63,13 +62,16 @@ class QwBlindDetectorArray:
 
 
   /// Virtual destructor
-  ~QwBlindDetectorArray() override{};
+  ~QwBlindDetectorArray() override;
+
+  /// Inherit assignment operator on base class
+  using VQwDetectorArray::operator=;
 
   public:
 
   /// \brief Blind the asymmetry
   void Blind(const QwBlinder *blinder) override;
-  
+
   /// \brief Blind the difference using the yield
   void Blind(const QwBlinder *blinder, const VQwSubsystemParity* subsys) override;
 
@@ -80,3 +82,6 @@ class QwBlindDetectorArray:
 #endif // HAS_RNTUPLE_SUPPORT
 
 };
+
+// Register this subsystem with the factory
+REGISTER_SUBSYSTEM_FACTORY(QwBlindDetectorArray);

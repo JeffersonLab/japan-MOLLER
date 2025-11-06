@@ -9,10 +9,10 @@ void plotCorr(Int_t runnum, Double_t fit_RMS = 3.5, TString first = "asym_bcm_an
   //const Int_t n_combo = (Int_t)TMath::Factorial(n_vars)/2/(Int_t)TMath::Factorial(n_vars-2);
   const Int_t n_combo = n_vars-1;
   cout << "There are " << n_combo << " variable combinations. \n";
-  
+
   //TString vars[n_vars] = {"diff_bpm4aX", "diff_bpm4aY", "diff_bpm4eX", "diff_bpm4eY", "diff_bpm12X", "asym_bpm4aWS", "asym_bpm4eWS", "asym_bpm12WS", "asym_bcm_an_ds3", "asym_bcm_an_us", "asym_usl", "asym_usr", "asym_dsl", "asym_dsr"};
-  
-  
+
+
   TString vars[n_vars] = {first,"asym_bcm_an_ds3","asym_bcm_an_ds","asym_bcm_an_us","asym_bcm_dg_ds","asym_bcm_dg_us","asym_cav4bQ","asym_cav4cQ","asym_cav4dQ","asym_bpm12WS","asym_bpm4eWS","asym_bpm4aWS","asym_bpm8WS","asym_bpm14WS","asym_bpm1WS","asym_bpm4ecWS","asym_bpm4acWS"};
   TString units[n_vars] = {first_unit,"ppm","ppm","ppm","ppm","ppm","ppm","ppm","ppm","ppm","ppm","ppm","ppm","ppm","ppm","ppm","ppm"};
   //TString vars[n_vars] = {"asym_bcm_an_ds3","asym_bcm_an_ds3","asym_bcm_an_us","asym_bcm_dg_ds","asym_cav4bQ"};
@@ -132,81 +132,81 @@ void plotCorr(Int_t runnum, Double_t fit_RMS = 3.5, TString first = "asym_bcm_an
 
         else{
           n_1D_canvas = 0;
-          cutsX = Form("ErrorFlag==0 && %s.Device_Error_Code==0",vars[i].Data()); 
-          ttree->Draw(Form("%s>>hx_%d", x_var.Data(), n_plot), cutsX.Data()); 
+          cutsX = Form("ErrorFlag==0 && %s.Device_Error_Code==0",vars[i].Data());
+          ttree->Draw(Form("%s>>hx_%d", x_var.Data(), n_plot), cutsX.Data());
           //canvas1DX[b]->cd();
-          //ttree->Draw(Form("%s>>hx_%d", x_var.Data(), n_plot), cutsX.Data()); 
-          cout<<"Draw: "<<Form("%s>>hx_%d", x_var.Data(), n_plot)<<"\nCuts: "<<cutsX.Data()<<endl; 
+          //ttree->Draw(Form("%s>>hx_%d", x_var.Data(), n_plot), cutsX.Data());
+          cout<<"Draw: "<<Form("%s>>hx_%d", x_var.Data(), n_plot)<<"\nCuts: "<<cutsX.Data()<<endl;
           TH1 *hx = (TH1*)gROOT -> FindObject(Form("hx_%d", n_plot));
           Double_t x_rms = hx -> GetRMS();
           //n_1D_canvas++;
 
           //Find the RMS values of the x and y variables
-          cutsDD = Form("ErrorFlag==0 && %s.Device_Error_Code==0 && %s.Device_Error_Code==0",vars[j].Data(),vars[i].Data()); 
-          //ttree->Draw(Form("(%s-%s)/sqrt(2)>>h_DoubleDifference_%d", y_var.Data(), x_var.Data(), n_plot), cutsDD.Data()); 
-          ttree->Draw(Form("(%s-%s)/sqrt(2)>>h_DoubleDifference_%s_%s", y_var.Data(), x_var.Data(), y_var.Data(), x_var.Data()), cutsDD.Data()); 
+          cutsDD = Form("ErrorFlag==0 && %s.Device_Error_Code==0 && %s.Device_Error_Code==0",vars[j].Data(),vars[i].Data());
+          //ttree->Draw(Form("(%s-%s)/sqrt(2)>>h_DoubleDifference_%d", y_var.Data(), x_var.Data(), n_plot), cutsDD.Data());
+          ttree->Draw(Form("(%s-%s)/sqrt(2)>>h_DoubleDifference_%s_%s", y_var.Data(), x_var.Data(), y_var.Data(), x_var.Data()), cutsDD.Data());
           //TH1 *h_DoubleDifference = (TH1*)gROOT -> FindObject(Form("h_DoubleDifference_%d", n_plot));
           TH1 *h_DoubleDifference = (TH1*)gROOT -> FindObject(Form("h_DoubleDifference_%s_%s",y_var.Data(),x_var.Data()));
           if (h_DoubleDifference->GetEntries()!=0){
             h_DoubleDifference -> GetXaxis() -> SetTitle(x_var + " DD " + y_var);
             h_DoubleDifference -> SetTitle(Form("%s DD %s", y_var.Data(), x_var.Data()));
             h_DoubleDifference -> Fit("gaus");
-            cout << h_DoubleDifference->GetFunction("gaus")->GetParameter(1)<<" +- "; 
+            cout << h_DoubleDifference->GetFunction("gaus")->GetParameter(1)<<" +- ";
             cout << h_DoubleDifference->GetFunction("gaus")->GetParError(1) << "\n";
-            cout << h_DoubleDifference->GetFunction("gaus")->GetParameter(2)<<" +- "; 
+            cout << h_DoubleDifference->GetFunction("gaus")->GetParameter(2)<<" +- ";
             cout << h_DoubleDifference->GetFunction("gaus")->GetParError(2) << "\n";
-            gaus_dd_mean[j-1] = h_DoubleDifference->GetFunction("gaus")->GetParameter(1); 
+            gaus_dd_mean[j-1] = h_DoubleDifference->GetFunction("gaus")->GetParameter(1);
             gaus_dd_mean_error[j-1] = h_DoubleDifference->GetFunction("gaus")->GetParError(1);
-            gaus_dd_width[j-1] = h_DoubleDifference->GetFunction("gaus")->GetParameter(2); 
+            gaus_dd_width[j-1] = h_DoubleDifference->GetFunction("gaus")->GetParameter(2);
             gaus_dd_width_error[j-1] = h_DoubleDifference->GetFunction("gaus")->GetParError(2);
           }
           else {
             gaus_asym_mean[j-1] = 0;
             gaus_asym_mean_error[j-1] = 0;
             gaus_asym_width[j-1] = 0;
-            gaus_asym_width_error[j-1] = 0; 
+            gaus_asym_width_error[j-1] = 0;
           }
           h_DoubleDifference->Draw();
           canvas1DD[b]->cd(n_canvas);
           canvas1DD[b]->cd(n_canvas)->SetLogy(1);
           h_DoubleDifference->Draw();
-          //ttree->Draw(Form("(%s-%s)/sqrt(2)>>h_DoubleDifference_%d", y_var.Data(), x_var.Data(), n_plot), cutsDD.Data()); 
+          //ttree->Draw(Form("(%s-%s)/sqrt(2)>>h_DoubleDifference_%d", y_var.Data(), x_var.Data(), n_plot), cutsDD.Data());
           //TH1 *h_DoubleDifference = (TH1*)gROOT -> FindObject(Form("h_DoubleDifference_%d", n_plot));
           Double_t ddx_rms = h_DoubleDifference -> GetRMS();
           n_1D_canvas++;
 
           canvas1DY[b]->cd(n_canvas);
           cutsY = Form("ErrorFlag==0 && %s.Device_Error_Code==0",vars[j].Data());
-          //ttree->Draw(Form("%s>>h_Asym_%d", y_var.Data(), n_plot), cutsY.Data()); 
-          ttree->Draw(Form("%s>>h_Asym_%s", y_var.Data(), y_var.Data()), cutsY.Data()); 
+          //ttree->Draw(Form("%s>>h_Asym_%d", y_var.Data(), n_plot), cutsY.Data());
+          ttree->Draw(Form("%s>>h_Asym_%s", y_var.Data(), y_var.Data()), cutsY.Data());
           //TH1 *h_Asym = (TH1*)gROOT -> FindObject(Form("h_Asym_%d", n_plot));
           TH1 *h_Asym = (TH1*)gROOT -> FindObject(Form("h_Asym_%s",y_var.Data()));
           if (h_Asym->GetEntries()!=0){
             h_Asym -> GetXaxis() -> SetTitle(y_var);
             h_Asym -> SetTitle(Form("Asym_%s", y_var.Data()));
             h_Asym -> Fit("gaus");
-            cout << h_Asym->GetFunction("gaus")->GetParameter(1)<<" +- "; 
+            cout << h_Asym->GetFunction("gaus")->GetParameter(1)<<" +- ";
             cout << h_Asym->GetFunction("gaus")->GetParError(1) << "\n";
-            cout << h_Asym->GetFunction("gaus")->GetParameter(2)<<" +- "; 
+            cout << h_Asym->GetFunction("gaus")->GetParameter(2)<<" +- ";
             cout << h_Asym->GetFunction("gaus")->GetParError(2) << "\n";
-            gaus_asym_mean[j-1] = h_Asym->GetFunction("gaus")->GetParameter(1); 
+            gaus_asym_mean[j-1] = h_Asym->GetFunction("gaus")->GetParameter(1);
             gaus_asym_mean_error[j-1] = h_Asym->GetFunction("gaus")->GetParError(1);
-            gaus_asym_width[j-1] = h_Asym->GetFunction("gaus")->GetParameter(2); 
+            gaus_asym_width[j-1] = h_Asym->GetFunction("gaus")->GetParameter(2);
             gaus_asym_width_error[j-1] = h_Asym->GetFunction("gaus")->GetParError(2);
           }
           else {
             gaus_asym_mean[j-1] = 0;
             gaus_asym_mean_error[j-1] = 0;
             gaus_asym_width[j-1] = 0;
-            gaus_asym_width_error[j-1] = 0; 
+            gaus_asym_width_error[j-1] = 0;
           }
           h_Asym->Draw();
           canvas1DY[b]->cd(n_canvas);
           canvas1DY[b]->cd(n_canvas)->SetLogy(1);
           h_Asym->Draw();
-          //ttree->Draw(Form("%s>>h_Asym_%d", y_var.Data(), n_plot), cutsY.Data()); 
-          //cout<<"Draw: "<<Form("%s>>h_Asym_%d", y_var.Data(), n_plot)<<"\nCuts: "<<cutsY.Data()<<endl; 
-          cout<<"Draw: "<<Form("%s>>h_Asym_%s", y_var.Data(), y_var.Data())<<"\nCuts: "<<cutsY.Data()<<endl; 
+          //ttree->Draw(Form("%s>>h_Asym_%d", y_var.Data(), n_plot), cutsY.Data());
+          //cout<<"Draw: "<<Form("%s>>h_Asym_%d", y_var.Data(), n_plot)<<"\nCuts: "<<cutsY.Data()<<endl;
+          cout<<"Draw: "<<Form("%s>>h_Asym_%s", y_var.Data(), y_var.Data())<<"\nCuts: "<<cutsY.Data()<<endl;
           //TH1 *h_Asym = (TH1*)gROOT -> FindObject(Form("h_Asym_%d", n_plot));
           Double_t y_rms = h_Asym -> GetRMS();
           //cut_RMS = Form("%s && %s>-%f*%f&&%s<%f*%f && %s>-%f*%f&&%s<%f*%f", cutsDD.Data(), y_var.Data(), x_var.Data(), fit_RMS, x_rms, x_var.Data(), fit_RMS, x_rms, y_var.Data(), fit_RMS, y_rms, y_var.Data(), fit_RMS, y_rms);
@@ -228,7 +228,7 @@ void plotCorr(Int_t runnum, Double_t fit_RMS = 3.5, TString first = "asym_bcm_an
 //        h_xy -> SetStats(1);
           h_xy -> Draw("box");
 
-          cout << h_xy->GetFunction("pol1")->GetParameter(1)<<" +- "; 
+          cout << h_xy->GetFunction("pol1")->GetParameter(1)<<" +- ";
           cout << h_xy->GetFunction("pol1")->GetParError(1) << "\n";
 
           offset[n_plot] = h_xy->GetFunction("pol1")->GetParameter(0);
@@ -246,7 +246,7 @@ void plotCorr(Int_t runnum, Double_t fit_RMS = 3.5, TString first = "asym_bcm_an
         slope_n[n_plot].Append(" vs. ");
         slope_n[n_plot].Append(vars[i].Data());
 
-        if(fp!=NULL)  
+        if(fp!=NULL)
           fprintf(fp, "%s:%s,%f,%f,%f,%f\n", x_var.Data(), y_var.Data(), slope[n_plot], slope_error[n_plot], offset[n_plot], offset_error[n_plot]);
         if(fpg!=NULL){
           fprintf(fpg, "%s,%f,%f,%f,%f\n",y_var.Data(), gaus_asym_mean[j-1] , gaus_asym_mean_error[j-1] , gaus_asym_width[j-1] , gaus_asym_width_error[j-1]);
@@ -296,12 +296,12 @@ void plotCorr(Int_t runnum, Double_t fit_RMS = 3.5, TString first = "asym_bcm_an
     Double_t g_slope_ex[n_blocks];
     for (Int_t k = 0 ; k<n_blocks; k++) {
       block_num[k] = k; // 4 is the hw_sum
-      g_slope[k] = 0;    
-      g_slope_ex[k] = 0;    
-      g_slope_ey[k] = 0;    
+      g_slope[k] = 0;
+      g_slope_ex[k] = 0;
+      g_slope_ey[k] = 0;
     }
 
-    cout << "There are " << n_combo*n_blocks << " plots total with " << n_vars << " different variables and " << n_combo << "TGraphs to make \n"; 
+    cout << "There are " << n_combo*n_blocks << " plots total with " << n_vars << " different variables and " << n_combo << "TGraphs to make \n";
     for(int i = 0; i < n_combo; i++){
       c_corr[i] = new TCanvas(Form("c%d", i), Form("c%d", i));
       //Each block has ncombo/nvar slopes in it. Get the slopes from the same two variables plotted against each other

@@ -43,8 +43,8 @@ class QwDBInterface;
 class QwEnergyCalculator : public VQwDataElement{
   /******************************************************************
    *  Class:QwEnergyCalculator
-   *         Perfroms the beam energy calculation using the beam angle
-   *         amnd position at the target and the beam postition at the
+   *         Performs the beam energy calculation using the beam angle
+   *         amnd position at the target and the beam position at the
    *         highest dispersive region on the beamline.
    *
    ******************************************************************/
@@ -78,7 +78,7 @@ class QwEnergyCalculator : public VQwDataElement{
     TString GetSubElementName(Int_t index) {return fDevice.at(index)->GetElementName();};
     void    LoadMockDataParameters(QwParameterFile &paramfile) override;
 //------------------------------------------------------------------------------------
-    
+
     void    ClearEventData() override;
     Int_t   ProcessEvBuffer(UInt_t* buffer,
 			    UInt_t word_position_in_buffer,UInt_t indexnumber) override;
@@ -87,9 +87,9 @@ class QwEnergyCalculator : public VQwDataElement{
     void    PrintInfo() const override;
     void    SetRootSaveStatus(TString &prefix);
 
-    Bool_t  ApplyHWChecks();//Check for harware errors in the devices
-    Bool_t  ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
-    Int_t   SetSingleEventCuts(Double_t mean, Double_t sigma);//two limts and sample size
+    Bool_t  ApplyHWChecks();//Check for hardware errors in the devices
+    Bool_t  ApplySingleEventCuts();//Check for good events by setting limits on the devices readings
+    Int_t   SetSingleEventCuts(Double_t mean, Double_t sigma);//two limits and sample size
     /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
     void    SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel);
     void    SetEventCutMode(Int_t bcuts){
@@ -99,14 +99,14 @@ class QwEnergyCalculator : public VQwDataElement{
     Bool_t CheckForBurpFail(const VQwDataElement *ev_error);
 
     void    IncrementErrorCounters();
-    void    PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
+    void    PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure
     UInt_t   GetEventcutErrorFlag() override{//return the error flag
       return fEnergyChange.GetEventcutErrorFlag();
     }
     UInt_t   UpdateErrorFlag() override;
 
     void    UpdateErrorFlag(const QwEnergyCalculator *ev_error);
-  
+
 
     void    Set(const VQwBPM* device,TString type, TString property ,Double_t tmatrix_ratio);
     void    Ratio(QwEnergyCalculator &numer,QwEnergyCalculator &denom);
@@ -125,10 +125,10 @@ class QwEnergyCalculator : public VQwDataElement{
     void    ConstructHistograms(TDirectory *folder, TString &prefix) override;
     void    FillHistograms() override;
 
-    void    ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
+    void    ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values);
     void    ConstructBranch(TTree *tree, TString &prefix);
     void    ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file);
-    void    FillTreeVector(std::vector<Double_t> &values) const;
+    void    FillTreeVector(QwRootTreeBranchVector &values) const;
 
 #ifdef HAS_RNTUPLE_SUPPORT
     void    ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
@@ -157,8 +157,7 @@ class QwEnergyCalculator : public VQwDataElement{
     std::vector <Double_t> fTMatrixRatio;
     std::vector <TString>  fProperty;
     std::vector <TString>  fType;
-    Int_t    fDeviceErrorCode;//keep the device HW status using a unique code from the QwVQWK_Channel::fDeviceErrorCode
-    Bool_t bEVENTCUTMODE;//If this set to kFALSE then Event cuts do not depend on HW ckecks. This is set externally through the qweak_beamline_eventcuts.map
+    Bool_t bEVENTCUTMODE;//If this set to kFALSE then Event cuts do not depend on HW checks. This is set externally through the qweak_beamline_eventcuts.map
     Bool_t   bFullSave; // used to restrict the amount of data histogramed
 
 

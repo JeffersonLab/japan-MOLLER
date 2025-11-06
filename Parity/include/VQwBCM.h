@@ -18,7 +18,7 @@
 // ROOT headers
 #include <TTree.h>
 
-// RNTuple headers  
+// RNTuple headers
 #ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTupleModel.hxx"
 #endif // HAS_RNTUPLE_SUPPORT
@@ -53,7 +53,7 @@ class VQwBCM : public VQwDataElement {
   /***************************************************************
    *  Class:  VQwBCM
    *          Pure Virtual base class for the BCMs in the beamline.
-   *          Through use of the Create factory function, one can 
+   *          Through use of the Create factory function, one can
    *          get a concrete instance of a templated QwBCM.
    *
    ***************************************************************/
@@ -74,7 +74,7 @@ public:
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   virtual void SetSingleEventCuts(UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel) = 0;
   virtual void Ratio( const VQwBCM &/*numer*/, const VQwBCM &/*denom*/)
-    { std::cerr << "Ratio not defined! (VQwBCM)" << std::endl; }
+    { throw std::runtime_error(std::string("Ratio() is not defined for BCM named ") + GetElementName().Data()); }
   void ClearEventData() override = 0;
 
   // Virtual functions delegated to sub classes
@@ -103,10 +103,10 @@ public:
   virtual void CalculateRunningAverage() = 0;
   virtual void AccumulateRunningSum(const VQwBCM& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) = 0;
   virtual void DeaccumulateRunningSum(VQwBCM& value, Int_t ErrorMask=0xFFFFFFF) = 0;
-  virtual void ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) = 0;
+  virtual void ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) = 0;
   virtual void ConstructBranch(TTree *tree, TString &prefix) = 0;
   virtual void ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist) = 0;
-  virtual void FillTreeVector(std::vector<Double_t> &values) const = 0;
+  virtual void FillTreeVector(QwRootTreeBranchVector &values) const = 0;
 
 #ifdef HAS_RNTUPLE_SUPPORT
   virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
@@ -120,7 +120,7 @@ public:
     {std::cerr << "FillRawEventData for VQwBPM not implemented!\n";};
   virtual void GetProjectedCharge(VQwBCM */*device*/){};
   virtual size_t GetNumberOfElements(){return size_t(1);}
-  virtual TString GetSubElementName(Int_t /*subindex*/) 
+  virtual TString GetSubElementName(Int_t /*subindex*/)
   {
     std::cerr << "GetSubElementName()  is not implemented!! for device: " << GetElementName() << "\n";
     return TString("OBJECT_UNDEFINED"); // Return an erroneous TString
@@ -151,7 +151,7 @@ public:
 
 protected:
   virtual VQwHardwareChannel* GetCharge() = 0;
-  
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 public:

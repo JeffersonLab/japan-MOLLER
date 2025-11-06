@@ -12,4 +12,3 @@ mul_trip->Draw("rcdb_sign*asym_bcm_an_us.hw_sum/1e-9:((ErrorFlag==0 && SinceLast
 
 
  mul_trip->Draw("rcdb_sign*asym_bcm_an_us.hw_sum/1e-9:run_number","ErrorFlag==0 && SinceLastTripEnd>=0 && SinceLastTripEnd<=250 && rcdb_flip_state==1 && rcdb_slug>109 & rcdb_slug<114","prof same")
-

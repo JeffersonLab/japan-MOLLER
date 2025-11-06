@@ -43,11 +43,11 @@ class QwDataHandlerArray;
 class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublishable_child<QwDataHandlerArray,VQwDataHandler> {
 
   public:
-  
+
     enum EQwHandleType {
       kHandleTypeUnknown=0, kHandleTypeMps, kHandleTypeAsym, kHandleTypeDiff, kHandleTypeYield
     };
-    
+
     typedef std::vector< VQwHardwareChannel* >::iterator Iterator_HdwChan;
     typedef std::vector< VQwHardwareChannel* >::const_iterator ConstIterator_HdwChan;
 
@@ -124,9 +124,9 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
     virtual void  FillHistograms() { };
 
     // Fill the vector for this subsystem
-    void FillTreeVector(std::vector<Double_t> &values) const;
+    void FillTreeVector(QwRootTreeBranchVector &values) const;
 
-    void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values);
+    void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values);
 #ifdef HAS_RNTUPLE_SUPPORT
     void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
     void FillNTupleVector(std::vector<Double_t>& values) const;
@@ -145,11 +145,11 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
     Bool_t PublishByRequest(TString device_name) override;
 
   protected:
-    
+
     VQwDataHandler() { }
-    
+
     virtual Int_t ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff);
-    
+
     void SetEventcutErrorFlagPointer(const UInt_t* errorflagptr) {
       fErrorFlagPtr = errorflagptr;
     }

@@ -22,9 +22,6 @@
 #include "QwParameterFile.h"
 #include "QwRootFile.h"
 
-// Register this handler with the factory
-RegisterHandlerFactory(QwCorrelator);
-
 // Static members
 bool QwCorrelator::fPrintCorrelations = false;
 
@@ -298,7 +295,7 @@ Int_t QwCorrelator::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArr
     // Get the dependent variables
 
     const VQwHardwareChannel* dv_ptr = 0;
-    
+
     if (fDependentType.at(dv)==kHandleTypeMps){
       //  Quietly ignore the MPS type when we're connecting the asym & diff
       continue;
@@ -336,7 +333,7 @@ Int_t QwCorrelator::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArr
     }
 
   }
-  
+
   // Add independent variables
   for (size_t iv = 0; iv < fIndependentName.size(); iv++) {
     // Get the independent variables
@@ -362,11 +359,11 @@ Int_t QwCorrelator::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArr
       QwWarning << "Independent variable " << fIndependentName.at(iv) << " for correlator could not be found."
                 << QwLog::endl;
     }
-      
+
   }
   fIndependentValues.resize(fIndependentVar.size());
   fDependentValues.resize(fDependentVar.size());
- 
+
   nP = fIndependentName.size();
   nY = fDependentName.size();
 
@@ -458,7 +455,7 @@ void QwCorrelator::ConstructTreeBranches(
   branchm(fTree,linReg.mRYYp, "RYYp");
 
   branchv(fTree,linReg.mMP,  "MP");   // Parameter mean
-  branchv(fTree,linReg.mMY,  "MY");   // Uncorrected mean 
+  branchv(fTree,linReg.mMY,  "MY");   // Uncorrected mean
   branchv(fTree,linReg.mMYp, "MYp");  // Corrected mean
 
   branchv(fTree,linReg.mSP,  "dMP");  // Parameter mean error
@@ -719,4 +716,3 @@ void QwCorrelator::WriteAliasFile()
   // Increment call counter
   fCycleCounter++;
 }
-

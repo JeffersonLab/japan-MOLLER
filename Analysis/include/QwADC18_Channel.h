@@ -107,7 +107,7 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   /// Internally generate random event data
   void  RandomizeEventData(int helicity = 0.0, double time = 0.0) override;
 
-  /// Forces the event "number of samples" varible to be what was expected from the mapfile.
+  /// Forces the event "number of samples" variable to be what was expected from the mapfile.
   /// NOTE: this should only be used in mock data generation!
   void  ForceMapfileSampleSize() {fNumberOfSamples = fNumberOfSamples_map;};
 
@@ -167,7 +167,11 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   void AccumulateRunningSum(const QwADC18_Channel& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
   void AccumulateRunningSum(const VQwHardwareChannel *value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override{
     const QwADC18_Channel *tmp_ptr = dynamic_cast<const QwADC18_Channel*>(value);
-    if (tmp_ptr != NULL) AccumulateRunningSum(*tmp_ptr, count, ErrorMask);
+    if (tmp_ptr != NULL) {
+      AccumulateRunningSum(*tmp_ptr, count, ErrorMask);
+    } else {
+      throw std::invalid_argument("Standard exception from QwADC18_Channel::AccumulateRunningSum: incompatible hardware channel type");
+    }
   };
   ////deaccumulate one value from the running sum
   inline void DeaccumulateRunningSum(const QwADC18_Channel& value, Int_t ErrorMask=0xFFFFFFF){
@@ -176,7 +180,11 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   /*
   void DeaccumulateRunningSum(VQwHardwareChannel *value){
     const QwADC18_Channel *tmp_ptr = dynamic_cast<const QwADC18_Channel*>(value);
-    if (tmp_ptr != NULL) DeaccumulateRunningSum(*tmp_ptr);
+    if (tmp_ptr != NULL) {
+      DeaccumulateRunningSum(*tmp_ptr);
+    } else {
+      throw std::invalid_argument("Standard exception from QwADC18_Channel::DeaccumulateRunningSum: incompatible hardware channel type");
+    }
   };
   */
 
@@ -190,7 +198,7 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   Bool_t ApplySingleEventCuts(Double_t LL, Double_t UL);
   //check values read from modules are at desired level by comparing upper and lower limits (fULimit and fLLimit) set on this channel
   Bool_t ApplySingleEventCuts() override;
-  // report number of events failed due to HW and event cut faliure
+  // report number of events failed due to HW and event cut failure
   void PrintErrorCounters() const override;
 
   // FIXME Set the absolute staturation limit in volts
@@ -204,7 +212,7 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   }
 
 
-  // Check for harware errors in the devices. This will return the device error code.
+  // Check for hardware errors in the devices. This will return the device error code.
   Int_t ApplyHWChecks() override;
 
   // Update the error counters based on the internal fErrorFlag
@@ -220,9 +228,9 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
   void  FillHistograms() override;
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) override;
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override;
   void  ConstructBranch(TTree *tree, TString &prefix) override;
-  void  FillTreeVector(std::vector<Double_t> &values) const override;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const override;
 #ifdef HAS_RNTUPLE_SUPPORT
   void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
   void  FillNTupleVector(std::vector<Double_t>& values) const override;
@@ -249,7 +257,7 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
 #ifdef __USE_DATABASE__
   // Error Counters exist in QwADC18_Channel, not in VQwHardwareChannel
   //
-  void AddErrEntriesToList(std::vector<QwErrDBInterface> &row_list);
+  void AddErrEntriesToList(std::vector<QwErrDBInterface> &row_list) override;
 #endif
 
  protected:
@@ -289,9 +297,6 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   /// Pointer to the running sum for this channel
   QwADC18_Channel* fRunningSum;
 
-  /// Pointer to the DAC channel for this channel
-  QwADC18_Channel* fDAC;
-
   /*! \name ADC Calibration                    */
   // @{
   static const Double_t kADC18_VoltsPerBit;
@@ -303,10 +308,10 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   /*! \name Channel configuration data members */
   // @{
 
-  size_t fSequenceNumber;      ///< Event sequence number for this channel
-  size_t fPreviousSequenceNumber; ///< Previous event sequence number for this channel
-  size_t fNumberOfSamples;     ///< Number of samples  read through the module
-  size_t fNumberOfSamples_map; ///< Number of samples in the expected to  read through the module. This value is set in the QwBeamline map file
+  UInt_t fSequenceNumber;      ///< Event sequence number for this channel
+  UInt_t fPreviousSequenceNumber; ///< Previous event sequence number for this channel
+  UInt_t fNumberOfSamples;     ///< Number of samples  read through the module
+  UInt_t fNumberOfSamples_map; ///< Number of samples in the expected to  read through the module. This value is set in the QwBeamline map file
 
   // Set of error counters for each HW test.
   Int_t fErrorCount_HWSat;    ///< check to see ADC channel is saturated
@@ -316,14 +321,13 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
   Int_t fErrorCount_SameHW;   ///< check to see ADC returning same HW value
   Int_t fErrorCount_ZeroHW;   ///< check to see ADC returning zero
 
-  Int_t fNumEvtsWithEventCutsRejected; ///< Counts the Event cut rejected events 
+  Int_t fNumEvtsWithEventCutsRejected; ///< Counts the Event cut rejected events
 
 
 
   Int_t fADC_Same_NumEvt; ///< Keep track of how many events with same ADC value returned
   Int_t fSequenceNo_Prev; ///< Keep the sequence number of the last event
   Int_t fSequenceNo_Counter; ///< Internal counter to keep track of the sequence number
-  Double_t fPrev_HardwareBlockSum; ///< Previous Module-based sum of the four sub-blocks
 
 
 
@@ -331,14 +335,5 @@ class QwADC18_Channel: public VQwHardwareChannel, public MQwMockable {
 
 
   const static Bool_t bDEBUG=kFALSE;///<debugging display purposes
-
-  ///<For ADC18 data element trimming uses
-  Bool_t bHw_sum;
-  Bool_t bHw_sum_raw;
-  Bool_t bBlock;
-  Bool_t bBlock_raw;
-  Bool_t bNum_samples;
-  Bool_t bDevice_Error_Code;
-  Bool_t bSequence_number;
 
 };

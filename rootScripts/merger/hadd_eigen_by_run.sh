@@ -38,4 +38,3 @@ else
   #root -l -b -q ~/PREX/prompt/Aggregator/wrapper/addUnits.C\(\"${OUTPUTROOTFILEDIR}/grand_${name}.root\"\)
 
 fi
-

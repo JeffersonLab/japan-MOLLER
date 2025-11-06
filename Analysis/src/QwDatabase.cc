@@ -12,14 +12,20 @@
 // System headers
 
 // Third-party headers
+#ifdef __USE_SQLPP11__
 #include <sqlpp11/select.h>
 #include <sqlpp11/functions.h>
+#endif // __USE_SQLPP11__
+#ifdef __USE_SQLPP23__
+#include <sqlpp23/core/clause/select.h>
+#include <sqlpp23/core/function.h>
+#endif // __USE_SQLPP23__
 
 // Qweak headers
 #include "QwParitySchema.h"
 
 // QwScopedConnection implementation
-QwScopedConnection::QwScopedConnection(QwDatabase* db) 
+QwScopedConnection::QwScopedConnection(QwDatabase* db)
     : fDatabase(db), fConnected(false) {
     if (fDatabase) {
         fConnected = fDatabase->Connect();
@@ -48,11 +54,11 @@ QwScopedConnection& QwScopedConnection::operator=(QwScopedConnection&& other) no
         if (fDatabase && fConnected) {
             fDatabase->Disconnect();
         }
-        
+
         // Move from other
         fDatabase = other.fDatabase;
         fConnected = other.fConnected;
-        
+
         // Clear other
         other.fDatabase = nullptr;
         other.fConnected = false;
@@ -165,7 +171,7 @@ Bool_t QwDatabase::ValidateConnection()
     //
     try {
       // FIXME (wdconinc) duplication with Connect
-      switch(fDBType) 
+      switch(fDBType)
       {
 #ifdef __USE_DATABASE_MYSQL__
         case kQwDatabaseMySQL: {
@@ -176,7 +182,16 @@ Bool_t QwDatabase::ValidateConnection()
           config.password = fDBPassword;
           config.database = fDatabase;
           config.port = fDBPortNumber;
+#ifdef __USE_SQLPP11__
           config.debug = fDBDebug;
+#endif
+#ifdef __USE_SQLPP23__
+          if (fDBDebug) {
+            config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
+              QwMessage << "SQL Debug: " << msg << QwLog::endl;
+            });
+          }
+#endif
           fDBConnection = std::make_shared<sqlpp::mysql::connection>(config);
           break;
         }
@@ -189,7 +204,16 @@ Bool_t QwDatabase::ValidateConnection()
           config.password = fDBPassword;
           // FIXME (wdconinc) use proper access flags
           config.flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+#ifdef __USE_SQLPP11__
           config.debug = fDBDebug;
+#endif
+#ifdef __USE_SQLPP23__
+          if (fDBDebug) {
+            config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
+              QwMessage << "SQL Debug: " << msg << QwLog::endl;
+            });
+          }
+#endif
           fDBConnection = std::make_shared<sqlpp::sqlite3::connection>(config);
           break;
         }
@@ -203,7 +227,16 @@ Bool_t QwDatabase::ValidateConnection()
           config.password = fDBPassword;
           config.dbname = fDatabase;
           config.port = fDBPortNumber;
+#ifdef __USE_SQLPP11__
           config.debug = fDBDebug;
+#endif
+#ifdef __USE_SQLPP23__
+          if (fDBDebug) {
+            config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
+              QwMessage << "SQL Debug: " << msg << QwLog::endl;
+            });
+          }
+#endif
           fDBConnection = std::make_shared<sqlpp::postgresql::connection>(config);
           break;
         }
@@ -248,7 +281,7 @@ Bool_t QwDatabase::ValidateConnection()
   }
 
   // Check to make sure database and QwDatabase schema versions match up.
-  if (fAccessLevel == kQwDatabaseReadWrite && 
+  if (fAccessLevel == kQwDatabaseReadWrite &&
       (fVersionMajor != kValidVersionMajor ||
        fVersionMinor != kValidVersionMinor ||
        fVersionPoint <  kValidVersionPoint)) {
@@ -273,7 +306,7 @@ bool QwDatabase::Connect()
    * Must call QwDatabase::ConnectionInfo() first.
    */
 
-  //  Return flase, if we're not using the DB.
+  //  Return false, if we're not using the DB.
   if (fAccessLevel==kQwDatabaseOff) return false;
 
   // Make sure not already connected
@@ -288,7 +321,7 @@ bool QwDatabase::Connect()
   if (fValidConnection) {
     // FIXME (wdconinc) duplication with ValidateConnection
     try {
-      switch(fDBType) 
+      switch(fDBType)
       {
 #ifdef __USE_DATABASE_MYSQL__
         case kQwDatabaseMySQL: {
@@ -299,6 +332,16 @@ bool QwDatabase::Connect()
           config.password = fDBPassword;
           config.database = fDatabase;
           config.port = fDBPortNumber;
+#ifdef __USE_SQLPP11__
+          config.debug = fDBDebug;
+#endif
+#ifdef __USE_SQLPP23__
+          if (fDBDebug) {
+            config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
+              QwMessage << "SQL Debug: " << msg << QwLog::endl;
+            });
+          }
+#endif
           fDBConnection = std::make_shared<sqlpp::mysql::connection>(config);
           break;
         }
@@ -311,7 +354,16 @@ bool QwDatabase::Connect()
           config.password = fDBPassword;
           // FIXME (wdconinc) use proper access flags
           config.flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+#ifdef __USE_SQLPP11__
           config.debug = fDBDebug;
+#endif
+#ifdef __USE_SQLPP23__
+          if (fDBDebug) {
+            config.debug = sqlpp::debug_logger({sqlpp::log_category::all}, [](const std::string& msg) {
+              QwMessage << "SQL Debug: " << msg << QwLog::endl;
+            });
+          }
+#endif
           fDBConnection = std::make_shared<sqlpp::sqlite3::connection>(config);
           break;
         }
@@ -364,8 +416,8 @@ void QwDatabase::DefineOptions(QwOptions& options)
   options.AddOptions("Database options")("QwDatabase.dbusername", po::value<string>(), "database username");
   options.AddOptions("Database options")("QwDatabase.dbpassword", po::value<string>(), "database password");
   options.AddOptions("Database options")("QwDatabase.dbport", po::value<int>()->default_value(0), "database server port number (defaults to standard mysql port)");
-  options.AddOptions("Database options")("QwDatabase.debug", po::value<bool>()->default_value(false), "enable database debug output (default false)");
-  options.AddOptions("Database options")("QwDatabase.insert-missing-keys", po::value<bool>()->default_value(false), "insert missing keys into the database (default false)");
+  options.AddOptions("Database options")("QwDatabase.debug", po::value<bool>()->default_bool_value(false), "enable database debug output (default false)");
+  options.AddOptions("Database options")("QwDatabase.insert-missing-keys", po::value<bool>()->default_bool_value(false), "insert missing keys into the database (default false)");
 
   std::stringstream dbtypes;
   dbtypes << "none";
@@ -520,7 +572,7 @@ bool QwDatabase::StoreDBVersion()
       size_t record_count = QueryCount(
           sqlpp::select(sqlpp::all_of(db_schema))
           .from(db_schema)
-          .unconditionally()
+          .where(sqlpp::value(true))
       );
       QwDebug << "QwDatabase::StoreDBVersion => Number of rows returned:  " << record_count << QwLog::endl;
 
@@ -540,7 +592,7 @@ bool QwDatabase::StoreDBVersion()
         auto results = QuerySelect(
             sqlpp::select(sqlpp::all_of(db_schema))
             .from(db_schema)
-            .unconditionally()
+            .where(sqlpp::value(true))
         );
         ForFirstResult(
           results,

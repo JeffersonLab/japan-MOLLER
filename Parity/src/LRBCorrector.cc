@@ -19,15 +19,13 @@
 #include <TFile.h>
 #include <TH2.h>
 #include <TKey.h>
-#include <TTree.h> 
+#include <TTree.h>
 #include <TChain.h>
 #include <TObjArray.h>
-#include <TEventList.h> 
+#include <TEventList.h>
 
 #include <TMatrixD.h>
 
-// Register this handler with the factory
-RegisterHandlerFactory(LRBCorrector);
 
 /// \brief Constructor with name
 LRBCorrector::LRBCorrector(const TString& name):VQwDataHandler(name),

@@ -13,9 +13,6 @@
 #include "QwParameterFile.h"
 #include "QwHelicityPattern.h"
 
-// Register this handler with the factory
-RegisterHandlerFactory(QwAlarmHandler);
-
 
 /// \brief Constructor with name
 QwAlarmHandler::QwAlarmHandler(const TString& name):VQwDataHandler(name)
@@ -132,7 +129,7 @@ Int_t QwAlarmHandler::LoadChannelMap(const std::string& mapfile)
     tmpAlarmObject.high         = map.GetNextToken(" ");
     tmpAlarmObject.low          = map.GetNextToken(" ");
     tmpAlarmObject.lowLow       = map.GetNextToken(" ");
-    tmpAlarmObject.ringLength   = map.GetNextToken(" "); 
+    tmpAlarmObject.ringLength   = map.GetNextToken(" ");
     tmpAlarmObject.tolerance    = map.GetNextToken(" "); // This is all hardcoded.... how to do with keywords? FIXME
     */
     // Default Initializations
@@ -246,7 +243,7 @@ Int_t QwAlarmHandler::ConnectChannels(
     if(new_vqwk==NULL){
       QwWarning << "Dependent variable " << fAnalysisName.at(dv) << " could not be found, "
                 << "or is not a VQWK channel." << QwLog::endl;
-      continue; 
+      continue;
     } else {
       //QwMessage << "dv: " << new_vqwk.GetElementName() << QwLog::endl;
       // pair creation
@@ -256,7 +253,7 @@ Int_t QwAlarmHandler::ConnectChannels(
       //fDependentVar.push_back(std::make_pair(vqwk, new_vqwk));
     }
   }
-  return 0; // FIXME this won't work, and the pointers are all wrong anyway... 
+  return 0; // FIXME this won't work, and the pointers are all wrong anyway...
 }*/
 
 void QwAlarmHandler::ProcessData() {
@@ -291,7 +288,7 @@ void QwAlarmHandler::ProcessData() {
  *
  *   Japan Main Detectors,usr,asym_mean,Alarm Status,OK/saturated/high/low/nsamples/highhigh/lowlow/invalid/trip/eventcuter (I'm the cause)
  *   Japan Main Detectors,usr,asym_mean,Analysis,mean/rms/eventcuts/device_error_code
- *   Japan Main Detectors,usr,asym_mean,High,10000    
+ *   Japan Main Detectors,usr,asym_mean,High,10000
  *   Japan Main Detectors,usr,asym_mean,Value,500
  *   Japan Main Detectors,usr,asym_mean,Low,50
  *   Japan Main Detectors,usr,asym_mean,Alarm Type,Japan
@@ -301,14 +298,14 @@ void QwAlarmHandler::ProcessData() {
  *
  *   Type, Channel, Ana, tree, channel, highhigh, high, low, lowlow, pat tol
  *   J-m-d, usr, asym_mean, mul, usr, 1000, 100, -100, -1000, 2
- * 
+ *
  *
  *  Make sure I update "canContain" method in /analysis/src/qwdatahandlerarray to include alarmhandler
  */
   /* FIXME Available VQwHardwareChannel methods
   size_t GetNumberOfDataWords() {return fNumberOfDataWords;}
   size_t GetNumberOfSubelements() {return fNumberOfSubElements;};
-  
+
   Int_t GetRawValue() const       {return this.GetRawValue(0);};
   Double_t GetValue() const       {return this->GetValue(0);};
   Double_t GetValueM2() const     {return this->GetValueM2(0);};
@@ -321,43 +318,43 @@ void QwAlarmHandler::ProcessData() {
   Double_t GetValueWidth(size_t element) const {*/
 
 void QwAlarmHandler::CheckAlarms() {
-  // If user-name-of-variable exists then grab it, grab its value from memory, and then compare to the upper and lower limits defined by user (if they were defined) 
+  // If user-name-of-variable exists then grab it, grab its value from memory, and then compare to the upper and lower limits defined by user (if they were defined)
   std::string tmpAlarmStat = "OK";
   for ( size_t numAna = 0; numAna < fAlarmObjectList.size() ; numAna++ ) {
     if (fAlarmObjectList.at(numAna).value != NULL){
       //QwWarning << "fAlarmObjectList.at("<<numAna<<").value == " << fAlarmObjectList.at(numAna).value  <<QwLog::endl;
       //QwWarning << "fAlarmObjectList.at("<<numAna<<").value->GetValue() == " << fAlarmObjectList.at(numAna).value->GetValue()  <<QwLog::endl;
-      if ( fAlarmObjectList.at(numAna).alarmParameterMapStr.count("Error-Code") != 0 
-          && ((TString)fAlarmObjectList.at(numAna).alarmParameterMapStr.at("Error-Code")).IsHex() && ((std::stoul(fAlarmObjectList.at(numAna).alarmParameterMapStr.at("Error-Code"),nullptr,16)) & *fAlarmObjectList.at(numAna).eventcutErrorFlag) != 0 ) { 
+      if ( fAlarmObjectList.at(numAna).alarmParameterMapStr.count("Error-Code") != 0
+          && ((TString)fAlarmObjectList.at(numAna).alarmParameterMapStr.at("Error-Code")).IsHex() && ((std::stoul(fAlarmObjectList.at(numAna).alarmParameterMapStr.at("Error-Code"),nullptr,16)) & *fAlarmObjectList.at(numAna).eventcutErrorFlag) != 0 ) {
         fAlarmObjectList.at(numAna).Nviolated++;
         fAlarmObjectList.at(numAna).NsinceLastViolation = 0;
         tmpAlarmStat = "Error-Code";
       }
-      else if (fAlarmObjectList.at(numAna).alarmParameterMap.count("Exactly") != 0 
+      else if (fAlarmObjectList.at(numAna).alarmParameterMap.count("Exactly") != 0
           && fAlarmObjectList.at(numAna).value->GetValue() != fAlarmObjectList.at(numAna).alarmParameterMap.at("Exactly"))  {
         fAlarmObjectList.at(numAna).Nviolated++;
         fAlarmObjectList.at(numAna).NsinceLastViolation = 0;
         tmpAlarmStat = "Not-Exactly";
       }
-      else if ( fAlarmObjectList.at(numAna).alarmParameterMap.count("HighHigh") != 0 
-          && fAlarmObjectList.at(numAna).value->GetValue() >= fAlarmObjectList.at(numAna).alarmParameterMap.at("HighHigh") ) { 
+      else if ( fAlarmObjectList.at(numAna).alarmParameterMap.count("HighHigh") != 0
+          && fAlarmObjectList.at(numAna).value->GetValue() >= fAlarmObjectList.at(numAna).alarmParameterMap.at("HighHigh") ) {
         fAlarmObjectList.at(numAna).Nviolated++;
         fAlarmObjectList.at(numAna).NsinceLastViolation = 0;
         tmpAlarmStat = "HighHigh";
       }
-      else if ( fAlarmObjectList.at(numAna).alarmParameterMap.count("High") != 0 
+      else if ( fAlarmObjectList.at(numAna).alarmParameterMap.count("High") != 0
           && fAlarmObjectList.at(numAna).value->GetValue() >= fAlarmObjectList.at(numAna).alarmParameterMap.at("High") ) {
         fAlarmObjectList.at(numAna).Nviolated++;
         fAlarmObjectList.at(numAna).NsinceLastViolation = 0;
         tmpAlarmStat = "High";
       }
-      else if ( fAlarmObjectList.at(numAna).alarmParameterMap.count("LowLow") != 0 
+      else if ( fAlarmObjectList.at(numAna).alarmParameterMap.count("LowLow") != 0
           && fAlarmObjectList.at(numAna).value->GetValue() <= fAlarmObjectList.at(numAna).alarmParameterMap.at("LowLow") ) {
         fAlarmObjectList.at(numAna).Nviolated++;
         fAlarmObjectList.at(numAna).NsinceLastViolation = 0;
         tmpAlarmStat = "LowLow";
       }
-      else if ( fAlarmObjectList.at(numAna).alarmParameterMap.count("Low") != 0 
+      else if ( fAlarmObjectList.at(numAna).alarmParameterMap.count("Low") != 0
           &&  fAlarmObjectList.at(numAna).value->GetValue() <= fAlarmObjectList.at(numAna).alarmParameterMap.at("Low") ) {
         fAlarmObjectList.at(numAna).Nviolated++;
         fAlarmObjectList.at(numAna).NsinceLastViolation = 0;
@@ -366,7 +363,7 @@ void QwAlarmHandler::CheckAlarms() {
       else {
         fAlarmObjectList.at(numAna).NsinceLastViolation++;
       }
-      if ( fAlarmObjectList.at(numAna).Nviolated > 0 && fAlarmObjectList.at(numAna).NsinceLastViolation > fAlarmObjectList.at(numAna).alarmParameterMap.at("Ring-Length") ) { 
+      if ( fAlarmObjectList.at(numAna).Nviolated > 0 && fAlarmObjectList.at(numAna).NsinceLastViolation > fAlarmObjectList.at(numAna).alarmParameterMap.at("Ring-Length") ) {
         fAlarmObjectList.at(numAna).Nviolated--;
       }
       if ( fAlarmObjectList.at(numAna).Nviolated > fAlarmObjectList.at(numAna).alarmParameterMap.at("Tolerance") ) {

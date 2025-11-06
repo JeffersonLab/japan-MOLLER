@@ -79,7 +79,10 @@ class QwCombinedBCM : public QwBCM<T> {
     return kTRUE;
   };
 
-  Bool_t ApplySingleEventCuts() override;//Check for good events by stting limits on the devices readings
+  Bool_t ApplySingleEventCuts() override;//Check for good events by setting limits on the devices readings
+
+  using QwBCM<T>::UpdateErrorFlag; // avoid hiding UpdateErrorFlag(const VQwBCM*)
+  //void UpdateErrorFlag(const VQwBCM *ev_error) override;
 
   UInt_t UpdateErrorFlag() override;
 

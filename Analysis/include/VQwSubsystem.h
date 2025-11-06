@@ -298,9 +298,9 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
    * @param prefix Name prefix for all branch names.
    * @param values Vector that will be filled by FillTreeVector.
    */
-  virtual void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values) = 0;
+  virtual void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values) = 0;
   /// \brief Construct the branch and tree vector
-  virtual void ConstructBranchAndVector(TTree *tree, std::vector<Double_t>& values) {
+  virtual void ConstructBranchAndVector(TTree *tree, QwRootTreeBranchVector &values) {
     TString tmpstr("");
     ConstructBranchAndVector(tree,tmpstr,values);
   };
@@ -324,8 +324,8 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
    * Fill the tree export vector with the current event values.
    * @param values Output vector to be filled.
    */
-  virtual void FillTreeVector(std::vector<Double_t>& values) const = 0;
-  
+  virtual void FillTreeVector(QwRootTreeBranchVector &values) const = 0;
+
 #ifdef HAS_RNTUPLE_SUPPORT
   /// \brief Construct the RNTuple fields and vector
   /**
@@ -336,7 +336,7 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
    * @param fieldPtrs Shared pointers to field backing storage.
    */
   virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
-  /// \brief Construct the RNTuple fields and vector  
+  /// \brief Construct the RNTuple fields and vector
   virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) {
     TString tmpstr("");
     ConstructNTupleAndVector(model, tmpstr, values, fieldPtrs);
@@ -351,7 +351,7 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
   // @}
 
 
- 
+
 
   /// \name Expert tree construction and maintenance
   /// These functions are not purely virtual, since not every subsystem is
@@ -475,7 +475,7 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
       }
       return index;
     };
-  
+
  protected:
 
   TString  fSystemName; ///< Name of this subsystem
@@ -489,7 +489,7 @@ class VQwSubsystem: virtual public VQwSubsystemCloneable, public MQwHistograms, 
  protected:
 
   ROCID_t  fCurrentROC_ID; ///< ROC ID that is currently being processed
-  BankID_t fCurrentBank_ID; ///< Bank ID (and Marker word) that is currently being processed; 
+  BankID_t fCurrentBank_ID; ///< Bank ID (and Marker word) that is currently being processed;
 
   /// Vector of ROC IDs associated with this subsystem
   std::vector<ROCID_t> fROC_IDs;

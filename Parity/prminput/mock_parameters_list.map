@@ -31,5 +31,3 @@ window_period = 1e-3
 [QwDetectorArray]
  name  = Large Angle Detector
  mock_param = mock_parameters_largeang.map
- 
- 

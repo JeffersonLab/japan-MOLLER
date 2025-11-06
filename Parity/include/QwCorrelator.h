@@ -81,9 +81,9 @@ class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCor
   Int_t fBlock;
 
   bool fDisableHistos;
-  
+
   std::vector< std::string > fIndependentFull;
-    
+
   //  Using the fDependentType and fDependentName from base class, but override the IV arrays
   std::vector< EQwHandleType > fIndependentType;
   std::vector< std::string > fIndependentName;
@@ -103,7 +103,7 @@ class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCor
 
   std::string fAliasOutputFileBase;
   std::string fAliasOutputFileSuff;
-  std::string fAliasOutputPath;		
+  std::string fAliasOutputPath;
   std::ofstream fAliasOutputFile;
   void OpenAliasFile(const std::string& prefix);
   void WriteAliasFile();
@@ -119,7 +119,7 @@ class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCor
   unsigned int fGoodEvent;
 
  private:
-		
+
   TString fNameNoSpaces;
   int nP, nY;
 
@@ -138,3 +138,8 @@ class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCor
   QwCorrelator();
 
 };
+
+// Register this handler with the factory
+REGISTER_DATA_HANDLER_FACTORY(QwCorrelator);
+
+

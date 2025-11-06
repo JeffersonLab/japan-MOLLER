@@ -48,7 +48,7 @@ class VQwClock : public VQwDataElement {
   /***************************************************************
    *  Class:  VQwClock
    *          Pure Virtual base class for the clocks in the datastream
-   *          Through use of the Create factory function, one can 
+   *          Through use of the Create factory function, one can
    *          get a concrete instance of a templated QwClock.
    *
    ***************************************************************/
@@ -77,17 +77,17 @@ public:
   virtual void SetEventCutMode(Int_t bcuts) = 0;
   virtual void SetPedestal(Double_t ped) = 0;
   virtual void SetCalibrationFactor(Double_t calib) = 0;
-  virtual Bool_t ApplySingleEventCuts() = 0;//Check for good events by stting limits on the devices readings
+  virtual Bool_t ApplySingleEventCuts() = 0;//Check for good events by setting limits on the devices readings
   virtual void IncrementErrorCounters() = 0;
   virtual void  ProcessEvent() = 0;
   virtual void Scale(Double_t factor) = 0;
   virtual void CalculateRunningAverage() = 0;
   virtual void AccumulateRunningSum(const VQwClock& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) = 0;
   virtual void DeaccumulateRunningSum(VQwClock& value, Int_t ErrorMask=0xFFFFFFF) = 0;
-  virtual void ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) = 0;
+  virtual void ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) = 0;
   virtual void ConstructBranch(TTree *tree, TString &prefix) = 0;
   virtual void ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist) = 0;
-  virtual void FillTreeVector(std::vector<Double_t> &values) const = 0;
+  virtual void FillTreeVector(QwRootTreeBranchVector &values) const = 0;
 #ifdef HAS_RNTUPLE_SUPPORT
   virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
   virtual void FillNTupleVector(std::vector<Double_t>& values) const = 0;

@@ -7,9 +7,10 @@
 
 #include "QwBlindDetectorArray.h"
 
-// Register this subsystem with the factory
-RegisterSubsystemFactory(QwBlindDetectorArray);
-
+/**
+ * Virtual destructor to ensure creation of VTT
+ */
+QwBlindDetectorArray::~QwBlindDetectorArray() { }
 
 /**
  * Blind the asymmetry

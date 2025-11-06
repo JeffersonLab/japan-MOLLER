@@ -95,20 +95,20 @@ template<typename T> class QwBCM : public VQwBCM {
   void  SetExternalRandomVariable(Double_t random_variable);
 
   void  ProcessEvent() override;
-  Bool_t ApplyHWChecks();//Check for harware errors in the devices
-  Bool_t ApplySingleEventCuts() override;//Check for good events by stting limits on the devices readings
+  Bool_t ApplyHWChecks();//Check for hardware errors in the devices
+  Bool_t ApplySingleEventCuts() override;//Check for good events by setting limits on the devices readings
   void IncrementErrorCounters() override;
-  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut faliure
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure
   UInt_t GetEventcutErrorFlag() override{//return the error flag
     return fBeamCurrent.GetEventcutErrorFlag();
   }
 
   void UpdateErrorFlag(const VQwBCM *ev_error) override;
 
-  UInt_t GetErrorCode() const {return (fBeamCurrent.GetErrorCode());}; 
+  UInt_t GetErrorCode() const {return (fBeamCurrent.GetErrorCode());};
 
 
-  Int_t SetSingleEventCuts(Double_t mean = 0, Double_t sigma = 0);//two limts and sample size
+  Int_t SetSingleEventCuts(Double_t mean = 0, Double_t sigma = 0);//two limits and sample size
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
   void SetSingleEventCuts(UInt_t errorflag, Double_t min = 0, Double_t max = 0, Double_t stability = 0, Double_t burplevel = 0) override;
 
@@ -165,17 +165,19 @@ public:
   void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
   void  FillHistograms() override;
 
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values) override;
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override;
   void  ConstructBranch(TTree *tree, TString &prefix) override;
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist) override;
-  void  FillTreeVector(std::vector<Double_t> &values) const override;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const override;
 #ifdef HAS_RNTUPLE_SUPPORT
   void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
   void  FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif
 
-  std::vector<QwDBInterface> GetDBEntry();
-  std::vector<QwErrDBInterface> GetErrDBEntry();
+#ifdef __USE_DATABASE__
+  std::vector<QwDBInterface> GetDBEntry() override;
+  std::vector<QwErrDBInterface> GetErrDBEntry() override;
+#endif
 
   Double_t GetValue() override;
   Double_t GetValueError() override;

@@ -20,6 +20,9 @@
 #endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
+#include "QwRootFile.h"
+
+// Qweak headers
 #include "QwHistogramHelper.h"
 #ifdef __USE_DATABASE__
 #include "QwParitySchema.h"
@@ -28,12 +31,8 @@
 #include "QwLog.h"
 
 extern QwHistogramHelper gQwHists;
+
 //**************************************************//
-
-// Register this subsystem with the factory
-RegisterSubsystemFactory(QwHelicity);
-
-
 /// Default helicity bit pattern of 0x69 represents a -++-+--+ octet
 /// (event polarity listed in reverse time order), where the LSB
 /// of the bit pattern is the first event of the pattern.
@@ -101,7 +100,7 @@ QwHelicity::QwHelicity(const QwHelicity& source)
   fEventNumberFirst(-1),fPatternNumberFirst(-1),
   fSuppressMPSErrorMsgs(kFALSE)
 {
-  fHelicityBitPattern = source.fHelicityBitPattern; 
+  fHelicityBitPattern = source.fHelicityBitPattern;
   //std::cout << source.fHelicityBitPattern.size() << " " << fHelicityBitPattern.size() << std::endl;
   ClearErrorCounters();
   // Default helicity delay to two patterns.
@@ -222,8 +221,8 @@ void QwHelicity::ProcessOptions(QwOptions &options)
   }
 
   if (options.HasValue("helicity.bitpattern")) {
-    QwMessage << " Helicity Pattern =" 
-	      << options.GetValue<std::string>("helicity.bitpattern") 
+    QwMessage << " Helicity Pattern ="
+	      << options.GetValue<std::string>("helicity.bitpattern")
 	      << QwLog::endl;
     std::string hex = options.GetValue<std::string>("helicity.bitpattern");
     //UInt_t bits = QwParameterFile::GetUInt(hex);
@@ -271,7 +270,7 @@ Bool_t QwHelicity::IsContinuous()
 Bool_t QwHelicity::IsGoodPatternNumber()
 {
   Bool_t results;
-  
+
   if((fPatternNumber == fPatternNumberOld) && (fPatternPhaseNumber == fPatternPhaseNumberOld+1))//same pattern new phase
        results = kTRUE; //got same pattern
   else if((fPatternNumber == fPatternNumberOld + 1) && (fPatternPhaseNumber == fMinPatternPhase))
@@ -363,7 +362,7 @@ Bool_t QwHelicity::IsGoodHelicity()
     //Have to start over again
     ResetPredictor();
   }
-  
+
   return fGoodHelicity;
 }
 
@@ -374,12 +373,12 @@ void QwHelicity::ClearEventData()
   for (size_t i=0;i<fWord.size();i++)
     fWord[i].ClearEventData();
 
-  /**Reset data by setting the old event number, pattern number and pattern phase 
+  /**Reset data by setting the old event number, pattern number and pattern phase
      to the values of the previous event.*/
   if (fEventNumberFirst==-1 && fEventNumberOld!= -1){
     fEventNumberFirst = fEventNumberOld;
   }
-  if (fPatternNumberFirst==-1 && fPatternNumberOld!=-1 
+  if (fPatternNumberFirst==-1 && fPatternNumberOld!=-1
       && fPatternNumber==fPatternNumberOld+1){
     fPatternNumberFirst = fPatternNumberOld;
   }
@@ -431,7 +430,7 @@ void QwHelicity::IncrementErrorCounters()
 }
 
 void QwHelicity::PrintErrorCounters() const{
-  // report number of events failed due to HW and event cut faliure
+  // report number of events failed due to HW and event cut failure
   QwMessage << "\n*********QwHelicity Error Summary****************"
 	    << QwLog::endl;
   QwMessage << "First helicity gate counter:  "
@@ -463,40 +462,40 @@ UInt_t QwHelicity::GetEventcutErrorFlag(){//return the error flag
 
 /*!
  * \brief Process helicity information from userbit configuration data.
- * 
+ *
  * This is a complex function (~80 lines) that extracts helicity information
  * from userbit data for injector tests and special configurations. It handles:
- * 
+ *
  * Userbit Decoding:
  * - Extracts 3-bit userbit pattern from bits 28-30 of userbit word
  * - Decodes quartet synchronization bit (bit 3) for pattern timing
  * - Decodes helicity bit (bit 2) for spin state determination
  * - Manages scaler offset calculations for event counting
- * 
+ *
  * Event Counting Logic:
  * - Increments event numbers based on scaler counter ratios
  * - Handles missed events when scaler offset > 1 (indicates DAQ issues)
  * - Maintains pattern phase and pattern number synchronization
  * - Resets quartet phase on quartet sync bit assertion
- * 
+ *
  * Helicity State Management:
  * - Sets fHelicityBitPlus/fHelicityBitMinus based on userbit helicity bit
  * - Updates fHelicityReported for downstream processing
  * - Maintains helicity predictor state for data quality monitoring
- * 
+ *
  * Error Recovery:
  * - Detects missed events through scaler offset analysis
  * - Resets helicity predictor when event sequence is uncertain
  * - Provides debug output for missed event scenarios
- * 
+ *
  * Pattern Synchronization:
  * - Manages quartet boundaries using sync bits
  * - Handles pattern phase wraparound at maximum phase
  * - Maintains continuous event numbering across pattern boundaries
- * 
+ *
  * \note This mode is primarily used for injector testing and is not the
  * standard helicity decoding method for production Qweak data analysis.
- * 
+ *
  * \warning Missed events (scaler offset > 1) will reset the helicity
  * predictor and may affect downstream helicity-dependent analyses.
  */
@@ -504,9 +503,9 @@ void QwHelicity::ProcessEventUserbitMode()
 {
 
   /** In this version of the code, the helicity is extracted for a userbit configuration.
-      This is not what we plan to have for Qweak but it was done for injector tests and 
-      so is usefull to have as another option to get helicity information. */
-  
+      This is not what we plan to have for Qweak but it was done for injector tests and
+      so is useful to have as another option to get helicity information. */
+
   Bool_t ldebug=kFALSE;
   UInt_t userbits;
   static UInt_t lastuserbits  = 0xFF;
@@ -515,7 +514,7 @@ void QwHelicity::ProcessEventUserbitMode()
   if(scaleroffset==1 || scaleroffset==0) {
     userbits = (fWord[kUserbit].fValue & 0xE0000000)>>28;
 
-    //  Now fake the input register, MPS coutner, QRT counter, and QRT phase.
+    //  Now fake the input register, MPS counter, QRT counter, and QRT phase.
     fEventNumber=fEventNumberOld+1;
 
     lastuserbits = userbits;
@@ -590,10 +589,10 @@ void QwHelicity::ProcessEventInputRegisterMode()
     fake_the_counters |= (kPatternCounter<=0)
       || ( kMpsCounter<=0) || (kPatternPhase<=0);
   }
-  
+
   if (CheckIORegisterMask(thisinputregister,fInputReg_FakeMPS))
     fIgnoreHelicity = kTRUE;
-  else 
+  else
     fIgnoreHelicity = kFALSE;
 
   /** If we get junk for the mps and pattern information from the run
@@ -613,7 +612,7 @@ void QwHelicity::ProcessEventInputRegisterMode()
       if (firstpattern && CheckIORegisterMask(thisinputregister,fInputReg_PatternSync)){
 	firstpattern   = kFALSE;
       }
-    
+
     // If firstpattern is still TRUE, we are still searching for the first
     // pattern of the data stream. So set the pattern number = 0
     if (firstpattern)
@@ -651,7 +650,7 @@ void QwHelicity::ProcessEventInputRegisterMode()
 
   if (CheckIORegisterMask(thisinputregister,fInputReg_PatternSync) && fPatternPhaseNumber != fMinPatternPhase){
     //  Quartet bit is set.
-    QwError << "QwHelicity::ProcessEvent:  The Multiplet Sync bit is set, but the Pattern Phase is (" 
+    QwError << "QwHelicity::ProcessEvent:  The Multiplet Sync bit is set, but the Pattern Phase is ("
 	    << fPatternPhaseNumber << ") not "
 	    << fMinPatternPhase << "!  Please check the fPatternPhaseOffset in the helicity map file." << QwLog::endl;
     fNumMultSyncErrors++;
@@ -667,7 +666,7 @@ void QwHelicity::ProcessEventInputRegisterMode()
   if (CheckIORegisterMask(thisinputregister,fInputReg_HelPlus)
       && CheckIORegisterMask(thisinputregister,fInputReg_HelMinus) ){
     //  Both helicity bits are set.
-    QwError << "QwHelicity::ProcessEvent:  Both the H+ and H- bits are set: thisinputregister==" 
+    QwError << "QwHelicity::ProcessEvent:  Both the H+ and H- bits are set: thisinputregister=="
 	    << thisinputregister << QwLog::endl;
     fHelicityReported = kUndefinedHelicity;
     fHelicityBitPlus  = kFALSE;
@@ -681,7 +680,7 @@ void QwHelicity::ProcessEventInputRegisterMode()
     fHelicityBitPlus  = kFALSE;
     fHelicityBitMinus = kTRUE;
   }
-  
+
   return;
 }
 
@@ -692,7 +691,7 @@ void QwHelicity::ProcessEventInputMollerMode()
   if(firstpattern && fWord[kPatternCounter].fValue > fPatternNumberOld){
     firstpattern = kFALSE;
   }
-  
+
   fEventNumber=fWord[kMpsCounter].fValue;
   if(fEventNumber!=(fEventNumberOld+1)){
     Int_t nummissed(fEventNumber - (fEventNumberOld+1));
@@ -714,7 +713,7 @@ void QwHelicity::ProcessEventInputMollerMode()
       fPatternPhaseNumber  = fPatternPhaseNumberOld + 1;
     }
   }
-  
+
   if (fEventType == kEventTypeHelPlus)       fHelicityReported=1;
   else if (fEventType == kEventTypeHelMinus) fHelicityReported=0;
   //  fHelicityReported = (fEventType == 1 ? 0 : 1);
@@ -756,7 +755,7 @@ void  QwHelicity::ProcessEvent()
 
   if(fHelicityBitPlus==fHelicityBitMinus)
     fHelicityReported=-1;
-    
+
   // Predict helicity if delay is non zero.
   if(fUsePredictor && !fIgnoreHelicity){
     PredictHelicity();
@@ -769,8 +768,8 @@ void  QwHelicity::ProcessEvent()
       fPreviousPatternPolarity = fActualPatternPolarity;
       fActualPatternPolarity   = fHelicityReported;
       fDelayedPatternPolarity  = fHelicityReported;
-    } 
-   
+    }
+
   }
 
   if(ldebug){
@@ -899,7 +898,7 @@ Int_t QwHelicity::LoadChannelMap(TString mapfile)
 
   UInt_t value = 0;
   TString valuestr;
-  
+
   while (mapstr.ReadNextLine()){
     RegisterRocBankMarker(mapstr);
 
@@ -965,11 +964,11 @@ Int_t QwHelicity::LoadChannelMap(TString mapfile)
       } else {
 	QwError  << "The helicity decoding mode read in file " << mapfile
 		 << " is not recognized in function QwHelicity::LoadChannelMap \n"
-		 << " Quiting this execution." << QwLog::endl;
+		 << " Quitting this execution." << QwLog::endl;
       }
     }
 
-    if(bankindex!=GetSubbankIndex(fCurrentROC_ID,fCurrentBank_ID)) { 
+    if(bankindex!=GetSubbankIndex(fCurrentROC_ID,fCurrentBank_ID)) {
       bankindex=GetSubbankIndex(fCurrentROC_ID,fCurrentBank_ID);
       if ((bankindex+1)>0){
 	UInt_t numbanks = UInt_t(bankindex+1);
@@ -1015,7 +1014,7 @@ Int_t QwHelicity::LoadChannelMap(TString mapfile)
       localword.fWordType=dettype;
       fWord.push_back(localword);
       fWordsPerSubbank.at(bankindex).second = fWord.size();
-      
+
       // Notice that "namech" is in lower-case, so these checks
       // should all be in lower-case
       switch (fHelicityDecodingMode)
@@ -1041,16 +1040,16 @@ Int_t QwHelicity::LoadChannelMap(TString mapfile)
 	}
     }
   }
-  
+
 
   if(ldebug) {
     std::cout << "Done with Load map channel \n";
     for(size_t i=0;i<fWord.size();i++)
       fWord[i].PrintID();
-    std::cout << " kUserbit=" << kUserbit << "\n";  
+    std::cout << " kUserbit=" << kUserbit << "\n";
   }
   ldebug=kFALSE;
-  
+
   if (fHelicityDecodingMode==kHelInputMollerMode){
     // Check to be sure kEventTypeHelPlus and kEventTypeHelMinus are both defined and not equal
     if (kEventTypeHelPlus != kEventTypeHelMinus
@@ -1074,7 +1073,7 @@ Int_t QwHelicity::LoadChannelMap(TString mapfile)
   }
 
 std::cout << fHelicityBitPattern.size() << std::endl;
-  
+
   mapstr.Close(); // Close the file (ifstream)
   return 0;
 }
@@ -1256,11 +1255,11 @@ void  QwHelicity::FillHistograms()
       if (fHistograms[index]!=NULL)
 	fHistograms[index]->Fill(fActualPatternPolarity);
       index+=1;
-      
+
       for (size_t i=0; i<fWord.size(); i++){
 	if (fHistograms[index]!=NULL)
 	  fHistograms[index]->Fill(fWord[i].fValue);
-	index+=1;	
+	index+=1;
 	QwDebug << "QwHelicity::FillHistograms " << fWord[i].fWordName << "=" << fWord[i].fValue << QwLog::endl;
       }
     }
@@ -1291,7 +1290,7 @@ void  QwHelicity::FillHistograms()
 }
 
 
-void  QwHelicity::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwHelicity::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   SetHistoTreeSave(prefix);
 
@@ -1306,71 +1305,71 @@ void  QwHelicity::ConstructBranchAndVector(TTree *tree, TString &prefix, std::ve
     {
       // basename = "actual_helicity";    //predicted actual helicity before being delayed.
       // values.push_back(0.0);
-      // tree->Branch(basename, &(values.back()), basename+"/D");
+      // tree->Branch(basename, &(values.back<Double_t>()), basename+"/D");
       //
       basename = "delayed_helicity";   //predicted delayed helicity
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "reported_helicity";  //delayed helicity reported by the input register.
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "pattern_phase";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "pattern_number";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "pattern_seed";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "event_number";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       for (size_t i=0; i<fWord.size(); i++)
 	{
 	  basename = fWord[i].fWordName;
-	  values.push_back(0.0);
-	  tree->Branch(basename, &(values.back()), basename+"/D");
+	  values.push_back(basename, 'I');
+	  tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
 	}
     }
   else if(fHistoType==kHelSavePattern)
     {
       basename = "actual_helicity";    //predicted actual helicity before being delayed.
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "actual_pattern_polarity";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "actual_previous_pattern_polarity";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "delayed_pattern_polarity";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "pattern_number";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "pattern_seed";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       for (size_t i=0; i<fWord.size(); i++)
-	{
-	  basename = fWord[i].fWordName;
-	  values.push_back(0.0);
-	  tree->Branch(basename, &(values.back()), basename+"/D");
-	}
+        {
+          basename = fWord[i].fWordName;
+          values.push_back(basename, 'I');
+          tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
+        }
     }
 
   return;
@@ -1502,32 +1501,32 @@ void  QwHelicity::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile&
   return;
 }
 
-void  QwHelicity::FillTreeVector(std::vector<Double_t> &values) const
+void  QwHelicity::FillTreeVector(QwRootTreeBranchVector &values) const
 {
 
   size_t index=fTreeArrayIndex;
   if(fHistoType==kHelSaveMPS)
     {
       // values[index++] = fHelicityActual;
-      values[index++] = fHelicityDelayed;
-      values[index++] = fHelicityReported;
-      values[index++] = fPatternPhaseNumber;
-      values[index++] = fPatternNumber;
-      values[index++] = fPatternSeed;
-      values[index++] = fEventNumber;
+      values.SetValue(index++, fHelicityDelayed);
+      values.SetValue(index++, fHelicityReported);
+      values.SetValue(index++, fPatternPhaseNumber);
+      values.SetValue(index++, fPatternNumber);
+      values.SetValue(index++, fPatternSeed);
+      values.SetValue(index++, fEventNumber);
       for (size_t i=0; i<fWord.size(); i++)
-	values[index++] = fWord[i].fValue;
+	values.SetValue(index++, fWord[i].fValue);
     }
   else if(fHistoType==kHelSavePattern)
     {
-      values[index++] = fHelicityActual;
-      values[index++] = fActualPatternPolarity;
-      values[index++] = fPreviousPatternPolarity;
-      values[index++] = fDelayedPatternPolarity;
-      values[index++] = fPatternNumber;
-      values[index++] = fPatternSeed;
+      values.SetValue(index++, fHelicityActual);
+      values.SetValue(index++, fActualPatternPolarity);
+      values.SetValue(index++, fPreviousPatternPolarity);
+      values.SetValue(index++, fDelayedPatternPolarity);
+      values.SetValue(index++, fPatternNumber);
+      values.SetValue(index++, fPatternSeed);
       for (size_t i=0; i<fWord.size(); i++){
-	values[index++] = fWord[i].fValue;
+	values.SetValue(index++, fWord[i].fValue);
       }
     }
 
@@ -1535,7 +1534,7 @@ void  QwHelicity::FillTreeVector(std::vector<Double_t> &values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void QwHelicity::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, std::vector<Double_t> &values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void QwHelicity::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   SetHistoTreeSave(prefix);
 
@@ -1614,7 +1613,7 @@ void QwHelicity::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& m
   fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
 }
 
-void QwHelicity::FillNTupleVector(std::vector<Double_t> &values) const
+void QwHelicity::FillNTupleVector(std::vector<Double_t>& values) const
 {
   // Use the same logic as FillTreeVector
   size_t index=fTreeArrayIndex;
@@ -1761,8 +1760,8 @@ UInt_t QwHelicity::GetRandomSeed(UShort_t* first24randbits)
   QwDebug << " Entering QwHelicity::GetRandomSeed \n";
 
   /**  This the random seed generator used in G0 (L.Jianglai)
-      Here we get the 24 random bits and derive the randome seed from that.
-      randome seed                      : b24 b23 b22.....b2 b1
+      Here we get the 24 random bits and derive the random seed from that.
+      random seed                      : b24 b23 b22.....b2 b1
       first 24 random bit from this seed: h1 h2 h3 ....h23 h24
       we have,
       b23 = h1, b22 = h2,... b5 = h20,
@@ -1787,7 +1786,7 @@ UInt_t QwHelicity::GetRandomSeed(UShort_t* first24randbits)
   b[2] = first24randbits[23]^b[23]^b[22];// h23^b23^b22 = b2
   b[1] = first24randbits[24]^b[21]^b[22]^b[24];// h24^b22^b24 = b1
 
-  ///assign the values in the h aray and into the sead
+  ///assign the values in the h array and into the sead
   for(size_t i=24;i>=1;i--)  ranseed = (ranseed << 1) | (b[i]&1);
 
   ranseed = ranseed&0xFFFFFF; //put a mask
@@ -1836,7 +1835,8 @@ void QwHelicity::RunPredictor()
 
   Int_t localphase = fPatternPhaseNumber-fMinPatternPhase;//Paul's modifications
 
-  Int_t localbit,indexnum,shiftnum;
+  UInt_t localbit;
+  Int_t indexnum,shiftnum;
   indexnum = TMath::FloorNint(localphase/32.);
   shiftnum = localphase - indexnum*32;
   //std::cout << localphase << " " << indexnum << " " << shiftnum << " "<< fHelicityBitPattern.size() << std::endl;
@@ -1976,12 +1976,12 @@ Bool_t QwHelicity::CollectRandBits30()
   /** Starting to collect 30 bits/helicity state to get the
       random seed for the 30 bit helicity predictor.
       These bits (1/0) are the reported helicity states of the first event
-      of each new pattern ot the so called pattern polarity.*/
+      of each new pattern or the so called pattern polarity.*/
 
   //  Bool_t  ldebug = kFALSE;
   const UInt_t ranbit_goal = 30;
 
-  /** If we have finished collecting the bits then ignore the rest of this funciton and return true.
+  /** If we have finished collecting the bits then ignore the rest of this function and return true.
       No need to recollect!*/
   if (n_ranbits == ranbit_goal)    return kTRUE;
 
@@ -2002,7 +2002,7 @@ Bool_t QwHelicity::CollectRandBits30()
   fGoodHelicity = kFALSE; //reset before prediction begins
 
   if(IsContinuous()) {
-    /**  Make sure we are at the beging of a valid pattern. */
+    /**  Make sure we are at the beginning of a valid pattern. */
     if((fPatternPhaseNumber==fMinPatternPhase)&& (fPatternNumber>=0)) {
       iseed_Delayed = ((iseed_Delayed << 1)&0x3FFFFFFF)|fHelicityReported;
       QwDebug << "QwHelicity:: CollectRandBits30:  Collecting randbit " << n_ranbits << ".." << QwLog::endl;
@@ -2088,12 +2088,12 @@ void QwHelicity::SetHelicityDelay(Int_t delay)
     fHelicityDelay = delay;
     if(delay == 0){
       QwWarning << "QwHelicity : SetHelicityDelay ::  helicity delay is set to 0."
-		<< " Disabling helicity predictor and using reported helicity information." 
+		<< " Disabling helicity predictor and using reported helicity information."
 		<< QwLog::endl;
       fUsePredictor = kFALSE;
     }
     else
-      fUsePredictor = kTRUE; 
+      fUsePredictor = kTRUE;
   }
   else
     QwError << "QwHelicity::SetHelicityDelay We cannot handle negative delay in the prediction of delayed helicity. Exiting.." << QwLog::endl;
@@ -2183,7 +2183,7 @@ VQwSubsystem&  QwHelicity::operator+=  (VQwSubsystem *value)
   //  Bool_t localdebug=kFALSE;
   QwDebug << "Entering QwHelicity::operator+= adding " << value->GetName() << " to " << this->GetName() << " " << QwLog::endl;
 
-  //this routine is most likely to be called during the computatin of assymetry
+  //this routine is most likely to be called during the computatin of asymmetry
   //this call doesn't make too much sense for this class so the following lines
   //are only use to put safe gards testing for example if the two instantiation indeed
   // refers to elements in the same pattern.
@@ -2197,11 +2197,11 @@ void QwHelicity::CheckPatternNum(VQwSubsystem *value)
   //  Bool_t localdebug=kFALSE;
   if(Compare(value)) {
     QwHelicity* input= dynamic_cast<QwHelicity*>(value);
-    QwDebug << "QwHelicity::MergeCounters: this->fPatternNumber=" << this->fPatternNumber 
+    QwDebug << "QwHelicity::MergeCounters: this->fPatternNumber=" << this->fPatternNumber
 	    << ", input->fPatternNumber=" << input->fPatternNumber << QwLog::endl;
 
     this->fErrorFlag |= input->fErrorFlag;
-    
+
     //  Make sure the pattern number and poalrity agree!
     if(this->fPatternNumber!=input->fPatternNumber)
       this->fPatternNumber=-999999;
@@ -2242,7 +2242,7 @@ void  QwHelicity::AccumulateRunningSum(VQwSubsystem* value, Int_t count, Int_t E
     QwHelicity* input = dynamic_cast<QwHelicity*>(value);
     fPatternNumber = (fPatternNumber <=0 ) ? input->fPatternNumber :
       std::min(fPatternNumber, input->fPatternNumber);
-    //  Keep track of the various error quantities, so we can print 
+    //  Keep track of the various error quantities, so we can print
     //  them at the end.
     fNumMissedGates       = input->fNumMissedGates;
     fNumMissedEventBlocks = input->fNumMissedEventBlocks;

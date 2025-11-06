@@ -80,7 +80,7 @@ void QwEventRing::ProcessOptions(QwOptions &options)
   int tmpval = fBurpExtent;
   if (fBurpPrecut>fBurpExtent){
     QwWarning << "The burp precut ("<<fBurpPrecut
-	      << ") is larger than the burp extent (" 
+	      << ") is larger than the burp extent ("
 	      << fBurpExtent
 	      << "; this may not be what you meant to do."
 	      << QwLog::endl;
@@ -89,7 +89,7 @@ void QwEventRing::ProcessOptions(QwOptions &options)
   tmpval += 2;
   if (fRING_SIZE<tmpval){
     QwWarning << "Forcing ring size to be " << tmpval
-	      << " to accomodate a burp extent of " << fBurpExtent
+         << " to accommodate a burp extent of " << fBurpExtent
 	      << " and a burp precut of " << fBurpPrecut
 	      << "; it had been " << fRING_SIZE << "." << QwLog::endl;
     fRING_SIZE = tmpval;
@@ -119,30 +119,30 @@ void QwEventRing::push(QwSubsystemArrayParity &event)
 {
   if (bDEBUG) QwMessage << "QwEventRing::push:  BEGIN" <<QwLog::endl;
 
-  
+
 
   if (bEVENT_READY){
     Int_t thisevent = fNextToBeFilled;
     Int_t prevevent = (thisevent+fRING_SIZE-1)%fRING_SIZE;
-    fEvent_Ring[thisevent]=event;//copy the current good event to the ring 
+    fEvent_Ring[thisevent]=event;//copy the current good event to the ring
     if (bStability){
       fRollingAvg.AccumulateAllRunningSum(event);
     }
 
 
-    if (bDEBUG) QwMessage<<" Filled at "<<thisevent;//<<"Ring count "<<fRing_Count<<QwLog::endl; 
+    if (bDEBUG) QwMessage<<" Filled at "<<thisevent;//<<"Ring count "<<fRing_Count<<QwLog::endl;
     if (bDEBUG_Write) fprintf(out_file," Filled at %d ",thisevent);
 
     // Increment fill index
     fNumberOfEvents ++;
     fNextToBeFilled = (thisevent + 1) % fRING_SIZE;
-    
+
     if(fNextToBeFilled == 0){
       //then we have RING_SIZE events to process
-      if (bDEBUG) QwMessage<<" RING FILLED "<<thisevent; //<<QwLog::endl; 
+      if (bDEBUG) QwMessage<<" RING FILLED "<<thisevent; //<<QwLog::endl;
       if (bDEBUG_Write) fprintf(out_file," RING FILLED ");
       bRING_READY=kTRUE;//ring is filled with good multiplets
-      fNextToBeFilled=0;//next event to be filled is the first element  
+      fNextToBeFilled=0;//next event to be filled is the first element
     }
 
 
@@ -151,10 +151,10 @@ void QwEventRing::push(QwSubsystemArrayParity &event)
 	    fRollingAvg.CalculateRunningAverage();
     	/*
 	    //The fRollingAvg dose not contain any regular errorcodes since it only accumulate rolling sum for errorflag==0 event.
-	    //The only errorflag it generates is the stability cut faliure error when the rolling avg is computed. 
+	    //The only errorflag it generates is the stability cut failure error when the rolling avg is computed.
 	    //Therefore when fRollingAvg.GetEventcutErrorFlag() is called it will return non-zero error code only if a global stability cut has failed
 	    //When fRollingAvg.GetEventcutErrorFlag() is called the fErrorFlag of the subsystemarrayparity object will be updated with any global
-	    //stability cut faliures
+	    //stability cut failures
 	    */
 	    fRollingAvg.UpdateErrorFlag(); //to update the global error code in the fRollingAvg
 	    if ( fRollingAvg.GetEventcutErrorFlag() != 0 ) {
@@ -192,12 +192,12 @@ void QwEventRing::push(QwSubsystemArrayParity &event)
  */
 QwSubsystemArrayParity& QwEventRing::pop(){
   Int_t tempIndex;
-  tempIndex=fNextToBeRead;  
-  if (bDEBUG) QwMessage<<" Read at "<<fNextToBeRead<<QwLog::endl; 
+  tempIndex=fNextToBeRead;
+  if (bDEBUG) QwMessage<<" Read at "<<fNextToBeRead<<QwLog::endl;
   if (bDEBUG_Write) fprintf(out_file," Read at %d \n",fNextToBeRead);
-  
+
   if (fNextToBeRead==(fRING_SIZE-1)){
-    bRING_READY=kFALSE;//setting to false is an extra measure of security to prevent reading a NULL value. 
+    bRING_READY=kFALSE;//setting to false is an extra measure of security to prevent reading a NULL value.
   }
   if (bStability){
      fRollingAvg.DeaccumulateRunningSum(fEvent_Ring[tempIndex]);
@@ -208,12 +208,12 @@ QwSubsystemArrayParity& QwEventRing::pop(){
   fNextToBeRead = (fNextToBeRead + 1) % fRING_SIZE;
 
   // Return the event
-  return fEvent_Ring[tempIndex];  
+  return fEvent_Ring[tempIndex];
 }
 
 
 /** Check if the ring buffer has events ready for retrieval. */
-Bool_t QwEventRing::IsReady(){ //Check for readyness to read data from the ring using the pop() routine   
+Bool_t QwEventRing::IsReady(){ //Check for readiness to read data from the ring using the pop() routine
   return bRING_READY;
 }
 

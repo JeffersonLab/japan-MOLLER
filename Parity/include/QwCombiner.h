@@ -50,9 +50,9 @@ class QwCombiner:public VQwDataHandler, public MQwDataHandlerCloneable<QwCombine
 			  QwSubsystemArrayParity& diff) override;
 
     void ProcessData() override;
-  
+
   protected:
-  
+
     /// Default constructor (Protected for child class access)
     QwCombiner() { };
 
@@ -68,6 +68,9 @@ class QwCombiner:public VQwDataHandler, public MQwDataHandlerCloneable<QwCombine
 
 
 }; // class QwCombiner
+
+// Register this handler with the factory
+REGISTER_DATA_HANDLER_FACTORY(QwCombiner);
 
 inline std::ostream& operator<< (std::ostream& stream, const QwCombiner::EQwHandleType& i) {
   switch (i){

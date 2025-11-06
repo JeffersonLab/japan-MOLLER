@@ -160,7 +160,7 @@ Bool_t QwCombinedPMT::ApplyHWChecks()
 {
   Bool_t eventokay=kTRUE;
 
- 
+
   return eventokay;
 }
 /********************************************************/
@@ -171,7 +171,7 @@ void QwCombinedPMT::SetSingleEventCuts(UInt_t errorflag, Double_t LL=0, Double_t
   //errorflag|=kPMTErrorFlag;
   QwMessage<<"QwCombinedPMT Error Code passing to QwIntegrationPMT "<<errorflag<<QwLog::endl;
   fSumADC.SetSingleEventCuts(errorflag,LL,UL,stability,burplevel);
-  
+
 }
 
 
@@ -192,7 +192,7 @@ void QwCombinedPMT::SetDefaultSampleSize(Int_t sample_size)
   fSumADC.SetDefaultSampleSize((size_t)sample_size);
 }
 
-// report number of events failed due to HW and event cut faliure
+// report number of events failed due to HW and event cut failure
 /** \brief Print error counters aggregated by the sum ADC. */
 void QwCombinedPMT::PrintErrorCounters() const
 {
@@ -211,7 +211,7 @@ Bool_t QwCombinedPMT::CheckForBurpFail(const VQwDataElement *ev_error){
       //std::cout<<" Here in QwCombinedPMT::CheckForBurpFail \n";
       if (this->GetElementName()!="") {
         const QwCombinedPMT* value_pmt = dynamic_cast<const QwCombinedPMT* >(ev_error);
-        burpstatus |= fSumADC.CheckForBurpFail(&(value_pmt->fSumADC)); 
+        burpstatus |= fSumADC.CheckForBurpFail(&(value_pmt->fSumADC));
       }
     } else {
       TString loc="Standard exception from QwCombinedPMT::CheckForBurpFail :"+
@@ -253,7 +253,7 @@ void QwCombinedPMT::UpdateErrorFlag(const QwCombinedPMT *ev_error){
     }
   } catch (std::exception& e) {
     std::cerr<< e.what()<<std::endl;
-  }  
+  }
 };
 
 
@@ -443,7 +443,7 @@ void  QwCombinedPMT::FillHistograms()
   return;
 }
 
-void  QwCombinedPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwCombinedPMT::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (GetElementName()=="")
     {
@@ -493,7 +493,7 @@ void  QwCombinedPMT::ConstructBranch(TTree *tree, TString &prefix, QwParameterFi
 }
 
 
-void  QwCombinedPMT::FillTreeVector(std::vector<Double_t> &values) const
+void  QwCombinedPMT::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()=="") {
     //  This channel is not used, so skip filling the histograms.

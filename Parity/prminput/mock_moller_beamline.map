@@ -85,13 +85,13 @@ sample_size=15000
   MollerADC, 6, 5, bpmstripline, BPM1H14XM
   MollerADC, 6, 6, bpmstripline, BPM1H14YP
   MollerADC, 6, 7, bpmstripline, BPM1H14YM
- 
-!ADC7 
+
+!ADC7
 !  MollerADC, 7, 0, bpmcavity, CAV1H04AXI
 !  MollerADC, 7, 1, bpmcavity, CAV1H04AYI
 !  MollerADC, 7, 2, bpmcavity, CAV1H04AQ
 
-!ADC8 
+!ADC8
 !  MollerADC, 8, 0, bpmcavity, CAV1H13AXI
 !  MollerADC, 8, 1, bpmcavity, CAV1H13AYI
 !  MollerADC, 8, 2, bpmcavity, CAV1H13AQ
@@ -131,13 +131,13 @@ end=combinedbcm
 
 begin=energycalculator
 name=target_energy
-!name          type            ratios     property  
+!name          type            ratios     property
  !BPM1C10,      bpmstripline,   0.00008,   beamposition
  BPM1C11,      bpmstripline,   0.00012,   beamposition
  BPM1C12,      bpmstripline,   0.00024,   beamposition
- BPM1C16,      bpmstripline,   0.00004,   beamposition 
+ BPM1C16,      bpmstripline,   0.00004,   beamposition
  BPM1C20,      bpmstripline,   0.00002,   beamposition
- bpm_target,   combinedbpm,   -0.00017,   targetbeamposition          
+ bpm_target,   combinedbpm,   -0.00017,   targetbeamposition
  bpm_target,   combinedbpm,    2.6,       targetbeamangle
 end=energycalculator
 

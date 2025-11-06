@@ -22,7 +22,7 @@
  *  \class QwPromptSummary
  *  \ingroup QwAnalysis
  *
- *  \brief 
+ *  \brief
  *
  */
 
@@ -34,14 +34,14 @@ class PromptSummaryElement :  public TObject
   ~PromptSummaryElement() override;
   //  friend std::ostream& operator<<(std::ostream& os, const PromptSummaryElement &ps_element);
 
-  void FillData(Double_t yield, Double_t yield_err, Double_t yield_width, TString yield_unit, 
+  void FillData(Double_t yield, Double_t yield_err, Double_t yield_width, TString yield_unit,
 		Double_t asym_diff, Double_t asym_diff_err,  Double_t asym_diff_width, TString asym_diff_unit);
 
-  void    SetName (const TString in)  {fElementName=in;};
-  TString GetName ()                  {return fElementName;};
+  void    SetElementName (const TString in)  {fElementName=in;};
+  TString GetElementName ()                  {return fElementName;};
 
 
-  // Yield      : fHardwareBlockSumM2 
+  // Yield      : fHardwareBlockSumM2
   // YieldError : fHardwareBlockSumError = sqrt(fHardwareBlockSumM2) / fGoodEventCount;
   //void SetNumGoodEvents        (const Double_t in) { fNumGoodEvents=in;};
 
@@ -50,20 +50,20 @@ class PromptSummaryElement :  public TObject
   void SetYieldWidth           (const Double_t in) { fYieldWidth=in; };
   void SetYieldUnit            (const TString  in) { fYieldUnit=in; };
 
-  // Asymmetry : 
+  // Asymmetry :
   void SetAsymmetry           (const Double_t in) { fAsymDiff=in; };
   void SetAsymmetryError      (const Double_t in) { fAsymDiffError=in; };
   void SetAsymmetryWidth      (const Double_t in) { fAsymDiffWidth=in; };
   void SetAsymmetryUnit       (const TString  in) { fAsymDiffUnit=in; };
 
 
-  // Difference : 
+  // Difference :
   void SetDifference           (const Double_t in) { fAsymDiff=in; };
   void SetDifferenceError      (const Double_t in) { fAsymDiffError=in; };
   void SetDifferenceWidth      (const Double_t in) { fAsymDiffWidth=in; };
   void SetDifferenceUnit       (const TString  in) { fAsymDiffUnit=in; };
 
-  // Yield 
+  // Yield
   Double_t GetNumGoodEvents ()    {
     //  Returns the number of entries corresponding to the asymmetry error/width ratio
     if(fAsymDiffError!=0){
@@ -73,20 +73,20 @@ class PromptSummaryElement :  public TObject
       return 0;
     }
   };
-    
+
   Double_t GetYield         () { return fYield; };
   Double_t GetYieldError    () { return fYieldError; };
   Double_t GetYieldWidth    () { return fYieldWidth; };
   TString  GetYieldUnit     () { return  fYieldUnit; };
 
-  // Asymmetry : 
+  // Asymmetry :
   Double_t GetAsymmetry     () { return fAsymDiff; };
   Double_t GetAsymmetryError() { return fAsymDiffError; };
   Double_t GetAsymmetryWidth() { return fAsymDiffWidth; };
   TString  GetAsymmetryUnit () { return fAsymDiffUnit; };
 
 
-  // Difference : 
+  // Difference :
   Double_t GetDifference     () { return fAsymDiff; };
   Double_t GetDifferenceError() { return fAsymDiffError; };
   Double_t GetDifferenceWidth() { return fAsymDiffWidth; };
@@ -108,7 +108,7 @@ class PromptSummaryElement :  public TObject
  private:
 
   TString fElementName;
-  
+
   Double_t fNumGoodEvents;
   Double_t fYield;
   Double_t fYieldError;
@@ -143,7 +143,7 @@ class QwPromptSummary  :  public TObject
 
   void SetRunNumber(const Int_t in) {fRunNumber = in;};
   Int_t GetRunNumber() {return fRunNumber;};
-  
+
   void SetRunletNumber(const Int_t in) {fRunletNumber = in;};
   Int_t GetRunletNumber() {return fRunletNumber;};
 
@@ -152,11 +152,11 @@ class QwPromptSummary  :  public TObject
 
   void AddElement(PromptSummaryElement *in);
   PromptSummaryElement* GetElementByName(TString name);
-  
-  void FillDataInElement(TString name, 
-			 Double_t yield, Double_t yield_err, Double_t yield_width, TString yield_unit, 
+
+  void FillDataInElement(TString name,
+			 Double_t yield, Double_t yield_err, Double_t yield_width, TString yield_unit,
 			 Double_t asym_diff, Double_t asym_diff_err, Double_t asym_diff_width, TString asym_diff_unit);
-  
+
   void FillYieldToElement(TString name, Double_t yield, Double_t yield_error, Double_t yield_width, TString yield_unit);
   void FillAsymDiffToElement(TString name, Double_t asym_diff, Double_t asym_diff_err, Double_t asym_diff_width, TString asym_diff_unit);
   //  void FillDifferenceToElement(Double_t asym_diff, Double_t asym_diff_err, TString asym_diff_unit);
@@ -185,9 +185,9 @@ private:
   void    SetupElementList();
   void    LoadElementsFromParameterFile(const std::string& parameter_file);
   void    LoadElementsFromParameterFile(QwParameterFile& parameterfile);
-  
+
   Int_t   fRunNumber;
-  Int_t   fRunletNumber;  
+  Int_t   fRunletNumber;
 
   Bool_t  fLocalDebug;
 

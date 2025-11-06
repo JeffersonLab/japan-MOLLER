@@ -1,3 +1,9 @@
 [submodule "thirdparty/sqlpp11"]
 	path = thirdparty/sqlpp11
 	url = https://github.com/rbock/sqlpp11.git
+[submodule "thirdparty/sqlpp23"]
+	path = thirdparty/sqlpp23
+	url = https://github.com/rbock/sqlpp23/
+[submodule "thirdparty/et"]
+	path = thirdparty/et
+	url = https://github.com/JeffersonLab/et
