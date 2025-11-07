@@ -813,8 +813,6 @@ void  QwHelicityBase::FillHistograms()
 void  QwHelicityBase::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   SetHistoTreeSave(prefix);
-
-
   fTreeArrayIndex  = values.size();
   TString basename;
   if(fHistoType==kHelNoSave)
@@ -828,67 +826,67 @@ void  QwHelicityBase::ConstructBranchAndVector(TTree *tree, TString &prefix, QwR
       // tree->Branch(basename, &(values.back<Double_t>()), basename+"/D");
       //
       basename = "delayed_helicity";   //predicted delayed helicity
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back<Double_t>()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "reported_helicity";  //delayed helicity reported by the input register.
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back<Double_t>()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "pattern_phase";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back<Double_t>()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "pattern_number";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back<Double_t>()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "pattern_seed";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back<Double_t>()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "event_number";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back<Double_t>()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       for (size_t i=0; i<fWord.size(); i++)
 	{
 	  basename = fWord[i].fWordName;
-	  values.push_back(0.0);
-	  tree->Branch(basename, &(values.back<Double_t>()), basename+"/D");
+          values.push_back(basename, 'I');
+          tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
 	}
     }
   else if(fHistoType==kHelSavePattern)
     {
       basename = "actual_helicity";    //predicted actual helicity before being delayed.
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back<Double_t>()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "actual_pattern_polarity";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back<Double_t>()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "actual_previous_pattern_polarity";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back<Double_t>()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "delayed_pattern_polarity";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back<Double_t>()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "pattern_number";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back<Double_t>()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "pattern_seed";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back<Double_t>()), basename+"/D");
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       for (size_t i=0; i<fWord.size(); i++)
 	{
 	  basename = fWord[i].fWordName;
-	  values.push_back(0.0);
-	  tree->Branch(basename, &(values.back<Double_t>()), basename+"/D");
+          values.push_back(basename, 'I');
+          tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
 	}
     }
 

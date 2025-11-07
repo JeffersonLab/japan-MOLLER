@@ -80,26 +80,26 @@ class QwHelicityDecoder: public QwHelicityBase, public MQwSubsystemCloneable<QwH
 
   void SetFirstBits(UInt_t nbits, UInt_t firstbits);
 
-  VQwSubsystem&  operator=  (VQwSubsystem *value);
-  VQwSubsystem&  operator+=  (VQwSubsystem *value);
+  VQwSubsystem&  operator=  (VQwSubsystem *value) override;
+  VQwSubsystem&  operator+=  (VQwSubsystem *value) override;
 
   VQwSubsystem& operator-= (VQwSubsystem *value) {return *this;};
-  void  Ratio(VQwSubsystem *numer, VQwSubsystem *denom);
+  void  Ratio(VQwSubsystem *numer, VQwSubsystem *denom) override;
 
-  void  AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
+  void  AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override;
   //remove one entry from the running sums for devices
-  void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF){
+  void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF) override{
   };
 
   using VQwSubsystem::ConstructHistograms;
-  void  ConstructHistograms(TDirectory *folder, TString &prefix);
-  void  FillHistograms();
+  void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
+  void  FillHistograms() override;
 
   using VQwSubsystem::ConstructBranchAndVector;
-  void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
-  void  ConstructBranch(TTree *tree, TString &prefix);
-  void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file);
-  void  FillTreeVector(std::vector<Double_t> &values) const;
+  void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override;
+  void  ConstructBranch(TTree *tree, TString &prefix) override;
+  void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file) override;
+  void  FillTreeVector(QwRootTreeBranchVector &values) const override;
 
 #ifdef __USE_DATABASE__
   void  FillDB(QwParityDB *db, TString type);

@@ -22,6 +22,7 @@
 #include "QwParityDB.h"
 #endif // __USE_DATABASE__
 #include "QwLog.h"
+#include "QwRootFile.h"
 
 extern QwHistogramHelper gQwHists;
 const Int_t QwHelicityDecoder::fNumDecoderWords=14;
@@ -712,9 +713,9 @@ void  QwHelicityDecoder::FillHistograms()
 }
 
 
-void  QwHelicityDecoder::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwHelicityDecoder::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
-SetHistoTreeSave(prefix);
+  SetHistoTreeSave(prefix);
   fTreeArrayIndex  = values.size();
   TString basename;
   if(fHistoType==kHelNoSave)
@@ -724,79 +725,79 @@ SetHistoTreeSave(prefix);
   else if(fHistoType==kHelSaveMPS)
     {
        basename = "hd_actual_helicity";    //predicted actual helicity before being delayed.
-       values.push_back(0.0);
-       tree->Branch(basename, &(values.back()), basename+"/D");
+       values.push_back(basename, 'I');
+       tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       
       basename = "hd_delayed_helicity";   //predicted delayed helicity
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+       values.push_back(basename, 'I');
+       tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
             basename = "hd_reported_helicity";  //delayed helicity reported by the input register.
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+       values.push_back(basename, 'I');
+       tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "hd_pattern_phase";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+       values.push_back(basename, 'I');
+       tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "hd_pattern_number";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+       values.push_back(basename, 'I');
+       tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "hd_pattern_seed";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+       values.push_back(basename, 'I');
+       tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "hd_event_number";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+       values.push_back(basename, 'I');
+       tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
 
       basename = "hd_event_Polarity";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+       values.push_back(basename, 'I');
+       tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
 
       basename = "hd_Reported_Pattern_Hel";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+       values.push_back(basename, 'I');
+       tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       for (size_t i=0; i<fWord.size(); i++)
         {
           basename = fWord[i].fWordName;
-          values.push_back(0.0);
-          tree->Branch(basename, &(values.back()), basename+"/D");
+          values.push_back(basename, 'I');
+          tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
         }
     }
  else if(fHistoType==kHelSavePattern)
     {
       basename = "hd_actual_helicity";    //predicted actual helicity before being delayed.
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+       values.push_back(basename, 'I');
+       tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "hd_actual_pattern_polarity";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+       values.push_back(basename, 'I');
+       tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "hd_actual_previous_pattern_polarity";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+       values.push_back(basename, 'I');
+       tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "hd_delayed_pattern_polarity";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+       values.push_back(basename, 'I');
+       tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "hd_pattern_number";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+       values.push_back(basename, 'I');
+       tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       basename = "hd_pattern_seed";
-      values.push_back(0.0);
-      tree->Branch(basename, &(values.back()), basename+"/D");
+       values.push_back(basename, 'I');
+       tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
       //
       for (size_t i=0; i<fWord.size(); i++)
         {
           basename = fWord[i].fWordName;
-          values.push_back(0.0);
-          tree->Branch(basename, &(values.back()), basename+"/D");
+          values.push_back(basename, 'I');
+          tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
         }
     }
   std::cout << "after construction size " << values.size() << std::endl;
@@ -871,6 +872,7 @@ TString basename;
           tree->Branch(basename, &fWord[i].fValue, basename+"/I");
         }
     }
+  //QwError << "entering construct branch should not be here : arindam" << QwLog::endl;
 
   return;
 }
@@ -944,35 +946,37 @@ void  QwHelicityDecoder::ConstructBranch(TTree *tree, TString &prefix, QwParamet
   return;
 }
 
-void  QwHelicityDecoder::FillTreeVector(std::vector<Double_t> &values) const
+void  QwHelicityDecoder::FillTreeVector(QwRootTreeBranchVector &values) const
 {
+
   size_t index=fTreeArrayIndex;
   if(fHistoType==kHelSaveMPS)
     {
-      values[index++] = fHelicityActual;
-      values[index++] = fHelicityDelayed;
-      values[index++] = fHelicityReported;
-      values[index++] = fPatternPhaseNumber;
-      values[index++] = fPatternNumber;
-      values[index++] = fPatternSeed;
-      values[index++] = fEventNumber;
-      values[index++] = fEventPolarity;
-      values[index++] = fReportedPatternHel;
+      values.SetValue(index++, fHelicityActual);
+      values.SetValue(index++, fHelicityDelayed);
+      values.SetValue(index++, fHelicityReported);
+      values.SetValue(index++, fPatternPhaseNumber);
+      values.SetValue(index++, fPatternNumber);
+      values.SetValue(index++, fPatternSeed);
+      values.SetValue(index++, fEventNumber);
+      values.SetValue(index++, fEventPolarity);
+      values.SetValue(index++, fReportedPatternHel);
       for (size_t i=0; i<fWord.size(); i++)
-        values[index++] = fWord[i].fValue;
+	values.SetValue(index++, fWord[i].fValue);
     }
   else if(fHistoType==kHelSavePattern)
     {
-      values[index++] = fHelicityActual;
-      values[index++] = fActualPatternPolarity;
-      values[index++] = fPreviousPatternPolarity;
-      values[index++] = fDelayedPatternPolarity;
-      values[index++] = fPatternNumber;
-      values[index++] = fPatternSeed;
+      values.SetValue(index++, fHelicityActual);
+      values.SetValue(index++, fActualPatternPolarity);
+      values.SetValue(index++, fPreviousPatternPolarity);
+      values.SetValue(index++, fDelayedPatternPolarity);
+      values.SetValue(index++, fPatternNumber);
+      values.SetValue(index++, fPatternSeed);
       for (size_t i=0; i<fWord.size(); i++){
-        values[index++] = fWord[i].fValue;
+	values.SetValue(index++, fWord[i].fValue);
       }
     }
+
   return;
 }
 
