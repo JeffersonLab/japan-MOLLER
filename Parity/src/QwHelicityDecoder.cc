@@ -991,10 +991,10 @@ void  QwHelicityDecoder::FillDB(QwParityDB *db, TString type)
   if (type=="yield" || type=="asymmetry")
     return;
 
-  db->Connect();
-  mysqlpp::Query query = db->Query();
-
-  db->Disconnect();
+//  db->Connect();
+//  mysqlpp::Query query = db->Query();
+//
+//  db->Disconnect();
 }
 
 
