@@ -205,11 +205,7 @@ void RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeam
   Double_t fCoeff_yp;
   Double_t fCoeff_e;
 
-  Bool_t fGoodEvent;//used to validate sequence number in the IsGoodEvent()
-
   QwMollerADC_Channel fTriumf_ADC;
-
-  Int_t fDeviceErrorCode;//keep the device HW status using a unique code from the QwMollerADC_Channel::fDeviceErrorCode
 
   Bool_t fIsBlindable; //
   Bool_t fIsNormalizable;
