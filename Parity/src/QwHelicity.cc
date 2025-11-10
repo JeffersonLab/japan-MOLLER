@@ -24,10 +24,6 @@
 
 // Qweak headers
 #include "QwHistogramHelper.h"
-#ifdef __USE_DATABASE__
-#include "QwParitySchema.h"
-#include "QwParityDB.h"
-#endif // __USE_DATABASE__
 #include "QwLog.h"
 
 extern QwHistogramHelper gQwHists;

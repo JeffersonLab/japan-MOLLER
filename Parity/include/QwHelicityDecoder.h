@@ -17,11 +17,6 @@
 #include "QwWord.h"
 #include "QwHelicityBase.h"
 
-// Forward declarations
-#ifdef __USE_DATABASE__
-class QwParityDB;
-#endif
-
 /*****************************************************************
 *  Class:
 ******************************************************************/
@@ -100,11 +95,6 @@ class QwHelicityDecoder: public QwHelicityBase, public MQwSubsystemCloneable<QwH
   void  ConstructBranch(TTree *tree, TString &prefix) override;
   void  ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& trim_file) override;
   void  FillTreeVector(QwRootTreeBranchVector &values) const override;
-
-#ifdef __USE_DATABASE__
-  void  FillDB(QwParityDB *db, TString type);
-  void  FillErrDB(QwParityDB *db, TString datatype);
-#endif // __USE_DATABASE__
 
   void  Print() const;
 

@@ -22,11 +22,6 @@
 #include "QwWord.h"
 #include "QwHelicityBase.h"
 
-// Forward declarations
-#ifdef __USE_DATABASE__
-class QwParityDB;
-#endif
-
 /**
  * \class QwHelicity
  * \ingroup QwAnalysis_BeamLine
@@ -99,11 +94,6 @@ class QwHelicity: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicity
   void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
 
   using VQwSubsystem::ConstructBranchAndVector;
-
-#ifdef __USE_DATABASE__
-  void  FillDB(QwParityDB *db, TString type) override;
-  void  FillErrDB(QwParityDB *db, TString datatype) override;
-#endif // __USE_DATABASE__
 
   void  Print() const;
 
