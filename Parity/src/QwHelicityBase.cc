@@ -14,15 +14,20 @@
 #include "TRegexp.h"
 #include "TMath.h"
 
+#ifdef HAS_RNTUPLE_SUPPORT
+// ROOT headers for RNTuple support
+#include <ROOT/RNTupleModel.hxx>
+#include <ROOT/RNTupleWriter.hxx>
+#endif
+
 // Qweak headers
 #include "QwHistogramHelper.h"
+#include "QwRootFile.h"
+#include "QwLog.h"
 #ifdef __USE_DATABASE__
-#define MYSQLPP_SSQLS_NO_STATICS
-#include "QwParitySSQLS.h"
+#include "QwParitySchema.h"
 #include "QwParityDB.h"
 #endif // __USE_DATABASE__
-#include "QwLog.h"
-#include "QwRootFile.h"
 
 extern QwHistogramHelper gQwHists;
 //**************************************************//
