@@ -184,8 +184,10 @@ void RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeam
   void  FillNTupleVector(std::vector<Double_t>& values) const;
 #endif // HAS_RNTUPLE_SUPPORT
 
+#ifdef __USE_DATABASE__
   std::vector<QwDBInterface> GetDBEntry();
   std::vector<QwErrDBInterface> GetErrDBEntry();
+#endif
 
  protected:
 
@@ -203,11 +205,7 @@ void RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeam
   Double_t fCoeff_yp;
   Double_t fCoeff_e;
 
-  Bool_t fGoodEvent;//used to validate sequence number in the IsGoodEvent()
-
   QwMollerADC_Channel fTriumf_ADC;
-
-  Int_t fDeviceErrorCode;//keep the device HW status using a unique code from the QwMollerADC_Channel::fDeviceErrorCode
 
   Bool_t fIsBlindable; //
   Bool_t fIsNormalizable;

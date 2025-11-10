@@ -284,7 +284,7 @@ void QwHelicityPattern::LoadEventData(QwSubsystemArrayParity &event)
     localPatternNumber = fLastPatternNumber;
     localEventNumber   = fLastWindowNumber + 1;
     localPhaseNumber   = fLastPhaseNumber + 1;
-    if(localPhaseNumber>=fPatternSize){
+    if(localPhaseNumber >= static_cast<Int_t>(fPatternSize)){
       localPatternNumber++;
       localPhaseNumber = 0; // Use "reduced pattern phase", counts from 0.
     }
@@ -311,7 +311,7 @@ void QwHelicityPattern::LoadEventData(QwSubsystemArrayParity &event)
 	    << "Reduced event phase number is less than zero; ignore this event."
 	    << QwLog::endl;
     ClearEventData();
-  } else if(localPhaseNumber>=fPatternSize){
+  } else if(localPhaseNumber >= static_cast<Int_t>(fPatternSize)){
     QwWarning<<" In QwHelicityPattern::LoadEventData trying upload an event with a phase larger than expected \n"
 	   <<" phase ="<<localPhaseNumber+1<<" maximum expected phase="<<fPatternSize<<"\n"
 	   <<" operation impossible, pattern reset to 0: no asymmetries will be computed "<<QwLog::endl;

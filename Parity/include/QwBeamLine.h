@@ -139,8 +139,8 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
 #endif
 
 #ifdef __USE_DATABASE__
-  void   FillDB(QwParityDB *db, TString datatype);
-  void   FillErrDB(QwParityDB *db, TString datatype);
+  void   FillDB(QwParityDB *db, TString datatype) override;
+  void   FillErrDB(QwParityDB *db, TString datatype) override;
 #endif // __USE_DATABASE__
 
   Bool_t Compare(VQwSubsystem *source);
@@ -216,3 +216,6 @@ private:
 
 
 };
+
+// Register this subsystem with the factory
+REGISTER_SUBSYSTEM_FACTORY(QwBeamLine);

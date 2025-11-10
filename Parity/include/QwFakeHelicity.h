@@ -32,6 +32,9 @@ class QwFakeHelicity: public QwHelicity {
 
     ~QwFakeHelicity() override { };
 
+    /// Inherit assignment operator on base class
+    using QwHelicity::operator=;
+
     void    ClearEventData() override;
     Bool_t  IsGoodHelicity() override;
     void    ProcessEvent() override;
@@ -47,3 +50,6 @@ class QwFakeHelicity: public QwHelicity {
     UInt_t GetRandbit(UInt_t& ranseed) override;
 
 };
+
+// Register this subsystem with the factory
+REGISTER_SUBSYSTEM_FACTORY(QwFakeHelicity);

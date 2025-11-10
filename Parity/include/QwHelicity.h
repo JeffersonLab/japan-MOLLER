@@ -157,8 +157,8 @@ class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHeli
 #endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
-  void  FillDB(QwParityDB *db, TString type);
-  void  FillErrDB(QwParityDB *db, TString datatype);
+  void  FillDB(QwParityDB *db, TString type) override;
+  void  FillErrDB(QwParityDB *db, TString datatype) override;
 #endif // __USE_DATABASE__
 
   void  Print() const;
@@ -333,3 +333,6 @@ class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHeli
   }
 
 };
+
+// Register this subsystem with the factory
+REGISTER_SUBSYSTEM_FACTORY(QwHelicity);

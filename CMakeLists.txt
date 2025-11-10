@@ -314,13 +314,14 @@ target_compile_options(${PROJECT_NAME}
 # TMapFile is broken with C++17 or higher and ROOT < 6.32
 if(${CMAKE_CXX_STANDARD} LESS 17 OR ${ROOT_VERSION} VERSION_GREATER_EQUAL 6.32)
   target_compile_definitions(${PROJECT_NAME} PUBLIC QW_ENABLE_MAPFILE)
+  set(LIBMAPFILE ROOT::New)
 endif()
 
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
     eviowrapper
   PUBLIC
-    ROOT::Core ROOT::Tree ROOT::Hist ROOT::Rint
+    ROOT::Core ROOT::Tree ROOT::Hist ROOT::Rint ${LIBMAPFILE}
     $<TARGET_NAME_IF_EXISTS:ROOT::ROOTNTuple>
     ${Boost_LIBRARIES}
   )

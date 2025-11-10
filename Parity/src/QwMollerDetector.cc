@@ -27,9 +27,6 @@
 #include "QwParameterFile.h"
 #include "QwScaler_Channel.h"
 
-// Register this subsystem with the factory
-REGISTER_SUBSYSTEM_FACTORY(QwMollerDetector);
-
 /**
  * Load the channel map
  * @param mapfile Map file

@@ -60,6 +60,13 @@ QwDetectorArray(const QwDetectorArray& source)
 
 
 /// Virtual destructor
-~QwDetectorArray() override {};
+~QwDetectorArray() override;
+
+
+/// Inherit assignment operator on base class
+using VQwDetectorArray::operator=;
 
 };
+
+// Register this subsystem with the factory
+REGISTER_SUBSYSTEM_FACTORY(QwDetectorArray);

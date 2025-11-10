@@ -13,9 +13,6 @@
 #include "QwParameterFile.h"
 #include "QwHelicityPattern.h"
 
-// Register this handler with the factory
-REGISTER_DATA_HANDLER_FACTORY(QwAlarmHandler);
-
 
 /// \brief Constructor with name
 QwAlarmHandler::QwAlarmHandler(const TString& name):VQwDataHandler(name)

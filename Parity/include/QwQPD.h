@@ -112,6 +112,7 @@ class QwQPD : public VQwBPM {
   void    SetSubElementPedestal(Int_t j, Double_t value) override;
   void    SetSubElementCalibrationFactor(Int_t j, Double_t value) override;
 
+  void    Ratio(VQwBPM &numer, VQwBPM &denum) override;
   void    Ratio(QwQPD &numer, QwQPD &denom);
   void    Scale(Double_t factor) override;
 
@@ -143,8 +144,8 @@ class QwQPD : public VQwBPM {
 
 
 #ifdef __USE_DATABASE__
-  std::vector<QwDBInterface> GetDBEntry();
-  std::vector<QwErrDBInterface> GetErrDBEntry();
+  std::vector<QwDBInterface> GetDBEntry() override;
+  std::vector<QwErrDBInterface> GetErrDBEntry() override;
 #endif // __USE_DATABASE__
 
   void    MakeQPDList();

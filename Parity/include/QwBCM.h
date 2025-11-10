@@ -174,8 +174,10 @@ public:
   void  FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif
 
-  std::vector<QwDBInterface> GetDBEntry();
-  std::vector<QwErrDBInterface> GetErrDBEntry();
+#ifdef __USE_DATABASE__
+  std::vector<QwDBInterface> GetDBEntry() override;
+  std::vector<QwErrDBInterface> GetErrDBEntry() override;
+#endif
 
   Double_t GetValue() override;
   Double_t GetValueError() override;

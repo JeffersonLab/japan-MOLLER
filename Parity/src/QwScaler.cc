@@ -18,9 +18,6 @@
 // Qweak headers
 #include "QwParameterFile.h"
 
-// Register this subsystem with the factory
-REGISTER_SUBSYSTEM_FACTORY(QwScaler);
-
 
 /** Define command-line options for scaler subsystem (placeholder). */
 void QwScaler::DefineOptions(QwOptions &options)

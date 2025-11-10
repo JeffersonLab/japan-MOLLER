@@ -31,12 +31,8 @@
 #include "QwLog.h"
 
 extern QwHistogramHelper gQwHists;
+
 //**************************************************//
-
-// Register this subsystem with the factory
-REGISTER_SUBSYSTEM_FACTORY(QwHelicity);
-
-
 /// Default helicity bit pattern of 0x69 represents a -++-+--+ octet
 /// (event polarity listed in reverse time order), where the LSB
 /// of the bit pattern is the first event of the pattern.
@@ -1839,7 +1835,8 @@ void QwHelicity::RunPredictor()
 
   Int_t localphase = fPatternPhaseNumber-fMinPatternPhase;//Paul's modifications
 
-  Int_t localbit,indexnum,shiftnum;
+  UInt_t localbit;
+  Int_t indexnum,shiftnum;
   indexnum = TMath::FloorNint(localphase/32.);
   shiftnum = localphase - indexnum*32;
   //std::cout << localphase << " " << indexnum << " " << shiftnum << " "<< fHelicityBitPattern.size() << std::endl;

@@ -202,7 +202,7 @@ public:
 #endif // __USE_DATABASE__
 
   virtual void Ratio(VQwBPM & /*numer*/, VQwBPM & /*denom*/) {
-    std::cerr << "Ratio() is not defined for BPM named="<<GetElementName()<<"\n";
+    throw std::runtime_error(std::string("Ratio() is not defined for BPM named ") + GetElementName().Data());
   }
 
   // Ensure polymorphic dispatch of burp-failure checks when called via VQwBPM*
