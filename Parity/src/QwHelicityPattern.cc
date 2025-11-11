@@ -259,12 +259,13 @@ void QwHelicityPattern::LoadEventData(QwSubsystemArrayParity &event)
     if (subsys_helicity.size()==0) {
     subsys_helicity = event.GetSubsystemByType("QwHelicityDecoder");
     }
+
     QwHelicityBase* helicity = 0;
     
     if (subsys_helicity.size() > 0) {
-      std::cout << "subsystem size : " << subsys_helicity.size() << std::endl;
+      //std::cout << "subsystem size : " << subsys_helicity.size() << std::endl;
       // Take the first helicity subsystem
-      helicity = dynamic_cast<QwHelicityDecoder*>(subsys_helicity.at(0));
+      helicity = dynamic_cast<QwHelicityBase*>(subsys_helicity.at(0));
       if (helicity->HasDataLoaded()){
 	localIgnoreHelicity = helicity->IsHelicityIgnored();
 	// Get the event, pattern, phase number and helicity
@@ -273,7 +274,7 @@ void QwHelicityPattern::LoadEventData(QwSubsystemArrayParity &event)
 	localPhaseNumber    = helicity->GetPhaseNumber() - helicity->GetMinPatternPhase(); // Use "reduced pattern phase", counts from 0.
 	localHelicityActual = helicity->GetHelicityActual();
 
-std::cout << " local phase: " << localPhaseNumber << " : local event : " << localEventNumber << " : local Pattern : " << localPatternNumber << " : local helicity : " << localHelicityActual << std::endl;
+        //std::cout << " local phase: " << localPhaseNumber << " : local event : " << localEventNumber << " : local Pattern : " << localPatternNumber << " : local helicity : " << localHelicityActual << std::endl;
       } else {
 	QwError << "QwHelicityPattern::LoadEventData:  The helicity subsystem does not have valid data!"
 		<< QwLog::endl;

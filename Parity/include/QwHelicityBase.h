@@ -44,8 +44,8 @@ class QwHelicityBase: public VQwSubsystemParity{
   QwHelicityBase(const TString& name);
   /// Copy constructor
   QwHelicityBase(const QwHelicityBase& source);
-  /// Virtual destructor
-  virtual ~QwHelicityBase() { }
+  /// destructor
+  ~QwHelicityBase() override { }
 
   static void DefineOptions(QwOptions &options);
   void ProcessOptions(QwOptions &options);

@@ -119,8 +119,6 @@ QwHelicityBase::QwHelicityBase(const QwHelicityBase& source)
   fGoodPattern=kFALSE;
   fHelicityDecodingMode=-1;
 
-//  fInputReg_FakeMPS = source.fInputReg_FakeMPS;
-
   this->fWord.resize(source.fWord.size());
   for(size_t i=0;i<this->fWord.size();i++)
     {
@@ -503,6 +501,7 @@ Int_t QwHelicityBase::LoadChannelMap(TString mapfile)
 
     if (mapstr.PopValue("patternphase",value)) {
       fMaxPatternPhase=value;
+      BuildHelicityBitPattern(fMaxPatternPhase);
       //QwMessage << " fMaxPatternPhase " << fMaxPatternPhase << QwLog::endl;
     }
     if (mapstr.PopValue("patternbits",valuestr)) {
@@ -644,7 +643,7 @@ Int_t QwHelicityBase::ProcessEvBuffer(UInt_t event_type, const ROCID_t roc_id, c
     if(lkDEBUG) {
       QwDebug << "QwHelicityBase::ProcessEvBuffer:  Done with Processing this event" << QwLog::endl;
       for(size_t i=0;i<fWord.size();i++) {
-	std::cout << " word number = " << i << " ";
+	std::cout << "QwHelicityBase::ProcessEvBuffer:  word number = " << i << " ";
 	fWord[i].Print();
       }
     }
@@ -1248,7 +1247,8 @@ void QwHelicityBase::RunPredictor()
 
   Int_t localphase = fPatternPhaseNumber-fMinPatternPhase;//Paul's modifications
 
-  Int_t localbit,indexnum,shiftnum;
+  UInt_t localbit;
+  Int_t indexnum,shiftnum;
   indexnum = TMath::FloorNint(localphase/32.);
   shiftnum = localphase - indexnum*32;
   //std::cout << localphase << " " << indexnum << " " << shiftnum << " "<< fHelicityBitPattern.size() << std::endl;
@@ -1547,13 +1547,10 @@ void QwHelicityBase::ResetPredictor()
 VQwSubsystem&  QwHelicityBase::operator=  (VQwSubsystem *value)
 {
   Bool_t ldebug = kFALSE;
-  if(Compare(value))
-    {
-
-       //QwHelicityBase* input= (QwHelicityBase*)value;
-      VQwSubsystem::operator=(value);
+  QwHelicityBase* input= dynamic_cast<QwHelicityBase*>(value);
+if (input) {
+      this->VQwSubsystem::operator=(value);
       QwHelicityBase* input= dynamic_cast<QwHelicityBase*>(value);
-
       for(size_t i=0;i<input->fWord.size();i++)
 	this->fWord[i].fValue=input->fWord[i].fValue;
       this->fHelicityActual = input->fHelicityActual;
@@ -1586,7 +1583,6 @@ VQwSubsystem&  QwHelicityBase::operator=  (VQwSubsystem *value)
 	std::cout << "input->fPatternNumber=" << input->fPatternNumber << "\n";
       }
     }
-
   return *this;
 }
 

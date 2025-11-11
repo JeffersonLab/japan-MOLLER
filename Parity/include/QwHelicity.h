@@ -41,9 +41,11 @@ class QwHelicity: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicity
 
   QwHelicity(const TString& name);
   QwHelicity(const QwHelicity& source);
-  /// Virtual destructor
 
+  /// destructor
   ~QwHelicity() override { }
+
+  using QwHelicityBase::operator=;
 
   static void DefineOptions(QwOptions &options);
   void ProcessOptions(QwOptions &options) override;
@@ -75,35 +77,12 @@ class QwHelicity: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicity
   UInt_t GetRandomSeedActual() { return iseed_Actual; };
   UInt_t GetRandomSeedDelayed() { return iseed_Delayed; };
 
-  Int_t  GetHelicityReported();
-  Int_t  GetHelicityActual();
-  Int_t  GetHelicityDelayed();
-  Long_t GetEventNumber();
-  Long_t GetPatternNumber();
-  Int_t  GetPhaseNumber();
-  Int_t GetMaxPatternPhase(){
-    return fMaxPatternPhase;
-  };
-  Int_t GetMinPatternPhase(){
-    return fMinPatternPhase;
-  }
-  void SetFirstBits(UInt_t nbits, UInt_t firstbits);
-  void SetEventPatternPhase(Int_t event, Int_t pattern, Int_t phase);
-
   using VQwSubsystem::ConstructHistograms;
   void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
 
   using VQwSubsystem::ConstructBranchAndVector;
 
-  void  Print() const;
-
-  Bool_t IsHelicityIgnored(){return fIgnoreHelicity;};
-
-  virtual Bool_t IsGoodHelicity();
-
  protected:
-  void CheckPatternNum(VQwSubsystem *value);
-  void MergeCounters(VQwSubsystem *value);
 
   Bool_t CheckIORegisterMask(const UInt_t& ioregister, const UInt_t& mask) const {
     return ((mask != 0)&&((ioregister & mask) == mask));
@@ -127,25 +106,6 @@ class QwHelicity: public QwHelicityBase, public MQwSubsystemCloneable<QwHelicity
   UInt_t fInputReg_HelMinus;
   UInt_t fInputReg_PatternSync;
   UInt_t fInputReg_PairSync;
-
-  static const std::vector<UInt_t> kDefaultHelicityBitPattern;
-
-  std::vector<UInt_t> fHelicityBitPattern;
-
-  std::vector <QwWord> fWord;
-  std::vector < std::pair<Int_t, Int_t> > fWordsPerSubbank;  // The indices of the first & last word in each subbank
-
-  // data taking. For example this was used during the injector data taking
-  // in winter 2008-09 injector tests
-  static const Int_t kUndefinedHelicity= -9999;
-
-  Bool_t IsGoodPatternNumber();
-  Bool_t IsGoodEventNumber();
-  Bool_t MatchActualHelicity(Int_t actual);
-  Bool_t IsGoodPhaseNumber();
-  Bool_t IsContinuous();
-
-  Bool_t Compare(VQwSubsystem *source);
 
 };
 
