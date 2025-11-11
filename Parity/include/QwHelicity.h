@@ -1,12 +1,12 @@
 /**********************************************************\
-* File: QwHelicityBase.h                                      *
+* File: QwHelicity.h                                      *
 *                                                         *
 * Author:                                                 *
 * Time-stamp:                                             *
 \**********************************************************/
 
 /*!
- * \file   QwHelicityBase.h
+ * \file   QwHelicity.h
  * \brief  Helicity state management and pattern recognition
  */
 
@@ -40,7 +40,7 @@ enum HelicityRootSavingType{kHelSaveMPS = 0,
 
 
 /**
- * \class QwHelicityBase
+ * \class QwHelicity
  * \ingroup QwAnalysis_BeamLine
  * \brief Subsystem for helicity state management and pattern recognition
  *
@@ -49,19 +49,19 @@ enum HelicityRootSavingType{kHelSaveMPS = 0,
  * and helicity-correlated systematic checks. Supports multiple helicity
  * encoding modes and provides helicity information to other subsystems.
  */
-class QwHelicityBase: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHelicityBase> {
+class QwHelicity: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHelicity> {
 
  private:
   /// Private default constructor (not implemented, will throw linker error on use)
-  QwHelicityBase();
+  QwHelicity();
 
  public:
   /// Constructor with name
-  QwHelicityBase(const TString& name);
+  QwHelicity(const TString& name);
   /// Copy constructor
-  QwHelicityBase(const QwHelicityBase& source);
+  QwHelicity(const QwHelicity& source);
   /// Virtual destructor
-  ~QwHelicityBase() override { }
+  ~QwHelicity() override { }
 
 
 
@@ -72,8 +72,8 @@ class QwHelicityBase: public VQwSubsystemParity, public MQwSubsystemCloneable<Qw
   void ProcessOptions(QwOptions &options) override;
   Int_t LoadChannelMap(TString mapfile) override;
   Int_t LoadInputParameters(TString pedestalfile) override;
-  Int_t LoadEventCuts(TString  filename) override;//Loads event cuts applicable to QwHelicityBase class, derived from VQwSubsystemParity
-  Bool_t ApplySingleEventCuts() override;//Apply event cuts in the QwHelicityBase class, derived from VQwSubsystemParity
+  Int_t LoadEventCuts(TString  filename) override;//Loads event cuts applicable to QwHelicity class, derived from VQwSubsystemParity
+  Bool_t ApplySingleEventCuts() override;//Apply event cuts in the QwHelicity class, derived from VQwSubsystemParity
 
   Bool_t  CheckForBurpFail(const VQwSubsystem *ev_error) override{
     return kFALSE;
@@ -206,7 +206,7 @@ class QwHelicityBase: public VQwSubsystemParity, public MQwSubsystemCloneable<Qw
   std::vector < std::pair<Int_t, Int_t> > fWordsPerSubbank;  // The indices of the first & last word in each subbank
 
   Int_t fHelicityDecodingMode;
-  // this variable is set at initialization in function QwHelicityBase::LoadChannelMap
+  // this variable is set at initialization in function QwHelicity::LoadChannelMap
   // it allows one to customize the helicity decoding mode
   // the helicity decoding mode will take one of the value of enum  HelicityEncodingType
 
@@ -335,4 +335,4 @@ class QwHelicityBase: public VQwSubsystemParity, public MQwSubsystemCloneable<Qw
 };
 
 // Register this subsystem with the factory
-REGISTER_SUBSYSTEM_FACTORY(QwHelicityBase);
+REGISTER_SUBSYSTEM_FACTORY(QwHelicity);
