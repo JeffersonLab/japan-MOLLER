@@ -23,28 +23,28 @@ jobs:
             os: "el9"
             compiler: "gcc13"
             opt: "opt"
-            cxxflags: "-g -pg"
+            cxxflags: "-march=x86-64-v3 -mtune=generic -g -pg"
             submodules: true
           - release: "LCG_107"
             arch: "x86_64"
             os: "el9"
             compiler: "gcc14"
             opt: "opt"
-            cxxflags: ""
+            cxxflags: "-march=x86-64-v3 -mtune=generic"
             submodules: true
           - release: "LCG_108"
             arch: "x86_64"
             os: "el9"
             compiler: "clang19"
             opt: "opt"
-            cxxflags: ""
+            cxxflags: "-march=x86-64-v3 -mtune=generic"
             submodules: true
           - release: "LCG_108"
             arch: "x86_64"
             os: "el9"
             compiler: "gcc15"
             opt: "opt"
-            cxxflags: ""
+            cxxflags: "-march=x86-64-v3 -mtune=generic"
             submodules: true
           # Build without submodules
           - release: "LCG_108"
@@ -52,7 +52,7 @@ jobs:
             os: "el9"
             compiler: "gcc15"
             opt: "dbg"
-            cxxflags: ""
+            cxxflags: "-march=x86-64-v3 -mtune=generic"
             submodules: false
     steps:
       - uses: actions/checkout@v5
@@ -231,7 +231,7 @@ jobs:
       - name: Upload logs
         uses: actions/upload-artifact@v5
         with:
-          name: logs-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}
+          name: logs-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: |
             qwmockdatagenerator.log
             qwparity-*.log
@@ -298,7 +298,7 @@ jobs:
       - name: Compare artifacts
         if: github.event_name == 'pull_request'
         run: |
-          echo "Comparing artifacts for ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}"
+          echo "Comparing artifacts for ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}"
 
           # Check if target artifacts exist
           if [ ! -d "./target" ] || [ -z "$(ls -A ./target)" ]; then
