@@ -23,28 +23,28 @@ jobs:
             os: "el9"
             compiler: "gcc13"
             opt: "opt"
-            cxxflags: "-g -pg"
+            cxxflags: "-march=x86-64-v3 -mtune=x86-64-v3 -g -pg"
             submodules: true
           - release: "LCG_107"
             arch: "x86_64"
             os: "el9"
             compiler: "gcc14"
             opt: "opt"
-            cxxflags: ""
+            cxxflags: "-march=x86-64-v3 -mtune=x86-64-v3"
             submodules: true
           - release: "LCG_108"
             arch: "x86_64"
             os: "el9"
             compiler: "clang19"
             opt: "opt"
-            cxxflags: ""
+            cxxflags: "-march=x86-64-v3 -mtune=x86-64-v3"
             submodules: true
           - release: "LCG_108"
             arch: "x86_64"
             os: "el9"
             compiler: "gcc15"
             opt: "opt"
-            cxxflags: ""
+            cxxflags: "-march=x86-64-v3 -mtune=x86-64-v3"
             submodules: true
           # Build without submodules
           - release: "LCG_108"
@@ -52,7 +52,7 @@ jobs:
             os: "el9"
             compiler: "gcc15"
             opt: "dbg"
-            cxxflags: ""
+            cxxflags: "-march=x86-64-v3 -mtune=x86-64-v3"
             submodules: false
     steps:
       - uses: actions/checkout@v5
