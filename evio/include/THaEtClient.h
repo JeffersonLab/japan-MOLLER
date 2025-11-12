@@ -43,8 +43,9 @@ public:
   Int_t codaOpen( const char* computer, Int_t mode = 1 ) override;
   Int_t codaOpen( const char* computer, const char* session, Int_t mode = 1 ) override;
   Int_t codaClose() override;
+  Int_t codaSetSelect( int* selectwords );  // codaSetSelect must be called before first read
   Int_t codaRead() override;    // codaRead() must be called once per event
-  Int_t codaWrite( const UInt_t* buffer, UInt_t buffer_length );  // Write event to ET
+  Int_t codaWrite( const UInt_t* buffer, UInt_t buffer_length, int* control = nullptr, int num_control = 0 );  // Write event to ET
   Int_t flushWrite();  // Flush pending writes to ET
   Bool_t isOpen() const override;
 
@@ -53,6 +54,7 @@ private:
   Int_t nused{0};
   int32_t waitflag{0};
   bool opened{false};
+  int* selectwords{nullptr};
   std::string daqhost, session, etfile, station;
   Int_t init( const char* station = "japa_sta" );
 

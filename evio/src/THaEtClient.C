@@ -85,6 +85,7 @@ THaEtClient::THaEtClient( const char* computer, const char* mysession, Int_t smo
 //______________________________________________________________________________
 THaEtClient::~THaEtClient()
 {
+  delete[] selectwords;
   THaEtClient::codaClose();
   // If error, codaClose already printed a message
 }
@@ -132,7 +133,12 @@ Int_t THaEtClient::init( const char* mystation )
   et_station_config_setblock(sconfig, ET_STATION_NONBLOCKING);
   et_station_config_setcue(sconfig, 100);
   et_station_config_setprescale(sconfig, 1);
-  et_station_config_setselect(sconfig, ET_STATION_SELECT_ALL);
+  if( selectwords == nullptr ) {
+    et_station_config_setselect(sconfig, ET_STATION_SELECT_ALL);
+  } else {
+    et_station_config_setselect(sconfig, ET_STATION_SELECT_MATCH);
+    et_station_config_setselectwords(sconfig, selectwords);
+  }
   et_stat_id my_stat{};
   int status = et_station_create(id, &my_stat, station.c_str(), sconfig);
   if( status != ET_OK ) {
@@ -251,7 +257,7 @@ Int_t THaEtClient::codaRead()
 }
 
 //______________________________________________________________________________
-Int_t THaEtClient::codaWrite( const UInt_t* buffer, UInt_t buffer_length )
+Int_t THaEtClient::codaWrite( const UInt_t* buffer, UInt_t buffer_length, int* control, int num_control )
 {
   if( !opened ) {
     Int_t status = init(station.c_str());
@@ -295,6 +301,10 @@ Int_t THaEtClient::codaWrite( const UInt_t* buffer, UInt_t buffer_length )
   size_t et_buf_size = 0;
   et_event_getdata(event, (void**)&pdata);
   et_event_getlength(event, &et_buf_size);
+  // Set control words in each obtained event
+  if( control != NULL && num_control > 0 ) {
+    et_event_setcontrol(event, control, num_control);
+  }
   
   if( pdata == nullptr ) {
     cerr << "THaEtClient: ERROR: null data pointer from ET event" << endl;
@@ -407,6 +417,18 @@ Int_t THaEtClient::codaOpen( const char* computer, Int_t smode )
     return CODA_ERROR;
   }
   return codaOpen(computer, s, smode);
+}
+
+//______________________________________________________________________________
+Int_t THaEtClient::codaSetSelect( int* words )
+{
+  if (words == nullptr) {
+    cerr << "THaEtClient: ERROR: null selectwords pointer" << endl;
+    return CODA_ERROR;
+  }
+  selectwords = new int[ET_STATION_SELECT_INTS];
+  std::copy(words, words + ET_STATION_SELECT_INTS, selectwords);
+  return CODA_OK;
 }
 
 //______________________________________________________________________________
@@ -600,6 +622,16 @@ int THaEtClient::EvET::get_chunk()
   et_event_getlength(currentChunk, &currentChunkStat.length);
   et_event_getendian(currentChunk, &currentChunkStat.endian);
   et_event_needtoswap(currentChunk, &currentChunkStat.swap);
+
+  if( verbose > 1 ) {
+    int control[ET_STATION_SELECT_INTS];
+    et_event_getcontrol(currentChunk, control);
+    printf("%s: got ET event with control words:", __func__);
+    for( int i = 0; i < ET_STATION_SELECT_INTS; i++ ) {
+      printf(" %d", control[i]);
+    }
+    printf("\n");
+  }
 
   if( verbose > 1 )
     print_chunk();
