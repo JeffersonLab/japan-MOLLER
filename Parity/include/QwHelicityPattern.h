@@ -25,7 +25,7 @@
 #include "QwBlinder.h"
 
 // Forward declarations
-class QwHelicity;
+class QwHelicityBase;
 
 ///
 /// \ingroup QwAnalysis_ADC
