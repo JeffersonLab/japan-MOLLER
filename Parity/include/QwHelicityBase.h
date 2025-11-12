@@ -1,8 +1,8 @@
 /**********************************************************\
-* File: QwHelicityBase.h                                      *
+* File: QwHelicityBase.h                                  *
 *                                                         *
-* Author:                                                 *
-* Time-stamp:                                             *
+* Author: Arindam Sen (asen@jlab.org)                     *
+* Time-stamp: November, 2025                              *
 \**********************************************************/
 
 /*!
@@ -17,6 +17,7 @@
 
 // ROOT headers
 #include "TTree.h"
+
 #ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTupleModel.hxx"
 #include "ROOT/RNTupleWriter.hxx"
@@ -38,18 +39,17 @@ enum HelicityRootSavingType{kHelSaveMPS = 0,
 // this emun vector needs to be coherent with the DetectorTypes declaration in the QwBeamLine constructor
 
 
-
 /**
  * \class QwHelicityBase
  * \ingroup QwAnalysis_BeamLine
- * \brief Subsystem for helicity state management and pattern recognition
+ * \brief Base subsystem for helicity state management and pattern recognition
  *
  * Manages helicity information from the polarized electron beam, including
  * helicity state determination, pattern recognition, delayed helicity decoding,
  * and helicity-correlated systematic checks. Supports multiple helicity
  * encoding modes and provides helicity information to other subsystems.
  */
-class QwHelicityBase: public VQwSubsystemParity, public MQwSubsystemCloneable<QwHelicityBase> {
+class QwHelicityBase: public VQwSubsystemParity{
 
  private:
   /// Private default constructor (not implemented, will throw linker error on use)
@@ -61,8 +61,7 @@ class QwHelicityBase: public VQwSubsystemParity, public MQwSubsystemCloneable<Qw
   /// Copy constructor
   QwHelicityBase(const QwHelicityBase& source);
   /// Virtual destructor
-  ~QwHelicityBase() override { }
-
+  virtual ~QwHelicityBase() override { }
 
 
   /* derived from VQwSubsystem */
@@ -88,19 +87,12 @@ class QwHelicityBase: public VQwSubsystemParity, public MQwSubsystemCloneable<Qw
 
   Int_t  ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id,
 				   UInt_t* buffer, UInt_t num_words) override;
-  Int_t  ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override {
+  Int_t  ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) {
     return ProcessEvBuffer(0x1,roc_id,bank_id,buffer,num_words);
   };
   Int_t  ProcessEvBuffer(UInt_t ev_type, const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override;
-  void   ProcessEventUserbitMode();//ProcessEvent has two modes Userbit and Inputregister modes
-  void   ProcessEventInputRegisterMode();
-  void   ProcessEventInputMollerMode();
 
-  void   EncodeEventData(std::vector<UInt_t> &buffer) override;
-
-
-  void  ClearEventData() override;
-  void  ProcessEvent() override;
+  virtual void  ClearEventData() override;
 
   UInt_t GetRandomSeedActual() { return iseed_Actual; };
   UInt_t GetRandomSeedDelayed() { return iseed_Delayed; };
@@ -129,20 +121,20 @@ class QwHelicityBase: public VQwSubsystemParity, public MQwSubsystemCloneable<Qw
   VQwSubsystem&  operator+=  (VQwSubsystem *value) override;
 
   //the following functions do nothing really : adding and subtracting helicity doesn't mean anything
-  VQwSubsystem& operator-= (VQwSubsystem *value) override {return *this;};
+  virtual  VQwSubsystem& operator-= (VQwSubsystem *value) override {return *this;};
   void  Scale(Double_t factor) override {return;};
   void  Ratio(VQwSubsystem *numer, VQwSubsystem *denom) override;
   // end of "empty" functions
 
   void  AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override;
   //remove one entry from the running sums for devices
-  void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF) override{
-  };
+  void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF) override{ };
   void  CalculateRunningAverage() override { };
 
   using VQwSubsystem::ConstructHistograms;
   void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
   void  FillHistograms() override;
+
 
   using VQwSubsystem::ConstructBranchAndVector;
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override;
@@ -171,32 +163,12 @@ class QwHelicityBase: public VQwSubsystemParity, public MQwSubsystemCloneable<Qw
  protected:
   void CheckPatternNum(VQwSubsystem *value);
   void MergeCounters(VQwSubsystem *value);
-
-  Bool_t CheckIORegisterMask(const UInt_t& ioregister, const UInt_t& mask) const {
-    return ((mask != 0)&&((ioregister & mask) == mask));
-  };
+  
 
  protected:
   enum HelicityRootSavingType{kHelSaveMPS = 0,
 			      kHelSavePattern,
 			      kHelNoSave};
-
-  enum HelicityEncodingType{kHelUserbitMode=0,
-			    kHelInputRegisterMode,
-			    kHelLocalyMadeUp,
-			    kHelInputMollerMode};
-  // this values allow to switch the code between different helicity encoding mode.
-
-  enum InputRegisterBits{kDefaultInputReg_HelPlus     = 0x1,
-			 kDefaultInputReg_HelMinus    = 0x2,
-			 kDefaultInputReg_PatternSync = 0x4,
-			 kDefaultInputReg_FakeMPS     = 0x8000};
-
-  UInt_t fInputReg_FakeMPS;
-  UInt_t fInputReg_HelPlus;
-  UInt_t fInputReg_HelMinus;
-  UInt_t fInputReg_PatternSync;
-  UInt_t fInputReg_PairSync;
 
   static const std::vector<UInt_t> kDefaultHelicityBitPattern;
 
@@ -315,11 +287,11 @@ class QwHelicityBase: public VQwSubsystemParity, public MQwSubsystemCloneable<Qw
 
   UInt_t fErrorFlag;
 
-  /// Flag to disable the printing os missed MPS error messages during
+  /// Flag to disable the printing os missed MPS error messags during
   /// online running
   Bool_t fSuppressMPSErrorMsgs;
 
- private:
+ protected:
 
   UInt_t BuildHelicityBitPattern(Int_t patternsize);
 
@@ -333,6 +305,3 @@ class QwHelicityBase: public VQwSubsystemParity, public MQwSubsystemCloneable<Qw
   }
 
 };
-
-// Register this subsystem with the factory
-REGISTER_SUBSYSTEM_FACTORY(QwHelicityBase);
