@@ -22,9 +22,6 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     endif()
 endif()
 
-# Local path for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../cmake/modules")
-
 #  Install directory
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   message(STATUS "    Install-prefix was at default -> forcing it to the source-dir" )
@@ -52,14 +49,10 @@ else()
     message(STATUS "RNTuple support requires ROOT 6.36 or higher")
 endif()
 
-add_definitions(-std=c++11)
-
-
-build_root_dictionary(
-    panguin                         # path to dictionary to generate
+ROOT_GENERATE_DICTIONARY(
+    panguinDict                     # path to dictionary to generate
     ${PROJECT_SOURCE_DIR}/include/panguinOnlineConfig.hh
     ${PROJECT_SOURCE_DIR}/include/panguinOnline.hh
-    TARGETS panguin
     LINKDEF "${PROJECT_SOURCE_DIR}/include/panguinOnlineLinkDef.h"  # ROOT linkDef file
     OPTIONS -p
 )
@@ -82,7 +75,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 #
 add_library(panguin-lib SHARED ${sources} ${headers} panguinDict.cxx)
 set_target_properties(panguin-lib PROPERTIES OUTPUT_NAME panguin)
-target_link_libraries(panguin-lib PUBLIC  ROOT::Libraries)
+target_link_libraries(panguin-lib PUBLIC ROOT::Core ROOT::Tree ROOT::Hist ROOT::Gui ROOT::Minuit2)
 
 add_executable(panguin-bin panguin.cc)
 set_target_properties(panguin-bin PROPERTIES OUTPUT_NAME panguin)
