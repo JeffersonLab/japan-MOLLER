@@ -1167,13 +1167,14 @@ void QwHelicity::SetFirstBits(UInt_t nbits, UInt_t seed)
   if (nbits != 24)
 	throw std::invalid_argument("SetFirstBits currently only supports 24 bits.");
   // Allocate nbits+1 elements as GetRandomSeed expects Fortran indexing (1-nbits)
-  UShort_t firstbits[nbits+1];  // NB firstbits[0] is never used
+  UShort_t* firstbits = new UShort_t[nbits+1];  // NB firstbits[0] is never used
   for (unsigned int i = 0; i < nbits+1; i++) firstbits[i] = (seed >> i) & 0x1;
   // Set delayed seed
   iseed_Delayed = GetRandomSeed(firstbits);
   // Progress actual seed by the helicity delay
   iseed_Actual = iseed_Delayed;
   for (int i = 0; i < fHelicityDelay; i++) GetRandbit(iseed_Actual);
+  delete[] firstbits;
 }
 
 void QwHelicity::SetHistoTreeSave(const TString &prefix)
