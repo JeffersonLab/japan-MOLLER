@@ -141,6 +141,13 @@ jobs:
             cmake --build build -j$(nproc) --target install
             echo "::endgroup::"
 
+            echo "::group::Configure and build panguin"
+            pushd panguin
+            cmake -Bbuild -S.
+            cmake --build build -j$(nproc) --target install
+            popd
+            echo "::endgroup::"
+
             echo "::group::ccache statistics"
             ccache --show-stats
             echo "::endgroup::"
