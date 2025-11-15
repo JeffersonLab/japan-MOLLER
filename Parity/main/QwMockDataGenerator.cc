@@ -168,7 +168,7 @@ if(1==2){
               run++) {
 
     // Set the random seed for this run
-    randomnessGenerator.seed(run);
+    MQwMockable::Seed(run);
     QwCombinedBCM<QwVQWK_Channel>::SetTripSeed(0x56781234 ^ (run*run));
 
     // Open new output file

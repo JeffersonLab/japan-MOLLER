@@ -39,7 +39,7 @@ class MQwMockable {
 public:
   MQwMockable(): fUseExternalRandomVariable(false),
                  fCalcMockDataAsDiff(false),
-		 fMockAsymmetry(0.0), fMockGaussianMean(0.0),
+                 fMockAsymmetry(0.0), fMockGaussianMean(0.0),
                  fMockGaussianSigma(0.0)
   {
     // Mock drifts
@@ -67,6 +67,11 @@ public:
   void  SetRandomEventParameters(Double_t mean, Double_t sigma);
   /// Set the helicity asymmetry
   void  SetRandomEventAsymmetry(Double_t asymmetry);
+
+  ///  Seed the internal Random Variable
+  static void Seed(uint seedval){
+    fRandomnessGenerator.seed(seedval);
+  }
 
   /// Return a random value generated either from the internal or
   /// external Random Variable.
