@@ -625,6 +625,7 @@ VQwSubsystem&  QwBeamMod::operator=  (VQwSubsystem *value)
   if(Compare(value))
     {
 
+      VQwSubsystem::operator=(value);
       QwBeamMod* input = dynamic_cast<QwBeamMod*>(value);
 
       for(size_t i=0;i<input->fModChannel.size();i++){
