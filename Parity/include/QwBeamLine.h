@@ -134,7 +134,7 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
 
 #ifdef HAS_RNTUPLE_SUPPORT
   using  VQwSubsystem::ConstructNTupleAndVector;
-  void   ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
+  void   ConstructNTupleAndVector(ROOT::RNTupleModel *model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
   void   FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif
 

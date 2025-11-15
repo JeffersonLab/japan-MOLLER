@@ -192,7 +192,7 @@ public:
   void  FillTreeVector(QwRootTreeBranchVector &values) const override = 0;
   void  ConstructBranch(TTree *tree, TString &prefix) override;
 #ifdef HAS_RNTUPLE_SUPPORT
-  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override = 0;
+  void  ConstructNTupleAndVector(ROOT::RNTupleModel *model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override = 0;
   void  FillNTupleVector(std::vector<Double_t>& values) const override = 0;
 #endif // HAS_RNTUPLE_SUPPORT
 
@@ -290,7 +290,7 @@ class QwScaler_Channel: public VQwScaler_Channel
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override;
   void  FillTreeVector(QwRootTreeBranchVector &values) const override;
 #ifdef HAS_RNTUPLE_SUPPORT
-  void  ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
+  void  ConstructNTupleAndVector(ROOT::RNTupleModel *model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
   void  FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif // HAS_RNTUPLE_SUPPORT
 

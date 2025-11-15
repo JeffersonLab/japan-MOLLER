@@ -386,7 +386,7 @@ void QwScaler::FillTreeVector(QwRootTreeBranchVector &values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void QwScaler::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void QwScaler::ConstructNTupleAndVector(ROOT::RNTupleModel *model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   for (size_t i = 0; i < fScaler.size(); i++) {
     fScaler.at(i)->ConstructNTupleAndVector(model, prefix, values, fieldPtrs);

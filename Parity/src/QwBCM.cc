@@ -650,7 +650,7 @@ void QwBCM<T>::FillTreeVector(QwRootTreeBranchVector &values) const
 #ifdef HAS_RNTUPLE_SUPPORT
 /** \brief Construct RNTuple fields and append values vector entries. */
 template<typename T>
-void QwBCM<T>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void QwBCM<T>::ConstructNTupleAndVector(ROOT::RNTupleModel *model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (this->GetElementName()==""){
     //  This channel is not used, so skip

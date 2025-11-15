@@ -222,12 +222,12 @@ class QwSubsystemArray:
 
 #ifdef HAS_RNTUPLE_SUPPORT
   /// \brief Construct RNTuple fields and vector for this subsystem
-  void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) {
+  void ConstructNTupleAndVector(ROOT::RNTupleModel *model, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) {
     TString tmpstr("");
     ConstructNTupleAndVector(model, tmpstr, values, fieldPtrs);
   };
   /// \brief Construct RNTuple fields and vector for this subsystem with a prefix
-  void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+  void ConstructNTupleAndVector(ROOT::RNTupleModel *model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
   /// \brief Fill the RNTuple vector for this subsystem
   void FillNTupleVector(std::vector<Double_t>& values) const;
 #endif // HAS_RNTUPLE_SUPPORT
