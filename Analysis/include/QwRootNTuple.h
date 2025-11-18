@@ -124,7 +124,6 @@ QwRootNTuple::QwRootNTuple(const std::string& name, const std::string& desc, T& 
 template < class T >
 void QwRootNTuple::ConstructFieldsAndVector(T& object)
 {
-  // TODO:
   // Reserve space for the field vector
   fVector.reserve(RNTUPLE_MAX_SIZE);
 

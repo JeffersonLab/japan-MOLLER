@@ -169,7 +169,6 @@ QwRootTree::QwRootTree(const QwRootTree* tree, T& object, const std::string& pre
 template < class T >
 void QwRootTree::ConstructBranchAndVector(T& object)
 {
-  // TODO:
   // Reserve space for the branch vector
   fVector.reserve(BRANCH_VECTOR_MAX_SIZE);
   // Associate branches with vector
@@ -181,14 +180,12 @@ void QwRootTree::ConstructBranchAndVector(T& object)
   fType = typeid(object).name();
 
   // Check memory reservation
-  /*
   if (fVector.size() > BRANCH_VECTOR_MAX_SIZE) {
     QwError << "The branch vector is too large: " << fVector.size() << " leaves!  "
             << "The maximum size is " << BRANCH_VECTOR_MAX_SIZE << "."
             << QwLog::endl;
     exit(-1);
   }
-  */
 }
 
 template < class T >
