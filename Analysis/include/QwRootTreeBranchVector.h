@@ -94,12 +94,12 @@ private:
 };
 
 /// IMPLEMENTATION ///
-template <typename T = uint8_t>
+template <typename T>
 const T& QwRootTreeBranchVector::operator[](size_type index) const
 {
   return value<T>(index);
 }
-template <typename T = uint8_t>
+template <typename T>
 T& QwRootTreeBranchVector::operator[](size_type index)
 {
   return value<T>(index);
