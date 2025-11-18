@@ -214,25 +214,16 @@ jobs:
             fi
             echo "::endgroup::"
 
-      # --- Create the slim ROOT (mul-only) and upload it ---
-      - name: Make slim ROOT (keep only mul)
-        uses: aidasoft/run-lcg-view@v5
-        with:
-          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
-          run: |
-            set -euo pipefail
-
-            # Cleanup previous view_worker Docker containers
-            ids=$(docker ps -a --filter "name=view_worker" -q || true)
-            if [ -n "${ids:-}" ]; then
-              docker rm -f $ids || true
+            echo "::group::Make slim ROOT (keep only mul)"
+            if [ -f trees/isu_sample_4.root ]; then
+              root -l -b -q 'rootScripts/ci/skim_mul.C("trees/isu_sample_4.root","trees/isu_sample_4.slim.root")'
+              test -f trees/isu_sample_4.slim.root
+            else
+              echo "Missing trees/isu_sample_4.root"
+              exit 1
             fi
+            echo "::endgroup::"
 
-            test -f trees/isu_sample_4.root || { echo "Missing trees/isu_sample_4.root"; exit 1; }
-
-            # Use the skim_mul macro from the repository
-            root -l -b -q 'rootScripts/ci/skim_mul.C("trees/isu_sample_4.root","trees/isu_sample_4.slim.root")'
-            test -f trees/isu_sample_4.slim.root
 
         # upload the slim ROOT file
       - name: Upload slim ROOT
@@ -340,6 +331,17 @@ jobs:
           fi
           ls -R ./target || true
 
+      - name: Cleanup previous view_worker Docker containers
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          ids=$(docker ps -a --filter "name=view_worker" -q || true)
+          if [ -n "${ids:-}" ]; then
+            echo "Removing previous view_worker container(s): $ids"
+            docker rm -f $ids || true
+          else
+            echo "No previous view_worker containers found"
+          fi
        
       - name: ROOT comparison (mul/diff_* in isu_sample_4.slim.root)
         if: github.event_name == 'pull_request'
@@ -348,12 +350,6 @@ jobs:
           release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           run: |
             set -euo pipefail
-
-            # Cleanup previous view_worker Docker containers
-            ids=$(docker ps -a --filter "name=view_worker" -q || true)
-            if [ -n "${ids:-}" ]; then
-              docker rm -f $ids || true
-            fi
             
             # Filenames unique per matrix entry (for logs only)
             COMP_TXT="compare-trees-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}.txt"
