@@ -36,13 +36,9 @@ void QwRootTree::ConstructNewTree()
 
   fTree = new TTree(fName.c_str(), fDesc.c_str());
   // Ensure tree is in the current directory
-  if (gDirectory) { // Is gDirectory ever NULL?
-  	QwMessage << "gDirectory is not NULL!\n";
+  if (gDirectory) {
     fTree->SetDirectory(gDirectory);
-  } else {
-  	QwMessage << "gDirectory is NULL!\n";
   }
-  getchar();
 }
 
 void QwRootTree::ConstructUnitsBranch()
