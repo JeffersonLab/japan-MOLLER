@@ -53,7 +53,7 @@ public:
   template <typename T>
   const T& value(size_type index) const;
 
-  // Disble Implicit Conversion
+  // Disable Implicit Conversion
   template<typename T>
   void SetValue(size_type index, T val) = delete;
   void SetValue(size_type index, Double_t val);

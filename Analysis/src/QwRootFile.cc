@@ -342,7 +342,7 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
   // First check if any in-memory trees have been filled
   for (auto& pair : fTreeByName) {
     for (auto& tree : pair.second) {
-      if (tree && tree->GetTree()) { // GetWriter should be replaced with IsInit()
+      if (tree && tree->GetTree()) {
         if (tree->GetNEntriesFilled() > 0) {
           return true;
         }
@@ -354,8 +354,8 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
   // Then check if any RNTuples have been filled
   for (auto& pair : fNTupleByName) {
     for (auto& ntuple : pair.second) {
-      if (ntuple && ntuple->GetWriter()) { // GetWriter should be replaced with IsInit()
-		if(ntuple->GetNEntriesFilled())
+      if (ntuple && ntuple->GetWriter()) {
+		if(ntuple->GetNEntriesFilled() > 0)
         	return true;
       }
     }
