@@ -93,6 +93,15 @@ public:
   //Set circular buffer size for the memory resident tree
   void SetCircular(Long64_t buff = 100000);
 
+  /// Get the name of the tree
+  const std::string& GetName()  const;
+  /// Get the description of the tree
+  const std::string& GetDesc()  const;
+  /// Get the description of the tree
+  const std::string& GetPrefix()const;
+  /// Get the object type
+  const std::string& GetType()  const;
+
 private:
   /// Tree pointer
   TTree* fTree;
@@ -105,16 +114,6 @@ private:
   const std::string fDesc;
   const std::string fPrefix;
   std::string fType;
-
-  /// Get the name of the tree
-  const std::string& GetName()  const;
-  /// Get the description of the tree
-  const std::string& GetDesc()  const;
-  /// Get the description of the tree
-  const std::string& GetPrefix()const;
-  /// Get the object type
-  const std::string& GetType()  const;
-
 
   /// Tree prescaling parameters
   UInt_t fCurrentEvent;
