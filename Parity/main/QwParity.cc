@@ -398,10 +398,10 @@ Int_t main(Int_t argc, Char_t* argv[])
             patternsum.AccumulatePairRunningSum(helicitypattern);
 
 	    // Fill pair tree branches
-	    treerootfile->FillTreeBranches(helicitypattern.GetPairYield());
-	    treerootfile->FillTreeBranches(helicitypattern.GetPairAsymmetry());
-	    treerootfile->FillTreeBranches(helicitypattern.GetPairDifference());
-	    treerootfile->FillTree("pr");
+	    burstrootfile->FillTreeBranches(helicitypattern.GetPairYield());
+	    burstrootfile->FillTreeBranches(helicitypattern.GetPairAsymmetry());
+	    burstrootfile->FillTreeBranches(helicitypattern.GetPairDifference());
+	    burstrootfile->FillTree("pr");
 
 	    // Fill pair RNTuples if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
@@ -632,7 +632,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 #endif
 
     //  Construct objects
-    treerootfile->ConstructObjects("objects", helicitypattern);
+    burstrootfile->ConstructObjects("objects", helicitypattern);
 
     /*  Write to the root file, being sure to delete the old cycles  *
      *  which were written by Autosave.                              *
