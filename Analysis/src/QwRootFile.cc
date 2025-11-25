@@ -16,9 +16,6 @@ std::string QwRootFile::fDefaultRootFileStem = "Qweak_";
 const Long64_t QwRootFile::kMaxTreeSize = 100000000000LL;
 const Int_t QwRootFile::kMaxMapFileSize = 0x3fffffff; // 1 GiB
 
-const TString QwRootTree::kUnitsName = "ppm/D:ppb/D:um/D:mm/D:mV_uA/D:V_uA/D";
-Double_t QwRootTree::kUnitsValue[] = { 1e-6, 1e-9, 1e-3, 1 , 1e-3, 1};
-
 /**
  * Constructor with relative filename
  */
@@ -346,9 +343,7 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
   for (auto& pair : fTreeByName) {
     for (auto& tree : pair.second) {
       if (tree && tree->GetTree()) {
-        Long64_t entries = tree->GetTree()->GetEntries();
-        if (entries > 0) {
-
+        if (tree->GetNEntriesFilled() > 0) {
           return true;
         }
       }
@@ -359,9 +354,9 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
   // Then check if any RNTuples have been filled
   for (auto& pair : fNTupleByName) {
     for (auto& ntuple : pair.second) {
-      if (ntuple && ntuple->fCurrentEvent > 0) {
-
-        return true;
+      if (ntuple && ntuple->GetWriter()) {
+		if(ntuple->GetNEntriesFilled() > 0)
+        	return true;
       }
     }
   }
@@ -415,3 +410,250 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
   }
   return false;
 }
+
+void QwRootFile::SetDefaultRootFileDir(const std::string& dir)
+{
+  fDefaultRootFileDir = dir;
+}
+void QwRootFile::SetDefaultRootFileStem(const std::string& stem)
+{
+      fDefaultRootFileStem = stem;
+}
+
+Bool_t QwRootFile::IsRootFile() const { return (fRootFile); }
+Bool_t QwRootFile::IsMapFile()  const { return (fMapFile);  }
+
+void QwRootFile::NewTree(const std::string& name, const std::string& desc)
+{
+  if (IsTreeDisabled(name)) return;
+  this->cd();
+  QwRootTree *tree = 0;
+  if (! HasTreeByName(name)) {
+    tree = new QwRootTree(name,desc);
+  } else {
+    tree = new QwRootTree(fTreeByName[name].front());
+  }
+  fTreeByName[name].push_back(tree);
+}
+
+TTree* QwRootFile::GetTree(const std::string& name)
+{
+  if (! HasTreeByName(name)) return 0;
+  else return fTreeByName[name].front()->GetTree();
+}
+
+Int_t QwRootFile::FillTree(const std::string& name)
+{
+  if (! HasTreeByName(name)) return 0;
+  else return fTreeByName[name].front()->Fill();
+}
+
+Int_t QwRootFile::FillTrees()
+{
+  // Loop over all registered tree names
+  Int_t retval = 0;
+  std::map< const std::string, std::vector<QwRootTree*> >::iterator iter;
+  for (iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++) {
+    retval += iter->second.front()->Fill();
+  }
+  return retval;
+}
+
+void QwRootFile::PrintTrees() const
+{
+  QwMessage << "Trees: " << QwLog::endl;
+  // Loop over all registered tree names
+  std::map< const std::string, std::vector<QwRootTree*> >::const_iterator iter;
+  for (iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++) {
+    QwMessage << iter->first << ": " << iter->second.size()
+              << " objects registered" << QwLog::endl;
+    // Loop over all registered objects for this tree
+    std::vector<QwRootTree*>::const_iterator tree;
+    for (tree = iter->second.begin(); tree != iter->second.end(); tree++) {
+      (*tree)->Print();
+    }
+  }
+}
+
+
+void QwRootFile::PrintDirs() const
+{
+  QwMessage << "Dirs: " << QwLog::endl;
+  // Loop ove rall registered directories
+  std::map< const std::string, TDirectory* >::const_iterator iter;
+  for (iter = fDirsByName.begin(); iter != fDirsByName.end(); iter++) {
+    QwMessage << iter->first << QwLog::endl;
+  }
+}
+
+void QwRootFile::Update()
+{
+	if (fMapFile) {
+		QwMessage << "TMapFile memory resident size: "
+			      << ((int*)fMapFile->GetBreakval() - (int*)fMapFile->GetBaseAddr()) * 4 / sizeof(int32_t) / 1024 / 1024 << " MiB"
+			      << QwLog::endl;
+		fMapFile->Update();
+	} else {
+		// this option will allow for reading the tree during write
+		Long64_t nBytes(0);
+		for (auto iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++)
+			nBytes += iter->second.front()->AutoSave("SaveSelf");
+
+		QwMessage << "TFile saved: "
+			<< nBytes/1000000 << "MB (inaccurate number)" //FIXME this calculation is inaccurate
+			<< QwLog::endl;
+	}
+}
+
+void QwRootFile::Print() const
+{
+	if (fMapFile) fMapFile->Print();
+	if (fRootFile) fRootFile->Print();
+}
+void QwRootFile::ls() const
+{
+	if (fMapFile) fMapFile->ls();
+	if (fRootFile) fRootFile->ls();
+}
+void QwRootFile::Map()
+{
+	if (fRootFile) fRootFile->Map();
+}
+void QwRootFile::Close()
+{
+
+  // Check if we should make the file permanent - restore original logic
+  if (!fMakePermanent) fMakePermanent = HasAnyFilled();
+
+#ifdef HAS_RNTUPLE_SUPPORT
+  // Close all RNTuples before closing the file
+  for (auto& pair : fNTupleByName) {
+    for (auto& ntuple : pair.second) {
+      if (ntuple) ntuple->Close();
+    }
+  }
+#endif // HAS_RNTUPLE_SUPPORT
+
+  // CRITICAL FIX: Explicitly write all trees before closing!
+  if (fRootFile) {
+
+    for (auto iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++) {
+      if (!iter->second.empty() && iter->second.front()) {
+        TTree* tree = iter->second.front()->GetTree();
+        if (tree && tree->GetEntries() > 0) {
+          tree->Write();
+        }
+      }
+    }
+  }
+
+  // Close the file and handle renaming
+  if (fRootFile) {
+    TString rootfilename = fRootFile->GetName();
+    fRootFile->Close();
+  }
+  if (fMapFile) fMapFile->Close();
+}
+
+Bool_t QwRootFile::cd(const char* path)
+{
+  Bool_t status = kTRUE;
+  if (fMapFile)  status &= fMapFile->cd(path);
+  if (fRootFile) status &= fRootFile->cd(path);
+  return status;
+}
+
+TDirectory* QwRootFile::mkdir(const char* name, const char* title)
+{
+  // TMapFile has no support for mkdir
+  if (fRootFile) return fRootFile->mkdir(name, title);
+  else return 0;
+}
+
+Int_t QwRootFile::Write(const char* name, Int_t option, Int_t bufsize)
+{
+  Int_t retval = 0;
+  // TMapFile has no support for Write
+  if (fRootFile) retval = fRootFile->Write(name, option, bufsize);
+  return retval;
+}
+
+void QwRootFile::DisableTree(const TString& regexp)
+{
+  fDisabledTrees.push_back(regexp);
+}
+
+bool QwRootFile::IsTreeDisabled(const std::string& name)
+{
+  for (size_t i = 0; i < fDisabledTrees.size(); i++)
+    if (fDisabledTrees.at(i).Match(name)) return true;
+  return false;
+}
+
+void QwRootFile::DisableHisto(const TString& regexp)
+{
+  fDisabledHistos.push_back(regexp);
+}
+
+bool QwRootFile::IsHistoDisabled(const std::string& name)
+{
+  for (size_t i = 0; i < fDisabledHistos.size(); i++)
+    if (fDisabledHistos.at(i).Match(name)) return true;
+  return false;
+}
+
+/// Is a tree registered for this name
+bool QwRootFile::HasTreeByName(const std::string& name)
+{
+  if (fTreeByName.count(name) == 0) return false;
+  else return true;
+}
+
+bool QwRootFile::HasDirByName(const std::string& name)
+{
+  if (fDirsByName.count(name) == 0) return false;
+  else return true;
+}
+
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwRootFile::NewNTuple(const std::string& name, const std::string& desc)
+{
+  if (IsTreeDisabled(name) || !fEnableRNTuples) return;
+  QwRootNTuple *ntuple = 0;
+  if (! HasNTupleByName(name)) {
+    ntuple = new QwRootNTuple(name, desc);
+    // Initialize the writer with our file
+    ntuple->InitializeWriter(fRootFile);
+  } else {
+    // For simplicity, don't support copying existing RNTuples yet
+    QwError << "Cannot create duplicate RNTuple: " << name << QwLog::endl;
+    return;
+  }
+  fNTupleByName[name].push_back(ntuple);
+}
+
+void QwRootFile::FillNTuple(const std::string& name)
+{
+  if (HasNTupleByName(name)) {
+    fNTupleByName[name].front()->Fill();
+  }
+}
+
+void QwRootFile::FillNTuples()
+{
+  // Loop over all registered RNTuple names
+  std::map< const std::string, std::vector<QwRootNTuple*> >::iterator iter;
+  for (iter = fNTupleByName.begin(); iter != fNTupleByName.end(); iter++) {
+    iter->second.front()->Fill();
+  }
+}
+
+bool QwRootFile::HasNTupleByName(const std::string& name)
+{
+  if (fNTupleByName.count(name) == 0) return false;
+  else return true;
+}
+
+
+#endif // HAS_RNTUPLE_SUPPORT
