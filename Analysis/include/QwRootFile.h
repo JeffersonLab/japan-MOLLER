@@ -21,6 +21,7 @@ using std::type_info;
 // ROOT headers
 #include "TFile.h"
 #include "TTree.h"
+#include "TKey.h"
 #include "TPRegexp.h"
 #include "TSystem.h"
 #include "TString.h"
@@ -1040,14 +1041,76 @@ class QwRootFile {
     void Print()  { if (fMapFile) fMapFile->Print();  if (fRootFile) fRootFile->Print(); }
     void ls()     { if (fMapFile) fMapFile->ls();     if (fRootFile) fRootFile->ls(); }
     void Map()    { if (fRootFile) fRootFile->Map(); }
+
+  private:
+    /// Recursively clear in-memory objects from a directory tree.
+    /// This removes objects from the TDirectory's in-memory list without deleting
+    /// their on-disk representation (keys). Used to prevent RNTupleWriter::Close()
+    /// from creating duplicate histogram cycles when it internally calls TFile::Write().
+    void ClearInMemoryObjects(TDirectory* dir) {
+      if (!dir) return;
+      
+      // First, collect subdirectory names
+      std::vector<TString> subdirs;
+      TIter next(dir->GetListOfKeys());
+      TKey* key;
+      while ((key = (TKey*)next())) {
+        if (TString(key->GetClassName()) == "TDirectoryFile") {
+          subdirs.push_back(key->GetName());
+        }
+      }
+      
+      // Recursively clear subdirectories
+      for (const auto& name : subdirs) {
+        TDirectory* sub = dynamic_cast<TDirectory*>(dir->Get(name));
+        if (sub) ClearInMemoryObjects(sub);
+      }
+      
+      // Clear this directory's in-memory object list
+      // "nodelete" option: remove from list but don't delete the TKey entries
+      TList* list = dir->GetList();
+      if (list) {
+        list->Clear("nodelete");
+      }
+    }
+
+  public:
     void Close()  {
 
       // Check if we should make the file permanent - restore original logic
       if (!fMakePermanent) fMakePermanent = HasAnyFilled();
 
+      if (fRootFile) {
+        // Step 1: Write all trees explicitly
+        for (auto iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++) {
+          if (!iter->second.empty() && iter->second.front()) {
+            TTree* tree = iter->second.front()->GetTree();
+            if (tree && tree->GetEntries() > 0) {
+              tree->Write();
+            }
+          }
+        }
+
+        // Step 2: Write all in-memory objects (histograms, etc.) to disk
+        // Use kOverwrite to avoid creating duplicate cycles
+        fRootFile->Write(0, TObject::kOverwrite);
+
+        // Step 3: CRITICAL FIX for RNTuple histogram duplication
+        // Clear all in-memory objects from the TFile's directory structure.
+        // This prevents RNTupleWriter::Close() from re-writing histograms,
+        // which would create duplicate cycles. The histograms are already
+        // safely written to disk in Step 2.
+#ifdef HAS_RNTUPLE_SUPPORT
+        if (!fNTupleByName.empty()) {
+          ClearInMemoryObjects(fRootFile);
+        }
+#endif // HAS_RNTUPLE_SUPPORT
+      }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-      // Close all RNTuples before closing the file
+      // Step 4: Close all RNTuples
+      // Now that in-memory histograms are cleared, the RNTupleWriter destructor
+      // won't create duplicate histogram cycles when it internally writes to TFile
       for (auto& pair : fNTupleByName) {
         for (auto& ntuple : pair.second) {
           if (ntuple) ntuple->Close();
@@ -1055,31 +1118,12 @@ class QwRootFile {
       }
 #endif // HAS_RNTUPLE_SUPPORT
 
-      // CRITICAL FIX: Explicitly write all trees before closing!
+      // Step 5: Close the file
       if (fRootFile) {
-
-        for (auto iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++) {
-          if (!iter->second.empty() && iter->second.front()) {
-            TTree* tree = iter->second.front()->GetTree();
-            if (tree && tree->GetEntries() > 0) {
-
-              tree->Write();
-            }
-          }
-        }
-      }
-
-      // Close the file and handle renaming
-      if (fRootFile) {
-        TString rootfilename = fRootFile->GetName();
-
         fRootFile->Close();
-
       }
 
       if (fMapFile) fMapFile->Close();
-
-
     }
 
     // Wrapped functionality
