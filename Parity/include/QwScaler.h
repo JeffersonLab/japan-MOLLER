@@ -60,8 +60,8 @@ class QwScaler: public VQwSubsystemParity, public MQwSubsystemCloneable<QwScaler
     static void DefineOptions(QwOptions &options);
     void ProcessOptions(QwOptions &options) override;
 
-    Int_t LoadChannelMap(TString mapfile) override;
-    Int_t LoadInputParameters(TString pedestalfile) override;
+    Int_t LoadChannelMap(const TString& mapfile) override;
+    Int_t LoadInputParameters(const TString& pedestalfile) override;
 
     void  ClearEventData() override;
 
@@ -98,7 +98,7 @@ class QwScaler: public VQwSubsystemParity, public MQwSubsystemCloneable<QwScaler
     void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF) override;
     void CalculateRunningAverage() override;
 
-    Int_t LoadEventCuts(TString filename) override;
+    Int_t LoadEventCuts(const TString& filename) override;
     Bool_t SingleEventCuts();
     Bool_t ApplySingleEventCuts() override;
 

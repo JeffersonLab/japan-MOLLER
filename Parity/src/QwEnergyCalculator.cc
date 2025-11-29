@@ -273,6 +273,7 @@ void QwEnergyCalculator::LoadMockDataParameters(QwParameterFile &paramfile){
 Bool_t QwEnergyCalculator::ApplySingleEventCuts(){
   Bool_t status=kTRUE;
 
+  [[maybe_unused]]
   UInt_t error_code = 0;
   for(UInt_t i = 0; i<fProperty.size(); i++){
     if(fProperty[i].Contains("targetbeamangle")){

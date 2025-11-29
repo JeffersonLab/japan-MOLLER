@@ -102,7 +102,7 @@ void QwEPICSEvent::ProcessOptions(QwOptions &options)
 #endif
 }
 
-Int_t QwEPICSEvent::LoadChannelMap(TString mapfile)
+Int_t QwEPICSEvent::LoadChannelMap(const TString& mapfile)
 {
   Int_t lineread = 0;
 

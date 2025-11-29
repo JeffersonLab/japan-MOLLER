@@ -242,10 +242,10 @@ void QwCorrelator::CalcCorrelations()
  * @param mapfile Filename of map file
  * @return Zero when success
  */
-Int_t QwCorrelator::LoadChannelMap(const std::string& mapfile)
+Int_t QwCorrelator::LoadChannelMap(const TString& mapfile)
 {
   // Open the file
-  QwParameterFile map(mapfile);
+  QwParameterFile map(mapfile.Data());
 
   // Read the sections of dependent variables
   std::pair<EQwHandleType,std::string> type_name;
