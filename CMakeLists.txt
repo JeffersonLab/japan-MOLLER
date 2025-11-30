@@ -235,6 +235,40 @@ set_compiler_flags("${ROOT_CXX_FLAGS}")
 set_diagnostic_flags(WALL)
 report_build_info()
 
+#----------------------------------------------------------------------------
+# Sanitizer options
+#
+option(USE_ASAN "Enable AddressSanitizer" OFF)
+option(USE_UBSAN "Enable UndefinedBehaviorSanitizer" OFF)
+
+if(USE_ASAN)
+    message(STATUS "AddressSanitizer enabled")
+    set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+    set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -fsanitize=address")
+    # Set ASAN runtime options
+    set(ENV{ASAN_OPTIONS} "detect_leaks=1:abort_on_error=1:print_stacktrace=1:check_initialization_order=1:strict_init_order=1")
+endif()
+
+if(USE_UBSAN)
+    message(STATUS "UndefinedBehaviorSanitizer enabled")
+    set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -fsanitize=undefined -fno-sanitize-recover=all")
+    set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -fsanitize=undefined")
+    # Set UBSAN runtime options
+    set(ENV{UBSAN_OPTIONS} "print_stacktrace=1:abort_on_error=1")
+endif()
+
+if(USE_ASAN OR USE_UBSAN)
+    # Apply sanitizer flags to all targets
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZER_FLAGS}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SANITIZER_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SANITIZER_FLAGS}")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${SANITIZER_FLAGS}")
+    
+    # Ensure we're using a compatible build type
+    if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+        message(WARNING "Sanitizers work best with Debug or RelWithDebInfo build types. Current: ${CMAKE_BUILD_TYPE}")
+    endif()
+endif()
 
 #----------------------------------------------------------------------------
 # ET library
