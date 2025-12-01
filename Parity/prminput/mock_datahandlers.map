@@ -27,3 +27,10 @@
 [QwCombiner]
   name = beamline_combiner
   map  = mock_beamline_combiner.map
+
+[QwCombiner]
+  name = det_combiner
+  priority = 99
+  map  = mock_det_combiner.map
+  tree-name  = avgs
+  tree-comment = Averages of detector combinations
