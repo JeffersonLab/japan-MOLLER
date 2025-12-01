@@ -342,7 +342,7 @@ void QwScaler_Channel<data_mask,data_shift>::FillTreeVector(QwRootTreeBranchVect
 
 #ifdef HAS_RNTUPLE_SUPPORT
 template<unsigned int data_mask, unsigned int data_shift>
-void QwScaler_Channel<data_mask,data_shift>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void QwScaler_Channel<data_mask,data_shift>::ConstructNTupleAndVector(ROOT::RNTupleModel *model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (IsNameEmpty()){
     //  This channel is not used, so skip setting up the RNTuple.

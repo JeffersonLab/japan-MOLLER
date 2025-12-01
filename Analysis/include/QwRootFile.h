@@ -660,7 +660,7 @@ class QwRootNTuple {
 
       // Associate fields with vector - now using shared field pointers
       TString prefix = Form("%s", fPrefix.c_str());
-      object.ConstructNTupleAndVector(fModel, prefix, fVector, fFieldPtrs);
+      object.ConstructNTupleAndVector(fModel.get(), prefix, fVector, fFieldPtrs);
 
       // Store the type of object
       fType = typeid(object).name();
