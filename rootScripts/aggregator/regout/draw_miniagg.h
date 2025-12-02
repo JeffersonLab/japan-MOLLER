@@ -11,9 +11,9 @@ class Source {
     TString run,split,input;
     Source(TString n_run, TString n_split, TString in): run(n_run), split(n_split), input(in) {}
     RDataFrame readSource();
-    void printInfo() { std::cout << "Processing run  " << run  << ". " << std::endl;} 
+    void printInfo() { std::cout << "Processing run  " << run  << ". " << std::endl;}
     void drawAll();
-    Channel GetChannelByName(TString name);    
+    Channel GetChannelByName(TString name);
 
 };
 

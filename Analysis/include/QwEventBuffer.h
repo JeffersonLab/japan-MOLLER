@@ -1,14 +1,14 @@
-/**********************************************************\
-* File: QwEventBuffer.h                                    *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2008-07-22 15:40>                           *
-\**********************************************************/
 
-#ifndef __QWEVENTBUFFER__
-#define __QWEVENTBUFFER__
+/*!
+ * \file   QwEventBuffer.h
+ * \brief  Event buffer management for reading and processing CODA data
+ * \author P. M. King
+ * \date   2008-07-22
+ */
 
+#pragma once
 
+#include <chrono>
 #include <string>
 #include <vector>
 #include "Rtypes.h"
@@ -22,6 +22,10 @@
 
 #include <unordered_map>
 
+#include "VEventDecoder.h"
+#include "Coda3EventDecoder.h"
+#include "Coda2EventDecoder.h"
+
 class QwOptions;
 class QwEPICSEvent;
 class VQwSubsystem;
@@ -30,9 +34,17 @@ class QwSubsystemArray;
 //////////////////////////////////////////////////////////////////////
 
 
-///
-/// \ingroup QwAnalysis
-class QwEventBuffer: public MQwCodaControlEvent{
+/**
+ * \class QwEventBuffer
+ * \ingroup QwAnalysis
+ * \brief Event buffer management for reading and processing CODA data
+ *
+ * Manages the reading of CODA event data files, including support for
+ * segmented files, run lists, and event stream processing. Handles
+ * event decoding via pluggable decoder classes and provides iteration
+ * over events and runs.
+ */
+class QwEventBuffer {
  public:
   static void DefineOptions(QwOptions &options);
   static void SetDefaultDataDirectory(const std::string& dir) {
@@ -62,11 +74,11 @@ class QwEventBuffer: public MQwCodaControlEvent{
       delete fEvStream;
       fEvStream = NULL;
     }
-    // Delete run list file
-    if (fRunListFile != NULL) {
-      delete fRunListFile;
-      fRunListFile = NULL;
-    }
+	  // Delete Decoder
+	  if(decoder != NULL) {
+			delete decoder;
+			decoder = NULL;
+	  }
   };
 
   /// \brief Sets internal flags based on the QwOptions
@@ -114,16 +126,16 @@ class QwEventBuffer: public MQwCodaControlEvent{
   Int_t CloseETStream();
 
   Bool_t IsPhysicsEvent() {
-    // fEvtType is an unsigned integer, hence always positive
-    return ((fIDBankNum == 0xCC) && ( /* fEvtType >= 0 && */ fEvtType <= 15));
+		return ( decoder->IsPhysicsEvent() );
   };
 
   Int_t GetPhysicsEventNumber() {return fNumPhysicsEvents;};
-  Int_t GetEventNumber() { return fEvtNumber; };
+  Int_t GetEventNumber() { return decoder->GetEvtNumber(); };
 
   Bool_t GetNextEventRange();
   Bool_t GetNextRunRange();
   Bool_t GetNextRunNumber();
+	void VerifyCodaVersion( const UInt_t *buffer);
 
   Int_t GetNextEvent();
 
@@ -133,15 +145,12 @@ class QwEventBuffer: public MQwCodaControlEvent{
   Bool_t IsOnline(){return fOnline;};
 
   Bool_t IsROCConfigurationEvent(){
-    return (fEvtType>=0x90 && fEvtType<=0xaf);
+    return ( decoder->IsROCConfigurationEvent() );
   };
 
   Bool_t IsEPICSEvent(){
-    //  What are the correct codes for our EPICS events?
-    //return (fEvtType>=160 && fEvtType<=170);// epics event type is only with tag="160"
-    // return (fEvtType>=160 && fEvtType<=190);// epics event type is only with tag="180" from July 2010 running
-    return (fEvtType==131);// epics event type is for 2019 summer PREX-II 
-  };
+    return ( decoder->IsEPICSEvent() ); // Defined in CodaDecoder.h
+	}
 
   Bool_t FillSubsystemConfigurationData(QwSubsystemArray &subsystems);
   Bool_t FillSubsystemData(QwSubsystemArray &subsystems);
@@ -151,11 +160,18 @@ class QwEventBuffer: public MQwCodaControlEvent{
   template < class T > Bool_t FillObjectWithEventData(T &t);
 
 
+  void ResetControlParameters();
+	void ReportRunSummary();
   Int_t EncodeSubsystemData(QwSubsystemArray &subsystems);
   Int_t EncodePrestartEvent(int runnumber, int runtype = 0);
   Int_t EncodeGoEvent();
   Int_t EncodePauseEvent();
   Int_t EncodeEndEvent();
+
+	TString GetStartSQLTime();
+	TString GetEndSQLTime();
+	time_t  GetStartUnixTime();
+	time_t  GetEndUnixTime();
 
   void ResetFlags();
 
@@ -166,6 +182,11 @@ class QwEventBuffer: public MQwCodaControlEvent{
   Bool_t FillSubsystemConfigurationData(std::vector<VQwSubsystem*> &subsystems);
   Bool_t FillSubsystemData(std::vector<VQwSubsystem*> &subsystems);
 
+	// Coda Version that is set by void VerifyCodaVersion( )
+	// Compared against the user-input coda version
+	Int_t fDataVersionVerify = 0;
+  Int_t fDataVersion; // User-input Coda Version
+
  protected:
   ///
   Bool_t fOnline;
@@ -175,17 +196,22 @@ class QwEventBuffer: public MQwCodaControlEvent{
   Int_t   fETWaitMode;
   Bool_t  fExitOnEnd;
 
-  Bool_t fAllowLowSubbankIDs;
+  // Event rate limiting
+  Bool_t fEventRateLimitEnabled{false};
+  Double_t fMaxEventRate{0.0};
+  std::chrono::duration<double> fMinEventInterval;
+  std::chrono::duration<double> fAccumulatedDelay{0.0};
+  std::chrono::steady_clock::time_point fLastEventTime;
 
   Bool_t fChainDataFiles;
   std::pair<Int_t, Int_t> fRunRange;
   std::string fRunListFileName;
-  QwParameterFile* fRunListFile;
+  std::unique_ptr<QwParameterFile> fRunListFile;
   std::vector<Int_t> fRunRangeMinList, fRunRangeMaxList;
 
   std::pair<UInt_t, UInt_t> fEventRange;
   std::string fEventListFileName;
-  QwParameterFile* fEventListFile;
+  std::unique_ptr<QwParameterFile> fEventListFile;
   std::vector<UInt_t> fEventList;
 
   std::pair<Int_t, Int_t> fSegmentRange;
@@ -210,14 +236,12 @@ class QwEventBuffer: public MQwCodaControlEvent{
   Int_t  GetEtEvent();
 
   Int_t WriteFileEvent(int* buffer);
+  Int_t WriteEtEvent(int* buffer);
 
   Bool_t DataFileIsSegmented();
 
   Int_t CloseThisSegment();
   Int_t OpenNextSegment();
-
-  void DecodeEventIDBank(UInt_t *buffer);
-  Bool_t DecodeSubbankHeader(UInt_t *buffer);
 
   const TString&  DataFile(const UInt_t run, const Short_t seg);
 
@@ -241,28 +265,8 @@ class QwEventBuffer: public MQwCodaControlEvent{
 
 
  protected:
-  Bool_t fPhysicsEventFlag;
-
-  UInt_t fEvtLength;
-  UInt_t fWordsSoFar;
-
-  UInt_t fEvtType;
-
-  UInt_t fEvtTag;
-  UInt_t fBankDataType;
-  UInt_t fIDBankNum;
-
-  UInt_t fEvtNumber;   ///< CODA event number; only defined for physics events
-  UInt_t fEvtClass;
-  UInt_t fStatSum;
-
   Double_t fCleanParameter[3]; ///< Scan data/clean data from the green monster
 
-  UInt_t fFragLength;
-  BankID_t fSubbankTag;
-  UInt_t fSubbankType;
-  UInt_t fSubbankNum;
-  ROCID_t fROC;
 
   TStopwatch fRunTimer;      ///<  Timer used for runlet processing loop
   TStopwatch fStopwatch;     ///<  Timer used for internal timing
@@ -273,7 +277,7 @@ class QwEventBuffer: public MQwCodaControlEvent{
   std::unordered_map<RocBankLabel_t, std::vector<UInt_t> > fMarkerList;
   std::unordered_map<RocBankLabel_t, std::vector<UInt_t> > fOffsetList;
 
-  Int_t CheckForMarkerWords(QwSubsystemArray &subsystems);
+  std::size_t CheckForMarkerWords(QwSubsystemArray &subsystems);
   RocBankLabel_t fThisRocBankLabel;
   UInt_t FindMarkerWord(UInt_t markerID, UInt_t* buffer, UInt_t num_words);
   UInt_t GetMarkerWord(UInt_t markerID);
@@ -282,8 +286,10 @@ class QwEventBuffer: public MQwCodaControlEvent{
   UInt_t     fNumPhysicsEvents;
   UInt_t     fStartingPhysicsEvent;
 
-  Bool_t     fSingleFile;
+  Bool_t fSingleFile;
 
+ protected:
+	VEventDecoder* decoder;
 };
 
 template < class T > Bool_t QwEventBuffer::FillObjectWithEventData(T &object){
@@ -295,44 +301,40 @@ template < class T > Bool_t QwEventBuffer::FillObjectWithEventData(T &object){
   ///  - Bool_t T::CanUseThisEventType(const UInt_t event_type);
   ///  - Bool_t T::ClearEventData(const UInt_t event_type);
   ///  - Int_t  T::ProcessBuffer(const UInt_t event_type,
-  ///       const ROCID_t roc_id, const BankID_t bank_id, 
+  ///       const ROCID_t roc_id, const BankID_t bank_id,
   ///       const UInt_t banktype, UInt_t* buffer, UInt_t num_words);
   ///
   Bool_t okay = kFALSE;
   UInt_t *localbuff = (UInt_t*)(fEvStream->getEvBuffer());
 
-  if (fFragLength==1 && localbuff[fWordsSoFar]==kNullDataWord){
-    fWordsSoFar += fFragLength;
-  } else if (object.CanUseThisEventType(fEvtType)){
+  if (decoder->GetFragLength()==1 && localbuff[decoder->GetWordsSoFar()]==kNullDataWord){
+    decoder->AddWordsSoFarAndFragLength();
+  } else if (object.CanUseThisEventType(decoder->GetEvtType())){
     //  Clear the old event information from the object
-    object.ClearEventData(fEvtType);
+    object.ClearEventData(decoder->GetEvtType());
     //  Loop through the data buffer in this event.
-    if (fBankDataType == 0x10){
+    if (decoder->GetBankDataType() == 0x10){
       //  This bank is subbanked; loop through subbanks
-      while ((okay = DecodeSubbankHeader(&localbuff[fWordsSoFar]))){
+      while ((okay = decoder->DecodeSubbankHeader(&localbuff[decoder->GetWordsSoFar()]))){
 	//  If this bank has further subbanks, restart the loop.
-	if (fSubbankType == 0x10) continue;
+	if (decoder->GetSubbankType() == 0x10) continue;
 	//  If this bank only contains the word 'NULL' then skip
 	//  this bank.
-	if (fFragLength==1 && localbuff[fWordsSoFar]==kNullDataWord){
-	  fWordsSoFar += fFragLength;
+	if (decoder->GetFragLength()==1 && localbuff[decoder->GetWordsSoFar()]==kNullDataWord){
+	  decoder->AddWordsSoFarAndFragLength();
 	  continue;
 	}
-	object.ProcessBuffer(fEvtType, fROC, fSubbankTag, fSubbankType,
-			     &localbuff[fWordsSoFar],
-			     fFragLength);
-	fWordsSoFar += fFragLength;
+	object.ProcessBuffer(decoder->GetEvtType(), decoder->GetROC(), decoder->GetSubbankTag(), decoder->GetSubbankType(),
+			     &localbuff[decoder->GetWordsSoFar()],
+			     decoder->GetFragLength());
+	decoder->AddWordsSoFarAndFragLength();
       }
     } else {
       //  This is a single bank of some type
-      object.ProcessBuffer(fEvtType, 0, fBankDataType,
-			   &localbuff[fWordsSoFar],
-			   fEvtLength);
+      object.ProcessBuffer(decoder->GetEvtType(), 0, decoder->GetBankDataType(),
+			   &localbuff[decoder->GetWordsSoFar()],
+			   decoder->GetEvtLength());
     }
   }
   return okay;
 }
-
-
-
-#endif

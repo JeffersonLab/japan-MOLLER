@@ -1,3 +1,8 @@
+/*!
+ * \file   QwPromptSummaryLinkDef.h
+ * \brief  ROOT linkage definitions for prompt summary classes
+ */
+
 #ifdef __CINT__
 
 #pragma link off all globals;

@@ -1,6 +1,8 @@
 # QwMockData Root Guide
-June 6, 2024\
-Version 1.0
+
+July 29, 2024\
+Version 1.1
+
 
 
 If you have any questions or suggestions for the guide, please send an
@@ -15,7 +17,7 @@ Using the JAPAN-MOLLER repository, run the following commands in a
 terminal:
 
         $  build/qwmockdatagenerator -r 4 -e 1:20000 --config qwparity_simple.conf --detectors mock_newdets.map --data <Data>
-        
+
         $  build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data <Data> --rootfiles <Rootfiles>
 
 General ROOT TTree Format
@@ -40,8 +42,7 @@ In a terminal, run
         $ root
         root[0] TBrowser b
 
-A ROOT Object Browser should appear. Using this you can browser, you can
-navigate to the rootfile and access the ROOT tree.
+A ROOT Object Browser should appear. Using this browser, you can navigate to the rootfile and access the ROOT tree.
 
 Terminal
 --------
@@ -52,8 +53,7 @@ In a terminal, run
         root[0] TFile* f = new TFile("<path/to/rootfile>")
         root[1] .ls
 
-This will display all the objects (e.g TTrees) inside the opened
-rootfile, with the form
+This will display all the objects (e.g. TTrees) inside the opened rootfile, with the form
 
       KEY: <OBJECT_TYPE>   <NAME>;<NAMECYCLE>   <DESCRIPTION>
 
@@ -128,20 +128,20 @@ misc. meta-data.
     (TList*) 0x55a04178aa0
     root[3] condition->ls()
     OBJ:  TList     4_condition     Doubly linked list : 0
-     OBJ: TObjString  ROOT Version : 6.26/10, Date: 20221115, GIT: 4dddea35 heads/latest-stable 
+     OBJ: TObjString  ROOT Version : 6.26/10, Date: 20221115, GIT: 4dddea35 heads/latest-stable
           Collectable string class : 0 at: 0x55fa041adbf0
-     OBJ: TObjString  QwAnalyzer Name : test_build/qwparity  Colectable string class : 0 
+     OBJ: TObjString  QwAnalyzer Name : test_build/qwparity  Colectable string class : 0
           at: 0x55fa0414486b0
-    OBJ: TObjString  ROOT file created on Hostname : Ryan-dellXPS  Collectable string class : 0 
+    OBJ: TObjString  ROOT file created on Hostname : Ryan-dellXPS  Collectable string class : 0
          at: 0x55fa040bf620
-    OBJ: TObjString  ROOT file created by the user : 20221116  Collectable string class : 0 
+    OBJ: TObjString  ROOT file created by the user : 20221116  Collectable string class : 0
          at: 0x55fa041a0540
     OBJ: TObjString  QwAnalyzer Options: -r4-e1:20000--configqwparity_simple.conf--
-         detectorsmock_newdets.map--data/home/mrc/Data--rootfiles/home/mrc/Rootfiles  
+         detectorsmock_newdets.map--data/home/mrc/Data--rootfiles/home/mrc/Rootfiles
          Collectable string class : 0 at: 0x55fa04143f20
-    OBJ: TObjString  ROOT file creating time: Mon, 29 Apr 2024 15:48:58 -0400 (EDT) +62870700 nsec 
+    OBJ: TObjString  ROOT file creating time: Mon, 29 Apr 2024 15:48:58 -0400 (EDT) +62870700 nsec
          Collectable string class : 0 at: 0x55a03abaeb0
-    OBJ: TObjString 
+    OBJ: TObjString
     commit 0692b13a79ce5376fb1c2226be8f62af8ef9112b
     Author: Paul King <pking@jlab.org>
     Date:   Mon Apr 1 11:15:22 2024 -0400
@@ -319,12 +319,13 @@ How these values are calculated can vary depending on the subsystem that
 they are calculated for.
      Subsystem|                 Quantity|                Name|          Unit
   ---------------| -----------------------------------| -------| -------------------
-   Beamline: BPM|        (1/2)(X_L-X_R)   |      Diff|           mm
-   Beamline: BPM|        (1/2)}(X_L+X_R)   |      Yield|          mm
-   Beamline: BCM|        (1/2)(X_L+X_R)   |      Yield|        uA
-   Beamline: BCM|       (X_L-X_R)/(X_L+X_R) |      Asym|         no unit
-   Main Detector|      (1/2)(Sig_L+Sig_R) |      Yield|   V/uA
-   Main Detector|   (Sig_L-Sig_R)/(Sig_L+Sig_R)|   Asym|         no unit
+   Beamline: BPM|        $\frac{1}{2}(X_L-X_R)$   |      Diff|           mm
+   Beamline: BPM|        $\frac{1}{2}(X_L+X_R)$   |      Yield|          mm
+   Beamline: BCM|        $\frac{1}{2}(X_L+X_R)$   |      Yield|        uA
+   Beamline: BCM|       $\frac{X_L-X_R}{X_L+X_R}$ |      Asym|         no unit
+   Main Detector|      $\frac{1}{2}(Sig_L+Sig_R)$ |      Yield|   V/uA
+   Main Detector|   $\frac{Sig_L-Sig_R}{Sig_L+Sig_R}$|   Asym|         no unit
+
 
 The BPM Difference is the difference in beam position reported by the
 BPM during a given multiplicity window. The BPM Yield is the average
@@ -358,11 +359,49 @@ We see the branch name, `asym_la14`.
   asym\_ |      Asymmetry calculation
   la14 |  Large Angle Monitor (See Detector section)
 
+
 We can see that this branch corresponds to the helicity multiplet
 asymmetry calculated for the large angle monitor device.
 
-BCM
----
+Beamline Monitors
+===================
+
+There are several monitors along the beamline that are essential in
+constraining asymmetry measurements. These beam monitors either monitor
+the beam position (Beam Position Monitor) or the beam charge (Beam
+Charge Monitor), both of which are correlated with the measured
+asymmetry. Both types of monitoring devices are stored in the rootfile
+with similar naming schemes. The beamline monitor branches are named
+`bXmVVYY` where `bXm` is either BPM or BCM (Beam Position Monitor or
+Beam Charge Monitor respectively), `VV` designates the region in the
+beamline, and `YY` designates the position in the region. The naming
+scheme describing the location along the beamline is identical for both
+monitors and is discussed below.
+
+  Keyword|                          Region
+  ----------| ----------------------------
+  2iYY|                       Electron Gun
+  0iYY|              Vertical Wein Segment
+  1iYY|                           Injector
+  0lYY|                    Pre-Accelerator
+  0rYY|         Pre-Accelerator Recombiner
+  1LYY|                  1st (North) Linac
+  1HYY|                             Hall A
+  1CYY|                  Hall A Switchyard
+  1PYY|             Hall A Compton Chicane
+  \_target|                         Target
+
+The `YY` are numerics that indicate where along the beamline (which
+girder) the monitor is placed. Smaller values are closer to the beamline
+entrance in that region whereas larger numbers are closer to the
+beamline exit in that region. The compton chicane is unique in that
+there is a straight path that bypasses the chicane. Those have an
+additional `1CYY{A,B,C,D}` to distinguish them. In general, `{A,B,C,D}`
+are appended at the end to further differentiate beamline monitors that
+are in the same region and monitor similar places along the
+beamline
+
+### BCM
 
 The Beam Charge Monitor (BCM) is a cylindrical shaped cavity with an
 antenna, or wire, inside to detect electromagnetic radiation from the
@@ -370,23 +409,13 @@ electron beam with the signal amplitude corresponding to the amount of
 beam that passes through the device. The BCM and BPM together constitute
 the beam-monitoring devices (Beminiwattha 2013). The naming scheme for
 the BCM branches always starts with `bcm` and then is followed by a
-keyword that indicates where in the beamline it is monitoring:
-
-  Keyword                        Description
-  --------- --------------------------------
-  0lXX        Injector / Pre-Accelerator BCM
-  0rXX                        Recombiner BCM
-  0hXX                            Hall A BCM
-
-The `XX` indicates the position of the BCM within that beamline section.
-One thing to note is that the BCMs will sometime have the prefix `qwk_`,
-this is a holdover from the Qweak experiment and is innocuous. It will
-most likely be phased out as japan-MOLLER matures.
+keyword that specifies the region and specific location along the
+beamline. See the Beamline Monitors section for details.
 
 ``` {.c}
-    root [8] evt->Print("qwk_bcm*")
+    root [8] evt->Print("bcm*")
     *............................................................................*
-    *Br    5 :qwk_bcm0l05 : hw_sum/D:block0/D:block1/D:block2/D:block3/D:        *
+    *Br    5 :bcm1h15 : hw_sum/D:block0/D:block1/D:block2/D:block3/D:            *
     *         | num_samples/D:Device_Error_Code/D:hw_sum_raw/D:block0_raw/D:     *
     *         | block1_raw/D:block2_raw/D:block3_raw/D:SumSq1_0/D:SumSq2_0/D:    *
     *         | RawMin_0/D:RawMax_0/D:SumSq1_1/D:SumSq2_1/D:RawMin_1/D:          *
@@ -397,61 +426,52 @@ most likely be phased out as japan-MOLLER matures.
     *............................................................................*
 ```
 
-We see the branch name, `qwk_bcm0l05`
- Keyword| Description
-  ------------------------------| --------------------------------
-  qwk\_|        Holdover from Qweak
-  0l |   Injector / Pre-Accelerator BCM
-  05 |     Fifth BCM
+We see the branch name, `bcm1h15`
 
-We can see that this branch corresponds to a BCM located at the
-injector.
+  Keyword|                          Description
+  ----------| ----------------------------
+  1h |   Hall A
+  15 |   Fifteenth BCM
 
-BPM
----
+We can see that this branch corresponds to a BCM located in Hall A.
+
+### BPM
+
 
 The Beam Position Monitor (BPM) is a cylindrical cavity with four
 symmetrical antennas, or wires, that pick up the RF-signal of the
 passing electron beam. The wires form a box that the beam passes
-through. The amplitude of the signal from each wire is proportional to
-the distance to the beam. From the four wires, we can obtain the x and y
-coordinate of the beam. The BPM and BCM together constitute the
-beam-monitoring devices(Beminiwattha 2013).The naming scheme for the BPM
-branches always starts with `bpm` or `qwk_` and is followed by two
-keywords, one that indicates where in the beamline it is monitoring and
-the other what beam parameter it is monitoring. We will start with the
-location keywords first:
+through.
 
-  Keyword     |        Description
-  ---------| ---------------------
-  0iXX|               Injector BCP
-  0lXX|        Pre-Accelerator BPM
-  0rXX|             Recombiner BPM
-  0hXX|                 Hall A BPM
-  1cXX|                 Transport Line BPM
+![image](Images/BPM_Wire_Drawing.png)
 
-Next we will examine the beam parameter keywords:
+The wires are labeled as either positive (plus, p) or negative (minus,
+m) given the beam coordinate system. From the plus and minus wire-pair,
+we can obtain the horizontal or vertical position by calculating the
+signal asymmetry and multiplying it by a scaling factor, which is `~18`.
 
-  Keyword |                      Description
-  ---------| -------------------------------
-  XP|          X-Position (sometimes just X)
-  XM|                                X-Slope
-  YP|          Y-Position (sometimes just Y)
-  YM|                                Y-Slope
-  Elli|                          Ellipticity
-  WS|                               Wire Sum
+The BPM and BCM together constitute the beam-monitoring
+devices(Beminiwattha 2013).The naming scheme for the BPM branches always
+starts with `bpm` and is followed by two keywords, one that indicates
+where in the beamline it is monitoring and the other what beam parameter
+it is monitoring. The location keywords are described in the Beamline
+Monitors section. The beam parameter keywords are described below.
 
-The `XX` indicates the position of the BPM within that beamline section.
-Often BPMs will be labeled with `qwk` like the BCMs; however, the BCMs
-will always have the the form `qwk_bcm` whereas the BPMs will just use
-`qwk_XXXX` instead of `bpmXXXX`. This is a holdover from the Qweak
-experiment and is innocuous. It will most likely be phased out as
-japan-MOLLER matures.
+  Keyword  |                                Description
+  ---------| ------------------------------------------
+  XP|                                            X-plus
+  XM|                                           X-minus
+  X |          $scale \times (\frac{X_p-X_m}{X_p+X_m})$
+  YP|                                            Y-plus
+  YM|                                           Y-minus
+  Y |          $scale \times (\frac{Y_p-Y_m}{Y_p+Y_m})$
+  Elli|                                     Ellipticity
+  WS|                                          Wire Sum
 
 ``` {.c}
-    root [9] evt->Print("qwk_*")
+    root [9] evt->Print("bpm*")
     *............................................................................*
-    *Br   75 :qwk_0l06aXM : hw_sum/D:block0/D:block1/D:block2/D:block3/D:        *
+    *Br   75 :bpm0l09XP : hw_sum/D:block0/D:block1/D:block2/D:block3/D:          *
     *         | num_samples/D:Device_Error_Code/D:hw_sum_raw/D:block0_raw/D:     *
     *         | block1_raw/D:block2_raw/D:block3_raw/D:SumSq1_0/D:SumSq2_0/D:    *
     *         | RawMin_0/D:RawMax_0/D:SumSq1_1/D:SumSq2_1/D:RawMin_1/D:          *
@@ -462,18 +482,49 @@ japan-MOLLER matures.
     *............................................................................*
 ```
 
-We see the branch name, `qwk_0l06aXm`. Note the use of `qwk_` in lieu of
-`bpm`.
+We see the branch name, `bpm0l09XP`.
 
 Keword| Meaning
   --------------------------------| ---------------------
-  qwk\_ | Holdover from Qweak
   0l |   Pre-Accelerator BPM
-  06a |        6th BPM
-  XM |         X-Slope
+  09 |         9th BPM
+  XP |         X-plus wire
 
 We can see that this branch corresponds to a BPM located at the injector
-and monitors the X-Slope.
+and is the signal from the x-plus wire.
+
+### Beamline Cavity
+
+Beamline cavities are a type of Beam Position Monitors (BPM) but the
+signals from the monitors are a product of the beam position and beam
+intensity (see the BPM section). The naming scheme for the beamline
+cavities are of the form `CAVXXYYVV`. The names always start with `CAV`,
+followed by a keyword specifying the location `XX`, a second keyword
+that specifies the region along the beamline `YY`, and a final keyword
+that describes the beam parameter `VV`. The location keywords are
+described in section 5.2 Beamline Monitors. The beam parameter keywords
+are described below.
+
+  Keyword |                                             Description
+  --------| -----------------------------------------------------
+  Q|                                        Beam Intensity ($I_B$)
+  XI|          $scale \times (\frac{X_p-X_m}{X_p+X_m}) \times I_B$
+  YI|          $scale \times (\frac{Y_p-Y_m}{Y_p+Y_m}) \times  I_B$
+
+TODO: Cavity BPMs are not yet in the ROOT files. Update example once
+they are included.
+
+Mock Example: We see the branch name, `CAV1H13AXI`.
+
+ Keyword | Description
+  -----------------------------| --------------------------------------------
+  1H |   Hall A Cavity BPM
+  13A |      Thirteenth (A) BPM
+  XI |   X position coupled with the Beam intensity
+
+We can see that this branch corresponds to a cavity BPM located in Hall
+A that monitors the X-position coupled with the Beam intensity.
+
 
 Detectors
 ---------
@@ -500,7 +551,7 @@ are 224 thin quartz detectors channels.
 ![image](Images/Quartz_Rings.png)
 
 The thin quarts detectors are labeled as `tq` in the ROOT tree. The
-segment that the thin quarts correspond to denoted explicitly by a
+segment that the thin quarts correspond to is denoted explicitly by a
 numeric value, i.e. `tq4` indicates a thin quarts in segment 4. The
 radial ring that the thin quarts corresponds to is indicated after the
 segment by `_r#`. Since ring 5 is divided further into three more
@@ -517,16 +568,16 @@ segments, ring 5 segments are denoted by `a,b,c (left,center,right)`.
     *         | SumSq1_3/D:SumSq2_3/D:RawMin_3/D:RawMax_3/D:sequence_number/D    *
     *Entries :    19989 : Total  Size=    4668242 bytes  File Size  =    2411788 *
     *Baskets :      294 : Basket Size=      16000 bytes  Compression=   1.93     *
-    *............................................................................*    
+    *............................................................................*
 ```
 
 We see the branch name, `tq24_r5a`
         Keyword | Meaning
   ------------------------| ---------------------
-  tq | thin quartz
-  24 |   segment 24
-  \_r5 |   ring 5
-  \_r5a |    ring 5 subsection a
+  tq |    thin quartz
+  24 | segment 24
+  \_r5a |    ring 5 subsection a (left)
+
 
 We can see that this branch corresponds to a ring 5 thin quartz
 detector, in segment 24, and in the additional ring 5 sub-segment a (left).
@@ -755,7 +806,7 @@ This is a BCM that monitors the transverse phase of the beam.
 
 ### Batery
 
-This is a physical battery that is connected to the ADC channels. It provides a constant voltage to the ADCs. 
+This is a physical battery that is connected to the ADC channels. It provides a constant voltage to the ADCs.
 
 ### Units
 
@@ -782,9 +833,11 @@ and `pat_counter` which count the number of MPS signals and the number
 of 64-mulitplet helicity pattern respectively. The branch `pat_phase`
 tracks which 64-multiplet helicity an event corresponds to.
 
-Navigation Tips
------------------------
+Useful Tips
+======
 
+Navigation
+----
 If you are using the terminal to access the rootfile, and only want to
 view specific branches, you can specify the output of the
 `(TTree)->Print()` command by inserting a string between the
@@ -795,15 +848,14 @@ i.e: `root [1] evt->Print("bcm*")`
 This will print out all the branches that start with `bcm`. Likewise,
 you can search for branches that end in `bcm` with the command
 `Print("*bcm")`. You can also search for branches that contain `bcm`
-somewhere with `Print("*bcm*")`. Lastily, you can search for a branch
-that contains `bcm` and another keyword by `Print("*bcm*0l*")`.
+somewhere with `Print("*bcm*")`, or you can search for a branch that
+contains `bcm` and another keyword with `Print("*bcm*0l*")`.
 
 Drawing Histograms Tips
------------------------
-
+----
 Below are some tips on drawing histogram plots of the different
 branches. We will be using the evt tree as our example tree and the
-large angle monitor leaves as our example leaves:
+large angle monitor branch as our example:
 
 ``` {.c}
 root [0] TFile* f = new TFile("isu_sample_4.root")
@@ -844,7 +896,7 @@ root [2] evt->Print()
 *............................................................................*
 ```
 
-### Plotting a Branch
+### Simple Plot
 
 To draw one branch in a TTree, you type
 `Tree_Name -> Draw("Branch_Name")`. Typing
@@ -933,8 +985,7 @@ Info in <TCanvas::MakeDefCanvas>:  created default TCanvas with name c1
 
 And voila! We can now draw two trees from two different files against
 each other. Just like in section 5.8.2, we can do binary
-operations on the two trees when we invoke `Draw("...")`. 
+operations on the two trees when we invoke `Draw("...")`.
 
 Note: You can only draw two branches against each other if they have the same number
 of entries.
-

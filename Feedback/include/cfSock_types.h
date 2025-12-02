@@ -11,4 +11,3 @@
 #define COMMAND_FDBK          3000
 #define COMMAND_HAPADC        4000
 #define COMMAND_SCAN          5000
-

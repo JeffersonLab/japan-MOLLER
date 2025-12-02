@@ -2,7 +2,7 @@
 
 
 usage()
-{ 
+{
   [ $i -eq 2 ] && echo "Please enter the name of the aggregated rootfile."
 	[ $1 -eq 3 ] && echo "Please enter input file name."
   [ $1 -eq 4 ] && echo "./twoDwrapper.sh -a run_aggregator_50uA_regress.root-f twoDinput.txt"
@@ -16,11 +16,11 @@ do
   case $c in
     a) AGG=$OPTARG ;;
     f) CONFIG=$OPTARG ;;
-    h) usage 4 ;;  
+    h) usage 4 ;;
   esac
 done
 
-[ -z "$AGG" ] && usage 2 
+[ -z "$AGG" ] && usage 2
 [ -z "$CONFIG" ] && usage 3
 
 

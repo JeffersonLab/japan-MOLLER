@@ -65,7 +65,7 @@ There are several subdirectories within the package:
 		This contains the CODA interface classes written
 		for Hall A and found in the pan distribution.
 		These are responsible for interfacing with CODA
-		format data files, or with the ET event stream 
+		format data files, or with the ET event stream
 		for online analysis.
 		As this is a copy of the Hall A subpackage, it
 		does not follow the package layout conventions,
@@ -76,7 +76,7 @@ There are several subdirectories within the package:
 		QwAnalysis engine.  This includes a event handler
 		class which can be configured to draw data from
 		file of event stream, and several base classes
-		used as the framework for the specialized 
+		used as the framework for the specialized
 		analyzers.
 		Subdirectories are:
 			src
@@ -86,10 +86,9 @@ There are several subdirectories within the package:
 
 	bin
 	lib
-		These will contain the executable and shared library 
+		These will contain the executable and shared library
 		files after compilation.
 	SetupFiles
 		This contains scripts used in the configuration of
 		the environment used for compilation and running
 		the package.
-

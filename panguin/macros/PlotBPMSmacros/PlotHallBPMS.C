@@ -1,6 +1,6 @@
-// Injector BPMs Plot Macro 
+// Injector BPMs Plot Macro
 // Source from Caryn Palatchi
-// Adapted by Tao Ye for JAPAN 
+// Adapted by Tao Ye for JAPAN
 // Adapted by KDP and PK for panguin
 // Last Update : 05-2019
 
@@ -49,7 +49,7 @@ void PlotHallBPMS(TString ucut){
     thishist = (TH1D*)gDirectory->FindObject(objnam);
     Aq[dd] = thishist->GetMean();
     eAq[dd]= thishist->GetMeanError();
-    rmsAq[dd]= thishist->GetRMS();    
+    rmsAq[dd]= thishist->GetRMS();
     zero[dd]=0;
     // delete thishist;
     mul_tree->Draw(Form("1e3*diff_%sX>>histx%d",vBPMHall[dd],dd),lcut,"goff");
@@ -92,7 +92,7 @@ void PlotHallBPMS(TString ucut){
   Aqgraph= new TGraphErrors(numchains,chain,&(Aq[0]),chainerr,&(eAq[0]));
   Aqrmsgraph = new TGraphErrors(numchains,chain,&(rmsAq[0]),chainerr,&(zero[0]));
 
-  
+
   TMultiGraph *xygraph = new TMultiGraph();
   TMultiGraph *xyrmsgraph = new TMultiGraph();
 
@@ -193,4 +193,3 @@ void PlotHallBPMS(TString ucut){
   pad_buff->SetGrid();
 
 }
-

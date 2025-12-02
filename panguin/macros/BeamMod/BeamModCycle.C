@@ -3,9 +3,9 @@
 /////---- Quinn Campgana ----
 /////----Carrington Metts-----
 //// ----- June-July 2019 --------
-///Panguin gui compatible diagnostic plots for shift taking online replay 
+///Panguin gui compatible diagnostic plots for shift taking online replay
 // 'zoomed in' on a single cyle
-// examining each BPM response vs time. 
+// examining each BPM response vs time.
 //color coded to quickly see X, Y , E modulation pattern
 //if trim card readback for single cycle is good, bpm response should be good
 
@@ -13,7 +13,7 @@ void CycleTest(TString type="evt", TString ref="CodaEventNumber", Bool_t ldebug 
   gStyle->SetOptStat(0);
   TTree* tree_R = (TTree*)gDirectory->Get(type);
 
-  //test if beam mod is on, print message and abort if it is off 
+  //test if beam mod is on, print message and abort if it is off
   //this must happen first, otherwise it´ll break
   TString bmon = "(ErrorFlag & 0x00009000) != 0"; //flags true if BM is on
   int bmnum = tree_R->Draw("CodaEventNumber", bmon, "goff"); //number of events with BM on
@@ -41,8 +41,8 @@ void CycleTest(TString type="evt", TString ref="CodaEventNumber", Bool_t ldebug 
     line3.DrawLatex(.2,.5,":(");
     return 0;
   }
-  
-  tree_R->Draw(">>elist", "bmwcycnum>0","entrylist"); //picks out unique cycle numbers 
+
+  tree_R->Draw(">>elist", "bmwcycnum>0","entrylist"); //picks out unique cycle numbers
   TEntryList *elist = (TEntryList*)gDirectory->Get("elist");
   tree_R->SetEntryList(elist);
   TLeaf *l_bmwcycnum = tree_R->GetLeaf("bmwcycnum");
@@ -63,7 +63,7 @@ void CycleTest(TString type="evt", TString ref="CodaEventNumber", Bool_t ldebug 
   }
   TString cyclechoice = Form("%f",cycles[1]);
   int Ncycles = cycles.size();
-  
+
 
   TString bmwcut = "bmwcycnum>0";
   TString evcut = "(ErrorFlag & 0x7bfe6fff)==0"; //basic cut, all events with beam on
@@ -77,7 +77,7 @@ void CycleTest(TString type="evt", TString ref="CodaEventNumber", Bool_t ldebug 
   TString coil[7] = {"bmod_trim1","bmod_trim2","bmod_trim3","bmod_trim4","bmod_trim5","bmod_trim6","bmod_trim7"};
   TString bpms[5]={"bpm4aX","bpm4aY","bpm4eX","bpm4eY", "bpm12X"};
 
-  
+
   TPad *cBMWPlot = new TPad("cBMWPlot","cBMWPlot",0,0,1,1);
   cBMWPlot->Divide(2,3);
   cBMWPlot->Draw();
@@ -151,11 +151,11 @@ void CycleTest(TString type="evt", TString ref="CodaEventNumber", Bool_t ldebug 
 
   cBMWPlot->cd(6);
   tGraphBMWPlot[0]->Draw("AL");
-  
+
   for(int i=1;i<7;i++){
     tGraphBMWPlot[i]->Draw("same");
   }
-  
+
   auto legend = new TLegend(0.1,0.7,0.4,0.9);
   legend->SetHeader("Trim Cards","C");
   legend->SetNColumns(2);
@@ -163,5 +163,5 @@ void CycleTest(TString type="evt", TString ref="CodaEventNumber", Bool_t ldebug 
   legend->AddEntry(tGraphBMWPlot[1],"Y mod","l");
   legend->AddEntry(tGraphBMWPlot[6],"E mod","l");
   legend->Draw();
-   
+
 }

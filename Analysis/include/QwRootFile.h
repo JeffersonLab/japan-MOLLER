@@ -1,8 +1,20 @@
-#ifndef __QWROOTFILE__
-#define __QWROOTFILE__
+/*!
+ * \file   QwRootFile.h
+ * \brief  ROOT file and tree management wrapper classes
+ */
+
+#pragma once
 
 // System headers
+#include <algorithm>
+#include <cctype>
+#include <cstdint>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 #include <typeindex>
+#include <unordered_map>
+#include <vector>
 #include <unistd.h>
 using std::type_info;
 
@@ -11,27 +23,346 @@ using std::type_info;
 #include "TTree.h"
 #include "TPRegexp.h"
 #include "TSystem.h"
+#include "TString.h"
+
+// RNTuple headers (modern ROOT namespace) - only if supported
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTuple.hxx"
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+#include "ROOT/RNTupleWriter.hxx"
+#endif
 
 // Qweak headers
 #include "QwOptions.h"
 #include "TMapFile.h"
 
-
 // If one defines more than this number of words in the full ntuple,
 // the results are going to get very very crazy.
 #define BRANCH_VECTOR_MAX_SIZE 25000
 
+/**
+ *  \class QwRootTreeBranchVector
+ *  \ingroup QwAnalysis
+ *  \brief A helper class to manage a vector of branch entries for ROOT trees
+ *
+ * This class provides functionality to manage a collection of branch entries,
+ * including their names, types, offsets, and sizes. It supports adding new entries,
+ * accessing entries by index or name, and generating leaf lists for ROOT trees.
+ */
+class QwRootTreeBranchVector {
+public:
+  struct Entry {
+    std::string name;
+    std::size_t offset;
+    std::size_t size;
+    char type;
+  };
+
+  using size_type = std::size_t;
+
+  QwRootTreeBranchVector() = default;
+
+  void reserve(size_type count) {
+    m_entries.reserve(count);
+    m_buffer.reserve(sizeof(double)*count);
+  }
+
+  void shrink_to_fit() {
+    m_entries.shrink_to_fit();
+    m_buffer.shrink_to_fit();
+  }
+
+  void clear() {
+    m_entries.clear();
+    m_buffer.clear();
+  }
+
+  size_type size() const noexcept { return m_entries.size(); }
+  bool empty() const noexcept { return m_entries.empty(); }
+
+  template <typename T = uint8_t>
+  const T& operator[](size_type index) const {
+    return value<T>(index);
+  }
+
+  template <typename T = uint8_t>
+  T& operator[](size_type index) {
+    return value<T>(index);
+  }
+
+  template <typename T>
+  T& value(size_type index) {
+    auto& entry = m_entries.at(index);
+    return *reinterpret_cast<T*>(m_buffer.data() + entry.offset);
+  }
+
+  template <typename T>
+  const T& value(size_type index) const {
+    const auto& entry = m_entries.at(index);
+    return *reinterpret_cast<const T*>(m_buffer.data() + entry.offset);
+  }
+
+  // Explicit SetValue overloads with type checking to prevent automatic conversions
+  // (presence of multiple overloads ensures a compilation error if the types do not match)
+  void SetValue(size_type index, Double_t val) {
+    const auto& entry = m_entries.at(index);
+    if (entry.type != 'D') {
+      throw std::invalid_argument("Type mismatch: entry type '" + std::string(1, entry.type) + "' cannot store double value '" + entry.name + "'");
+    }
+    this->value<Double_t>(index) = val;
+  }
+
+  void SetValue(size_type index, Float_t val) {
+    const auto& entry = m_entries.at(index);
+    if (entry.type != 'F') {
+      throw std::invalid_argument("Type mismatch: entry type '" + std::string(1, entry.type) + "' cannot store float value '" + entry.name + "'");
+    }
+    this->value<Float_t>(index) = val;
+  }
+
+  void SetValue(size_type index, Int_t val) {
+    const auto& entry = m_entries.at(index);
+    if (entry.type != 'I') {
+      throw std::invalid_argument("Type mismatch: entry type '" + std::string(1, entry.type) + "' cannot store int value '" + entry.name + "'");
+    }
+    this->value<Int_t>(index) = val;
+  }
+
+  void SetValue(size_type index, Long64_t val) {
+    const auto& entry = m_entries.at(index);
+    if (entry.type != 'L') {
+      throw std::invalid_argument("Type mismatch: entry type '" + std::string(1, entry.type) + "' cannot store long long value '" + entry.name + "'");
+    }
+    this->value<Long64_t>(index) = val;
+  }
+
+  void SetValue(size_type index, Short_t val) {
+    const auto& entry = m_entries.at(index);
+    if (entry.type != 'S') {
+      throw std::invalid_argument("Type mismatch: entry type '" + std::string(1, entry.type) + "' cannot store short value '" + entry.name + "'");
+    }
+    this->value<Short_t>(index) = val;
+  }
+
+  // Unsigned type overloads
+  void SetValue(size_type index, UShort_t val) {
+    const auto& entry = m_entries.at(index);
+    if (entry.type != 's') {
+      throw std::invalid_argument("Type mismatch: entry type '" + std::string(1, entry.type) + "' cannot store short value '" + entry.name + "'");
+    }
+    this->value<UShort_t>(index) = val;
+  }
+
+  void SetValue(size_type index, UInt_t val) {
+    const auto& entry = m_entries.at(index);
+    if (entry.type != 'i') {
+      throw std::invalid_argument("Type mismatch: entry type '" + std::string(1, entry.type) + "' cannot store unsigned int value '" + entry.name + "'");
+    }
+    this->value<UInt_t>(index) = val;
+  }
+
+  void SetValue(size_type index, ULong64_t val) {
+    const auto& entry = m_entries.at(index);
+    if (entry.type != 'l') {
+      throw std::invalid_argument("Type mismatch: entry type '" + std::string(1, entry.type) + "' cannot store long long value '" + entry.name + "'");
+    }
+    this->value<ULong64_t>(index) = val;
+  }
+
+  void* data() noexcept { return m_buffer.data(); }
+  const void* data() const noexcept { return m_buffer.data(); }
+  size_type data_size() const noexcept { return m_buffer.size(); }
+
+  template <typename T>
+  T& back() {
+    if (m_entries.empty()) {
+      throw std::out_of_range("QwRootTreeBranchVector::back() called on empty container");
+    }
+    const auto& last_entry = m_entries.back();
+    return *reinterpret_cast<T*>(m_buffer.data() + last_entry.offset);
+  }
+
+  template <typename T>
+  const T& back() const {
+    if (m_entries.empty()) {
+      throw std::out_of_range("QwRootTreeBranchVector::back() called on empty container");
+    }
+    const auto& last_entry = m_entries.back();
+    return *reinterpret_cast<const T*>(m_buffer.data() + last_entry.offset);
+  }
+
+  void push_back(const std::string& name, const char type = 'D') {
+    const std::size_t entry_size = GetTypeSize(type);
+    const std::size_t offset = AlignOffset(m_buffer.size());
+
+    if (offset > m_buffer.capacity()) {
+      throw std::out_of_range("QwRootTreeBranchVector::push_back() requires buffer resize beyond reserved capacity");
+    }
+    if (offset > m_buffer.size()) {
+      m_buffer.resize(offset, 0u);
+    }
+
+    Entry entry{name, offset, entry_size, type};
+    m_entries.push_back(entry);
+
+    const std::size_t required = offset + entry_size;
+    if (required > m_buffer.capacity()) {
+      throw std::out_of_range("QwRootTreeBranchVector::push_back() requires buffer resize beyond reserved capacity");
+    }
+    if (required > m_buffer.size()) {
+      m_buffer.resize(required, 0u);
+    }
+  }
+
+  // Overload for TString (ROOT's string class)
+  void push_back(const TString& name, const char type = 'D') {
+    push_back(std::string(name.Data()), type);
+  }
+
+  // Overload for const char* (string literals)
+  void push_back(const char* name, const char type = 'D') {
+    push_back(std::string(name), type);
+  }
+
+  std::string LeafList(size_type start_index = 0) const {
+    static const std::string separator = ":";
+    std::ostringstream stream;
+    bool first = true;
+    for (size_type index = start_index; index < m_entries.size(); ++index) {
+      const auto& entry = m_entries[index];
+      if (!first) {
+        stream << separator;
+      }
+      stream << entry.name << "/" << entry.type;
+      first = false;
+    }
+    return stream.str();
+  }
+
+  std::string Dump(size_type start_index = 0, size_type end_index = 0) const {
+    std::ostringstream stream;
+    stream << "QwRootTreeBranchVector: " << m_entries.size() << " entries, "
+           << m_buffer.size() << " bytes\n";
+    size_t end_offset = (end_index == 0 || end_index > m_entries.size()) ?
+      m_buffer.size()
+      : m_entries[end_index - 1].offset + m_entries[end_index - 1].size;
+    stream << "QwRootTreeBranchVector: buffer at 0x" << std::hex << (void*) &m_buffer[0] << '\n';
+    stream << "QwRootTreeBranchVector: entries at 0x" << std::hex << (void*) &m_entries[0] << '\n';
+    for (size_t offset = m_entries[start_index].offset; offset < end_offset; offset += 4) {
+      stream << std::dec
+             << "  [" << offset << "] "
+             << std::hex
+             << " offset=0x" << offset
+             << " (0x" << std::setw(4) << std::setfill('0')
+                       << offset - m_entries[start_index].offset << ")"
+             << " buff=";
+      // Little-endian
+      for (std::size_t byte = 0; byte < 4; ++byte) {
+        stream << std::hex << std::setw(2) << std::setfill('0')
+               << static_cast<unsigned int>(m_buffer[offset + byte])
+               << " ";
+      }
+      stream << '\n';
+    }
+    end_index = (end_index == 0 || end_index > m_entries.size()) ?
+      m_entries.size()
+      : end_index;
+    for (size_type index = start_index; index < end_index; ++index) {
+      const auto& entry = m_entries[index];
+      stream << std::dec
+             << "  [" << index << "] "
+             << std::hex
+             << " offset=0x" << entry.offset
+             << " (0x" << std::setw(4) << std::setfill('0')
+                       << entry.offset - m_entries[start_index].offset << ")"
+             << " size=0x" << entry.size
+             << " buff=0x";
+      // Little-endian
+      for (std::size_t byte = GetTypeSize(entry.type); byte > 0; --byte) {
+        stream << std::hex << std::setw(2) << std::setfill('0')
+               << static_cast<unsigned int>((m_buffer.data() + entry.offset)[byte - 1]);
+      }
+      stream << std::dec
+             << " name=" << entry.name << "/" << entry.type
+             << " value=" << FormatValue(entry, index);
+      stream << '\n';
+    }
+    return stream.str();
+  }
+
+private:
+  static std::size_t GetTypeSize(char type) {
+    switch (type) {
+      case 'D':
+        return sizeof(double);
+      case 'F':
+        return sizeof(float);
+      case 'L':
+        return sizeof(long long);
+      case 'l':
+        return sizeof(unsigned long long);
+      case 'I':
+        return sizeof(int);
+      case 'i':
+        return sizeof(unsigned int);
+      case 'S':
+        return sizeof(short);
+      case 's':
+        return sizeof(unsigned short);
+      default:
+        throw std::invalid_argument("Unsupported branch type code: " + std::string(1, type));
+    }
+  }
+
+  static std::size_t AlignOffset(std::size_t offset) {
+    const std::size_t alignment = 4u;
+    return (offset + (alignment - 1u)) & ~(alignment - 1u);
+  }
+
+  std::vector<Entry> m_entries;
+  std::vector<std::uint8_t> m_buffer;
+
+  std::string FormatValue(const Entry& entry, size_type index) const {
+    switch (entry.type) {
+      case 'D':
+        return FormatNumeric(value<double>(index));
+      case 'F':
+        return FormatNumeric(value<float>(index));
+      case 'L':
+        return FormatNumeric(value<long long>(index));
+      case 'l':
+        return FormatNumeric(value<unsigned long long>(index));
+      case 'I':
+        return FormatNumeric(value<int>(index));
+      case 'i':
+        return FormatNumeric(value<unsigned int>(index));
+      case 'S':
+        return FormatNumeric(value<short>(index));
+      case 's':
+        return FormatNumeric(value<unsigned short>(index));
+      default:
+        return "<unknown>";
+    }
+  }
+
+  template <typename T>
+  static std::string FormatNumeric(T input) {
+    std::ostringstream stream;
+    stream << input;
+    return stream.str();
+  }
+};
 
 /**
  *  \class QwRootTree
  *  \ingroup QwAnalysis
- *  \brief A wrapper class for a ROOT tree
+ *  \brief Wrapper class for ROOT tree management with vector-based data storage
  *
- * This class provides the functionality to write to ROOT trees using a vector
- * of doubles.  The vector is part of this object, as well as a pointer to the
- * tree that contains the branches.  One ROOT tree can have multiple QwRootTree
- * objects, for example in tracking mode both parity and tracking detectors
- * can be stored in the same tree.
+ * Provides functionality to write to ROOT trees using vectors of doubles,
+ * with support for branch construction, event filtering, and tree sharing.
+ * Handles both new tree creation and attachment to existing trees, enabling
+ * multiple subsystems to contribute data to a single ROOT tree.
  */
 class QwRootTree {
 
@@ -92,7 +423,16 @@ class QwRootTree {
     /// Construct the tree
     void ConstructNewTree() {
       QwMessage << "New tree: " << fName << ", " << fDesc << QwLog::endl;
+
       fTree = new TTree(fName.c_str(), fDesc.c_str());
+
+      // Ensure tree is in the current directory
+      if (gDirectory) {
+        fTree->SetDirectory(gDirectory);
+
+      } else {
+
+      }
     }
 
     void ConstructUnitsBranch() {
@@ -126,7 +466,7 @@ class QwRootTree {
         exit(-1);
       }
     }
-   
+
 
   public:
 
@@ -188,7 +528,7 @@ class QwRootTree {
     /// Tree pointer
     TTree* fTree;
     /// Vector of leaves
-    std::vector<Double_t> fVector;
+    QwRootTreeBranchVector fVector;
 
 
     /// Name, description
@@ -263,7 +603,198 @@ class QwRootTree {
     }
 };
 
+#ifdef HAS_RNTUPLE_SUPPORT
+/**
+ *  \class QwRootNTuple
+ *  \ingroup QwAnalysis
+ *  \brief A wrapper class for a ROOT RNTuple
+ *
+ * This class provides the functionality to write to ROOT RNTuples using a vector
+ * of doubles, similar to QwRootTree but using the newer RNTuple format.
+ */
+class QwRootNTuple {
 
+  public:
+
+    /// Constructor with name and description
+    QwRootNTuple(const std::string& name, const std::string& desc, const std::string& prefix = "")
+    : fName(name), fDesc(desc), fPrefix(prefix), fType("type undefined"),
+      fCurrentEvent(0), fNumEventsCycle(0), fNumEventsToSave(0), fNumEventsToSkip(0) {
+      // Create RNTuple model
+      fModel = ROOT::RNTupleModel::Create();
+    }
+
+    /// Constructor with name, description, and object
+    template < class T >
+    QwRootNTuple(const std::string& name, const std::string& desc, T& object, const std::string& prefix = "")
+    : fName(name), fDesc(desc), fPrefix(prefix), fType("type undefined"),
+      fCurrentEvent(0), fNumEventsCycle(0), fNumEventsToSave(0), fNumEventsToSkip(0) {
+      // Create RNTuple model
+      fModel = ROOT::RNTupleModel::Create();
+
+      // Construct fields and vector
+      ConstructFieldsAndVector(object);
+    }
+
+    /// Destructor
+    virtual ~QwRootNTuple() {
+      Close();
+    }
+
+    /// Close and finalize the RNTuple writer
+    void Close() {
+      if (fWriter) {
+        // Explicitly commit any remaining data and close the writer
+        // This ensures all data is written to the file before destruction
+        fWriter.reset();  // This calls the destructor which should finalize the RNTuple
+      }
+    }
+
+  private:
+
+    /// Construct the fields and vector for generic objects
+    template < class T >
+    void ConstructFieldsAndVector(T& object) {
+      // Reserve space for the field vector
+      fVector.reserve(BRANCH_VECTOR_MAX_SIZE);
+
+      // Associate fields with vector - now using shared field pointers
+      TString prefix = Form("%s", fPrefix.c_str());
+      object.ConstructNTupleAndVector(fModel, prefix, fVector, fFieldPtrs);
+
+      // Store the type of object
+      fType = typeid(object).name();
+
+      // Check memory reservation
+      if (fVector.size() > BRANCH_VECTOR_MAX_SIZE) {
+        QwError << "The field vector is too large: " << fVector.size() << " fields!  "
+                << "The maximum size is " << BRANCH_VECTOR_MAX_SIZE << "."
+                << QwLog::endl;
+        exit(-1);
+      }
+
+      // Shrink memory reservation
+      fVector.shrink_to_fit();
+    }
+
+  public:
+
+    /// Initialize the RNTuple writer with a file
+    void InitializeWriter(TFile* file) {
+      if (!fModel) {
+        QwError << "RNTuple model not created for " << fName << QwLog::endl;
+        return;
+      }
+
+      // Before creating the writer, ensure all fields are added to the model
+      if (fVector.empty()) {
+        QwError << "No fields defined in RNTuple model for " << fName << QwLog::endl;
+        return;
+      }
+
+      try {
+        // Create the writer with the model (transfers ownership)
+        // Use Append to add RNTuple to existing TFile
+        fWriter = ROOT::RNTupleWriter::Append(std::move(fModel), fName, *file);
+
+        QwMessage << "Created RNTuple '" << fName << "' in file " << file->GetName() << QwLog::endl;
+
+      } catch (const std::exception& e) {
+        QwError << "Failed to create RNTuple writer for '" << fName << "': " << e.what() << QwLog::endl;
+      }
+    }
+
+    /// Fill the fields for generic objects
+    template < class T >
+    void FillNTupleFields(const T& object) {
+      if (typeid(object).name() == fType) {
+        // Fill the field vector
+        object.FillNTupleVector(fVector);
+
+        // Use the shared field pointers which remain valid
+        if (fWriter) {
+          for (size_t i = 0; i < fVector.size() && i < fFieldPtrs.size(); ++i) {
+            if (fFieldPtrs[i]) {
+              *(fFieldPtrs[i]) = fVector[i];
+            }
+          }
+
+          // CRITICAL: Actually commit the data to the RNTuple
+          fWriter->Fill();
+
+          // Update event counter
+          fCurrentEvent++;
+          // RNTuple prescaling
+          if (fNumEventsCycle > 0) {
+            fCurrentEvent %= fNumEventsCycle;
+          }
+        } else {
+          QwError << "RNTuple writer not initialized for " << fName << QwLog::endl;
+        }
+      } else {
+        QwError << "Attempting to fill RNTuple vector for type " << fType << " with "
+                << "object of type " << typeid(object).name() << QwLog::endl;
+        exit(-1);
+      }
+    }
+
+    /// Fill the RNTuple (called by FillTree wrapper methods)
+    void Fill() {
+      // This method is now called indirectly - the actual filling happens in FillNTupleFields
+      // Just here for compatibility with the tree interface
+    }
+
+    /// Get the name of the RNTuple
+    const std::string& GetName() const { return fName; }
+    /// Get the description of the RNTuple
+    const std::string& GetDesc() const { return fDesc; }
+    /// Get the prefix of the RNTuple
+    const std::string& GetPrefix() const { return fPrefix; }
+    /// Get the object type
+    std::string GetType() const { return fType; }
+
+    /// Set prescaling parameters
+    void SetPrescaling(UInt_t num_to_save, UInt_t num_to_skip) {
+      fNumEventsToSave = num_to_save;
+      fNumEventsToSkip = num_to_skip;
+      fNumEventsCycle = fNumEventsToSave + fNumEventsToSkip;
+    }
+
+    /// Print the RNTuple name and description
+    void Print() const {
+      QwMessage << GetName() << ", " << GetType();
+      if (fPrefix != "")
+        QwMessage << " (prefix " << GetPrefix() << ")";
+      QwMessage << QwLog::endl;
+    }
+
+  private:
+
+    /// RNTuple model and writer
+    std::unique_ptr<ROOT::RNTupleModel> fModel;
+    std::unique_ptr<ROOT::RNTupleWriter> fWriter;
+
+    /// Vector of values and shared field pointers (for RNTuple)
+    std::vector<Double_t> fVector;
+    std::vector<std::shared_ptr<Double_t>> fFieldPtrs;
+
+    /// Name, description, prefix
+    const std::string fName;
+    const std::string fDesc;
+    const std::string fPrefix;
+
+    /// Object type
+    std::string fType;
+
+    /// RNTuple prescaling parameters
+    UInt_t fCurrentEvent;
+    UInt_t fNumEventsCycle;
+    UInt_t fNumEventsToSave;
+    UInt_t fNumEventsToSkip;
+
+  friend class QwRootFile;
+};
+#endif // HAS_RNTUPLE_SUPPORT
 
 /**
  *  \class QwRootFile
@@ -335,6 +866,18 @@ class QwRootFile {
     template < class T >
     void FillTreeBranches(const T& object);
 
+#ifdef HAS_RNTUPLE_SUPPORT
+    /// \brief Construct the RNTuple fields of a generic object
+    template < class T >
+    void ConstructNTupleFields(const std::string& name, const std::string& desc, T& object, const std::string& prefix = "");
+    /// \brief Fill the RNTuple fields of a generic object by name
+    template < class T >
+    void FillNTupleFields(const std::string& name, const T& object);
+    /// \brief Fill the RNTuple fields of a generic object by type only
+    template < class T >
+    void FillNTupleFields(const T& object);
+#endif // HAS_RNTUPLE_SUPPORT
+
 
     template < class T >
       Int_t WriteParamFileList(const TString& name, T& object);
@@ -354,7 +897,12 @@ class QwRootFile {
       static Int_t update_count = 0;
       update_count++;
       if ((fUpdateInterval > 0) && ( update_count % fUpdateInterval == 0)) Update();
-      if (! HasDirByType(object)) return;
+
+      // Debug directory registration
+      std::string type = typeid(object).name();
+      bool hasDir = HasDirByType(object);
+
+      if (! hasDir) return;
       // Fill histograms
       object.FillHistograms();
     }
@@ -372,6 +920,24 @@ class QwRootFile {
       }
       fTreeByName[name].push_back(tree);
     }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+    /// Create a new RNTuple with name and description
+    void NewNTuple(const std::string& name, const std::string& desc) {
+      if (IsTreeDisabled(name) || !fEnableRNTuples) return;
+      QwRootNTuple *ntuple = 0;
+      if (! HasNTupleByName(name)) {
+        ntuple = new QwRootNTuple(name, desc);
+        // Initialize the writer with our file
+        ntuple->InitializeWriter(fRootFile);
+      } else {
+        // For simplicity, don't support copying existing RNTuples yet
+        QwError << "Cannot create duplicate RNTuple: " << name << QwLog::endl;
+        return;
+      }
+      fNTupleByName[name].push_back(ntuple);
+    }
+#endif // HAS_RNTUPLE_SUPPORT
 
     /// Get the tree with name
     TTree* GetTree(const std::string& name) {
@@ -395,6 +961,26 @@ class QwRootFile {
       }
       return retval;
     }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+    /// Fill the RNTuple with name
+    void FillNTuple(const std::string& name) {
+      if (HasNTupleByName(name)) {
+        fNTupleByName[name].front()->Fill();
+      }
+    }
+#endif // HAS_RNTUPLE_SUPPORT
+
+#ifdef HAS_RNTUPLE_SUPPORT
+    /// Fill all registered RNTuples
+    void FillNTuples() {
+      // Loop over all registered RNTuple names
+      std::map< const std::string, std::vector<QwRootNTuple*> >::iterator iter;
+      for (iter = fNTupleByName.begin(); iter != fNTupleByName.end(); iter++) {
+        iter->second.front()->Fill();
+      }
+    }
+#endif // HAS_RNTUPLE_SUPPORT
 
     /// Print registered trees
     void PrintTrees() const {
@@ -426,7 +1012,7 @@ class QwRootFile {
     template < class T >
     Int_t WriteObject(const T* obj, const char* name, Option_t* option = "", Int_t bufsize = 0) {
       Int_t retval = 0;
-      // TMapFile has no suport for WriteObject
+      // TMapFile has no support for WriteObject
       if (fRootFile) retval = fRootFile->WriteObject(obj,name,option,bufsize);
       return retval;
     }
@@ -445,9 +1031,9 @@ class QwRootFile {
 	Long64_t nBytes(0);
 	for (auto iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++)
 	  nBytes += iter->second.front()->AutoSave("SaveSelf");
-        
+
 	QwMessage << "TFile saved: "
-                  << nBytes/1000000 << "MB (innacurate number)" //FIXME this calculation is innacurate
+                  << nBytes/1000000 << "MB (inaccurate number)" //FIXME this calculation is inaccurate
                   << QwLog::endl;
       }
     }
@@ -455,9 +1041,45 @@ class QwRootFile {
     void ls()     { if (fMapFile) fMapFile->ls();     if (fRootFile) fRootFile->ls(); }
     void Map()    { if (fRootFile) fRootFile->Map(); }
     void Close()  {
+
+      // Check if we should make the file permanent - restore original logic
       if (!fMakePermanent) fMakePermanent = HasAnyFilled();
+
+
+#ifdef HAS_RNTUPLE_SUPPORT
+      // Close all RNTuples before closing the file
+      for (auto& pair : fNTupleByName) {
+        for (auto& ntuple : pair.second) {
+          if (ntuple) ntuple->Close();
+        }
+      }
+#endif // HAS_RNTUPLE_SUPPORT
+
+      // CRITICAL FIX: Explicitly write all trees before closing!
+      if (fRootFile) {
+
+        for (auto iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++) {
+          if (!iter->second.empty() && iter->second.front()) {
+            TTree* tree = iter->second.front()->GetTree();
+            if (tree && tree->GetEntries() > 0) {
+
+              tree->Write();
+            }
+          }
+        }
+      }
+
+      // Close the file and handle renaming
+      if (fRootFile) {
+        TString rootfilename = fRootFile->GetName();
+
+        fRootFile->Close();
+
+      }
+
       if (fMapFile) fMapFile->Close();
-      if (fRootFile) fRootFile->Close();
+
+
     }
 
     // Wrapped functionality
@@ -470,7 +1092,7 @@ class QwRootFile {
 
     // Wrapped functionality
     TDirectory* mkdir(const char* name, const char* title = "") {
-      // TMapFile has no suport for mkdir
+      // TMapFile has no support for mkdir
       if (fRootFile) return fRootFile->mkdir(name, title);
       else return 0;
     }
@@ -478,7 +1100,7 @@ class QwRootFile {
     // Wrapped functionality
     Int_t Write(const char* name = 0, Int_t option = 0, Int_t bufsize = 0) {
       Int_t retval = 0;
-      // TMapFile has no suport for Write
+      // TMapFile has no support for Write
       if (fRootFile) retval = fRootFile->Write(name, option, bufsize);
       return retval;
     }
@@ -517,12 +1139,13 @@ class QwRootFile {
     TMapFile* fMapFile;
     Bool_t fEnableMapFile;
     Int_t fUpdateInterval;
+    Int_t fCompressionAlgorithm;
     Int_t fCompressionLevel;
     Int_t fBasketSize;
     Int_t fAutoFlush;
     Int_t fAutoSave;
 
-  
+
 
   private:
 
@@ -560,6 +1183,16 @@ class QwRootFile {
     std::map< const std::type_index , std::vector<QwRootTree*> > fTreeByType;
     // ... Are type_index objects really unique? Let's hope so.
 
+#ifdef HAS_RNTUPLE_SUPPORT
+    /// RNTuple names, addresses, and types
+    std::map< const std::string, std::vector<QwRootNTuple*> > fNTupleByName;
+    std::map< const void*      , std::vector<QwRootNTuple*> > fNTupleByAddr;
+    std::map< const std::type_index , std::vector<QwRootNTuple*> > fNTupleByType;
+
+    /// RNTuple support flag
+    Bool_t fEnableRNTuples;
+#endif // HAS_RNTUPLE_SUPPORT
+
     /// Is a tree registered for this name
     bool HasTreeByName(const std::string& name) {
       if (fTreeByName.count(name) == 0) return false;
@@ -579,6 +1212,28 @@ class QwRootFile {
       if (fTreeByAddr.count(addr) == 0) return false;
       else return true;
     }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+    /// Is an RNTuple registered for this name
+    bool HasNTupleByName(const std::string& name) {
+      if (fNTupleByName.count(name) == 0) return false;
+      else return true;
+    }
+    /// Is an RNTuple registered for this type
+    template < class T >
+    bool HasNTupleByType(const T& object) {
+      const std::type_index type = typeid(object);
+      if (fNTupleByType.count(type) == 0) return false;
+      else return true;
+    }
+    /// Is an RNTuple registered for this object
+    template < class T >
+    bool HasNTupleByAddr(const T& object) {
+      const void* addr = static_cast<const void*>(&object);
+      if (fNTupleByAddr.count(addr) == 0) return false;
+      else return true;
+    }
+#endif // HAS_RNTUPLE_SUPPORT
 
     /// Directories
     std::map< const std::string, TDirectory* > fDirsByName;
@@ -661,6 +1316,7 @@ void QwRootFile::ConstructTreeBranches(
   if (fTreeByName.count(name) == 0) {
 
     // Go to top level directory
+
     this->cd();
 
     // New tree with name, description, object, prefix
@@ -745,6 +1401,107 @@ void QwRootFile::FillTreeBranches(
 }
 
 
+#ifdef HAS_RNTUPLE_SUPPORT
+/**
+ * Construct the RNTuple fields of a generic object
+ * @param name Name for RNTuple
+ * @param desc Description for RNTuple
+ * @param object Subsystem array
+ * @param prefix Prefix for the RNTuple
+ */
+template < class T >
+void QwRootFile::ConstructNTupleFields(
+        const std::string& name,
+        const std::string& desc,
+        T& object,
+        const std::string& prefix)
+{
+  // Return if RNTuples are disabled
+  if (!fEnableRNTuples) return;
+
+  // Pointer to new RNTuple
+  QwRootNTuple* ntuple = 0;
+
+  // If the RNTuple does not exist yet, create it
+  if (fNTupleByName.count(name) == 0) {
+
+    // New RNTuple with name, description, object, prefix
+    ntuple = new QwRootNTuple(name, desc, object, prefix);
+
+    // Initialize the writer with our file
+    ntuple->InitializeWriter(fRootFile);
+
+    // Settings only relevant for new RNTuples
+    if (name == "evt")
+      ntuple->SetPrescaling(fNumMpsEventsToSave, fNumMpsEventsToSkip);
+    else if (name == "mul")
+      ntuple->SetPrescaling(fNumHelEventsToSave, fNumHelEventsToSkip);
+
+  } else {
+
+    // For simplicity, don't support multiple RNTuples with same name yet
+    QwError << "Cannot create duplicate RNTuple: " << name << QwLog::endl;
+    return;
+  }
+
+   // Add the fields to the list of RNTuples by name, object, type
+  const void* addr = static_cast<const void*>(&object);
+  const std::type_index type = typeid(object);
+  fNTupleByName[name].push_back(ntuple);
+  fNTupleByAddr[addr].push_back(ntuple);
+  fNTupleByType[type].push_back(ntuple);
+}
+
+
+/**
+ * Fill the RNTuple fields of a generic object by name
+ * @param name Name for RNTuple
+ * @param object Subsystem array
+ */
+template < class T >
+void QwRootFile::FillNTupleFields(
+        const std::string& name,
+        const T& object)
+{
+  // If this name has no registered RNTuples
+  if (! HasNTupleByName(name)) return;
+  // If this type has no registered RNTuples
+  if (! HasNTupleByType(object)) return;
+
+  // Get the address of the object
+  const void* addr = static_cast<const void*>(&object);
+
+  // Fill the RNTuples with the correct address
+  for (size_t ntuple = 0; ntuple < fNTupleByAddr[addr].size(); ntuple++) {
+    if (fNTupleByAddr[addr].at(ntuple)->GetName() == name) {
+      fNTupleByAddr[addr].at(ntuple)->FillNTupleFields(object);
+    }
+  }
+}
+
+
+/**
+ * Fill the RNTuple fields of a generic object by type only
+ * @param object Subsystem array
+ */
+template < class T >
+void QwRootFile::FillNTupleFields(
+        const T& object)
+{
+  // If this address has no registered RNTuples
+  if (! HasNTupleByAddr(object)) return;
+
+  // Get the address of the object
+  const void* addr = static_cast<const void*>(&object);
+
+  // Fill the RNTuples with the correct address
+  for (size_t ntuple = 0; ntuple < fNTupleByAddr[addr].size(); ntuple++) {
+    fNTupleByAddr[addr].at(ntuple)->FillNTupleFields(object);
+  }
+}
+#endif // HAS_RNTUPLE_SUPPORT
+
+
 /**
  * Construct the objects directory of a generic object
  * @param name Name for objects directory
@@ -798,14 +1555,15 @@ void QwRootFile::ConstructHistograms(const std::string& name, T& object)
             fRootFile->GetDirectory(("/" + name).c_str()) :
             fRootFile->GetDirectory("/")->mkdir(name.c_str());
     fDirsByType[type].push_back(name);
+
     object.ConstructHistograms(fDirsByName[name]);
   }
 
   // No support for directories in a map file
   if (fMapFile) {
     QwMessage << "QwRootFile::ConstructHistograms::detectors address "
-	      << &object  
-	      << " and its name " << name 
+	      << &object
+	      << " and its name " << name
 	      << QwLog::endl;
 
     std::string type = typeid(object).name();
@@ -829,6 +1587,3 @@ Int_t QwRootFile::WriteParamFileList(const TString &name, T& object)
   }
   return retval;
 }
-
-
-#endif // __QWROOTFILE__

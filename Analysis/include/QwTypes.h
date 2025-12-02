@@ -1,5 +1,9 @@
-#ifndef QWTYPES_H
-#define QWTYPES_H
+/*!
+ * \file   QwTypes.h
+ * \brief  Basic data types and constants used throughout the Qweak analysis framework
+ */
+
+#pragma once
 
 // C and C++ headers
 #include <map>
@@ -12,7 +16,7 @@ class TString;
 // Qweak headers
 #include "QwUnits.h"
 
-//  Types for the ROC_ID and Bank_ID used in decoding and destributing data
+//  Types for the ROC_ID and Bank_ID used in decoding and distributing data
 typedef UInt_t    ROCID_t;
 typedef ULong64_t BankID_t; /// Bank ID will combine both bank and marker words
 static const ROCID_t  kNullROCID  = kMaxUInt;
@@ -151,16 +155,6 @@ enum EQwBeamInstrumentType {
   kBeamDevTypes  // This should be the last enum; it provides the number of know types.
 };
 
-// Enumerator type for the electronics module type
-enum EQwModuleType {
-  kUnknownModuleType = 0,
-  kV775_TDC,
-  kV792_ADC,
-  kF1TDC,
-  kSIS3801,
-  kNumModuleTypes
-};
-
 //Beamline device errorflags
 static const UInt_t kErrorFlag_VQWK_Sat   = 0x01; // in Decimal 1 to identify a VQWK is saturating
 static const UInt_t kErrorFlag_sample     = 0x2;  // in Decimal 2   for sample size check
@@ -177,7 +171,7 @@ static const UInt_t kBPMErrorFlag = 0x400; // in Decimal 1024 to identify the si
 static const UInt_t kPMTErrorFlag = 0x800; // in Decimal 2048 to identify the single event cut is failed for a PMT (Combined or regular)
 static const UInt_t kBModFFBErrorFlag = 0x1000; // in Decimal 4096 (2^12) to identify the FFB OFF periods for Energy modulation
 static const UInt_t kBModErrorFlag = 0x8000; // in Decimal 32768 (2^15) to identify the single event cut is failed for a BMod channel
-static const UInt_t kEventCutMode3 = 0x10000;  // in Decimal 65536 to identify the mode 3 where we only flag event cut failed events 
+static const UInt_t kEventCutMode3 = 0x10000;  // in Decimal 65536 to identify the mode 3 where we only flag event cut failed events
 static const UInt_t kErrorFlag_Helicity = 0x20000;  // Any type of helicity decoding problem
 
 
@@ -239,8 +233,15 @@ inline QwHelicityMap CreateHelicityMap()
 static const QwHelicityMap kMapHelicity = CreateHelicityMap();
 
 
-///
-/// \ingroup QwAnalysis
+/**
+ * \class QwDetectorID
+ * \ingroup QwAnalysis
+ * \brief Detector identification structure for tracking system components
+ *
+ * Encapsulates the complete identification of a detector element including
+ * region, package, octant, plane, direction, and element number. Used
+ * throughout the tracking system for detector mapping and data organization.
+ */
 class QwDetectorID
 {
  public:
@@ -248,11 +249,11 @@ class QwDetectorID
   : fRegion(kRegionIDNull),fPackage(kPackageNull),fOctant(-1),
     fPlane(-1),fDirection(kDirectionNull),fElement(-1) { };
 
-  QwDetectorID(const EQwRegionID region, 
-               const EQwDetectorPackage package, 
+  QwDetectorID(const EQwRegionID region,
+               const EQwDetectorPackage package,
                const Int_t octant,
                const Int_t plane,
-               const EQwDirectionID direction, 
+               const EQwDirectionID direction,
                const Int_t wire)
   : fRegion(region),fPackage(package),fOctant(octant),
     fPlane(plane),fDirection(direction),fElement(wire) { };
@@ -264,7 +265,7 @@ class QwDetectorID
   Int_t              fPlane;     ///< R or theta index for R1; plane index for R2 & R3
   EQwDirectionID     fDirection; ///< direction of the wire plane X,Y,U,V etc - Rakitha (10/23/2008)
   Int_t              fElement;   ///< trace number for R1; wire number for R2 & R3; PMT number for others
-  
+
   friend std::ostream& operator<<(std::ostream& os, const QwDetectorID &detectorID) {
     os << " Region ";
     os <<  detectorID.fRegion;
@@ -284,23 +285,15 @@ class QwDetectorID
 };
 
 
-
-///
-/// \ingroup QwAnalysis
-class QwElectronicsID
-{
- public:
- QwElectronicsID():fModule(-1),fChannel(-1){};
- QwElectronicsID(const int slot,const int chan):fModule(slot),fChannel(chan){};
-
- public:
-  int fModule;       //F1TDC slot number or module number
-  int fChannel;      //channel number
-};
-
-
-///
-/// \ingroup QwAnalysis
+/**
+ * \class QwDelayLineID
+ * \ingroup QwAnalysis
+ * \brief Identification structure for delay line detector components
+ *
+ * Specifies the location of delay line elements using backplane number,
+ * line number, and side identification. Used for delay line detector
+ * mapping and data processing.
+ */
 class QwDelayLineID{
  public:
  QwDelayLineID():fBackPlane(-1),fLineNumber(-1),fSide(-1){};
@@ -315,7 +308,7 @@ class QwDelayLineID{
 enum EQwWienMode {
   kWienIndeterminate = 0,
   kWienForward,
-  kWienBackward, 
+  kWienBackward,
   kWienVertTrans,
   kWienHorizTrans
 };
@@ -329,5 +322,3 @@ typedef class QwMollerADC_Channel QwBeamCharge;
 typedef class QwMollerADC_Channel QwBeamPosition;
 typedef class QwMollerADC_Channel QwBeamAngle;
 typedef class QwMollerADC_Channel QwBeamEnergy;
-
-#endif

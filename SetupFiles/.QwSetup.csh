@@ -64,5 +64,3 @@ endif
 source ${QWANALYSIS}/SetupFiles/make_scratch_dir
 source ${QWANALYSIS}/SetupFiles/.Qwcshrc
 source ${QWANALYSIS}/SetupFiles/.Qwcshrc_scratch
-
-

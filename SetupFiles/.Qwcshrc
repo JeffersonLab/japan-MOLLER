@@ -38,9 +38,9 @@ else
     set myrootlib=${ROOTSYS}/lib
 endif
 if ($?LD_LIBRARY_PATH) then
-   setenv LD_LIBRARY_PATH  ${QW_LIB}:${myrootlib}:${MYSQLPP_LIB_DIR}:${LD_LIBRARY_PATH}
+   setenv LD_LIBRARY_PATH  ${QW_LIB}:${myrootlib}:${LD_LIBRARY_PATH}
 else
-   setenv LD_LIBRARY_PATH  ${QW_LIB}:${myrootlib}:${MYSQLPP_LIB_DIR}
+   setenv LD_LIBRARY_PATH  ${QW_LIB}:${myrootlib}
 endif
 
 # Create alias for make when gmake is not found; the standard

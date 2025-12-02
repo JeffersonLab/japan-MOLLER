@@ -1,5 +1,9 @@
-#ifndef QWUNITS_H
-#define QWUNITS_H
+/*!
+ * \file   QwUnits.h
+ * \brief  Physical units and constants for Qweak analysis
+ */
+
+#pragma once
 
 /**
  * \ingroup QwAnalysis
@@ -130,7 +134,7 @@ namespace Qw {
   static const double c = 299792458. * m / sec;    ///< Speed of light
   static const double Mp = 938.272013 * MeV;    ///< Mass of the proton
   //@}
-  
+
   //@{
   //Asymmetry: base unit is 1
   static const double ppm=1e-6;
@@ -138,5 +142,3 @@ namespace Qw {
   //@}
 
 } // namespace Qw
-
-#endif // QWUNITS_H

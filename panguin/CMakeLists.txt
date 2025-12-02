@@ -43,6 +43,15 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 find_package(ROOT 6 REQUIRED Gui Minuit2)
 include_directories(${ROOT_INCLUDE_DIR})
 
+# Check ROOT version for RNTuple support (available in ROOT 6.36+)
+if(${ROOT_VERSION} VERSION_GREATER_EQUAL "6.36.0")
+    message(STATUS "ROOT version ${ROOT_VERSION} supports RNTuple - enabling RNTuple functionality in panguin")
+    add_definitions(-DHAS_RNTUPLE_SUPPORT)
+else()
+    message(STATUS "ROOT version ${ROOT_VERSION} does not support RNTuple - disabling RNTuple functionality in panguin")
+    message(STATUS "RNTuple support requires ROOT 6.36 or higher")
+endif()
+
 add_definitions(-std=c++11)
 
 

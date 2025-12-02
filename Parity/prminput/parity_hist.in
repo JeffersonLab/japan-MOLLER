@@ -1,6 +1,6 @@
 #Beamline
 #   This is the histogram parameter input file for the QwHistogramHelper class
-#   "." is the wildcard here!!!! Please use "." only (no "*") since we 
+#   "." is the wildcard here!!!! Please use "." only (no "*") since we
 #   require the exact same length for two strings to match!!!!
 #   The values after the axis titles, if exist, are the min and max of
 #   the histogram filled weight.
@@ -26,8 +26,8 @@ hel_mps_counter			TH1F	189 	-2.5	186.5 				ScalerCounter	Counts
 pat_counter			TH1F	189 	-2.5	186.5 				ScalerCounter	Counts
 hel_pat_counter			TH1F	189 	-2.5	186.5 				ScalerCounter	Counts
 userbit				TH1F	5 	-2.5	2.5 				Userbit 	Counts
-input_register			TH1F  12      -1.5	10.5				inputregister	Events	
-output_register			TH1F  12      -1.5	10.5				outputregister	Events	
+input_register			TH1F  12      -1.5	10.5				inputregister	Events
+output_register			TH1F  12      -1.5	10.5				outputregister	Events
 hel_cleandata			TH1F	5 	-2.5	2.5 				Cleandata	Counts
 hel_scandata1			TH1F	101 	-0.5	100.5 				Scandata1 	Counts
 hel_scandata2			TH1F	101 	-0.5	100.5 				Scandata2	Counts
@@ -46,7 +46,7 @@ bmod_qwk_bcm.*				TProfile	371	-5.5	365.5	 0 200 		Phase/deg	Current
 bmod_.*				TProfile	371	-5.5	365.5	 -10000 10000 		Phase/deg	Value
 
 
-###  New MD yield histograms 
+###  New MD yield histograms
 
 qwk_md...._hw			TH1F	10000	-0.08	0.08				V/#muA	Events
 qwk_md...._hw_raw		TH1F	10000	-6.1e7	6.1e7				Samples	Events
@@ -93,12 +93,12 @@ asym_qwk_mdallbars_block.	TH1F	1001	0	0				Asymmetry	Events
 
 asym_qwk_mdevenbars_hw		TH1F	1001	0	0				Asymmetry       Events
 asym_qwk_mdevenbars_block.	TH1F	1001	0	0				Asymmetry       Events
-						 	 				                      
+
 asym_qwk_mdoddbars_hw		TH1F	1001	0	0				Asymmetry       Events
 asym_qwk_mdoddbars_block.	TH1F	1001	0	0				Asymmetry       Events
 
 
-###  Auxilliary/Background detector
+###  Auxiliary/Background detector
 qwk_pmtled_hw                   TH1F	1001	0 0				V/#muA	Events
 qwk_pmtled_block.               TH1F	1001	0 0				V/#muA	Events
 qwk_pmtonl_hw                   TH1F	1001	0 0				V/#muA	Events
@@ -125,7 +125,7 @@ asym_qwk_preamp_block.          TH1F    1001   0 0   			Asymmetry Events
 asym_qwk_cagesr_hw              TH1F    1001   0 0   			Asymmetry Events
 asym_qwk_cagesr_block.          TH1F    1001   0 0   			Asymmetry Events
 
-###  New Lumi histograms 
+###  New Lumi histograms
 
 qwk_dslumi._hw			TH1F	10000	0.01	0.03				V/#muA	Events
 qwk_dslumi._hw_raw		TH1F	10000	0		3.1e7				Samples	Events
@@ -332,7 +332,7 @@ diff_qwk_bpm.*Rel._dev_err	TH1F	101	-1.0	128          	ErrorCode	Events
 
 ###diff-BPM-X/Y########
 diff_qwk_bpm.*._block.		TH1F	1001	0	0		Diff(mm)	Entries
-diff_qwk_bpm.*._hw		TH1F	1001	0	0		Diff(mm)	Entries			
+diff_qwk_bpm.*._hw		TH1F	1001	0	0		Diff(mm)	Entries
 diff_qwk_bpm.*._dev_err		TH1F	101	-1.0	128          	ErrorCode	Events
 
 ###Combo-BPM#############
@@ -384,12 +384,12 @@ yield_qwk_target.Intercept_block.	TH1F	1001	-5.0e2	5.0e2		Intcp(mm)	Entries
 yield_qwk_target.Intercept_hw		TH1F	1001	-5.0e2	5.0e2		Intcp(mm)	Entries
 yield_qwk_target.Intercept_dev_err	TH1F	101	-1.0	128          	ErrorCode	Events
 
-yield_qwk_target.Slope_block.		TH1F	1001	-1.0	1.0		slope		Entries			
-yield_qwk_target.Slope_hw		TH1F	1001	-1.0	1.0		slope		Entries	
+yield_qwk_target.Slope_block.		TH1F	1001	-1.0	1.0		slope		Entries
+yield_qwk_target.Slope_hw		TH1F	1001	-1.0	1.0		slope		Entries
 yield_qwk_target.Slope_dev_err		TH1F	101	-1.0	128          	ErrorCode	Events
 
 #####Combo-energy#############
-yield_qwk_energy_block.			TH1F	1001	-1.0e-3	1.0e-3		Energy		Entries		
+yield_qwk_energy_block.			TH1F	1001	-1.0e-3	1.0e-3		Energy		Entries
 yield_qwk_energy_hw			TH1F	1001	-1.0e-3	1.0e-3		Energy		Entries
 yield_qwk_energy_dev_err		TH1F	101	-1.0	128          	ErrorCode	Events
 
@@ -397,7 +397,7 @@ yield_qwk_energy_dev_err		TH1F	101	-1.0	128          	ErrorCode	Events
 
 ###MPS-BPM-Abs-yield########
 qwk_bpm.*._block.		TH1F	1001	-5.0	5.0		AbsPos(mm)	Entries
-qwk_bpm.*._hw			TH1F	1001	-5.0	5.0		AbsPos(mm)	Entries	
+qwk_bpm.*._hw			TH1F	1001	-5.0	5.0		AbsPos(mm)	Entries
 qwk_bpm.*._dev_err		TH1F	101	-1.0	128          	ErrorCode	Events
 
 
@@ -410,13 +410,13 @@ qwk_target.Intercept_block.	TH1F	1001	-5.0e2	5.0e2		Intcp(mm)	Entries
 qwk_target.Intercept_hw		TH1F	1001	-5.0e2	5.0e2		Intcp(mm)	Entries
 qwk_target.Intercept_dev_err	TH1F	101	-1.0	128          	ErrorCode	Events
 
-qwk_target.Slope_block.		TH1F	1001	-1.0	1.0		slope		Entries	
+qwk_target.Slope_block.		TH1F	1001	-1.0	1.0		slope		Entries
 qwk_target.Slope_hw		TH1F	1001	-1.0	1.0		slope		Entries
 qwk_target.Slope_dev_err	TH1F	101	-1.0	128          	ErrorCode	Events
 
 #####Combo-energy#############
-qwk_energy_block.		TH1F	1001	-1.0e-3		1.0e-3		Energy		Entries	
-qwk_energy_hw			TH1F	1001	-1.0e-3		1.0e-3		Energy		Entries	
+qwk_energy_block.		TH1F	1001	-1.0e-3		1.0e-3		Energy		Entries
+qwk_energy_hw			TH1F	1001	-1.0e-3		1.0e-3		Energy		Entries
 qwk_energy_dev_err		TH1F	101	-1.0		128          	ErrorCode	Events
 
 

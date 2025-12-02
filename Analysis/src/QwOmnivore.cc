@@ -1,8 +1,12 @@
+/*!
+ * \file   QwOmnivore.cc
+ * \brief  Implementation for omnivorous subsystem template class
+ */
+
 #include "QwOmnivore.h"
 
-// Register this subsystem with the factory
-RegisterSubsystemFactory(QwOmnivore<VQwSubsystemParity>);
-
-// Register this subsystem with the factory
-// TODO (wdc) disabled due to extraneous includes
-//RegisterSubsystemFactory(QwOmnivore<VQwSubsystemTracking>);
+/**
+ * Virtual destructor to ensure creation of VTT
+ */
+template<typename VQwSubsystem_t>
+QwOmnivore<VQwSubsystem_t>::~QwOmnivore() { }

@@ -1,5 +1,5 @@
 
-/* cfSockCli - send requests to server over a TCP socket 
+/* cfSockCli - send requests to server over a TCP socket
                for configuration utility */
 /*
   DESCRIPTION
@@ -50,19 +50,19 @@ static int   gSocketKeepOpen = 0; /* indicator to keep the socket open:
 
 
 int cfSockCliOpen (int crate_number, int keepopen);
-int cfSockCliSend (int crate_number, struct request *myRequest, 
+int cfSockCliSend (int crate_number, struct request *myRequest,
 		   struct request *serverReply);
 int cfSockCliClose();
 
 
-int cfSockCli ( 
+int cfSockCli (
 	       int crate_number,      /* which crate to address */
 	       struct request *myRequest,    /* request to send to server */
 	       struct request *serverReply   /* reply from server */
  )
 {
   int status;
-  
+
   //  printf("cfSockCli: gSocketKeepOpen=%d\n",gSocketKeepOpen);
   //  if (gSocketKeepOpen==0){
   if (1==1){
@@ -105,24 +105,24 @@ int cfSockCliOpen (int crate_number, int keepopen) {
     break;
   case Crate_Injector:
     servername = ServerName_Injector;
-    break; 
+    break;
   case Crate_Qwvmets:
     servername = ServerName_QwTSCrate;
-    break; 
+    break;
 
   default:
     return (SOCK_ERROR);
-  }  
+  }
 
   if ((gSocketFd = socket (PF_INET, SOCK_STREAM, 0)) == SOCK_ERROR)
     {
       perror ("socket");
       return (SOCK_ERROR);
     }
-  
+
   optval = 1;
   int test = 0;
-  test = setsockopt ( gSocketFd, IPPROTO_TCP, TCP_NODELAY, 
+  test = setsockopt ( gSocketFd, IPPROTO_TCP, TCP_NODELAY,
 	       (char *) &optval,
 	       4 ); /* black magic from Chowdhary's code */
 
@@ -131,20 +131,20 @@ int cfSockCliOpen (int crate_number, int keepopen) {
 
   /* bind not required - port number is dynamic */
     /* build server socket address */
-  
+
   sockAddrSize = sizeof (struct sockaddr_in);
   bzero ((char *) &serverAddr, sockAddrSize);
   serverAddr.sin_family = PF_INET;
   serverAddr.sin_port = htons (SERVER_PORT_NUM);
-  
+
   if ((serverAddr.sin_addr.s_addr = inet_addr (servername)) == SOCK_ERROR)
     {
       perror ("unknown server name");
       close (gSocketFd);
       return (SOCK_ERROR);
     }
-  
-  /* connect to server */  
+
+  /* connect to server */
   if (connect (gSocketFd, (struct sockaddr *) &serverAddr, sockAddrSize) == SOCK_ERROR)
     {
       perror ("connect");
@@ -155,7 +155,7 @@ int cfSockCliOpen (int crate_number, int keepopen) {
   return (SOCK_OK);
 };
 
-int cfSockCliSend ( 
+int cfSockCliSend (
 	       int crate_number,      /* which crate to address */
 	       struct request *myRequest,    /* request to send to server */
 	       struct request *serverReply   /* reply from server */
@@ -182,7 +182,7 @@ int cfSockCliSend (
 
   /* send request to server */
   nWrite = send (gSocketFd, (char *) myRequest, sizeof (*myRequest), 0);
-  if ( nWrite != sizeof(*myRequest) ) 
+  if ( nWrite != sizeof(*myRequest) )
     {
       printf ( "cfSockCli WARN: nWrite = %d, sizeof (*myRequest) = %d\n",
 		     nWrite, sizeof (*myRequest) );
@@ -190,12 +190,12 @@ int cfSockCliSend (
       close(gSocketFd);
       return (SOCK_ERROR);
     }
-  
+
   if (myRequest->reply)        /* if expecting reply, read and display it */
     {
       i = recv ( gSocketFd, (char *) serverReply, sizeof(*serverReply), 0 );
 
-      if ( i == SOCK_ERROR ) 
+      if ( i == SOCK_ERROR )
 	{
 	  perror ("Error reading result\n");
 	  return (SOCK_ERROR);
@@ -216,7 +216,7 @@ int cfSockCliSend (
        */
       while ( i < sizeof(*serverReply) ) {
 	j = recv( gSocketFd, ((char *) serverReply)+i, sizeof(*serverReply)-i, 0 );
-	if ( j == SOCK_ERROR ) 
+	if ( j == SOCK_ERROR )
 	  {
 	    perror ("Error reading result\n");
 	    close(gSocketFd);
@@ -254,10 +254,10 @@ int cfSockCliClose()
   }
   main (int argc, char *argv[])
   {
-  struct request myRequest;     // request to send to server 
-  struct request serverReply;   // reply from server 
-  
-  
+  struct request myRequest;     // request to send to server
+  struct request serverReply;   // reply from server
+
+
   //    cfSockCli("129.57.164.13");
   buildRequestInteractive(&myRequest);
   printf("\n");
@@ -265,22 +265,22 @@ int cfSockCliClose()
   printf("your magic_cookie will be: %d \n",ntohl(myRequest.magic_cookie));
   printf("your request param_1 will be: %d \n",ntohl(myRequest.par1));
   printf("your request param_2 will be: %d \n",ntohl(myRequest.par2));
-  
+
   cfSockCli(Crate_CountingHouse, &myRequest,&serverReply);
-    
+
   if (myRequest.reply)        // if expecting reply, read and display it
   handleReplyInteractive(&serverReply);
-  
+
   }
 */
 
 int cfSockCommand(int crate_number,
-		  long command_type, long command,  
-		  long req_param,    long req_param_2, 
+		  long command_type, long command,
+		  long req_param,    long req_param_2,
 		  char *reply,       char *msg  )
 {
-  struct request myRequest;     // request to send to server 
-  struct request serverReply;   // reply from server 
+  struct request myRequest;     // request to send to server
+  struct request serverReply;   // reply from server
   int mlen;
   int errFlag;
   //  char *reply = "Y";
@@ -290,7 +290,7 @@ int cfSockCommand(int crate_number,
   myRequest.magic_cookie = htonl(MAGIC_COOKIE);
   myRequest.par1 = htonl(req_param);
   myRequest.par2 = htonl(req_param_2);
-  switch (*reply) 
+  switch (*reply)
    {
     case 'y':
     case 'Y': myRequest.reply = TRUE;
@@ -311,10 +311,10 @@ int cfSockCommand(int crate_number,
   //  printf("your request param_2 will be: %d \n",ntohl(myRequest.par2));
   //  printf("Requested reply?  : %s \n",reply);
   //  printf("\n");
-  
+
   errFlag = cfSockCli(crate_number,&myRequest,&serverReply);
   if (errFlag != SOCK_OK) return errFlag;
-    
+
   // if expecting reply, read and display it
   if (myRequest.reply) {
 	msg = strcpy(serverReply.message,serverReply.message);
@@ -333,12 +333,12 @@ int cfSockCommand(int crate_number,
 
 int GreenSockCommand(int crate_number, struct greenRequest *gRequest)
 {
-  struct request myRequest;     // request to send to server 
-  struct request serverReply;   // reply from server 
+  struct request myRequest;     // request to send to server
+  struct request serverReply;   // reply from server
   //  char *reply;
   int mlen;
   int errFlag;
-  
+
   //  char *reply = "Y";
 
   myRequest.command_type = htonl(gRequest->command_type);
@@ -367,11 +367,11 @@ int GreenSockCommand(int crate_number, struct greenRequest *gRequest)
   //  printf("your request param_2 will be: %d \n",ntohl(myRequest.par2));
   //  printf("Requested reply?  : %s \n",gRequest->reply);
   //  printf("\n");
-  
+
   errFlag = cfSockCli(crate_number, &myRequest,&serverReply);
 
   if (errFlag != SOCK_OK) return errFlag;
-    
+
   // if expecting reply, read and display it
   if (myRequest.reply) {
     //	gRequest->message = strcpy(serverReply.message,serverReply.message);
@@ -380,7 +380,7 @@ int GreenSockCommand(int crate_number, struct greenRequest *gRequest)
     gRequest->command = htonl(serverReply.command);
     gRequest->par1 = htonl(serverReply.par1);
     gRequest->par2 = htonl(serverReply.par2);
-    
+
     //    printf ("cfSockCli: MESSAGE FROM SERVER:   %s\n", gRequest->message);
     //    printf("Server reply command: %d \n",gRequest->command);
     //    printf("Server reply param_1: %d \n",gRequest->req_param);
@@ -393,14 +393,14 @@ int GreenSockCommand(int crate_number, struct greenRequest *gRequest)
 
 void buildRequestInteractive(struct request *myRequest) {
   /* build request, prompting user for message */
-  int                 mlen;          /* length of message */  
+  int                 mlen;          /* length of message */
   char                reply;         /* if TRUE, expect reply back */
-  
+
   printf ("Message to send: \n");
   mlen = read (STD_IN, myRequest->message, REQUEST_MSG_SIZE);
   myRequest->msgLen = htonl(mlen);
   myRequest->message[mlen - 1] = '\0';
-  
+
   myRequest->command_type = htonl(1);
   printf("your command type will be: %d \n",ntohl(myRequest->command_type));
   myRequest->command = htonl(10);
@@ -434,10 +434,3 @@ void handleReplyInteractive(struct request *serverReply) {
       printf("Server reply param_2: %d \n",ntohl(serverReply->par2));
       printf("Server reply msgLen: %d \n",ntohl(serverReply->msgLen));
 }
-
-
-
-
-
-
-

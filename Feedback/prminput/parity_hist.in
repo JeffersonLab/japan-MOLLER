@@ -1,6 +1,6 @@
 #Beamline
 #   This is the histogram parameter input file for the QwHistogramHelper class
-#   "." is the wildcard here!!!! Please use "." only (no "*") since we 
+#   "." is the wildcard here!!!! Please use "." only (no "*") since we
 #   require the exact same length for two strings to match!!!!
 #   The values after the axis titles, if exist, are the min and max of
 #   the histogram filled weight.
@@ -26,16 +26,16 @@ hel_mps_counter			TH1F	189 	-2.5	186.5 				ScalerCounter	Counts
 pat_counter			TH1F	189 	-2.5	186.5 				ScalerCounter	Counts
 hel_pat_counter			TH1F	189 	-2.5	186.5 				ScalerCounter	Counts
 userbit				TH1F	5 	-2.5	2.5 				Userbit 	Counts
-input_register			TH1F  12      -1.5	10.5				inputregister Events	
-output_register			TH1F  12      -1.5	10.5				outputregister Events	
+input_register			TH1F  12      -1.5	10.5				inputregister Events
+output_register			TH1F  12      -1.5	10.5				outputregister Events
 hel_cleandata			TH1F	5 	-2.5	2.5 				Cleandata	Counts
 hel_scandata1			TH1F	101 	-0.5	100.5 				Scandata1 	Counts
 hel_scandata2			TH1F	101 	-0.5	100.5 				Scandata2	Counts
 hel_scalerheader		TH1F	5 	-2.5	2.5 				ScalerHeader	Counts
 hel_scalercounter		TH1F	189 	-2.5	186.5 				ScalerCounter	Counts
 hel_userbit			TH1F	5 	-2.5	2.5 				Userbit 	Counts
-hel_input_register		TH1F    12      -1.5	10.5				inputregister Events	
-hel_output_register		TH1F    12      -1.5	10.5				inputregister Events	
+hel_input_register		TH1F    12      -1.5	10.5				inputregister Events
+hel_output_register		TH1F    12      -1.5	10.5				inputregister Events
 empty._block._raw		TH1F	1000	-5.0e9	5.0e9				Counts	Events
 empty._block.    		TH1F	1000	-5.0e9	5.0e9				CalibratedCounts Events
 empty._.w_raw	        	TH1F	1000	-5.0e9	5.0e9				Counts	Events
@@ -109,7 +109,7 @@ yield_empty._block.             TH1F	1000	-5.0e9	5.0e9				CalibratedCounts Event
 yield_empty._.w                 TH1F	1000	-5.0e9	5.0e9				CalibratedCounts Events
 yield_phasemonitor_block.       TH1F	1000	-5.0e9	5.0e9				CalibratedCounts Events
 yield_phasemonitor_.w 		TH1F	1000	-5.0e9	5.0e9				CalibratedCounts Events
-yield_qwk_.....			TH1F	1000	-5.0e9	5.0e9				Counts	Events          
+yield_qwk_.....			TH1F	1000	-5.0e9	5.0e9				Counts	Events
 yield_qwk_....._block._raw	TH1F	1000	-5.0e9	5.0e9				Counts	Events
 yield_qwk_....._block.    	TH1F	1000	-5.0e9	5.0e9				CalibratedCounts Events
 yield_qwk_....._.w_raw  	TH1F	1000	-5.0e9	5.0e9			        Counts	Events
@@ -326,7 +326,7 @@ md2neg_sw-hw_raw		TH1F	5000	 8	10				Counts	Events
 ......_.w_raw			TH1F	1000	-5.0e9	5.0e9				Counts	Events
 ......_.w			TH1F	1000	-5.0e9	5.0e9				CalibratedCounts Events
 ......_seqnum			TH1F	301	-0.5	300.5				SequenceNumber	Events
-......_numsamples		TH1F	1001	-2.5	5002.5	
+......_numsamples		TH1F	1001	-2.5	5002.5
 MD.Neg_block._raw		TH1F	5000	-5.0e9	5.0e9				Counts	Events
 MD.Neg_block._volt		TH1F	2000	-0.4	-0.01				Voltage	Events
 MD.Neg_.w_raw			TH1F	1000	-5.0e9	5.0e9				Counts	Events
@@ -379,8 +379,8 @@ asymMD.Pos_.w_volt		TH1F	1001	-5.005e-9	5.005e-9		Asym(volts)	Events
 asymMD.Pos_seqnum		TH1F	301	-0.5		300.5			SequenceNumber	Events
 asymMD.Pos_numsamples	TH1F	1001	-2.5		5002.5			NumberOfSamples	Events
 ###
-###  
-###  Single Ended adc histograms 
+###
+###  Single Ended adc histograms
 ###  Single event histograms
 SE......_block._raw		TH1F	1000	-5.0e7	5.0e7				Counts	Events
 SE......_block._volt		TH1F	2000	-0.4	-0.01				Voltage	Events

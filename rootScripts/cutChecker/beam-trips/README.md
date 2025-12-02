@@ -1,6 +1,6 @@
 == How to use the Tree Skimmer-Trip Finder ==
 The trip finder/tree skimmer (addTripCounter.C) does 3 things
-1) It grabs the existing tree and makes an exact copy of a subset of it's branches - useful things like CodaEventNumber and ErrorFlag, but also devices. 
+1) It grabs the existing tree and makes an exact copy of a subset of it's branches - useful things like CodaEventNumber and ErrorFlag, but also devices.
 NOTE: I am not 100% sure that grabbing 2 struct-devices from the tree will work. I had bad luck the first time I tried, then I stopped doing 2 devices but I also I think fixed the struct definition to not fail. It needs to be followed up on
 2) It adds in some new useful branches like "run_number" and all of the RCDB info (using the standard string->double conversions decided in the aggregator) from the RCDB (so you need to be running this on a computer with access to RCDB and set your RCDB access environment appropriately).
 3) While looping over the tree, it will check if an event is a good event in all ErrorFlag bits other than the beam trip bits, and when that trip holdoff cut ends it will restart a counter SinceLastTripEnd demarkating the beginning of a new period of clean, post-trip data.
@@ -20,5 +20,5 @@ The data-set comparator (loopAq.C) does 2 things
 
 To utilize this script properly it is best to already have the outputs of addTripCounter.C and then hadd together into one file (currently hardcoded in loopAq.C to be "test.root") that contains every single run's full tree in a single TTree.
 
-== Others == 
+== Others ==
 There are a number of other macros and shell scripts for executing loops of these jobs and for making specific convenient plots. Most are adapted from simple command line executions or ROOT command line draw commands, so none are elegant.

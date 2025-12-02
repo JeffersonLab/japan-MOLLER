@@ -1,36 +1,55 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
+cmake_policy(SET CMP0079 NEW)
 
+#----------------------------------------------------------------------------
+# Set name of lib being built
+#
+set(LIBNAME eviowrapper)
 
 #----------------------------------------------------------------------------
 # Sources and headers
 #
 file(GLOB my_evio_headers
   include/THaCoda*.h
-  include/evio.h
+  include/CustomAlloc.h
+  include/Helper.h
   )
 file(GLOB my_evio_sources
   src/THaCoda*.C
-  src/evio.C
-  src/swap_util.C
   )
 
+#----------------------------------------------------------------------------
+# EVIO
+find_package(EVIO CONFIG QUIET)
+if(NOT EVIO_FOUND)
+  find_package(EVIO MODULE)
+  if(NOT EVIO_FOUND)
+    include(FetchBuildEVIO)
+  endif()
+endif()
 
 #----------------------------------------------------------------------------
 # CODA ET
 #
-find_package(ET)
-IF(ET_FOUND)
+if(NOT TARGET et)
+  find_package(ET CONFIG QUIET)
+  if(NOT ET_FOUND)
+    find_package(ET MODULE)
+  endif()
+endif()
+if(ET_FOUND OR TARGET et)
   add_definitions(-D__CODA_ET)
-  include_directories(${ET_INCLUDE_DIR})
-  list(APPEND my_evio_headers
-    ${PROJECT_SOURCE_DIR}/evio/include/THaEtClient.h
-    )
-  list(APPEND my_evio_sources
-    ${PROJECT_SOURCE_DIR}/evio/src/THaEtClient.C
-    )
-else(ET_FOUND)
-  set(ET_LIBRARY "")
-endif(ET_FOUND)
+	# Sources and headers
+	file(GLOB my_et_headers
+		include/THaEtClient.h
+  )
+	file(GLOB my_et_sources
+		src/THaEtClient.C
+  )
+	set(my_evio_sources ${my_evio_sources} ${my_et_sources})
+	set(my_evio_headers ${my_evio_headers} ${my_et_headers})
+	set(ET_DEPENDENCY ET::ET)
+endif()
 
 
 #----------------------------------------------------------------------------
@@ -47,49 +66,42 @@ foreach(file ${my_evio_headers})
     # Add dictionary target with possible LinkDef file
     set(dict ${CMAKE_CURRENT_BINARY_DIR}/${file_name}Dict)
     set(linkdef ${file_path}/${file_name}LinkDef.h)
-    build_root_dictionary(${file_name} ${file}
-      TARGETS evio
-      LINKDEF ${linkdef}
-    )
+    ROOT_GENERATE_DICTIONARY(${dict} ${file} LINKDEF ${linkdef} DEPENDENCIES ${ET_DEPENDENCY})
     # Add dictionary to evio sources
     set(my_evio_sources ${my_evio_sources} ${file_name}Dict.cxx)
   endif()
 endforeach()
 
-
 #----------------------------------------------------------------------------
 # evio library
 #
-add_library(evio SHARED ${my_evio_sources})
+add_library(eviowrapper SHARED ${my_evio_sources})
 
-target_include_directories(evio
+target_include_directories(${LIBNAME}
   PUBLIC
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+	$<BUILD_INTERFACE:${ET_INCLUDE_DIR}>
   )
 
-target_compile_options(evio
+target_compile_options(eviowrapper
   PUBLIC
     ${${PROJECT_NAME_UC}_CXX_FLAGS_LIST}
   PRIVATE
     ${${PROJECT_NAME_UC}_DIAG_FLAGS_LIST}
   )
 
-if(ET_FOUND)
-target_link_libraries(evio
+target_link_libraries(eviowrapper
   PUBLIC
-    EVIO::ET
-    ROOT::Libraries
+    $<TARGET_NAME_IF_EXISTS:ET::ET>
+    $<TARGET_NAME_IF_EXISTS:et>
+    ROOT::Core
+  PRIVATE
+    EVIO::EVIO
   )
-else()
-target_link_libraries(evio
-  PUBLIC
-    ROOT::Libraries
-  )
-endif()
 
-install(TARGETS evio
+install(TARGETS eviowrapper
   EXPORT ${MAIN_PROJECT_NAME_LC}-exports
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -97,4 +109,3 @@ install(TARGETS evio
   )
 
 install(FILES ${my_evio_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-

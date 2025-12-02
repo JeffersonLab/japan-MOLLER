@@ -11,21 +11,21 @@ void camguin(TString ana = "help", TString tree = "mul", TString branch = "asym_
   getAlarmStatus_h();
   getAggregatorStatus_h();
   if (debug>0) Printf("Analysis: %s",(const char*) ana);
-  if( 
-       ana == "Integral" 
-    || ana == "integral" 
-    || ana == "Sum" 
+  if(
+       ana == "Integral"
+    || ana == "integral"
+    || ana == "Sum"
     || ana == "sum"){
     //writeInt_loop_h( tree, branch, leaf, cut, runNumber, minirunNumber, splitNumber, nRuns );
     writeInt_leafHist_h( tree, branch, leaf, cut, overWriteCut, histMode, runNumber, minirunNumber, splitNumber, nRuns );
     if (debug>1) Printf("Done with integral ana");
   }
-  else if( 
+  else if(
        ana == "intloop"){
     writeInt_loop_h( tree, branch, leaf, cut, overWriteCut, runNumber, minirunNumber, splitNumber, nRuns );
     if (debug>1) Printf("Done with intloop ana");
   }
-  else if( 
+  else if(
        ana == "nevents"
     || ana == "NeventsCuts"
     || ana == "eventscuts"
@@ -39,7 +39,7 @@ void camguin(TString ana = "help", TString tree = "mul", TString branch = "asym_
     writeNEvents_Loop_h( tree, branch, leaf, cut, overWriteCut, stabilityRing, runNumber, minirunNumber, splitNumber, nRuns );
     if (debug>1) Printf("Done with nEvents loop ana");
   }
-  else if( 
+  else if(
        ana == "last"
     || ana == "lastloop"
     || ana == "getlast"
@@ -47,7 +47,7 @@ void camguin(TString ana = "help", TString tree = "mul", TString branch = "asym_
     writeLast_Loop_h( tree, branch, leaf, runNumber, minirunNumber, splitNumber, nRuns );
     if (debug>1) Printf("Done with getLast ana");
   }
-  else if( 
+  else if(
        ana == "eventsloopn"
     || ana == "eventloopn"
     || ana == "eventloopN"
@@ -58,17 +58,17 @@ void camguin(TString ana = "help", TString tree = "mul", TString branch = "asym_
     writeEventLoopN_Loop_h( tree, branch, leaf, cut, overWriteCut, stabilityRing, runNumber, minirunNumber, splitNumber, nRuns );
     if (debug>1) Printf("Done with EventLoopNs loop ana");
   }
-  else if ( 
-       ana == "rms" 
-    || ana == "Rms" 
-    || ana == "width" 
-    || ana == "Width" 
-    || ana == "RMS" 
-    || ana == "Stddev" 
-    || ana == "stddev" 
-    || ana == "Stdv" 
-    || ana == "stdv" 
-    || ana == "Sigma" 
+  else if (
+       ana == "rms"
+    || ana == "Rms"
+    || ana == "width"
+    || ana == "Width"
+    || ana == "RMS"
+    || ana == "Stddev"
+    || ana == "stddev"
+    || ana == "Stdv"
+    || ana == "stdv"
+    || ana == "Sigma"
     || ana == "sigma"
     || ana == "Sig"
     || ana == "sig"){

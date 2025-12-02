@@ -1,9 +1,11 @@
-/*
-Adopted from G0EPICSEvent class.
-*/
+/*!
+ * \file   QwEPICSEvent.h
+ * \brief  EPICS data event handling and storage
+ *
+ * Adopted from G0EPICSEvent class.
+ */
 
-#ifndef __QWEPICSEVENT__
-#define __QWEPICSEVENT__
+#pragma once
 
 // System headers
 #include <map>
@@ -15,14 +17,27 @@ using std::string;
 #include "Rtypes.h"
 #include "TString.h"
 #include "TTree.h"
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "QwOptions.h"
 
 // Forward declarations
 class QwParityDB;
+class QwRootTreeBranchVector;
 
-
+/**
+ * \class QwEPICSEvent
+ * \ingroup QwAnalysis
+ * \brief EPICS slow controls data management
+ *
+ * Handles EPICS slow controls data including beam parameters, magnet
+ * settings, and other experimental conditions. Provides storage,
+ * retrieval, and database interface for slow controls information.
+ */
 class QwEPICSEvent
 {
  public:
@@ -81,7 +96,7 @@ class QwEPICSEvent
 
   void FillDB(QwParityDB *db);
   void FillSlowControlsData(QwParityDB *db);
-  void FillSlowControlsStrigs(QwParityDB *db);
+  void FillSlowControlsStrings(QwParityDB *db);
   void FillSlowControlsSettings(QwParityDB *db);
 
 
@@ -98,9 +113,16 @@ class QwEPICSEvent
  public:
 
   /// \brief Construct the branch and tree vector
-  void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector<Double_t>& values);
+  void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values);
   /// \brief Fill the tree vector
-  void FillTreeVector(std::vector<Double_t>& values) const;
+  void FillTreeVector(QwRootTreeBranchVector &values) const;
+
+#ifdef HAS_RNTUPLE_SUPPORT
+  /// \brief Construct the RNTuple fields and vector
+  void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+  /// \brief Fill the RNTuple vector
+  void FillNTupleVector(std::vector<Double_t>& values) const;
+#endif // HAS_RNTUPLE_SUPPORT
 
 
  public:
@@ -109,7 +131,7 @@ class QwEPICSEvent
   static void SetDefaultAutogainList(std::vector<std::string>& input_list);
 
   void WriteEPICSStringValues();
-  
+
  private:
 
   /// Default autogain list
@@ -176,7 +198,5 @@ class QwEPICSEvent
   Double_t fNominalWienAngle;
   Int_t    fExtraHelicityReversal;
 
-  
-}; // class QwEPICSEvent
 
-#endif // __QWEPICSEVENT__
+}; // class QwEPICSEvent

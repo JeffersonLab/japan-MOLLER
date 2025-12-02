@@ -1,5 +1,8 @@
-#ifndef _QWINTERPOLATOR_H_
-#define _QWINTERPOLATOR_H_
+/*!n * \file   QwInterpolator.h
+ * \brief  Multi-dimensional grid interpolation methods
+ */
+
+#pragma once
 
 // System headers
 #include <vector>
@@ -882,6 +885,3 @@ inline bool QwInterpolator<value_t,value_n>::ReadBinaryFile(const std::string& f
   file.close();
   return true;
 }
-
-
-#endif // _QWINTERPOLATOR_H_

@@ -1,4 +1,4 @@
-///Panguin gui compatible diagnostic plots for shift taking online replay 
+///Panguin gui compatible diagnostic plots for shift taking online replay
 //#include "GetStats.C"
 #include <iostream>
 #include <fstream>
@@ -25,7 +25,7 @@ void longSlopeCheck(TString type = "burst_lrb_std", Double_t refRMS4eX = 10, Dou
     tmpInfile = Form("%s%d%s",infile1.c_str(),listOfFileIndices.at(i),infile2.c_str());
     tree_agg->Add(tmpInfile.c_str());
   }
-  
+
   int num = tree_R->Draw("MYp[0]","","goff"); // Number of miniruns
   if(num<1) {
     TPad *cPlot = new TPad("cPlot","cPlot",0,0,1,1);
@@ -51,7 +51,7 @@ void longSlopeCheck(TString type = "burst_lrb_std", Double_t refRMS4eX = 10, Dou
     line3.DrawLatex(.12,.75,"(Wait for 5 minutes of good data)");
     return 0;
   }
-  
+
   TPad *cPlot = new TPad("cPlot","cPlot",0,0,1,1);
   cPlot->Divide(3,2);
   cPlot->Draw();
@@ -149,7 +149,7 @@ void longSlopeCheck(TString type = "burst_lrb_std", Double_t refRMS4eX = 10, Dou
     cPlot->cd(i+1);
     tMGraphPlot[i]->Draw("A");
   }
-  
+
   cPlot->cd(3);
   //auto legend = new TLegend(0.1,0.7,0.4,0.9);
   //auto legend1 = new TLegend(0.7,0.7,0.9,0.925);

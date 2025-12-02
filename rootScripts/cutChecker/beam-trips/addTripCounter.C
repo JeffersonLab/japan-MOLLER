@@ -3,7 +3,7 @@ author: Cameron Clarke
 last update: February 2021
 
 */
-// FIXME 
+// FIXME
 // Major bug: If I include more than one device, the next first device is garbage... something about struct having improper memory management/size allocation I guess
 
 #include "getRCDB.hh"
@@ -90,7 +90,7 @@ void addTripCounter(int runNum = 5408, TString ana = "prompt"){ //(int start, in
     Double_t num_samples;
     Double_t Device_Error_Code;
   } japan_device ;
-  // BCMs 
+  // BCMs
   japan_device bcm_an_us;  // FIXME For now do it all by pointer... does = by pointer in loop work? do I need to write a function to = each internal component?
   japan_device bcm_an_ds;
   // RAW Asyms
@@ -228,7 +228,7 @@ void addTripCounter(int runNum = 5408, TString ana = "prompt"){ //(int start, in
   Int_t LE = 0;
   Int_t NS = 0;
   Int_t NE = 0;
-  
+
   std::vector<Int_t> SLTSV = {};
   std::vector<Int_t> SLTEV = {};
   SLTSV.reserve((Int_t)1e6);
@@ -270,13 +270,13 @@ void addTripCounter(int runNum = 5408, TString ana = "prompt"){ //(int start, in
   //Printf("LS = %d, LE = %d",LS,LE);
     SLTSV.push_back(LS);
     SLTEV.push_back(LE);
-    
+
   //Update previous error flag
     PreviousErrorFlag = ErrorFlag;
   }
   PreviousErrorFlag = 0;
   std::vector<Int_t> UNTSV = {};
-  std::vector<Int_t> UNTEV = {}; 
+  std::vector<Int_t> UNTEV = {};
   UNTSV.reserve((Int_t)1e6);
   UNTEV.reserve((Int_t)1e6);
   for(int ievt=(nEntries-1);ievt>=0;ievt--){
@@ -316,7 +316,7 @@ void addTripCounter(int runNum = 5408, TString ana = "prompt"){ //(int start, in
   //Printf("NS = %d, NE = %d",NS,NE);
     UNTSV.push_back(NS);
     UNTEV.push_back(NE);
-    
+
   //Update previous error flag
     PreviousErrorFlag = ErrorFlag;
   }
