@@ -130,7 +130,7 @@ void QwCorrelatorNew::ProcessData()
 
     TVectorD P(fIndependentValues.size(), fIndependentValues.data());
     TVectorD Y(fDependentValues.size(),   fDependentValues.data());
-    linReg += std::make_pair(P, Y);
+    operator+= (std::make_pair(P, Y));
   }
 }
 
@@ -147,14 +147,14 @@ void QwCorrelatorNew::ClearEventData()
   fGoodEvent = -1;
 
   // Clear regression
-  linReg.clear();
+  this->clear();
 }
 
 void QwCorrelatorNew::AccumulateRunningSum(VQwDataHandler &value, Int_t count, Int_t ErrorMask)
 {
   QwCorrelatorNew* correlator = dynamic_cast<QwCorrelatorNew*>(&value);
   if (correlator) {
-    linReg += correlator->linReg;
+    operator+=(*correlator);
   } else {
     QwWarning << "QwCorrelatorNew::AccumulateRunningSum "
               << "can only accept other QwCorrelatorNew objects."
@@ -204,19 +204,19 @@ void QwCorrelatorNew::CalcCorrelations()
     }
   }
 
-  if (! linReg.failed()) {
+  if (! this->failed()) {
 
     if (fPrintCorrelations) {
-      linReg.printSummaryP();
-      linReg.printSummaryY();
+      this->printSummaryP();
+      this->printSummaryY();
     }
 
-    linReg.solve();
+    this->solve();
 
     if (fPrintCorrelations) {
-      linReg.printSummaryAlphas();
-      linReg.printSummaryMeansWithUnc();
-      linReg.printSummaryMeansWithUncCorrected();
+      this->printSummaryAlphas();
+      this->printSummaryMeansWithUnc();
+      this->printSummaryMeansWithUncCorrected();
     }
   }
 
@@ -360,8 +360,8 @@ Int_t QwCorrelatorNew::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystem
   nP = fIndependentName.size();
   nY = fDependentName.size();
 
-  linReg.setDims(nP, nY);
-  linReg.init();
+  this->setDims(nP, nY);
+  this->init();
 
   fErrCounts_IV.resize(fIndependentVar.size(),0);
   fErrCounts_DV.resize(fDependentVar.size(),0);
@@ -401,8 +401,8 @@ void QwCorrelatorNew::ConstructTreeBranches(
   fTree->Branch(TString(branchprefix + "total_count"), &fTotalCount);
   fTree->Branch(TString(branchprefix + "good_count"),  &fGoodCount);
 
-  fTree->Branch(TString(branchprefix + "n"), &(linReg.fGoodEventNumber));
-  fTree->Branch(TString(branchprefix + "ErrorFlag"), &(linReg.fErrorFlag));
+  fTree->Branch(TString(branchprefix + "n"), &(this->fGoodEventNumber));
+  fTree->Branch(TString(branchprefix + "ErrorFlag"), &(this->fErrorFlag));
 
   auto bn = [&](const TString& n) {
     return TString(branchprefix + n);
@@ -426,34 +426,34 @@ void QwCorrelatorNew::ConstructTreeBranches(
     tree->Branch(bn(n),pv(v),lv(v,n));
   };
 
-  branchm(fTree,linReg.Axy,  "A");
-  branchm(fTree,linReg.dAxy, "dA");
+  branchm(fTree,this->Axy,  "A");
+  branchm(fTree,this->dAxy, "dA");
 
-  branchm(fTree,linReg.mVPP,  "VPP");
-  branchm(fTree,linReg.mVPY,  "VPY");
-  branchm(fTree,linReg.mVYP,  "VYP");
-  branchm(fTree,linReg.mVYY,  "VYY");
-  branchm(fTree,linReg.mVYYp, "VYYp");
+  branchm(fTree,this->mVPP,  "VPP");
+  branchm(fTree,this->mVPY,  "VPY");
+  branchm(fTree,this->mVYP,  "VYP");
+  branchm(fTree,this->mVYY,  "VYY");
+  branchm(fTree,this->mVYYp, "VYYp");
 
-  branchm(fTree,linReg.mSPP,  "SPP");
-  branchm(fTree,linReg.mSPY,  "SPY");
-  branchm(fTree,linReg.mSYP,  "SYP");
-  branchm(fTree,linReg.mSYY,  "SYY");
-  branchm(fTree,linReg.mSYYp, "SYYp");
+  branchm(fTree,this->mSPP,  "SPP");
+  branchm(fTree,this->mSPY,  "SPY");
+  branchm(fTree,this->mSYP,  "SYP");
+  branchm(fTree,this->mSYY,  "SYY");
+  branchm(fTree,this->mSYYp, "SYYp");
 
-  branchm(fTree,linReg.mRPP,  "RPP");
-  branchm(fTree,linReg.mRPY,  "RPY");
-  branchm(fTree,linReg.mRYP,  "RYP");
-  branchm(fTree,linReg.mRYY,  "RYY");
-  branchm(fTree,linReg.mRYYp, "RYYp");
+  branchm(fTree,this->mRPP,  "RPP");
+  branchm(fTree,this->mRPY,  "RPY");
+  branchm(fTree,this->mRYP,  "RYP");
+  branchm(fTree,this->mRYY,  "RYY");
+  branchm(fTree,this->mRYYp, "RYYp");
 
-  branchv(fTree,linReg.mMP,  "MP");   // Parameter mean
-  branchv(fTree,linReg.mMY,  "MY");   // Uncorrected mean
-  branchv(fTree,linReg.mMYp, "MYp");  // Corrected mean
+  branchv(fTree,this->mMP,  "MP");   // Parameter mean
+  branchv(fTree,this->mMY,  "MY");   // Uncorrected mean
+  branchv(fTree,this->mMYp, "MYp");  // Corrected mean
 
-  branchv(fTree,linReg.mSP,  "dMP");  // Parameter mean error
-  branchv(fTree,linReg.mSY,  "dMY");  // Uncorrected mean error
-  branchv(fTree,linReg.mSYp, "dMYp"); // Corrected mean error
+  branchv(fTree,this->mSP,  "dMP");  // Parameter mean error
+  branchv(fTree,this->mSY,  "dMY");  // Uncorrected mean error
+  branchv(fTree,this->mSYp, "dMYp"); // Corrected mean error
 
 }
 
@@ -574,21 +574,21 @@ void QwCorrelatorNew::WriteAlphaFile()
   if (fAlphaOutputFile) fAlphaOutputFile->cd();
 
   // Write objects
-  linReg.Axy.Write("slopes");
-  linReg.dAxy.Write("sigSlopes");
+  this->Axy.Write("slopes");
+  this->dAxy.Write("sigSlopes");
 
-  linReg.mRPP.Write("IV_IV_correlation");
-  linReg.mRPY.Write("IV_DV_correlation");
-  linReg.mRYY.Write("DV_DV_correlation");
-  linReg.mRYYp.Write("DV_DV_correlation_prime");
+  this->mRPP.Write("IV_IV_correlation");
+  this->mRPY.Write("IV_DV_correlation");
+  this->mRYY.Write("DV_DV_correlation");
+  this->mRYYp.Write("DV_DV_correlation_prime");
 
-  linReg.mMP.Write("IV_mean");
-  linReg.mMY.Write("DV_mean");
-  linReg.mMYp.Write("DV_mean_prime");
+  this->mMP.Write("IV_mean");
+  this->mMY.Write("DV_mean");
+  this->mMYp.Write("DV_mean_prime");
 
   // number of events
   TMatrixD Mstat(1,1);
-  Mstat(0,0)=linReg.getUsedEve();
+  Mstat(0,0)=this->getUsedEve();
   Mstat.Write("MyStat");
 
   //... IVs
@@ -602,36 +602,36 @@ void QwCorrelatorNew::WriteAlphaFile()
   hdv.Write();
 
   // sigmas
-  linReg.mSP.Write("IV_sigma");
-  linReg.mSY.Write("DV_sigma");
-  linReg.mSYp.Write("DV_sigma_prime");
+  this->mSP.Write("IV_sigma");
+  this->mSY.Write("DV_sigma");
+  this->mSYp.Write("DV_sigma_prime");
 
   // raw covariances
-  linReg.mVPP.Write("IV_IV_rawVariance");
-  linReg.mVPY.Write("IV_DV_rawVariance");
-  linReg.mVYY.Write("DV_DV_rawVariance");
-  linReg.mVYYp.Write("DV_DV_rawVariance_prime");
-  TVectorD mVY2(TMatrixDDiag(linReg.mVYY));
+  this->mVPP.Write("IV_IV_rawVariance");
+  this->mVPY.Write("IV_DV_rawVariance");
+  this->mVYY.Write("DV_DV_rawVariance");
+  this->mVYYp.Write("DV_DV_rawVariance_prime");
+  TVectorD mVY2(TMatrixDDiag(this->mVYY));
   mVY2.Write("DV_rawVariance");
-  TVectorD mVP2(TMatrixDDiag(linReg.mVPP));
+  TVectorD mVP2(TMatrixDDiag(this->mVPP));
   mVP2.Write("IV_rawVariance");
-  TVectorD mVY2prime(TMatrixDDiag(linReg.mVYYp));
+  TVectorD mVY2prime(TMatrixDDiag(this->mVYYp));
   mVY2prime.Write("DV_rawVariance_prime");
 
   // normalized covariances
-  linReg.mSPP.Write("IV_IV_normVariance");
-  linReg.mSPY.Write("IV_DV_normVariance");
-  linReg.mSYY.Write("DV_DV_normVariance");
-  linReg.mSYYp.Write("DV_DV_normVariance_prime");
-  TVectorD sigY2(TMatrixDDiag(linReg.mSYY));
+  this->mSPP.Write("IV_IV_normVariance");
+  this->mSPY.Write("IV_DV_normVariance");
+  this->mSYY.Write("DV_DV_normVariance");
+  this->mSYYp.Write("DV_DV_normVariance_prime");
+  TVectorD sigY2(TMatrixDDiag(this->mSYY));
   sigY2.Write("DV_normVariance");
-  TVectorD sigX2(TMatrixDDiag(linReg.mSPP));
+  TVectorD sigX2(TMatrixDDiag(this->mSPP));
   sigX2.Write("IV_normVariance");
-  TVectorD sigY2prime(TMatrixDDiag(linReg.mSYYp));
+  TVectorD sigY2prime(TMatrixDDiag(this->mSYYp));
   sigY2prime.Write("DV_normVariance_prime");
 
-  linReg.Axy.Write("A_xy");
-  linReg.Ayx.Write("A_yx");
+  this->Axy.Write("A_xy");
+  this->Ayx.Write("A_yx");
 }
 
 void QwCorrelatorNew::OpenAlphaFile(const std::string& prefix)
@@ -700,7 +700,7 @@ void QwCorrelatorNew::WriteAliasFile()
     fAliasOutputFile << Form("  tree->SetAlias(\"reg_%s\",",fDependentFull[i].c_str()) << std::endl;
     fAliasOutputFile << Form("         \"%s",fDependentFull[i].c_str());
     for (int j = 0; j < nP; j++) {
-      fAliasOutputFile << Form("%+.4e*%s", -linReg.Axy(j,i), fIndependentFull[j].c_str());
+      fAliasOutputFile << Form("%+.4e*%s", -this->Axy(j,i), fIndependentFull[j].c_str());
     }
     fAliasOutputFile << "\");" << std::endl;
   }
@@ -742,7 +742,6 @@ QwCorrelatorNew::QwCorrelatorNew(const QwCorrelatorNew& source)
   fAliasOutputFileBase(source.fAliasOutputFileBase),
   fAliasOutputFileSuff(source.fAliasOutputFileSuff),
   fAliasOutputPath(source.fAliasOutputPath),
-  nP(source.nP),nY(source.nY),
   fCycleCounter(source.fCycleCounter)
 {
   QwMessage << fGoodEventNumber << QwLog::endl;

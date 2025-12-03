@@ -10,7 +10,7 @@
   tree-name  = mulc_lrb
   tree-comment = Corrected helicity event data tree (run-level slopes)
 
-[QwCorrelator]
+[QwCorrelatorNew]
   name       = lrb_std
   priority   = 50
   map        = mock_corrolator.conf

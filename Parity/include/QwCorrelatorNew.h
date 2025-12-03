@@ -123,10 +123,9 @@ class QwCorrelatorNew : public VQwDataHandler, public MQwDataHandlerCloneable<Qw
   std::vector<std::vector<TH2D>> fH2iv;
   std::vector<std::vector<TH2D>> fH2dv;
 
-  QwCorrelatorNew linReg;
-
   Int_t fCycleCounter;
 
+  // Default Constructor
   QwCorrelatorNew();
 
   
@@ -163,10 +162,6 @@ class QwCorrelatorNew : public VQwDataHandler, public MQwDataHandlerCloneable<Qw
   TMatrixD Axy, Ayx, dAxy, dAyx; // found slopes and their standard errors
 
  public:
-
-  QwCorrelatorNew();
-  QwCorrelatorNew(const QwCorrelatorNew& source);
-  virtual ~QwCorrelatorNew() { };
 
   void solve();
   bool failed() { return fGoodEventNumber < nP + 1; }
@@ -205,8 +200,9 @@ class QwCorrelatorNew : public VQwDataHandler, public MQwDataHandlerCloneable<Qw
   QwCorrelatorNew& operator+=(const std::pair<TVectorD,TVectorD>& rhs);
   QwCorrelatorNew& operator+=(const QwCorrelatorNew& rhs);
   // Addition using addition-assignment
-  friend // friends defined inside class body are inline and are hidden from non-ADL lookup
-  QwCorrelatorNew operator+(QwCorrelatorNew lhs,  // passing lhs by value helps optimize chained a+b+c
+
+  
+  friend QwCorrelatorNew operator+(QwCorrelatorNew lhs,  // passing lhs by value helps optimize chained a+b+c
                    const QwCorrelatorNew& rhs) // otherwise, both parameters may be const references
   {
     lhs += rhs; // reuse compound assignment
@@ -215,9 +211,6 @@ class QwCorrelatorNew : public VQwDataHandler, public MQwDataHandlerCloneable<Qw
 
   /// \brief Output stream operator
   friend std::ostream& operator<< (std::ostream& stream, const QwCorrelatorNew& h);
-
-  /// Friend class with correlator for ROOT tree output
-  friend class QwCorrelator;
 };
 
 /// Output stream operator
