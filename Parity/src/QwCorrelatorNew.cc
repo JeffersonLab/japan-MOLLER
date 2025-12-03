@@ -45,7 +45,7 @@ QwCorrelatorNew::QwCorrelatorNew(const TString& name)
   ClearEventData();
 }
 
-QwCorrelatorNew::QwCorrelatorNew(const QwCorrelatorNew& source)
+/*QwCorrelatorNew::QwCorrelatorNew(const QwCorrelatorNew& source)
 : VQwDataHandler(source),
   fBlock(source.fBlock),
   fDisableHistos(source.fDisableHistos),
@@ -65,7 +65,7 @@ QwCorrelatorNew::QwCorrelatorNew(const QwCorrelatorNew& source)
   // Clear all data
   ClearEventData();
 }
-
+*/
 QwCorrelatorNew::~QwCorrelatorNew()
 {
   // Close alpha and alias file
@@ -715,8 +715,6 @@ void QwCorrelatorNew::WriteAliasFile()
 
 #include "TString.h"
 
-#include "LinReg_Bevington_Pebay.h"
-
 #include "QwLog.h"
 
 //=================================================
@@ -732,9 +730,27 @@ QwCorrelatorNew::QwCorrelatorNew()
 QwCorrelatorNew::QwCorrelatorNew(const QwCorrelatorNew& source)
 : nP(source.nP),nY(source.nY),
   fErrorFlag(-1),
-  fGoodEventNumber(0)
+  fGoodEventNumber(0),
+  VQwDataHandler(source),
+  fBlock(source.fBlock),
+  fDisableHistos(source.fDisableHistos),
+  fAlphaOutputFileBase(source.fAlphaOutputFileBase),
+  fAlphaOutputFileSuff(source.fAlphaOutputFileSuff),
+  fAlphaOutputPath(source.fAlphaOutputPath),
+  fAlphaOutputFile(0),
+  fTree(0),
+  fAliasOutputFileBase(source.fAliasOutputFileBase),
+  fAliasOutputFileSuff(source.fAliasOutputFileSuff),
+  fAliasOutputPath(source.fAliasOutputPath),
+  nP(source.nP),nY(source.nY),
+  fCycleCounter(source.fCycleCounter)
 {
   QwMessage << fGoodEventNumber << QwLog::endl;
+
+  QwWarning << "QwCorrelatorNew copy constructor required but untested" << QwLog::endl;
+
+  // Clear all data
+  ClearEventData();
 }
 
 //=================================================

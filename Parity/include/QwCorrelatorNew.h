@@ -127,6 +127,8 @@ class QwCorrelatorNew : public VQwDataHandler, public MQwDataHandlerCloneable<Qw
 
   Int_t fCycleCounter;
 
+  QwCorrelatorNew();
+
   
  private:
   Int_t fErrorFlag;             ///< is information valid
@@ -164,6 +166,7 @@ class QwCorrelatorNew : public VQwDataHandler, public MQwDataHandlerCloneable<Qw
 
   QwCorrelatorNew();
   QwCorrelatorNew(const QwCorrelatorNew& source);
+  virtual ~QwCorrelatorNew() { };
 
   void solve();
   bool failed() { return fGoodEventNumber < nP + 1; }
