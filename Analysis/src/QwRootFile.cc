@@ -68,9 +68,36 @@ QwRootFile::QwRootFile(const TString& run_label)
       rootfilename += Form("/%s%s.%s.%d.root",
 			   fRootFileStem.Data(), run_label.Data(),
 			   hostname.Data(), pid);
+      // Delete permanent file if it exists to prevent accumulation across segments
+      if (gSystem->AccessPathName(fPermanentName.Data()) == 0) {
+        QwVerbose << "Removing existing permanent file: " << fPermanentName << QwLog::endl;
+        gSystem->Unlink(fPermanentName.Data());
+      }
+      // CRITICAL: Also delete the temporary file if it exists!
+      // RECREATE mode doesn't properly clear files that contain RNTuples,
+      // so we must manually delete before opening
+      if (gSystem->AccessPathName(rootfilename.Data()) == 0) {
+        QwVerbose << "Removing existing temporary file before RECREATE: " << rootfilename << QwLog::endl;
+        gSystem->Unlink(rootfilename.Data());
+      }
     } else {
       rootfilename = fPermanentName;
+      // Delete permanent file if it exists to ensure RECREATE truly starts fresh
+      // This is especially important for RNTuple files where RECREATE doesn't properly clear
+      if (gSystem->AccessPathName(rootfilename.Data()) == 0) {
+        QwMessage << "File exists before RECREATE, deleting: " << rootfilename << QwLog::endl;
+        int unlink_result = gSystem->Unlink(rootfilename.Data());
+        if (unlink_result == 0) {
+          QwMessage << "Successfully deleted file" << QwLog::endl;
+        } else {
+          QwError << "Failed to delete file! Error code: " << unlink_result << QwLog::endl;
+        }
+      } else {
+        QwMessage << "File does not exist before RECREATE: " << rootfilename << QwLog::endl;
+      }
     }
+    QwMessage << "Opening file with RECREATE mode: " << rootfilename << QwLog::endl;
+    QwMessage << "QwRootFile constructor called for: " << rootfilename << QwLog::endl;
     fRootFile = new TFile(rootfilename.Data(), "RECREATE", "myfile1");
     if (! fRootFile) {
       QwError << "ROOT file " << rootfilename
@@ -131,6 +158,10 @@ QwRootFile::~QwRootFile()
     const char* action;
     if (fUseTemporaryFile){
       if (fMakePermanent) {
+	// Delete existing permanent file first to avoid accumulation
+	if (gSystem->AccessPathName(fPermanentName.Data()) == 0) {
+	  remove(fPermanentName.Data());
+	}
 	action = " rename ";
 	err = rename( rootfilename.Data(), fPermanentName.Data() );
       } else {
