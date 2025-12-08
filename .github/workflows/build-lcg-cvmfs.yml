@@ -85,6 +85,9 @@ jobs:
         with:
           release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           run: |
+            # Ensure we fail even when piping output to tee
+            set -o pipefail
+
             echo "::group::Add submodules to git safe directories"
             git config --global --add safe.directory $PWD
             git config --global --add safe.directory $PWD/thirdparty/\* # Literal asterisk
