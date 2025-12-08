@@ -89,7 +89,7 @@ asym:tq27_r2, 0.03571
 asym:tq28_r2, 0.03571
 
 # Ring 3 all
-[asym:@asym_tq_r3]
+[asym:@asym_tq_r1]
 asym:tq01_r3, 0.03571
 asym:tq02_r3, 0.03571
 asym:tq03_r3, 0.03571
