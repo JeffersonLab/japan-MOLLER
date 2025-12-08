@@ -280,7 +280,7 @@ void QwRootFile::DefineOptions(QwOptions &options)
      "TTree circular buffer");
   options.AddOptions("ROOT performance options")
     ("compression-algorithm", po::value<int>()->default_value(1),
-     "TFile compression algorithm (default = 1 ZLIB)");
+     "TFile compression algorithm (1=ZLIB, 2=LZMA, 4=LZ4, 5=ZSTD, default=1 ZLIB)");
   options.AddOptions("ROOT performance options")
     ("compression-level", po::value<int>()->default_value(1),
      "TFile compression level (default = 1, no compression = 0)");

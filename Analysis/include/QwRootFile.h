@@ -32,6 +32,7 @@ using std::type_info;
 #include "ROOT/RNTupleModel.hxx"
 #include "ROOT/RField.hxx"
 #include "ROOT/RNTupleWriter.hxx"
+#include "ROOT/RNTupleWriteOptions.hxx"
 #endif
 
 // Qweak headers
@@ -694,11 +695,15 @@ class QwRootNTuple {
       }
 
       try {
+        // Create write options with LZ4 compression for best performance
+        ROOT::RNTupleWriteOptions options;
+        options.SetCompression(ROOT::RCompressionSetting::EAlgorithm::kLZ4, 4);
+
         // Create the writer with the model (transfers ownership)
         // Use Append to add RNTuple to existing TFile
-        fWriter = ROOT::RNTupleWriter::Append(std::move(fModel), fName, *file);
+        fWriter = ROOT::RNTupleWriter::Append(std::move(fModel), fName, *file, options);
 
-        QwMessage << "Created RNTuple '" << fName << "' in file " << file->GetName() << QwLog::endl;
+        QwMessage << "Created RNTuple '" << fName << "' with LZ4 compression in file " << file->GetName() << QwLog::endl;
 
       } catch (const std::exception& e) {
         QwError << "Failed to create RNTuple writer for '" << fName << "': " << e.what() << QwLog::endl;
