@@ -1082,9 +1082,6 @@ class QwRootFile {
   public:
     void Close()  {
 
-      // Check if we should make the file permanent - restore original logic
-      if (!fMakePermanent) fMakePermanent = HasAnyFilled();
-
       if (fRootFile) {
         // Step 1: Write all trees explicitly
         for (auto iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++) {
@@ -1099,6 +1096,10 @@ class QwRootFile {
         // Step 2: Write all in-memory objects (histograms, etc.) to disk
         // Use kOverwrite to avoid creating duplicate cycles
         fRootFile->Write(0, TObject::kOverwrite);
+
+        // Check if we should make the file permanent AFTER writing
+        // This ensures histograms are on disk and detectable by HasAnyFilled()
+        if (!fMakePermanent) fMakePermanent = HasAnyFilled();
 
         // Step 3: CRITICAL FIX for RNTuple histogram duplication
         // Clear all in-memory objects from the TFile's directory structure.
