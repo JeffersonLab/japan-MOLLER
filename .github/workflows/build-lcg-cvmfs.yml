@@ -85,9 +85,6 @@ jobs:
         with:
           release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           run: |
-            # Ensure we fail even when piping output to tee
-            set -o pipefail
-
             echo "::group::Add submodules to git safe directories"
             git config --global --add safe.directory $PWD
             git config --global --add safe.directory $PWD/thirdparty/\* # Literal asterisk
@@ -147,6 +144,9 @@ jobs:
             echo "::group::ccache statistics"
             ccache --show-stats
             echo "::endgroup::"
+
+            # Ensure we fail even when piping output to tee
+            set -o pipefail
 
             echo "::group::Mock data generation"
             # Run the mock data generator and analysis as described in README
@@ -391,12 +391,12 @@ jobs:
         with:
           release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           run: |
-            # Ensure we fail even when piping output to tee
-            set -o pipefail
-
             echo "::group::System architecture"
             gcc -march=native -Q --help=target | grep -m1 -- '-march='
             echo "::endgroup::"
+
+            # Ensure we fail even when piping output to tee
+            set -o pipefail
 
             echo "::group::Mock data generation"
             build/qwmockdatagenerator -r 4 -e 1:20000 --config qwparity_simple.conf --detectors mock_newdets.map --data .
