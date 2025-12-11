@@ -672,7 +672,7 @@ void QwSubsystemArray::FillTreeVector(QwRootTreeBranchVector &values) const
  * @param fieldPtrs Vector of shared field pointers
  */
 void QwSubsystemArray::ConstructNTupleAndVector(
-    std::unique_ptr<ROOT::RNTupleModel>& model,
+    ROOT::RNTupleModel *model,
     TString& prefix,
     std::vector<Double_t>& values,
     std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
