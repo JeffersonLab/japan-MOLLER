@@ -1,4 +1,16 @@
+#ifdef HAS_RNTUPLE_SUPPORT
 #include "QwRootNTuple.h"
+
+// System Headers
+#include <string>
+
+// ROOT Headers
+#include "Rtypes.h"
+#include "TFile.h"
+
+// QWeak Headers
+#include "QwLog.h"
+
 
 QwRootNTuple::QwRootNTuple(const std::string& name, const std::string& desc, const std::string& prefix)
 : fName(name)
@@ -72,4 +84,4 @@ void QwRootNTuple::Print() const
     QwMessage << " (prefix " << GetPrefix() << ")";
   QwMessage << QwLog::endl;
 }
-
+#endif // HAS_RNTUPLE_SUPPORT
