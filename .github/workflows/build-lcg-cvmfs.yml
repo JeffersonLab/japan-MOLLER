@@ -67,7 +67,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ccache
       - name: Setup ccache cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.ccache
           key: ccache-${{ matrix.LCG }}-${{ github.ref_name }}
@@ -145,6 +145,9 @@ jobs:
             ccache --show-stats
             echo "::endgroup::"
 
+            # Ensure we fail even when piping output to tee
+            set -o pipefail
+
             echo "::group::Mock data generation"
             # Run the mock data generator and analysis as described in README
             source SetupFiles/SET_ME_UP.bash
@@ -221,7 +224,7 @@ jobs:
       - name: Compress build directory
         run: tar -caf build.tar.zst build/
       - name: Upload build artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: build.tar.zst
@@ -229,7 +232,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload logs
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: logs-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: |
@@ -239,7 +242,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload profiling analysis
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: gprof-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: |
@@ -248,7 +251,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload prompt summary
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: |
@@ -258,7 +261,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload database dumps
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: qwparity-sql-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: |
@@ -267,7 +270,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload regression alias definitions
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: |
@@ -374,7 +377,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Download build artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: .
@@ -391,6 +394,9 @@ jobs:
             echo "::group::System architecture"
             gcc -march=native -Q --help=target | grep -m1 -- '-march='
             echo "::endgroup::"
+
+            # Ensure we fail even when piping output to tee
+            set -o pipefail
 
             echo "::group::Mock data generation"
             build/qwmockdatagenerator -r 4 -e 1:20000 --config qwparity_simple.conf --detectors mock_newdets.map --data .
@@ -432,7 +438,7 @@ jobs:
             echo "::endgroup::"
 
       - name: Upload callgrind analysis
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: callgrind-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: |
