@@ -695,15 +695,27 @@ class QwRootNTuple {
       }
 
       try {
-        // Create write options with LZ4 compression for best performance
+        // Create write options with user-specified compression settings
         ROOT::RNTupleWriteOptions options;
-        options.SetCompression(ROOT::RCompressionSetting::EAlgorithm::kLZ4, 4);
+        options.SetCompression(
+          static_cast<ROOT::RCompressionSetting::EAlgorithm::EValues>(fRNTupleCompressionAlgorithm),
+          fRNTupleCompressionLevel
+        );
 
         // Create the writer with the model (transfers ownership)
         // Use Append to add RNTuple to existing TFile
         fWriter = ROOT::RNTupleWriter::Append(std::move(fModel), fName, *file, options);
 
-        QwMessage << "Created RNTuple '" << fName << "' with LZ4 compression in file " << file->GetName() << QwLog::endl;
+        const char* algo_name = "UNKNOWN";
+        switch(fRNTupleCompressionAlgorithm) {
+          case 1: algo_name = "ZLIB"; break;
+          case 2: algo_name = "LZMA"; break;
+          case 4: algo_name = "LZ4"; break;
+          case 5: algo_name = "ZSTD"; break;
+        }
+        QwMessage << "Created RNTuple '" << fName << "' with " << algo_name 
+                  << " compression (level " << fRNTupleCompressionLevel << ") in file " 
+                  << file->GetName() << QwLog::endl;
 
       } catch (const std::exception& e) {
         QwError << "Failed to create RNTuple writer for '" << fName << "': " << e.what() << QwLog::endl;
@@ -797,6 +809,10 @@ class QwRootNTuple {
     UInt_t fNumEventsCycle;
     UInt_t fNumEventsToSave;
     UInt_t fNumEventsToSkip;
+
+    /// RNTuple compression settings
+    Int_t fRNTupleCompressionAlgorithm;
+    Int_t fRNTupleCompressionLevel;
 
   friend class QwRootFile;
 };
@@ -934,6 +950,9 @@ class QwRootFile {
       QwRootNTuple *ntuple = 0;
       if (! HasNTupleByName(name)) {
         ntuple = new QwRootNTuple(name, desc);
+        // Set compression settings before initializing writer
+        ntuple->fRNTupleCompressionAlgorithm = fRNTupleCompressionAlgorithm;
+        ntuple->fRNTupleCompressionLevel = fRNTupleCompressionLevel;
         // Initialize the writer with our file
         ntuple->InitializeWriter(fRootFile);
       } else {
@@ -1191,6 +1210,8 @@ class QwRootFile {
     Int_t fUpdateInterval;
     Int_t fCompressionAlgorithm;
     Int_t fCompressionLevel;
+    Int_t fRNTupleCompressionAlgorithm;
+    Int_t fRNTupleCompressionLevel;
     Int_t fBasketSize;
     Int_t fAutoFlush;
     Int_t fAutoSave;
@@ -1477,6 +1498,10 @@ void QwRootFile::ConstructNTupleFields(
 
     // New RNTuple with name, description, object, prefix
     ntuple = new QwRootNTuple(name, desc, object, prefix);
+
+    // Set compression settings before initializing writer
+    ntuple->fRNTupleCompressionAlgorithm = fRNTupleCompressionAlgorithm;
+    ntuple->fRNTupleCompressionLevel = fRNTupleCompressionLevel;
 
     // Initialize the writer with our file
     ntuple->InitializeWriter(fRootFile);

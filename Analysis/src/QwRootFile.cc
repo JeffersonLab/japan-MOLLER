@@ -284,6 +284,12 @@ void QwRootFile::DefineOptions(QwOptions &options)
   options.AddOptions("ROOT performance options")
     ("compression-level", po::value<int>()->default_value(1),
      "TFile compression level (default = 1, no compression = 0)");
+  options.AddOptions("ROOT performance options")
+    ("rntuple-compression-algorithm", po::value<int>()->default_value(4),
+     "RNTuple compression algorithm (1=ZLIB, 2=LZMA, 4=LZ4, 5=ZSTD, default=4 LZ4)");
+  options.AddOptions("ROOT performance options")
+    ("rntuple-compression-level", po::value<int>()->default_value(0),
+     "RNTuple compression level (0-12, default=0 for maximum performance)");
 }
 
 
@@ -345,6 +351,8 @@ void QwRootFile::ProcessOptions(QwOptions &options)
   fUpdateInterval = options.GetValue<int>("mapfile-update-interval");
   fCompressionAlgorithm = options.GetValue<int>("compression-algorithm");
   fCompressionLevel = options.GetValue<int>("compression-level");
+  fRNTupleCompressionAlgorithm = options.GetValue<int>("rntuple-compression-algorithm");
+  fRNTupleCompressionLevel = options.GetValue<int>("rntuple-compression-level");
   fBasketSize = options.GetValue<int>("basket-size");
 
   // Autoflush and autosave
