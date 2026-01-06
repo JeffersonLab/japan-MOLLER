@@ -40,8 +40,9 @@ endif()
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # Load ROOT and setup include directory
-find_package(ROOT 6 REQUIRED Gui Minuit2)
-include_directories(${ROOT_INCLUDE_DIR})
+find_package(ROOT 6 REQUIRED COMPONENTS Gui Minuit2 Tree RIO ROOTDataFrame ROOTNTuple)
+include_directories(${ROOT_INCLUDE_DIRS})
+link_directories(${ROOT_LIBRARY_DIR})
 
 # Check ROOT version for RNTuple support (available in ROOT 6.36+)
 if(${ROOT_VERSION} VERSION_GREATER_EQUAL "6.36.0")
@@ -52,15 +53,21 @@ else()
     message(STATUS "RNTuple support requires ROOT 6.36 or higher")
 endif()
 
-add_definitions(-std=c++11)
+# ROOT 6.36+ requires C++17
+if(${ROOT_VERSION} VERSION_GREATER_EQUAL "6.36.0")
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    message(STATUS "Using C++17 for ROOT 6.36+")
+else()
+    add_definitions(-std=c++11)
+endif()
 
 
-build_root_dictionary(
-    panguin                         # path to dictionary to generate
+ROOT_GENERATE_DICTIONARY(
+    panguinDict
     ${PROJECT_SOURCE_DIR}/include/panguinOnlineConfig.hh
     ${PROJECT_SOURCE_DIR}/include/panguinOnline.hh
-    TARGETS panguin
-    LINKDEF "${PROJECT_SOURCE_DIR}/include/panguinOnlineLinkDef.h"  # ROOT linkDef file
+    LINKDEF "${PROJECT_SOURCE_DIR}/include/panguinOnlineLinkDef.h"
     OPTIONS -p
 )
 
@@ -82,7 +89,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 #
 add_library(panguin-lib SHARED ${sources} ${headers} panguinDict.cxx)
 set_target_properties(panguin-lib PROPERTIES OUTPUT_NAME panguin)
-target_link_libraries(panguin-lib PUBLIC  ROOT::Libraries)
+target_link_libraries(panguin-lib PUBLIC ${ROOT_LIBRARIES})
 
 add_executable(panguin-bin panguin.cc)
 set_target_properties(panguin-bin PROPERTIES OUTPUT_NAME panguin)
