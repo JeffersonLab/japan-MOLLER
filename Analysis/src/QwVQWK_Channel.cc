@@ -902,7 +902,7 @@ void  QwVQWK_Channel::FillTreeVector(QwRootTreeBranchVector &values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void  QwVQWK_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString &prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>> &fieldPtrs)
+void  QwVQWK_Channel::ConstructNTupleAndVector(ROOT::RNTupleModel *model, TString &prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>> &fieldPtrs)
 {
   //  This channel is not used, so skip setting up the RNTuple.
   if (IsNameEmpty()) return;
