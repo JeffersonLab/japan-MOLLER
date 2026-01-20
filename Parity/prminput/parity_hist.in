@@ -311,3 +311,16 @@ asym_batery._dev_err		TH1F	101	-1.0	128          	ErrorCode	Entries
 asym_phasemonitor_block.	TH1F	1001	-5.0e-6	5.0e-6		Asym		Entries
 asym_phasemonitor_hw		TH1F	1001	-5.0e-6	5.0e-6		Asym  		Entries
 asym_phasemonitor_dev_err	TH1F	101	-1.0	128          	ErrorCode	Entries
+
+
+###########################################
+#  Adding some fully wildcarded histogram names.
+#  Do not add any other specific names below these.
+###########################################
+.*_block._raw		TH1F	1000	-5.0e9	5.0e9		Counts		Events
+.*_block.    		TH1F	1000	-5.0e9	5.0e9		CalibratedCounts Events
+.*_.w_raw		TH1F	1000	-5.0e9	5.0e9		Counts		Events
+.*_.w			TH1F	1000	-5.0e9	5.0e9		CalibratedCounts Events
+.*_sw-hw_raw		TH1F	1000	-5.0e2	5.0e2		Counts		Events
+
+.*            TH1F  101
