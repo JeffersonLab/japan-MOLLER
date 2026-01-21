@@ -368,7 +368,6 @@ void QwMollerADC_Channel::SetEventData(Double_t* block, UInt_t sequencenumber)
   return;
 }
 
-__attribute__((no_sanitize("signed-integer-overflow")))
 void QwMollerADC_Channel::SetRawEventData(){
   fNumberOfSamples = fNumberOfSamples_map;
   fHardwareBlockSum_raw = 0;
@@ -1195,11 +1194,21 @@ const QwMollerADC_Channel QwMollerADC_Channel::operator+ (const QwMollerADC_Chan
   return result;
 }
 
+__attribute__((no_sanitize("signed-integer-overflow")))
 QwMollerADC_Channel& QwMollerADC_Channel::operator+= (const QwMollerADC_Channel &value)
 {
 
   if (!IsNameEmpty()) {
     for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+      if (fBlock_raw[i] > 0 && value.fBlock_raw[i] > std::numeric_limits<Int_t>::max() - fBlock_raw[i] ||
+          fBlock_raw[i] < 0 && value.fBlock_raw[i] < std::numeric_limits<Int_t>::min() - fBlock_raw[i]) {
+        QwWarning << "QwMollerADC_Channel::operator+=: Overflow for channel "
+                  << this->GetElementName() << ": "
+                  << "fBlock_raw[i] = " << fBlock_raw[i] << ""
+                  << " += "
+                  << "value.fBlock_raw[i] = " << value.fBlock_raw[i] << ""
+                  << QwLog::endl;
+      }
       this->fBlock[i] += value.fBlock[i];
       this->fBlockM2[i] = 0.0;
     }

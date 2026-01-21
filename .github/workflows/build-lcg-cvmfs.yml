@@ -12,6 +12,7 @@ concurrency:
 
 jobs:
   linux:
+    name: ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.compiler }} (${{ matrix.sanitizer }})
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -25,6 +26,7 @@ jobs:
             opt: "opt"
             cxxflags: "-march=x86-64-v3 -mtune=generic -g -pg"
             submodules: true
+            sanitizer: "none"
           - release: "LCG_107"
             arch: "x86_64"
             os: "el9"
@@ -32,6 +34,7 @@ jobs:
             opt: "opt"
             cxxflags: "-march=x86-64-v3 -mtune=generic"
             submodules: true
+            sanitizer: "none"
           - release: "LCG_108"
             arch: "x86_64"
             os: "el9"
@@ -39,6 +42,7 @@ jobs:
             opt: "opt"
             cxxflags: "-march=x86-64-v3 -mtune=generic"
             submodules: true
+            sanitizer: "none"
           - release: "LCG_108"
             arch: "x86_64"
             os: "el9"
@@ -46,6 +50,7 @@ jobs:
             opt: "opt"
             cxxflags: "-march=x86-64-v3 -mtune=generic"
             submodules: true
+            sanitizer: "none"
           # Build without submodules
           - release: "LCG_108"
             arch: "x86_64"
@@ -54,6 +59,32 @@ jobs:
             opt: "dbg"
             cxxflags: "-march=x86-64-v3 -mtune=generic"
             submodules: false
+            sanitizer: "none"
+          # AddressSanitizer builds (using clang for better ASAN support)
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "clang16"
+            opt: "opt"
+            cxxflags: "-march=x86-64-v3 -mtune=generic"
+            submodules: true
+            sanitizer: "asan"
+          # UndefinedBehaviorSanitizer builds
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "clang16"
+            opt: "opt"
+            cxxflags: "-march=x86-64-v3 -mtune=generic"
+            submodules: true
+            sanitizer: "ubsan"
+          # Combined AddressSanitizer + UndefinedBehaviorSanitizer builds
+          - release: "LCG_107"
+            arch: "x86_64"
+            os: "el9"
+            compiler: "clang16"
+            opt: "opt"
+            sanitizer: "asan+ubsan"
     steps:
       - uses: actions/checkout@v6
         with:
@@ -117,7 +148,7 @@ jobs:
             gcc -march=native -Q --help=target | grep -m1 -- '-march='
             echo "::endgroup::"
 
-            echo "::group::Compilation with ccache"
+            echo "::group::Compilation with ccache and optional sanitizers"
             if [[ "${{ matrix.submodules }}" == "true" ]] ; then
               SQLPP_OPTIONS="\
                 -DBUILD_MARIADB_CONNECTOR=ON \
@@ -127,9 +158,22 @@ jobs:
             else
               SQLPP_OPTIONS=""
             fi
+            if [[ "${{ matrix.sanitizer }}" == "asan" ]]; then
+              SANITIZER_OPTIONS="-DUSE_ASAN=ON"
+              echo "Building with AddressSanitizer enabled"
+            elif [[ "${{ matrix.sanitizer }}" == "ubsan" ]]; then
+              SANITIZER_OPTIONS="-DUSE_UBSAN=ON"
+              echo "Building with UndefinedBehaviorSanitizer enabled"
+            elif [[ "${{ matrix.sanitizer }}" == "asan+ubsan" ]]; then
+              SANITIZER_OPTIONS="-DUSE_ASAN=ON -DUSE_UBSAN=ON"
+              echo "Building with both AddressSanitizer and UndefinedBehaviorSanitizer enabled"
+            else
+              echo "Building without sanitizers"
+            fi
             cmake -Bbuild -S. \
               -Wdev -Werror=dev \
               ${SQLPP_OPTIONS} \
+              ${SANITIZER_OPTIONS} \
               -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache \
               -DCMAKE_INSTALL_PREFIX=install \
               -DCMAKE_CXX_FLAGS="${{ matrix.cxxflags }}" 2>&1 | tee cmake.txt
@@ -152,6 +196,21 @@ jobs:
             # Run the mock data generator and analysis as described in README
             source SetupFiles/SET_ME_UP.bash
 
+            # Set up sanitizer environment if enabled
+            if [[ "${{ matrix.sanitizer }}" == "asan" ]]; then
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=0:malloc_context_size=20:detect_leaks=1:verify_asan_link_order=0:detect_stack_use_after_return=1:detect_odr_violation=1:new_delete_type_mismatch=0:intercept_tls_get_addr=0:log_path=./asan"
+              export LSAN_OPTIONS="suppressions=${{ github.workspace }}/.github/lsan.supp"
+              echo "AddressSanitizer configured with leak detection and suppressions"
+            elif [[ "${{ matrix.sanitizer }}" == "ubsan" ]]; then
+              export UBSAN_OPTIONS="abort_on_error=0:print_stacktrace=1:silence_unsigned_overflow=1:report_error_type=1:suppressions=${{ github.workspace }}/.github/ubsan.supp:log_path=./ubsan"
+              echo "UndefinedBehaviorSanitizer configured with suppressions"
+            elif [[ "${{ matrix.sanitizer }}" == "asan+ubsan" ]]; then
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=0:malloc_context_size=20:detect_leaks=1:verify_asan_link_order=0:detect_stack_use_after_return=1:detect_odr_violation=1:new_delete_type_mismatch=0:intercept_tls_get_addr=0:log_path=./asan"
+              export LSAN_OPTIONS="suppressions=${{ github.workspace }}/.github/lsan.supp"
+              export UBSAN_OPTIONS="abort_on_error=0:print_stacktrace=1:silence_unsigned_overflow=1:report_error_type=1:suppressions=${{ github.workspace }}/.github/ubsan.supp:log_path=./ubsan"
+              echo "Both AddressSanitizer and UndefinedBehaviorSanitizer configured with suppressions"
+            fi
+            
             # Generate mock data
             /usr/bin/time -v \
             build/qwmockdatagenerator -r 4 -e 1:20000 \
@@ -226,7 +285,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v6
         with:
-          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}-${{ matrix.sanitizer }}
           path: build.tar.zst
           retention-days: 7
           if-no-files-found: error
@@ -234,7 +293,7 @@ jobs:
       - name: Upload logs
         uses: actions/upload-artifact@v6
         with:
-          name: logs-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          name: logs-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}-${{ matrix.sanitizer }}
           path: |
             qwmockdatagenerator.log
             qwparity-*.log
@@ -253,12 +312,30 @@ jobs:
       - name: Upload prompt summary
         uses: actions/upload-artifact@v6
         with:
-          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}-${{ matrix.sanitizer }}
           path: |
             trees/summary_*.txt
             rntuples/summary_*.txt
           retention-days: 7
           if-no-files-found: error
+
+      - name: Ensure sanitizer logs are readable
+        if: always() && (matrix.sanitizer == 'asan' || matrix.sanitizer == 'ubsan' || matrix.sanitizer == 'asan+ubsan')
+        run: |
+          shopt -s nullglob
+          ls -al ./asan* ./ubsan* 2>/dev/null || echo "No sanitizer logs found"
+          sudo chmod +r ./asan* ./ubsan* 2>/dev/null || echo "No logs to change permissions for"
+          cat ./asan* ./ubsan*
+            
+      - name: Upload sanitizer logs
+        if: always() && (matrix.sanitizer == 'asan' || matrix.sanitizer == 'ubsan' || matrix.sanitizer == 'asan+ubsan')
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanitizer-logs-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.sanitizer }}
+          path: |
+            ./asan*
+            ./ubsan*
+          if-no-files-found: ignore
 
       - name: Upload database dumps
         uses: actions/upload-artifact@v6
@@ -272,7 +349,7 @@ jobs:
       - name: Upload regression alias definitions
         uses: actions/upload-artifact@v6
         with:
-          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}-${{ matrix.sanitizer }}
           path: |
             *regalias*.C
           retention-days: 7
@@ -284,7 +361,7 @@ jobs:
         with:
           workflow: build-lcg-cvmfs.yml
           branch: ${{ github.event.pull_request.base.ref }}
-          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          name: prompt-summary-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}-${{ matrix.sanitizer }}
           path: ./target
           if_no_artifact_found: warn
 
@@ -294,14 +371,14 @@ jobs:
         with:
           workflow: build-lcg-cvmfs.yml
           branch: ${{ github.event.pull_request.base.ref }}
-          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}-${{ matrix.sanitizer }}
           path: ./target
           if_no_artifact_found: warn
 
       - name: Compare artifacts
         if: github.event_name == 'pull_request'
         run: |
-          echo "Comparing artifacts for ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}"
+          echo "Comparing artifacts for ${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}-${{ matrix.sanitizer }}"
 
           # Check if target artifacts exist
           if [ ! -d "./target" ] || [ -z "$(ls -A ./target)" ]; then
@@ -373,13 +450,14 @@ jobs:
             compiler: "gcc14"
             opt: "opt"
             cxxflags: ""
+            sanitizer: "none"
     steps:
       - uses: actions/checkout@v6
 
       - name: Download build artifact
         uses: actions/download-artifact@v7
         with:
-          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          name: build-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}-${{ matrix.sanitizer }}
           path: .
       - name: Uncompress build artifact
         run: tar -xaf build.tar.zst
