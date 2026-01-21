@@ -221,8 +221,29 @@ jobs:
             fi
             echo "::endgroup::"
 
+            echo "::group::Make slim ROOT (keep only mul)"
+            if [ -f trees/isu_sample_4.root ]; then
+              root -l -b -q 'rootScripts/ci/skim_mul.C("trees/isu_sample_4.root","trees/isu_sample_4.slim.root")'
+              test -f trees/isu_sample_4.slim.root
+            else
+              echo "Missing trees/isu_sample_4.root"
+              exit 1
+            fi
+            echo "::endgroup::"
+
+
+        # upload the slim ROOT file
+      - name: Upload slim ROOT
+        uses: actions/upload-artifact@v5
+        with:
+          name: root-slim-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          path: trees/isu_sample_4.slim.root
+          retention-days: 7
+          if-no-files-found: error
+
       - name: Compress build directory
         run: tar -caf build.tar.zst build/
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v6
         with:
@@ -297,6 +318,95 @@ jobs:
           name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: ./target
           if_no_artifact_found: warn
+
+      - name: Download target branch artifacts (root-slim)
+        if: github.event_name == 'pull_request'
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: build-lcg-cvmfs.yml
+          branch: ${{ github.event.pull_request.base.ref }}
+          workflow_conclusion: completed
+          name: root-slim-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          path: ./target
+          if_no_artifact_found: warn
+
+      - name: Normalize baseline slim path
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          mkdir -p ./target
+          slim="$(find ./target -type f -name 'isu_sample_4.slim.root' | head -n1 || true)"
+          if [ -n "${slim:-}" ]; then
+            if [ "$slim" != "./target/isu_sample_4.slim.root" ]; then
+              cp "$slim" ./target/isu_sample_4.slim.root
+            else
+              echo "Baseline slim already at ./target/isu_sample_4.slim.root"
+            fi
+            echo "Baseline slim ready at ./target/isu_sample_4.slim.root"
+          else
+            echo "No baseline slim ROOT found under ./target"
+          fi
+          ls -R ./target || true
+
+      - name: Cleanup previous view_worker Docker containers
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          ids=$(docker ps -a --filter "name=view_worker" -q || true)
+          if [ -n "${ids:-}" ]; then
+            echo "Removing previous view_worker container(s): $ids"
+            docker rm -f $ids || true
+          else
+            echo "No previous view_worker containers found"
+          fi
+       
+      - name: ROOT comparison (mul/diff_* in isu_sample_4.slim.root)
+        if: github.event_name == 'pull_request'
+        uses: aidasoft/run-lcg-view@v5
+        with:
+          release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          run: |
+            set -euo pipefail
+            
+            # Filenames unique per matrix entry (for logs only)
+            COMP_TXT="compare-trees-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}.txt"
+            : > "$COMP_TXT"  # create/empty the file up front so it always exists
+
+            # Stable paths: keep standard filenames
+            PR_ROOT_SLIM="trees/isu_sample_4.slim.root"
+            BASE_ROOT="./target/isu_sample_4.slim.root"
+
+            echo "::group::Verify PR slim"
+            test -f "trees/isu_sample_4.root" || { echo "Missing trees/isu_sample_4.root" | tee -a "$COMP_TXT"; exit 1; }
+            test -f "$PR_ROOT_SLIM" || root -l -b -q 'rootScripts/ci/skim_mul.C("trees/isu_sample_4.root","trees/isu_sample_4.slim.root")'
+            test -f "$PR_ROOT_SLIM" || { echo "Failed to produce slim ROOT" | tee -a "$COMP_TXT"; exit 1; }
+            echo "Found PR slim ROOT: $PR_ROOT_SLIM" >> "$COMP_TXT"
+            echo "::endgroup::"
+
+            if [ ! -f "$BASE_ROOT" ]; then
+              {
+                echo "No baseline slim ROOT found at $BASE_ROOT"
+                echo "(Likely first run or base branch not built recently.)"
+              } >> "$COMP_TXT"
+              exit 0
+            fi
+
+            echo "::group::Run CompareTrees"
+            echo "BASE: $BASE_ROOT" >> "$COMP_TXT"
+            echo "PR  : $PR_ROOT_SLIM" >> "$COMP_TXT"
+            root -l -b -q "rootScripts/ci/CompareTrees.C(\"$BASE_ROOT\",\"$PR_ROOT_SLIM\",\"mul\",\"diff_\")" \
+              | tee -a "$COMP_TXT"
+            echo "::endgroup::"
+
+      - name: Upload compare-trees output
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v5
+        with:
+          name: compare-trees-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
+          path: compare-trees-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}.txt
+          retention-days: 7
+          if-no-files-found: error
+
 
       - name: Compare artifacts
         if: github.event_name == 'pull_request'
