@@ -218,6 +218,7 @@ class QwDataHandlerArray:
     std::vector<std::string> fDataHandlersDisabledByType; ///< List of disabled names
 
     Bool_t fPrintRunningSum;
+    Bool_t fEnableRNTuples;
 
     /// Test whether this handler array can contain a particular handler
     static Bool_t CanContain(VQwDataHandler* handler) {
