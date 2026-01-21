@@ -29,7 +29,7 @@ class QwExtractor:public VQwDataHandler, public MQwDataHandlerCloneable<QwExtrac
     /// Virtual destructor
     ~QwExtractor() override;
 
-    Int_t LoadChannelMap(const std::string& mapfile) override;
+    Int_t LoadChannelMap(const TString& mapfile) override;
     /**
      * \brief Connect to channels (event-only extraction).
      * @param event Subsystem array providing per-MPS yields to extract.

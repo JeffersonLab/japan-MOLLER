@@ -35,7 +35,7 @@ class QwAlarmHandler:public VQwDataHandler, public MQwDataHandlerCloneable<QwAla
     ~QwAlarmHandler() override {};
 
     /// \brief Load the channels and sensitivities
-    Int_t LoadChannelMap(const std::string& mapfile) override;
+    Int_t LoadChannelMap(const TString& mapfile) override;
 
     /// \brief Connect to Channels (event only)
     //Int_t ConnectChannels(QwSubsystemArrayParity& event);

@@ -124,8 +124,8 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
 
 
     void ProcessOptions(QwOptions &options) override;//Handle command line options
-    Int_t LoadChannelMap(TString mapfile) override;
-    Int_t LoadInputParameters(TString pedestalfile) override;
+    Int_t LoadChannelMap(const TString& mapfile) override;
+    Int_t LoadInputParameters(const TString& pedestalfile) override;
     void LoadEventCuts_Init() override {};
     void LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, Int_t &eventcut_flag) override;
     void LoadEventCuts_Fin(Int_t &eventcut_flag) override;
@@ -224,7 +224,7 @@ class VQwDetectorArray: virtual public VQwSubsystemParity {
 
     };
 
-    void LoadMockDataParameters(TString pedestalfile) override;
+    void LoadMockDataParameters(const TString& pedestalfile) override;
 
     void  PrintValue() const override;
     void  WritePromptSummary(QwPromptSummary *ps, TString type) override;

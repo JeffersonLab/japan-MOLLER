@@ -62,7 +62,7 @@ class QwEPICSEvent
   Int_t AddEPICSTag(const string& tag, const string& table = "",
       EQwEPICSDataType datatype = kEPICSFloat);
 
-  Int_t LoadChannelMap(TString mapfile);
+  Int_t LoadChannelMap(const TString& mapfile);
 
   std::vector<Double_t> ReportAutogains(std::vector<std::string> tag_list = fDefaultAutogainList);
 

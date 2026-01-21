@@ -137,7 +137,7 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
     }
 
     Int_t LoadChannelMap(){return this->LoadChannelMap(fMapFile);}
-    virtual Int_t LoadChannelMap(const std::string& /*mapfile*/){return 0;};
+    virtual Int_t LoadChannelMap(const TString& /*mapfile*/){return 0;};
 
     /// \brief Publish all variables of the subsystem
     Bool_t PublishInternalValues() const override;

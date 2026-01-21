@@ -69,13 +69,13 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
   /* derived from VQwSubsystem */
 
   void   ProcessOptions(QwOptions &options) override;//Handle command line options
-  Int_t  LoadChannelMap(TString mapfile) override;
-  Int_t  LoadInputParameters(TString pedestalfile) override;
+  Int_t  LoadChannelMap(const TString& mapfile) override;
+  Int_t  LoadInputParameters(const TString& pedestalfile) override;
   void LoadEventCuts_Init() override {};
   void LoadEventCuts_Line(QwParameterFile &mapstr, TString &varvalue, Int_t &eventcut_flag) override;
   void LoadEventCuts_Fin(Int_t &eventcut_flag) override;
-  Int_t  LoadGeometryDefinition(TString mapfile) override;
-  void  LoadMockDataParameters(TString mapfile) override;
+  Int_t  LoadGeometryDefinition(const TString& mapfile) override;
+  void  LoadMockDataParameters(const TString& mapfile) override;
   void   AssignGeometry(QwParameterFile* mapstr, VQwBPM * bpm);
 
   Bool_t ApplySingleEventCuts() override;//derived from VQwSubsystemParity

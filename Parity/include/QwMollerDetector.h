@@ -92,9 +92,8 @@ class QwMollerDetector:
 
     /* derived from VQwSubsystem */
     void ProcessOptions(QwOptions &options) override; //Handle command line options
-    Int_t LoadChannelMap(TString mapfile) override;
-    Int_t LoadInputParameters(TString pedestalfile) override;
-    Int_t LoadEventCuts(TString & filename);
+    Int_t LoadChannelMap(const TString& mapfile) override;
+    Int_t LoadInputParameters(const TString& pedestalfile) override;
     Bool_t SingleEventCuts();
     Int_t ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override;
     Int_t ProcessConfigurationBuffer(UInt_t ev_type, const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words);
@@ -117,7 +116,7 @@ class QwMollerDetector:
     void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF) override{
     };
     void  CalculateRunningAverage() override;
-    Int_t LoadEventCuts(TString filename) override;
+    Int_t LoadEventCuts(const TString& filename) override;
     Bool_t  ApplySingleEventCuts() override;
     void IncrementErrorCounters() override {};
     void PrintErrorCounters() const override;
