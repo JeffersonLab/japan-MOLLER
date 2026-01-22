@@ -857,7 +857,7 @@ void  QwMollerADC_Channel::FillTreeVector(QwRootTreeBranchVector& values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+void  QwMollerADC_Channel::ConstructNTupleAndVector(ROOT::RNTupleModel *model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   //For rntuple
   if (IsNameEmpty()) {
