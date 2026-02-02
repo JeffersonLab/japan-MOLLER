@@ -107,9 +107,9 @@ void GrandCorrelator::ProcessData()
         double xj = fAllValues[j];
 
         mNij(i,j) += 1.0;
-        double delta = xj - mMij(i,j);
+        double delta = xi - mMij(i,j);
         mMij(i,j) += delta / mNij(i,j);
-        mSij(i,j) += delta * (xj-mMij(i,j));
+        mSij(i,j) += delta * (xi-mMij(i,j));
     }
   }
 }
