@@ -58,6 +58,7 @@ Doxygen/html
 #tmp files
 *~
 z_*
+*.swp
 
 # setup files
 SetupFiles/SET_ME_UP.*
