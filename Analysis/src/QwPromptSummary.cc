@@ -106,15 +106,15 @@ Bool_t dd= fElementName.Contains("_dd");
 Bool_t da= fElementName.Contains("_da");
 
 
-if (type.Contains("yield")&& !(dd||da)){
-   		out = Form("%20s | Mean: %8.3f +/- %8.3f \t Width: %8.3f\n", fElementName.Data(), fYield, fYieldError, fYieldWidth);
+if (type.Contains("yield")&& !(dd||da)){     
+   		out = Form("%20s | Mean: %8.3g +/- %8.3g \t Width: %8.3g\n", fElementName.Data(), fYield, fYieldError, fYieldWidth); 
 }
 if (type.Contains("asy")&& !(dd||da)){
-      out = Form("%20s | Mean: %8.3f +/- %8.3f \t Width: %8.3f\n", fElementName.Data(), fAsymDiff, fAsymDiffError, fAsymDiffWidth);
+      out = Form("%20s | Mean: %8.3g +/- %8.3g \t Width: %8.3g\n", fElementName.Data(), fAsymDiff, fAsymDiffError, fAsymDiffWidth);
 }
 if (type.Contains("double")&& (dd||da)) {
-     	out = Form("%20s | Mean: %8.3f +/- %8.3f \t Width: %8.3f\n", fElementName.Data(), fAsymDiff, fAsymDiffError, fAsymDiffWidth);
-}
+     	out = Form("%20s | Mean: %8.3g +/- %8.3g \t Width: %8.3g\n", fElementName.Data(), fAsymDiff, fAsymDiffError, fAsymDiffWidth);
+}     
 
 
 return out;

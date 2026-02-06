@@ -256,7 +256,7 @@ void QwMollerDetector::FillNTupleVector(std::vector<Double_t>& values) const
 VQwSubsystem&  QwMollerDetector::operator=(VQwSubsystem *value){
   // std::cout << "QwMollerDetector assignment (operator=)" << std::endl;
   if(this != value && Compare(value)){
-    //VQwSubsystem::operator=(value);
+    VQwSubsystem::operator=(value);
     QwMollerDetector* input = dynamic_cast<QwMollerDetector *> (value);
     for(size_t i = 0; i < input->fSTR7200_Channel.size(); i++){
       for(size_t j = 0; j < input->fSTR7200_Channel[i].size(); j++){

@@ -27,6 +27,7 @@ std::shared_ptr<VQwSubsystem> QwCombinerSubsystem::GetSharedPointerToStaticObjec
 
 VQwSubsystem& QwCombinerSubsystem::operator=(VQwSubsystem* value)
 {
+  VQwSubsystem::operator=(value);
   QwCombinerSubsystem* input= dynamic_cast<QwCombinerSubsystem*>(value);
   if (input!=NULL) {
     for(size_t i = 0; i < input->fDependentVar.size(); i++) {

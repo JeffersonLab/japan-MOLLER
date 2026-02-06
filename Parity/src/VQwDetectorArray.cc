@@ -1433,7 +1433,7 @@ VQwSubsystem&  VQwDetectorArray::operator=  (VQwSubsystem *value) {
 
     if (this != value && Compare(value)) {
 
-        //VQwSubsystem::operator=(value);
+        VQwSubsystem::operator=(value);
         VQwDetectorArray* input = dynamic_cast<VQwDetectorArray*> (value);
 
         for (size_t i=0;i<input->fIntegrationPMT.size();i++)

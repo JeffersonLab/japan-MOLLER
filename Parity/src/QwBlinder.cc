@@ -722,8 +722,16 @@ void QwBlinder::InitBlinders(const UInt_t seed_id)
   }
 
   // Generate checksum
+#if __cplusplus < 202002L
+  ULong64_t factor_bits, offset_bits;
+  memcpy(&factor_bits, &fBlindingFactor, sizeof(ULong64_t));
+  memcpy(&offset_bits, &fBlindingOffset, sizeof(ULong64_t));
+#else
+  auto factor_bits = std::bit_cast<ULong64_t>(fBlindingFactor);
+  auto offset_bits = std::bit_cast<ULong64_t>(fBlindingOffset);
+#endif
   TString hex_string;
-  hex_string.Form("%.16llx%.16llx", *(ULong64_t*)(&fBlindingFactor), *(ULong64_t*)(&fBlindingOffset));
+  hex_string.Form("%.16llx%.16llx", factor_bits, offset_bits);
   fDigest = GenerateDigest(hex_string);
   fChecksum = "";
   for (size_t i = 0; i < fDigest.size(); i++)

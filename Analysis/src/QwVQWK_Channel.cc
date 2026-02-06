@@ -7,6 +7,7 @@
 
 // System headers
 #include <stdexcept>
+#include "TMath.h"
 
 // Qweak headers
 #include "QwLog.h"
@@ -1741,11 +1742,11 @@ void QwVQWK_Channel::CalculateRunningAverage()
       // Stability check 83951872
       if ((fStability>0) &&( (fErrorConfigFlag & kStabilityCut) == kStabilityCut)) {
         // check to see the channel has stability cut activated in the event cut file
-	if (GetValueWidth() > fStability){
-	  // if the width is greater than the stability required flag the event
-	  fErrorFlag = kBeamStabilityError;
-	} else
-	  fErrorFlag = 0;
+        if (GetValueWidth() > fStability){
+          // if the width is greater than the stability required flag the event
+          fErrorFlag = kBeamStabilityError;
+        } else
+          fErrorFlag = 0;
       }
     }
 }
@@ -1799,7 +1800,7 @@ void QwVQWK_Channel::Blind(const QwBlinder *blinder)
     } else {
       blinder->ModifyThisErrorCode(fErrorFlag);
       for (Int_t i = 0; i < fBlocksPerEvent; i++)
-	fBlock[i] = QwBlinder::kValue_BlinderFail;
+        fBlock[i] = QwBlinder::kValue_BlinderFail;
       fHardwareBlockSum =  QwBlinder::kValue_BlinderFail;
     }
   }
@@ -1821,7 +1822,7 @@ void QwVQWK_Channel::Blind(const QwBlinder *blinder, const QwVQWK_Channel& yield
     } else {
       blinder->ModifyThisErrorCode(fErrorFlag);//update the HW error code
       for (Int_t i = 0; i < fBlocksPerEvent; i++)
-	fBlock[i] = QwBlinder::kValue_BlinderFail * yield.fBlock[i];
+        fBlock[i] = QwBlinder::kValue_BlinderFail * yield.fBlock[i];
       fHardwareBlockSum = QwBlinder::kValue_BlinderFail * yield.fHardwareBlockSum;
     }
   }

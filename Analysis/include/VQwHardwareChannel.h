@@ -162,7 +162,7 @@ public:
 
   virtual Bool_t ApplySingleEventCuts() = 0;//check values read from modules are at desired level
 
-  virtual Bool_t CheckForBurpFail(const VQwHardwareChannel *event){
+  Bool_t CheckForBurpFail(const VQwHardwareChannel *event){
     Bool_t foundburp = kFALSE;
     if (fBurpThreshold>0){
       Double_t diff = this->GetValue() - event->GetValue();
