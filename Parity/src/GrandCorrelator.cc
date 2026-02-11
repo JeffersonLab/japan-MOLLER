@@ -65,6 +65,7 @@ void GrandCorrelator::DefineOptions(QwOptions &options)
       po::value<bool>(&fPrintCorrelations)->default_bool_value(false),
       "print correlations after determining them");
 }
+
 void GrandCorrelator::ProcessOptions(QwOptions &options)
 {
 }
@@ -88,9 +89,10 @@ void GrandCorrelator::ParseConfigFile(QwParameterFile& file)
 
 void GrandCorrelator::ProcessData()
 {
-  // Add to total count
+  // Add to total count for solve step 2
   fTotalCount++;
 
+  
   for(size_t i = 0; i < fAllVar.size(); ++i){
     fAllGood[i] = (fAllVar[i]->GetErrorCode() == 0);
     fAllValues[i] = fAllVar[i]->GetValue(fBlock+1);
@@ -98,18 +100,24 @@ void GrandCorrelator::ProcessData()
   }
 
   fGoodCount++;
-  for(int i = 0; i<nP; ++i){
-    if(!fAllGood[i]) continue;
-    for(int j = i; j<nP; ++j){
-        if(!fAllGood[j]) continue;
+  for(int i = 0; i<fAllVar.size(); ++i){
+    for(int j = i; j<fAllVar.size(); ++j){
+        if(!fAllGood[i] || !fAllGood[j]) continue;
 
         double xi = fAllValues[i];
         double xj = fAllValues[j];
 
-        mNij(i,j) += 1.0;
-        double delta = xi - mMij(i,j);
-        mMij(i,j) += delta / mNij(i,j);
-        mSij(i,j) += delta * (xi-mMij(i,j));
+        mNij(i,j) += 1;
+        double delta_i = xi - mMij(i,j);
+        mMij(i,j) += delta_i / mNij(i,j);
+        mSij(i,j) += delta_i * (xi-mMij(i,j));
+
+        double delta_j = xj - mMji(j,i);
+        mMji(j,i) += delta_j / mNij(j,i);
+        mSji(j,i) += delta_j * (xj - mMji(j,i));
+
+
+        mCij(i,j) += (xi - mMij(i,j)) * (xj - mMji(j,i));
     }
   }
 }
@@ -144,28 +152,76 @@ void GrandCorrelator::AccumulateRunningSum(VQwDataHandler &value, Int_t count, I
 
 void GrandCorrelator::CalcCorrelations()
 {
-  if (nP == 0) return;
-  
-  for(int i = 0; i<nP; ++i){
-    for(int j = i; j<nP; ++j){
-        if(mNij(i,j) > 1){
-            double var = mSij(i,j) / (mNij(i,j) - 1.0);
-            mSY[i] = sqrt(var);
-            mRPY(i,j) = var;
-        }
+  // Check if any channels are active
+  if (nP == 0 || nY == 0) {
+    return;
+  }
+
+  QwMessage << "GrandCorrelator::CalcCorrelations(): name=" << GetName() << QwLog::endl;
+
+  // Print entry summary
+  QwVerbose << "GrandCorrelator: "
+            << "total entries: " << fTotalCount << ", "
+            << "good entries: " << fGoodCount
+            << QwLog::endl;
+  // and warn if zero
+  if (fTotalCount > 100 && fGoodCount == 0) {
+    QwWarning << "GrandCorrelator: "
+              << "< 1% good events, "
+              << fGoodCount << " of " << fTotalCount
+              << QwLog::endl;
+  }
+
+  // Event error flag
+  if (fErrCounts_EF > 0) {
+    QwVerbose << "   Entries failed due to error flag: "
+              << fErrCounts_EF << QwLog::endl;
+  }
+  // Dependent variable error codes
+  for (size_t i = 0; i < fDependentVar.size(); ++i) {
+    if (fErrCounts_DV.at(i) > 0) {
+      QwVerbose << "   Entries failed due to " << fDependentVar.at(i)->GetElementName()
+                << ": " <<  fErrCounts_DV.at(i) << QwLog::endl;
+    }
+  }
+  // Independent variable error codes
+  for (size_t i = 0; i < fIndependentVar.size(); ++i) {
+    if (fErrCounts_IV.at(i) > 0) {
+      QwVerbose << "   Entries failed due to " << fIndependentVar.at(i)->GetElementName()
+                << ": " <<  fErrCounts_IV.at(i) << QwLog::endl;
     }
   }
 
-  if(fPrintCorrelations){
-    printSummaryAlphas();
-    printSummaryMeansWithUnc();
+  if (! this->failed()) {
+
+    if (fPrintCorrelations) {
+      this->printSummaryP();
+      this->printSummaryY();
+    }
+
+    this->solve();
+
+    if (fPrintCorrelations) {
+      this->printSummaryAlphas();
+      this->printSummaryMeansWithUnc();
+      this->printSummaryMeansWithUncCorrected();
+    }
   }
 
-  if(fTree) fTree->Fill();
+  // Fill tree
+  if (fTree) fTree->Fill();
+  else QwWarning << "No tree" << QwLog::endl;
+
+  // Write alpha and alias file
   WriteAlphaFile();
   WriteAliasFile();
 }
 
+/** Load the channel map
+ *
+ * @param mapfile Filename of map file
+ * @return Zero when success
+ */
 Int_t GrandCorrelator::LoadChannelMap(const std::string& mapfile)
 {
   // Open the file
@@ -180,45 +236,127 @@ Int_t GrandCorrelator::LoadChannelMap(const std::string& mapfile)
     map.TrimComment();
     map.TrimWhitespace();
     if (map.LineIsEmpty()) continue;
-    std::string token = map.GetNextToken(" ");
-    fAllName.push_back(token);
-    fAllVar.push_back(nullptr);
-}
-return 0;
+    // Get first token: label (dv or iv), second token is the name like "asym_blah"
+    string primary_token = map.GetNextToken(" ");
+    string current_token = map.GetNextToken(" ");
+    // Parse current token into independent variable type and name
+    type_name = ParseHandledVariable(current_token);
+
+    if (primary_token == "iv") {
+      fIndependentType.push_back(type_name.first);
+      fIndependentName.push_back(type_name.second);
+      fIndependentFull.push_back(current_token);
+    }
+    else if (primary_token == "dv") {
+      fDependentType.push_back(type_name.first);
+      fDependentName.push_back(type_name.second);
+      fDependentFull.push_back(current_token);
+    }
+    else if (primary_token == "treetype") {
+      QwMessage << "Tree Type read, ignoring." << QwLog::endl;
+    }
+    else {
+      QwError << "LoadChannelMap in GrandCorrelator read invalid primary_token " << primary_token << QwLog::endl;
+    }
+  }
+
+  return 0;
 }
 
 Int_t GrandCorrelator::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff)
 {
   SetEventcutErrorFlagPointer(asym.GetEventcutErrorFlagPointer());
 
-  fAllValues.resize(fAllName.size());
-  fAllGood.resize(fAllName.size(), true);
+  // Return if correlator is not enabled
 
-  for(size_t i = 0; i<fAllName.size(); ++i){
-    const VQwHardwareChannel* ptr = RequestExternalPointer(fAllName[i]);
-    if(!ptr){
-        ptr = asym.RequestExternalPointer(fAllName[i]);
-        if(!ptr) ptr = diff.RequestExternalPointer(fAllName[i]);
+  /// Fill vector of pointers to the relevant data elements
+  for (size_t dv = 0; dv < fDependentName.size(); dv++) {
+    // Get the dependent variables
+
+    const VQwHardwareChannel* dv_ptr = 0;
+
+    if (fDependentType.at(dv)==kHandleTypeMps){
+      //  Quietly ignore the MPS type when we're connecting the asym & diff
+      continue;
+    }else{
+      dv_ptr = this->RequestExternalPointer(fDependentFull.at(dv));
+      if (dv_ptr==NULL){
+	switch (fDependentType.at(dv)) {
+        case kHandleTypeAsym:
+          dv_ptr = asym.RequestExternalPointer(fDependentName.at(dv));
+          break;
+        case kHandleTypeDiff:
+          dv_ptr = diff.RequestExternalPointer(fDependentName.at(dv));
+          break;
+        default:
+          QwWarning << "GrandCorrelator::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff): "
+                    << "Dependent variable, " << fDependentName.at(dv)
+                    << ", for asym/diff correlator does not have proper type, type=="
+                    << fDependentType.at(dv) << "." << QwLog::endl;
+          break;
+        }
+      }
+      if (dv_ptr == NULL){
+	QwWarning << "QwCombiner::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff):  Dependent variable, "
+		  << fDependentName.at(dv)
+		  << ", was not found (fullname=="
+		  << fDependentFull.at(dv)<< ")." << QwLog::endl;
+	 continue;
+      }
     }
-    if(!ptr){
-        QwWarning << "GrandCorrelator: variable " << fAllName[i] << " not found." << QwLog::endl;
-        continue;
+
+    // pair creation
+    if(dv_ptr != NULL){
+      // fDependentVarType.push_back(fDependentType.at(dv));
+      fDependentVar.push_back(dv_ptr);
     }
-    fAllVar[i] = ptr;
+
   }
 
-  nP = fAllName.size();
-  setDims(nP,nP);
-  init();
-  fErrCounts_IV.resize(nP,0);
-  fErrCounts_DV.resize(nP,0);
+  // Add independent variables
+  for (size_t iv = 0; iv < fIndependentName.size(); iv++) {
+    // Get the independent variables
+    const VQwHardwareChannel* iv_ptr = 0;
+    iv_ptr = this->RequestExternalPointer(fIndependentFull.at(iv));
+    if (iv_ptr==NULL){
+      switch (fIndependentType.at(iv)) {
+      case kHandleTypeAsym:
+        iv_ptr = asym.RequestExternalPointer(fIndependentName.at(iv));
+        break;
+      case kHandleTypeDiff:
+        iv_ptr = diff.RequestExternalPointer(fIndependentName.at(iv));
+        break;
+      default:
+        QwWarning << "Independent variable for correlator has unknown type."
+                  << QwLog::endl;
+        break;
+      }
+    }
+    if (iv_ptr) {
+      fIndependentVar.push_back(iv_ptr);
+    } else {
+      QwWarning << "Independent variable " << fIndependentName.at(iv) << " for correlator could not be found."
+                << QwLog::endl;
+    }
+
+  }
+  fIndependentValues.resize(fIndependentVar.size());
+  fDependentValues.resize(fDependentVar.size());
+
+  nP = fIndependentName.size();
+  nY = fDependentName.size();
+
+  this->setDims(nP, nY);
+  this->init();
+
+  fErrCounts_IV.resize(fIndependentVar.size(),0);
+  fErrCounts_DV.resize(fDependentVar.size(),0);
 
   return 0;
 }
 
 
 
-//NEED TO LOOK AT THESE LATER
 void GrandCorrelator::ConstructTreeBranches(
     QwRootFile *treerootfile,
     const std::string& treeprefix,
@@ -563,7 +701,7 @@ void GrandCorrelator::WriteAliasFile()
 
 
 GrandCorrelator::GrandCorrelator()
-: nP(0),
+: nP(0),nY(0),
   fErrorFlag(-1),
   fGoodEventNumber(0)
 { }
@@ -571,7 +709,7 @@ GrandCorrelator::GrandCorrelator()
 //=================================================
 //=================================================
 GrandCorrelator::GrandCorrelator(const GrandCorrelator& source)
-: nP(source.nP),
+: nP(source.nP),nY(source.nY),
   fErrorFlag(-1),
   fGoodEventNumber(0),
   VQwDataHandler(source),
@@ -599,12 +737,39 @@ GrandCorrelator::GrandCorrelator(const GrandCorrelator& source)
 //=================================================
 void GrandCorrelator::init()
 {
-  mVPP.ResizeTo(nP,nP); //pairwise covariance
-  mVP.ResizeTo(nP);     //variances
-  mMP.ResizeTo(nP);     //means
-  mSY.ResizeTo(nP);     //standard deviations
+  mMP.ResizeTo(nP);
+  mMY.ResizeTo(nY);
+  mMYp.ResizeTo(nY);
 
-  mRPP.ResizeTo(nP,nP); //correlation matrix
+  mVPP.ResizeTo(nP,nP);
+  mVPY.ResizeTo(nP,nY);
+  mVYP.ResizeTo(nY,nP);
+  mVYY.ResizeTo(nY,nY);
+  mVYYp.ResizeTo(nY,nY);
+  mVP.ResizeTo(nP);
+  mVY.ResizeTo(nY);
+  mVYp.ResizeTo(nY);
+
+  mSPP.ResizeTo(mVPP);
+  mSPY.ResizeTo(mVPY);
+  mSYP.ResizeTo(mVYP);
+  mSYY.ResizeTo(mVYY);
+  mSYYp.ResizeTo(mVYYp);
+
+  Axy.ResizeTo(nP,nY);
+  Ayx.ResizeTo(nY,nP);
+  dAxy.ResizeTo(Axy);
+  dAyx.ResizeTo(Ayx);
+
+  mSP.ResizeTo(nP);
+  mSY.ResizeTo(nY);
+  mSYp.ResizeTo(nY);
+
+  mRPP.ResizeTo(mVPP);
+  mRPY.ResizeTo(mVPY);
+  mRYP.ResizeTo(mVYP);
+  mRYY.ResizeTo(mVYY);
+  mRYYp.ResizeTo(mVYYp);
 
   fGoodEventNumber = 0;
 }
@@ -613,11 +778,39 @@ void GrandCorrelator::init()
 //=================================================
 void GrandCorrelator::clear()
 {
-  mVPP.Zero();
-  mVP.Zero();
   mMP.Zero();
+  mMY.Zero();
+  mMYp.Zero();
+
+  mVPP.Zero();
+  mVPY.Zero();
+  mVYP.Zero();
+  mVYY.Zero();
+  mVYYp.Zero();
+  mVP.Zero();
+  mVY.Zero();
+  mVYp.Zero();
+
+  mSPP.Zero();
+  mSPY.Zero();
+  mSYP.Zero();
+  mSYY.Zero();
+  mSYYp.Zero();
+
+  Axy.Zero();
+  Ayx.Zero();
+  dAxy.Zero();
+  dAyx.Zero();
+
+  mSP.Zero();
   mSY.Zero();
+  mSYp.Zero();
+
   mRPP.Zero();
+  mRPY.Zero();
+  mRYP.Zero();
+  mRYY.Zero();
+  mRYYp.Zero();
 
   fErrorFlag = -1;
   fGoodEventNumber = 0;
@@ -627,33 +820,49 @@ void GrandCorrelator::clear()
 //=================================================
 void GrandCorrelator::print()
 {
-  QwMessage << "LinReg dims:  nP=" << nP << QwLog::endl;
+  QwMessage << "LinReg dims:  nP=" << nP << " nY=" << nY << QwLog::endl;
 
-  QwMessage << "VPP:"; mVPP.Print();
-  QwMessage << "VP:"; mVP.Print();
   QwMessage << "MP:"; mMP.Print();
-  QwMessage << "SY:"; mSY.Print();
-  QwMessage << "RPP:"; mRPP.Print();
+  QwMessage << "MY:"; mMY.Print();
+  QwMessage << "VPP:"; mVPP.Print();
+  QwMessage << "VPY:"; mVPY.Print();
+  QwMessage << "VYY:"; mVYY.Print();
+  QwMessage << "VYYprime:"; mVYYp.Print();
 }
 
 //==========================================================
 //==========================================================
 GrandCorrelator& GrandCorrelator::operator+=(const std::pair<TVectorD,TVectorD>& rhs)
 {
-  const TVectorD& vals = rhs.first;
-  
+  // Get independent and dependent components
+  const TVectorD& P = rhs.first;
+  const TVectorD& Y = rhs.second;
+
+  // Update number of events
   fGoodEventNumber++;
-  if(fGoodEventNumber == 1){
-    mMP = vals;
+
+  if (fGoodEventNumber <= 1) {
+    // First event, set covariances to zero and means to first value
     mVPP.Zero();
+    mVPY.Zero();
+    mVYY.Zero();
+    mMP = P;
+    mMY = Y;
   } else {
-    TVectorD delta(vals - mMP);
+    // Deviations from mean
+    TVectorD delta_y(Y - mMY);
+    TVectorD delta_p(P - mMP);
 
-    Double_t alpha = (fGoodEventNumber - 1.0)/fGoodEventNumber;
-    mVPP.Rank1Update(delta,alpha);
+    // Update covariances
+    Double_t alpha = (fGoodEventNumber - 1.0) / fGoodEventNumber;
+    mVPP.Rank1Update(delta_p, alpha);
+    mVPY.Rank1Update(delta_p, delta_y, alpha);
+    mVYY.Rank1Update(delta_y, alpha);
 
-    Double_t beta = 1.0/fGoodEventNumber;
-    mMP += delta*beta;
+    // Update means
+    Double_t beta = 1.0 / fGoodEventNumber;
+    mMP += delta_p * beta;
+    mMY += delta_y * beta;
   }
 
   return *this;
@@ -676,17 +885,23 @@ GrandCorrelator& GrandCorrelator::operator+=(const GrandCorrelator& rhs)
     return *this;
 
   // Deviations from mean
-  TVectorD delta(mMP - rhs.mMP);
+  TVectorD delta_y(mMY - rhs.mMY);
+  TVectorD delta_p(mMP - rhs.mMP);
 
   // Update covariances
   Double_t alpha = fGoodEventNumber * rhs.fGoodEventNumber
                 / (fGoodEventNumber + rhs.fGoodEventNumber);
+  mVYY += rhs.mVYY;
+  mVYY.Rank1Update(delta_y, alpha);
+  mVPY += rhs.mVPY;
+  mVPY.Rank1Update(delta_p, delta_y, alpha);
   mVPP += rhs.mVPP;
-  mVPP.Rank1Update(delta, alpha);
+  mVPP.Rank1Update(delta_p, alpha);
 
   // Update means
   Double_t beta = rhs.fGoodEventNumber / (fGoodEventNumber + rhs.fGoodEventNumber);
-  mMP += delta * beta;
+  mMY += delta_y * beta;
+  mMP += delta_p * beta;
 
   fGoodEventNumber += rhs.fGoodEventNumber;
 
@@ -703,6 +918,29 @@ Int_t GrandCorrelator::getMeanP(const int i, Double_t &mean) const
    mean = mMP(i);    return 0;
 }
 
+
+//==========================================================
+//==========================================================
+Int_t GrandCorrelator::getMeanY(const int i, Double_t &mean) const
+{
+  mean=-1e50;
+  if(i<0 || i >= nY ) return -1;
+  if( fGoodEventNumber<1) return -3;
+  mean = mMY(i);    return 0;
+}
+
+
+//==========================================================
+//==========================================================
+Int_t GrandCorrelator::getMeanYprime(const int i, Double_t &mean) const
+{
+  mean=-1e50;
+  if(i<0 || i >= nY ) return -1;
+  if( fGoodEventNumber<1) return -3;
+  mean = mMYp(i);    return 0;
+}
+
+
 //==========================================================
 //==========================================================
 Int_t GrandCorrelator::getSigmaP(const int i, Double_t &sigma) const
@@ -711,6 +949,29 @@ Int_t GrandCorrelator::getSigmaP(const int i, Double_t &sigma) const
   if(i<0 || i >= nP ) return -1;
   if( fGoodEventNumber<2) return -3;
   sigma=sqrt(mVPP(i,i)/(fGoodEventNumber-1.));
+  return 0;
+}
+
+
+//==========================================================
+//==========================================================
+Int_t GrandCorrelator::getSigmaY(const int i, Double_t &sigma) const
+{
+  sigma=-1e50;
+  if(i<0 || i >= nY ) return -1;
+  if( fGoodEventNumber<2) return -3;
+  sigma=sqrt(mVYY(i,i)/(fGoodEventNumber-1.));
+  return 0;
+}
+
+//==========================================================
+//==========================================================
+Int_t GrandCorrelator::getSigmaYprime(const int i, Double_t &sigma) const
+{
+  sigma=-1e50;
+  if(i<0 || i >= nY ) return -1;
+  if( fGoodEventNumber<2) return -3;
+  sigma=sqrt(mVYYp(i,i)/(fGoodEventNumber-1.));
   return 0;
 }
 
@@ -724,6 +985,32 @@ Int_t GrandCorrelator::getCovarianceP( int i, int j, Double_t &covar) const
     if(i<0 || i >= nP ) return -11;
     if( fGoodEventNumber<2) return -14;
     covar=mVPP(i,j)/(fGoodEventNumber-1.);
+    return 0;
+}
+
+//==========================================================
+//==========================================================
+Int_t GrandCorrelator::getCovariancePY(  int ip, int iy, Double_t &covar) const
+{
+    covar=-1e50;
+    //... now we need only upper right triangle
+    if(ip<0 || ip >= nP ) return -11;
+    if(iy<0 || iy >= nY ) return -12;
+    if( fGoodEventNumber<2) return -14;
+    covar=mVPY(ip,iy)/(fGoodEventNumber-1.);
+    return 0;
+}
+
+//==========================================================
+//==========================================================
+Int_t GrandCorrelator::getCovarianceY( int i, int j, Double_t &covar) const
+{
+    covar=-1e50;
+    if( i>j) { int k=i; i=j; j=k; }//swap i & j
+    //... now we need only upper right triangle
+    if(i<0 || i >= nY ) return -11;
+    if( fGoodEventNumber<2) return -14;
+    covar=mVYY(i,j)/(fGoodEventNumber-1.);
     return 0;
 }
 
@@ -767,20 +1054,95 @@ void GrandCorrelator::printSummaryP() const
 //==========================================================
 void GrandCorrelator::solve()
 {
-  // diagonal variances
-  for(int i=0; i<nP; i++)
-    mVP(i) = sqrt(mVPP(i,i));
+//==========================================================
+//Solve step 1
+for(int i = 0; i < fAllVar.size(); ++i){
+    for(int j = 0; j < fAllVar.size(); ++j){
+        mVij(i,j) = mCij(i.j) / mNij(i,j) - 1.;
+        sigma_ij = sqrt((mSij(i,j)) / (mNij(i,j) - 1.));
+        sigma_ji = sqrt((mSji(j,i)) / (mNji(j,i) - 1.));
 
-  mRPP = mVPP;
-  for(int i=0; i<nP; i++){
-    for(int j=0; j<nP; j++){
-        if(mVP(i)*mVP(j) != 0){
-            mRPP(i,j) /=(mVP(i)*mVP(j));
-        }else{
-            mRPP(i,j) = 0.0;
+        if(sigma_ij > 0.0 && sigma_ji > 0.0){
+        mRij(i,j) = mVij(i,j) / (sigma_ij * sigma_ji);
+        } else {
+            mRij(i,j) = 0.0;
         }
     }
 }
+
+
+//==========================================================
+//Solve step 2
+
+
+  // off-diagonal raw covariance
+  mVYP.Transpose(mVPY);
+
+  // diagonal variances
+  mVP = TMatrixDDiag(mVPP); mVP.Sqrt();
+  mVY = TMatrixDDiag(mVYY); mVY.Sqrt();
+
+  // correlation matrices
+  mRPP = mVPP; mRPP.NormByColumn(mVP); mRPP.NormByRow(mVP);
+  mRYY = mVYY; mRYY.NormByColumn(mVY); mRYY.NormByRow(mVY);
+  mRPY = mVPY; mRPY.NormByColumn(mVP); mRPY.NormByRow(mVY);
+
+  /// normalized covariances
+  mSYY = mVYY * (1.0 / (fGoodEventNumber - 1.));
+  mSPP = mVPP * (1.0 / (fGoodEventNumber - 1.));
+  mSPY = mVPY * (1.0 / (fGoodEventNumber - 1.));
+  mSYP.Transpose(mSPY);
+
+  // uncertainties on the means
+  mSP = TMatrixDDiag(mSPP); mSP.Sqrt();
+  mSY = TMatrixDDiag(mSYY); mSY.Sqrt();
+
+  // Warn if correlation matrix determinant close to zero (heuristic)
+  if (mRPP.Determinant() < std::pow(10,-(2*nP))) {
+    QwWarning << "LRB: correlation matrix nearly singular, "
+              << "determinant = " << mRPP.Determinant()
+              << " (set includes highly correlated variable pairs)"
+              << QwLog::endl;
+    if (fGoodEventNumber > 10*nP) {
+      QwMessage << fGoodEventNumber << " events" << QwLog::endl;
+      QwMessage << "Covariance matrix: " << QwLog::endl; mVPP.Print();
+      QwMessage << "Correlation matrix: " << QwLog::endl; mRPP.Print();
+    }
+    QwWarning << "LRB: solving failed (this happens when only few events)."
+              << QwLog::endl;
+    return;
+  }
+  // slopes
+  TMatrixD invRPP(TMatrixD::kInverted, mRPP);
+  Axy = TMatrixD(invRPP, TMatrixD::kMult, mRPY);
+  Axy.NormByColumn(mSP); // divide
+  Axy.NormByRow(mSY, ""); // mult
+  Ayx.Transpose(Axy);
+
+  // new means
+  mMYp = mMY - Ayx * mMP;
+
+  // new raw covariance
+  mVYYp = mVYY + Ayx * mVPP * Axy - (Ayx * mVPY + mVYP * Axy);
+  // new variances
+  mVYp = TMatrixDDiag(mVYYp); mVYp.Sqrt();
+
+  // new normalized covariance
+  mSYYp = mSYY + Ayx * mSPP * Axy - (Ayx * mSPY + mSYP * Axy);
+  // uncertainties on the new means
+  mSYp = TMatrixDDiag(mSYYp); mSYp.Sqrt();
+
+  // new correlation matrix
+  mRYYp = mVYYp; mRYYp.NormByColumn(mVYp); mRYYp.NormByRow(mVYp);
+
+  // slope uncertainties
+  double norm = 1. / (fGoodEventNumber - nP - 1);
+  dAxy.Zero();
+  dAxy.Rank1Update(TMatrixDDiag(invRPP), TMatrixDDiag(mRYYp), norm); // diag mRYYp = row of ones
+  dAxy.Sqrt();
+  dAxy.NormByColumn(mSP); // divide
+  dAxy.NormByRow(mSYp, ""); // mult
+  dAyx.Transpose(dAxy);
 
   fErrorFlag = 0;
 }

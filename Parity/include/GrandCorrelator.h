@@ -157,11 +157,16 @@ class GrandCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<Gr
   /// mean values
   TVectorD mMP, mMY, mMYp;
 
+//========================================================
+  /// new matrices and vectors
   TMatrixD mNij, mSij, mMij;
+  TMatrixD mSji, mMji;
+  TMatrixD mVij, mRij;
   std::vector<const VQwHardwareChannel*> fAllVar; // stores the channels (pointers)
   std::vector<double> fAllValues;                 // stores the current event values
   std::vector<bool> fAllGood;
   std::vector<std::string> fAllName;
+//========================================================
 
 
   /// slopes
