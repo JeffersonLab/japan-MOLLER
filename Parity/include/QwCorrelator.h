@@ -68,6 +68,16 @@ class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCor
   /// \brief Fill the tree branches
   void FillTreeBranches(QwRootFile *treerootfile) override { };
 
+#ifdef HAS_RNTUPLE_SUPPORT
+  /// \brief Construct the rntuple fields
+  void ConstructNTupleFields(
+      QwRootFile *treerootfile,
+      const std::string& treeprefix = "",
+      const std::string& branchprefix = "") override;
+  /// \brief Fill the rntuple fields
+  void FillNTupleFields(QwRootFile *treerootfile) override { };
+#endif
+
   /// \brief Construct the histograms in a folder with a prefix
   void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
   /// \brief Fill the histograms
@@ -100,6 +110,17 @@ class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCor
   void CloseAlphaFile();
 
   TTree* fTree;
+
+#ifdef HAS_RNTUPLE_SUPPORT
+  ROOT::RNTupleModel* fNTupleModel;
+  ROOT::RNTupleWriter* fNTupleWriter;
+  std::vector<std::shared_ptr<Int_t>> fIntFieldPtrs;
+  std::vector<std::shared_ptr<Long64_t>> fLongFieldPtrs;
+  std::vector<std::shared_ptr<std::vector<Double_t>>> fVectorFieldPtrs;
+  std::vector<std::shared_ptr<std::vector<Double_t>>> fMatrixFieldPtrs;
+  std::vector<std::shared_ptr<Int_t>> fMatrixRowsPtrs;    // Store matrix row counts
+  std::vector<std::shared_ptr<Int_t>> fMatrixColsPtrs;    // Store matrix col counts
+#endif
 
   std::string fAliasOutputFileBase;
   std::string fAliasOutputFileSuff;
