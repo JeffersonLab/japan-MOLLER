@@ -886,11 +886,11 @@ void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupl
     TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
     fTreeArrayIndex  = values.size();
 
-    // For derived data (yield_, asym_, diff_), only store the main value to match TTree format
+    // For derived data (yield_, asym_, diff_), store with _hw_sum suffix for consistency
     if (fDataToSave == kDerived) {
-      // Only store the main hardware sum value, just like the original tree
+      // Store the main hardware sum value with explicit _hw_sum suffix
       values.resize(values.size() + 1, 0.0);
-      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum").Data()));
       fTreeArrayNumEntries = 1;
       return;
     }
@@ -955,7 +955,7 @@ void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupl
     // Add fields in the same order as FillTreeVector
     // hw_sum
     if (bHw_sum) {
-      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum").Data()));
     }
 
     if (bBlock) {
@@ -977,7 +977,7 @@ void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupl
     if (fDataToSave == kRaw) {
       // hw_sum_raw
       if (bHw_sum_raw) {
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_raw").Data()));
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum_raw").Data()));
       }
 
       if (bBlock_raw) {

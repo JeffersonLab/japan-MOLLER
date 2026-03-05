@@ -930,11 +930,11 @@ void  QwVQWK_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleMode
   TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
   fTreeArrayIndex  = values.size();
 
-  // For derived data (yield_, asym_, diff_), only store the main value to match TTree format
+  // For derived data (yield_, asym_, diff_), store with _hw_sum suffix for consistency
   if (fDataToSave == kDerived) {
-    // Only store the main hardware sum value, just like the original tree
+    // Store the main hardware sum value with explicit _hw_sum suffix
     values.push_back(0.0);
-    auto field = model->MakeField<Double_t>(basename.Data());
+    auto field = model->MakeField<Double_t>((basename + "_hw_sum").Data());
     fieldPtrs.push_back(field);
     fTreeArrayNumEntries = 1;
     return;
