@@ -106,18 +106,19 @@ void GrandCorrelator::ProcessData()
 
         double xi = fAllValues[i];
         double xj = fAllValues[j];
+        double delta_i = xi - mMij(i,j);
+        double delta_j = xj - mMji(j,i);
 
         mNij(i,j) += 1;
-        double delta_i = xi - mMij(i,j);
         mMij(i,j) += delta_i / mNij(i,j);
         mSij(i,j) += delta_i * (xi-mMij(i,j));
 
-        double delta_j = xj - mMji(j,i);
         mMji(j,i) += delta_j / mNij(j,i);
         mSji(j,i) += delta_j * (xj - mMji(j,i));
 
 
-        mCij(i,j) += (xi - mMij(i,j)) * (xj - mMji(j,i));
+        mCij(i,j) += ((mNij(i,j) - 1) / mNij(i,j))  * (delta_i) * (delta_j);
+
     }
   }
 }
@@ -351,6 +352,14 @@ Int_t GrandCorrelator::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystem
 
   fErrCounts_IV.resize(fIndependentVar.size(),0);
   fErrCounts_DV.resize(fDependentVar.size(),0);
+
+
+  // Create vector list for all values
+  fAllVar = fIndependentVar;
+  fAllVar.insert(fIndependentVar.end(), fDependentVar.begin(), fDependentVar.end());
+  fAllVals = fIndependentValues;
+  fAllVals.insert(fIndependentValues.end(), fDependentValues.begin(), fDependentValues.end());
+  fAllGood.resize(fAllVals.size(), true);
 
   return 0;
 }
@@ -1057,13 +1066,13 @@ void GrandCorrelator::solve()
 //==========================================================
 //Solve step 1
 for(int i = 0; i < fAllVar.size(); ++i){
-    for(int j = 0; j < fAllVar.size(); ++j){
-        mVij(i,j) = mCij(i.j) / mNij(i,j) - 1.;
-        sigma_ij = sqrt((mSij(i,j)) / (mNij(i,j) - 1.));
-        sigma_ji = sqrt((mSji(j,i)) / (mNji(j,i) - 1.));
+    for(int j = i; j < fAllVar.size(); ++j){
+        mVij(i,j) = mCij(i,j) / (mNij(i,j) - 1.);
+        sigma_ij(i,j) = sqrt((mSij(i,j)) / (mNij(i,j) - 1.));
+        sigma_ji(j,i) = sqrt((mSji(j,i)) / (mNji(j,i) - 1.));
 
-        if(sigma_ij > 0.0 && sigma_ji > 0.0){
-        mRij(i,j) = mVij(i,j) / (sigma_ij * sigma_ji);
+        if(sigma_ij(i,j) > 0.0 && sigma_ji(j,i) > 0.0){
+        mRij(i,j) = mVij(i,j) / (sigma_ij(i,j) * sigma_ji(j,i));
         } else {
             mRij(i,j) = 0.0;
         }
@@ -1074,28 +1083,54 @@ for(int i = 0; i < fAllVar.size(); ++i){
 //==========================================================
 //Solve step 2
 
+  mVFULL = mCij;
+  mVPY = mVFULL.GetSub(0,nP-1,nP,nP+nY-1);
+  mVPP = mVFULL.GetSub(0,nP-1,0,nP-1);
+  mVYY = mVFULL.GetSub(nP,nP+nY-1,nP,nP+nY-1);
+  mRFULL = mRij;
+  mRPY = mRFULL.GetSub(0,nP-1,nP,nP+nY-1);
+  mRPP = mRFULL.GetSub(0,nP-1,0,nP-1);
+  mRYY = mRFULL.GetSub(nP,nP+nY-1,nP,nP+nY-1);
+  mSFULL = mVij;
+  mSPY = mSFULL.GetSub(0,nP-1,nP,nP+nY-1);
+  mSPP = mSFULL.GetSub(0,nP-1,0,nP-1);
+  mSYY = mSFULL.GetSub(nP,nP+nY-1,nP,nP+nY-1);
+
 
   // off-diagonal raw covariance
   mVYP.Transpose(mVPY);
 
   // diagonal variances
-  mVP = TMatrixDDiag(mVPP); mVP.Sqrt();
-  mVY = TMatrixDDiag(mVYY); mVY.Sqrt();
+  TMatrixD sigmaP = sigma_ij.GetSub(0,nP-1,0,nP-1);
+  TMatrixD sigmaY = sigma_ij.GetSub(nP,nP+nY-1,nP,nP+nY-1);
+  mVP = TMatrixDDiag(sigmaP);
+  mVY = TMatrixDDiag(sigmaY);
 
-  // correlation matrices
-  mRPP = mVPP; mRPP.NormByColumn(mVP); mRPP.NormByRow(mVP);
-  mRYY = mVYY; mRYY.NormByColumn(mVY); mRYY.NormByRow(mVY);
-  mRPY = mVPY; mRPY.NormByColumn(mVP); mRPY.NormByRow(mVY);
 
-  /// normalized covariances
-  mSYY = mVYY * (1.0 / (fGoodEventNumber - 1.));
-  mSPP = mVPP * (1.0 / (fGoodEventNumber - 1.));
-  mSPY = mVPY * (1.0 / (fGoodEventNumber - 1.));
-  mSYP.Transpose(mSPY);
+  // "Clean" matrices
+  TMatrixD mVFULL_clean;
+  TMatrixD mSFULL_clean;
+  for(int i = 0; i < fAllVar.size(); ++i){
+    for(int j = i; j < fAllVar.size(); ++j){
+        mVFULL_clean(i,j) = mRij(i,j) * sigma_ij(i,j) * sigma_ji(j,i) * (fGoodCount - 1);
+        mSFULL_clean(i,j) = mRij(i,j) * sigma_ij(i,j) * sigma_ji(j,i);
+    }
+}
+  TMatrixD mVPY_clean = mVFULL_clean.GetSub(0,nP-1,nP,nP+nY-1);
+  TMatrixD mVPP_clean = mVFULL_clean.GetSub(0,nP-1,0,nP-1);
+  TMatrixD mVYY_clean = mVFULL_clean.GetSub(nP,nP+nY-1,nP,nP+nY-1);
+  TMatrixD mVYP_clean(TMatrixD::kTransposed, mVPY_clean);
 
-  // uncertainties on the means
-  mSP = TMatrixDDiag(mSPP); mSP.Sqrt();
-  mSY = TMatrixDDiag(mSYY); mSY.Sqrt();
+
+  TMatrixD mSPY_clean = mSFULL_clean.GetSub(0,nP-1,nP,nP+nY-1);
+  TMatrixD mSPP_clean = mSFULL_clean.GetSub(0,nP-1,0,nP-1);
+  TMatrixD mSYY_clean = mSFULL_clean.GetSub(nP,nP+nY-1,nP,nP+nY-1);
+
+  TMatrixD mSYP_clean(TMatrixD::kTransposed, mSPY_clean);
+  TVectorD mSP_clean = TMatrixDDiag(mSPP_clean); mSP_clean.Sqrt();
+  TVectorD mSY_clean = TMatrixDDiag(mSYY_clean); mSY_clean.Sqrt();
+
+  // Check for goodness and then get rid of bad columns
 
   // Warn if correlation matrix determinant close to zero (heuristic)
   if (mRPP.Determinant() < std::pow(10,-(2*nP))) {
@@ -1105,30 +1140,33 @@ for(int i = 0; i < fAllVar.size(); ++i){
               << QwLog::endl;
     if (fGoodEventNumber > 10*nP) {
       QwMessage << fGoodEventNumber << " events" << QwLog::endl;
-      QwMessage << "Covariance matrix: " << QwLog::endl; mVPP.Print();
+      QwMessage << "Covariance matrix: " << QwLog::endl; mVPP_clean.Print();
       QwMessage << "Correlation matrix: " << QwLog::endl; mRPP.Print();
     }
     QwWarning << "LRB: solving failed (this happens when only few events)."
               << QwLog::endl;
     return;
   }
+
+  //==========================================================
+  //Solve Step 3
   // slopes
   TMatrixD invRPP(TMatrixD::kInverted, mRPP);
   Axy = TMatrixD(invRPP, TMatrixD::kMult, mRPY);
-  Axy.NormByColumn(mSP); // divide
-  Axy.NormByRow(mSY, ""); // mult
+  Axy.NormByColumn(mSP_clean); // divide
+  Axy.NormByRow(mSY_clean, ""); // mult
   Ayx.Transpose(Axy);
 
   // new means
   mMYp = mMY - Ayx * mMP;
 
   // new raw covariance
-  mVYYp = mVYY + Ayx * mVPP * Axy - (Ayx * mVPY + mVYP * Axy);
+  mVYYp = mVYY_clean + Ayx * mVPP_clean * Axy - (Ayx * mVPY_clean + mVYP_clean * Axy);
   // new variances
   mVYp = TMatrixDDiag(mVYYp); mVYp.Sqrt();
 
   // new normalized covariance
-  mSYYp = mSYY + Ayx * mSPP * Axy - (Ayx * mSPY + mSYP * Axy);
+  mSYYp = mSYY_clean + Ayx * mSPP_clean * Axy - (Ayx * mSPY_clean + mSYP_clean * Axy);
   // uncertainties on the new means
   mSYp = TMatrixDDiag(mSYYp); mSYp.Sqrt();
 
@@ -1140,7 +1178,7 @@ for(int i = 0; i < fAllVar.size(); ++i){
   dAxy.Zero();
   dAxy.Rank1Update(TMatrixDDiag(invRPP), TMatrixDDiag(mRYYp), norm); // diag mRYYp = row of ones
   dAxy.Sqrt();
-  dAxy.NormByColumn(mSP); // divide
+  dAxy.NormByColumn(mSP_clean); // divide
   dAxy.NormByRow(mSYp, ""); // mult
   dAyx.Transpose(dAxy);
 

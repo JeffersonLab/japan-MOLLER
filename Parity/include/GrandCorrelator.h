@@ -160,12 +160,15 @@ class GrandCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<Gr
 //========================================================
   /// new matrices and vectors
   TMatrixD mNij, mSij, mMij;
-  TMatrixD mSji, mMji;
-  TMatrixD mVij, mRij;
+  TMatrixD mNji, mSji, mMji;
+  TMatrixD mCij, mVij, mRij;
+  TMatrixD mVFULL, mRFULL, mSFULL;
+  TMatrixD sigma_ij, sigma_ji;
   std::vector<const VQwHardwareChannel*> fAllVar; // stores the channels (pointers)
   std::vector<double> fAllValues;                 // stores the current event values
   std::vector<bool> fAllGood;
   std::vector<std::string> fAllName;
+  std::vector<double> fAllVals;
 //========================================================
 
 
