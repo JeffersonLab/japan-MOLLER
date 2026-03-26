@@ -92,7 +92,8 @@ void GrandCorrelator::ProcessData()
   // Add to total count for solve step 2
   fTotalCount++;
 
-  
+  QwMessage << "fAllGood: " << fAllGood.size() << "fAllValues: " << fAllValues.size() << "fAllVar: " << fAllVar.size() << QwLog::endl;
+  QwMessage << "mMij: " << mMij.GetNcols() << QwLog::endl;
   for(size_t i = 0; i < fAllVar.size(); ++i){
     fAllGood[i] = (fAllVar[i]->GetErrorCode() == 0);
     fAllValues[i] = fAllVar[i]->GetValue(fBlock+1);
@@ -353,13 +354,13 @@ Int_t GrandCorrelator::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystem
   fErrCounts_IV.resize(fIndependentVar.size(),0);
   fErrCounts_DV.resize(fDependentVar.size(),0);
 
-
+  QwMessage << "Starting to make list of all variables" << QwLog::endl;
   // Create vector list for all values
   fAllVar = fIndependentVar;
-  fAllVar.insert(fIndependentVar.end(), fDependentVar.begin(), fDependentVar.end());
-  fAllVals = fIndependentValues;
-  fAllVals.insert(fIndependentValues.end(), fDependentValues.begin(), fDependentValues.end());
-  fAllGood.resize(fAllVals.size(), true);
+  fAllVar.insert(fAllVar.end(), fDependentVar.begin(), fDependentVar.end());
+  fAllValues = fIndependentValues;
+  fAllValues.insert(fAllValues.end(), fDependentValues.begin(), fDependentValues.end());
+  fAllGood.resize(fAllValues.size(), true);
 
   return 0;
 }
@@ -780,6 +781,22 @@ void GrandCorrelator::init()
   mRYY.ResizeTo(mVYY);
   mRYYp.ResizeTo(mVYYp);
 
+  mNij.ResizeTo(nP+nY,nP+nY);
+  mSij.ResizeTo(nP+nY,nP+nY);
+  mMij.ResizeTo(nP+nY,nP+nY);
+  mNji.ResizeTo(nP+nY,nP+nY);
+  mSji.ResizeTo(nP+nY,nP+nY);
+  mMji.ResizeTo(nP+nY,nP+nY);
+  mCij.ResizeTo(nP+nY,nP+nY);
+  mVij.ResizeTo(nP+nY,nP+nY);
+  mRij.ResizeTo(nP+nY,nP+nY);
+  sigma_ij.ResizeTo(nP+nY,nP+nY);
+  sigma_ji.ResizeTo(nP+nY,nP+nY);
+  mVFULL.ResizeTo(nP+nY,nP+nY);
+  mRFULL.ResizeTo(nP+nY,nP+nY);
+  mSFULL.ResizeTo(nP+nY,nP+nY);
+  
+
   fGoodEventNumber = 0;
 }
 
@@ -820,6 +837,21 @@ void GrandCorrelator::clear()
   mRYP.Zero();
   mRYY.Zero();
   mRYYp.Zero();
+
+  mNij.Zero();
+  mSij.Zero();
+  mMij.Zero();
+  mNji.Zero();
+  mSji.Zero();
+  mMji.Zero();
+  mCij.Zero();
+  mVij.Zero();
+  mRij.Zero();
+  sigma_ij.Zero();
+  sigma_ji.Zero();
+  mVFULL.Zero();
+  mRFULL.Zero();
+  mSFULL.Zero();
 
   fErrorFlag = -1;
   fGoodEventNumber = 0;
