@@ -285,14 +285,14 @@ Int_t main(Int_t argc, Char_t* argv[])
     if (! eventbuffer.IsOnline() ){
       QwMessage << "Finding first EPICS event" << QwLog::endl;
       while (eventbuffer.GetNextEvent() == CODA_OK) {
-	if (eventbuffer.IsEPICSEvent()) {
-	  eventbuffer.FillEPICSData(epicsevent);
-	  if (epicsevent.HasDataLoaded()) {
-	    helicitypattern.UpdateBlinder(epicsevent);
-	    // and break out of this event loop
-	    break;
-	  }
-	}
+        if (eventbuffer.IsEPICSEvent()) {
+          eventbuffer.FillEPICSData(epicsevent);
+          if (epicsevent.HasDataLoaded()) {
+            helicitypattern.UpdateBlinder(epicsevent);
+            // and break out of this event loop
+            break;
+          }
+        }
       }
       epicsevent.ResetCounters();
       //  Rewind stream
@@ -334,7 +334,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 	  treerootfile->FillNTupleFields(epicsevent);
 	  treerootfile->FillNTuple("slow");
 #endif
-	}
+        }
       }
 
 
@@ -351,33 +351,37 @@ Int_t main(Int_t argc, Char_t* argv[])
 
       // The event pass the event cut constraints
       if (detectors.ApplySingleEventCuts()) {
-
-        // Add event to the ring
-        eventring.push(detectors);
+        
+        // Add event to the ring using two-phased approach:
+        // - During filling: copy assignment preserves configuration
+        // - When full: swap preserves configuration in both directions
+        eventring.push_swap(detectors);
 
         // Check to see ring is ready
         if (eventring.IsReady()) {
-	  ringoutput = eventring.pop();
-	  ringoutput.IncrementErrorCounters();
+          // Use swap to get ring output
+          eventring.pop_swap(ringoutput);
 
+          // Increment error counters
+          ringoutput.IncrementErrorCounters();
 
-	  // Accumulate the running sum to calculate the event based running average
-	  eventsum.AccumulateRunningSum(ringoutput);
+          // Accumulate the running sum to calculate the event based running average
+          eventsum.AccumulateRunningSum(ringoutput);
 
-	  // Fill the histograms
-	  historootfile->FillHistograms(ringoutput);
+          // Fill the histograms
+          historootfile->FillHistograms(ringoutput);
 
-	  // Fill mps tree branches
-	  treerootfile->FillTreeBranches(ringoutput);
-	  treerootfile->FillTree("evt");
+          // Fill mps tree branches
+          treerootfile->FillTreeBranches(ringoutput);
+          treerootfile->FillTree("evt");
 
-	  // Fill RNTuple if enabled
+          // Fill RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
 	  treerootfile->FillNTupleFields(ringoutput);
 	  treerootfile->FillNTuple("evt");
 #endif
 
-	  // Process data handlers
+          // Process data handlers
           datahandlerarray_evt.ProcessDataHandlerEntry();
 
           // Fill data handler histograms
@@ -394,7 +398,7 @@ Int_t main(Int_t argc, Char_t* argv[])
           // Load the event into the helicity pattern
           helicitypattern.LoadEventData(ringoutput);
 
-	  if (helicitypattern.PairAsymmetryIsGood()) {
+          if (helicitypattern.PairAsymmetryIsGood()) {
             patternsum.AccumulatePairRunningSum(helicitypattern);
 
 	    // Fill pair tree branches
@@ -495,9 +499,9 @@ Int_t main(Int_t argc, Char_t* argv[])
                 datahandlerarray_burst.FillNTupleFields(burstrootfile);
 #endif
 
-		helicitypattern.IncrementBurstCounter();
-		datahandlerarray_mul.UpdateBurstCounter(helicitypattern.GetBurstCounter());
-		datahandlerarray_burst.UpdateBurstCounter(helicitypattern.GetBurstCounter());
+                helicitypattern.IncrementBurstCounter();
+                datahandlerarray_mul.UpdateBurstCounter(helicitypattern.GetBurstCounter());
+                datahandlerarray_burst.UpdateBurstCounter(helicitypattern.GetBurstCounter());
                 // Clear the data
                 patternsum_per_burst.ClearEventData();
                 datahandlerarray_burst.ClearEventData();
@@ -506,7 +510,7 @@ Int_t main(Int_t argc, Char_t* argv[])
               // Clear the data
               helicitypattern.ClearEventData();
 
-	  } // helicitypattern.IsGoodAsymmetry()
+          } // helicitypattern.IsGoodAsymmetry()
 
         } // eventring.IsReady()
 
@@ -537,9 +541,9 @@ Int_t main(Int_t argc, Char_t* argv[])
       burstsum.AccumulateRunningSum(patternsum_per_burst);
 
       if (gQwOptions.GetValue<bool>("print-burstsum")) {
-	QwMessage << " Running average of this burst" << QwLog::endl;
-	QwMessage << " =============================" << QwLog::endl;
-	patternsum_per_burst.PrintValue();
+        QwMessage << " Running average of this burst" << QwLog::endl;
+        QwMessage << " =============================" << QwLog::endl;
+        patternsum_per_burst.PrintValue();
       }
 
       // Fill histograms
