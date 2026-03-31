@@ -10,6 +10,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  models: read
+
 jobs:
   linux:
     runs-on: ubuntu-24.04
@@ -297,6 +301,22 @@ jobs:
           name: regalias-${{ matrix.release }}-${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           path: ./target
           if_no_artifact_found: warn
+
+      - name: Compare artifacts (AI)
+        id: compare
+        if: github.event_name == 'pull_request'
+        uses: actions/ai-inference@v2
+        with:
+          prompt-file: './.github/prompts/compare-summaries.yml'
+          file_input: |
+            var1: ./target/trees/summary_4.txt
+            var2: ./trees/summary_4.txt
+
+      - name: Fail on meaningful differences (AI)
+        if: ${{ steps.compare.outputs.response.failure }}
+        run: |
+          echo "${{ steps.compare.outputs.response.message }}"
+          exit 1
 
       - name: Compare artifacts
         if: github.event_name == 'pull_request'
