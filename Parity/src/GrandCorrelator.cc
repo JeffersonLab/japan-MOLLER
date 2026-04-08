@@ -92,15 +92,33 @@ void GrandCorrelator::ProcessData()
   // Add to total count for solve step 2
   fTotalCount++;
 
-  QwMessage << "fAllGood: " << fAllGood.size() << "fAllValues: " << fAllValues.size() << "fAllVar: " << fAllVar.size() << QwLog::endl;
-  QwMessage << "mMij: " << mMij.GetNcols() << QwLog::endl;
-  for(size_t i = 0; i < fAllVar.size(); ++i){
-    fAllGood[i] = (fAllVar[i]->GetErrorCode() == 0);
-    fAllValues[i] = fAllVar[i]->GetValue(fBlock+1);
-    if(!fAllGood[i]) fErrCounts_IV[i]++;
+  
+  // Event error flag
+  fGoodEvent |= GetEventcutErrorFlag();
+  if ( GetEventcutErrorFlag() != 0) fErrCounts_EF++;
+  // Dependent variable error codes
+  for (size_t i = 0; i < fDependentVar.size(); ++i) {
+    fGoodEvent |= fDependentVar.at(i)->GetErrorCode();
+    fDependentValues.at(i) = (fDependentVar[i]->GetValue(fBlock+1));
+    if (fDependentVar.at(i)->GetErrorCode() !=0)  (fErrCounts_DV.at(i))++;
+  }
+  // Independent variable error codes
+  for (size_t i = 0; i < fIndependentVar.size(); ++i) {
+    fGoodEvent |= fIndependentVar.at(i)->GetErrorCode();
+    fIndependentValues.at(i) = (fIndependentVar[i]->GetValue(fBlock+1));
+    if (fIndependentVar.at(i)->GetErrorCode() !=0)  (fErrCounts_IV.at(i))++;
   }
 
-  fGoodCount++;
+    for(size_t i = 0; i < fAllVar.size(); ++i){
+    fAllGood[i] = (fAllVar[i]->GetErrorCode() == 0);
+    fAllValues[i] = fAllVar[i]->GetValue(fBlock+1);
+    //if(!fAllGood[i]) fErrCounts_IV[i]++;
+  }
+
+  TVectorD P(fIndependentValues.size(), fIndependentValues.data());
+  TVectorD Y(fDependentValues.size(),   fDependentValues.data());
+  operator+= (std::make_pair(P, Y));
+
   for(int i = 0; i<fAllVar.size(); ++i){
     for(int j = i; j<fAllVar.size(); ++j){
         if(!fAllGood[i] || !fAllGood[j]) continue;
@@ -111,6 +129,7 @@ void GrandCorrelator::ProcessData()
         double delta_j = xj - mMji(j,i);
 
         mNij(i,j) += 1;
+        mNij(j,i) = mNij(i,j);
         mMij(i,j) += delta_i / mNij(i,j);
         mSij(i,j) += delta_i * (xi-mMij(i,j));
 
@@ -133,7 +152,7 @@ void GrandCorrelator::ClearEventData()
 
   // Clear event counts
   fTotalCount = 0;
-  fGoodCount = 0;
+  fGoodEventNumber = 0;
   fGoodEvent = -1;
 
   // Clear regression
@@ -164,13 +183,13 @@ void GrandCorrelator::CalcCorrelations()
   // Print entry summary
   QwVerbose << "GrandCorrelator: "
             << "total entries: " << fTotalCount << ", "
-            << "good entries: " << fGoodCount
+            << "good entries: " << fGoodEventNumber
             << QwLog::endl;
   // and warn if zero
-  if (fTotalCount > 100 && fGoodCount == 0) {
+  if (fTotalCount > 100 && fGoodEventNumber == 0) {
     QwWarning << "GrandCorrelator: "
               << "< 1% good events, "
-              << fGoodCount << " of " << fTotalCount
+              << fGoodEventNumber << " of " << fTotalCount
               << QwLog::endl;
   }
 
@@ -194,8 +213,9 @@ void GrandCorrelator::CalcCorrelations()
     }
   }
 
+  QwMessage << "Before failed in CalcCorrelations" << QwLog::endl;
   if (! this->failed()) {
-
+    QwMessage << "Inside of failed loop" << QwLog::endl;
     if (fPrintCorrelations) {
       this->printSummaryP();
       this->printSummaryY();
@@ -203,7 +223,7 @@ void GrandCorrelator::CalcCorrelations()
 
     this->solve();
 
-    if (fPrintCorrelations) {
+    if (kTRUE || fPrintCorrelations) {
       this->printSummaryAlphas();
       this->printSummaryMeansWithUnc();
       this->printSummaryMeansWithUncCorrected();
@@ -298,6 +318,9 @@ Int_t GrandCorrelator::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystem
           break;
         }
       }
+
+      
+      
       if (dv_ptr == NULL){
 	QwWarning << "QwCombiner::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystemArrayParity& diff):  Dependent variable, "
 		  << fDependentName.at(dv)
@@ -334,8 +357,10 @@ Int_t GrandCorrelator::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystem
         break;
       }
     }
+
     if (iv_ptr) {
       fIndependentVar.push_back(iv_ptr);
+      
     } else {
       QwWarning << "Independent variable " << fIndependentName.at(iv) << " for correlator could not be found."
                 << QwLog::endl;
@@ -361,6 +386,7 @@ Int_t GrandCorrelator::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystem
   fAllValues = fIndependentValues;
   fAllValues.insert(fAllValues.end(), fDependentValues.begin(), fDependentValues.end());
   fAllGood.resize(fAllValues.size(), true);
+
 
   return 0;
 }
@@ -396,7 +422,7 @@ void GrandCorrelator::ConstructTreeBranches(
 
   // Set up branches
   fTree->Branch(TString(branchprefix + "total_count"), &fTotalCount);
-  fTree->Branch(TString(branchprefix + "good_count"),  &fGoodCount);
+  fTree->Branch(TString(branchprefix + "good_count"),  &fGoodEventNumber);
 
   fTree->Branch(TString(branchprefix + "n"), &(this->fGoodEventNumber));
   fTree->Branch(TString(branchprefix + "ErrorFlag"), &(this->fErrorFlag));
@@ -784,7 +810,6 @@ void GrandCorrelator::init()
   mNij.ResizeTo(nP+nY,nP+nY);
   mSij.ResizeTo(nP+nY,nP+nY);
   mMij.ResizeTo(nP+nY,nP+nY);
-  mNji.ResizeTo(nP+nY,nP+nY);
   mSji.ResizeTo(nP+nY,nP+nY);
   mMji.ResizeTo(nP+nY,nP+nY);
   mCij.ResizeTo(nP+nY,nP+nY);
@@ -795,7 +820,8 @@ void GrandCorrelator::init()
   mVFULL.ResizeTo(nP+nY,nP+nY);
   mRFULL.ResizeTo(nP+nY,nP+nY);
   mSFULL.ResizeTo(nP+nY,nP+nY);
-  
+  mVFULL_clean.ResizeTo(nP+nY,nP+nY);
+  mSFULL_clean.ResizeTo(nP+nY,nP+nY);
 
   fGoodEventNumber = 0;
 }
@@ -841,7 +867,6 @@ void GrandCorrelator::clear()
   mNij.Zero();
   mSij.Zero();
   mMij.Zero();
-  mNji.Zero();
   mSji.Zero();
   mMji.Zero();
   mCij.Zero();
@@ -852,6 +877,8 @@ void GrandCorrelator::clear()
   mVFULL.Zero();
   mRFULL.Zero();
   mSFULL.Zero();
+  mVFULL_clean.Zero();
+  mSFULL_clean.Zero();
 
   fErrorFlag = -1;
   fGoodEventNumber = 0;
@@ -876,6 +903,7 @@ void GrandCorrelator::print()
 GrandCorrelator& GrandCorrelator::operator+=(const std::pair<TVectorD,TVectorD>& rhs)
 {
   // Get independent and dependent components
+  QwMessage << "Inside of operator += function" << QwLog::endl;
   const TVectorD& P = rhs.first;
   const TVectorD& Y = rhs.second;
 
@@ -921,6 +949,7 @@ GrandCorrelator& GrandCorrelator::operator+=(const GrandCorrelator& rhs)
   // SSDBM '18 Proceedings of the 30th International Conference
   // on Scientific and Statistical Database Management.
   // https://doi.org/10.1145/3221269.3223036
+
 
   if(fGoodEventNumber + rhs.fGoodEventNumber == 0)
     return *this;
@@ -1097,24 +1126,32 @@ void GrandCorrelator::solve()
 {
 //==========================================================
 //Solve step 1
+QwMessage << "Starting Grand Correlator Solve Step 1" << QwLog::endl;
 for(int i = 0; i < fAllVar.size(); ++i){
     for(int j = i; j < fAllVar.size(); ++j){
+      if(mNij(i,j) >= 2){
         mVij(i,j) = mCij(i,j) / (mNij(i,j) - 1.);
         sigma_ij(i,j) = sqrt((mSij(i,j)) / (mNij(i,j) - 1.));
-        sigma_ji(j,i) = sqrt((mSji(j,i)) / (mNji(j,i) - 1.));
+        sigma_ji(j,i) = sqrt((mSji(j,i)) / (mNij(j,i) - 1.));
 
         if(sigma_ij(i,j) > 0.0 && sigma_ji(j,i) > 0.0){
         mRij(i,j) = mVij(i,j) / (sigma_ij(i,j) * sigma_ji(j,i));
         } else {
             mRij(i,j) = 0.0;
         }
+      }
+      else {
+        mVij(i,j) = 0;
+        sigma_ij(i,j) = 0;
+        sigma_ji(j,i) = 0;
+        mRij(i,j) = 0;
+      }
     }
 }
 
-
 //==========================================================
 //Solve step 2
-
+  QwMessage << "Starting Grand Correlator Solve Step 2" << QwLog::endl;
   mVFULL = mCij;
   mVPY = mVFULL.GetSub(0,nP-1,nP,nP+nY-1);
   mVPP = mVFULL.GetSub(0,nP-1,0,nP-1);
@@ -1134,18 +1171,22 @@ for(int i = 0; i < fAllVar.size(); ++i){
 
   // diagonal variances
   TMatrixD sigmaP = sigma_ij.GetSub(0,nP-1,0,nP-1);
+  sigmaP.Print();
   TMatrixD sigmaY = sigma_ij.GetSub(nP,nP+nY-1,nP,nP+nY-1);
   mVP = TMatrixDDiag(sigmaP);
   mVY = TMatrixDDiag(sigmaY);
 
-
+  QwMessage << "Making Clean Matrices" << QwLog::endl;
+  QwMessage << "fGoodEventNumber" << fGoodEventNumber << QwLog::endl;
   // "Clean" matrices
-  TMatrixD mVFULL_clean;
-  TMatrixD mSFULL_clean;
   for(int i = 0; i < fAllVar.size(); ++i){
     for(int j = i; j < fAllVar.size(); ++j){
-        mVFULL_clean(i,j) = mRij(i,j) * sigma_ij(i,j) * sigma_ji(j,i) * (fGoodCount - 1);
+      if(i < 5 && j < 5){
+QwMessage << mRij(i,j) << " " << sigma_ij(i,j) << " " << sigma_ji(j,i) << QwLog::endl;
+      }
+        mVFULL_clean(i,j) = mRij(i,j) * sigma_ij(i,j) * sigma_ji(j,i) * (fGoodEventNumber - 1);
         mSFULL_clean(i,j) = mRij(i,j) * sigma_ij(i,j) * sigma_ji(j,i);
+        
     }
 }
   TMatrixD mVPY_clean = mVFULL_clean.GetSub(0,nP-1,nP,nP+nY-1);
@@ -1158,9 +1199,15 @@ for(int i = 0; i < fAllVar.size(); ++i){
   TMatrixD mSPP_clean = mSFULL_clean.GetSub(0,nP-1,0,nP-1);
   TMatrixD mSYY_clean = mSFULL_clean.GetSub(nP,nP+nY-1,nP,nP+nY-1);
 
+
   TMatrixD mSYP_clean(TMatrixD::kTransposed, mSPY_clean);
-  TVectorD mSP_clean = TMatrixDDiag(mSPP_clean); mSP_clean.Sqrt();
-  TVectorD mSY_clean = TMatrixDDiag(mSYY_clean); mSY_clean.Sqrt();
+  TVectorD mSP_clean = TMatrixDDiag(mSPP_clean);
+  mSPP_clean.Print();
+  QwMessage << "Before Sqrt of mSP_clean, number rows: " << mSP_clean.GetNrows() << QwLog::endl;
+  mSP_clean.Print();
+  mSP_clean.Sqrt();
+  TVectorD mSY_clean = TMatrixDDiag(mSYY_clean);
+  mSY_clean.Sqrt();
 
   // Check for goodness and then get rid of bad columns
 
@@ -1183,6 +1230,7 @@ for(int i = 0; i < fAllVar.size(); ++i){
   //==========================================================
   //Solve Step 3
   // slopes
+  QwMessage << "Starting Grand Correlator Solve Step 3" << std::endl;
   TMatrixD invRPP(TMatrixD::kInverted, mRPP);
   Axy = TMatrixD(invRPP, TMatrixD::kMult, mRPY);
   Axy.NormByColumn(mSP_clean); // divide
@@ -1195,12 +1243,14 @@ for(int i = 0; i < fAllVar.size(); ++i){
   // new raw covariance
   mVYYp = mVYY_clean + Ayx * mVPP_clean * Axy - (Ayx * mVPY_clean + mVYP_clean * Axy);
   // new variances
-  mVYp = TMatrixDDiag(mVYYp); mVYp.Sqrt();
+  mVYp = TMatrixDDiag(mVYYp); 
+  mVYp.Sqrt();
 
   // new normalized covariance
   mSYYp = mSYY_clean + Ayx * mSPP_clean * Axy - (Ayx * mSPY_clean + mSYP_clean * Axy);
   // uncertainties on the new means
-  mSYp = TMatrixDDiag(mSYYp); mSYp.Sqrt();
+  mSYp = TMatrixDDiag(mSYYp); 
+  mSYp.Sqrt();
 
   // new correlation matrix
   mRYYp = mVYYp; mRYYp.NormByColumn(mVYp); mRYYp.NormByRow(mVYp);

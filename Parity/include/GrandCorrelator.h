@@ -108,6 +108,7 @@ class GrandCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<Gr
   int fErrCounts_EF;
   std::vector<int> fErrCounts_IV;
   std::vector<int> fErrCounts_DV;
+  std::vector<int> fErrCounts_ALL;
 
   unsigned int fGoodEvent;
 
@@ -164,11 +165,12 @@ class GrandCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<Gr
   TMatrixD mCij, mVij, mRij;
   TMatrixD mVFULL, mRFULL, mSFULL;
   TMatrixD sigma_ij, sigma_ji;
+  TMatrixD mVFULL_clean;
+  TMatrixD mSFULL_clean;
   std::vector<const VQwHardwareChannel*> fAllVar; // stores the channels (pointers)
   std::vector<double> fAllValues;                 // stores the current event values
   std::vector<bool> fAllGood;
   std::vector<std::string> fAllName;
-  std::vector<double> fAllVals;
 //========================================================
 
 
