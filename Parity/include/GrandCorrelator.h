@@ -161,7 +161,6 @@ class GrandCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<Gr
 //========================================================
   /// new matrices and vectors
   TMatrixD mNij, mSij, mMij;
-  TMatrixD mNji, mSji, mMji;
   TMatrixD mCij, mVij, mRij;
   TMatrixD mVFULL, mRFULL, mSFULL;
   TMatrixD sigma_ij, sigma_ji;

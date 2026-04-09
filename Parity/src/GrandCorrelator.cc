@@ -126,18 +126,25 @@ void GrandCorrelator::ProcessData()
         double xi = fAllValues[i];
         double xj = fAllValues[j];
         double delta_i = xi - mMij(i,j);
-        double delta_j = xj - mMji(j,i);
+        double delta_j = xj - mMij(j,i);
 
         mNij(i,j) += 1;
-        mNij(j,i) = mNij(i,j);
         mMij(i,j) += delta_i / mNij(i,j);
         mSij(i,j) += delta_i * (xi-mMij(i,j));
+        if (mNij(i,j)<=1){
+          mCij(i,j) = 0.0;
+        } else {
+          mCij(i,j) += ((mNij(i,j) - 1) / mNij(i,j))  * (delta_i) * (delta_j);
+          //QwMessage << "mNij: " << mNij(i,j) << " delta_i: " << delta_i << " delta_j: " << delta_j << QwLog::endl;
+        }
 
-        mMji(j,i) += delta_j / mNij(j,i);
-        mSji(j,i) += delta_j * (xj - mMji(j,i));
-
-
-        mCij(i,j) += ((mNij(i,j) - 1) / mNij(i,j))  * (delta_i) * (delta_j);
+        if (j>i){
+          mNij(j,i) = mNij(i,j);
+          mMij(j,i) += delta_j / mNij(j,i);
+          mSij(j,i) += delta_j * (xj - mMij(j,i));
+          mCij(j,i) = mCij(i,j);
+        }
+        
 
     }
   }
@@ -810,8 +817,6 @@ void GrandCorrelator::init()
   mNij.ResizeTo(nP+nY,nP+nY);
   mSij.ResizeTo(nP+nY,nP+nY);
   mMij.ResizeTo(nP+nY,nP+nY);
-  mSji.ResizeTo(nP+nY,nP+nY);
-  mMji.ResizeTo(nP+nY,nP+nY);
   mCij.ResizeTo(nP+nY,nP+nY);
   mVij.ResizeTo(nP+nY,nP+nY);
   mRij.ResizeTo(nP+nY,nP+nY);
@@ -867,8 +872,6 @@ void GrandCorrelator::clear()
   mNij.Zero();
   mSij.Zero();
   mMij.Zero();
-  mSji.Zero();
-  mMji.Zero();
   mCij.Zero();
   mVij.Zero();
   mRij.Zero();
@@ -903,7 +906,6 @@ void GrandCorrelator::print()
 GrandCorrelator& GrandCorrelator::operator+=(const std::pair<TVectorD,TVectorD>& rhs)
 {
   // Get independent and dependent components
-  QwMessage << "Inside of operator += function" << QwLog::endl;
   const TVectorD& P = rhs.first;
   const TVectorD& Y = rhs.second;
 
@@ -1122,22 +1124,134 @@ void GrandCorrelator::printSummaryP() const
 
 //==========================================================
 //==========================================================
+void GrandCorrelator::printSummaryY() const
+{
+  QwMessage << Form("\nLinRegBevPeb::printSummaryY seen good eve=%lld  (CSV-format)",fGoodEventNumber)<<QwLog::endl;
+  QwMessage << Form("  j,       mean,     sig(mean),   nSig(mean),  sig(distribution)    \n");
+
+  for (int i = 0; i <nY; i++) {
+    double meanI,sigI;
+    if (getMeanY(i,meanI) < 0) QwWarning << "LRB::getMeanY failed" << QwLog::endl;
+    if (getSigmaY(i,sigI) < 0) QwWarning << "LRB::getSigmaY failed" << QwLog::endl;
+    double err = sigI / sqrt(fGoodEventNumber);
+    double nSigErr = meanI / err;
+    QwMessage << Form("Y%02d, %+11.4g, %12.4g, %8.1f, %12.4g "" ",i,meanI,err,nSigErr,sigI)<<QwLog::endl;
+
+  }
+}
+
+
+
+//==========================================================
+//==========================================================
+void GrandCorrelator::printSummaryAlphas() const
+{
+  QwMessage << Form("\nLinRegBevPeb::printSummaryAlphas seen good eve=%lld",fGoodEventNumber)<<QwLog::endl;
+  QwMessage << Form("\n  j                slope         sigma     mean/sigma\n");
+  for (int iy = 0; iy <nY; iy++) {
+    QwMessage << Form("dv=Y%d: ",iy)<<QwLog::endl;
+    for (int j = 0; j < nP; j++) {
+      double val=Axy(j,iy);
+      double err=dAxy(j,iy);
+      double nSig=val/err;
+      char x=' ';
+      if(fabs(nSig)>3.) x='*';
+      QwMessage << Form("  slope_%d = %11.3g  +/-%11.3g  (nSig=%.2f) %c\n",j,val, err,nSig,x);
+    }
+  }
+}
+
+
+//==========================================================
+//==========================================================
+void GrandCorrelator::printSummaryYP() const
+{
+  QwMessage << Form("\nLinRegBevPeb::printSummaryYP seen good eve=%lld",fGoodEventNumber)<<QwLog::endl;
+
+  if(fGoodEventNumber<2) { QwMessage<<"  too few events, skip"<<QwLog::endl; return;}
+  QwMessage << Form("\n         name:             ");
+  for (int i = 0; i <nP; i++) {
+    QwMessage << Form(" %10sP%d "," ",i);
+  }
+  QwMessage << Form("\n  j                   meanY         sigY      correlation with Ps ....\n");
+  for (int iy = 0; iy <nY; iy++) {
+    double meanI,sigI;
+    if (getMeanY(iy,meanI) < 0) QwWarning << "LRB::getMeanY failed" << QwLog::endl;
+    if (getSigmaY(iy,sigI) < 0) QwWarning << "LRB::getSigmaY failed" << QwLog::endl;
+
+    QwMessage << Form(" %3d %6sY%d:  %+12.4g  %12.4g ",iy," ",iy,meanI,sigI);
+    for (int ip = 0; ip <nP; ip++) {
+      double sigJ,cov;
+      if (getSigmaP(ip,sigJ) < 0) QwWarning << "LRB::getSigmaP failed" << QwLog::endl;
+      if (getCovariancePY(ip,iy,cov) < 0) QwWarning << "LRB::getCovariancePY failed" << QwLog::endl;
+      double corel = cov / sigI / sigJ;
+      QwMessage << Form("  %12.3g",corel);
+    }
+    QwMessage << Form("\n");
+  }
+}
+
+
+//==========================================================
+//==========================================================
+void GrandCorrelator::printSummaryMeansWithUnc() const
+{
+  QwMessage << "Uncorrected Y values:" << QwLog::endl;
+  QwMessage << "     mean          sig" << QwLog::endl;
+  for (int i = 0; i < nY; i++){
+    QwMessage << "Y" << i << ":  " << mMY(i) << " +- " << mSY(i) << QwLog::endl;
+  }
+  QwMessage << QwLog::endl;
+}
+
+
+//==========================================================
+//==========================================================
+void GrandCorrelator::printSummaryMeansWithUncCorrected() const
+{
+  QwMessage << "Corrected Y values:" << QwLog::endl;
+  QwMessage << "     mean          sig" << QwLog::endl;
+  for (int i = 0; i < nY; i++){
+    QwMessage << "Y" << i << ":  " << mMYp(i) << " +- " << mSYp(i) << QwLog::endl;
+  }
+  QwMessage << QwLog::endl;
+}
+
+//==========================================================
+//==========================================================
 void GrandCorrelator::solve()
 {
 //==========================================================
 //Solve step 1
+//QwMessage << "mSij and mNij" << QwLog::endl;
+//mSij.Print();
+//mNij.Print();
+//mCij.Print();
+//return;
 QwMessage << "Starting Grand Correlator Solve Step 1" << QwLog::endl;
 for(int i = 0; i < fAllVar.size(); ++i){
     for(int j = i; j < fAllVar.size(); ++j){
       if(mNij(i,j) >= 2){
         mVij(i,j) = mCij(i,j) / (mNij(i,j) - 1.);
         sigma_ij(i,j) = sqrt((mSij(i,j)) / (mNij(i,j) - 1.));
-        sigma_ji(j,i) = sqrt((mSji(j,i)) / (mNij(j,i) - 1.));
+        sigma_ji(j,i) = sqrt((mSij(j,i)) / (mNij(j,i) - 1.));
 
         if(sigma_ij(i,j) > 0.0 && sigma_ji(j,i) > 0.0){
         mRij(i,j) = mVij(i,j) / (sigma_ij(i,j) * sigma_ji(j,i));
         } else {
             mRij(i,j) = 0.0;
+        }
+
+        if(j > i){
+        mVij(j,i) = mVij(i,j);
+        sigma_ij(j,i) = sqrt((mSij(j,i)) / (mNij(j,i) - 1.));
+        sigma_ji(i,j) = sqrt((mSij(i,j)) / (mNij(i,j) - 1.));
+
+        if(sigma_ij(j,i) > 0.0 && sigma_ji(i,j) > 0.0){
+        mRij(j,i) = mVij(j,i) / (sigma_ij(j,i) * sigma_ji(i,j));
+        } else {
+            mRij(i,j) = 0.0;
+        }
         }
       }
       else {
@@ -1146,8 +1260,26 @@ for(int i = 0; i < fAllVar.size(); ++i){
         sigma_ji(j,i) = 0;
         mRij(i,j) = 0;
       }
+
+      //Bottom half matrix
+
+      mVij(j,i) = mVij(i,j);
+
+        // Correlation
+        if (sigma_ij(i,j) > 0.0 && sigma_ji(j,i) > 0.0) {
+            mRij(i,j) = mVij(i,j) / (sigma_ij(i,j) * sigma_ji(j,i));
+            mRij(j,i) = mRij(i,j); // mirror
+        } else {
+            mRij(i,j) = 0.0;
+            mRij(j,i) = 0.0;
+        }
     }
 }
+
+QwMessage << "Printing Vij, sigma_ij, sigma_ji" << QwLog::endl;
+mVij.Print();
+sigma_ij.Print();
+sigma_ji.Print();
 
 //==========================================================
 //Solve step 2
@@ -1157,6 +1289,7 @@ for(int i = 0; i < fAllVar.size(); ++i){
   mVPP = mVFULL.GetSub(0,nP-1,0,nP-1);
   mVYY = mVFULL.GetSub(nP,nP+nY-1,nP,nP+nY-1);
   mRFULL = mRij;
+  mRFULL.Print();
   mRPY = mRFULL.GetSub(0,nP-1,nP,nP+nY-1);
   mRPP = mRFULL.GetSub(0,nP-1,0,nP-1);
   mRYY = mRFULL.GetSub(nP,nP+nY-1,nP,nP+nY-1);
@@ -1185,8 +1318,9 @@ for(int i = 0; i < fAllVar.size(); ++i){
 QwMessage << mRij(i,j) << " " << sigma_ij(i,j) << " " << sigma_ji(j,i) << QwLog::endl;
       }
         mVFULL_clean(i,j) = mRij(i,j) * sigma_ij(i,j) * sigma_ji(j,i) * (fGoodEventNumber - 1);
+        mVFULL_clean(j,i) = mVFULL_clean(i,j);
         mSFULL_clean(i,j) = mRij(i,j) * sigma_ij(i,j) * sigma_ji(j,i);
-        
+        mSFULL_clean(j,i) = mSFULL_clean(i,j);
     }
 }
   TMatrixD mVPY_clean = mVFULL_clean.GetSub(0,nP-1,nP,nP+nY-1);
@@ -1232,18 +1366,40 @@ QwMessage << mRij(i,j) << " " << sigma_ij(i,j) << " " << sigma_ji(j,i) << QwLog:
   // slopes
   QwMessage << "Starting Grand Correlator Solve Step 3" << std::endl;
   TMatrixD invRPP(TMatrixD::kInverted, mRPP);
+  mRPP.Print();
+  invRPP.Print();
+  mRPY.Print();
   Axy = TMatrixD(invRPP, TMatrixD::kMult, mRPY);
   Axy.NormByColumn(mSP_clean); // divide
+  QwMessage << "Did Norm Col" << QwLog::endl;
   Axy.NormByRow(mSY_clean, ""); // mult
+  QwMessage << "Did Norm Row" << QwLog::endl;
   Ayx.Transpose(Axy);
+  QwMessage << "Did Transpose" << QwLog::endl;
 
   // new means
   mMYp = mMY - Ayx * mMP;
+  mMYp.Print();
 
   // new raw covariance
+  QwMessage << "Beginning Print statement test covariance" << QwLog::endl;
   mVYYp = mVYY_clean + Ayx * mVPP_clean * Axy - (Ayx * mVPY_clean + mVYP_clean * Axy);
+  mVYY_clean.Print();
+  Ayx.Print();
+  mVPP_clean.Print();
+  Axy.Print();
+  mVPY_clean.Print();
+  mVYP_clean.Print();
+  QwMessage << "End of Print Statement test covariance" << QwLog::endl;
+
   // new variances
   mVYp = TMatrixDDiag(mVYYp); 
+  for (int i = 0; i < mVYp.GetNrows(); i++) {
+    if (mVYp(i) < 0 && fabs(mVYp(i)) < 1e-12) {
+        mVYp(i) = 0;
+    }
+  }
+  mVYp.Print();
   mVYp.Sqrt();
 
   // new normalized covariance
@@ -1253,16 +1409,24 @@ QwMessage << mRij(i,j) << " " << sigma_ij(i,j) << " " << sigma_ji(j,i) << QwLog:
   mSYp.Sqrt();
 
   // new correlation matrix
-  mRYYp = mVYYp; mRYYp.NormByColumn(mVYp); mRYYp.NormByRow(mVYp);
+  mRYYp = mVYYp; 
+  mRYYp.NormByColumn(mVYp); 
+  QwMessage << "Norm Col" << QwLog::endl;
+  mRYYp.NormByRow(mVYp);
+  QwMessage << "Norm Row" << QwLog::endl;
 
   // slope uncertainties
   double norm = 1. / (fGoodEventNumber - nP - 1);
   dAxy.Zero();
   dAxy.Rank1Update(TMatrixDDiag(invRPP), TMatrixDDiag(mRYYp), norm); // diag mRYYp = row of ones
   dAxy.Sqrt();
+  QwMessage << "SQRT" << QwLog::endl;
   dAxy.NormByColumn(mSP_clean); // divide
+  QwMessage << "Norm 1" << QwLog::endl;
   dAxy.NormByRow(mSYp, ""); // mult
+  QwMessage << "Norm 2" << QwLog::endl;
   dAyx.Transpose(dAxy);
+  QwMessage << "Transpose" << QwLog::endl;
 
   fErrorFlag = 0;
 }
