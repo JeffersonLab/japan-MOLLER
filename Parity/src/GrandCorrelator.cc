@@ -135,7 +135,6 @@ void GrandCorrelator::ProcessData()
           mCij(i,j) = 0.0;
         } else {
           mCij(i,j) += ((mNij(i,j) - 1) / mNij(i,j))  * (delta_i) * (delta_j);
-          //QwMessage << "mNij: " << mNij(i,j) << " delta_i: " << delta_i << " delta_j: " << delta_j << QwLog::endl;
         }
 
         if (j>i){
@@ -220,9 +219,7 @@ void GrandCorrelator::CalcCorrelations()
     }
   }
 
-  QwMessage << "Before failed in CalcCorrelations" << QwLog::endl;
   if (! this->failed()) {
-    QwMessage << "Inside of failed loop" << QwLog::endl;
     if (fPrintCorrelations) {
       this->printSummaryP();
       this->printSummaryY();
@@ -386,7 +383,6 @@ Int_t GrandCorrelator::ConnectChannels(QwSubsystemArrayParity& asym, QwSubsystem
   fErrCounts_IV.resize(fIndependentVar.size(),0);
   fErrCounts_DV.resize(fDependentVar.size(),0);
 
-  QwMessage << "Starting to make list of all variables" << QwLog::endl;
   // Create vector list for all values
   fAllVar = fIndependentVar;
   fAllVar.insert(fAllVar.end(), fDependentVar.begin(), fDependentVar.end());
@@ -1223,12 +1219,6 @@ void GrandCorrelator::solve()
 {
 //==========================================================
 //Solve step 1
-//QwMessage << "mSij and mNij" << QwLog::endl;
-//mSij.Print();
-//mNij.Print();
-//mCij.Print();
-//return;
-QwMessage << "Starting Grand Correlator Solve Step 1" << QwLog::endl;
 for(int i = 0; i < fAllVar.size(); ++i){
     for(int j = i; j < fAllVar.size(); ++j){
       if(mNij(i,j) >= 2){
@@ -1276,23 +1266,19 @@ for(int i = 0; i < fAllVar.size(); ++i){
     }
 }
 
-QwMessage << "Printing Vij, sigma_ij, sigma_ji" << QwLog::endl;
-mVij.Print();
-sigma_ij.Print();
-sigma_ji.Print();
 
 //==========================================================
 //Solve step 2
-  QwMessage << "Starting Grand Correlator Solve Step 2" << QwLog::endl;
   mVFULL = mCij;
   mVPY = mVFULL.GetSub(0,nP-1,nP,nP+nY-1);
   mVPP = mVFULL.GetSub(0,nP-1,0,nP-1);
   mVYY = mVFULL.GetSub(nP,nP+nY-1,nP,nP+nY-1);
+
   mRFULL = mRij;
-  mRFULL.Print();
   mRPY = mRFULL.GetSub(0,nP-1,nP,nP+nY-1);
   mRPP = mRFULL.GetSub(0,nP-1,0,nP-1);
   mRYY = mRFULL.GetSub(nP,nP+nY-1,nP,nP+nY-1);
+
   mSFULL = mVij;
   mSPY = mSFULL.GetSub(0,nP-1,nP,nP+nY-1);
   mSPP = mSFULL.GetSub(0,nP-1,0,nP-1);
@@ -1304,18 +1290,15 @@ sigma_ji.Print();
 
   // diagonal variances
   TMatrixD sigmaP = sigma_ij.GetSub(0,nP-1,0,nP-1);
-  sigmaP.Print();
   TMatrixD sigmaY = sigma_ij.GetSub(nP,nP+nY-1,nP,nP+nY-1);
+
   mVP = TMatrixDDiag(sigmaP);
   mVY = TMatrixDDiag(sigmaY);
 
-  QwMessage << "Making Clean Matrices" << QwLog::endl;
-  QwMessage << "fGoodEventNumber" << fGoodEventNumber << QwLog::endl;
   // "Clean" matrices
   for(int i = 0; i < fAllVar.size(); ++i){
     for(int j = i; j < fAllVar.size(); ++j){
       if(i < 5 && j < 5){
-QwMessage << mRij(i,j) << " " << sigma_ij(i,j) << " " << sigma_ji(j,i) << QwLog::endl;
       }
         mVFULL_clean(i,j) = mRij(i,j) * sigma_ij(i,j) * sigma_ji(j,i) * (fGoodEventNumber - 1);
         mVFULL_clean(j,i) = mVFULL_clean(i,j);
@@ -1335,11 +1318,10 @@ QwMessage << mRij(i,j) << " " << sigma_ij(i,j) << " " << sigma_ji(j,i) << QwLog:
 
 
   TMatrixD mSYP_clean(TMatrixD::kTransposed, mSPY_clean);
+
   TVectorD mSP_clean = TMatrixDDiag(mSPP_clean);
-  mSPP_clean.Print();
-  QwMessage << "Before Sqrt of mSP_clean, number rows: " << mSP_clean.GetNrows() << QwLog::endl;
-  mSP_clean.Print();
   mSP_clean.Sqrt();
+
   TVectorD mSY_clean = TMatrixDDiag(mSYY_clean);
   mSY_clean.Sqrt();
 
@@ -1364,33 +1346,20 @@ QwMessage << mRij(i,j) << " " << sigma_ij(i,j) << " " << sigma_ji(j,i) << QwLog:
   //==========================================================
   //Solve Step 3
   // slopes
-  QwMessage << "Starting Grand Correlator Solve Step 3" << std::endl;
   TMatrixD invRPP(TMatrixD::kInverted, mRPP);
-  mRPP.Print();
-  invRPP.Print();
-  mRPY.Print();
   Axy = TMatrixD(invRPP, TMatrixD::kMult, mRPY);
+
   Axy.NormByColumn(mSP_clean); // divide
-  QwMessage << "Did Norm Col" << QwLog::endl;
+
   Axy.NormByRow(mSY_clean, ""); // mult
-  QwMessage << "Did Norm Row" << QwLog::endl;
+
   Ayx.Transpose(Axy);
-  QwMessage << "Did Transpose" << QwLog::endl;
 
   // new means
   mMYp = mMY - Ayx * mMP;
-  mMYp.Print();
 
   // new raw covariance
-  QwMessage << "Beginning Print statement test covariance" << QwLog::endl;
   mVYYp = mVYY_clean + Ayx * mVPP_clean * Axy - (Ayx * mVPY_clean + mVYP_clean * Axy);
-  mVYY_clean.Print();
-  Ayx.Print();
-  mVPP_clean.Print();
-  Axy.Print();
-  mVPY_clean.Print();
-  mVYP_clean.Print();
-  QwMessage << "End of Print Statement test covariance" << QwLog::endl;
 
   // new variances
   mVYp = TMatrixDDiag(mVYYp); 
@@ -1399,7 +1368,7 @@ QwMessage << mRij(i,j) << " " << sigma_ij(i,j) << " " << sigma_ji(j,i) << QwLog:
         mVYp(i) = 0;
     }
   }
-  mVYp.Print();
+
   mVYp.Sqrt();
 
   // new normalized covariance
@@ -1411,22 +1380,22 @@ QwMessage << mRij(i,j) << " " << sigma_ij(i,j) << " " << sigma_ji(j,i) << QwLog:
   // new correlation matrix
   mRYYp = mVYYp; 
   mRYYp.NormByColumn(mVYp); 
-  QwMessage << "Norm Col" << QwLog::endl;
+
   mRYYp.NormByRow(mVYp);
-  QwMessage << "Norm Row" << QwLog::endl;
+
 
   // slope uncertainties
   double norm = 1. / (fGoodEventNumber - nP - 1);
   dAxy.Zero();
   dAxy.Rank1Update(TMatrixDDiag(invRPP), TMatrixDDiag(mRYYp), norm); // diag mRYYp = row of ones
   dAxy.Sqrt();
-  QwMessage << "SQRT" << QwLog::endl;
+
   dAxy.NormByColumn(mSP_clean); // divide
-  QwMessage << "Norm 1" << QwLog::endl;
+
   dAxy.NormByRow(mSYp, ""); // mult
-  QwMessage << "Norm 2" << QwLog::endl;
+
   dAyx.Transpose(dAxy);
-  QwMessage << "Transpose" << QwLog::endl;
+
 
   fErrorFlag = 0;
 }
