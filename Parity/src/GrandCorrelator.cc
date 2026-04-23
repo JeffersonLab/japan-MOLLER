@@ -89,35 +89,36 @@ void GrandCorrelator::ParseConfigFile(QwParameterFile& file)
 
 void GrandCorrelator::ProcessData()
 {
-  // Add to total count for solve step 2
   fTotalCount++;
-
-  
-  // Event error flag
+  fGoodEvent = 0;
+ // Event error flag
   fGoodEvent |= GetEventcutErrorFlag();
   if ( GetEventcutErrorFlag() != 0) fErrCounts_EF++;
   // Dependent variable error codes
   for (size_t i = 0; i < fDependentVar.size(); ++i) {
-    fGoodEvent |= fDependentVar.at(i)->GetErrorCode();
+    //fGoodEvent |= fDependentVar.at(i)->GetErrorCode();
     fDependentValues.at(i) = (fDependentVar[i]->GetValue(fBlock+1));
     if (fDependentVar.at(i)->GetErrorCode() !=0)  (fErrCounts_DV.at(i))++;
   }
   // Independent variable error codes
   for (size_t i = 0; i < fIndependentVar.size(); ++i) {
-    fGoodEvent |= fIndependentVar.at(i)->GetErrorCode();
+    //fGoodEvent |= fIndependentVar.at(i)->GetErrorCode();
     fIndependentValues.at(i) = (fIndependentVar[i]->GetValue(fBlock+1));
     if (fIndependentVar.at(i)->GetErrorCode() !=0)  (fErrCounts_IV.at(i))++;
   }
 
-    for(size_t i = 0; i < fAllVar.size(); ++i){
+  for(size_t i = 0; i < fAllVar.size(); ++i){
     fAllGood[i] = (fAllVar[i]->GetErrorCode() == 0);
     fAllValues[i] = fAllVar[i]->GetValue(fBlock+1);
     //if(!fAllGood[i]) fErrCounts_IV[i]++;
   }
-
-  TVectorD P(fIndependentValues.size(), fIndependentValues.data());
-  TVectorD Y(fDependentValues.size(),   fDependentValues.data());
-  operator+= (std::make_pair(P, Y));
+  if(fGoodEvent != 0){
+    return;
+  }
+  fGoodEventNumber++;
+  //TVectorD P(fIndependentValues.size(), fIndependentValues.data());
+  //TVectorD Y(fDependentValues.size(),   fDependentValues.data());
+  //operator+= (std::make_pair(P, Y));
 
   for(int i = 0; i<fAllVar.size(); ++i){
     for(int j = i; j<fAllVar.size(); ++j){
