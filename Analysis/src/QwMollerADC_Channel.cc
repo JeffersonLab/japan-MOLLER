@@ -7,6 +7,7 @@
 
 // System headers
 #include <stdexcept>
+#include "TMath.h"
 
 // Qweak headers
 #include "QwLog.h"
@@ -885,11 +886,11 @@ void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupl
     TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
     fTreeArrayIndex  = values.size();
 
-    // For derived data (yield_, asym_, diff_), only store the main value to match TTree format
+    // For derived data (yield_, asym_, diff_), store with _hw_sum suffix for consistency
     if (fDataToSave == kDerived) {
-      // Only store the main hardware sum value, just like the original tree
+      // Store the main hardware sum value with explicit _hw_sum suffix
       values.resize(values.size() + 1, 0.0);
-      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum").Data()));
       fTreeArrayNumEntries = 1;
       return;
     }
@@ -954,7 +955,7 @@ void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupl
     // Add fields in the same order as FillTreeVector
     // hw_sum
     if (bHw_sum) {
-      fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum").Data()));
     }
 
     if (bBlock) {
@@ -976,7 +977,7 @@ void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupl
     if (fDataToSave == kRaw) {
       // hw_sum_raw
       if (bHw_sum_raw) {
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_raw").Data()));
+        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum_raw").Data()));
       }
 
       if (bBlock_raw) {
@@ -1695,11 +1696,11 @@ void QwMollerADC_Channel::CalculateRunningAverage()
       // Stability check 83951872
       if ((fStability>0) &&( (fErrorConfigFlag & kStabilityCut) == kStabilityCut)) {
         // check to see the channel has stability cut activated in the event cut file
-	if (GetValueWidth() > fStability){
-	  // if the width is greater than the stability required flag the event
-	  fErrorFlag = kBeamStabilityError;
-	} else
-	  fErrorFlag = 0;
+        if (GetValueWidth() > fStability){
+          // if the width is greater than the stability required flag the event
+          fErrorFlag = kBeamStabilityError;
+        } else
+          fErrorFlag = 0;
       }
     }
 }
@@ -1753,7 +1754,7 @@ void QwMollerADC_Channel::Blind(const QwBlinder *blinder)
     } else {
       blinder->ModifyThisErrorCode(fErrorFlag);
       for (Int_t i = 0; i < fBlocksPerEvent; i++)
-	fBlock[i] = QwBlinder::kValue_BlinderFail;
+        fBlock[i] = QwBlinder::kValue_BlinderFail;
       fHardwareBlockSum =  QwBlinder::kValue_BlinderFail;
     }
   }
@@ -1775,7 +1776,7 @@ void QwMollerADC_Channel::Blind(const QwBlinder *blinder, const QwMollerADC_Chan
     } else {
       blinder->ModifyThisErrorCode(fErrorFlag);//update the HW error code
       for (Int_t i = 0; i < fBlocksPerEvent; i++)
-	fBlock[i] = QwBlinder::kValue_BlinderFail * yield.fBlock[i];
+        fBlock[i] = QwBlinder::kValue_BlinderFail * yield.fBlock[i];
       fHardwareBlockSum = QwBlinder::kValue_BlinderFail * yield.fHardwareBlockSum;
     }
   }

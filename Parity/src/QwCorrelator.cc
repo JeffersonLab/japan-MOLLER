@@ -677,6 +677,9 @@ void QwCorrelator::CloseAlphaFile()
 {
   // Close slopes output file
   if (fAlphaOutputFile) {
+    // Switch to this file's directory before writing to avoid
+    // trying to write objects from other (possibly closed) files
+    fAlphaOutputFile->cd();
     fAlphaOutputFile->Write();
     fAlphaOutputFile->Close();
   }

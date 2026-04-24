@@ -725,11 +725,10 @@ void OnlineGUI::GetNTupleVars() {
       const auto& descriptor = fRootNTuple[i]->GetDescriptor();
 
       // Get the top-level field (root field) and iterate through its sub-fields
-      auto rootFieldId = descriptor.GetFieldZeroId();
-      for (const auto& fieldDesc : descriptor.GetFieldIterable(rootFieldId)) {
+      for (const auto& fieldDesc : descriptor.GetTopLevelFields()) {
         TString fieldName = fieldDesc.GetFieldName();
-        // Skip the root field itself
-        if (fieldName != "" && fieldDesc.GetId() != rootFieldId) {
+        // Add all top-level fields
+        if (fieldName != "") {
           currentNTuple.push_back(fieldName);
         }
       }
@@ -1254,10 +1253,17 @@ void OnlineGUI::NTupleDraw(vector <TString> command) {
     if(fVerbosity>=2)
       cout<<"got NTuple index from variable "<<iNTuple<<endl;
   } else {
-    // For now, use first available RNTuple if name specified
-    iNTuple = 0;
+    // Find RNTuple by name specified in -tree option
+    TString requestedNTuple = command[4];
+    iNTuple = fRootNTuple.size() + 1; // Default to not found
+    for(UInt_t i=0; i<fRootNTupleNames.size(); i++) {
+      if(fRootNTupleNames[i] == requestedNTuple) {
+        iNTuple = i;
+        break;
+      }
+    }
     if(fVerbosity>=2)
-      cout<<"got NTuple index from command "<<iNTuple<<endl;
+      cout<<"got NTuple index from command (-tree "<<requestedNTuple<<"): "<<iNTuple<<endl;
   }
 
   TString drawopt = command[2];
@@ -1603,10 +1609,17 @@ void OnlineGUI::DataFrameDraw(vector <TString> command) {
     if(fVerbosity>=2)
       cout<<"got NTuple index from variable "<<iNTuple<<endl;
   } else {
-    // For now, use first available RNTuple if name specified
-    iNTuple = 0;
+    // Find RNTuple by name specified in -tree option
+    TString requestedNTuple = command[4];
+    iNTuple = fRootNTuple.size() + 1; // Default to not found
+    for(UInt_t i=0; i<fRootNTupleNames.size(); i++) {
+      if(fRootNTupleNames[i] == requestedNTuple) {
+        iNTuple = i;
+        break;
+      }
+    }
     if(fVerbosity>=2)
-      cout<<"got NTuple index from command "<<iNTuple<<endl;
+      cout<<"got NTuple index from command (-tree "<<requestedNTuple<<"): "<<iNTuple<<endl;
   }
 
   // Check if we found a valid RNTuple
@@ -1650,7 +1663,7 @@ void OnlineGUI::DataFrameDraw(vector <TString> command) {
         // Create histogram using DataFrame with proper model
         auto histTitle = command[3].IsNull() ? var : command[3];
         ROOT::RDF::TH1DModel model{histoname.Data(), histTitle.Data(), 100, 0., 0.};
-        auto hist = filteredDf.Histo1D(model, var.Data());
+        auto hist = filteredDf.Histo1D(model, std::string(var.Data()));
 
         // Force computation of the histogram
         hist->GetEntries(); // This triggers computation
@@ -1689,7 +1702,7 @@ void OnlineGUI::DataFrameDraw(vector <TString> command) {
         // No cuts - create histogram directly
         auto histTitle = command[3].IsNull() ? var : command[3];
         ROOT::RDF::TH1DModel model{histoname.Data(), histTitle.Data(), 100, 0., 0.};
-        auto hist = df.Histo1D(model, var.Data());
+        auto hist = df.Histo1D(model, std::string(var.Data()));
 
         // Force computation of the histogram
         hist->GetEntries(); // This triggers computation

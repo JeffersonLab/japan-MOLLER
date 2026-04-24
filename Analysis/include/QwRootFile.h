@@ -21,6 +21,7 @@ using std::type_info;
 // ROOT headers
 #include "TFile.h"
 #include "TTree.h"
+#include "TKey.h"
 #include "TPRegexp.h"
 #include "TSystem.h"
 #include "TString.h"
@@ -31,6 +32,7 @@ using std::type_info;
 #include "ROOT/RNTupleModel.hxx"
 #include "ROOT/RField.hxx"
 #include "ROOT/RNTupleWriter.hxx"
+#include "ROOT/RNTupleWriteOptions.hxx"
 #endif
 
 // Qweak headers
@@ -693,11 +695,27 @@ class QwRootNTuple {
       }
 
       try {
+        // Create write options with user-specified compression settings
+        ROOT::RNTupleWriteOptions options;
+        options.SetCompression(
+          static_cast<ROOT::RCompressionSetting::EAlgorithm::EValues>(fRNTupleCompressionAlgorithm),
+          fRNTupleCompressionLevel
+        );
+
         // Create the writer with the model (transfers ownership)
         // Use Append to add RNTuple to existing TFile
-        fWriter = ROOT::RNTupleWriter::Append(std::move(fModel), fName, *file);
+        fWriter = ROOT::RNTupleWriter::Append(std::move(fModel), fName, *file, options);
 
-        QwMessage << "Created RNTuple '" << fName << "' in file " << file->GetName() << QwLog::endl;
+        const char* algo_name = "UNKNOWN";
+        switch(fRNTupleCompressionAlgorithm) {
+          case 1: algo_name = "ZLIB"; break;
+          case 2: algo_name = "LZMA"; break;
+          case 4: algo_name = "LZ4"; break;
+          case 5: algo_name = "ZSTD"; break;
+        }
+        QwMessage << "Created RNTuple '" << fName << "' with " << algo_name 
+                  << " compression (level " << fRNTupleCompressionLevel << ") in file " 
+                  << file->GetName() << QwLog::endl;
 
       } catch (const std::exception& e) {
         QwError << "Failed to create RNTuple writer for '" << fName << "': " << e.what() << QwLog::endl;
@@ -791,6 +809,10 @@ class QwRootNTuple {
     UInt_t fNumEventsCycle;
     UInt_t fNumEventsToSave;
     UInt_t fNumEventsToSkip;
+
+    /// RNTuple compression settings
+    Int_t fRNTupleCompressionAlgorithm;
+    Int_t fRNTupleCompressionLevel;
 
   friend class QwRootFile;
 };
@@ -928,6 +950,9 @@ class QwRootFile {
       QwRootNTuple *ntuple = 0;
       if (! HasNTupleByName(name)) {
         ntuple = new QwRootNTuple(name, desc);
+        // Set compression settings before initializing writer
+        ntuple->fRNTupleCompressionAlgorithm = fRNTupleCompressionAlgorithm;
+        ntuple->fRNTupleCompressionLevel = fRNTupleCompressionLevel;
         // Initialize the writer with our file
         ntuple->InitializeWriter(fRootFile);
       } else {
@@ -1040,14 +1065,77 @@ class QwRootFile {
     void Print()  { if (fMapFile) fMapFile->Print();  if (fRootFile) fRootFile->Print(); }
     void ls()     { if (fMapFile) fMapFile->ls();     if (fRootFile) fRootFile->ls(); }
     void Map()    { if (fRootFile) fRootFile->Map(); }
+
+  private:
+    /// Recursively clear in-memory objects from a directory tree.
+    /// This removes objects from the TDirectory's in-memory list without deleting
+    /// their on-disk representation (keys). Used to prevent RNTupleWriter::Close()
+    /// from creating duplicate histogram cycles when it internally calls TFile::Write().
+    void ClearInMemoryObjects(TDirectory* dir) {
+      if (!dir) return;
+      
+      // First, collect subdirectory names
+      std::vector<TString> subdirs;
+      TIter next(dir->GetListOfKeys());
+      TKey* key;
+      while ((key = (TKey*)next())) {
+        if (TString(key->GetClassName()) == "TDirectoryFile") {
+          subdirs.push_back(key->GetName());
+        }
+      }
+      
+      // Recursively clear subdirectories
+      for (const auto& name : subdirs) {
+        TDirectory* sub = dynamic_cast<TDirectory*>(dir->Get(name));
+        if (sub) ClearInMemoryObjects(sub);
+      }
+      
+      // Clear this directory's in-memory object list
+      // "nodelete" option: remove from list but don't delete the TKey entries
+      TList* list = dir->GetList();
+      if (list) {
+        list->Clear("nodelete");
+      }
+    }
+
+  public:
     void Close()  {
 
-      // Check if we should make the file permanent - restore original logic
-      if (!fMakePermanent) fMakePermanent = HasAnyFilled();
+      if (fRootFile) {
+        // Step 1: Write all trees explicitly
+        for (auto iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++) {
+          if (!iter->second.empty() && iter->second.front()) {
+            TTree* tree = iter->second.front()->GetTree();
+            if (tree && tree->GetEntries() > 0) {
+              tree->Write();
+            }
+          }
+        }
 
+        // Step 2: Write all in-memory objects (histograms, etc.) to disk
+        // Use kOverwrite to avoid creating duplicate cycles
+        fRootFile->Write(0, TObject::kOverwrite);
+
+        // Check if we should make the file permanent AFTER writing
+        // This ensures histograms are on disk and detectable by HasAnyFilled()
+        if (!fMakePermanent) fMakePermanent = HasAnyFilled();
+
+        // Step 3: CRITICAL FIX for RNTuple histogram duplication
+        // Clear all in-memory objects from the TFile's directory structure.
+        // This prevents RNTupleWriter::Close() from re-writing histograms,
+        // which would create duplicate cycles. The histograms are already
+        // safely written to disk in Step 2.
+#ifdef HAS_RNTUPLE_SUPPORT
+        if (!fNTupleByName.empty()) {
+          ClearInMemoryObjects(fRootFile);
+        }
+#endif // HAS_RNTUPLE_SUPPORT
+      }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-      // Close all RNTuples before closing the file
+      // Step 4: Close all RNTuples
+      // Now that in-memory histograms are cleared, the RNTupleWriter destructor
+      // won't create duplicate histogram cycles when it internally writes to TFile
       for (auto& pair : fNTupleByName) {
         for (auto& ntuple : pair.second) {
           if (ntuple) ntuple->Close();
@@ -1055,31 +1143,12 @@ class QwRootFile {
       }
 #endif // HAS_RNTUPLE_SUPPORT
 
-      // CRITICAL FIX: Explicitly write all trees before closing!
+      // Step 5: Close the file
       if (fRootFile) {
-
-        for (auto iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++) {
-          if (!iter->second.empty() && iter->second.front()) {
-            TTree* tree = iter->second.front()->GetTree();
-            if (tree && tree->GetEntries() > 0) {
-
-              tree->Write();
-            }
-          }
-        }
-      }
-
-      // Close the file and handle renaming
-      if (fRootFile) {
-        TString rootfilename = fRootFile->GetName();
-
         fRootFile->Close();
-
       }
 
       if (fMapFile) fMapFile->Close();
-
-
     }
 
     // Wrapped functionality
@@ -1141,6 +1210,8 @@ class QwRootFile {
     Int_t fUpdateInterval;
     Int_t fCompressionAlgorithm;
     Int_t fCompressionLevel;
+    Int_t fRNTupleCompressionAlgorithm;
+    Int_t fRNTupleCompressionLevel;
     Int_t fBasketSize;
     Int_t fAutoFlush;
     Int_t fAutoSave;
@@ -1427,6 +1498,10 @@ void QwRootFile::ConstructNTupleFields(
 
     // New RNTuple with name, description, object, prefix
     ntuple = new QwRootNTuple(name, desc, object, prefix);
+
+    // Set compression settings before initializing writer
+    ntuple->fRNTupleCompressionAlgorithm = fRNTupleCompressionAlgorithm;
+    ntuple->fRNTupleCompressionLevel = fRNTupleCompressionLevel;
 
     // Initialize the writer with our file
     ntuple->InitializeWriter(fRootFile);

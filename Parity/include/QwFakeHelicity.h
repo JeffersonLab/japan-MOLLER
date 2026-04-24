@@ -22,9 +22,10 @@
  * Used for testing and simulations when real helicity decoding is not
  * available. Inherits the helicity interface and overrides event handling.
  */
-class QwFakeHelicity: public QwHelicity {
+class QwFakeHelicity: public QwHelicityBase {
+
  public:
-  QwFakeHelicity(TString region_tmp):VQwSubsystem(region_tmp),QwHelicity(region_tmp),fMinPatternPhase(1)
+  QwFakeHelicity(TString region_tmp):VQwSubsystem(region_tmp),QwHelicityBase(region_tmp),fMinPatternPhase(1)
 
     {
       // using the constructor of the base class
@@ -33,7 +34,7 @@ class QwFakeHelicity: public QwHelicity {
     ~QwFakeHelicity() override { };
 
     /// Inherit assignment operator on base class
-    using QwHelicity::operator=;
+    using QwHelicityBase::operator=;
 
     void    ClearEventData() override;
     Bool_t  IsGoodHelicity() override;
