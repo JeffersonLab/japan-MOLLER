@@ -24,7 +24,37 @@
   tree-name  = lrb_std
   tree-comment = Correlations
 
-[QwCombiner]
+[QwCorrelatorNew]
+  name       = lrb_std_new
+  priority   = 50
+  map        = mock_corrolator.conf
+  slope-file-base = blueR_newcorr
+  slope-file-suff = new.slope.root
+  slope-path = .
+  alias-file-base = regalias_newcorr_
+  alias-file-suff =
+  alias-path = .
+  disable-histos = true
+  tree-name  = newcorr
+  tree-comment = Correlations
+
+  [GrandCorrelator]
+  name       = lrb_std_grand
+  priority   = 50
+  map        = mock_corrolator.conf
+  slope-file-base = blueR_grand
+  slope-file-suff = new.slope.root
+  slope-path = .
+  alias-file-base = regalias_grand_
+  alias-file-suff =
+  alias-path = .
+  disable-histos = true
+  tree-name  = grand
+  tree-comment = Correlations
+
+
+
+  [QwCombiner]
   name = beamline_combiner
   map  = mock_beamline_combiner.map
 
