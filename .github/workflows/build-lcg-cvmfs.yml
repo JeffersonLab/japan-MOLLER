@@ -81,7 +81,7 @@ jobs:
           ccache --set-config=compression=true
           ccache --zero-stats
           echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
-      - uses: aidasoft/run-lcg-view@v5
+      - uses: aidasoft/run-lcg-view@v6
         with:
           release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           run: |
@@ -387,7 +387,7 @@ jobs:
       - uses: cvmfs-contrib/github-action-cvmfs@v5
         with:
           cvmfs_repositories: 'sft.cern.ch,geant4.cern.ch'
-      - uses: aidasoft/run-lcg-view@v5
+      - uses: aidasoft/run-lcg-view@v6
         with:
           release-platform: ${{ matrix.release }}/${{ matrix.arch }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}
           run: |
