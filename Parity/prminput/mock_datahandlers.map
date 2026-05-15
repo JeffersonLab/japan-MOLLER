@@ -38,10 +38,10 @@
   tree-name  = newcorr
   tree-comment = Correlations
 
-  [GrandCorrelator]
+[GrandCorrelator]
   name       = lrb_std_grand
   priority   = 50
-  map        = mock_corrolator.conf
+  map        = mock_corrolator_truncated.conf
   slope-file-base = blueR_grand
   slope-file-suff = new.slope.root
   slope-path = .
@@ -54,7 +54,7 @@
 
 
 
-  [QwCombiner]
+[QwCombiner]
   name = beamline_combiner
   map  = mock_beamline_combiner.map
 
