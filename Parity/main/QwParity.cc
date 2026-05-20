@@ -39,6 +39,8 @@
 #include "QwCombinerSubsystem.h"
 #include "QwPromptSummary.h"
 #include "QwCorrelator.h"
+#include "QwCorrelatorNew.h"
+#include "GrandCorrelator.h"
 #include "LRBCorrector.h"
 #include "QwExtractor.h"
 #include "QwDataHandlerArray.h"
