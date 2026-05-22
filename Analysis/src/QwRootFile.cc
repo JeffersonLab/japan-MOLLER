@@ -328,6 +328,18 @@ void QwRootFile::ProcessOptions(QwOptions &options)
 #ifdef HAS_RNTUPLE_SUPPORT
   // Option 'enable-rntuples' to enable RNTuple output
   fEnableRNTuples = options.GetValue<bool>("enable-rntuples");
+  // RNTuples require a TFile (RNTupleWriter::Append takes a TDirectory&);
+  // they cannot be hosted by a TMapFile.  If both flags are requested,
+  // disable RNTuples and warn loudly so the run does not crash later in
+  // QwRootNTuple::InitializeWriter with a null TFile*.
+  if (fEnableMapFile && fEnableRNTuples) {
+    QwMessage << QwLog::endl;
+    QwWarning << "QwRootFile::ProcessOptions:  "
+              << "RNTuple output is not supported alongside --enable-mapfile "
+                 "(TMapFile is not a TDirectory). Disabling RNTuples."
+              << QwLog::endl;
+    fEnableRNTuples = false;
+  }
 #endif // HAS_RNTUPLE_SUPPORT
 
   // Options 'disable-trees' and 'disable-histos' for disabling
