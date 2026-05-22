@@ -98,10 +98,16 @@ QwRootFile::QwRootFile(const TString& run_label)
     }
     QwMessage << "Opening file with RECREATE mode: " << rootfilename << QwLog::endl;
     QwMessage << "QwRootFile constructor called for: " << rootfilename << QwLog::endl;
-    fRootFile = new TFile(rootfilename.Data(), "RECREATE", "myfile1");
-    if (! fRootFile) {
+    // Use TFile::Open instead of `new TFile(...)` so the ROOT plug-in manager
+    // can dispatch remote URLs (e.g. root://host/path) to TNetXNGFile etc.
+    // The TFile(name, opt, title) constructor refuses remote paths and returns
+    // a half-built object, which then segfaults at first use.
+    fRootFile = TFile::Open(rootfilename.Data(), "RECREATE", "myfile1");
+    if (!fRootFile || fRootFile->IsZombie()) {
       QwError << "ROOT file " << rootfilename
               << " could not be opened!" << QwLog::endl;
+      delete fRootFile;
+      fRootFile = nullptr;
       return;
     } else {
       QwMessage << "Opened "<< (fUseTemporaryFile?"temporary ":"")
