@@ -611,6 +611,14 @@ void OnlineGUI::GetFileObjects()
     while(rec) {
       TString objname  = rec->GetName();
       TString objtype  = rec->GetClassName();
+      // TMapRec::GetClassName() can return an empty string when the
+      // producer hasn't registered the class with the consumer's
+      // dictionary; in that case resolve it through the live object so
+      // downstream type filtering (TH1, TH2, ...) keeps working.
+      if(objtype.IsNull()) {
+        TObject *obj = fMapFile->Get(objname.Data());
+        if(obj) objtype = obj->ClassName();
+      }
       if(fVerbosity>=1)
         cout << "MapRec = " << objname << " (" << objtype << ")" << endl;
       fileObjects.push_back(make_pair(objname, objtype));
