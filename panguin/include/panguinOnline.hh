@@ -6,6 +6,9 @@
 
 #include <TTree.h>
 #include <TFile.h>
+#ifdef QW_ENABLE_MAPFILE
+#include <TMapFile.h>
+#endif
 // RNTuple support - only if available in ROOT version
 #ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTuple.hxx"
@@ -57,6 +60,13 @@ private:
   UInt_t                            current_page;
   TFile*                            fRootFile;
   TFile*                            fGoldenFile;
+#ifdef QW_ENABLE_MAPFILE
+  // When the configured rootfile is a TMapFile (shared-memory producer
+  // file, conventionally named *.map or living under /dev/shm/), fRootFile
+  // stays null and we read histograms from fMapFile instead.
+  TMapFile*                         fMapFile;
+  Bool_t                            fIsMapFile;
+#endif
   Bool_t                            doGolden;
   std::vector <TTree*>                   fRootTree;
   std::vector <Int_t>                    fTreeEntries;
@@ -125,6 +135,15 @@ public:
   void BadDraw(TString);
   void CheckRootFile();
   Int_t OpenRootFile();
+#ifdef QW_ENABLE_MAPFILE
+  // Returns kTRUE when path looks like a TMapFile (i.e., ends in .map
+  // or lives under /dev/shm/).
+  static Bool_t LooksLikeMapFile(const TString& path);
+  // Fetch a histogram by name from whichever input is currently open.
+  // For a TFile this calls gDirectory->Get(); for a TMapFile it calls
+  // TMapFile::Get() which clones the object out of shared memory.
+  TObject* GetObjectFromFile(const TString& name);
+#endif
   void PrintToFile();
   void PrintPages();
   void MyCloseWindow();
