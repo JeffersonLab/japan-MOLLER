@@ -349,6 +349,41 @@ void QwRootFile::ProcessOptions(QwOptions &options)
   if (options.GetValue<bool>("disable-trees"))  DisableTree(".*");
   if (options.GetValue<bool>("disable-histos")) DisableHisto(".*");
 
+  // In TMapFile mode there is no on-disk TFile (the constructor opens only
+  // fMapFile), so every TTree created via NewTree() lives inside the 1 GiB
+  // mmap region.  TMapFile::Update() then re-streams all basket state via
+  // CustomReAlloc2 and aborts as soon as the cumulative basket size grows
+  // past the mmap.  TMapFile was designed for live histogram monitoring,
+  // not tree storage, so silently disable trees in that mode.
+  if (fEnableMapFile) {
+    QwMessage << QwLog::endl;
+    QwMessage << "QwRootFile::ProcessOptions:  "
+              << "--enable-mapfile is set; disabling tree output "
+                 "(TMapFile cannot host TTree baskets; histograms only)."
+              << QwLog::endl;
+    DisableTree(".*");
+  }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+  // TTree and RNTuple writers share per-channel state (fTreeArrayIndex,
+  // fTreeArrayNumEntries, fDataToSave, b* flags). When both are active,
+  // the second Construct*AndVector() call clobbers the first writer's
+  // layout, and subsequent Fill*Vector() then walks a vector whose entry
+  // types no longer match what was pushed (e.g. SetValue throws
+  // "entry type 'D' cannot store unsigned int value 'block2'").
+  // Until per-writer layout state is added, make the two writers
+  // mutually exclusive: keep RNTuples and silence TTrees.
+  if (fEnableRNTuples) {
+    QwMessage << QwLog::endl;
+    QwMessage << "QwRootFile::ProcessOptions:  "
+              << "--enable-rntuples is set; disabling tree output "
+                 "(channels share layout state between TTree and RNTuple "
+                 "writers, so the two cannot be produced in the same run)."
+              << QwLog::endl;
+    DisableTree(".*");
+  }
+#endif // HAS_RNTUPLE_SUPPORT
+
   // Options 'disable-mps' and 'disable-hel' for disabling
   // helicity window and helicity pattern output
   if (options.GetValue<bool>("disable-mps-tree"))  DisableTree("^evt$");
