@@ -68,3 +68,4 @@ Parity/prminput/max_burst_index.*
 
 # Generated database schema headers
 Parity/include/QwParitySchema.h
+Parity/prminput/qweak_mysql.conf

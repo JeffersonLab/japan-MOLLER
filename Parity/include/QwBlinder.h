@@ -206,7 +206,9 @@ class QwBlinder {
     const Bool_t& IsBlinderOkay() const {return fBlinderIsOkay;};
 
     void ConstructObjects(TDirectory *folder, TString &prefix) {
-      if (folder != NULL) folder->cd();
+      // TDirectory writes are unsupported in TMapFile mode (folder is null).
+      if (folder == NULL) return;
+      folder->cd();
       const TObjString* seed = new TObjString(fSeed);
       folder->WriteTObject(seed, prefix + "seed", "WriteDelete");
       const TObjString* seedID = new TObjString(Form("%u",fSeedID));

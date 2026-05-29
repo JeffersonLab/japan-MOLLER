@@ -44,6 +44,10 @@ OnlineGUI::OnlineGUI(OnlineConfig& config, Bool_t printonly=0, int ver=0):
   runNumber(0),
   timer(0),
   timerNow(0),
+#ifdef QW_ENABLE_MAPFILE
+  fMapFile(nullptr),
+  fIsMapFile(kFALSE),
+#endif
   fFileAlive(kFALSE),
   fVerbosity(ver)
 {
@@ -74,6 +78,60 @@ void OnlineGUI::CreateGUI(const TGWindow *p, UInt_t w, UInt_t h)
 
   // Open the RootFile.  Die if it doesn't exist.
   //  unless we're watching a file.
+#ifdef QW_ENABLE_MAPFILE
+  fIsMapFile = LooksLikeMapFile(fConfig->GetRootFile());
+  if(fIsMapFile) {
+    fRootFile = NULL;
+    fMapFile  = TMapFile::Create(fConfig->GetRootFile(), "READ");
+    if(fMapFile == nullptr) {
+      cout << "ERROR:  mapfile: " << fConfig->GetRootFile()
+           << " could not be attached"
+           << endl;
+      if(fConfig->IsMonitor()) {
+        cout << "Will wait... hopefully.." << endl;
+      } else {
+        gApplication->Terminate();
+      }
+    } else {
+      fFileAlive = kTRUE;
+      runNumber  = fConfig->GetRunNumber();
+      // No trees / RNTuples / DataFrame in mapfile mode: TMapFile only
+      // hosts directly-stored objects such as histograms.
+      GetFileObjects();
+    }
+  } else {
+    fRootFile = new TFile(fConfig->GetRootFile(),"READ");
+    if(!fRootFile->IsOpen()) {
+      cout << "ERROR:  rootfile: " << fConfig->GetRootFile()
+           << " does not exist"
+           << endl;
+      if(fConfig->IsMonitor()) {
+        cout << "Will wait... hopefully.." << endl;
+      } else {
+        gApplication->Terminate();
+      }
+    } else {
+      fFileAlive = kTRUE;
+      runNumber = fConfig->GetRunNumber();
+      // Open the Root Trees.  Give a warning if it's not there..
+      GetFileObjects();
+      GetRootTree();
+      GetTreeVars();
+#ifdef HAS_RNTUPLE_SUPPORT
+      // Initialize RNTuples
+      GetRootNTuple();
+      GetNTupleVars();
+#endif // HAS_RNTUPLE_SUPPORT
+      // Initialize DataFrame for large dataset support
+      InitializeDataFrame();
+      for(UInt_t i=0; i<fRootTree.size(); i++) {
+        if(fRootTree[i]==0) {
+          fRootTree.erase(fRootTree.begin() + i);
+        }
+      }
+    }
+  }
+#else
   fRootFile = new TFile(fConfig->GetRootFile(),"READ");
   if(!fRootFile->IsOpen()) {
     cout << "ERROR:  rootfile: " << fConfig->GetRootFile()
@@ -105,7 +163,19 @@ void OnlineGUI::CreateGUI(const TGWindow *p, UInt_t w, UInt_t h)
     }
 
   }
+#endif // QW_ENABLE_MAPFILE
   TString goldenfilename=fConfig->GetGoldenFile();
+#ifdef QW_ENABLE_MAPFILE
+  // Golden-file comparison requires "switching back" to the main file via
+  // fRootFile->cd(), which is not meaningful with a TMapFile.  Refuse the
+  // comparison and warn so the user knows the goldenrootfile is ignored.
+  if(fIsMapFile && !goldenfilename.IsNull()) {
+    cout << "NOTE:  goldenrootfile comparison is not supported in TMapFile "
+            "mode; ignoring '" << goldenfilename << "'."
+         << endl;
+    goldenfilename = "";
+  }
+#endif
   if(!goldenfilename.IsNull()) {
     fGoldenFile = new TFile(goldenfilename,"READ");
     if(!fGoldenFile->IsOpen()) {
@@ -498,11 +568,67 @@ Bool_t OnlineGUI::IsHistogram(TString objectname)
 
 }
 
+#ifdef QW_ENABLE_MAPFILE
+Bool_t OnlineGUI::LooksLikeMapFile(const TString& path)
+{
+  // A path is interpreted as a TMapFile when it ends in ".map" or
+  // lives under /dev/shm/.  This keeps the .cfg syntax unchanged
+  // ('rootfile <path>') and just routes the open by extension.
+  if(path.EndsWith(".map")) return kTRUE;
+  if(path.BeginsWith("/dev/shm/")) return kTRUE;
+  return kFALSE;
+}
+
+TObject* OnlineGUI::GetObjectFromFile(const TString& name)
+{
+  // Fetch a named object from whichever input is currently attached.
+  // For a TMapFile the returned object is a fresh clone owned by the
+  // caller; for a TFile we delegate to gDirectory and the file owns it.
+  if(fIsMapFile) {
+    if(fMapFile == nullptr) return nullptr;
+    return fMapFile->Get(name.Data());
+  }
+  return gDirectory->Get(name.Data());
+}
+#endif // QW_ENABLE_MAPFILE
+
 void OnlineGUI::GetFileObjects()
 {
   // Utility to find all of the objects within a File (TTree, TH1F, etc).
   //  The pair stored in the vector is <ObjName, ObjType>
   //  If there's no good keys.. do nothing.
+#ifdef QW_ENABLE_MAPFILE
+  if(fIsMapFile) {
+    // A TMapFile is not a TDirectory and has no key dictionary; instead
+    // it exposes a singly-linked list of TMapRec entries (name + class).
+    fileObjects.clear();
+    if(fMapFile == nullptr) {
+      fUpdate = kFALSE;
+      return;
+    }
+    TMapRec *rec = fMapFile->GetFirst();
+    UInt_t nrec = 0;
+    while(rec) {
+      TString objname  = rec->GetName();
+      TString objtype  = rec->GetClassName();
+      // TMapRec::GetClassName() can return an empty string when the
+      // producer hasn't registered the class with the consumer's
+      // dictionary; in that case resolve it through the live object so
+      // downstream type filtering (TH1, TH2, ...) keeps working.
+      if(objtype.IsNull()) {
+        TObject *obj = fMapFile->Get(objname.Data());
+        if(obj) objtype = obj->ClassName();
+      }
+      if(fVerbosity>=1)
+        cout << "MapRec = " << objname << " (" << objtype << ")" << endl;
+      fileObjects.push_back(make_pair(objname, objtype));
+      rec = rec->GetNext();
+      ++nrec;
+    }
+    fUpdate = (nrec > 0);
+    return;
+  }
+#endif // QW_ENABLE_MAPFILE
   if(fVerbosity>=1)
     cout << "Keys = " << fRootFile->ReadKeys() << endl;
 
@@ -868,6 +994,26 @@ void OnlineGUI::TimerUpdate() {
   if(fVerbosity>=1)
     cout<<__PRETTY_FUNCTION__<<"\t"<<__LINE__<<endl;
 
+#ifdef QW_ENABLE_MAPFILE
+  if(fIsMapFile) {
+    // TMapFile points at a live, producer-updated shared-memory region.
+    // No close/reopen needed: subsequent Get() calls in HistDraw fetch
+    // the latest version of each histogram from shm.  Just refresh the
+    // object listing in case the producer added new entries, and redraw.
+    if(fMapFile == nullptr) {
+      // Producer dropped away; arm CheckRootFile to wait for it to come back.
+      timer->Reset();
+      timer->Disconnect();
+      timer->Connect(timer,"Timeout()","OnlineGUI",this,"CheckRootFile()");
+      return;
+    }
+    GetFileObjects();
+    if(fUpdate) DoDraw();
+    timer->Reset();
+    return;
+  }
+#endif // QW_ENABLE_MAPFILE
+
 #ifdef OLDTIMERUPDATE
   if(fVerbosity>=2)
     cout<<"\t rtFile: "<<fRootFile<<"\t"<<fConfig->GetRootFile()<<endl;
@@ -969,6 +1115,15 @@ void OnlineGUI::CheckRootFile() {
 
   if(gSystem->AccessPathName(fConfig->GetRootFile())==0) {
     cout << "Found the new run" << endl;
+#ifdef QW_ENABLE_MAPFILE
+    if(fIsMapFile && fMapFile == nullptr) {
+      // Producer file appeared again; reattach.
+      fMapFile = TMapFile::Create(fConfig->GetRootFile(), "READ");
+      if(fMapFile == nullptr) return;
+      fFileAlive = kTRUE;
+      GetFileObjects();
+    }
+#endif
 #ifndef OLDTIMERUPDATE
     if(OpenRootFile()==0) {
 #endif
@@ -988,6 +1143,32 @@ void OnlineGUI::CheckRootFile() {
 
 Int_t OnlineGUI::OpenRootFile() {
 
+#ifdef QW_ENABLE_MAPFILE
+  if(fIsMapFile) {
+    // TMapFile is producer-managed; we just (re)attach and refresh.
+    if(fMapFile == nullptr) {
+      fMapFile = TMapFile::Create(fConfig->GetRootFile(), "READ");
+    }
+    if(fMapFile == nullptr) {
+      cout << "Producer mapfile not yet available.  Waiting..." << endl;
+      timer->Reset();
+      timer->Disconnect();
+      timer->Connect(timer,"Timeout()","OnlineGUI",this,"CheckRootFile()");
+      return -1;
+    }
+    runNumber = fConfig->GetRunNumber();
+    if(runNumber != 0) {
+      TString rnBuff = "Run #";
+      rnBuff += runNumber;
+      fRunNumber->SetText(rnBuff.Data());
+      hframe->Layout();
+    }
+    GetFileObjects();
+    if(!fUpdate) return -1;
+    DoDraw();
+    return 0;
+  }
+#endif // QW_ENABLE_MAPFILE
 
   fRootFile = new TFile(fConfig->GetRootFile(),"READ");
   if(fRootFile->IsZombie() || (fRootFile->GetSize() == -1)
@@ -1052,9 +1233,18 @@ void OnlineGUI::HistDraw(vector <TString> command) {
   for(UInt_t i=0; i<fileObjects.size(); i++) {
     if (fileObjects[i].first.Contains(command[0])) {
       if(fileObjects[i].second.Contains("TH1")) {
+#ifdef QW_ENABLE_MAPFILE
+	if(fIsMapFile) {
+	  mytemp1d = (TH1D*)GetObjectFromFile(command[0]);
+	} else {
+	  if(showGolden) fRootFile->cd();
+	  mytemp1d = (TH1D*)gDirectory->Get(command[0]);
+	}
+#else
 	if(showGolden) fRootFile->cd();
 	mytemp1d = (TH1D*)gDirectory->Get(command[0]);
-	if(mytemp1d->GetEntries()==0) {
+#endif
+	if(mytemp1d==NULL || mytemp1d->GetEntries()==0) {
 	  BadDraw("Empty Histogram");
 	} else {
 	  if(showGolden) {
@@ -1075,9 +1265,18 @@ void OnlineGUI::HistDraw(vector <TString> command) {
 	break;
       }
       if(fileObjects[i].second.Contains("TH2")) {
+#ifdef QW_ENABLE_MAPFILE
+	if(fIsMapFile) {
+	  mytemp2d = (TH2D*)GetObjectFromFile(command[0]);
+	} else {
+	  if(showGolden) fRootFile->cd();
+	  mytemp2d = (TH2D*)gDirectory->Get(command[0]);
+	}
+#else
 	if(showGolden) fRootFile->cd();
 	mytemp2d = (TH2D*)gDirectory->Get(command[0]);
-	if(mytemp2d->GetEntries()==0) {
+#endif
+	if(mytemp2d==NULL || mytemp2d->GetEntries()==0) {
 	  BadDraw("Empty Histogram");
 	} else {
 	  // These are commented out for some reason (specific to DVCS?)
@@ -1094,9 +1293,18 @@ void OnlineGUI::HistDraw(vector <TString> command) {
 	break;
       }
       if(fileObjects[i].second.Contains("TH3")) {
+#ifdef QW_ENABLE_MAPFILE
+	if(fIsMapFile) {
+	  mytemp3d = (TH3D*)GetObjectFromFile(command[0]);
+	} else {
+	  if(showGolden) fRootFile->cd();
+	  mytemp3d = (TH3D*)gDirectory->Get(command[0]);
+	}
+#else
 	if(showGolden) fRootFile->cd();
 	mytemp3d = (TH3D*)gDirectory->Get(command[0]);
-	if(mytemp3d->GetEntries()==0) {
+#endif
+	if(mytemp3d==NULL || mytemp3d->GetEntries()==0) {
 	  BadDraw("Empty Histogram");
 	} else {
 	  mytemp3d->Draw();
@@ -1420,6 +1628,20 @@ void OnlineGUI::PrintPages() {
 
   // Open the RootFile
   //  unless we're watching a file.
+#ifdef QW_ENABLE_MAPFILE
+  fIsMapFile = LooksLikeMapFile(fConfig->GetRootFile());
+  if(fIsMapFile) {
+    fMapFile = TMapFile::Create(fConfig->GetRootFile(), "READ");
+    if(fMapFile == nullptr) {
+      cout << "ERROR:  mapfile: " << fConfig->GetRootFile()
+           << " could not be attached" << endl;
+      gApplication->Terminate();
+    } else {
+      fFileAlive = kTRUE;
+      GetFileObjects();
+    }
+  } else {
+#endif
   fRootFile = new TFile(fConfig->GetRootFile(),"READ");
   if(!fRootFile->IsOpen()) {
     cout << "ERROR:  rootfile: " << fConfig->GetRootFile()
@@ -1443,7 +1665,17 @@ void OnlineGUI::PrintPages() {
     }
 
   }
+#ifdef QW_ENABLE_MAPFILE
+  }
+#endif
   TString goldenfilename=fConfig->GetGoldenFile();
+#ifdef QW_ENABLE_MAPFILE
+  if(fIsMapFile && !goldenfilename.IsNull()) {
+    cout << "NOTE:  goldenrootfile comparison is not supported in TMapFile "
+            "mode; ignoring '" << goldenfilename << "'." << endl;
+    goldenfilename = "";
+  }
+#endif
   if(!goldenfilename.IsNull()) {
     fGoldenFile = new TFile(goldenfilename,"READ");
     if(!fGoldenFile->IsOpen()) {
@@ -1551,6 +1783,9 @@ void OnlineGUI::MyCloseWindow()
   delete fMain;
   if(fGoldenFile!=NULL) delete fGoldenFile;
   if(fRootFile!=NULL) delete fRootFile;
+#ifdef QW_ENABLE_MAPFILE
+  if(fMapFile!=nullptr) { fMapFile->Close(); fMapFile = nullptr; }
+#endif
   delete fConfig;
 
   gApplication->Terminate();
@@ -1777,5 +2012,8 @@ OnlineGUI::~OnlineGUI()
   delete fMain;
   if(fGoldenFile!=NULL) delete fGoldenFile;
   if(fRootFile!=NULL) delete fRootFile;
+#ifdef QW_ENABLE_MAPFILE
+  if(fMapFile!=nullptr) { fMapFile->Close(); fMapFile = nullptr; }
+#endif
   delete fConfig;
 }
