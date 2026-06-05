@@ -462,12 +462,9 @@ private:
 
 // Convenience type aliases for common tables
 using beam_optics_row = row<beam_optics>;
-using md_data_row = row<md_data>;
-using lumi_data_row = row<lumi_data>;
-using beam_row = row<beam>;
-using beam_errors_row = row<beam_errors>;
-using lumi_errors_row = row<lumi_errors>;
-using md_errors_row = row<md_errors>;
+using detector_data_row = row<detector_data>;
+using detector_data_summary_row = row<detector_data_summary>;
+using grand_correlator_row = row<grand_correlator>;
 using general_errors_row = row<general_errors>;
 
 } // namespace QwParitySchema

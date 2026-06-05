@@ -18,9 +18,7 @@
 using namespace QwParitySchema;
 
 // Definition of static class members in QwParityDB
-std::map<string, unsigned int> QwParityDB::fMonitorIDs;
-std::map<string, unsigned int> QwParityDB::fMainDetectorIDs;
-std::map<string, unsigned int> QwParityDB::fLumiDetectorIDs;
+std::map<string, unsigned int> QwParityDB::fDetectorIDs;
 std::vector<string>            QwParityDB::fMeasurementIDs;
 std::map<string, unsigned int> QwParityDB::fSlowControlDetectorIDs;// for epics
 std::map<string, unsigned char> QwParityDB::fErrorCodeIDs;
@@ -562,103 +560,66 @@ UInt_t QwParityDB::GetAnalysisID(QwEventBuffer& qwevt)
 /*
  * This function retrieves the monitor table key 'monitor_id' for a given beam monitor.
  */
-UInt_t QwParityDB::GetMonitorID(const string& name, Bool_t zero_id_is_error)
-{
-  if (fMonitorIDs.size() == 0) {
-    StoreMonitorIDs();
-  }
-
-  UInt_t monitor_id = fMonitorIDs[name];
-
-  if (zero_id_is_error && monitor_id==0) {
-    //    monitor_id = 6; // only for QwMockDataAnalysis
-    QwError << "QwParityDB::GetMonitorID() => Unable to determine valid ID for beam monitor " << name << QwLog::endl;
-  }
-
-  return monitor_id;
-
-}
-
 /*
- * Stores monitor table keys in an associative array indexed by monitor name.
+ * This function retrieves the detector table key 'detector_id' for a given detector name.
  */
-void QwParityDB::StoreMonitorIDs()
+UInt_t QwParityDB::GetDetectorID(const string& name, Bool_t zero_id_is_error)
 {
-  try {
-    auto c = GetScopedConnection();
-
-    QwParitySchema::monitor monitor{};
-    auto query = sqlpp::select(sqlpp::all_of(monitor)).from(monitor).where(sqlpp::value(true));
-    QuerySelectForEachResult(query, [&](const auto& row) {
-      QwDebug << "StoreMonitorID:  monitor_id = " << row.monitor_id << " quantity = " << row.quantity << QwLog::endl;
-      QwParityDB::fMonitorIDs.insert(std::make_pair(row.quantity, row.monitor_id));
-    });
-  }
-  catch (const std::exception& er) {
-    QwError << er.what() << QwLog::endl;
-    exit(1);
-  }
-  return;
-}
-
-/*
- * This function retrieves the main_detector table key 'main_detector_id' for a given beam main_detector.
- */
-UInt_t QwParityDB::GetMainDetectorID(const string& name, Bool_t zero_id_is_error)
-{
-  if (fMainDetectorIDs.size() == 0) {
-    StoreMainDetectorIDs();
+  if (fDetectorIDs.size() == 0) {
+    StoreDetectorIDs();
   }
 
-  UInt_t main_detector_id = fMainDetectorIDs[name];
+  UInt_t detector_id = fDetectorIDs[name];
 
-  if (zero_id_is_error && main_detector_id==0) {
+  if (zero_id_is_error && detector_id==0) {
 
     if (fDBInsertMissingKeys) {
-      QwWarning << "Inserting missing variable " << name << " into main_detector table." << QwLog::endl;
+      QwWarning << "Inserting missing variable " << name << " into detector table." << QwLog::endl;
       try {
         auto c = GetScopedConnection();
 
-        QwParitySchema::main_detector main_detector;
-        QwParitySchema::row<QwParitySchema::main_detector> main_detector_row;
-        main_detector_row[main_detector.quantity] = name;
-        main_detector_row[main_detector.title] = "unknown";
+        QwParitySchema::detector detector;
+        QwParitySchema::row<QwParitySchema::detector> detector_row;
+        detector_row[detector.name] = name;
+        detector_row[detector.description] = "unknown";
+        detector_row[detector.detector_type] = "md";  // default to main detector type
 
-        auto insert_id = QueryInsertAndGetId(main_detector_row.insert_into());
+        auto insert_id = QueryInsertAndGetId(detector_row.insert_into());
 
         if (insert_id != 0) {
-          fMainDetectorIDs[name] = insert_id;
-          main_detector_id = insert_id;
-          QwWarning << "Successfully inserted variable " << name << " into main_detector table with ID " << insert_id << QwLog::endl;
+          fDetectorIDs[name] = insert_id;
+          detector_id = insert_id;
+          QwWarning << "Successfully inserted variable " << name << " into detector table with ID " << insert_id << QwLog::endl;
         } else {
-          QwError << "Failed to insert variable " << name << " into main_detector table." << QwLog::endl;
+          QwError << "Failed to insert variable " << name << " into detector table." << QwLog::endl;
         }
       }
       catch (const std::exception& er) {
         QwError << er.what() << QwLog::endl;
       }
     } else {
+      QwError << "QwParityDB::GetDetectorID() => Unable to determine valid ID for detector " << name << QwLog::endl;
       QwError << "To enable automatic insertion of missing variables, set the option '--QwDatabase.insert-missing-keys'" << QwLog::endl;
     }
   }
 
-  return main_detector_id;
+  return detector_id;
 }
 
 
 /*
- * Stores main_detector table keys in an associative array indexed by main_detector name.
+ * Stores detector table keys in an associative array indexed by detector name.
  */
-void QwParityDB::StoreMainDetectorIDs()
+void QwParityDB::StoreDetectorIDs()
 {
   try {
     auto c = GetScopedConnection();
 
-    QwParitySchema::main_detector main_detector{};
-    auto query = sqlpp::select(sqlpp::all_of(main_detector)).from(main_detector).where(sqlpp::value(true));
+    QwParitySchema::detector detector{};
+    auto query = sqlpp::select(sqlpp::all_of(detector)).from(detector).where(sqlpp::value(true));
     QuerySelectForEachResult(query, [&](const auto& row) {
-      QwDebug << "StoreMainDetectorID:  main_detector_id = " << row.main_detector_id << " quantity = " << row.quantity << QwLog::endl;
-      QwParityDB::fMainDetectorIDs.insert(std::make_pair(row.quantity, row.main_detector_id));
+      QwDebug << "StoreDetectorID:  detector_id = " << row.detector_id << " name = " << row.name << QwLog::endl;
+      QwParityDB::fDetectorIDs.insert(std::make_pair(row.name, row.detector_id));
     });
   }
   catch (const std::exception& er) {
@@ -778,49 +739,6 @@ void QwParityDB::StoreErrorCodeIDs()
   }
   return;
 }
-
-/*
- * This function retrieves the lumi_detector table key 'lumi_detector_id' for a given beam lumi_detector.
- */
-UInt_t QwParityDB::GetLumiDetectorID(const string& name, Bool_t zero_id_is_error)
-{
-  if (fLumiDetectorIDs.size() == 0) {
-    StoreLumiDetectorIDs();
-  }
-
-  UInt_t lumi_detector_id = fLumiDetectorIDs[name];
-
-  if (zero_id_is_error && lumi_detector_id==0) {
-     QwError << "QwParityDB::GetLumiDetectorID() => Unable to determine valid ID for beam lumi_detector " << name << QwLog::endl;
-  }
-
-  return lumi_detector_id;
-}
-
-/*
- * Stores lumi_detector table keys in an associative array indexed by lumi_detector name.
- */
-void QwParityDB::StoreLumiDetectorIDs()
-{
-  try {
-    auto c = GetScopedConnection();
-
-    QwParitySchema::lumi_detector lumi_detector{};
-    auto query = sqlpp::select(sqlpp::all_of(lumi_detector)).from(lumi_detector).where(sqlpp::value(true));
-    QuerySelectForEachResult(query, [&](const auto& row) {
-      QwDebug << "StoreLumiDetectorID:  lumi_detector_id = " << row.lumi_detector_id << " quantity = " << row.quantity << QwLog::endl;
-      QwParityDB::fLumiDetectorIDs.insert(std::make_pair(row.quantity, row.lumi_detector_id));
-    });
-  }
-  catch (const std::exception& er) {
-    QwError << er.what() << QwLog::endl;
-    exit(1);
-  }
-  return;
-}
-
-
-
 
 const string QwParityDB::GetMeasurementID(const Int_t index)
 {
