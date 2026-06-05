@@ -70,10 +70,17 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.ccache
-          key: ccache-${{ matrix.LCG }}-${{ github.ref_name }}
+          # The matrix variable is `release` (not `LCG`); using the wrong name
+          # collapses every toolchain to the same cache key and lets gcc13
+          # objects pollute clang19/gcc15 builds, producing SIGILL at static
+          # initialization on hosts that lack the instructions the cached
+          # objects were compiled for.  Key on release+compiler+opt to keep
+          # one cache per toolchain.
+          key: ccache-${{ matrix.release }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}-${{ github.ref_name }}
           restore-keys: |
-            ccache-${{ matrix.LCG }}-
-            ccache-
+            ccache-${{ matrix.release }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.opt }}-
+            ccache-${{ matrix.release }}-${{ matrix.os }}-${{ matrix.compiler }}-
+            ccache-${{ matrix.release }}-
       - name: Configure ccache
         run: |
           ccache --set-config=cache_dir=$HOME/.ccache

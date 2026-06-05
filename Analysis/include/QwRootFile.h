@@ -1148,7 +1148,9 @@ class QwRootFile {
         fRootFile->Close();
       }
 
-      if (fMapFile) fMapFile->Close();
+      // TMapFile::Close() is NOT idempotent: re-closing in ~QwRootFile()
+      // crashes on the already-detached mmap descriptor.
+      if (fMapFile) { fMapFile->Close(); fMapFile = 0; }
     }
 
     // Wrapped functionality
