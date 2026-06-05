@@ -15,6 +15,7 @@
 // Qweak headers
 #include "QwLog.h"
 #include "QwBPMStripline.h"
+#include  "QwLinearDiodeArray.h"
 #include "QwCombinedBPM.h"
 #include "QwVQWK_Channel.h"
 #include "QwScaler_Channel.h"
@@ -304,6 +305,35 @@ VQwBPM* VQwBPM::CreateStripline(const VQwBPM& source)
     return new QwBPMStripline<QwMollerADC_Channel>(dynamic_cast<const QwBPMStripline<QwMollerADC_Channel>&>(source));
   } else { // Unsupported one!
     QwWarning << "BPM of type="<<type<<" is UNSUPPORTED!!\n";
+    exit(-1);
+  }
+}
+
+VQwBPM* VQwBPM::CreateLinearDiodeArray(TString subsystemname, TString type) {
+  Bool_t localdebug = kFALSE;
+  type.ToUpper();
+  if( localdebug ) QwMessage<<"Create Linear Diode Array of type: "<<type<<". Subsystem Name: "<<subsystemname<<"\n";
+  if( type == "VQWK") {
+    return new QwLinearDiodeArray<QwVQWK_Channel>(subsystemname,type);
+  } else if( type == "MOLLERADC" ) {
+    return new QwLinearDiodeArray<QwMollerADC_Channel>(subsystemname,type);
+  } else {
+    QwWarning<<"Linear Diode Array of type="<<type<<" is UNSUPPORTED!!\n";
+    exit(-1);
+  }
+}
+
+VQwBPM* VQwBPM::CreateLinearDiodeArray(const VQwBPM& source) {
+  Bool_t localdebug = kFALSE;
+  TString type = source.GetModuleType();
+  type.ToUpper();
+  if( localdebug ) QwMessage<<"Create Linear Diode Array of type: "<<type<<QwLog::endl;
+  if( type == "VQWK") {
+    return new QwLinearDiodeArray<QwVQWK_Channel>(dynamic_cast<const QwLinearDiodeArray<QwVQWK_Channel>&>(source));
+  } else if( type == "MOLLERADC" ) {
+    return new QwLinearDiodeArray<QwMollerADC_Channel>(dynamic_cast<const QwLinearDiodeArray<QwMollerADC_Channel>&>(source));
+  } else {
+    QwWarning<<"Linear Diode Array of type="<<type<<" is UNSUPPORTED!!\n";
     exit(-1);
   }
 }
