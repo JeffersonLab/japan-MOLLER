@@ -22,19 +22,23 @@
 #include "QwDBInterface.h"
 #endif // __USE_DATABASE__
 
-const size_t QwLinearDiodeArray::kMaxElements = 8;
+template <typename ChannelType>
+const size_t QwLinearDiodeArray<ChannelType>::kMaxElements = 8;
 
 /*Individual pads of the linear array*/
-const TString QwLinearDiodeArray::subelement[8]={"p1","p2","p3","p4","p5","p6","p7","p8"};
+template <typename ChannelType>
+const TString QwLinearDiodeArray<ChannelType>::subelement[8]={"p1","p2","p3","p4","p5","p6","p7","p8"};
 
 /* Pad size in mm*/
-const Double_t QwLinearDiodeArray::kQwLinearDiodeArrayPadSize = 1.57;
+template <typename ChannelType>
+const Double_t QwLinearDiodeArray<ChannelType>::kQwLinearDiodeArrayPadSize = 1.57;
 
 /**
  * \brief Initialize this linear diode array with a detector name.
  * \param name Detector name used for subchannel naming.
  */
-void  QwLinearDiodeArray::InitializeChannel(TString name)
+template <typename ChannelType>
+void  QwLinearDiodeArray<ChannelType>::InitializeChannel(TString name)
 {
 
   Int_t i=0;
@@ -65,7 +69,8 @@ void  QwLinearDiodeArray::InitializeChannel(TString name)
  * \param subsystem Subsystem identifier.
  * \param name Detector name used for subchannel naming.
  */
-void  QwLinearDiodeArray::InitializeChannel(TString subsystem, TString name)
+template <typename ChannelType>
+void  QwLinearDiodeArray<ChannelType>::InitializeChannel(TString subsystem, TString name)
 {
 
   Int_t i=0;
@@ -92,7 +97,8 @@ void  QwLinearDiodeArray::InitializeChannel(TString subsystem, TString name)
 }
 
 /** \brief Clear event-scoped data for all pads and derived channels. */
-void QwLinearDiodeArray::ClearEventData()
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::ClearEventData()
 {
   size_t i=0;
 
@@ -111,7 +117,8 @@ void QwLinearDiodeArray::ClearEventData()
  * \brief Apply hardware checks for all photodiode pads.
  * \return kTRUE if no hardware error was detected; otherwise kFALSE.
  */
-Bool_t QwLinearDiodeArray::ApplyHWChecks()
+template <typename ChannelType>
+Bool_t QwLinearDiodeArray<ChannelType>::ApplyHWChecks()
 {
   Bool_t eventokay=kTRUE;
 
@@ -129,7 +136,8 @@ Bool_t QwLinearDiodeArray::ApplyHWChecks()
 }
 
 /** \brief Increment error counters for all internal channels. */
-void QwLinearDiodeArray::IncrementErrorCounters()
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::IncrementErrorCounters()
 {
   size_t i=0;
   for(i=0;i<8;i++) fPhotodiode[i].IncrementErrorCounters();
@@ -140,7 +148,8 @@ void QwLinearDiodeArray::IncrementErrorCounters()
 }
 
 /** \brief Print error counters for all internal channels. */
-void QwLinearDiodeArray::PrintErrorCounters() const
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::PrintErrorCounters() const
 {
   size_t i=0;
   for(i=0;i<8;i++) fPhotodiode[i].PrintErrorCounters();
@@ -151,7 +160,8 @@ void QwLinearDiodeArray::PrintErrorCounters() const
 }
 
 /** \brief Aggregate and return the event-cut error flag for this array. */
-UInt_t QwLinearDiodeArray::GetEventcutErrorFlag()
+template <typename ChannelType>
+UInt_t QwLinearDiodeArray<ChannelType>::GetEventcutErrorFlag()
 {
   size_t i=0;
   UInt_t error=0;
@@ -165,7 +175,8 @@ UInt_t QwLinearDiodeArray::GetEventcutErrorFlag()
 }
 
 /** \brief Update and return the aggregated event-cut error flag. */
-UInt_t QwLinearDiodeArray::UpdateErrorFlag()
+template <typename ChannelType>
+UInt_t QwLinearDiodeArray<ChannelType>::UpdateErrorFlag()
 {
   size_t i=0;
   UInt_t error1=0;
@@ -187,7 +198,8 @@ UInt_t QwLinearDiodeArray::UpdateErrorFlag()
  * \brief Apply single-event cuts across photodiodes and derived channels.
  * \return kTRUE if the event passes all configured cuts; otherwise kFALSE.
  */
-Bool_t QwLinearDiodeArray::ApplySingleEventCuts()
+template <typename ChannelType>
+Bool_t QwLinearDiodeArray<ChannelType>::ApplySingleEventCuts()
 {
   Bool_t status=kTRUE;
   size_t i=0;
@@ -235,7 +247,8 @@ Bool_t QwLinearDiodeArray::ApplySingleEventCuts()
  * \param ch_name Subelement symbolic name (e.g., relx, rely, absx, absy).
  * \return Non-owning pointer to the requested hardware channel.
  */
-VQwHardwareChannel* QwLinearDiodeArray::GetSubelementByName(TString ch_name)
+template <typename ChannelType>
+VQwHardwareChannel* QwLinearDiodeArray<ChannelType>::GetSubelementByName(TString ch_name)
 {
   VQwHardwareChannel* tmpptr = NULL;
   ch_name.ToLower();
@@ -259,7 +272,7 @@ VQwHardwareChannel* QwLinearDiodeArray::GetSubelementByName(TString ch_name)
 }
 
 /*
-void QwLinearDiodeArray::SetSingleEventCuts(TString ch_name, Double_t minX, Double_t maxX)
+void QwLinearDiodeArray<ChannelType>::SetSingleEventCuts(TString ch_name, Double_t minX, Double_t maxX)
 {
   QwWarning << "QwLinearDiodeArray::SetSingleEventCuts:  "
 	    << "Does not do anything yet." << QwLog::endl;
@@ -274,7 +287,8 @@ void QwLinearDiodeArray::SetSingleEventCuts(TString ch_name, Double_t minX, Doub
  * \param stability Stability threshold.
  * \param burplevel Burp detection threshold.
  */
-void QwLinearDiodeArray::SetSingleEventCuts(TString ch_name, UInt_t errorflag,Double_t minX, Double_t maxX, Double_t stability, Double_t burplevel){
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::SetSingleEventCuts(TString ch_name, UInt_t errorflag,Double_t minX, Double_t maxX, Double_t stability, Double_t burplevel){
   errorflag|=kBPMErrorFlag;//update the device flag (Do not have a error flag yet)
   //  QwWarning << "QwLinearDiodeArray::SetSingleEventCuts:  " << "Does not do anything yet." << QwLog::endl;
   if (ch_name=="relx"){
@@ -300,7 +314,8 @@ void QwLinearDiodeArray::SetSingleEventCuts(TString ch_name, UInt_t errorflag,Do
  * \param ev_error Reference array to compare against.
  * \return kTRUE if a burp failure was detected; otherwise kFALSE.
  */
-Bool_t QwLinearDiodeArray::CheckForBurpFail(const VQwDataElement *ev_error){
+template <typename ChannelType>
+Bool_t QwLinearDiodeArray<ChannelType>::CheckForBurpFail(const VQwDataElement *ev_error){
   Short_t i=0;
   Bool_t burpstatus = kFALSE;
   try {
@@ -328,7 +343,8 @@ Bool_t QwLinearDiodeArray::CheckForBurpFail(const VQwDataElement *ev_error){
   return burpstatus;
 };
 
-void QwLinearDiodeArray::UpdateErrorFlag(const VQwBPM *ev_error){
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::UpdateErrorFlag(const VQwBPM *ev_error){
   Short_t i=0;
   try {
     if(typeid(*ev_error)==typeid(*this)) {
@@ -354,12 +370,13 @@ void QwLinearDiodeArray::UpdateErrorFlag(const VQwBPM *ev_error){
   }
 };
 
-void  QwLinearDiodeArray::ProcessEvent()
+template <typename ChannelType>
+void  QwLinearDiodeArray<ChannelType>::ProcessEvent()
 {
   Bool_t localdebug = kFALSE;
-  static QwVQWK_Channel mean, meansqr;
-  static QwVQWK_Channel tmp("tmp");
-  static QwVQWK_Channel tmp2("tmp2");
+  static ChannelType mean, meansqr;
+  static ChannelType tmp("tmp");
+  static ChannelType tmp2("tmp2");
 
   mean.InitializeChannel("mean","raw");
   meansqr.InitializeChannel("meansqr","raw");
@@ -416,8 +433,8 @@ void  QwLinearDiodeArray::ProcessEvent()
   return;
 }
 
-
-Int_t QwLinearDiodeArray::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer,UInt_t index)
+template <typename ChannelType>
+Int_t QwLinearDiodeArray<ChannelType>::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer,UInt_t index)
 {
   if(index<8)
     {
@@ -432,8 +449,8 @@ Int_t QwLinearDiodeArray::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_i
 }
 
 
-
-void QwLinearDiodeArray::PrintValue() const
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::PrintValue() const
 {
   for (size_t i = 0; i < 2; i++) {
     fRelPos[i].PrintValue();
@@ -441,7 +458,8 @@ void QwLinearDiodeArray::PrintValue() const
   return;
 }
 
-void QwLinearDiodeArray::PrintInfo() const
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::PrintInfo() const
 {
   size_t i = 0;
   for (i = 0; i < 8; i++) fPhotodiode[i].PrintInfo();
@@ -451,8 +469,8 @@ void QwLinearDiodeArray::PrintInfo() const
   fEffectiveCharge.PrintInfo();
 }
 
-
-TString QwLinearDiodeArray::GetSubElementName(Int_t subindex)
+template <typename ChannelType>
+TString QwLinearDiodeArray<ChannelType>::GetSubElementName(Int_t subindex)
 {
   TString thisname;
   size_t localindex=kInvalidSubelementIndex;
@@ -468,7 +486,8 @@ TString QwLinearDiodeArray::GetSubElementName(Int_t subindex)
   return thisname;
 }
 
-UInt_t QwLinearDiodeArray::GetSubElementIndex(TString subname)
+template <typename ChannelType>
+UInt_t QwLinearDiodeArray<ChannelType>::GetSubElementIndex(TString subname)
 {
   size_t localindex=kInvalidSubelementIndex;
   TString padindex;
@@ -489,7 +508,8 @@ UInt_t QwLinearDiodeArray::GetSubElementIndex(TString subname)
   return localindex;
 }
 
-void  QwLinearDiodeArray::GetAbsolutePosition()
+template <typename ChannelType>
+void  QwLinearDiodeArray<ChannelType>::GetAbsolutePosition()
 {
   for(size_t i=kXAxis;i<kNumAxes;i++){
     fAbsPos[i].AddChannelOffset(fPositionCenter[i]);
@@ -498,14 +518,16 @@ void  QwLinearDiodeArray::GetAbsolutePosition()
 }
 
 
-VQwBPM& QwLinearDiodeArray::operator= (const VQwBPM &value)
+template <typename ChannelType>
+VQwBPM& QwLinearDiodeArray<ChannelType>::operator= (const VQwBPM &value)
 {
   *(dynamic_cast<QwLinearDiodeArray*>(this)) =
       *(dynamic_cast<const QwLinearDiodeArray*>(&value));
   return *this;
 }
 
-QwLinearDiodeArray& QwLinearDiodeArray::operator= (const QwLinearDiodeArray &value)
+template <typename ChannelType>
+QwLinearDiodeArray<ChannelType>& QwLinearDiodeArray<ChannelType>::operator= (const QwLinearDiodeArray &value)
 {
   VQwBPM::operator= (value);
 
@@ -520,14 +542,16 @@ QwLinearDiodeArray& QwLinearDiodeArray::operator= (const QwLinearDiodeArray &val
   return *this;
 }
 
-VQwBPM& QwLinearDiodeArray::operator+= (const VQwBPM &value)
+template <typename ChannelType>
+VQwBPM& QwLinearDiodeArray<ChannelType>::operator+= (const VQwBPM &value)
 {
   *(dynamic_cast<QwLinearDiodeArray*>(this)) +=
       *(dynamic_cast<const QwLinearDiodeArray*>(&value));
   return *this;
 }
 
-QwLinearDiodeArray& QwLinearDiodeArray::operator+= (const QwLinearDiodeArray &value)
+template <typename ChannelType>
+QwLinearDiodeArray<ChannelType>& QwLinearDiodeArray<ChannelType>::operator+= (const QwLinearDiodeArray &value)
 {
 
   if (GetElementName()!=""){
@@ -541,14 +565,16 @@ QwLinearDiodeArray& QwLinearDiodeArray::operator+= (const QwLinearDiodeArray &va
   return *this;
 }
 
-VQwBPM& QwLinearDiodeArray::operator-= (const VQwBPM &value)
+template <typename ChannelType>
+VQwBPM& QwLinearDiodeArray<ChannelType>::operator-= (const VQwBPM &value)
 {
   *(dynamic_cast<QwLinearDiodeArray*>(this)) -=
       *(dynamic_cast<const QwLinearDiodeArray*>(&value));
   return *this;
 }
 
-QwLinearDiodeArray& QwLinearDiodeArray::operator-= (const QwLinearDiodeArray &value)
+template <typename ChannelType>
+QwLinearDiodeArray<ChannelType>& QwLinearDiodeArray<ChannelType>::operator-= (const QwLinearDiodeArray &value)
 {
 
   if (GetElementName()!=""){
@@ -563,7 +589,8 @@ QwLinearDiodeArray& QwLinearDiodeArray::operator-= (const QwLinearDiodeArray &va
 }
 
 
-void QwLinearDiodeArray::Ratio(QwLinearDiodeArray &numer, QwLinearDiodeArray &denom)
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::Ratio(QwLinearDiodeArray &numer, QwLinearDiodeArray &denom)
 {
   // this function is called when forming asymmetries. In this case what we actually want for the
   // LinearArray is the difference only not the asymmetries
@@ -573,13 +600,15 @@ void QwLinearDiodeArray::Ratio(QwLinearDiodeArray &numer, QwLinearDiodeArray &de
   return;
 }
 
-void QwLinearDiodeArray::Ratio(VQwBPM &numer, VQwBPM &denom)
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::Ratio(VQwBPM &numer, VQwBPM &denom)
 {
   Ratio(*(dynamic_cast<QwLinearDiodeArray*>(&numer)), *(dynamic_cast<QwLinearDiodeArray*>(&denom)));
 }
 
 
-void QwLinearDiodeArray::Scale(Double_t factor)
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::Scale(Double_t factor)
 {
   size_t i = 0;
   fEffectiveCharge.Scale(factor);
@@ -592,7 +621,8 @@ void QwLinearDiodeArray::Scale(Double_t factor)
 }
 
 
-void QwLinearDiodeArray::CalculateRunningAverage()
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::CalculateRunningAverage()
 {
   size_t i = 0;
   for(i=0;i<8;i++) fPhotodiode[i].CalculateRunningAverage();
@@ -601,11 +631,13 @@ void QwLinearDiodeArray::CalculateRunningAverage()
   return;
 }
 
-void QwLinearDiodeArray::AccumulateRunningSum(const VQwBPM& value, Int_t count, Int_t ErrorMask){
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::AccumulateRunningSum(const VQwBPM& value, Int_t count, Int_t ErrorMask){
   AccumulateRunningSum(*dynamic_cast<const QwLinearDiodeArray* >(&value), count, ErrorMask);
 }
 
-void QwLinearDiodeArray::AccumulateRunningSum(const QwLinearDiodeArray& value, Int_t count, Int_t ErrorMask)
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::AccumulateRunningSum(const QwLinearDiodeArray& value, Int_t count, Int_t ErrorMask)
 {
   size_t i = 0;
   for(i=0;i<8;i++) fPhotodiode[i].AccumulateRunningSum(value.fPhotodiode[i], count, ErrorMask);
@@ -614,11 +646,13 @@ void QwLinearDiodeArray::AccumulateRunningSum(const QwLinearDiodeArray& value, I
   return;
 }
 
-void QwLinearDiodeArray::DeaccumulateRunningSum(VQwBPM& value, Int_t ErrorMask){
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::DeaccumulateRunningSum(VQwBPM& value, Int_t ErrorMask){
   DeaccumulateRunningSum(*dynamic_cast<QwLinearDiodeArray* >(&value), ErrorMask);
 }
 
-void QwLinearDiodeArray::DeaccumulateRunningSum(QwLinearDiodeArray& value, Int_t ErrorMask)
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::DeaccumulateRunningSum(QwLinearDiodeArray& value, Int_t ErrorMask)
 {
   size_t i = 0;
   for(i=0;i<8;i++) fPhotodiode[i].DeaccumulateRunningSum(value.fPhotodiode[i], ErrorMask);
@@ -629,7 +663,8 @@ void QwLinearDiodeArray::DeaccumulateRunningSum(QwLinearDiodeArray& value, Int_t
 
 
 
-void  QwLinearDiodeArray::ConstructHistograms(TDirectory *folder, TString &prefix)
+template <typename ChannelType>
+void  QwLinearDiodeArray<ChannelType>::ConstructHistograms(TDirectory *folder, TString &prefix)
 {
 
   if (GetElementName()=="") {
@@ -652,7 +687,8 @@ void  QwLinearDiodeArray::ConstructHistograms(TDirectory *folder, TString &prefi
   return;
 }
 
-void  QwLinearDiodeArray::FillHistograms()
+template <typename ChannelType>
+void  QwLinearDiodeArray<ChannelType>::FillHistograms()
 {
   if (GetElementName()=="") {
     //  This channel is not used, so skip filling the histograms.
@@ -670,7 +706,8 @@ void  QwLinearDiodeArray::FillHistograms()
   return;
 }
 
-void  QwLinearDiodeArray::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
+template <typename ChannelType>
+void  QwLinearDiodeArray<ChannelType>::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing trees.
@@ -695,7 +732,8 @@ void  QwLinearDiodeArray::ConstructBranchAndVector(TTree *tree, TString &prefix,
   return;
 }
 
-void  QwLinearDiodeArray::ConstructBranch(TTree *tree, TString &prefix)
+template <typename ChannelType>
+void  QwLinearDiodeArray<ChannelType>::ConstructBranch(TTree *tree, TString &prefix)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing trees.
@@ -720,7 +758,8 @@ void  QwLinearDiodeArray::ConstructBranch(TTree *tree, TString &prefix)
   return;
 }
 
-void  QwLinearDiodeArray::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist)
+template <typename ChannelType>
+void  QwLinearDiodeArray<ChannelType>::ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist)
 {
   TString devicename;
 
@@ -758,7 +797,8 @@ void  QwLinearDiodeArray::ConstructBranch(TTree *tree, TString &prefix, QwParame
   return;
 }
 
-void  QwLinearDiodeArray::FillTreeVector(QwRootTreeBranchVector &values) const
+template <typename ChannelType>
+void  QwLinearDiodeArray<ChannelType>::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()=="") {
     //  This channel is not used, so skip filling the tree.
@@ -777,7 +817,8 @@ void  QwLinearDiodeArray::FillTreeVector(QwRootTreeBranchVector &values) const
 }
 
 #ifdef HAS_RNTUPLE_SUPPORT
-void  QwLinearDiodeArray::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+template <typename ChannelType>
+void  QwLinearDiodeArray<ChannelType>::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing.
@@ -802,7 +843,8 @@ void  QwLinearDiodeArray::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTuple
   return;
 }
 
-void  QwLinearDiodeArray::FillNTupleVector(std::vector<Double_t>& values) const
+template <typename ChannelType>
+void  QwLinearDiodeArray<ChannelType>::FillNTupleVector(std::vector<Double_t>& values) const
 {
   if (GetElementName()=="") {
     //  This channel is not used, so skip filling.
@@ -822,7 +864,8 @@ void  QwLinearDiodeArray::FillNTupleVector(std::vector<Double_t>& values) const
 #endif
 
 
-void QwLinearDiodeArray::SetEventCutMode(Int_t bcuts)
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::SetEventCutMode(Int_t bcuts)
 {
   size_t i = 0;
   //  bEVENTCUTMODE=bcuts;
@@ -834,21 +877,22 @@ void QwLinearDiodeArray::SetEventCutMode(Int_t bcuts)
   fEffectiveCharge.SetEventCutMode(bcuts);
 }
 
-
-void QwLinearDiodeArray::MakeLinearArrayList()
+template<typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::MakeLinearArrayList()
 {
   for (size_t i = kXAxis; i < kNumAxes; i++) {
-	QwVQWK_Channel relpos(fRelPos[i]);
+	ChannelType relpos(fRelPos[i]);
 	relpos = fRelPos[i];
     fLinearArrayElementList.push_back(relpos);
   }
-  QwVQWK_Channel effectivecharge(fEffectiveCharge);
+  ChannelType effectivecharge(fEffectiveCharge);
   effectivecharge = fEffectiveCharge;
   fLinearArrayElementList.push_back(effectivecharge);
 }
 
 #ifdef __USE_DATABASE__
-std::vector<QwDBInterface> QwLinearDiodeArray::GetDBEntry()
+template <typename ChannelType>
+std::vector<QwDBInterface> QwLinearDiodeArray<ChannelType>::GetDBEntry()
 {
   std::vector <QwDBInterface> row_list;
   row_list.clear();
@@ -860,7 +904,8 @@ std::vector<QwDBInterface> QwLinearDiodeArray::GetDBEntry()
   return row_list;
 }
 
-std::vector<QwErrDBInterface> QwLinearDiodeArray::GetErrDBEntry()
+template <typename ChannelType>
+std::vector<QwErrDBInterface> QwLinearDiodeArray<ChannelType>::GetErrDBEntry()
 {
   std::vector <QwErrDBInterface> row_list;
   row_list.clear();
@@ -877,7 +922,8 @@ std::vector<QwErrDBInterface> QwLinearDiodeArray::GetErrDBEntry()
  * Mock data generation routines
  **********************************/
 
-void  QwLinearDiodeArray::SetRandomEventParameters(Double_t meanX, Double_t sigmaX, Double_t meanY, Double_t sigmaY)
+template <typename ChannelType>
+void  QwLinearDiodeArray<ChannelType>::SetRandomEventParameters(Double_t meanX, Double_t sigmaX, Double_t meanY, Double_t sigmaY)
 {
   // Average values of the signals in the stripline ADCs
   Double_t sumX = 1.1e8; // These are just guesses, but I made X and Y different
@@ -904,16 +950,16 @@ void  QwLinearDiodeArray::SetRandomEventParameters(Double_t meanX, Double_t sigm
   fPhotodiode[3].SetRandomEventParameters(meanYM, sigmaYM);
 }
 
-
-void QwLinearDiodeArray::RandomizeEventData(int helicity, double time)
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::RandomizeEventData(int helicity, double time)
 {
   for (size_t i=0; i<8; i++) fPhotodiode[i].RandomizeEventData(helicity, time);
 
   return;
 }
 
-
-void QwLinearDiodeArray::SetEventData(Double_t* relpos, UInt_t sequencenumber)
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::SetEventData(Double_t* relpos, UInt_t sequencenumber)
 {
   for (size_t i=0; i<2; i++)
     {
@@ -924,27 +970,33 @@ void QwLinearDiodeArray::SetEventData(Double_t* relpos, UInt_t sequencenumber)
 }
 
 
-void QwLinearDiodeArray::EncodeEventData(std::vector<UInt_t> &buffer)
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::EncodeEventData(std::vector<UInt_t> &buffer)
 {
   for (size_t i=0; i<8; i++) fPhotodiode[i].EncodeEventData(buffer);
 }
 
 
-void QwLinearDiodeArray::SetDefaultSampleSize(Int_t sample_size)
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::SetDefaultSampleSize(Int_t sample_size)
 {
   for(size_t i=0;i<8;i++) fPhotodiode[i].SetDefaultSampleSize((size_t)sample_size);
   return;
 }
 
-
-void QwLinearDiodeArray::SetSubElementPedestal(Int_t j, Double_t value)
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::SetSubElementPedestal(Int_t j, Double_t value)
 {
   fPhotodiode[j].SetPedestal(value);
   return;
 }
 
-void QwLinearDiodeArray::SetSubElementCalibrationFactor(Int_t j, Double_t value)
+template <typename ChannelType>
+void QwLinearDiodeArray<ChannelType>::SetSubElementCalibrationFactor(Int_t j, Double_t value)
 {
   fPhotodiode[j].SetCalibrationFactor(value);
   return;
 }
+
+template class QwLinearDiodeArray<QwMollerADC_Channel>;
+template class QwLinearDiodeArray<QwVQWK_Channel>;
