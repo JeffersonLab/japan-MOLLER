@@ -760,7 +760,7 @@ void  QwVQWK_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, QwR
   bSequence_number = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "sequence_number");
 
   if (bHw_sum) {
-    values.push_back("hw_sum", 'I');
+    values.push_back("hw_sum", 'D');
     if (fDataToSave == kMoments) {
       values.push_back("hw_sum_m2", 'D');
       values.push_back("hw_sum_err", 'D');
@@ -775,7 +775,7 @@ void  QwVQWK_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, QwR
   }
 
   if (bNum_samples) {
-    values.push_back("num_samples", 'I');
+    values.push_back("num_samples", 'i');
   }
 
   if (bDevice_Error_Code) {
