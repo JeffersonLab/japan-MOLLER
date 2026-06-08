@@ -95,9 +95,18 @@ void OnlineGUI::CreateGUI(const TGWindow *p, UInt_t w, UInt_t h)
     } else {
       fFileAlive = kTRUE;
       runNumber  = fConfig->GetRunNumber();
-      // No trees / RNTuples / DataFrame in mapfile mode: TMapFile only
-      // hosts directly-stored objects such as histograms.
+      // TMapFile hosts directly-stored objects: histograms and (when the
+      // producer publishes them) TTrees whose live in-memory baskets ride
+      // along through TTree::Streamer.  RNTuples and DataFrame need a real
+      // TFile so they remain unavailable here.
       GetFileObjects();
+      GetRootTree();
+      GetTreeVars();
+      for(UInt_t i=0; i<fRootTree.size(); i++) {
+        if(fRootTree[i]==0) {
+          fRootTree.erase(fRootTree.begin() + i);
+        }
+      }
     }
   } else {
     fRootFile = new TFile(fConfig->GetRootFile(),"READ");
@@ -696,6 +705,14 @@ void OnlineGUI::GetTreeVars()
 void OnlineGUI::GetRootTree() {
   // Utility to search a ROOT File for ROOT Trees
   // Fills the fRootTree vector
+#ifdef QW_ENABLE_MAPFILE
+  // In mapfile mode TMapFile::Get returns caller-owned clones; release the
+  // previous batch before fetching a fresh snapshot, otherwise every refresh
+  // would leak whole trees.
+  if(fIsMapFile) {
+    for(auto *t : fRootTree) delete t;
+  }
+#endif
   fRootTree.clear();
 
   list <TString> found;
@@ -714,6 +731,12 @@ void OnlineGUI::GetRootTree() {
   UInt_t nTrees = found.size();
 
   for(UInt_t i=0; i<nTrees; i++) {
+#ifdef QW_ENABLE_MAPFILE
+    if(fIsMapFile) {
+      TObject *o = fMapFile ? fMapFile->Get(found.front().Data()) : nullptr;
+      fRootTree.push_back(dynamic_cast<TTree*>(o));
+    } else
+#endif
     fRootTree.push_back((TTree*)fRootFile->Get(found.front()));
     found.pop_front();
   }
@@ -1008,6 +1031,11 @@ void OnlineGUI::TimerUpdate() {
       return;
     }
     GetFileObjects();
+    // Re-fetch trees on every cycle: each TMapFile::Get returns a fresh
+    // Streamer-decoded snapshot, so the previous fRootTree entries are
+    // stale and must be replaced.
+    GetRootTree();
+    GetTreeVars();
     if(fUpdate) DoDraw();
     timer->Reset();
     return;
@@ -1165,6 +1193,8 @@ Int_t OnlineGUI::OpenRootFile() {
     }
     GetFileObjects();
     if(!fUpdate) return -1;
+    GetRootTree();
+    GetTreeVars();
     DoDraw();
     return 0;
   }
@@ -1639,6 +1669,16 @@ void OnlineGUI::PrintPages() {
     } else {
       fFileAlive = kTRUE;
       GetFileObjects();
+      // Same as CreateGUI: TTrees published into the mapfile via Add/Update
+      // can be enumerated and drawn; RNTuples and DataFrame still need a
+      // real TFile and remain unavailable.
+      GetRootTree();
+      GetTreeVars();
+      for(UInt_t i=0; i<fRootTree.size(); i++) {
+        if(fRootTree[i]==0) {
+          fRootTree.erase(fRootTree.begin() + i);
+        }
+      }
     }
   } else {
 #endif
@@ -2013,6 +2053,12 @@ OnlineGUI::~OnlineGUI()
   if(fGoldenFile!=NULL) delete fGoldenFile;
   if(fRootFile!=NULL) delete fRootFile;
 #ifdef QW_ENABLE_MAPFILE
+  // Mapfile-resident TTree clones are caller-owned; release them before
+  // detaching from the shared-memory region.
+  if(fIsMapFile) {
+    for(auto *t : fRootTree) delete t;
+    fRootTree.clear();
+  }
   if(fMapFile!=nullptr) { fMapFile->Close(); fMapFile = nullptr; }
 #endif
   delete fConfig;
