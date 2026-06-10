@@ -349,19 +349,37 @@ void QwRootFile::ProcessOptions(QwOptions &options)
   if (options.GetValue<bool>("disable-trees"))  DisableTree(".*");
   if (options.GetValue<bool>("disable-histos")) DisableHisto(".*");
 
-  // In TMapFile mode there is no on-disk TFile (the constructor opens only
-  // fMapFile), so every TTree created via NewTree() lives inside the 1 GiB
-  // mmap region.  TMapFile::Update() then re-streams all basket state via
-  // CustomReAlloc2 and aborts as soon as the cumulative basket size grows
-  // past the mmap.  TMapFile was designed for live histogram monitoring,
-  // not tree storage, so silently disable trees in that mode.
-  if (fEnableMapFile) {
+  // Read --circular-buffer up front so the mapfile-mode logic below can use
+  // it (the original ProcessOptions read it further down, but we now need
+  // it during the mapfile-tree decision).
+  fCircularBufferSize = options.GetValue<int>("circular-buffer");
+
+  // TMapFile-mode tree publishing.
+  //
+  // TTrees can be published into the mapfile: TDirectoryFile::Append
+  // auto-calls TMapFile::Add() when the directory's mother is a TMapFile,
+  // so a TTree created while gDirectory == fMapFile->GetDirectory()
+  // becomes a TMapRec on its own.  TMapFile::Update() then re-streams the
+  // tree (header + baskets) into the 1 GiB mmap on every interval.
+  //
+  // The hazard is that an unbounded TTree's serialized size grows
+  // monotonically and CustomReAlloc2 aborts as soon as it overruns the
+  // mmap.  TTree::SetCircular(N) caps the in-memory entry count, which
+  // caps the serialized size.  Require a non-zero circular buffer in
+  // mapfile mode; if the user did not pass one, force a safe default
+  // and warn loudly rather than silently dropping all trees.
+  if (fEnableMapFile && fCircularBufferSize == 0) {
+    const UInt_t kMapFileCircularDefault = 100;
     QwMessage << QwLog::endl;
-    QwMessage << "QwRootFile::ProcessOptions:  "
-              << "--enable-mapfile is set; disabling tree output "
-                 "(TMapFile cannot host TTree baskets; histograms only)."
+    QwWarning << "QwRootFile::ProcessOptions:  "
+              << "--enable-mapfile requires a bounded TTree to avoid "
+                 "overrunning the " << (kMaxMapFileSize >> 20)
+              << " MiB mmap region.  "
+                 "Forcing --circular-buffer=" << kMapFileCircularDefault
+              << " (pass --circular-buffer=N to override; pass "
+                 "--disable-trees to suppress tree output entirely)."
               << QwLog::endl;
-    DisableTree(".*");
+    fCircularBufferSize = kMapFileCircularDefault;
   }
 
 #ifdef HAS_RNTUPLE_SUPPORT
@@ -400,7 +418,6 @@ void QwRootFile::ProcessOptions(QwOptions &options)
   fNumHelEventsToSkip = options.GetValue<int>("num-mps-discarded-events");
 
   // Update interval for the map file
-  fCircularBufferSize = options.GetValue<int>("circular-buffer");
   fUpdateInterval = options.GetValue<int>("mapfile-update-interval");
   fCompressionAlgorithm = options.GetValue<int>("compression-algorithm");
   fCompressionLevel = options.GetValue<int>("compression-level");
