@@ -129,6 +129,7 @@ bcm1h13, bcm, 1.0
 bcm1h15, bcm, 1.0
 end=combinedbcm
 
+
 begin=energycalculator
 name=target_energy
 !name          type            ratios     property
@@ -141,6 +142,16 @@ name=target_energy
  bpm_target,   combinedbpm,    2.6,       targetbeamangle
 end=energycalculator
 
+
+!Trim cards dummy test
+	MollerADC, 8, 0, bcm, bmod_trim1
+	MollerADC, 8, 1, bcm, bmod_trim2
+	MollerADC, 8, 2, bcm, bmod_trim3
+	MollerADC, 8, 3, bcm, bmod_trim4
+	MollerADC, 8, 4, bcm, bmod_trim5
+	MollerADC, 8, 5, bcm, bmod_trim6
+	MollerADC, 8, 6, bcm, bmod_trim7
+	MollerADC, 8, 7, bcm, bmod_ramp
 
 [PUBLISH]
  q_targ,   combobcm,     bcm_target,     c

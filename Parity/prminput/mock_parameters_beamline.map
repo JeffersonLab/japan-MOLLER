@@ -85,3 +85,24 @@ energycalculator, target_energy,  0.0e-5,       0.0e-3,      1.0e-6 !1.0e-6
 
 !EnergyCalculator drifts               amplitude (abs), phase shift (rad), frequency (Hz)
 energycalculator, target_energy,  drift         1.0e-5,        0.0,          53.0 !1.0e-5
+
+!Trim card parameters
+!device_type,     device_name,    asym,         mean,         sigma(jitter)
+bcm,              bmod_trim1,     0.0,          1.7e3,        0.0
+bcm,              bmod_trim2,     0.0,          1.7e3,        0.0
+bcm,              bmod_trim3,     0.0,          1.7e3,        0.0
+bcm,              bmod_trim4,     0.0,          1.7e3,        0.0
+bcm,              bmod_trim5,     0.0,          1.7e3,        0.0
+bcm,              bmod_trim6,     0.0,          1.7e3,        0.0
+bcm,              bmod_trim7,     0.0,          1.7e3,        0.0
+bcm,              bmod_ramp,      0.0,          -65,          0.0
+
+!Trim card resolution smearing
+bcm,              bmod_trim1,       resolution    0.0
+bcm,              bmod_trim2,       resolution    0.0
+bcm,              bmod_trim3,       resolution    0.0
+bcm,              bmod_trim4,       resolution    0.0
+bcm,              bmod_trim5,       resolution    0.0
+bcm,              bmod_trim6,       resolution    0.0
+bcm,              bmod_trim7,       resolution    0.0
+bcm,              bmod_ramp,       resolution    0.0

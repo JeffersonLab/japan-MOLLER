@@ -69,5 +69,14 @@ BPM1H14XM  ,	            0   ,  76.293e-6
 BPM1H14YP  ,	            0   ,  76.293e-6
 BPM1H14YM  ,	            0   ,  76.293e-6
 
+bmod_trim1  ,	            0   ,  1.0
+bmod_trim2  ,	            0   ,  1.0
+bmod_trim3  ,	            0   ,  1.0
+bmod_trim4  ,	            0   ,  1.0
+bmod_trim5  ,	            0   ,  1.0
+bmod_trim6  ,	            0   ,  1.0
+bmod_trim7  ,	            0   ,  1.0
+bmod_ramp  ,	            0   ,  1.0
+
 !END
 .
