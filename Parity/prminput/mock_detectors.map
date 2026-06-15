@@ -1,20 +1,63 @@
-# This is the detectors map used for VQWK checks
-
+# This is a detector map used to generate and analyze mock data for all detector subsystems in MOLLER
+# Contains the necessary inputs to decode each different detector subsystem
+# 
+# name : name of the detector subsystem. User defined
+# map : A text file containing crate/module/channel mapping needed for decoding data
+# param : A text file containing pedestals to be applied for each detector component
+# geom : geometry and physical location information
+# eventcut : event cuts to be applied to the data during analysis
+#
+# Change above as needed.
+#
+# This file is currently being called by moller_mock.config file
+#
+# Last updated: 17/7/25 by B.Waidyawansa
 
 [QwHelicity]
  name = Helicity Info
  map  = mock_qweak_helicity.map
 
-
 [QwBeamLine]
+ name     = Hall A BeamLine
+ map      = mock_moller_beamline.map
+ param    = mock_moller_beamline_pedestal.map
+ geom     = mock_moller_beamline_geometry.map
+ eventcut = mock_moller_beamline_eventcuts.map 
+
+ [QwBeamLine]
  name  = Injector BeamLine
- map   = mock_qweak_beamline.map
- param = mock_qweak_pedestal.map
- geom  = mock_beamline_geometry.map
- eventcut = mock_beamline_eventcuts.map
+ map   = mollinj_beamline.map
+ param = mollinj_beamline_pedestal.map
+ geom  = mollinj_beamline_geometry.map
+ eventcut = mollinj_beamline_eventcuts.map
 
 [QwDetectorArray]
- name  = Main Detector
- map   = mock_moller_maindet_adc.map
- param = mock_moller_maindet_pedestal.map
+ name  = Thin Quartz Detector
+ map   = mock_moller_thinqtz_adc.map
+ param = pedestal_thinqtz.map
+ eventcut = mock_moller_maindet_eventcuts.map  
+
+[QwDetectorArray]
+ name  = Shower Max Detector
+ map   = mock_moller_shrmax_adc.map
+ param = pedestal_shrmax.map
+ eventcut = mock_moller_maindet_eventcuts.map 
+
+ 
+[QwDetectorArray]
+ name  = Pion Detector
+ map   = mock_moller_piondet_adc.map
+ param = pedestal_piondet.map
+ eventcut = mock_moller_maindet_eventcuts.map 
+
+[QwDetectorArray]
+ name  = Small Angle Detector
+ map   = mock_moller_smallang_adc.map
+ param = pedestal_smallang.map
+ eventcut = mock_moller_maindet_eventcuts.map 
+
+[QwDetectorArray]
+ name  = Large Angle Detector
+ map   = mock_moller_largeang_adc.map
+ param = pedestal_largeang.map
  eventcut = mock_moller_maindet_eventcuts.map
