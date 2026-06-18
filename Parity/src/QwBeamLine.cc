@@ -1195,7 +1195,7 @@ Int_t QwBeamLine::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, 
 		    std::cout<<"word left to read in this buffer:"<<num_words-fBeamDetectorID[i].fWordInSubbank<<std::endl;
 		  }
 		fStripline[fBeamDetectorID[i].fIndex].get()->
-		  ProcessEvBuffer(&(buffer[fBeamDetectorID[i].fWordInSubbank - 1]),
+		  ProcessEvBuffer(&(buffer[fBeamDetectorID[i].fWordInSubbank]),
 				  num_words-fBeamDetectorID[i].fWordInSubbank,
 				  fBeamDetectorID[i].fSubelement);
 	      }
@@ -1208,7 +1208,7 @@ Int_t QwBeamLine::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, 
 		    std::cout<<"word left to read in this buffer:"<<num_words-fBeamDetectorID[i].fWordInSubbank<<std::endl;
 		  }
 		fQPD[fBeamDetectorID[i].fIndex].
-		  ProcessEvBuffer(&(buffer[fBeamDetectorID[i].fWordInSubbank - 1]),
+		  ProcessEvBuffer(&(buffer[fBeamDetectorID[i].fWordInSubbank]),
 				  num_words-fBeamDetectorID[i].fWordInSubbank,
 				  fBeamDetectorID[i].fSubelement);
 	      }
@@ -1221,7 +1221,7 @@ Int_t QwBeamLine::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, 
 		    std::cout<<"word left to read in this buffer:"<<num_words-fBeamDetectorID[i].fWordInSubbank<<std::endl;
 		  }
 		fLinearArray[fBeamDetectorID[i].fIndex].
-		  ProcessEvBuffer(&(buffer[fBeamDetectorID[i].fWordInSubbank - 1]),
+		  ProcessEvBuffer(&(buffer[fBeamDetectorID[i].fWordInSubbank]),
 				  num_words-fBeamDetectorID[i].fWordInSubbank,
 				  fBeamDetectorID[i].fSubelement);
 
@@ -1235,7 +1235,7 @@ Int_t QwBeamLine::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, 
 		    std::cout<<"word left to read in this buffer:"<<num_words-fBeamDetectorID[i].fWordInSubbank<<std::endl;
 		  }
 		fCavity[fBeamDetectorID[i].fIndex].
-		  ProcessEvBuffer(&(buffer[fBeamDetectorID[i].fWordInSubbank - 1]),
+		  ProcessEvBuffer(&(buffer[fBeamDetectorID[i].fWordInSubbank]),
 				  num_words-fBeamDetectorID[i].fWordInSubbank,
 				  fBeamDetectorID[i].fSubelement);
 	      }
@@ -1248,7 +1248,7 @@ Int_t QwBeamLine::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, 
 		    std::cout<<"word left to read in this buffer:"<<num_words-fBeamDetectorID[i].fWordInSubbank<<std::endl;
 		  }
 		fBCM[fBeamDetectorID[i].fIndex].get()->
-		  ProcessEvBuffer(&(buffer[fBeamDetectorID[i].fWordInSubbank - 1]),
+		  ProcessEvBuffer(&(buffer[fBeamDetectorID[i].fWordInSubbank]),
 				  num_words-fBeamDetectorID[i].fWordInSubbank);
 	      }
 
@@ -1260,7 +1260,7 @@ Int_t QwBeamLine::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, 
 		    std::cout<<"word left to read in this buffer:"<<num_words-fBeamDetectorID[i].fWordInSubbank<<std::endl;
 		  }
 		fClock[fBeamDetectorID[i].fIndex].get()->
-		  ProcessEvBuffer(&(buffer[fBeamDetectorID[i].fWordInSubbank - 1]),
+		  ProcessEvBuffer(&(buffer[fBeamDetectorID[i].fWordInSubbank]),
 				  num_words-fBeamDetectorID[i].fWordInSubbank);
 	      }
 
@@ -1272,7 +1272,7 @@ Int_t QwBeamLine::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, 
 		    std::cout<<"word left to read in this buffer:"<<num_words-fBeamDetectorID[i].fWordInSubbank<<std::endl;
 		  }
 		fHaloMonitor[fBeamDetectorID[i].fIndex].
-		  ProcessEvBuffer(&(buffer[fBeamDetectorID[i].fWordInSubbank - 1]),
+		  ProcessEvBuffer(&(buffer[fBeamDetectorID[i].fWordInSubbank]),
 				  num_words-fBeamDetectorID[i].fWordInSubbank);
 	      }
 
