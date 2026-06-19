@@ -568,7 +568,7 @@ bool QwDatabase::StoreDBVersion()
 {
   try
     {
-      QwParitySchema::db_schema db_schema;
+      QwParitySchema::DbSchema db_schema;
       size_t record_count = QueryCount(
           sqlpp::select(sqlpp::all_of(db_schema))
           .from(db_schema)

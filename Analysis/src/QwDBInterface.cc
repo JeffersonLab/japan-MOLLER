@@ -47,29 +47,35 @@ TString QwDBInterface::DetermineMeasurementTypeID(TString type, TString suffix,
 }
 
 #ifdef __USE_DATABASE__
-void QwDBInterface::SetMonitorID(QwParityDB *db)
+void QwDBInterface::SetDetectorID(QwParityDB *db, const TString& detector_type)
 {
-  fDeviceId = db->GetMonitorID(fDeviceName.Data());
-}
-
-void QwDBInterface::SetMainDetectorID(QwParityDB *db)
-{
-  fDeviceId = db->GetMainDetectorID(fDeviceName.Data());
-}
-
-void QwDBInterface::SetLumiDetectorID(QwParityDB *db)
-{
-  fDeviceId = db->GetLumiDetectorID(fDeviceName.Data());
+  fDetectorType = detector_type;
+  fDeviceId = db->GetDetectorID(fDeviceName.Data());
 }
 
 QwDBInterface::EQwDBIDataTableType QwDBInterface::SetDetectorID(QwParityDB *db)
 {
-  fDeviceId = db->GetMonitorID(fDeviceName.Data(),kFALSE);
-  if (fDeviceId!=0) return kQwDBI_BeamTable;
-  fDeviceId = db->GetMainDetectorID(fDeviceName.Data(),kFALSE);
-  if (fDeviceId!=0) return kQwDBI_MDTable;
-  fDeviceId = db->GetLumiDetectorID(fDeviceName.Data(),kFALSE);
-  if (fDeviceId!=0) return kQwDBI_LumiTable;
+  // Legacy compatibility wrapper that auto-detects type
+  // Try to find in unified detector table
+  fDeviceId = db->GetDetectorID(fDeviceName.Data(), kFALSE);
+  if (fDeviceId != 0) {
+    // Auto-detect detector type based on naming convention
+    // Note: In production, this should query the detector table to get actual detector_type
+    if (fDeviceName.Contains("bcm", TString::kIgnoreCase) || 
+        fDeviceName.Contains("bpm", TString::kIgnoreCase) ||
+        fDeviceName.Contains("clock", TString::kIgnoreCase) ||
+        fDeviceName.Contains("energy", TString::kIgnoreCase)) {
+      fDetectorType = "beam";
+    } else if (fDeviceName.Contains("lumi", TString::kIgnoreCase)) {
+      fDetectorType = "lumi";
+    } else if (fDeviceName.Contains("bkg", TString::kIgnoreCase) ||
+               fDeviceName.Contains("background", TString::kIgnoreCase)) {
+      fDetectorType = "bkg";
+    } else {
+      fDetectorType = "md";  // default to main detector
+    }
+    return kQwDBI_DetectorTable;
+  }
   return kQwDBI_OtherTable;
 }
 #endif // __USE_DATABASE__
@@ -85,47 +91,34 @@ T QwDBInterface::TypedDBClone()
 #ifdef __USE_DATABASE__
 /// Specifications of the templated function
 /// template \verbatim<class T>\endverbatim inline T QwDBInterface::TypedDBClone();
-template<> QwParitySchema::md_data_row
-QwDBInterface::TypedDBClone<QwParitySchema::md_data_row>() {
-  QwParitySchema::md_data md_data;
-  QwParitySchema::md_data_row row;
-  row[md_data.analysis_id]         = fAnalysisId;
-  row[md_data.main_detector_id]    = fDeviceId;
-  row[md_data.measurement_type_id] = fMeasurementTypeId;
-  row[md_data.subblock]            = fSubblock;
-  row[md_data.n]                   = fN;
-  row[md_data.value]               = fValue;
-  row[md_data.error]               = fError;
+
+// New unified detector_data_row specialization
+template<> QwParitySchema::detector_data_row
+QwDBInterface::TypedDBClone<QwParitySchema::detector_data_row>() {
+  QwParitySchema::DetectorData DetectorData;
+  QwParitySchema::detector_data_row row;
+  
+  row[DetectorData.analysisId]       = fAnalysisId;
+  row[DetectorData.detectorId]       = fDeviceId;
+  row[DetectorData.detectorTypeId]  = fDetectorType.Data();  // "md", "beam", "lumi", "bkg"
+  row[DetectorData.measureTypeId]   = fMeasurementTypeId;
+  row[DetectorData.subblock]          = fSubblock;
+  row[DetectorData.n]                 = fN;
+  row[DetectorData.value]             = fValue;
+  row[DetectorData.error]             = fError;
+  
+  // Set default values for new fields not in old schema
+  // TODO: slug_id should be obtained from analysis context (run.slug)
+  row[DetectorData.slugId]           = 0;
+  // error_code fields default to 0 (no error)
+  row[DetectorData.errorCodeId]     = 0;
+  row[DetectorData.errorCodeN]      = 0;
+  
   return row;
 }
 
-template<> QwParitySchema::lumi_data_row
-QwDBInterface::TypedDBClone<QwParitySchema::lumi_data_row>() {
-  QwParitySchema::lumi_data lumi_data;
-  QwParitySchema::lumi_data_row row;
-  row[lumi_data.analysis_id]         = fAnalysisId;
-  row[lumi_data.lumi_detector_id]    = fDeviceId;
-  row[lumi_data.measurement_type_id] = fMeasurementTypeId;
-  row[lumi_data.subblock]            = fSubblock;
-  row[lumi_data.n]                   = fN;
-  row[lumi_data.value]               = fValue;
-  row[lumi_data.error]               = fError;
-  return row;
-}
-
-template<> QwParitySchema::beam_row
-QwDBInterface::TypedDBClone<QwParitySchema::beam_row>() {
-  QwParitySchema::beam beam;
-  QwParitySchema::beam_row row;
-  row[beam.analysis_id]         = fAnalysisId;
-  row[beam.monitor_id]          = fDeviceId;
-  row[beam.measurement_type_id] = fMeasurementTypeId;
-  row[beam.subblock]            = fSubblock;
-  row[beam.n]                   = fN;
-  row[beam.value]               = fValue;
-  row[beam.error]               = fError;
-  return row;
-}
+// Note: Legacy types md_data_row, lumi_data_row, beam_row now all map to detector_data_row type
+// (row<DetectorData>), so there's only one template specialization above.
 #endif // __USE_DATABASE__
 
 
@@ -134,19 +127,10 @@ QwDBInterface::TypedDBClone<QwParitySchema::beam_row>() {
 // QwErrDBInterface
 
 #ifdef __USE_DATABASE__
-void QwErrDBInterface::SetMonitorID(QwParityDB *db)
+void QwErrDBInterface::SetDetectorID(QwParityDB *db, const TString& detector_type)
 {
-  fDeviceId = db->GetMonitorID(fDeviceName.Data());
-}
-
-void QwErrDBInterface::SetMainDetectorID(QwParityDB *db)
-{
-  fDeviceId = db->GetMainDetectorID(fDeviceName.Data());
-}
-
-void QwErrDBInterface::SetLumiDetectorID(QwParityDB *db)
-{
-  fDeviceId = db->GetLumiDetectorID(fDeviceName.Data());
+  fDetectorType = detector_type;
+  fDeviceId = db->GetDetectorID(fDeviceName.Data());
 }
 #endif // __USE_DATABASE__
 template <class T>
@@ -157,46 +141,40 @@ T QwErrDBInterface::TypedDBClone()
 }
 #ifdef __USE_DATABASE__
 // Simplified error interface TypedDBClone implementations
-template<> QwParitySchema::md_errors_row
-QwErrDBInterface::TypedDBClone<QwParitySchema::md_errors_row>() {
-  QwParitySchema::md_errors_row row;
-  QwParitySchema::md_errors md_errors;
-  row[md_errors.analysis_id]         = fAnalysisId;
-  row[md_errors.main_detector_id]    = fDeviceId;
-  row[md_errors.error_code_id]       = fErrorCodeId;
-  row[md_errors.n]                   = fN;
+
+// New unified detector_data_row specialization for errors
+template<> QwParitySchema::detector_data_row
+QwErrDBInterface::TypedDBClone<QwParitySchema::detector_data_row>() {
+  QwParitySchema::DetectorData DetectorData;
+  QwParitySchema::detector_data_row row;
+  
+  row[DetectorData.analysisId]       = fAnalysisId;
+  row[DetectorData.detectorId]       = fDeviceId;
+  row[DetectorData.detectorTypeId]  = fDetectorType.Data();
+  row[DetectorData.measureTypeId]   = "";  // Not applicable for errors
+  row[DetectorData.subblock]          = 0;   // Not applicable for errors
+  row[DetectorData.n]                 = fN;
+  row[DetectorData.value]             = 0.0; // Not applicable for errors
+  row[DetectorData.error]             = 0.0; // Not applicable for errors
+  
+  // Error tracking fields
+  row[DetectorData.slugId]           = 0;  // TODO: Get from analysis context
+  row[DetectorData.errorCodeId]     = fErrorCodeId;
+  row[DetectorData.errorCodeN]      = fN;  // Error count
+  
   return row;
 }
 
-template<> QwParitySchema::lumi_errors_row
-QwErrDBInterface::TypedDBClone<QwParitySchema::lumi_errors_row>() {
-  QwParitySchema::lumi_errors_row row;
-  QwParitySchema::lumi_errors lumi_errors;
-  row[lumi_errors.analysis_id]         = fAnalysisId;
-  row[lumi_errors.lumi_detector_id]    = fDeviceId;
-  row[lumi_errors.error_code_id]       = fErrorCodeId;
-  row[lumi_errors.n]                   = fN;
-  return row;
-}
-
-template<> QwParitySchema::beam_errors_row
-QwErrDBInterface::TypedDBClone<QwParitySchema::beam_errors_row>() {
-  QwParitySchema::beam_errors_row row;
-  QwParitySchema::beam_errors beam_errors;
-  row[beam_errors.analysis_id]         = fAnalysisId;
-  row[beam_errors.monitor_id]          = fDeviceId;
-  row[beam_errors.error_code_id]       = fErrorCodeId;
-  row[beam_errors.n]                   = fN;
-  return row;
-}
+// Note: Legacy error types md_errors_row, lumi_errors_row, beam_errors_row now all map to detector_data_row type
+// (row<DetectorData>), so there's only one template specialization above.
 
 template<> QwParitySchema::general_errors_row
 QwErrDBInterface::TypedDBClone<QwParitySchema::general_errors_row>() {
+  QwParitySchema::GeneralErrors GeneralErrors;
   QwParitySchema::general_errors_row row;
-  QwParitySchema::general_errors general_errors;
-  row[general_errors.analysis_id]         = fAnalysisId;
-  row[general_errors.error_code_id]       = fErrorCodeId;
-  row[general_errors.n]                   = fN;
+  row[GeneralErrors.analysisId]         = fAnalysisId;
+  row[GeneralErrors.errorCodeId]       = fErrorCodeId;
+  row[GeneralErrors.n]                   = fN;
   return row;
 }
 #endif // __USE_DATABASE__
