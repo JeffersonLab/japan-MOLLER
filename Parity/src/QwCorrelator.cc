@@ -227,6 +227,125 @@ void QwCorrelator::CalcCorrelations()
     }
   }
 
+#ifdef HAS_RNTUPLE_SUPPORT
+  // Fill RNTuple field pointers
+  if (fNTupleWriter) {
+    // Helper lambdas to flatten matrix and vector to std::vector
+    // Note: these rely on RVO with copy elision to avoid unnecessary copies
+    auto flattenMatrix = [](const TMatrixD& m) -> std::vector<Double_t> {
+      const Double_t* data = m.GetMatrixArray();
+      return std::vector<Double_t>(data, data + m.GetNrows() * m.GetNcols());
+    };  
+    auto flattenVector = [](const TVectorD& v) -> std::vector<Double_t> {
+      const Double_t* data = v.GetMatrixArray();
+      return std::vector<Double_t>(data, data + v.GetNrows());
+    };
+
+    // Copy local variables to RNTuple fields - scalar values
+    *fIntFieldPtrs[0] = fTotalCount;
+    *fIntFieldPtrs[1] = fGoodCount;
+    *fIntFieldPtrs[2] = linReg.fErrorFlag;
+    *fLongFieldPtrs[0] = linReg.fGoodEventNumber;
+
+    // Fill matrix fields with flattened data
+    int matIdx = 0;
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.Axy);
+    *fMatrixRowsPtrs[matIdx] = linReg.Axy.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.Axy.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.dAxy);
+    *fMatrixRowsPtrs[matIdx] = linReg.dAxy.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.dAxy.GetNcols();
+    matIdx++;
+
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mVPP);
+    *fMatrixRowsPtrs[matIdx] = linReg.mVPP.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mVPP.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mVPY);
+    *fMatrixRowsPtrs[matIdx] = linReg.mVPY.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mVPY.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mVYP);
+    *fMatrixRowsPtrs[matIdx] = linReg.mVYP.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mVYP.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mVYY);
+    *fMatrixRowsPtrs[matIdx] = linReg.mVYY.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mVYY.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mVYYp);
+    *fMatrixRowsPtrs[matIdx] = linReg.mVYYp.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mVYYp.GetNcols();
+    matIdx++;
+
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mSPP);
+    *fMatrixRowsPtrs[matIdx] = linReg.mSPP.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mSPP.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mSPY);
+    *fMatrixRowsPtrs[matIdx] = linReg.mSPY.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mSPY.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mSYP);
+    *fMatrixRowsPtrs[matIdx] = linReg.mSYP.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mSYP.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mSYY);
+    *fMatrixRowsPtrs[matIdx] = linReg.mSYY.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mSYY.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mSYYp);
+    *fMatrixRowsPtrs[matIdx] = linReg.mSYYp.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mSYYp.GetNcols();
+    matIdx++;
+
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mRPP);
+    *fMatrixRowsPtrs[matIdx] = linReg.mRPP.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mRPP.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mRPY);
+    *fMatrixRowsPtrs[matIdx] = linReg.mRPY.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mRPY.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mRYP);
+    *fMatrixRowsPtrs[matIdx] = linReg.mRYP.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mRYP.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mRYY);
+    *fMatrixRowsPtrs[matIdx] = linReg.mRYY.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mRYY.GetNcols();
+    matIdx++;
+    
+    *fMatrixFieldPtrs[matIdx] = flattenMatrix(linReg.mRYYp);
+    *fMatrixRowsPtrs[matIdx] = linReg.mRYYp.GetNrows();
+    *fMatrixColsPtrs[matIdx] = linReg.mRYYp.GetNcols();
+
+    // Fill vector fields with flattened data
+    *fVectorFieldPtrs[0] = flattenVector(linReg.mMP);
+    *fVectorFieldPtrs[1] = flattenVector(linReg.mMY);
+    *fVectorFieldPtrs[2] = flattenVector(linReg.mMYp);
+
+    *fVectorFieldPtrs[3] = flattenVector(linReg.mSP);
+    *fVectorFieldPtrs[4] = flattenVector(linReg.mSY);
+    *fVectorFieldPtrs[5] = flattenVector(linReg.mSYp);
+
+    fNTupleWriter->Fill();
+  }
+#endif
+
   // Fill tree
   if (fTree) fTree->Fill();
   else QwWarning << "No tree" << QwLog::endl;
@@ -461,8 +580,86 @@ void QwCorrelator::ConstructTreeBranches(
   branchv(fTree,linReg.mSP,  "dMP");  // Parameter mean error
   branchv(fTree,linReg.mSY,  "dMY");  // Uncorrected mean error
   branchv(fTree,linReg.mSYp, "dMYp"); // Corrected mean error
-
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwCorrelator::ConstructNTupleFields(
+    QwRootFile *treerootfile,
+    const std::string& treeprefix,
+    const std::string& branchprefix)
+{
+  // Check if any channels are active
+  if (nP == 0 || nY == 0) {
+    return;
+  }
+
+  // Check if tree name is specified
+  if (fTreeName == "") {
+    QwWarning << "QwCorrelator: no tree name specified, use 'tree-name = value'" << QwLog::endl;
+    return;
+  }
+
+  // Create alpha and alias files before trying to create the tree
+  OpenAlphaFile(treeprefix);
+  OpenAliasFile(treeprefix);
+
+  // Construct tree name and create new tree
+  const std::string name = treeprefix + fTreeName;
+  treerootfile->NewNTuple(name, fTreeComment.c_str());
+  QwRootNTuple* ntuple = treerootfile->GetNTuple(name);
+  fNTupleModel = ntuple->GetModel();
+
+  // Set up branches
+  fIntFieldPtrs.push_back(fNTupleModel->MakeField<decltype(fTotalCount)>(TString(branchprefix + "total_count")));
+  fIntFieldPtrs.push_back(fNTupleModel->MakeField<decltype(fGoodCount)>(TString(branchprefix + "good_count")));
+  fIntFieldPtrs.push_back(fNTupleModel->MakeField<decltype(linReg.fErrorFlag)>(TString(branchprefix + "ErrorFlag")));
+  fLongFieldPtrs.push_back(fNTupleModel->MakeField<decltype(linReg.fGoodEventNumber)>(TString(branchprefix + "n")));
+
+  auto bn = [&](const TString& n) {
+    return TString(branchprefix + n);
+  };
+  auto branchm = [&](ROOT::RNTupleModel* model, TMatrixD& m, const TString& n) {
+    fMatrixFieldPtrs.push_back(model->MakeField<std::vector<Double_t>>(bn(n)));
+    fMatrixRowsPtrs.push_back(model->MakeField<Int_t>(bn(n) + "_rows"));
+    fMatrixColsPtrs.push_back(model->MakeField<Int_t>(bn(n) + "_cols"));
+  };
+  auto branchv = [&](ROOT::RNTupleModel* model, TVectorD& v, const TString& n) {
+    fVectorFieldPtrs.push_back(model->MakeField<std::vector<Double_t>>(bn(n)));
+  };
+
+  branchm(fNTupleModel,linReg.Axy,  "A");
+  branchm(fNTupleModel,linReg.dAxy, "dA");
+
+  branchm(fNTupleModel,linReg.mVPP,  "VPP");
+  branchm(fNTupleModel,linReg.mVPY,  "VPY");
+  branchm(fNTupleModel,linReg.mVYP,  "VYP");
+  branchm(fNTupleModel,linReg.mVYY,  "VYY");
+  branchm(fNTupleModel,linReg.mVYYp, "VYYp");
+
+  branchm(fNTupleModel,linReg.mSPP,  "SPP");
+  branchm(fNTupleModel,linReg.mSPY,  "SPY");
+  branchm(fNTupleModel,linReg.mSYP,  "SYP");
+  branchm(fNTupleModel,linReg.mSYY,  "SYY");
+  branchm(fNTupleModel,linReg.mSYYp, "SYYp");
+
+  branchm(fNTupleModel,linReg.mRPP,  "RPP");
+  branchm(fNTupleModel,linReg.mRPY,  "RPY");
+  branchm(fNTupleModel,linReg.mRYP,  "RYP");
+  branchm(fNTupleModel,linReg.mRYY,  "RYY");
+  branchm(fNTupleModel,linReg.mRYYp, "RYYp");
+
+  branchv(fNTupleModel,linReg.mMP,  "MP");   // Parameter mean
+  branchv(fNTupleModel,linReg.mMY,  "MY");   // Uncorrected mean
+  branchv(fNTupleModel,linReg.mMYp, "MYp");  // Corrected mean
+
+  branchv(fNTupleModel,linReg.mSP,  "dMP");  // Parameter mean error
+  branchv(fNTupleModel,linReg.mSY,  "dMY");  // Uncorrected mean error
+  branchv(fNTupleModel,linReg.mSYp, "dMYp"); // Corrected mean error
+
+  // Create and get the writer for the model
+  fNTupleWriter = ntuple->GetWriter();
+}
+#endif
 
 /// \brief Construct the histograms in a folder with a prefix
 void QwCorrelator::ConstructHistograms(TDirectory *folder, TString &prefix)
