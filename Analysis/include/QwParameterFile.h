@@ -17,6 +17,7 @@
 #include <map>
 #include <set>
 #include <filesystem>
+#include <algorithm>
 namespace fs = std::filesystem;
 
 // ROOT headers

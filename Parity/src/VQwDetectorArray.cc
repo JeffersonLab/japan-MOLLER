@@ -1695,7 +1695,7 @@ void  VQwDetectorArray::FillDB(QwParityDB *db, TString datatype) {
     }
 
     std::vector<QwDBInterface> interface;
-    std::vector<QwParitySchema::md_data_row> entrylist;
+    std::vector<QwParitySchema::detector_data_row> entrylist;
 
     UInt_t analysis_id = db->GetAnalysisID();
 
@@ -1715,7 +1715,7 @@ void  VQwDetectorArray::FillDB(QwParityDB *db, TString datatype) {
         for(j=0; j<interface.size(); j++) {
 
             interface.at(j).SetAnalysisID( analysis_id );
-            interface.at(j).SetMainDetectorID( db );
+            interface.at(j).SetDetectorID( db, "md" );
             interface.at(j).SetMeasurementTypeID( measurement_type );
             interface.at(j).PrintStatus( local_print_flag );
             interface.at(j).AddThisEntryToList( entrylist );
@@ -1732,7 +1732,7 @@ void  VQwDetectorArray::FillDB(QwParityDB *db, TString datatype) {
         for(j=0; j<interface.size(); j++) {
 
             interface.at(j).SetAnalysisID( analysis_id );
-	        interface.at(j).SetMainDetectorID( db );
+	        interface.at(j).SetDetectorID( db, "md" );
 	        interface.at(j).SetMeasurementTypeID( measurement_type );
 	        interface.at(j).PrintStatus( local_print_flag );
 	        interface.at(j).AddThisEntryToList( entrylist );
@@ -1816,7 +1816,7 @@ void VQwDetectorArray::FillErrDB(QwParityDB *db, TString datatype) {
 
 
     std::vector<QwErrDBInterface> interface;
-    std::vector<QwParitySchema::md_errors_row> entrylist;
+    std::vector<QwParitySchema::detector_data_row> entrylist;
 
     UInt_t analysis_id = db->GetAnalysisID();
 
@@ -1832,7 +1832,7 @@ void VQwDetectorArray::FillErrDB(QwParityDB *db, TString datatype) {
         for(j=0; j<interface.size(); j++) {
 
             interface.at(j).SetAnalysisID     ( analysis_id );
-            interface.at(j).SetMainDetectorID ( db );
+            interface.at(j).SetDetectorID     ( db, "md" );
             interface.at(j).PrintStatus       ( local_print_flag );
             interface.at(j).AddThisEntryToList( entrylist );
 
@@ -1850,7 +1850,7 @@ void VQwDetectorArray::FillErrDB(QwParityDB *db, TString datatype) {
         for(j=0; j<interface.size(); j++) {
 
             interface.at(j).SetAnalysisID     ( analysis_id );
-	        interface.at(j).SetMainDetectorID ( db );
+	        interface.at(j).SetDetectorID     ( db, "md" );
 	        interface.at(j).PrintStatus       ( local_print_flag );
 	        interface.at(j).AddThisEntryToList( entrylist );
 
