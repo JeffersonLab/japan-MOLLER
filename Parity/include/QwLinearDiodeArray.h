@@ -15,6 +15,7 @@
 #include <ROOT/RNTupleModel.hxx>
 
 // Qweak headers
+#include "QwMollerADC_Channel.h"
 #include "QwVQWK_Channel.h"
 #include "VQwBPM.h"
 #include "QwParameterFile.h"
@@ -32,6 +33,7 @@ class QwErrDBInterface;
  * Provides position calculation from diode array readouts with calibration
  * and error handling for linear array detectors.
  */
+template <typename ChannelType>
 class QwLinearDiodeArray : public VQwBPM {
 
  public:
@@ -42,6 +44,10 @@ class QwLinearDiodeArray : public VQwBPM {
   QwLinearDiodeArray(TString name):VQwBPM(name){
   };
   QwLinearDiodeArray(TString subsystemname, TString name):VQwBPM(name){
+    SetSubsystemName(subsystemname);
+    InitializeChannel(subsystemname, name);
+  };
+  QwLinearDiodeArray(TString subsystemname, TString name, TString type):VQwBPM(name){
     SetSubsystemName(subsystemname);
     InitializeChannel(subsystemname, name);
   };
@@ -164,15 +170,15 @@ class QwLinearDiodeArray : public VQwBPM {
 
 
  protected:
-  // std::vector<QwVQWK_Channel> fPhotodiode;
-  QwVQWK_Channel fPhotodiode[8];
-  QwVQWK_Channel fRelPos[2];
+  // std::vector<ChannelType> fPhotodiode;
+  ChannelType fPhotodiode[8];
+  ChannelType fRelPos[2];
 
   //  These are the "real" data elements, to which the base class
   //  fAbsPos_base and fEffectiveCharge_base are pointers.
-  QwVQWK_Channel fAbsPos[2];
-  QwVQWK_Channel fEffectiveCharge;
+  ChannelType fAbsPos[2];
+  ChannelType fEffectiveCharge;
 
-  std::vector<QwVQWK_Channel> fLinearArrayElementList;
+  std::vector<ChannelType> fLinearArrayElementList;
 
 };
