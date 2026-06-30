@@ -75,5 +75,6 @@ CodaEventType
 
 #  Wildcarded pattern for the SAM element branch names
 .*sam.*
+
 #EVERYTHING
 .*

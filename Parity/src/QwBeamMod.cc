@@ -381,7 +381,11 @@ Int_t QwBeamMod::LoadInputParameters(TString pedestalfile)
 Int_t QwBeamMod::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words)
 {
 
-
+// std::cerr << "[ENTERED QwBeamMod::ProcessEvBuffer] "
+//           << "roc=" << roc_id
+//           << " bank=" << bank_id
+//           << " num_words=" << num_words
+//           << std::endl;
   Bool_t lkDEBUG=kFALSE;
 
   Int_t index = GetSubbankIndex(roc_id,bank_id);

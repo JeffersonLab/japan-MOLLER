@@ -1,6 +1,9 @@
+decode_mode = 0
+
 ROC=6
 Bank=0x6110
 sample_size=15000
+NumberOfBlocks=4
 !
 !
 ! module.type, module.num, module.chan, det.type, det.name
