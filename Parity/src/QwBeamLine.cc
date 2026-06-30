@@ -2848,7 +2848,7 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
   }
 
   std::vector<QwDBInterface> interface;
-  std::vector<QwParitySchema::beam_row> entrylist;
+  std::vector<QwParitySchema::detector_data_row> entrylist;
 
   UInt_t analysis_id = db->GetAnalysisID();
 
@@ -2875,7 +2875,7 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
     interface = fBCM[i].get()->GetDBEntry();
     for (j=0; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id );
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).SetMeasurementTypeID( measurement_type_bcm );
       interface.at(j).PrintStatus( local_print_flag );
       interface.at(j).AddThisEntryToList( entrylist );
@@ -2890,7 +2890,7 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
     interface = fStripline[i].get()->GetDBEntry();
     for (j=0; j<interface.size()-5; j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).SetMeasurementTypeID( measurement_type_bpm );
       interface.at(j).PrintStatus( local_print_flag);
       interface.at(j).AddThisEntryToList( entrylist );
@@ -2898,7 +2898,7 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
     // effective charge (last 4 elements)  need to be saved as measurement_type_bcm
     for (j=interface.size()-5; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).SetMeasurementTypeID( measurement_type_bcm );
       interface.at(j).PrintStatus( local_print_flag);
       interface.at(j).AddThisEntryToList( entrylist );
@@ -2914,7 +2914,7 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
     interface = fBPMCombo[i].get()->GetDBEntry();
     for (j=0; j<interface.size()-5; j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).SetMeasurementTypeID( measurement_type_bpm );
       interface.at(j).PrintStatus( local_print_flag);
       interface.at(j).AddThisEntryToList( entrylist );
@@ -2922,7 +2922,7 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
     // effective charge (last element) need to be saved as measurement_type_bcm
     for (j=interface.size()-5; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).SetMeasurementTypeID( measurement_type_bcm );
       interface.at(j).PrintStatus( local_print_flag);
       interface.at(j).AddThisEntryToList( entrylist );
@@ -2937,7 +2937,7 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
     interface = fBCMCombo[i].get()->GetDBEntry();
     for (j=0; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id );
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).SetMeasurementTypeID( measurement_type_bcm );
       interface.at(j).PrintStatus( local_print_flag );
       interface.at(j).AddThisEntryToList( entrylist );
@@ -2952,7 +2952,7 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
     interface = fECalculator[i].GetDBEntry();
     for (j=0; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id );
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).SetMeasurementTypeID( measurement_type_bpm );
       interface.at(j).PrintStatus( local_print_flag );
       interface.at(j).AddThisEntryToList( entrylist );
@@ -2968,7 +2968,7 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
     interface = fQPD[i].GetDBEntry();
     for (j=0; j<interface.size()-5; j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).SetMeasurementTypeID( measurement_type_bpm );
       interface.at(j).PrintStatus( local_print_flag);
       interface.at(j).AddThisEntryToList( entrylist );
@@ -2976,7 +2976,7 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
     // effective charge need (last element) to be saved as measurement_type_bcm
     for (j=interface.size()-5; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).SetMeasurementTypeID( measurement_type_bcm );
       interface.at(j).PrintStatus( local_print_flag);
       interface.at(j).AddThisEntryToList( entrylist );
@@ -2991,14 +2991,14 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
     interface = fLinearArray[i].GetDBEntry();
     for (j=0; j<interface.size()-5; j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).SetMeasurementTypeID( measurement_type_bpm );
       interface.at(j).PrintStatus( local_print_flag);
       interface.at(j).AddThisEntryToList( entrylist );
     }
     for (j=interface.size()-5; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).SetMeasurementTypeID( measurement_type_bcm );
       interface.at(j).PrintStatus( local_print_flag);
       interface.at(j).AddThisEntryToList( entrylist );
@@ -3013,14 +3013,14 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
     interface = fCavity[i].GetDBEntry();
     for (j=0; j<interface.size()-5; j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).SetMeasurementTypeID( measurement_type_bpm );
       interface.at(j).PrintStatus( local_print_flag);
       interface.at(j).AddThisEntryToList( entrylist );
     }
     for (j=interface.size()-5; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).SetMeasurementTypeID( measurement_type_bcm );
       interface.at(j).PrintStatus( local_print_flag);
       interface.at(j).AddThisEntryToList( entrylist );
@@ -3035,7 +3035,7 @@ void QwBeamLine::FillDB(QwParityDB *db, TString datatype)
     interface = fHaloMonitor[i].GetDBEntry();
     for (j=0; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id );
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).SetMeasurementTypeID( measurement_type_halo );
       interface.at(j).PrintStatus( local_print_flag );
       interface.at(j).AddThisEntryToList( entrylist );
@@ -3071,7 +3071,7 @@ void QwBeamLine::FillErrDB(QwParityDB *db, TString datatype)
   }
 
   std::vector<QwErrDBInterface> interface;
-  std::vector<QwParitySchema::beam_errors_row> entrylist;
+  std::vector<QwParitySchema::detector_data_row> entrylist;
 
   UInt_t analysis_id = db->GetAnalysisID();
 
@@ -3084,7 +3084,7 @@ void QwBeamLine::FillErrDB(QwParityDB *db, TString datatype)
     interface = fBCM[i].get()->GetErrDBEntry();
     for (j=0; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id );
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).PrintStatus( local_print_flag );
       interface.at(j).AddThisEntryToList( entrylist );
     }
@@ -3098,7 +3098,7 @@ void QwBeamLine::FillErrDB(QwParityDB *db, TString datatype)
     interface = fStripline[i].get()->GetErrDBEntry();
     for (j=0; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).PrintStatus( local_print_flag );
       interface.at(j).AddThisEntryToList( entrylist );
     }
@@ -3111,7 +3111,7 @@ void QwBeamLine::FillErrDB(QwParityDB *db, TString datatype)
     interface = fBPMCombo[i].get()->GetErrDBEntry();
     for (j=0; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).PrintStatus( local_print_flag );
       interface.at(j).AddThisEntryToList( entrylist );
     }
@@ -3125,7 +3125,7 @@ void QwBeamLine::FillErrDB(QwParityDB *db, TString datatype)
     interface = fBCMCombo[i].get()->GetErrDBEntry();
     for (j=0; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).PrintStatus( local_print_flag );
       interface.at(j).AddThisEntryToList( entrylist );
     }
@@ -3139,7 +3139,7 @@ void QwBeamLine::FillErrDB(QwParityDB *db, TString datatype)
     interface = fECalculator[i].GetErrDBEntry();
     for (j=0; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).PrintStatus( local_print_flag );
       interface.at(j).AddThisEntryToList( entrylist );
     }
@@ -3153,7 +3153,7 @@ void QwBeamLine::FillErrDB(QwParityDB *db, TString datatype)
     interface = fQPD[i].GetErrDBEntry();
     for (j=0; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).PrintStatus( local_print_flag );
       interface.at(j).AddThisEntryToList( entrylist );
     }
@@ -3167,7 +3167,7 @@ void QwBeamLine::FillErrDB(QwParityDB *db, TString datatype)
     interface = fLinearArray[i].GetErrDBEntry();
     for (j=0; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).PrintStatus( local_print_flag );
       interface.at(j).AddThisEntryToList( entrylist );
     }
@@ -3181,7 +3181,7 @@ void QwBeamLine::FillErrDB(QwParityDB *db, TString datatype)
     interface = fCavity[i].GetErrDBEntry();
     for (j=0; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).PrintStatus( local_print_flag );
       interface.at(j).AddThisEntryToList( entrylist );
     }
@@ -3195,7 +3195,7 @@ void QwBeamLine::FillErrDB(QwParityDB *db, TString datatype)
     interface = fHaloMonitor[i].GetErrDBEntry();
     for (j=0; j<interface.size(); j++){
       interface.at(j).SetAnalysisID( analysis_id ) ;
-      interface.at(j).SetMonitorID( db );
+      interface.at(j).SetDetectorID( db, "beam" );
       interface.at(j).PrintStatus( local_print_flag );
       interface.at(j).AddThisEntryToList( entrylist );
     }

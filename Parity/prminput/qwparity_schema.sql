@@ -10,20 +10,13 @@ DROP TABLE IF EXISTS slow_controls_strings;
 DROP TABLE IF EXISTS slow_controls_data;
 DROP TABLE IF EXISTS sc_detector;
 DROP TABLE IF EXISTS slow_controls_settings;
-DROP TABLE IF EXISTS lumi_errors;
-DROP TABLE IF EXISTS lumi_data;
-DROP TABLE IF EXISTS lumi_detector;
-DROP TABLE IF EXISTS md_errors;
-DROP TABLE IF EXISTS md_data;
-DROP TABLE IF EXISTS main_detector;
-DROP TABLE IF EXISTS monitor;
-DROP TABLE IF EXISTS slope_type;
+DROP TABLE IF EXISTS grand_correlator;
+DROP TABLE IF EXISTS detector_data_summary;
+DROP TABLE IF EXISTS detector_data;
+DROP TABLE IF EXISTS detector;
+DROP TABLE IF EXISTS detector_type;
 DROP TABLE IF EXISTS error_code;
 DROP TABLE IF EXISTS measurement_type;
-DROP TABLE IF EXISTS beam_errors;
-DROP TABLE IF EXISTS beam;
-DROP TABLE IF EXISTS lumi_slope;
-DROP TABLE IF EXISTS md_slope;
 DROP TABLE IF EXISTS general_errors;
 DROP TABLE IF EXISTS parameter_files;
 DROP TABLE IF EXISTS analysis;
@@ -128,7 +121,7 @@ CREATE TABLE parameter_files (
 -- Error tracking tables
 CREATE TABLE error_code (
     error_code_id TINYINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    quantity TEXT NOT NULL
+    description TEXT NOT NULL
 );
 
 CREATE TABLE general_errors (
@@ -145,112 +138,50 @@ CREATE TABLE measurement_type (
     title TEXT NOT NULL
 );
 
-CREATE TABLE slope_type (
-    slope_type_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    slope TEXT NOT NULL,
-    units TEXT NOT NULL,
+CREATE TABLE detector_type (
+    detector_type_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    detector TEXT NOT NULL,
     title TEXT NOT NULL
 );
 
-CREATE TABLE monitor (
-    monitor_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    quantity TEXT NOT NULL,
-    title TEXT NOT NULL
-);
-
-CREATE TABLE main_detector (
-    main_detector_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    quantity TEXT NOT NULL,
-    title TEXT NOT NULL
-);
-
-CREATE TABLE lumi_detector (
-    lumi_detector_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    quantity TEXT NOT NULL,
-    title TEXT NOT NULL
+CREATE TABLE detector (
+    detector_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    detector_type ENUM('md','beam','lumi','bkg') NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL
 );
 
 -- Data tables
-CREATE TABLE md_data (
-    md_data_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE detector_data (
+    detector_data_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    detector_type_id CHAR(3) NOT NULL,
     analysis_id INT UNSIGNED NOT NULL,
-    main_detector_id INT UNSIGNED NULL,
-    measurement_type_id CHAR(3) NOT NULL,
-    subblock TINYINT UNSIGNED NOT NULL,
-    n INT UNSIGNED NOT NULL,
-    value FLOAT NOT NULL,
-    error FLOAT NOT NULL
-);
-
-CREATE TABLE md_errors (
-    md_errors_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    analysis_id INT UNSIGNED NOT NULL,
-    main_detector_id INT UNSIGNED NOT NULL,
+    slug_id INT UNSIGNED NOT NULL,
+    detector_id INT UNSIGNED NULL,
+    measure_type_id CHAR(3) NOT NULL,
     error_code_id TINYINT UNSIGNED NOT NULL,
-    n INT UNSIGNED NOT NULL
-);
-
-CREATE TABLE lumi_data (
-    lumi_data_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    analysis_id INT UNSIGNED NOT NULL,
-    lumi_detector_id INT UNSIGNED NULL,
-    measurement_type_id CHAR(3) NOT NULL,
+    error_code_n TINYINT UNSIGNED NOT NULL,
     subblock TINYINT UNSIGNED NOT NULL,
     n INT UNSIGNED NOT NULL,
     value FLOAT NOT NULL,
     error FLOAT NOT NULL
 );
 
-CREATE TABLE lumi_errors (
-    lumi_errors_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    analysis_id INT UNSIGNED NOT NULL,
-    lumi_detector_id INT UNSIGNED NOT NULL,
-    error_code_id TINYINT UNSIGNED NOT NULL,
-    n INT UNSIGNED NOT NULL
-);
-
-CREATE TABLE beam (
-    beam_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    analysis_id INT UNSIGNED NOT NULL,
-    monitor_id INT UNSIGNED NOT NULL,
-    measurement_type_id CHAR(3) NOT NULL,
-    subblock TINYINT UNSIGNED NOT NULL,
+CREATE TABLE detector_data_summary (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    detector_type_id CHAR(3) NOT NULL,
+    slug_id INT UNSIGNED NOT NULL,
+    detector_id INT UNSIGNED NULL,
+    measure_type_id CHAR(3) NOT NULL,
     n INT UNSIGNED NOT NULL,
     value FLOAT NOT NULL,
     error FLOAT NOT NULL
 );
 
-CREATE TABLE beam_errors (
-    beam_errors_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE grand_correlator (
+    correlator_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     analysis_id INT UNSIGNED NOT NULL,
-    monitor_id INT UNSIGNED NOT NULL,
-    error_code_id TINYINT UNSIGNED NOT NULL,
-    n INT UNSIGNED NOT NULL
-);
-
--- Slope data tables
-CREATE TABLE md_slope (
-    md_slope_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    analysis_id INT UNSIGNED NOT NULL,
-    slope_type_id INT UNSIGNED NOT NULL,
-    measurement_type_id CHAR(3) NOT NULL,
-    main_detector_id INT UNSIGNED NOT NULL,
-    subblock TINYINT UNSIGNED NOT NULL,
-    n INT UNSIGNED NOT NULL,
-    value FLOAT NOT NULL,
-    error FLOAT NOT NULL
-);
-
-CREATE TABLE lumi_slope (
-    lumi_slope_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    analysis_id INT UNSIGNED NOT NULL,
-    slope_type_id INT UNSIGNED NOT NULL,
-    measurement_type_id CHAR(3) NOT NULL,
-    lumi_detector_id INT UNSIGNED NOT NULL,
-    subblock TINYINT UNSIGNED NOT NULL,
-    n INT UNSIGNED NOT NULL,
-    value FLOAT NOT NULL,
-    error FLOAT NOT NULL
+    matrix JSON NOT NULL
 );
 
 -- Slow controls tables
@@ -309,7 +240,7 @@ CREATE TABLE modulation_type (
 CREATE TABLE beam_optics (
     beam_optics_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     analysis_id INT UNSIGNED NOT NULL,
-    monitor_id INT UNSIGNED NOT NULL,
+    detector_id INT UNSIGNED NOT NULL,
     modulation_type_id INT UNSIGNED NOT NULL,
     n INT UNSIGNED NOT NULL,
     amplitude FLOAT NOT NULL,
