@@ -74,16 +74,6 @@ Int_t QwMollerADC_Channel::ApplyHWChecks()
     if (bDEBUG)
       QwWarning<<" QwQWVK_Channel "<<GetElementName()<<"  "<<GetNumberOfSamples()<<QwLog::endl;
 
-    if (fDecodeMode == kOldMock) {
-      // The old mock payload does not provide reliable HW/SW-sum equality or
-      // sequence metadata.  Keep only the basic missing-data check so mock
-      // detector asymmetries are not rejected by checks they cannot satisfy.
-      fErrorFlag = 0;
-      if (GetRawHardwareSum()==0) {
-        fErrorFlag|=kErrorFlag_ZeroHW;
-      }
-      return fErrorFlag;
-    }
 
     // Sample size check
     bStatus = MatchNumberOfSamples(fNumberOfSamples_map);//compare the default sample size with no.of samples read by the module
