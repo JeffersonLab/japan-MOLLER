@@ -876,13 +876,13 @@ Bool_t QwEventBuffer::FillSubsystemData(QwSubsystemArray &subsystems)
       continue;
     }
 
-    // if (GetSubbankType() == 0x85) {
-    //   std::cout << "ProcessEventBuffer: , SubbankTag= "<< GetSubbankTag()<<" FragLength="<<GetFragLength() <<std::endl;
-    // }
+//     if (GetSubbankType() == 0x85) {
+     //  std::cout << "ProcessEventBuffer: , SubbankTag= "<< decoder->GetSubbankTag()<<" FragLength="<<decoder->GetFragLength() <<std::endl;
+//     }
 
-//     QwDebug << "QwEventBuffer::FillSubsystemData:  "
-// 	    << "Beginning loop: fWordsSoFar=="<<GetWordsSoFar()
-// 	    <<QwLog::endl;
+    // QwDebug << "QwEventBuffer::FillSubsystemData:  "
+	  //   << "Beginning loop: fWordsSoFar=="<<GetWordsSoFar()
+	  //   <<QwLog::endl;
 
     //  Loop through the subsystems and try to store the data
     //  from this bank in each subsystem.

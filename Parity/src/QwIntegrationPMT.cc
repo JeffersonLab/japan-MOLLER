@@ -487,6 +487,8 @@ void QwIntegrationPMT::Difference(const QwIntegrationPMT &value1, const QwIntegr
   *this -= value2;
 }
 
+
+
 void QwIntegrationPMT::Ratio(QwIntegrationPMT &numer, QwIntegrationPMT &denom)
 {
   //  std::cout<<"QwIntegrationPMT::Ratio element name ="<<GetElementName()<<" \n";

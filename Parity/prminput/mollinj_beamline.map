@@ -1,3 +1,5 @@
+decode_mode = 0
+
 
 ROC=24
 Bank=0x2400
@@ -5,6 +7,7 @@ vqwk_buffer_offset=1
 
 !same sample size for ADCs in a given bank
 sample_size=16564
+NumberOfBlocks=4
 !
 !
 ! module.type, module.num  chan.num, det.type, det.name

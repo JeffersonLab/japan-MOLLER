@@ -120,6 +120,14 @@ class VQwBPM : public VQwDataElement {
   virtual VQwBPM& operator+= (const VQwBPM &value) =0;
   virtual VQwBPM& operator-= (const VQwBPM &value) =0;
 
+  //added this
+  virtual void SetMollerADCHeaderData(UInt_t region_number,
+                                    ULong64_t region_timestamp,
+                                    UInt_t header_num_words,
+                                    UInt_t header_block_number,
+                                    ULong64_t header_packet_count,
+                                    ULong64_t header_tsamples) {}
+
   void    SetRootSaveStatus(TString &prefix);
 
 

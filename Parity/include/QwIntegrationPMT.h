@@ -103,6 +103,7 @@ void RandomizeMollerEvent(int helicity, const QwBeamCharge& charge, const QwBeam
   Double_t GetValue();
   Double_t GetValue(Int_t blocknum);
 
+
   void  ProcessEvent();
   Bool_t ApplyHWChecks();//Check for hardware errors in the devices
   Bool_t ApplySingleEventCuts();//Check for good events by setting limits on the devices readings
