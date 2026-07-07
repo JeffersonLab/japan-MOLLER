@@ -155,4 +155,13 @@ class QwSubsystemArrayParity: public QwSubsystemArray {
     UInt_t fErrorFlag;
     Int_t  fErrorFlagTreeIndex;
 
+    // One-time resolved dispatch cache for parity pairwise operations.
+    mutable std::vector<VQwSubsystemParity*> fResolvedParitySelf;
+    mutable const QwSubsystemArrayParity* fResolvedParityPeer = nullptr;
+    mutable std::vector<VQwSubsystem*> fResolvedParityPeerSlots;
+    mutable std::vector<Bool_t> fResolvedParityCompatible;
+
+    void BuildResolvedParitySelf() const;
+    void ResolveParityPairing(const QwSubsystemArrayParity& value, const char* context) const;
+
 }; // class QwSubsystemArrayParity

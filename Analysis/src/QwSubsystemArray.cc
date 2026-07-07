@@ -61,6 +61,56 @@ QwSubsystemArray::QwSubsystemArray(const QwSubsystemArray& source)
   }
 }
 
+void QwSubsystemArray::InvalidateResolvedDispatchCache()
+{
+  fResolvedSelf.clear();
+  fResolvedPeer = nullptr;
+  fResolvedPeerSlots.clear();
+  fResolvedPairCompatible.clear();
+}
+
+void QwSubsystemArray::BuildResolvedSelf() const
+{
+  if (fResolvedSelf.size() == this->size()) return;
+  fResolvedSelf.assign(this->size(), nullptr);
+  for (size_t i = 0; i < this->size(); ++i) {
+    if (this->at(i) != nullptr) {
+      fResolvedSelf[i] = this->at(i).get();
+    }
+  }
+}
+
+void QwSubsystemArray::ResolvePairing(const QwSubsystemArray& source, const char* context) const
+{
+  BuildResolvedSelf();
+  const Bool_t cache_valid =
+      (fResolvedPeer == &source)
+      && (fResolvedPeerSlots.size() == source.size())
+      && (fResolvedPairCompatible.size() == source.size());
+  if (cache_valid) return;
+
+  fResolvedPeer = &source;
+  fResolvedPeerSlots.assign(source.size(), nullptr);
+  fResolvedPairCompatible.assign(source.size(), kFALSE);
+  if (this->size() != source.size()) return;
+
+  for (size_t i = 0; i < source.size(); ++i) {
+    VQwSubsystem* ptr1 = fResolvedSelf[i];
+    VQwSubsystem* ptr2 = source.at(i).get();
+    fResolvedPeerSlots[i] = ptr2;
+    if (ptr1 == nullptr || ptr2 == nullptr) continue;
+
+    if (typeid(*ptr1) == typeid(*ptr2)) {
+      fResolvedPairCompatible[i] = kTRUE;
+    } else {
+      QwError << context << " types do not match at slot " << i << QwLog::endl;
+      QwError << " typeid(*ptr1)=" << typeid(*ptr1).name()
+              << " but typeid(*ptr2)=" << typeid(*ptr2).name()
+              << QwLog::endl;
+    }
+  }
+}
+
 
 /**
  * Assignment operator
@@ -73,24 +123,10 @@ QwSubsystemArray& QwSubsystemArray::operator=(const QwSubsystemArray& source)
   this->fCodaEventType   = source.fCodaEventType;
   if (!source.empty()){
     if (this->size() == source.size()){
+      ResolvePairing(source, "QwSubsystemArray::operator=");
       for(size_t i=0;i<source.size();i++){
-        if (source.at(i)==NULL || this->at(i)==NULL){
-          //  Either the source or the destination subsystem
-          //  are null
-        } else {
-          VQwSubsystem *ptr1 =
-            dynamic_cast<VQwSubsystem*>(this->at(i).get());
-          VQwSubsystem *ptr2 = source.at(i).get();
-          if (typeid(*ptr1)==typeid(*(ptr2))){
-            *(ptr1) = source.at(i).get();
-          } else {
-            //  Subsystems don't match
-            QwError << " QwSubsystemArray::operator= types do not mach" << QwLog::endl;
-            QwError << " typeid(*ptr1)=" << typeid(*ptr1).name()
-                    << " but typeid(*ptr2)=" << typeid(*ptr2).name()
-                    << QwLog::endl;
-          }
-        }
+        if (!fResolvedPairCompatible[i]) continue;
+        *(fResolvedSelf[i]) = fResolvedPeerSlots[i];
       }
     } else {
       //  Array sizes don't match
@@ -217,6 +253,7 @@ void QwSubsystemArray::push_back(VQwSubsystem* subsys)
   } else {
     std::shared_ptr<VQwSubsystem> subsys_tmp(subsys);
     SubsysPtrs::push_back(subsys_tmp);
+    InvalidateResolvedDispatchCache();
 
     // Set the parent of the subsystem to this array
     subsys_tmp->SetParent(this);
@@ -843,6 +880,7 @@ void QwSubsystemArray::push_back(std::shared_ptr<VQwSubsystem> subsys)
  } else {
    std::shared_ptr<VQwSubsystem> subsys_tmp(subsys);
    SubsysPtrs::push_back(subsys_tmp);
+   InvalidateResolvedDispatchCache();
 
    // Set the parent of the subsystem to this array
    subsys_tmp->SetParent(this);

@@ -297,6 +297,17 @@ class QwSubsystemArray:
 
   std::vector< std::pair<UInt_t,UInt_t> > fBadEventRange;
 
+ protected:
+  // One-time resolved dispatch cache for pairwise whole-array operations.
+  mutable std::vector<VQwSubsystem*> fResolvedSelf;
+  mutable const QwSubsystemArray* fResolvedPeer = nullptr;
+  mutable std::vector<VQwSubsystem*> fResolvedPeerSlots;
+  mutable std::vector<Bool_t> fResolvedPairCompatible;
+
+  void InvalidateResolvedDispatchCache();
+  void BuildResolvedSelf() const;
+  void ResolvePairing(const QwSubsystemArray& source, const char* context) const;
+
  private:
   /// Filename of the global detector map
   std::string fSubsystemsMapFile;
