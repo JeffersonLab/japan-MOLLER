@@ -120,8 +120,8 @@ void GrandCorrelator::ProcessData()
   //TVectorD Y(fDependentValues.size(),   fDependentValues.data());
   //operator+= (std::make_pair(P, Y));
 
-  for(int i = 0; i<fAllVar.size(); ++i){
-    for(int j = i; j<fAllVar.size(); ++j){
+  for(size_t i = 0; i<fAllVar.size(); ++i){
+    for(size_t j = i; j<fAllVar.size(); ++j){
         if(!fAllGood[i] || !fAllGood[j]) continue;
 
         double xi = fAllValues[i];
@@ -1220,8 +1220,8 @@ void GrandCorrelator::solve()
 {
 //==========================================================
 //Solve step 1
-for(int i = 0; i < fAllVar.size(); ++i){
-    for(int j = i; j < fAllVar.size(); ++j){
+for(size_t i = 0; i < fAllVar.size(); ++i){
+    for(size_t j = i; j < fAllVar.size(); ++j){
       if(mNij(i,j) >= 2){
         mVij(i,j) = mCij(i,j) / (mNij(i,j) - 1.);
         sigma_ij(i,j) = sqrt((mSij(i,j)) / (mNij(i,j) - 1.));
@@ -1297,8 +1297,8 @@ for(int i = 0; i < fAllVar.size(); ++i){
   mVY = TMatrixDDiag(sigmaY);
 
   // "Clean" matrices
-  for(int i = 0; i < fAllVar.size(); ++i){
-    for(int j = i; j < fAllVar.size(); ++j){
+  for(size_t i = 0; i < fAllVar.size(); ++i){
+    for(size_t j = i; j < fAllVar.size(); ++j){
       if(i < 5 && j < 5){
       }
         mVFULL_clean(i,j) = mRij(i,j) * sigma_ij(i,j) * sigma_ji(j,i) * (fGoodEventNumber - 1);
