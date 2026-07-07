@@ -256,6 +256,29 @@ Int_t main(Int_t argc, Char_t* argv[])
     burstrootfile->ConstructNTupleFields("bursts", "Burst running sum RNTuple", burstsum, "|stat");
 #endif
 
+    // Cache tree handles to avoid per-event string lookups.
+    TTree* evt_tree    = treerootfile->GetTree("evt");
+    TTree* mul_tree    = treerootfile->GetTree("mul");
+    TTree* slow_tree   = treerootfile->GetTree("slow");
+    TTree* evts_tree   = treerootfile->GetTree("evts");
+    TTree* muls_tree   = treerootfile->GetTree("muls");
+    TTree* pr_tree     = burstrootfile->GetTree("pr");
+    TTree* burst_tree  = burstrootfile->GetTree("burst");
+    TTree* bursts_tree = burstrootfile->GetTree("bursts");
+
+#ifdef HAS_RNTUPLE_SUPPORT
+    // Cache RNTuple handles to avoid per-event string lookups.
+    QwRootNTuple* evt_ntuple      = treerootfile->GetNTuple("evt");
+    QwRootNTuple* mul_ntuple      = treerootfile->GetNTuple("mul");
+    QwRootNTuple* slow_ntuple     = treerootfile->GetNTuple("slow");
+    QwRootNTuple* evts_ntuple     = treerootfile->GetNTuple("evts");
+    QwRootNTuple* muls_ntuple     = treerootfile->GetNTuple("muls");
+    QwRootNTuple* pr_yield_ntuple = burstrootfile->GetNTuple("pr_yield");
+    QwRootNTuple* pr_asym_ntuple  = burstrootfile->GetNTuple("pr_asym");
+    QwRootNTuple* burst_ntuple    = burstrootfile->GetNTuple("burst");
+    QwRootNTuple* bursts_ntuple   = burstrootfile->GetNTuple("bursts");
+#endif
+
     // Summarize the ROOT file structure
     //treerootfile->PrintTrees();
     //treerootfile->PrintDirs();
@@ -329,12 +352,12 @@ Int_t main(Int_t argc, Char_t* argv[])
 	  helicitypattern.UpdateBlinder(epicsevent);
 
 	  treerootfile->FillTreeBranches(epicsevent);
-	  treerootfile->FillTree("slow");
+          if (slow_tree) slow_tree->Fill();
 
 	  // Fill RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
 	  treerootfile->FillNTupleFields(epicsevent);
-	  treerootfile->FillNTuple("slow");
+          if (slow_ntuple) slow_ntuple->Fill();
 #endif
 	}
       }
@@ -372,12 +395,12 @@ Int_t main(Int_t argc, Char_t* argv[])
 
 	  // Fill mps tree branches
 	  treerootfile->FillTreeBranches(ringoutput);
-	  treerootfile->FillTree("evt");
+          if (evt_tree) evt_tree->Fill();
 
 	  // Fill RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
 	  treerootfile->FillNTupleFields(ringoutput);
-	  treerootfile->FillNTuple("evt");
+          if (evt_ntuple) evt_ntuple->Fill();
 #endif
 
 	  // Process data handlers
@@ -405,14 +428,14 @@ Int_t main(Int_t argc, Char_t* argv[])
 	    burstrootfile->FillTreeBranches(helicitypattern.GetPairYield());
 	    burstrootfile->FillTreeBranches(helicitypattern.GetPairAsymmetry());
 	    burstrootfile->FillTreeBranches(helicitypattern.GetPairDifference());
-	    burstrootfile->FillTree("pr");
+            if (pr_tree) pr_tree->Fill();
 
 	    // Fill pair RNTuples if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
 	    burstrootfile->FillNTupleFields("pr_yield", helicitypattern.GetPairYield());
 	    burstrootfile->FillNTupleFields("pr_asym", helicitypattern.GetPairAsymmetry());
-	    burstrootfile->FillNTuple("pr_yield");
-	    burstrootfile->FillNTuple("pr_asym");
+            if (pr_yield_ntuple) pr_yield_ntuple->Fill();
+            if (pr_asym_ntuple) pr_asym_ntuple->Fill();
 #endif
 
 	    // Clear the data
@@ -428,12 +451,12 @@ Int_t main(Int_t argc, Char_t* argv[])
 
               // Fill helicity tree branches
               treerootfile->FillTreeBranches(helicitypattern);
-              treerootfile->FillTree("mul");
+              if (mul_tree) mul_tree->Fill();
 
               // Fill helicity RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
               treerootfile->FillNTupleFields(helicitypattern);
-              treerootfile->FillNTuple("mul");
+              if (mul_ntuple) mul_ntuple->Fill();
 #endif
 
               // Process data handlers
@@ -477,12 +500,12 @@ Int_t main(Int_t argc, Char_t* argv[])
 
                 // Fill burst tree branches
                 burstrootfile->FillTreeBranches(patternsum_per_burst);
-                burstrootfile->FillTree("burst");
+                if (burst_tree) burst_tree->Fill();
 
                 // Fill burst RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
                 burstrootfile->FillNTupleFields(patternsum_per_burst);
-                burstrootfile->FillNTuple("burst");
+                if (burst_ntuple) burst_ntuple->Fill();
 #endif
 
                 // Finish data handler for burst
@@ -551,12 +574,12 @@ Int_t main(Int_t argc, Char_t* argv[])
 
       // Fill burst tree branches
       burstrootfile->FillTreeBranches(patternsum_per_burst);
-      burstrootfile->FillTree("burst");
+      if (burst_tree) burst_tree->Fill();
 
       // Fill burst RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
       burstrootfile->FillNTupleFields(patternsum_per_burst);
-      burstrootfile->FillNTuple("burst");
+      if (burst_ntuple) burst_ntuple->Fill();
 #endif
 
       // Finish data handler for burst
@@ -599,12 +622,12 @@ Int_t main(Int_t argc, Char_t* argv[])
       eventsum.PrintValue();
     }
     treerootfile->FillTreeBranches(eventsum);
-    treerootfile->FillTree("evts");
+    if (evts_tree) evts_tree->Fill();
 
     // Fill running sum RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
     treerootfile->FillNTupleFields(eventsum);
-    treerootfile->FillNTuple("evts");
+    if (evts_ntuple) evts_ntuple->Fill();
 #endif
 
     if (gQwOptions.GetValue<bool>("print-patternsum")) {
@@ -613,12 +636,12 @@ Int_t main(Int_t argc, Char_t* argv[])
       patternsum.PrintValue();
     }
     treerootfile->FillTreeBranches(patternsum);
-    treerootfile->FillTree("muls");
+    if (muls_tree) muls_tree->Fill();
 
     // Fill pattern sum RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
     treerootfile->FillNTupleFields(patternsum);
-    treerootfile->FillNTuple("muls");
+    if (muls_ntuple) muls_ntuple->Fill();
 #endif
 
     if (gQwOptions.GetValue<bool>("print-burstsum")) {
@@ -627,12 +650,12 @@ Int_t main(Int_t argc, Char_t* argv[])
       burstsum.PrintValue();
     }
     burstrootfile->FillTreeBranches(burstsum);
-    burstrootfile->FillTree("bursts");
+    if (bursts_tree) bursts_tree->Fill();
 
     // Fill burst sum RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
     burstrootfile->FillNTupleFields(burstsum);
-    burstrootfile->FillNTuple("bursts");
+    if (bursts_ntuple) bursts_ntuple->Fill();
 #endif
 
     //  Construct objects

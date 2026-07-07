@@ -920,8 +920,6 @@ class QwRootFile {
       update_count++;
       if ((fUpdateInterval > 0) && ( update_count % fUpdateInterval == 0)) Update();
 
-      // Debug directory registration
-      std::string type = typeid(object).name();
       bool hasDir = HasDirByType(object);
 
       if (! hasDir) return;
@@ -988,6 +986,12 @@ class QwRootFile {
     }
 
 #ifdef HAS_RNTUPLE_SUPPORT
+    /// Get the RNTuple wrapper with name
+    QwRootNTuple* GetNTuple(const std::string& name) {
+      if (! HasNTupleByName(name)) return nullptr;
+      return fNTupleByName[name].front();
+    }
+
     /// Fill the RNTuple with name
     void FillNTuple(const std::string& name) {
       if (HasNTupleByName(name)) {
@@ -1311,6 +1315,7 @@ class QwRootFile {
     /// Directories
     std::map< const std::string, TDirectory* > fDirsByName;
     std::map< const std::string, std::vector<std::string> > fDirsByType;
+    std::unordered_map< std::type_index, bool > fHasDirByTypeCache;
 
     /// Is a tree registered for this name
     bool HasDirByName(const std::string& name) {
@@ -1320,9 +1325,12 @@ class QwRootFile {
     /// Is a directory registered for this type
     template < class T >
     bool HasDirByType(const T& object) {
-      std::string type = typeid(object).name();
-      if (fDirsByType.count(type) == 0) return false;
-      else return true;
+      const std::type_index type = typeid(object);
+      if (fHasDirByTypeCache.count(type) > 0) return true;
+      const std::string type_name = type.name();
+      if (fDirsByType.count(type_name) == 0) return false;
+      fHasDirByTypeCache[type] = true;
+      return true;
     }
 
 
