@@ -749,10 +749,10 @@ GrandCorrelator::GrandCorrelator()
 //=================================================
 //=================================================
 GrandCorrelator::GrandCorrelator(const GrandCorrelator& source)
-: nP(source.nP),nY(source.nY),
+: VQwDataHandler(source),
+  nP(source.nP),nY(source.nY),
   fErrorFlag(-1),
   fGoodEventNumber(0),
-  VQwDataHandler(source),
   fBlock(source.fBlock),
   fDisableHistos(source.fDisableHistos),
   fAlphaOutputFileBase(source.fAlphaOutputFileBase),
