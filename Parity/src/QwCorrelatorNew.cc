@@ -708,9 +708,6 @@ QwCorrelatorNew::QwCorrelatorNew()
 //=================================================
 QwCorrelatorNew::QwCorrelatorNew(const QwCorrelatorNew& source)
 : VQwDataHandler(source),
-  nP(source.nP),nY(source.nY),
-  fErrorFlag(-1),
-  fGoodEventNumber(0),
   fBlock(source.fBlock),
   fDisableHistos(source.fDisableHistos),
   fAlphaOutputFileBase(source.fAlphaOutputFileBase),
@@ -721,7 +718,10 @@ QwCorrelatorNew::QwCorrelatorNew(const QwCorrelatorNew& source)
   fAliasOutputFileBase(source.fAliasOutputFileBase),
   fAliasOutputFileSuff(source.fAliasOutputFileSuff),
   fAliasOutputPath(source.fAliasOutputPath),
-  fCycleCounter(source.fCycleCounter)
+  nP(source.nP),nY(source.nY),
+  fCycleCounter(source.fCycleCounter),
+  fErrorFlag(-1),
+  fGoodEventNumber(0)
 {
   QwMessage << fGoodEventNumber << QwLog::endl;
 
