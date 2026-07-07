@@ -359,7 +359,8 @@ Int_t main(Int_t argc, Char_t* argv[])
 
         // Check to see ring is ready
         if (eventring.IsReady()) {
-	  ringoutput = eventring.pop();
+	  QwSubsystemArrayParity& ringevent = eventring.pop();
+	  ringoutput = ringevent;
 	  ringoutput.IncrementErrorCounters();
 
 
@@ -394,7 +395,8 @@ Int_t main(Int_t argc, Char_t* argv[])
 #endif
 
           // Load the event into the helicity pattern
-          helicitypattern.LoadEventData(ringoutput);
+          // ringoutput is reused each loop iteration; load from stable ring storage.
+          helicitypattern.LoadEventData(ringevent);
 
 	  if (helicitypattern.PairAsymmetryIsGood()) {
             patternsum.AccumulatePairRunningSum(helicitypattern);

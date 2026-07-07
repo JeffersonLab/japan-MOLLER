@@ -222,6 +222,7 @@ class QwHelicityPattern {
  protected:
 
   std::vector<QwSubsystemArrayParity> fEvents;
+  std::vector<const QwSubsystemArrayParity*> fEventPtrs;
   std::vector<Bool_t> fEventLoaded;
   std::vector<Int_t> fHelicity;// this is here up to when we code the Helicity decoding routine
   std::vector<Int_t> fEventNumber;
@@ -287,6 +288,13 @@ class QwHelicityPattern {
   // Flag to indicate that the pattern contains data
   Bool_t fIsDataLoaded;
   void SetDataLoaded(Bool_t flag) { fIsDataLoaded = flag; };
+
+  const QwSubsystemArrayParity& GetEventForPhase(size_t phase) const {
+    if (phase < fEventPtrs.size() && fEventPtrs[phase] != nullptr) {
+      return *(fEventPtrs[phase]);
+    }
+    return fEvents.at(phase);
+  }
 
   friend class QwDataHandlerArray;
 };
