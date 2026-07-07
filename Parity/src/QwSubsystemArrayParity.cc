@@ -44,6 +44,54 @@ QwSubsystemArrayParity::~QwSubsystemArrayParity()
   // nothing
 }
 
+void QwSubsystemArrayParity::BuildResolvedParitySelf() const
+{
+  if (fResolvedParitySelf.size() == this->size()) return;
+  fResolvedParitySelf.assign(this->size(), nullptr);
+  for (size_t i = 0; i < this->size(); ++i) {
+    if (this->at(i) != nullptr) {
+      fResolvedParitySelf[i] = dynamic_cast<VQwSubsystemParity*>(this->at(i).get());
+      if (fResolvedParitySelf[i] == nullptr) {
+        QwError << "QwSubsystemArrayParity::BuildResolvedParitySelf "
+                << "failed to cast slot " << i << " to VQwSubsystemParity."
+                << QwLog::endl;
+      }
+    }
+  }
+}
+
+void QwSubsystemArrayParity::ResolveParityPairing(
+    const QwSubsystemArrayParity& value, const char* context) const
+{
+  BuildResolvedParitySelf();
+  const Bool_t cache_valid =
+      (fResolvedParityPeer == &value)
+      && (fResolvedParityPeerSlots.size() == value.size())
+      && (fResolvedParityCompatible.size() == value.size());
+  if (cache_valid) return;
+
+  fResolvedParityPeer = &value;
+  fResolvedParityPeerSlots.assign(value.size(), nullptr);
+  fResolvedParityCompatible.assign(value.size(), kFALSE);
+  if (this->size() != value.size()) return;
+
+  for (size_t i = 0; i < value.size(); ++i) {
+    VQwSubsystemParity* ptr1 = fResolvedParitySelf[i];
+    VQwSubsystem* ptr2 = value.at(i).get();
+    fResolvedParityPeerSlots[i] = ptr2;
+    if (ptr1 == nullptr || ptr2 == nullptr) continue;
+
+    if (typeid(*ptr1) == typeid(*ptr2)) {
+      fResolvedParityCompatible[i] = kTRUE;
+    } else {
+      QwError << context << " types do not match at slot " << i << QwLog::endl;
+      QwError << " typeid(*ptr1)=" << typeid(*ptr1).name()
+              << " but typeid(*ptr2)=" << typeid(*ptr2).name()
+              << QwLog::endl;
+    }
+  }
+}
+
 //*****************************************************************//
 
 VQwSubsystemParity* QwSubsystemArrayParity::GetSubsystemByName(const TString& name)
@@ -112,25 +160,10 @@ QwSubsystemArrayParity& QwSubsystemArrayParity::operator+= (const QwSubsystemArr
         std::min(fCodaEventNumber, value.fCodaEventNumber);
     if (this->size() == value.size()){
       this->fErrorFlag|=value.fErrorFlag;
+      ResolveParityPairing(value, "QwSubsystemArrayParity::operator+=");
       for(size_t i=0;i<value.size();i++){
-	if (value.at(i)==NULL || this->at(i)==NULL){
-	  //  Either the value or the destination subsystem
-	  //  are null
-	} else {
-	  VQwSubsystemParity *ptr1 =
-	    dynamic_cast<VQwSubsystemParity*>(this->at(i).get());
-          VQwSubsystem *ptr2 = value.at(i).get();
-	  if (typeid(*ptr1)==typeid(*ptr2)){
-	    *(ptr1) += ptr2;
-	    //std::cout<<"QwSubsystemArrayParity::operator+ here where types match \n";
-	  } else {
-	    QwError << "QwSubsystemArrayParity::operator+ here where types don't match" << QwLog::endl;
-	    QwError << " typeid(ptr1)=" << typeid(ptr1).name()
-                    << " but typeid(value.at(i)))=" << typeid(value.at(i)).name()
-                    << QwLog::endl;
-	    //  Subsystems don't match
-	  }
-	}
+        if (!fResolvedParityCompatible[i]) continue;
+        *(fResolvedParitySelf[i]) += fResolvedParityPeerSlots[i];
       }
     } else {
       //  Array sizes don't match
@@ -153,20 +186,10 @@ QwSubsystemArrayParity& QwSubsystemArrayParity::operator-= (const QwSubsystemArr
         std::min(fCodaEventNumber, value.fCodaEventNumber);
     if (this->size() == value.size()){
       this->fErrorFlag|=value.fErrorFlag;
+      ResolveParityPairing(value, "QwSubsystemArrayParity::operator-=");
       for(size_t i=0;i<value.size();i++){
-	if (value.at(i)==NULL || this->at(i)==NULL){
-	  //  Either the value or the destination subsystem
-	  //  are null
-	} else {
-	  VQwSubsystemParity *ptr1 =
-	    dynamic_cast<VQwSubsystemParity*>(this->at(i).get());
-          VQwSubsystem *ptr2 = value.at(i).get();
-	  if (typeid(*ptr1)==typeid(*ptr2)){
-	    *(ptr1) -= ptr2;
-	  } else {
-	    //  Subsystems don't match
-	  }
-	}
+        if (!fResolvedParityCompatible[i]) continue;
+        *(fResolvedParitySelf[i]) -= fResolvedParityPeerSlots[i];
       }
     } else {
       //  Array sizes don't match
@@ -267,25 +290,11 @@ void QwSubsystemArrayParity::AccumulateRunningSum(const QwSubsystemArrayParity& 
       if (value.GetEventcutErrorFlag()==0){//do running sum only if error flag is zero. This way will prevent any Beam Trip(in ev mode 3) related events going into the running sum.
         fCodaEventNumber = (fCodaEventNumber == 0) ? value.fCodaEventNumber :
             std::min(fCodaEventNumber, value.fCodaEventNumber);
+        ResolveParityPairing(value, "QwSubsystemArrayParity::AccumulateRunningSum");
         for (size_t i = 0; i < value.size(); i++) {
-	  if (value.at(i)==NULL || this->at(i)==NULL) {
-	    //  Either the value or the destination subsystem
-	    //  are null
-	  } else {
-	    VQwSubsystemParity *ptr1 =
-	      dynamic_cast<VQwSubsystemParity*>(this->at(i).get());
-            VQwSubsystem *ptr2 = value.at(i).get();
-	    if (typeid(*ptr1) == typeid(*ptr2)) {
-	      ptr1->AccumulateRunningSum(ptr2, count, ErrorMask);
-	    } else {
-	      QwError << "QwSubsystemArrayParity::AccumulateRunningSum here where types don't match" << QwLog::endl;
-	      QwError << " typeid(ptr1)=" << typeid(ptr1).name()
-		      << " but typeid(value.at(i)))=" << typeid(value.at(i)).name()
-		      << QwLog::endl;
-	      //  Subsystems don't match
-	    }
-	  }
-	}
+          if (!fResolvedParityCompatible[i]) continue;
+          fResolvedParitySelf[i]->AccumulateRunningSum(fResolvedParityPeerSlots[i], count, ErrorMask);
+        }
       }
 
     } else {
@@ -302,24 +311,10 @@ void QwSubsystemArrayParity::AccumulateAllRunningSum(const QwSubsystemArrayParit
   if (!value.empty()) {
     if (this->size() == value.size()) {
       //if (value.GetEventcutErrorFlag()==0){//do running sum only if error flag is zero. This way will prevent any Beam Trip(in ev mode 3) related events going into the running sum.
+	ResolveParityPairing(value, "QwSubsystemArrayParity::AccumulateAllRunningSum");
 	for (size_t i = 0; i < value.size(); i++) {
-	  if (value.at(i)==NULL || this->at(i)==NULL) {
-	    //  Either the value or the destination subsystem
-	    //  are null
-	  } else {
-	    VQwSubsystemParity *ptr1 =
-	      dynamic_cast<VQwSubsystemParity*>(this->at(i).get());
-            VQwSubsystem *ptr2 = value.at(i).get();
-	    if (typeid(*ptr1) == typeid(*ptr2)) {
-	      ptr1->AccumulateRunningSum(ptr2, count, ErrorMask);
-	    } else {
-	      QwError << "QwSubsystemArrayParity::AccumulateRunningSum here where types don't match" << QwLog::endl;
-	      QwError << " typeid(ptr1)=" << typeid(ptr1).name()
-		      << " but typeid(value.at(i)))=" << typeid(value.at(i)).name()
-		      << QwLog::endl;
-	      //  Subsystems don't match
-	    }
-	  }
+	  if (!fResolvedParityCompatible[i]) continue;
+	  fResolvedParitySelf[i]->AccumulateRunningSum(fResolvedParityPeerSlots[i], count, ErrorMask);
 	}
 	//}//else if ((value.fErrorFlag& 512)==512){
       //QwMessage << " AccumulateRunningSum "<<(value.fErrorFlag & 0x2FF)<<" - "<<value.GetCodaEventNumber()<< QwLog::endl;
@@ -343,24 +338,10 @@ void QwSubsystemArrayParity::DeaccumulateRunningSum(const QwSubsystemArrayParity
   if (!value.empty()) {
     if (this->size() == value.size()) {
       //if (value.GetEventcutErrorFlag()==0){//do derunningsum only if error flag is zero.
+	ResolveParityPairing(value, "QwSubsystemArrayParity::DeaccumulateRunningSum");
 	for (size_t i = 0; i < value.size(); i++) {
-	  if (value.at(i)==NULL || this->at(i)==NULL) {
-	    //  Either the value or the destination subsystem
-	    //  are null
-	  } else {
-	    VQwSubsystemParity *ptr1 =
-	      dynamic_cast<VQwSubsystemParity*>(this->at(i).get());
-            VQwSubsystem *ptr2 = value.at(i).get();
-	    if (typeid(*ptr1) == typeid(*ptr2)) {
-	      ptr1->DeaccumulateRunningSum(ptr2, ErrorMask);
-	    } else {
-	      QwError << "QwSubsystemArrayParity::AccumulateRunningSum here where types don't match" << QwLog::endl;
-	      QwError << " typeid(ptr1)=" << typeid(ptr1).name()
-		      << " but typeid(value.at(i)))=" << typeid(value.at(i)).name()
-		      << QwLog::endl;
-	      //  Subsystems don't match
-	    }
-	  }
+	  if (!fResolvedParityCompatible[i]) continue;
+	  fResolvedParitySelf[i]->DeaccumulateRunningSum(fResolvedParityPeerSlots[i], ErrorMask);
 	}
 	//}//else if ((value.fErrorFlag & 268435968)==268435968){
       //QwMessage << " DeaccumulateRunningSum "<<(value.fErrorFlag & 0x2FF)<<" - "<<value.GetCodaEventNumber()<< QwLog::endl;
