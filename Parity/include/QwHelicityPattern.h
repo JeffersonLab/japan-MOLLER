@@ -229,6 +229,7 @@ class QwHelicityPattern {
   Int_t fCurrentPatternNumber;
   size_t fPatternSize;
   Int_t fQuartetNumber;
+  Int_t fHelicitySubsystemIndex;
 
   // Blinding strategy
   QwBlinder fBlinder;

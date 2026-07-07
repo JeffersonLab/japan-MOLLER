@@ -138,6 +138,7 @@ QwHelicityPattern::QwHelicityPattern(QwSubsystemArrayParity &event, const TStrin
     fNextPair(0),
     fPairIsGood(false),
     fPatternIsGood(false),
+    fHelicitySubsystemIndex(-1),
     fIsDataLoaded(false)
 {
   // Retrieve the helicity subsystem to query for
@@ -149,15 +150,30 @@ QwHelicityPattern::QwHelicityPattern(QwSubsystemArrayParity &event, const TStrin
 
     // Take the first helicity subsystem
     QwHelicityBase* helicity = dynamic_cast<QwHelicityBase*>(subsys_helicity.at(0));
+    for (size_t i = 0; i < event.size(); ++i) {
+      if (event.at(i).get() == subsys_helicity.at(0)) {
+        fHelicitySubsystemIndex = static_cast<Int_t>(i);
+        break;
+      }
+    }
 
-    // Get the maximum pattern phase (i.e. pattern size)
-    fPatternSize = helicity->GetMaxPatternPhase();
+    if (helicity != nullptr && fHelicitySubsystemIndex >= 0) {
+      // Get the maximum pattern phase (i.e. pattern size)
+      fPatternSize = helicity->GetMaxPatternPhase();
 
-    // Warn if more than one helicity subsystem defined
-    if (subsys_helicity.size() > 1)
-      QwWarning << "Multiple helicity subsystems defined! "
-                << "Using " << helicity->GetName() << "."
-                << QwLog::endl;
+      // Warn if more than one helicity subsystem defined
+      if (subsys_helicity.size() > 1)
+        QwWarning << "Multiple helicity subsystems defined! "
+                  << "Using " << helicity->GetName() << "."
+                  << QwLog::endl;
+    } else {
+      QwError << "Failed to cache helicity subsystem index; "
+              << "calculate asymmetries based on (+--+) quartets!"
+              << QwLog::endl;
+      fHelicityIsMissing = kTRUE;
+      fPatternSize = 4;
+      fHelicitySubsystemIndex = -1;
+    }
 
   } else {
     // We are not using any helicity subsystem
@@ -233,6 +249,7 @@ QwHelicityPattern::QwHelicityPattern(const QwHelicityPattern &source)
   fNextPair(0),
   fPairIsGood(false),
   fPatternIsGood(false),
+  fHelicitySubsystemIndex(source.fHelicitySubsystemIndex),
   fIsDataLoaded(false)
 {
   fEvents.resize(fPatternSize, source.fYield);
@@ -271,40 +288,37 @@ void QwHelicityPattern::LoadEventData(QwSubsystemArrayParity &event)
   Bool_t localIgnoreHelicity = kFALSE;
 
 
-  // Get the list of helicity subsystems
+  // Read the helicity subsystem from the cached subsystem slot.
   if (! fHelicityIsMissing){
-    std::vector<VQwSubsystem*> subsys_helicity = event.GetSubsystemByType("QwHelicity");
-    if (subsys_helicity.size()==0) {
-    subsys_helicity = event.GetSubsystemByType("QwHelicityDecoder");
+    QwHelicityBase* helicity = nullptr;
+    if (fHelicitySubsystemIndex >= 0
+        && fHelicitySubsystemIndex < static_cast<Int_t>(event.size())) {
+      helicity = dynamic_cast<QwHelicityBase*>(event.at(fHelicitySubsystemIndex).get());
     }
 
-    QwHelicityBase* helicity = 0;
-    
-    if (subsys_helicity.size() > 0) {
-      //std::cout << "subsystem size : " << subsys_helicity.size() << std::endl;
-      // Take the first helicity subsystem
-      helicity = dynamic_cast<QwHelicityBase*>(subsys_helicity.at(0));
+    if (helicity != nullptr) {
       if (helicity->HasDataLoaded()){
-	localIgnoreHelicity = helicity->IsHelicityIgnored();
-	// Get the event, pattern, phase number and helicity
-	localEventNumber    = helicity->GetEventNumber();
-	localPatternNumber  = helicity->GetPatternNumber();
-	localPhaseNumber    = helicity->GetPhaseNumber() - helicity->GetMinPatternPhase(); // Use "reduced pattern phase", counts from 0.
-	localHelicityActual = helicity->GetHelicityActual();
+        localIgnoreHelicity = helicity->IsHelicityIgnored();
+        // Get the event, pattern, phase number and helicity
+        localEventNumber    = helicity->GetEventNumber();
+        localPatternNumber  = helicity->GetPatternNumber();
+        localPhaseNumber    = helicity->GetPhaseNumber() - helicity->GetMinPatternPhase(); // Use "reduced pattern phase", counts from 0.
+        localHelicityActual = helicity->GetHelicityActual();
 
         //std::cout << " local phase: " << localPhaseNumber << " : local event : " << localEventNumber << " : local Pattern : " << localPatternNumber << " : local helicity : " << localHelicityActual << std::endl;
       } else {
-	QwError << "QwHelicityPattern::LoadEventData:  The helicity subsystem does not have valid data!"
-		<< QwLog::endl;
+        QwError << "QwHelicityPattern::LoadEventData:  The helicity subsystem does not have valid data!"
+                << QwLog::endl;
       }
     } else {
       // We are not using any helicity subsystem
       static Bool_t user_has_been_warned = kFALSE;
       if (! user_has_been_warned) {
-	QwError << "No helicity subsystem found!  Dropping to \"Missing Helicity\" mode!" << QwLog::endl;
-	user_has_been_warned = kTRUE;
-	fHelicityIsMissing = kTRUE;
+        QwError << "No helicity subsystem found!  Dropping to \"Missing Helicity\" mode!" << QwLog::endl;
+        user_has_been_warned = kTRUE;
       }
+      fHelicityIsMissing = kTRUE;
+      fHelicitySubsystemIndex = -1;
     }
   }
   if (fHelicityIsMissing){
