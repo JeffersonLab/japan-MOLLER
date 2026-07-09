@@ -799,7 +799,7 @@ void  QwVQWK_Channel::ConstructBranchAndVector(TTree *tree, TString &prefix, QwR
 
   fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
 
-  std::string leaf_list = values.LeafList();
+  std::string leaf_list = values.LeafList(fTreeArrayIndex);
 
   if (gQwHists.MatchDeviceParamsFromList(basename.Data())
     && (bHw_sum || bBlock || bNum_samples || bDevice_Error_Code ||
