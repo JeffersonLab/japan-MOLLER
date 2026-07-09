@@ -806,7 +806,7 @@ void QwBeamMod::ConstructBranchAndVector(TTree *tree, TString & prefix, QwRootTr
     // 	  basename = fWord[i].fWordName;
     basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length());
     basename += fWord[i].fWordName;
-    values.push_back(basename.Data(), 'D');
+    values.push_back(basename.Data(), 'I');
     tree->Branch(basename, &(values[fTreeArrayIndex + i]), values.LeafList(fTreeArrayIndex + i).c_str());
   }
 }
