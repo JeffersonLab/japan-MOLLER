@@ -9,6 +9,7 @@
  */
 
 #include "QwEventRing.h"
+#include <utility>  // for std::move
 
 /** Constructor: initialize ring buffer with specified size and options. */
 QwEventRing::QwEventRing(QwOptions &options, QwSubsystemArrayParity &event)
@@ -25,6 +26,9 @@ QwEventRing::QwEventRing(QwOptions &options, QwSubsystemArrayParity &event)
   fNextToBeFilled = 0;
   fNextToBeRead = 0;
   countdown = 0;
+
+  // Initialize helicity index tracking
+  fHelicityIndex = std::nullopt;
 
   //open the log file
   if (bDEBUG_Write)
@@ -89,7 +93,7 @@ void QwEventRing::ProcessOptions(QwOptions &options)
   tmpval += 2;
   if (fRING_SIZE<tmpval){
     QwWarning << "Forcing ring size to be " << tmpval
-         << " to accommodate a burp extent of " << fBurpExtent
+              << " to accommodate a burp extent of " << fBurpExtent
 	      << " and a burp precut of " << fBurpPrecut
 	      << "; it had been " << fRING_SIZE << "." << QwLog::endl;
     fRING_SIZE = tmpval;
@@ -149,7 +153,7 @@ void QwEventRing::push(QwSubsystemArrayParity &event)
       //check for current ramps
     if (bRING_READY && bStability){
 	    fRollingAvg.CalculateRunningAverage();
-    	/*
+    	    /*
 	    //The fRollingAvg dose not contain any regular errorcodes since it only accumulate rolling sum for errorflag==0 event.
 	    //The only errorflag it generates is the stability cut failure error when the rolling avg is computed.
 	    //Therefore when fRollingAvg.GetEventcutErrorFlag() is called it will return non-zero error code only if a global stability cut has failed
@@ -172,15 +176,193 @@ void QwEventRing::push(QwSubsystemArrayParity &event)
       }
       if (countdown > 0) {
         --countdown;
-  	    for(Int_t i=0;i<fRING_SIZE;i++){
-	        fEvent_Ring[i].UpdateErrorFlag(kBeamTripError);
-	      }
-    	}
+              for(Int_t i=0;i<fRING_SIZE;i++){
+                fEvent_Ring[i].UpdateErrorFlag(kBeamTripError);
+              }
+            }
     }
     //ring processing is done at a separate location
 
     this->CheckBurpCut(thisevent);
   }
+}
+
+void QwEventRing::push(QwSubsystemArrayParity &&event)
+{
+  if (bDEBUG) QwMessage << "QwEventRing::push (move):  BEGIN" <<QwLog::endl;
+
+  
+
+  if (bEVENT_READY){
+    Int_t thisevent = fNextToBeFilled;
+    Int_t prevevent = (thisevent+fRING_SIZE-1)%fRING_SIZE;
+    fEvent_Ring[thisevent] = std::move(event);//move the current good event to the ring 
+    if (bStability){
+      fRollingAvg.AccumulateAllRunningSum(fEvent_Ring[thisevent]);
+    }
+
+
+    if (bDEBUG) QwMessage<<" Filled at "<<thisevent;//<<"Ring count "<<fRing_Count<<QwLog::endl; 
+    if (bDEBUG_Write) fprintf(out_file," Filled at %d ",thisevent);
+
+    // Increment fill index
+    fNumberOfEvents ++;
+    fNextToBeFilled = (thisevent + 1) % fRING_SIZE;
+    
+    if(fNextToBeFilled == 0){
+      //then we have RING_SIZE events to process
+      if (bDEBUG) QwMessage<<" RING FILLED "<<thisevent; //<<QwLog::endl; 
+      if (bDEBUG_Write) fprintf(out_file," RING FILLED ");
+      bRING_READY=kTRUE;//ring is filled with good multiplets
+      fNextToBeFilled=0;//next event to be filled is the first element  
+    }
+
+
+      //check for current ramps
+    if (bRING_READY && bStability){
+            fRollingAvg.CalculateRunningAverage();
+            /*
+            //The fRollingAvg dose not contain any regular errorcodes since it only accumulate rolling sum for errorflag==0 event.
+            //The only errorflag it generates is the stability cut faliure error when the rolling avg is computed. 
+            //Therefore when fRollingAvg.GetEventcutErrorFlag() is called it will return non-zero error code only if a global stability cut has failed
+            //When fRollingAvg.GetEventcutErrorFlag() is called the fErrorFlag of the subsystemarrayparity object will be updated with any global
+            //stability cut faliures
+            */
+            fRollingAvg.UpdateErrorFlag(); //to update the global error code in the fRollingAvg
+            if ( fRollingAvg.GetEventcutErrorFlag() != 0 ) {
+              //  This test really needs to determine in any of the subelements
+              //  might have a local stability cut failure, instead of just this
+              //  global stability cut failure.
+              for(Int_t i=0;i<fRING_SIZE;i++){
+                fEvent_Ring[i].UpdateErrorFlag(fRollingAvg);
+                fEvent_Ring[i].UpdateErrorFlag();
+              }
+            }
+            if ((fEvent_Ring[thisevent].GetEventcutErrorFlag() & kBCMErrorFlag)!=0 &&
+                (fEvent_Ring[prevevent].GetEventcutErrorFlag() & kBCMErrorFlag)!=0){
+        countdown = holdoff;
+      }
+      if (countdown > 0) {
+        --countdown;
+              for(Int_t i=0;i<fRING_SIZE;i++){
+                fEvent_Ring[i].UpdateErrorFlag(kBeamTripError);
+              }
+            }
+    }
+    //ring processing is done at a separate location
+
+    this->CheckBurpCut(thisevent);
+  }
+}
+
+void QwEventRing::push_swap(QwSubsystemArrayParity &event)
+{
+  // Two-phased approach for optimal performance and configuration preservation
+  // Phase 1: During ring filling, use copy assignment to preserve configuration in incoming event
+  // Phase 2: When ring is full, use swap to efficiently exchange data while preserving configuration
+  
+  if (bDEBUG) QwMessage << "QwEventRing::push_swap:  BEGIN" <<QwLog::endl;
+
+  if (bEVENT_READY){
+    Int_t thisevent = fNextToBeFilled;
+    Int_t prevevent = (thisevent+fRING_SIZE-1)%fRING_SIZE;
+    
+    if (bRING_READY) {
+      // Phase 2: Ring is full - use swap for efficient data exchange
+      // This preserves configuration in both the incoming event and ring event
+      
+      // Find helicity subsystem index once for efficiency
+      if (!fHelicityIndex.has_value()) {
+        auto helicity_subsystems = event.GetSubsystemByType("QwHelicity");
+        if (!helicity_subsystems.empty()) {
+          VQwSubsystem* helicity_subsystem = helicity_subsystems[0];
+          for (size_t i = 0; i < event.size(); i++) {
+            if (event.at(i).get() == helicity_subsystem) {
+              fHelicityIndex = i;
+              break;
+            }
+          }
+        }
+        if (bDEBUG && fHelicityIndex.has_value()) {
+          QwMessage << "Found helicity subsystem at index " << fHelicityIndex.value() << QwLog::endl;
+        }
+      }
+      
+      std::swap(fEvent_Ring[thisevent], event);
+      
+      // Preserve helicity information: copy it back from ring to incoming event
+      // This ensures the calling code retains helicity state for the next event
+      if (fHelicityIndex.has_value() && 
+          fHelicityIndex.value() < event.size() && 
+          fHelicityIndex.value() < fEvent_Ring[thisevent].size()) {
+        *(event.at(fHelicityIndex.value())) = *(fEvent_Ring[thisevent].at(fHelicityIndex.value()));
+        if (bDEBUG) QwMessage << " Preserved helicity info after swap" << QwLog::endl;
+      }
+      if (bDEBUG) QwMessage<<" Swapped at "<<thisevent;
+      if (bDEBUG_Write) fprintf(out_file," Swapped at %d ",thisevent);
+    } else {
+      // Phase 1: Ring is filling - use assignment to preserve configuration
+      fEvent_Ring[thisevent] = event;
+      if (bDEBUG) QwMessage<<" Filled at "<<thisevent;
+      if (bDEBUG_Write) fprintf(out_file," Filled at %d ",thisevent);
+    }
+    
+    if (bStability){
+      fRollingAvg.AccumulateAllRunningSum(fEvent_Ring[thisevent]);
+    }
+
+    // Increment fill index
+    fNumberOfEvents ++;
+    fNextToBeFilled = (thisevent + 1) % fRING_SIZE;
+    
+    if(fNextToBeFilled == 0 && !bRING_READY){
+      //then we have RING_SIZE events to process
+      if (bDEBUG) QwMessage<<" RING FILLED "<<thisevent;
+      if (bDEBUG_Write) fprintf(out_file," RING FILLED ");
+      bRING_READY=kTRUE;//ring is filled with good multiplets
+      fNextToBeFilled=0;//next event to be filled is the first element  
+    }
+
+    if (bDEBUG) QwMessage<<QwLog::endl;
+    if (bDEBUG_Write) fprintf(out_file,"\\n");
+
+    //check for current ramps
+    if (bRING_READY && bStability){
+      fRollingAvg.CalculateRunningAverage();
+      /*
+      //The fRollingAvg dose not contain any regular errorcodes since it only accumulate rolling sum for errorflag==0 event.
+      //The only errorflag it generates is the stability cut faliure error when the rolling avg is computed. 
+      //Therefore when fRollingAvg.GetEventcutErrorFlag() is called it will return non-zero error code only if a global stability cut has failed
+      //When fRollingAvg.GetEventcutErrorFlag() is called the fErrorFlag of the subsystemarrayparity object will be updated with any global
+      //stability cut faliures
+      */
+      fRollingAvg.UpdateErrorFlag(); //to update the global error code in the fRollingAvg
+      if ( fRollingAvg.GetEventcutErrorFlag() != 0 ) {
+        //  This test really needs to determine in any of the subelements
+        //  might have a local stability cut failure, instead of just this
+        //  global stability cut failure.
+        for(Int_t i=0;i<fRING_SIZE;i++){
+          fEvent_Ring[i].UpdateErrorFlag(fRollingAvg);
+          fEvent_Ring[i].UpdateErrorFlag();
+        }
+      }
+      if ((fEvent_Ring[thisevent].GetEventcutErrorFlag() & kBCMErrorFlag)!=0 &&
+          (fEvent_Ring[prevevent].GetEventcutErrorFlag() & kBCMErrorFlag)!=0){
+        countdown = holdoff;
+      }
+      if (countdown > 0) {
+        --countdown;
+        for(Int_t i=0;i<fRING_SIZE;i++){
+          fEvent_Ring[i].UpdateErrorFlag(kBeamTripError);
+        }
+      }
+    }
+    //ring processing is done at a separate location
+
+    this->CheckBurpCut(thisevent);
+  }
+
+  if (bDEBUG) QwMessage << "QwEventRing::push_swap:  END" <<QwLog::endl;
 }
 
 
@@ -211,6 +393,52 @@ QwSubsystemArrayParity& QwEventRing::pop(){
   return fEvent_Ring[tempIndex];
 }
 
+QwSubsystemArrayParity QwEventRing::pop_move(){
+  Int_t tempIndex;
+  tempIndex=fNextToBeRead;  
+  if (bDEBUG) QwMessage<<" Read at (move) "<<fNextToBeRead<<QwLog::endl; 
+  if (bDEBUG_Write) fprintf(out_file," Read at (move) %d \n",fNextToBeRead);
+  
+  if (fNextToBeRead==(fRING_SIZE-1)){
+    bRING_READY=kFALSE;//setting to false is an extra measure of security to prevent reading a NULL value. 
+  }
+  if (bStability){
+     fRollingAvg.DeaccumulateRunningSum(fEvent_Ring[tempIndex]);
+  }
+
+  // Increment read index
+  fNumberOfEvents --;
+  fNextToBeRead = (fNextToBeRead + 1) % fRING_SIZE;
+
+  // Return the event using move semantics
+  return std::move(fEvent_Ring[tempIndex]);  
+}
+
+void QwEventRing::pop_swap(QwSubsystemArrayParity &outgoing_event){
+  // Pop using swap - this preserves configuration in both directions
+  // The outgoing_event gets the ring data, and the ring gets the outgoing_event's data
+  
+  Int_t tempIndex;
+  tempIndex=fNextToBeRead;  
+  if (bDEBUG) QwMessage<<" Read at (swap) "<<fNextToBeRead<<QwLog::endl; 
+  if (bDEBUG_Write) fprintf(out_file," Read at (swap) %d \n",fNextToBeRead);
+  
+  if (fNextToBeRead==(fRING_SIZE-1)){
+    bRING_READY=kFALSE;//setting to false is an extra measure of security to prevent reading a NULL value. 
+  }
+  if (bStability){
+     fRollingAvg.DeaccumulateRunningSum(fEvent_Ring[tempIndex]);
+  }
+
+  // Swap the ring event with the outgoing event
+  // This preserves configuration in both the ring and the outgoing event
+  std::swap(fEvent_Ring[tempIndex], outgoing_event);
+
+  // Increment read index
+  fNumberOfEvents --;
+  fNextToBeRead = (fNextToBeRead + 1) % fRING_SIZE;
+}
+
 
 /** Check if the ring buffer has events ready for retrieval. */
 Bool_t QwEventRing::IsReady(){ //Check for readiness to read data from the ring using the pop() routine
@@ -227,8 +455,8 @@ void QwEventRing::CheckBurpCut(Int_t thisevent)
     if (fBurpAvg.CheckForBurpFail(fEvent_Ring[thisevent])){
       Int_t precut_start = (thisevent+fRING_SIZE-fBurpPrecut)%fRING_SIZE;
       for(Int_t i=precut_start;i!=(thisevent+1)%fRING_SIZE;i=(i+1)%fRING_SIZE){
-	      fEvent_Ring[i].UpdateErrorFlag(fBurpAvg);
-	      fEvent_Ring[i].UpdateErrorFlag();
+        fEvent_Ring[i].UpdateErrorFlag(fBurpAvg);
+        fEvent_Ring[i].UpdateErrorFlag();
       }
     }
     Int_t beforeburp = (thisevent+fRING_SIZE-fBurpExtent-1)%fRING_SIZE;
