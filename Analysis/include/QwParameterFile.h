@@ -8,6 +8,8 @@
 #pragma once
 
 // System headers
+#include <algorithm>
+#include <cctype>
 #include <vector>
 #include <iostream>
 #include <sstream>
