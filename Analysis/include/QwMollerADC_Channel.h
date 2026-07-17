@@ -52,6 +52,7 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
  ******************************************************************/
  public:
   static Int_t GetBufferOffset(Int_t moduleindex, Int_t channelindex);
+  static void SetDecodeMode(UInt_t input);
   static void  PrintErrorCounterHead();
   static void  PrintErrorCounterTail();
 
@@ -123,7 +124,6 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
     // This will be checked against the no.of samples read by the module
     fNumberOfSamples_map = num_samples_map;
   };
-
   void  ClearEventData() override;
 
   /// Internally generate random event data
@@ -143,10 +143,42 @@ class QwMollerADC_Channel: public VQwHardwareChannel, public MQwMockable {
   void  SetEventData(Double_t* block, UInt_t sequencenumber = 0);
   void  SetRawEventData() override;
 
+  // added this
+  void SetMollerADCHeaderData(UInt_t region_number,
+                            ULong64_t region_timestamp,
+                            UInt_t header_num_words,
+                            UInt_t header_block_number,
+                            ULong64_t header_packet_count,
+                            ULong64_t header_tsamples)
+{
+  fRegionNumber = region_number;
+  fRegionTimestamp = region_timestamp;
+  fHeaderNumWords = header_num_words;
+  fHeaderBlockNumber = header_block_number;
+  fHeaderPacketCount = header_packet_count;
+  fHeaderTSamples = header_tsamples;
+}
+
+  void SetRegionNumber(UInt_t x)          { fRegionNumber = x; }
+void SetRegionTimestamp(ULong64_t x)    { fRegionTimestamp = x; }
+void SetHeaderPacketCount(ULong64_t x)  { fHeaderPacketCount = x; }
+void SetHeaderBlockNumber(UInt_t x)     { fHeaderBlockNumber = x; }
+void SetHeaderNumWords(UInt_t x)        { fHeaderNumWords = x; }
+void SetHeaderTSamples(ULong64_t x)     { fHeaderTSamples = x; }
+
+UInt_t GetRegionNumber() const              { return fRegionNumber; }
+ULong64_t GetRegionTimestamp() const        { return fRegionTimestamp; }
+ULong64_t GetHeaderPacketCount() const      { return fHeaderPacketCount; }
+UInt_t GetHeaderBlockNumber() const         { return fHeaderBlockNumber; }
+UInt_t GetHeaderNumWords() const            { return fHeaderNumWords; }
+ULong64_t GetHeaderTSamples() const         { return fHeaderTSamples; }
+
   /// Encode the event data into a CODA buffer
   void  EncodeEventData(std::vector<UInt_t> &buffer) override;
   /// Decode the event data from a CODA buffer
   Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t num_words_left, UInt_t index = 0) override;
+  Int_t ProcessEvBuffer_oldmock(UInt_t* buffer, UInt_t num_words_left, UInt_t index = 0);
+  Int_t ProcessEvBuffer_newreshuffled(UInt_t* buffer, UInt_t num_words_left, UInt_t index = 0); //{return 0;};
   /// Process the event data according to pedestal and calibration factor
   void  ProcessEvent() override;
 
@@ -316,8 +348,22 @@ private:
 
  private:
   static const Bool_t kDEBUG;
-  static const Int_t  kWordsPerChannel; //no.of words per channel in the CODA buffer
+
   static const Int_t  kMaxChannels;     //no.of channels per module
+  static const Int_t  kModuleHeaderWords;     //no.of words per header
+  static constexpr Int_t kMaxBlock=15; // maximum no.of blocks
+  enum EDecodeMode {kOldMock = 0, kNewReshuffled = 1};
+  static EDecodeMode fDecodeMode;
+  static constexpr Int_t kOldMockChannelsPerModule = 8;
+  static constexpr Int_t kNewReshuffledChannelsPerModule = 16;
+  static constexpr Int_t kOldMockDefaultBlocks = 4;
+  static constexpr Int_t kNewReshuffledDefaultBlocks = kMaxBlock;
+  static constexpr Int_t kOldMockWordsPerChannel = 30;
+  static constexpr Int_t kNewReshuffledWordsPerChannel = 14;
+  static Int_t GetWordsPerChannel();
+  static Int_t GetChannelsPerModule();
+  static Int_t GetModuleHeaderWords();
+  static Int_t GetDefaultBlocksPerEvent();
 
   /*! \name ADC Calibration                    */
   // @{
@@ -337,18 +383,20 @@ private:
 
   /*! \name Event data members---Raw values */
   // @{
-  Int_t fBlock_raw[4];      ///< Array of the sub-block data as read from the module
-  Int_t fHardwareBlockSum_raw; ///< Module-based sum of the four sub-blocks as read from the module
-  Int_t fSoftwareBlockSum_raw; ///< Sum of the data in the four sub-blocks raw
-  Long64_t fBlockSumSq_raw[5];
-  Int_t fBlock_min[5];
-  Int_t fBlock_max[5];
+  Long64_t fBlock_raw[kMaxBlock];      ///< Array of the sub-block data as read from the module
+  Long64_t fHardwareBlockSum_raw; ///< Module-based sum of the four sub-blocks as read from the module
+  Long64_t fSoftwareBlockSum_raw; ///< Sum of the data in the four sub-blocks raw
+  Long64_t fBlockSumSq_raw[kMaxBlock+1];
+  Int_t fBlock_min[kMaxBlock+1];
+  Int_t fBlock_max[kMaxBlock+1];
+  Short_t fBlock_numSamples[kMaxBlock+1];
+  UInt_t fBlockSample[kMaxBlock+1]; // number of samples in each block
   // @}
 
   /*! \name Event data members---Potentially calibrated values*/
   // @{
   // The following values potentially have pedestal removed  and calibration applied
-  Double_t fBlock[4];          ///< Array of the sub-block data
+  Double_t fBlock[kMaxBlock];          ///< Array of the sub-block data
   Double_t fHardwareBlockSum;  ///< Module-based sum of the four sub-blocks
   // @}
 
@@ -356,20 +404,31 @@ private:
   /// \name Calculation of the statistical moments
   // @{
   // Moments of the separate blocks
-  Double_t fBlockM2[4];        ///< Second moment of the sub-block
-  Double_t fBlockError[4];     ///< Uncertainty on the sub-block
+  Double_t fBlockM2[kMaxBlock];        ///< Second moment of the sub-block
+  Double_t fBlockError[kMaxBlock];     ///< Uncertainty on the sub-block
   // Moments of the hardware sum
   Double_t fHardwareBlockSumM2;    ///< Second moment of the hardware sum
   Double_t fHardwareBlockSumError; ///< Uncertainty on the hardware sum
+
+  Double_t fHardwareBlockSumRMS;   // RMS of the hardware sum
+  Double_t fBlockRMS[kMaxBlock+1]; // RMS of the sub-blocks
+
+  Double_t GetHardwareSumRMS() const { return fHardwareBlockSumRMS; } // RMS of the hardware sum
+  Double_t GetBlockRMS(Int_t i) const { return fBlockRMS[i]; }        // RMS of the sub-blocks
+
   // @}
 
 
   UInt_t fSequenceNumber;      ///< Event sequence number for this channel
   UInt_t fPreviousSequenceNumber; ///< Previous event sequence number for this channel
   UInt_t fNumberOfSamples;     ///< Number of samples  read through the module
+  UInt_t    fRegionNumber;
+ULong64_t fRegionTimestamp;
+UInt_t    fHeaderNumWords;
+UInt_t    fHeaderBlockNumber;
+ULong64_t fHeaderPacketCount;
+ULong64_t fHeaderTSamples;
   UInt_t fNumberOfSamples_map; ///< Number of samples in the expected to  read through the module. This value is set in the QwBeamline map file
-
-
   // Set of error counters for each HW test.
   Int_t fErrorCount_HWSat;    ///< check to see ADC channel is saturated
   Int_t fErrorCount_sample;   ///< for sample size check

@@ -105,8 +105,8 @@ void QwHelicityDecoder::ProcessOptions(QwOptions &options)
   }
 
   if (options.HasValue("helicity.bitpattern")) {
-    QwMessage << " Helicity Pattern =" 
-	      << options.GetValue<std::string>("helicity.bitpattern") 
+    QwMessage << " Helicity Pattern ="
+	      << options.GetValue<std::string>("helicity.bitpattern")
 	      << QwLog::endl;
     std::string hex = options.GetValue<std::string>("helicity.bitpattern");
     //UInt_t bits = QwParameterFile::GetUInt(hex);
@@ -143,12 +143,12 @@ void QwHelicityDecoder::ClearEventData()
   for (size_t i=0;i<fWord.size();i++)
     fWord[i].ClearEventData();
 
-  /**Reset data by setting the old event number, pattern number and pattern phase 
+  /**Reset data by setting the old event number, pattern number and pattern phase
      to the values of the previous event.*/
   if (fEventNumberFirst==-1 && fEventNumberOld!= -1){
     fEventNumberFirst = fEventNumberOld;
   }
-  if (fPatternNumberFirst==-1 && fPatternNumberOld!=-1 
+  if (fPatternNumberFirst==-1 && fPatternNumberOld!=-1
       && fPatternNumber==fPatternNumberOld+1){
     fPatternNumberFirst = fPatternNumberOld;
   }
@@ -187,7 +187,7 @@ Bool_t QwHelicityDecoder::ApplySingleEventCuts(){
 
 void  QwHelicityDecoder::ProcessEvent()
 {
-  Bool_t ldebug = kTRUE;
+  Bool_t ldebug = kFALSE;
   fErrorFlag = 0;
 
   if (! HasDataLoaded()) return;
@@ -197,8 +197,9 @@ void  QwHelicityDecoder::ProcessEvent()
   if(firstpattern && fPatternNumber > fPatternNumberOld){
     firstpattern = kFALSE;
   }
-  
-  if(fEventNumber!=(fEventNumberOld+1)){
+
+
+  if((fEventNumberFirst!=-1) && (fEventNumber!=(fEventNumberOld+1))){
     Int_t nummissed(fEventNumber - (fEventNumberOld+1));
     QwError << "QwHelicityDecoder::ProcessEvent read event# ("
 	    << fEventNumber << ") is not  old_event#+1; missed "
@@ -206,7 +207,7 @@ void  QwHelicityDecoder::ProcessEvent()
     fNumMissedGates += nummissed;
     fNumMissedEventBlocks++;
   }
-  
+
   fHelicityReported=fBit_Helicity;
 
   if (fHelicityReported == 1){
@@ -220,7 +221,7 @@ void  QwHelicityDecoder::ProcessEvent()
 
   if(fHelicityBitPlus==fHelicityBitMinus)
     fHelicityReported=-1;
-    
+
   // Predict helicity if delay is non zero.
   if(fUsePredictor && !fIgnoreHelicity){
     PredictHelicity();
@@ -229,8 +230,8 @@ void  QwHelicityDecoder::ProcessEvent()
     fHelicityActual  = fHelicityReported;
     fHelicityDelayed = fHelicityReported;
   }
-  
-  fPatternSeed = fSeed_Reported & 0x7fffffff;  
+
+  fPatternSeed = fSeed_Reported & 0x7fffffff;
 
   if(ldebug){
     std::cout<<"\nevent number= "<<fEventNumber<<std::endl;
@@ -238,6 +239,9 @@ void  QwHelicityDecoder::ProcessEvent()
     std::cout<<"pattern phase = "<<fPatternPhaseNumber<<std::endl;
     std::cout<<"max pattern phase = "<<fMaxPatternPhase<<std::endl;
     std::cout<<"min pattern phase = "<<fMinPatternPhase<<std::endl;
+    std::cout << "Helicity Info: [Reported = " << fHelicityReported
+          << ", Delayed = " << fHelicityDelayed
+          << ", Actual = " << fHelicityActual << "]" << std::endl;
 
 
   }
@@ -286,7 +290,7 @@ Int_t QwHelicityDecoder::LoadChannelMap(TString mapfile)
     //  so there is nothing to do in this loop.  We just need the one
     //  call to "ReadNextLine" to populate the list of key/vale pairs.
 
-    // std::cout << "in the loop: " << mapstr.GetLine() << std::endl;   
+    // std::cout << "in the loop: " << mapstr.GetLine() << std::endl;
     // RegisterRocBankMarker(mapstr);
   }
   //std::cout << "finished loop" << std::endl;
@@ -294,7 +298,7 @@ Int_t QwHelicityDecoder::LoadChannelMap(TString mapfile)
   //  Call "RegisterRocBankMarker" to record the ROC/Bank our data is in.
   RegisterRocBankMarker(mapstr);
 
-  //  If we have other key/values we want to use, we'd need to go though 
+  //  If we have other key/values we want to use, we'd need to go though
   //  them here to see if they were found in the mapfile.
   if (mapstr.PopValue("patternphase",value)) {
     fMaxPatternPhase=value;
@@ -316,7 +320,7 @@ Int_t QwHelicityDecoder::ProcessEvBuffer(UInt_t event_type, const ROCID_t roc_id
 {
 
   Bool_t lkDEBUG = kFALSE;
-  //std::cout << " roc id = " << roc_id << "bank id = " << bank_id << std::endl; 
+  //std::cout << " roc id = " << roc_id << "bank id = " << bank_id << std::endl;
   Int_t index = GetSubbankIndex(roc_id,bank_id);
   //std::cout << "index = " << index << std::endl;
   if (index >= 0 && num_words > 0) {
@@ -327,11 +331,11 @@ Int_t QwHelicityDecoder::ProcessEvBuffer(UInt_t event_type, const ROCID_t roc_id
   uint32_t time_last = 0;
   uint32_t decoder_index = 0;
   uint32_t num_decoder_words = 1;
-  
+
   uint32_t slot_id_ev_hd = 0;
   uint32_t slot_id_dnv = 0;
   uint32_t slot_id_fill = 0;
-   
+
   uint32_t new_type;
   uint32_t type;
   uint32_t slot_id_hd;
@@ -351,8 +355,8 @@ Int_t QwHelicityDecoder::ProcessEvBuffer(UInt_t event_type, const ROCID_t roc_id
   if (num_words<fNumDecoderWords+4){
     std::cerr << "Not enough words in the bank:"<< std::endl;
     return kFALSE;
-    
-  } else 
+
+  } else
     for (size_t i=0; i<num_words; i++){
 
       data = buffer[i];
@@ -391,7 +395,7 @@ Int_t QwHelicityDecoder::ProcessEvBuffer(UInt_t event_type, const ROCID_t roc_id
 	      new_type = 0;
 	      type = type_last;
 	    }
-	  
+
 	  switch (type)
 	    {
 	    case 0:         /* BLOCK HEADER */
@@ -405,7 +409,7 @@ Int_t QwHelicityDecoder::ProcessEvBuffer(UInt_t event_type, const ROCID_t roc_id
 		   data, slot_id_hd, mod_id_hd, n_evts,
 		   blk_num);
 	      break;
-	      
+
 	    case 1:         /* BLOCK TRAILER */
 	      slot_id_tr = (data & 0x7C00000) >> 22;
 	      n_words = (data & 0x3FFFFF);
@@ -413,7 +417,7 @@ Int_t QwHelicityDecoder::ProcessEvBuffer(UInt_t event_type, const ROCID_t roc_id
 		printf("%8X - BLOCK TRAILER - slot = %d   n_words = %d\n",
 		       data, slot_id_tr, n_words);
 	      break;
-	      
+
 	    case 2:         /* EVENT HEADER */
 	      if(new_type)
 		{
@@ -427,9 +431,9 @@ Int_t QwHelicityDecoder::ProcessEvBuffer(UInt_t event_type, const ROCID_t roc_id
 		       trig_time);
 		}
 	      break;
-	      
+
 	    case 3:         /* TRIGGER TIME */
-	      
+
 	      if(new_type)
 		{
 		  time_1 = (data & 0x7FFFFFF);
@@ -455,22 +459,22 @@ Int_t QwHelicityDecoder::ProcessEvBuffer(UInt_t event_type, const ROCID_t roc_id
 		  time_last = time_now;
 		}
           break;
-	  
+
 	    case 4:         /* UNDEFINED TYPE */
 	      if(lkDEBUG)
 		printf("%8X - UNDEFINED TYPE = %d\n", data, type);
 	      break;
-	      
+
 	    case 5:         /* UNDEFINED TYPE */
 	      if(lkDEBUG)
 		printf("%8X - UNDEFINED TYPE = %d\n", data, type);
 	      break;
-	      
+
 	    case 6:         /* UNDEFINED TYPE */
 	      if(lkDEBUG)
 		printf("%8X - UNDEFINED TYPE = %d\n", data, type);
 	      break;
-	      
+
 	    case 7:         /* UNDEFINED TYPE */
 	      if(lkDEBUG)
 		printf("%8X - UNDEFINED TYPE = %d\n", data, type);
@@ -483,39 +487,39 @@ Int_t QwHelicityDecoder::ProcessEvBuffer(UInt_t event_type, const ROCID_t roc_id
 		printf("%8X - DECODER HEADER = %d  (NUM DECODER WORDS = %d)\n",
 		       data, type, num_decoder_words);
 	      break;
-	      
+
 	    case 9:         /* UNDEFINED TYPE */
 	      if(lkDEBUG)
 		printf("%8X - UNDEFINED TYPE = %d\n", data, type);
 	      break;
-	      
+
 	    case 10:                /* UNDEFINED TYPE */
 	      if(lkDEBUG)
 		printf("%8X - UNDEFINED TYPE = %d\n", data, type);
 	      break;
-	      
+
 	    case 11:                /* UNDEFINED TYPE */
 	      if(lkDEBUG)
 		printf("%8X - UNDEFINED TYPE = %d\n", data, type);
 	      break;
-	      
+
 	    case 12:                /* UNDEFINED TYPE */
 	      if(lkDEBUG)
 		printf("%8X - UNDEFINED TYPE = %d\n", data, type);
 	      break;
-	      
+
 	    case 13:                /* END OF EVENT */
 	      if(lkDEBUG)
 		printf("%8X - END OF EVENT = %d\n", data, type);
 	      break;
-	      
+
 	    case 14:                /* DATA NOT VALID (no data available) */
 	      slot_id_dnv = (data & 0x7C00000) >> 22;
 	      if(lkDEBUG)
 		printf("%8X - DATA NOT VALID = %d  slot = %d\n", data,
 		       type, slot_id_dnv);
 	      break;
-	      
+
 	    case 15:                /* FILLER WORD */
 	      slot_id_fill = (data & 0x7C00000) >> 22;
 	      if(lkDEBUG)
@@ -523,12 +527,12 @@ Int_t QwHelicityDecoder::ProcessEvBuffer(UInt_t event_type, const ROCID_t roc_id
 		       slot_id_fill);
 	      break;
 	    }
-	  
+
 	  type_last = type; /* save type of current data word */
-	  
+
 	}
     }
-  }    
+  }
   return 0;
 }
 
@@ -677,11 +681,11 @@ void  QwHelicityDecoder::FillHistograms()
       if (fHistograms[index]!=NULL)
         fHistograms[index]->Fill(fActualPatternPolarity);
       index+=1;
-      
+
       for (size_t i=0; i<fWord.size(); i++){
         if (fHistograms[index]!=NULL)
           fHistograms[index]->Fill(fWord[i].fValue);
-        index+=1;       
+        index+=1;
         QwDebug << "QwHelicityDecoder::FillHistograms " << fWord[i].fWordName << "=" << fWord[i].fValue << QwLog::endl;
       }
     }
@@ -726,7 +730,7 @@ void  QwHelicityDecoder::ConstructBranchAndVector(TTree *tree, TString &prefix, 
        basename = "hd_actual_helicity";    //predicted actual helicity before being delayed.
        values.push_back(basename, 'I');
        tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
-      
+
       basename = "hd_delayed_helicity";   //predicted delayed helicity
        values.push_back(basename, 'I');
        tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
@@ -758,7 +762,31 @@ void  QwHelicityDecoder::ConstructBranchAndVector(TTree *tree, TString &prefix, 
       basename = "hd_Reported_Pattern_Hel";
        values.push_back(basename, 'I');
        tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
-      //
+      //new time / status variables
+       basename = "hd_num_tstable_fall";
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
+
+      basename = "hd_num_pair_sync";
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
+
+      basename = "hd_time_since_tstable";
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
+
+      basename = "hd_time_since_tsettle";
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
+
+      basename = "hd_last_duration_tstable";
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
+
+      basename = "hd_last_duration_tsettle";
+      values.push_back(basename, 'I');
+      tree->Branch(basename, &(values.back<Double_t>()), basename+"/I");
+
       for (size_t i=0; i<fWord.size(); i++)
         {
           basename = fWord[i].fWordName;
@@ -960,6 +988,14 @@ void  QwHelicityDecoder::FillTreeVector(QwRootTreeBranchVector &values) const
       values.SetValue(index++, fEventNumber);
       values.SetValue(index++, fEventPolarity);
       values.SetValue(index++, fReportedPatternHel);
+       // NEW TIME / STATUS VARIABLES
+      values.SetValue(index++, fNum_TStable_Fall);
+      values.SetValue(index++, fNum_Pair_Sync);
+      values.SetValue(index++, fTime_since_TStable);
+      values.SetValue(index++, fTime_since_TSettle);
+      values.SetValue(index++, fLast_Duration_TStable);
+      values.SetValue(index++, fLast_Duration_TSettle);
+
       for (size_t i=0; i<fWord.size(); i++)
 	values.SetValue(index++, fWord[i].fValue);
     }
@@ -1011,7 +1047,7 @@ void QwHelicityDecoder::RunPredictor()
 	    fPreviousPatternPolarity = fActualPatternPolarity;
 	    fActualPatternPolarity = GetRandbit30(iseed_Actual);
 	  }
-	} 
+	}
      }
     fHelicityActual  = fActualPatternPolarity ^ fEventPolarity;
     fHelicityDelayed = fDelayedPatternPolarity ^ fEventPolarity;
@@ -1054,12 +1090,12 @@ void QwHelicityDecoder::SetHelicityDelay(Int_t delay)
     fHelicityDelay = delay;
     if(delay == 0){
       QwWarning << "QwHelicityDecoder : SetHelicityDelay ::  helicity delay is set to 0."
-		<< " Disabling helicity predictor and using reported helicity information." 
+		<< " Disabling helicity predictor and using reported helicity information."
 		<< QwLog::endl;
       fUsePredictor = kFALSE;
     }
     else
-      fUsePredictor = kTRUE; 
+      fUsePredictor = kTRUE;
   }
   else
     QwError << "QwHelicityDecoder::SetHelicityDelay We cannot handle negative delay in the prediction of delayed helicity. Exiting.." << QwLog::endl;
@@ -1115,6 +1151,13 @@ VQwSubsystem&  QwHelicityDecoder::operator=  (VQwSubsystem *value)
       this->fIgnoreHelicity = input->fIgnoreHelicity;
       this->fEventPolarity = input->fEventPolarity;
       this->fReportedPatternHel = input->fReportedPatternHel;
+      //new time / status variables
+      this->fNum_TStable_Fall     = input->fNum_TStable_Fall;
+      this->fNum_Pair_Sync        = input->fNum_Pair_Sync;
+      this->fTime_since_TStable   = input->fTime_since_TStable;
+      this->fTime_since_TSettle   = input->fTime_since_TSettle;
+      this->fLast_Duration_TStable = input->fLast_Duration_TStable;
+      this->fLast_Duration_TSettle = input->fLast_Duration_TSettle;
 
       this->fErrorFlag = input->fErrorFlag;
       this->fEventNumberFirst     = input->fEventNumberFirst;
@@ -1152,11 +1195,11 @@ void QwHelicityDecoder::CheckPatternNum(VQwSubsystem *value)
   //  Bool_t localdebug=kFALSE;
   if(Compare(value)) {
     QwHelicityDecoder* input= dynamic_cast<QwHelicityDecoder*>(value);
-    QwDebug << "QwHelicityDecoder::MergeCounters: this->fPatternNumber=" << this->fPatternNumber 
+    QwDebug << "QwHelicityDecoder::MergeCounters: this->fPatternNumber=" << this->fPatternNumber
 	    << ", input->fPatternNumber=" << input->fPatternNumber << QwLog::endl;
 
     this->fErrorFlag |= input->fErrorFlag;
-    
+
     //  Make sure the pattern number and poalrity agree!
     if(this->fPatternNumber!=input->fPatternNumber)
       this->fPatternNumber=-999999;
@@ -1197,7 +1240,7 @@ void  QwHelicityDecoder::AccumulateRunningSum(VQwSubsystem* value, Int_t count, 
     QwHelicityDecoder* input = dynamic_cast<QwHelicityDecoder*>(value);
     fPatternNumber = (fPatternNumber <=0 ) ? input->fPatternNumber :
       std::min(fPatternNumber, input->fPatternNumber);
-    //  Keep track of the various error quantities, so we can print 
+    //  Keep track of the various error quantities, so we can print
     //  them at the end.
     fNumMissedGates       = input->fNumMissedGates;
     fNumMissedEventBlocks = input->fNumMissedEventBlocks;

@@ -1,0 +1,38 @@
+! Helicity Decoder signals input to intadcse08 and intadcse09
+decode_mode = 1
+
+
+Bank = 212
+sample_size = 7201
+NumberOfBlocks = 4
+ROC = 25
+
+MollerADC 0 0 bcm pair_sync_1
+MollerADC 0 4 bcm reported_helicity_1
+MollerADC 0 6 bcm pattern_sync_1
+MollerADC 0 8 bcm tsettle_1
+
+
+
+ROC = 21
+
+MollerADC 0 0 bcm pair_sync_2
+MollerADC 0 4 bcm reported_helicity_2
+MollerADC 0 6 bcm pattern_sync_2
+MollerADC 0 8 bcm tsettle_2
+
+
+! battery input connections to intadcse12
+
+ROC = 06
+
+MollerADC 0 0 bcm battery_hall_1
+MollerADC 0 2 bcm battery_hall_2
+
+
+
+! battery input connections to intadcse11
+
+ROC = 11
+
+MollerADC 0 0 bcm battery_hall_3

@@ -714,6 +714,36 @@ Double_t QwBCM<T>::GetValueWidth()
 {
   return fBeamCurrent.GetValueWidth();
 }
+// added this
+template<typename T>
+void QwBCM<T>::SetMollerADCHeaderData(UInt_t,
+                                      ULong64_t,
+                                      UInt_t,
+                                      UInt_t,
+                                      ULong64_t,
+                                      ULong64_t)
+{
+  // No-op for non-MollerADC BCM types.
+}
+
+template<>
+void QwBCM<QwMollerADC_Channel>::SetMollerADCHeaderData(
+    UInt_t region_number,
+    ULong64_t region_timestamp,
+    UInt_t header_num_words,
+    UInt_t header_block_number,
+    ULong64_t header_packet_count,
+    ULong64_t header_tsamples)
+{
+  fBeamCurrent.SetMollerADCHeaderData(
+    region_number,
+    region_timestamp,
+    header_num_words,
+    header_block_number,
+    header_packet_count,
+    header_tsamples
+  );
+}
 
 template class QwBCM<QwVQWK_Channel>;
 template class QwBCM<QwADC18_Channel>;

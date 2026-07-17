@@ -1,3 +1,5 @@
+decode_mode = 0
+
 !!!!
 !!!!  Beamline element names and locations are taken from MOLLER DocDB 1071, version 5.
 !!!!  https://moller-docdb.physics.sunysb.edu/cgi-bin/DocDBTest/private/ShowDocument?docid=1071&version=5
@@ -10,6 +12,7 @@ Bank=0x3102
 ! module.type, module.num  chan.num, det.type, det.name, if unrotated then last column ->UNROTATED
 
 sample_size=15000
+NumberOfBlocks=4
 !ADC0
   MollerADC, 0, 0,  bpmstripline,  BPM1C10XP
   MollerADC, 0, 1,  bpmstripline,  BPM1C10XM
