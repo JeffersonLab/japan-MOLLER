@@ -113,6 +113,7 @@ void QwIntegrationPMT::SetRandomEventAsymmetry(Double_t asymmetry)
 void QwIntegrationPMT::RandomizeEventData(int helicity, double time)
 {
   fTriumf_ADC.RandomizeEventData(helicity, time);
+  fTriumf_ADC.SetRawEventData();
   return;
 }
 

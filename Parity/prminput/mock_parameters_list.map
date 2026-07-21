@@ -32,4 +32,6 @@ window_period = 1e-3
  name  = Large Angle Detector
  mock_param = mock_parameters_largeang.map
  
- 
+[QwScanner]
+ name  =  Upstream Scanner
+ mock_param = mock_parameters_scanner.map 
