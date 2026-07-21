@@ -3,14 +3,14 @@
 QwEPICSControl::QwEPICSControl()
 {
   Int_t status;
-  status = ca_search("IGLdac3:ao_7", &fIDHall_A_IA);//IA Cell Setpoint  Hall A  
+  status = ca_search("IGLdac3:ao_7", &fIDHall_A_IA);//IA Cell Setpoint  Hall A
   status = ca_pend_io(10);
   status = ca_search("IGLdac3:ao_4", &fIDHall_C_IA);//IA Cell Setpoint  Hall C
   status = ca_pend_io(10);
   //updated PC values
   status = ca_search("C1068_QDAC01", &fIDPockels_Cell_plus);//PC (PITA) POS
   status = ca_pend_io(10);
-  status = ca_search("C1068_QDAC02", &fIDPockels_Cell_minus);//PC (PITA) NEG 
+  status = ca_search("C1068_QDAC02", &fIDPockels_Cell_minus);//PC (PITA) NEG
   status = ca_pend_io(10);
 
   //new Hall C IA variables
@@ -69,7 +69,7 @@ QwEPICSControl::QwEPICSControl()
   status = ca_pend_io(10);
   status = ca_search("qw:ChargeAsymmetryWidth", &fChargeAsymmetryWidth);//
   status = ca_pend_io(10);
-  
+
   ca_search("IGL1I00DI24_24M", &fHalfWavePlateStatus);
   status = ca_pend_io(10);
   //Hall A parameters
@@ -79,7 +79,7 @@ QwEPICSControl::QwEPICSControl()
   status = ca_pend_io(10);
   status = ca_search("qw:HAChargeAsymmetryWidth", &fHAChargeAsymmetryWidth);//
   status = ca_pend_io(10);
-  
+
   //Target paremetes
   status = ca_search("qw:TargetDiffX", &fTargetXDiff);
   status = ca_search("qw:TargetDiffXError", &fTargetXDiffError);
@@ -127,7 +127,6 @@ QwEPICSControl::QwEPICSControl()
 };
 
 QwEPICSControl::~QwEPICSControl()
-{  
+{
 
 };
-

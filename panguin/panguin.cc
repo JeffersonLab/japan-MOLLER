@@ -13,7 +13,7 @@ void online(TString type="standard",UInt_t run=0,Bool_t printonly=kFALSE, int ve
 
 int main(int argc, char **argv){
   tStart = clock();
- 
+
   TString type="default";
   UInt_t run=0;
   Bool_t printonly=kFALSE;
@@ -107,4 +107,3 @@ void Usage(){
   cerr << "  -P : Only Print Summary Plots" << endl;
   cerr << endl;
 }
-

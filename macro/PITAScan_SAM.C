@@ -5,14 +5,14 @@ void PITAScan_SAM(int run_num = 3431){
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.15);
   gStyle->SetStatW(0.37);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(111);
   gStyle->SetStatX(0.9);
   gStyle->SetStatY(0.9);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -21,8 +21,8 @@ void PITAScan_SAM(int run_num = 3431){
   gStyle->SetLabelSize(0.035,"x");
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.06,"hxyz");
-  gROOT->ForceStyle();  
-  
+  gROOT->ForceStyle();
+
   TString rf_name =Form("$QW_ROOTFILES/prexALL_%d.000.root",run_num);
   TFile *rootfile = TFile::Open(rf_name);
   TTree *tree= (TTree*)rootfile->Get("mul");
@@ -59,7 +59,7 @@ void PITAScan_SAM(int run_num = 3431){
   double bcm_dev[nBCM];
   TString my_cut = Form("cleandata&&ErrorFlag==0");
 
-  
+
 
 
   for(int idet=0;idet<nDET;idet++){

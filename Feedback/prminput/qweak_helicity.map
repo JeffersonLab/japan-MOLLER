@@ -57,14 +57,14 @@ WORD, 0,  0, helicitydata,  scandata1
 WORD, 0,  0, helicitydata,  scandata2
 SKIP 1
 !END
-! 
+!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !USER BIT MODE
 
-!HelicityDecodingMode= UserbitMode    
+!HelicityDecodingMode= UserbitMode
 !PatternPhase=4
 !seed size is either 24 bit or 30 bit. default is 24 bit
 !RandSeedBits=24
@@ -73,12 +73,11 @@ SKIP 1
 !Bank=0x3101
 !
 ! module.type, module.num  chan.num, det.type, det.name
-! 
+!
 !WORD, 0,  0, helicitydata,  cleandata
 !WORD, 0,  0, helicitydata,  scandata1
 !WORD, 0,  0, helicitydata,  scandata2
 !WORD, 0,  0, helicitydata,  scalerheader
 !WORD, 0,  0, helicitydata,  scalercounter
-!WORD, 0,  0, helicitydata,  userbit 
+!WORD, 0,  0, helicitydata,  userbit
 !END
-  

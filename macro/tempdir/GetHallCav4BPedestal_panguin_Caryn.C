@@ -4,14 +4,14 @@ void GetHallCav4BPedestal_panguin_Caryn(TString user_cut ="1",TString scan_data 
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.2);
   gStyle->SetStatW(0.3);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(1011);
   gStyle->SetStatX(0.7);
   gStyle->SetStatY(0.9);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -20,9 +20,9 @@ void GetHallCav4BPedestal_panguin_Caryn(TString user_cut ="1",TString scan_data 
   gStyle->SetLabelSize(0.035,"x");
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.06,"hxyz");
-  gROOT->ForceStyle();  
-  
- 
+  gROOT->ForceStyle();
+
+
   TTree *tree= (TTree*)gROOT->FindObject("evt");
 tree->SetAlias("beam_current", scan_data);
   tree->Draw(Form("beam_current>>htemp%d",myii),user_cut.Data(),"goff");
@@ -31,9 +31,9 @@ tree->SetAlias("beam_current", scan_data);
   int nbinx = (int)(10*max); // to one-tenth precision.
 
   vector<double> vec_scandata;
-  TH1D *hsd = new TH1D(Form("hsd%d",myii),"scan data",nbinx,-0.05,max-0.05); 
+  TH1D *hsd = new TH1D(Form("hsd%d",myii),"scan data",nbinx,-0.05,max-0.05);
   tree->Draw(Form("beam_current>>hsd%d",myii),Form("%s&&scandata1!=0",user_cut.Data()),"goff");
-  int bin_content; 
+  int bin_content;
   double bin_center;
   for(int ibin=0;ibin<nbinx;ibin++){
     bin_content = hsd->GetBinContent(ibin+1); // Histogram bin number starts from 1
@@ -76,16 +76,16 @@ tree->SetAlias("beam_current", scan_data);
   f_zero->SetLineWidth(2);
   f_zero->SetLineColor(kRed);
   f_zero->SetLineStyle(9);
-  
+
   TString branch_name;
   TString num_samples_name;
 
 
 
   //  const int ndata = sizeof(beam_evtcut)/sizeof(*beam_evtcut);
-  double bcm_mean[ndata]; 
+  double bcm_mean[ndata];
   double bcm_error[ndata];
-  double unser_mean[ndata]; 
+  double unser_mean[ndata];
   double unser_error[ndata];
   double bcm_res[ndata]; // residual
 
@@ -99,7 +99,7 @@ tree->SetAlias("beam_current", scan_data);
 	char outfilename[255];
 
   TGraphErrors *g_cavb_res;
-  TGraphErrors *g_cavb_fit;  
+  TGraphErrors *g_cavb_fit;
   TGraphErrors *g_cavb_res_ref;
   TGraphErrors *g_cavb_fit_ref;
   TMultiGraph *mg_cavb_res;
@@ -168,7 +168,7 @@ tree->SetAlias("beam_current", scan_data);
 	bcm_res[i] = bcm_mean[i] - f_fit->Eval(unser_mean[i]);
 	//	bcm_error[i] = bcm_error[i] *gain[ibcm];
       }
-      
+
       c_res->cd(ibcm+1);
       g_cavb_res = new TGraphErrors(ndata,unser_mean,bcm_res,unser_error,bcm_error);
       g_cavb_res->SetMarkerStyle(20);

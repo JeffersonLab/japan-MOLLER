@@ -3,7 +3,7 @@
 # 03/09/2011
 # This bash script allows us to set the PC setpoints to get large positive charge asymmetry
 # To use it,
-# compile using 
+# compile using
 # chmod +x SetLargePositive_A_q
 # and then run ./SetLargePositive_A_q
 
@@ -27,14 +27,14 @@
 #4. Runs checked OUT - 11283 IN - 11286 -Changed by Rakitha 04/11/2011 - rakithab@jlab.org
 #PC_pos_t0_IN=43300
 #PC_neg_t0_IN=40899
-#PC_pos_t0_OUT=42864 
+#PC_pos_t0_OUT=42864
 #PC_neg_t0_OUT=41335
 
 PC_Delta_Counts=2500
 
 #5. No longer needs above values.
 # Reads text files,
-# /local/scratch/qweak/Last_good_PC_pos_OUT, 
+# /local/scratch/qweak/Last_good_PC_pos_OUT,
 # /local/scratch/qweak/Last_good_PC_neg_OUT
 # /local/scratch/qweak/Last_good_PC_pos_IN
 # /local/scratch/qweak/Last_good_PC_neg_IN
@@ -72,7 +72,7 @@ else
         PC_pos_t0_IN="`cat /local/scratch/qweak/norminal_PC_IN`"
 	PC_neg_t0_IN="`cat /local/scratch/qweak/norminal_PC_IN`"
 
-    	echo "Current IHWP state is IN"	
+    	echo "Current IHWP state is IN"
 	echo "Norminal PC_pos = $PC_pos_t0_IN"
 	echo "Current PC_pos = $PC_pos_current"
 	echo "Norminal PC_neg = $PC_neg_t0_IN"
@@ -84,5 +84,3 @@ else
 	echo "Setting PC negative setpoint to $PC_neg_IN to get large positive charge asymmetry"
 	#caput C1068_QDAC02 $PC_neg_IN
 fi
-
-

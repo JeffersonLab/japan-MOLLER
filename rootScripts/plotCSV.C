@@ -73,11 +73,11 @@ void plotCSVHelper(string file = "test.csv", int flag = 1) {
 		std::stringstream iss3(data[i][0]);
 		iss3 >> runnumber[i];
 		std::stringstream iss4(data[i][1]);
-		iss4 >> value[i];	
+		iss4 >> value[i];
 		std::stringstream iss5(data[i][2]);
-		iss5 >> error[i];	
+		iss5 >> error[i];
 	}
-	
+
 	double intVal = 0.0;
 	double intErr = 0.0;
 	double *integrated_value = new double[len];
@@ -91,7 +91,7 @@ void plotCSVHelper(string file = "test.csv", int flag = 1) {
 		intErr+=error[j];
 		integrated_error[j]=intErr;
 	}
-	
+
 	// Instantaneous
 	TGraphErrors * graph = new TGraphErrors(len,runnumber,value,0,error);
 	if (flag==1){
@@ -109,7 +109,7 @@ void plotCSVHelper(string file = "test.csv", int flag = 1) {
 		//c1->Update();
 		//TPaveStats * stats = (TPaveStats*)graph->GetListOfFunctions()->FindObject("stats");
 		//stats->SetTextColor(alreadyDrew);
-		//stats->SetX1NDC(0.333*(alreadyDrew-1)); 
+		//stats->SetX1NDC(0.333*(alreadyDrew-1));
 		//stats->SetX2NDC(0.333*alreadyDrew);
 		//stats->SetY1NDC(0.9);
 		//stats->SetY2NDC(1.0);

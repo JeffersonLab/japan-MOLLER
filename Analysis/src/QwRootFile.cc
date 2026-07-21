@@ -1,3 +1,8 @@
+/*!
+ * \file   QwRootFile.cc
+ * \brief  Implementation for ROOT file and tree management wrapper classes
+ */
+
 #include "QwRootFile.h"
 #include "QwRunCondition.h"
 #include "TH1.h"
@@ -21,6 +26,9 @@ QwRootFile::QwRootFile(const TString& run_label)
   : fRootFile(0), fMakePermanent(0),
     fMapFile(0), fEnableMapFile(kFALSE),
     fUpdateInterval(-1)
+#ifdef HAS_RNTUPLE_SUPPORT
+    , fEnableRNTuples(kFALSE)
+#endif // HAS_RNTUPLE_SUPPORT
 {
   // Process the configuration options
   ProcessOptions(gQwOptions);
@@ -60,13 +68,46 @@ QwRootFile::QwRootFile(const TString& run_label)
       rootfilename += Form("/%s%s.%s.%d.root",
 			   fRootFileStem.Data(), run_label.Data(),
 			   hostname.Data(), pid);
+      // Delete permanent file if it exists to prevent accumulation across segments
+      if (gSystem->AccessPathName(fPermanentName.Data()) == 0) {
+        QwVerbose << "Removing existing permanent file: " << fPermanentName << QwLog::endl;
+        gSystem->Unlink(fPermanentName.Data());
+      }
+      // CRITICAL: Also delete the temporary file if it exists!
+      // RECREATE mode doesn't properly clear files that contain RNTuples,
+      // so we must manually delete before opening
+      if (gSystem->AccessPathName(rootfilename.Data()) == 0) {
+        QwVerbose << "Removing existing temporary file before RECREATE: " << rootfilename << QwLog::endl;
+        gSystem->Unlink(rootfilename.Data());
+      }
     } else {
       rootfilename = fPermanentName;
+      // Delete permanent file if it exists to ensure RECREATE truly starts fresh
+      // This is especially important for RNTuple files where RECREATE doesn't properly clear
+      if (gSystem->AccessPathName(rootfilename.Data()) == 0) {
+        QwMessage << "File exists before RECREATE, deleting: " << rootfilename << QwLog::endl;
+        int unlink_result = gSystem->Unlink(rootfilename.Data());
+        if (unlink_result == 0) {
+          QwMessage << "Successfully deleted file" << QwLog::endl;
+        } else {
+          QwError << "Failed to delete file! Error code: " << unlink_result << QwLog::endl;
+        }
+      } else {
+        QwMessage << "File does not exist before RECREATE: " << rootfilename << QwLog::endl;
+      }
     }
-    fRootFile = new TFile(rootfilename.Data(), "RECREATE", "myfile1");
-    if (! fRootFile) {
+    QwMessage << "Opening file with RECREATE mode: " << rootfilename << QwLog::endl;
+    QwMessage << "QwRootFile constructor called for: " << rootfilename << QwLog::endl;
+    // Use TFile::Open instead of `new TFile(...)` so the ROOT plug-in manager
+    // can dispatch remote URLs (e.g. root://host/path) to TNetXNGFile etc.
+    // The TFile(name, opt, title) constructor refuses remote paths and returns
+    // a half-built object, which then segfaults at first use.
+    fRootFile = TFile::Open(rootfilename.Data(), "RECREATE", "myfile1");
+    if (!fRootFile || fRootFile->IsZombie()) {
       QwError << "ROOT file " << rootfilename
               << " could not be opened!" << QwLog::endl;
+      delete fRootFile;
+      fRootFile = nullptr;
       return;
     } else {
       QwMessage << "Opened "<< (fUseTemporaryFile?"temporary ":"")
@@ -88,6 +129,7 @@ QwRootFile::QwRootFile(const TString& run_label)
       );
     }
 
+    fRootFile->SetCompressionAlgorithm(fCompressionAlgorithm);
     fRootFile->SetCompressionLevel(fCompressionLevel);
   }
 }
@@ -122,6 +164,10 @@ QwRootFile::~QwRootFile()
     const char* action;
     if (fUseTemporaryFile){
       if (fMakePermanent) {
+	// Delete existing permanent file first to avoid accumulation
+	if (gSystem->AccessPathName(fPermanentName.Data()) == 0) {
+	  remove(fPermanentName.Data());
+	}
 	action = " rename ";
 	err = rename( rootfilename.Data(), fPermanentName.Data() );
       } else {
@@ -201,6 +247,13 @@ void QwRootFile::DefineOptions(QwOptions &options)
     ("disable-slow-tree", po::value<bool>()->default_bool_value(false),
      "disable slow control tree");
 
+#ifdef HAS_RNTUPLE_SUPPORT
+  // Define the RNTuple options
+  options.AddOptions("ROOT output options")
+    ("enable-rntuples", po::value<bool>()->default_bool_value(false),
+     "enable RNTuple output");
+#endif // HAS_RNTUPLE_SUPPORT
+
   // Define the tree output prescaling options
   options.AddOptions("ROOT output options")
     ("num-mps-accepted-events", po::value<int>()->default_value(0),
@@ -232,8 +285,17 @@ void QwRootFile::DefineOptions(QwOptions &options)
     ("circular-buffer", po::value<int>()->default_value(0),
      "TTree circular buffer");
   options.AddOptions("ROOT performance options")
+    ("compression-algorithm", po::value<int>()->default_value(1),
+     "TFile compression algorithm (1=ZLIB, 2=LZMA, 4=LZ4, 5=ZSTD, default=1 ZLIB)");
+  options.AddOptions("ROOT performance options")
     ("compression-level", po::value<int>()->default_value(1),
-     "TFile compression level");
+     "TFile compression level (default = 1, no compression = 0)");
+  options.AddOptions("ROOT performance options")
+    ("rntuple-compression-algorithm", po::value<int>()->default_value(4),
+     "RNTuple compression algorithm (1=ZLIB, 2=LZMA, 4=LZ4, 5=ZSTD, default=4 LZ4)");
+  options.AddOptions("ROOT performance options")
+    ("rntuple-compression-level", po::value<int>()->default_value(0),
+     "RNTuple compression level (0-12, default=0 for maximum performance)");
 }
 
 
@@ -263,12 +325,82 @@ void QwRootFile::ProcessOptions(QwOptions &options)
 #endif
   fUseTemporaryFile = options.GetValue<bool>("write-temporary-rootfiles");
 
+#ifdef HAS_RNTUPLE_SUPPORT
+  // Option 'enable-rntuples' to enable RNTuple output
+  fEnableRNTuples = options.GetValue<bool>("enable-rntuples");
+  // RNTuples require a TFile (RNTupleWriter::Append takes a TDirectory&);
+  // they cannot be hosted by a TMapFile.  If both flags are requested,
+  // disable RNTuples and warn loudly so the run does not crash later in
+  // QwRootNTuple::InitializeWriter with a null TFile*.
+  if (fEnableMapFile && fEnableRNTuples) {
+    QwMessage << QwLog::endl;
+    QwWarning << "QwRootFile::ProcessOptions:  "
+              << "RNTuple output is not supported alongside --enable-mapfile "
+                 "(TMapFile is not a TDirectory). Disabling RNTuples."
+              << QwLog::endl;
+    fEnableRNTuples = false;
+  }
+#endif // HAS_RNTUPLE_SUPPORT
+
   // Options 'disable-trees' and 'disable-histos' for disabling
   // tree and histogram output
   auto v = options.GetValueVector<std::string>("disable-tree");
   std::for_each(v.begin(), v.end(), [&](const std::string& s){ this->DisableTree(s); });
   if (options.GetValue<bool>("disable-trees"))  DisableTree(".*");
   if (options.GetValue<bool>("disable-histos")) DisableHisto(".*");
+
+  // Read --circular-buffer up front so the mapfile-mode logic below can use
+  // it (the original ProcessOptions read it further down, but we now need
+  // it during the mapfile-tree decision).
+  fCircularBufferSize = options.GetValue<int>("circular-buffer");
+
+  // TMapFile-mode tree publishing.
+  //
+  // TTrees can be published into the mapfile: TDirectoryFile::Append
+  // auto-calls TMapFile::Add() when the directory's mother is a TMapFile,
+  // so a TTree created while gDirectory == fMapFile->GetDirectory()
+  // becomes a TMapRec on its own.  TMapFile::Update() then re-streams the
+  // tree (header + baskets) into the 1 GiB mmap on every interval.
+  //
+  // The hazard is that an unbounded TTree's serialized size grows
+  // monotonically and CustomReAlloc2 aborts as soon as it overruns the
+  // mmap.  TTree::SetCircular(N) caps the in-memory entry count, which
+  // caps the serialized size.  Require a non-zero circular buffer in
+  // mapfile mode; if the user did not pass one, force a safe default
+  // and warn loudly rather than silently dropping all trees.
+  if (fEnableMapFile && fCircularBufferSize == 0) {
+    const UInt_t kMapFileCircularDefault = 100;
+    QwMessage << QwLog::endl;
+    QwWarning << "QwRootFile::ProcessOptions:  "
+              << "--enable-mapfile requires a bounded TTree to avoid "
+                 "overrunning the " << (kMaxMapFileSize >> 20)
+              << " MiB mmap region.  "
+                 "Forcing --circular-buffer=" << kMapFileCircularDefault
+              << " (pass --circular-buffer=N to override; pass "
+                 "--disable-trees to suppress tree output entirely)."
+              << QwLog::endl;
+    fCircularBufferSize = kMapFileCircularDefault;
+  }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+  // TTree and RNTuple writers share per-channel state (fTreeArrayIndex,
+  // fTreeArrayNumEntries, fDataToSave, b* flags). When both are active,
+  // the second Construct*AndVector() call clobbers the first writer's
+  // layout, and subsequent Fill*Vector() then walks a vector whose entry
+  // types no longer match what was pushed (e.g. SetValue throws
+  // "entry type 'D' cannot store unsigned int value 'block2'").
+  // Until per-writer layout state is added, make the two writers
+  // mutually exclusive: keep RNTuples and silence TTrees.
+  if (fEnableRNTuples) {
+    QwMessage << QwLog::endl;
+    QwMessage << "QwRootFile::ProcessOptions:  "
+              << "--enable-rntuples is set; disabling tree output "
+                 "(channels share layout state between TTree and RNTuple "
+                 "writers, so the two cannot be produced in the same run)."
+              << QwLog::endl;
+    DisableTree(".*");
+  }
+#endif // HAS_RNTUPLE_SUPPORT
 
   // Options 'disable-mps' and 'disable-hel' for disabling
   // helicity window and helicity pattern output
@@ -286,9 +418,11 @@ void QwRootFile::ProcessOptions(QwOptions &options)
   fNumHelEventsToSkip = options.GetValue<int>("num-mps-discarded-events");
 
   // Update interval for the map file
-  fCircularBufferSize = options.GetValue<int>("circular-buffer");
   fUpdateInterval = options.GetValue<int>("mapfile-update-interval");
+  fCompressionAlgorithm = options.GetValue<int>("compression-algorithm");
   fCompressionLevel = options.GetValue<int>("compression-level");
+  fRNTupleCompressionAlgorithm = options.GetValue<int>("rntuple-compression-algorithm");
+  fRNTupleCompressionLevel = options.GetValue<int>("rntuple-compression-level");
   fBasketSize = options.GetValue<int>("basket-size");
 
   // Autoflush and autosave
@@ -312,33 +446,81 @@ Bool_t QwRootFile::HasAnyFilled(void) {
   return this->HasAnyFilled(fRootFile);
 }
 Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
-  if (!d) return false;
+  if (!d) {
+
+    return false;
+  }
+
+  // First check if any in-memory trees have been filled
+  for (auto& pair : fTreeByName) {
+    for (auto& tree : pair.second) {
+      if (tree && tree->GetTree()) {
+        Long64_t entries = tree->GetTree()->GetEntries();
+        if (entries > 0) {
+
+          return true;
+        }
+      }
+    }
+  }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+  // Then check if any RNTuples have been filled
+  for (auto& pair : fNTupleByName) {
+    for (auto& ntuple : pair.second) {
+      if (ntuple && ntuple->fCurrentEvent > 0) {
+
+        return true;
+      }
+    }
+  }
+#endif // HAS_RNTUPLE_SUPPORT
+
   TList* l = d->GetListOfKeys();
+
 
   for( int i=0; i < l->GetEntries(); ++i) {
     const char* name = l->At(i)->GetName();
     TObject* obj = d->FindObjectAny(name);
 
+
+
     // Objects which can't be found don't count.
-    if (!obj) continue;
+    if (!obj) {
+
+      continue;
+    }
 
     // Lists of parameter files, map files, and job conditions don't count.
-    if ( TString(name).Contains("parameter_file") ) continue;
-    if ( TString(name).Contains("mapfile") ) continue;
-    if ( TString(name).Contains("_condition") ) continue;
+    if ( TString(name).Contains("parameter_file") ) {
+
+      continue;
+    }
+    if ( TString(name).Contains("mapfile") ) {
+      continue;
+    }
+    if ( TString(name).Contains("_condition") ) {
+      continue;
+    }
     //  The EPICS tree doesn't count
-    if ( TString(name).Contains("slow") ) continue;
+    if ( TString(name).Contains("slow") ) {
+      continue;
+    }
 
     // Recursively check subdirectories.
-    if (obj->IsA()->InheritsFrom( "TDirectory" ))
+    if (obj->IsA()->InheritsFrom( "TDirectory" )) {
       if (this->HasAnyFilled( (TDirectory*)obj )) return true;
+    }
 
-    if (obj->IsA()->InheritsFrom( "TTree" ))
-      if ( ((TTree*) obj)->GetEntries() ) return true;
+    if (obj->IsA()->InheritsFrom( "TTree" )) {
+      Long64_t entries = ((TTree*) obj)->GetEntries();
+      if ( entries ) return true;
+    }
 
-    if (obj->IsA()->InheritsFrom( "TH1" ))
-      if ( ((TH1*) obj)->GetEntries() ) return true;
+    if (obj->IsA()->InheritsFrom( "TH1" )) {
+      Double_t entries = ((TH1*) obj)->GetEntries();
+      if ( entries ) return true;
+    }
   }
-
   return false;
 }

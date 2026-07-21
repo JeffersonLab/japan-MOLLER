@@ -18,8 +18,8 @@ arm = 0 -> Both good
 /******* Channel class for storing information regarding a particular device *******/
 
 // Class initialization
-class Channel{ 
-    public: 
+class Channel{
+    public:
     TString name;          // Name of channel. Ends with _mean, _rms, or _slope according to aggregator convention.
     Int_t signCorrect = 0; // Whether or not to perform sign correction
     // FIXME Correction is applied to all values, and that isn't realistic for non-diff/asym quantities
@@ -59,13 +59,13 @@ class Channel{
     double value_L_OUT_err;
     double value_L_OUT_Chi2;
     int value_L_OUT_NDOF;
-  
+
     Channel (TString a): name (a)  {};
     void draw(TTree *, TString);
     void drawRange(TTree *, TString, Int_t, Int_t);
     TGraphErrors drawReg(Int_t, Double_t *, Double_t *, Double_t *);
     void printInfo() { std::cout << "Plotting "<< name<<" vs slug number" << endl;}
-};  
+};
 
 //Draw, but only in a range of slug numbers
 void Channel::drawRange(TTree* tree,TString output, Int_t min = 0, Int_t max = 100000){
@@ -128,10 +128,10 @@ void Channel::draw(TTree* tree,TString output){
       nEntries_R_IN=chan_t->Draw("n_runs:"+chan_name+":0",cut1 , "goff");
     }
     if ( signCorrect && !chan_name.Contains("yield") && !chan_name.Contains("rms") && !chan_name.Contains("epics") && !chan_name.Contains("slope") )
-    { 
+    {
       for( auto i=0; i< nEntries_R_IN; i ++)
       {
-        *(chan_t->GetV2()+i)=sign[cut1]*(*(chan_t->GetV2()+i));  
+        *(chan_t->GetV2()+i)=sign[cut1]*(*(chan_t->GetV2()+i));
       }
     }
     else {
@@ -145,10 +145,10 @@ void Channel::draw(TTree* tree,TString output){
       nEntries_R_OUT= chan_t->Draw("n_runs:"+chan_name+":0",cut2 ,  "goff");
     }
     if ( signCorrect && !chan_name.Contains("yield") && !chan_name.Contains("rms") && !chan_name.Contains("epics") && !chan_name.Contains("slope") )
-    { 
+    {
       for( auto i=0; i< nEntries_R_OUT; i ++)
       {
-        *(chan_t->GetV2()+i)=sign[cut2]*(*(chan_t->GetV2()+i));  
+        *(chan_t->GetV2()+i)=sign[cut2]*(*(chan_t->GetV2()+i));
       }
     }
     TGraphErrors g_R_OUT = drawReg(nEntries_R_OUT, chan_t->GetV1(), chan_t->GetV2(), chan_t->GetV3());
@@ -160,10 +160,10 @@ void Channel::draw(TTree* tree,TString output){
       nEntries_L_IN= chan_t->Draw("n_runs:"+chan_name+":0", cut3, "goff");
     }
     if ( signCorrect && !chan_name.Contains("yield") && !chan_name.Contains("rms") && !chan_name.Contains("epics") && !chan_name.Contains("slope") )
-    { 
+    {
       for( auto i=0; i< nEntries_L_IN; i ++)
       {
-        *(chan_t->GetV2()+i)=sign[cut3]*(*(chan_t->GetV2()+i));  
+        *(chan_t->GetV2()+i)=sign[cut3]*(*(chan_t->GetV2()+i));
       }
     }
     TGraphErrors g_L_IN= drawReg(nEntries_L_IN, chan_t->GetV1(), chan_t->GetV2(), chan_t->GetV3());
@@ -175,10 +175,10 @@ void Channel::draw(TTree* tree,TString output){
       nEntries_L_OUT =chan_t->Draw("n_runs:"+chan_name+":0", cut4, "goff");
     }
     if ( signCorrect && !chan_name.Contains("yield") && !chan_name.Contains("rms") && !chan_name.Contains("epics") && !chan_name.Contains("slope") )
-    { 
+    {
       for( auto i=0; i< nEntries_L_OUT; i ++)
       {
-        *(chan_t->GetV2()+i)=sign[cut4]*(*(chan_t->GetV2()+i));  
+        *(chan_t->GetV2()+i)=sign[cut4]*(*(chan_t->GetV2()+i));
       }
     }
     TGraphErrors g_L_OUT= drawReg(nEntries_L_OUT, chan_t->GetV1(), chan_t->GetV2(), chan_t->GetV3());
@@ -266,38 +266,38 @@ void Channel::draw(TTree* tree,TString output){
     value_err        = fConst_ALL->GetParError(0);  // error for the experiment
     value_Chi2       = fConst_ALL->GetChisquare();  // Chi2 for the experiment
     value_NDOF       = fConst_ALL->GetNDF();        // NDOF for the experiment
-    value_R          = fConst_R->GetParameter(0); 
-    value_R_err      = fConst_R->GetParError(0);  
-    value_R_Chi2     = fConst_R->GetChisquare();  
-    value_R_NDOF     = fConst_R->GetNDF();        
-    value_L          = fConst_L->GetParameter(0); 
-    value_L_err      = fConst_L->GetParError(0);  
-    value_L_Chi2     = fConst_L->GetChisquare();  
-    value_L_NDOF     = fConst_L->GetNDF();        
+    value_R          = fConst_R->GetParameter(0);
+    value_R_err      = fConst_R->GetParError(0);
+    value_R_Chi2     = fConst_R->GetChisquare();
+    value_R_NDOF     = fConst_R->GetNDF();
+    value_L          = fConst_L->GetParameter(0);
+    value_L_err      = fConst_L->GetParError(0);
+    value_L_Chi2     = fConst_L->GetChisquare();
+    value_L_NDOF     = fConst_L->GetNDF();
     value_IN         = fConst_IN->GetParameter(0);
-    value_IN_err     = fConst_IN->GetParError(0); 
-    value_IN_Chi2    = fConst_IN->GetChisquare(); 
-    value_IN_NDOF    = fConst_IN->GetNDF();       
-    value_OUT        = fConst_OUT->GetParameter(0); 
-    value_OUT_err    = fConst_OUT->GetParError(0);  
-    value_OUT_Chi2   = fConst_OUT->GetChisquare();  
-    value_OUT_NDOF   = fConst_OUT->GetNDF();        
+    value_IN_err     = fConst_IN->GetParError(0);
+    value_IN_Chi2    = fConst_IN->GetChisquare();
+    value_IN_NDOF    = fConst_IN->GetNDF();
+    value_OUT        = fConst_OUT->GetParameter(0);
+    value_OUT_err    = fConst_OUT->GetParError(0);
+    value_OUT_Chi2   = fConst_OUT->GetChisquare();
+    value_OUT_NDOF   = fConst_OUT->GetNDF();
     value_R_IN       = fConst_R_IN->GetParameter(0);
-    value_R_IN_err   = fConst_R_IN->GetParError(0); 
-    value_R_IN_Chi2  = fConst_R_IN->GetChisquare(); 
-    value_R_IN_NDOF  = fConst_R_IN->GetNDF();       
+    value_R_IN_err   = fConst_R_IN->GetParError(0);
+    value_R_IN_Chi2  = fConst_R_IN->GetChisquare();
+    value_R_IN_NDOF  = fConst_R_IN->GetNDF();
     value_L_IN       = fConst_L_IN->GetParameter(0);
-    value_L_IN_err   = fConst_L_IN->GetParError(0); 
-    value_L_IN_Chi2  = fConst_L_IN->GetChisquare(); 
-    value_L_IN_NDOF  = fConst_L_IN->GetNDF();       
+    value_L_IN_err   = fConst_L_IN->GetParError(0);
+    value_L_IN_Chi2  = fConst_L_IN->GetChisquare();
+    value_L_IN_NDOF  = fConst_L_IN->GetNDF();
     value_R_OUT      = fConst_R_OUT->GetParameter(0);
-    value_R_OUT_err  = fConst_R_OUT->GetParError(0); 
-    value_R_OUT_Chi2 = fConst_R_OUT->GetChisquare(); 
-    value_R_OUT_NDOF = fConst_R_OUT->GetNDF();       
+    value_R_OUT_err  = fConst_R_OUT->GetParError(0);
+    value_R_OUT_Chi2 = fConst_R_OUT->GetChisquare();
+    value_R_OUT_NDOF = fConst_R_OUT->GetNDF();
     value_L_OUT      = fConst_L_OUT->GetParameter(0);
-    value_L_OUT_err  = fConst_L_OUT->GetParError(0); 
-    value_L_OUT_Chi2 = fConst_L_OUT->GetChisquare(); 
-    value_L_OUT_NDOF = fConst_L_OUT->GetNDF();       
+    value_L_OUT_err  = fConst_L_OUT->GetParError(0);
+    value_L_OUT_Chi2 = fConst_L_OUT->GetChisquare();
+    value_L_OUT_NDOF = fConst_L_OUT->GetNDF();
 
     /*
        if (!chan_name.Contains("_rms")&& !chan_name.Contains("_mean")){
@@ -364,7 +364,7 @@ void Channel::draw(TTree* tree,TString output){
       pt_ALL_normal->SetTextFont(43);
       pt_ALL_normal->SetTextSize(26);
       pt_ALL_normal->SetTextColor(kGreen+2);
-    
+
       pt_ALL_normal->Draw();
     }
     else {
@@ -418,7 +418,7 @@ void Channel::draw(TTree* tree,TString output){
 
 
 TGraphErrors Channel::drawReg(Int_t nEntries, Double_t *v1, Double_t *v2, Double_t *v3){
-  auto chan_name =  (this->name).Data(); 
+  auto chan_name =  (this->name).Data();
   TGraphErrors g(nEntries,v1, v2, 0, v3);
   return g;
 }
@@ -433,15 +433,15 @@ TGraphErrors Channel::drawReg(Int_t nEntries, Double_t *v1, Double_t *v2, Double
 class Source {
     TString file, tree, output;
     Int_t signCorrect = 0;
-       
+
   public:
     std::vector<Channel> list;
-    TChain *T;   
+    TChain *T;
     Source (TString a, TString b, TString c, Int_t d): file(a), tree(b), output(c), signCorrect(d) {T=new TChain(tree); T->Add(file);}
-    void printInfo() { std::cout << "Reading from  " << tree  << " tree in file " << std::endl;} 
+    void printInfo() { std::cout << "Reading from  " << tree  << " tree in file " << std::endl;}
     void drawAll();
     void drawAllRange(Int_t min, Int_t max);
-    Channel GetChannelByName(TString name);    
+    Channel GetChannelByName(TString name);
 
 };
 
@@ -454,15 +454,15 @@ void Source::drawAll(){
 
   while (auto *var= var_iter.Next()){
     TString name(var->GetName());
-    bool createPlotObj = ((name.Contains("_mean") || name.Contains("_slope") || name.Contains("_pslope")|| name.Contains("_rms")) && !(name.Contains("_error"))); 
+    bool createPlotObj = ((name.Contains("_mean") || name.Contains("_slope") || name.Contains("_pslope")|| name.Contains("_rms")) && !(name.Contains("_error")));
     if (createPlotObj) {
-      Channel channel(var->GetName());     
+      Channel channel(var->GetName());
       channel.signCorrect = this->signCorrect;
       channel.printInfo();
       channel.draw(this->T, filename);
       (this->list).push_back(channel);
     }
-  }   
+  }
 }
 
 void Source::drawAllRange(Int_t min = 0, Int_t max = 10000){
@@ -474,15 +474,15 @@ void Source::drawAllRange(Int_t min = 0, Int_t max = 10000){
 
   while (auto *var= var_iter.Next()){
     TString name(var->GetName());
-    bool createPlotObj = ((name.Contains("_mean") || name.Contains("_slope") || name.Contains("_pslope")|| name.Contains("_rms")) && !(name.Contains("_error"))); 
+    bool createPlotObj = ((name.Contains("_mean") || name.Contains("_slope") || name.Contains("_pslope")|| name.Contains("_rms")) && !(name.Contains("_error")));
     if (createPlotObj) {
-      Channel channel(var->GetName());     
+      Channel channel(var->GetName());
       channel.signCorrect = this->signCorrect;
       channel.printInfo();
       channel.drawRange(this->T, filename, min, max);
       (this->list).push_back(channel);
     }
-  }   
+  }
 }
 
 Channel Source::GetChannelByName(TString name){
@@ -492,10 +492,6 @@ Channel Source::GetChannelByName(TString name){
       chan=*iter;
       break;
     }
-  } 
+  }
   return chan;
 }
-
-
-
-

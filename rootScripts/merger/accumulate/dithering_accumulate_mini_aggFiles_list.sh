@@ -44,4 +44,3 @@ else
   root -l -b -q ~/PREX/prompt/Aggregator/wrapper/addUnits.C\(\"${OUTPUTROOTFILEDIR}/run_${1}.root\"\)
 
 fi
-

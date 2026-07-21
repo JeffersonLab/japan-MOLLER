@@ -21,10 +21,10 @@
 #include <fstream>
 using namespace std;
 class TF1 *f1trap[42];
-void AsymTime() { 
+void AsymTime() {
   //PLOT ASYM VERSUS TIME FOR DOUBLE PEAK RUNS
 
-  //Change run number here 
+  //Change run number here
   //int numruns = 1;
   int run = 3901;
   TFile *file1 =new TFile(Form("/adaq1/work1/apar/japanOutput/prexPrompt_pass1_%d.000.root", run));
@@ -34,7 +34,7 @@ void AsymTime() {
   //make the trees
   TTree *tree_mul = (TTree*) file1->Get("mul");
 
-  //define event cuts based on previous, current polarity 
+  //define event cuts based on previous, current polarity
   TString evcut_p0c0 = "ErrorFlag==0 && CodaEventNumber>10 && actual_previous_pattern_polarity==0 && actual_pattern_polarity==0";
   TString evcut_p0c1 = "ErrorFlag==0 && CodaEventNumber>10 && actual_previous_pattern_polarity==0 && actual_pattern_polarity==1";
   TString evcut_p1c0 = "ErrorFlag==0 && CodaEventNumber>10 && actual_previous_pattern_polarity==1 && actual_pattern_polarity==0";
@@ -69,30 +69,30 @@ void AsymTime() {
     for (int i=0; i<4; i++) { //4
       canvases[c]->cd(i+1);
       tree_mul->Draw(Form("%s:CodaEventNumber", asym_bcms[c].Data()), cuts[i].Data());
-     
+
       TH1F *htemp = new TH1F("htemp", "htemp", 100, -0.002, 0.002);
       tree_mul->Draw(Form("%s>>htemp", asym_bcms[c].Data()), cuts[i].Data(), "goff");
       mean = htemp->GetMean();
       error = htemp->GetMeanError();
-      
+
       meanfile << asym_bcms[c] << " " << i << " "<< mean << " " << error <<"\n";
     }
   }
   cout << "done" << endl;
- 
-  //save canvases 
-  
+
+  //save canvases
+
   c_asym_bcm_an_us->SaveAs(Form("asym_an_us_vtime%d.pdf", run));
   c_asym_bcm_an_ds->SaveAs(Form("asym_an_ds_vtime%d.pdf", run));
   c_asym_bcm0l02->SaveAs(Form("asym_0l02_vtime%d.pdf", run));
   c_asym_bcm_dg_us->SaveAs(Form("asym_dg_us_vtime%d.pdf", run));
   c_asym_bcm_dg_ds->SaveAs(Form("asym_dg_ds_vtime%d.pdf", run));
-  
 
 
- 
-  
-  
+
+
+
+
 
 
 

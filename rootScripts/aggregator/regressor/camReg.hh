@@ -28,7 +28,7 @@ void regress_h(TString tree = "mul", Int_t runNumber = 0, Int_t minirunNumber = 
   }
   else {
     oldTree = getTree_h(tree, runNumber, minirunNumber, splitNumber, nRuns, "NULL");
-  } 
+  }
   if (oldTree==0){
     Printf("Root file does not exist");
     return;
@@ -129,16 +129,16 @@ void regress_h(TString tree = "mul", Int_t runNumber = 0, Int_t minirunNumber = 
       else {
         oldRespondingDataBranchList.push_back(textFile[listEntryN][0]);
       }
-      //oldRespondingValues.push_back(0.0); 
+      //oldRespondingValues.push_back(0.0);
       if (textFile[listEntryN][2]!="NULL"){
         oldRespondingErrorBranchList.push_back(textFile[listEntryN][0]+textFile[listEntryN][2]);
       }
       else {
         oldRespondingErrorBranchList.push_back(errorBranchName);
       }
-      //oldRespondingErrors.push_back(0.0); 
+      //oldRespondingErrors.push_back(0.0);
       newRegressedBranchList.push_back("reg_"+textFile[listEntryN][0]);
-      newRegressedValues.push_back(0.0); 
+      newRegressedValues.push_back(0.0);
       listEntryN++; // Read next line for uncertainty data
       if (textFile[listEntryN][0]=="File" && textFile[listEntryN][2]!="NULL"){
         oldRespondingUncertaintiesBranchList.push_back(textFile[listEntryN][1]+textFile[listEntryN][2]);
@@ -168,25 +168,25 @@ void regress_h(TString tree = "mul", Int_t runNumber = 0, Int_t minirunNumber = 
         parameters.push_back(stof(textFile[listEntryN][3])); // Push back the physics asymmetry value placeholder at nmanip+1 position... assume it is trivially 0 for first pass
         weighting.push_back(stof(textFile[listEntryN][4])); // Push back the physics asymmetry relative weighting factor for uncertainty calculations
         if (parameterLimits) {
-          parametersLowerLimit.push_back(stof(textFile[listEntryN][5])); 
-          parametersUpperLimit.push_back(stof(textFile[listEntryN][6])); 
+          parametersLowerLimit.push_back(stof(textFile[listEntryN][5]));
+          parametersUpperLimit.push_back(stof(textFile[listEntryN][6]));
         }
         nmanipInputs=nmanip; // This is our constant term
       }
       else {
-        oldManipulatedValues.push_back(0.0); 
+        oldManipulatedValues.push_back(0.0);
         if (textFile[listEntryN][2]!="NULL"){
           oldManipulatedErrorBranchList.push_back(textFile[listEntryN][0]+textFile[listEntryN][2]);
         }
         else {
           oldManipulatedErrorBranchList.push_back(errorBranchName);
         }
-        oldManipulatedErrors.push_back(0.0); 
+        oldManipulatedErrors.push_back(0.0);
         parameters.push_back(stof(textFile[listEntryN][3])); // Initial parameter correlation slope guess for iterating fit
         weighting.push_back(stof(textFile[listEntryN][4])); // Initial weighting guess for errors
         if (parameterLimits) {
-          parametersLowerLimit.push_back(stof(textFile[listEntryN][5])); 
-          parametersUpperLimit.push_back(stof(textFile[listEntryN][6])); 
+          parametersLowerLimit.push_back(stof(textFile[listEntryN][5]));
+          parametersUpperLimit.push_back(stof(textFile[listEntryN][6]));
         }
       }
       listEntryN++; // Read next line for uncertainty data
@@ -384,7 +384,7 @@ void regress_h(TString tree = "mul", Int_t runNumber = 0, Int_t minirunNumber = 
         dddfi[1][0][0] = 0.0;
         dddfi[1][0][1] = ddfi[1][1]/parameters[0];
       }
-      if((*oldRespondingErrorsReader[fitN])!=0.0){ 
+      if((*oldRespondingErrorsReader[fitN])!=0.0){
         if (debug > 3) Printf("Entry %d has an error in input %s",eventN,(const char*)oldRespondingDataBranchList[fitN]);
         newRegressedValuesOkCut = 0.0;
       }
@@ -393,7 +393,7 @@ void regress_h(TString tree = "mul", Int_t runNumber = 0, Int_t minirunNumber = 
       } // use the ROOT file supplied branch with uncertainties in it
       f.push_back(fi);
       newRegressedValues[fitN] = *oldRespondingValuesReader[fitN] - fi + (parameters[nmanip]*1); // Regressed asymmetry of main detector [fitN]
-      if (newRegressedValuesOkCut==0.0){ 
+      if (newRegressedValuesOkCut==0.0){
         numErrorEntries++;
         newTree->GetBranch(newRegressedBranchList[fitN])->Fill(); // Empty event here with error flag set to not ok
         newTree->GetBranch(okFlagReg)->Fill(); // Empty event here with error flag set to not ok
@@ -402,7 +402,7 @@ void regress_h(TString tree = "mul", Int_t runNumber = 0, Int_t minirunNumber = 
 
         newRegressedValuesOkCut = 1.0;
         //eventN++;
-        continue; 
+        continue;
       }
       si2 += oldRespondingUncertainties[fitN]*oldRespondingUncertainties[fitN];
       for (Int_t j = 0 ; j<nmanip ; j++){ // Loop over fit parameters j
@@ -548,8 +548,8 @@ void regress_h(TString tree = "mul", Int_t runNumber = 0, Int_t minirunNumber = 
           numErrorEntries=0;
           oldTreeReader.Restart();
           //newTree->Reset();
-          newTree->GetBranch(newRegressedBranchList[fitN])->Reset(); 
-          newTree->GetBranch(okFlagReg)->Reset(); 
+          newTree->GetBranch(newRegressedBranchList[fitN])->Reset();
+          newTree->GetBranch(okFlagReg)->Reset();
           newTree->SetEntries(0);
         }
         if (parRms2<parameterLimitRMS && parAvg > parameterLimitValue){
@@ -559,8 +559,8 @@ void regress_h(TString tree = "mul", Int_t runNumber = 0, Int_t minirunNumber = 
           numErrorEntries=0;
           oldTreeReader.Restart();
           //newTree->Reset();
-          newTree->GetBranch(newRegressedBranchList[fitN])->Reset(); 
-          newTree->GetBranch(okFlagReg)->Reset(); 
+          newTree->GetBranch(newRegressedBranchList[fitN])->Reset();
+          newTree->GetBranch(okFlagReg)->Reset();
           newTree->SetEntries(0);*/
         }
         else{
@@ -617,7 +617,7 @@ void regress_h(TString tree = "mul", Int_t runNumber = 0, Int_t minirunNumber = 
       //gROOT->SetBatch(kFALSE);
 
       if (folder != NULL) folder->cd();
-      
+
       TCanvas * c1 = new TCanvas();
       c1->SetLogy();
 

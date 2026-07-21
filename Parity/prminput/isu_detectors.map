@@ -5,4 +5,3 @@
  map = isu_channels.map
  param = isu_pedestals.map
  eventcut = isu_eventcuts.in
-

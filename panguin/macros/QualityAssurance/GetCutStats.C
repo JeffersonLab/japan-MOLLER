@@ -10,7 +10,7 @@ void GetCutStats(){
 
   TTree* r = (TTree*)gROOT->FindObject("evt");
   TH1D* hist = new TH1D("CodaEventNumber", "CodaEventNumber", 100, 0, 10e9);
- 
+
   statStr[0] = Form("Total Number of events");
   r->Project(hist->GetName(), "CodaEventNumber", "1");
   Int_t tot = hist->GetEntries();
@@ -54,13 +54,12 @@ void GetCutStats(){
 
   TLatex text;
   text.SetTextSize(0.08);
-  a1->cd(); 
+  a1->cd();
   Float_t iniY = 0.90, diffY = 0.05;
-  text.DrawLatex(0.10, 0.93, "Event Stats, Full Run"); 
+  text.DrawLatex(0.10, 0.93, "Event Stats, Full Run");
   text.SetTextSize(0.06);
   for (Int_t j = 0 ; j < Nstats ; j++){
-    text.DrawLatex(0.10, iniY - (j*2.5+1)*diffY, statStr[j]); 
-    text.DrawLatex(0.10, iniY - (j*2.5+2)*diffY, statStrNumbers[j]); 
+    text.DrawLatex(0.10, iniY - (j*2.5+1)*diffY, statStr[j]);
+    text.DrawLatex(0.10, iniY - (j*2.5+2)*diffY, statStrNumbers[j]);
   }
 }
-

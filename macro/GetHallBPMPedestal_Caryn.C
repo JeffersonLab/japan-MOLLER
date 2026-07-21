@@ -4,14 +4,14 @@ void GetHallBPMPedestal_Caryn(int run_num,TString scan_data = "unser",TString us
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.2);
   gStyle->SetStatW(0.3);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(1011);
   gStyle->SetStatX(0.7);
   gStyle->SetStatY(0.9);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -20,12 +20,12 @@ void GetHallBPMPedestal_Caryn(int run_num,TString scan_data = "unser",TString us
   gStyle->SetLabelSize(0.035,"x");
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.06,"hxyz");
-  gROOT->ForceStyle();  
-  
+  gROOT->ForceStyle();
+
   // TString rf_name =Form("$QW_ROOTFILES/prexPrompt_pass2_%d.000.root",run_num);
   TFile *rootfile = TFile::Open(Form("$QW_ROOTFILES/prexPrompt_pass2_%d.000.root",run_num));
   TTree *tree= (TTree*)rootfile->Get("evt");
-  
+
    //---------------------------
 
  tree->SetAlias("beam_current", scan_data);
@@ -36,9 +36,9 @@ void GetHallBPMPedestal_Caryn(int run_num,TString scan_data = "unser",TString us
   int nbinx = (int)(10*max); // to one-tenth precision.
 
   vector<double> vec_scandata;
-  TH1D *hsd = new TH1D(Form("hsd%d",myii),"scan data",nbinx,-0.05,max-0.05); 
+  TH1D *hsd = new TH1D(Form("hsd%d",myii),"scan data",nbinx,-0.05,max-0.05);
   tree->Draw(Form("beam_current>>hsd%d",myii),user_cut.Data(),"goff");
-  int bin_content; 
+  int bin_content;
   double bin_center;
   for(int ibin=0;ibin<nbinx;ibin++){
     bin_content = hsd->GetBinContent(ibin+1); // Histogram bin number starts from 1
@@ -64,12 +64,12 @@ TString device_name[] ={"4a","4e","12","14","8","4ac","4ec","1p02b","1p03a"};
   TVirtualPad* c_res = c3->cd(2);
   c_fit->Divide(4,1);
   c_res->Divide(4,1);
-  
+
   TF1 *f_zero = new TF1("f_zero","0",0,10000);
   f_zero->SetLineWidth(2);
   f_zero->SetLineColor(kRed);
   f_zero->SetLineStyle(9);
-  
+
   TString branch_name;
   TString num_samples_name;
 
@@ -77,7 +77,7 @@ TString device_name[] ={"4a","4e","12","14","8","4ac","4ec","1p02b","1p03a"};
   double adc_error[5][ndata];
   double adc_res[5][ndata]; // residual
 
-  double unser_mean[ndata]; 
+  double unser_mean[ndata];
   double unser_error[ndata];
 
   TString gfit_title[5];
@@ -90,13 +90,13 @@ TString device_name[] ={"4a","4e","12","14","8","4ac","4ec","1p02b","1p03a"};
 	sprintf(outfilename,"%s/run%d_bpm_pedestal_fit.txt",
 			outputDir.Data(),run_num);
 	printf("Writing output to %s\n",outfilename);
-	//FILE *outfile = fopen(outfilename, "w"); 
+	//FILE *outfile = fopen(outfilename, "w");
 	ofstream outfile;
 	outfile.open(outfilename);
 
 
   TGraphErrors *g_res[5];
-  TGraphErrors *g_fit[5];  
+  TGraphErrors *g_fit[5];
   TGraphErrors *g_res_ref[5];
   TGraphErrors *g_fit_ref[5];
   TMultiGraph *mg_res[5];
@@ -155,7 +155,7 @@ TString device_name[] ={"4a","4e","12","14","8","4ac","4ec","1p02b","1p03a"};
 	adc_error[ich][i] = h_stat->GetRMS()/TMath::Sqrt(h_stat->GetEntries());
       }
       c_fit->cd(ich+1);
-      
+
       g_fit[ich] = new TGraphErrors(ndata,unser_mean,adc_mean[ich],unser_error,adc_error[ich]);
       g_fit[ich]->SetMarkerStyle(20);
       g_fit[ich]->Draw("AP");
@@ -169,10 +169,10 @@ TString device_name[] ={"4a","4e","12","14","8","4ac","4ec","1p02b","1p03a"};
 
       ped[ibpm][ich] = f_fit->GetParameter(0);
       slope[ibpm][ich] = f_fit->GetParameter(1);
-      
+
       for(int i=0;i<ndata;i++)
 	adc_res[ich][i] = adc_mean[ich][i] - f_fit->Eval(unser_mean[i]);
-      
+
       c_res->cd(ich+1);
       g_res[ich] = new TGraphErrors(ndata,unser_mean,adc_res[ich],unser_error,adc_error[ich]);
       g_res[ich]->SetMarkerStyle(20);

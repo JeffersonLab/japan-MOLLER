@@ -17,10 +17,10 @@ devicelist = args['devicelist']
 basename   = args['basename']
 fullruns   = args['fullruns']
 #slug       = args['slug']
-# Get slug: 
+# Get slug:
 cmds = ['rcnd',str(run),'slug']
 cond_out = "NULL"
-cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful 
+cond_out = subprocess.Popen(cmds, stdout=subprocess.PIPE).stdout.read().strip().decode('ascii') # Needs to be decoded... be careful
 slug = float(cond_out)
 print("The slug is slug: "+str(slug))
 

@@ -1,5 +1,5 @@
 ////////BeamModCycle.C
-///Panguin gui compatible diagnostic plots for shift taking online replay 
+///Panguin gui compatible diagnostic plots for shift taking online replay
 
 void rmsCheck(TString type = "burst_lrb_std", Double_t refRMSraw = 1900.0, Double_t refRMSreg = 1125.0, Double_t burstLen = 9000.0) {
   gStyle->SetOptStat(0);
@@ -31,7 +31,7 @@ void rmsCheck(TString type = "burst_lrb_std", Double_t refRMSraw = 1900.0, Doubl
     line3.DrawLatex(.12,.75,"(Wait for 5 minutes of good data)");
     return 0;
   }
-  
+
   TPad *cPlot = new TPad("cPlot","cPlot",0,0,1,1);
   cPlot->Divide(2,2);
   cPlot->Draw();
@@ -111,7 +111,7 @@ void rmsCheck(TString type = "burst_lrb_std", Double_t refRMSraw = 1900.0, Doubl
     cPlot->cd(i+1);
     tMGraphPlot[i]->Draw("A");
   }
-  
+
   cPlot->cd(3);
   //auto legend = new TLegend(0.1,0.7,0.4,0.9);
   auto legend1 = new TLegend(0.7,0.7,0.9,0.925);

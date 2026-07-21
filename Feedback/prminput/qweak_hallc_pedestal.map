@@ -1,8 +1,8 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! 
-! Filename : qweak_hallc_pedestal.9695-.map 
 !
-! ** HallC BPM pedestals (per sample) obtained using Run 5900 
+! Filename : qweak_hallc_pedestal.9695-.map
+!
+! ** HallC BPM pedestals (per sample) obtained using Run 5900
 !           qwk_bcm1 (is calibrated with Run 5807 Gain Setting 2)
 !
 ! ** HallC BCM pedestals and their gains obtained using Run 8370
@@ -14,21 +14,21 @@
 !//                   only 8395, 8396 is junk
 !//
 !//
-!//  8397-            BCM gain setting 2 
+!//  8397-            BCM gain setting 2
 !//                   https://hallcweb.jlab.org/hclog/1012_archive/101221061819.html
 !//                   https://hallcweb.jlab.org/hclog/1012_archive/101221062342.html
-!//                   https://hallcweb.jlab.org/hclog/1012_archive/101221062621.html  
+!//                   https://hallcweb.jlab.org/hclog/1012_archive/101221062621.html
 
 
 !  For BCM5/6         https://hallcweb.jlab.org/hclog/1101_archive/110120122054.html
 !    8966 -
-!         
+!
 !   Thursday, January 20 13:12:51 EST 2011, jhlee
 !
 !  For BCM1/2/5/6   https://hallcweb.jlab.org/hclog/1101_archive/110125222318.html
 !  		    Wednesday, January 26 09:00:19 EST 2011, jhlee
 !                   Ramesh confirmed the results is the better than run 8966,
-!                   thus, I simply use run 9723 
+!                   thus, I simply use run 9723
 !                   Wednesday, January 26 18:33:21 EST 2011, jhlee
 !
 !  For BCM5/6       Friday, February  4 16:10:37 EST 2011,jhlee
@@ -150,5 +150,3 @@
   qwk_invert_tstable   , -541.714 	, 1.0
   sca_habcm, 5335.6, 0.00000121050
   sca_4mhz         ,    0.0,     0.000000250
-
-

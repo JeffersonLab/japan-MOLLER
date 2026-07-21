@@ -31,7 +31,7 @@ Int_t TreeGetter::getListOfFiles(std::string fileName = "slug_list.txt") {
   return 0;
 }
 
-Int_t TreeGetter::getData() { 
+Int_t TreeGetter::getData() {
   for (Int_t i = 0; i < listOfFileIndices.size() ; i++ ){
     std::string tmpInfile = "";
     tmpInfile = inputFolderName;

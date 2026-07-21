@@ -10,6 +10,12 @@
 // System headers
 #include <stdexcept>
 
+// ROOT headers for RNTuple support
+#ifdef HAS_RNTUPLE_SUPPORT
+#include <ROOT/RNTupleModel.hxx>
+#include <ROOT/RNTupleWriter.hxx>
+#endif // HAS_RNTUPLE_SUPPORT
+
 // Qweak headers
 #include "QwParameterFile.h"
 #ifdef __USE_DATABASE__
@@ -24,6 +30,10 @@ const TString QwLinearDiodeArray::subelement[8]={"p1","p2","p3","p4","p5","p6","
 /* Pad size in mm*/
 const Double_t QwLinearDiodeArray::kQwLinearDiodeArrayPadSize = 1.57;
 
+/**
+ * \brief Initialize this linear diode array with a detector name.
+ * \param name Detector name used for subchannel naming.
+ */
 void  QwLinearDiodeArray::InitializeChannel(TString name)
 {
 
@@ -33,11 +43,11 @@ void  QwLinearDiodeArray::InitializeChannel(TString name)
 
   for(i=0;i<8;i++) {
     fPhotodiode[i].InitializeChannel(name+subelement[i],"raw");
-    
+
     if(localdebug)
       std::cout<<" photodiode ["<<i<<"]="<<fPhotodiode[i].GetElementName()<<"\n";
   }
-  
+
 
   fEffectiveCharge.InitializeChannel(name+"WS","derived");
 
@@ -50,6 +60,11 @@ void  QwLinearDiodeArray::InitializeChannel(TString name)
   return;
 }
 
+/**
+ * \brief Initialize this linear diode array with subsystem and name.
+ * \param subsystem Subsystem identifier.
+ * \param name Detector name used for subchannel naming.
+ */
 void  QwLinearDiodeArray::InitializeChannel(TString subsystem, TString name)
 {
 
@@ -76,6 +91,7 @@ void  QwLinearDiodeArray::InitializeChannel(TString subsystem, TString name)
   return;
 }
 
+/** \brief Clear event-scoped data for all pads and derived channels. */
 void QwLinearDiodeArray::ClearEventData()
 {
   size_t i=0;
@@ -91,6 +107,10 @@ void QwLinearDiodeArray::ClearEventData()
 }
 
 
+/**
+ * \brief Apply hardware checks for all photodiode pads.
+ * \return kTRUE if no hardware error was detected; otherwise kFALSE.
+ */
 Bool_t QwLinearDiodeArray::ApplyHWChecks()
 {
   Bool_t eventokay=kTRUE;
@@ -108,6 +128,7 @@ Bool_t QwLinearDiodeArray::ApplyHWChecks()
   return eventokay;
 }
 
+/** \brief Increment error counters for all internal channels. */
 void QwLinearDiodeArray::IncrementErrorCounters()
 {
   size_t i=0;
@@ -118,6 +139,7 @@ void QwLinearDiodeArray::IncrementErrorCounters()
   fEffectiveCharge.IncrementErrorCounters();
 }
 
+/** \brief Print error counters for all internal channels. */
 void QwLinearDiodeArray::PrintErrorCounters() const
 {
   size_t i=0;
@@ -128,6 +150,7 @@ void QwLinearDiodeArray::PrintErrorCounters() const
   fEffectiveCharge.PrintErrorCounters();
 }
 
+/** \brief Aggregate and return the event-cut error flag for this array. */
 UInt_t QwLinearDiodeArray::GetEventcutErrorFlag()
 {
   size_t i=0;
@@ -141,11 +164,12 @@ UInt_t QwLinearDiodeArray::GetEventcutErrorFlag()
   return error;
 }
 
+/** \brief Update and return the aggregated event-cut error flag. */
 UInt_t QwLinearDiodeArray::UpdateErrorFlag()
 {
   size_t i=0;
   UInt_t error1=0;
-  UInt_t error2=0;  
+  UInt_t error2=0;
   for(i=0;i<8;i++){
     error1|=fPhotodiode[i].GetErrorCode();
     error2|=fPhotodiode[i].GetEventcutErrorFlag();
@@ -159,6 +183,10 @@ UInt_t QwLinearDiodeArray::UpdateErrorFlag()
   return error2;
 }
 
+/**
+ * \brief Apply single-event cuts across photodiodes and derived channels.
+ * \return kTRUE if the event passes all configured cuts; otherwise kFALSE.
+ */
 Bool_t QwLinearDiodeArray::ApplySingleEventCuts()
 {
   Bool_t status=kTRUE;
@@ -166,7 +194,7 @@ Bool_t QwLinearDiodeArray::ApplySingleEventCuts()
   UInt_t error_code = 0;
   //Event cuts for four wires
   for(i=0;i<8;i++){
-    if (fPhotodiode[i].ApplySingleEventCuts()){ 
+    if (fPhotodiode[i].ApplySingleEventCuts()){
       status&=kTRUE;
     }
     else{
@@ -202,6 +230,11 @@ Bool_t QwLinearDiodeArray::ApplySingleEventCuts()
 }
 
 
+/**
+ * \brief Resolve an internal channel pointer by subelement name.
+ * \param ch_name Subelement symbolic name (e.g., relx, rely, absx, absy).
+ * \return Non-owning pointer to the requested hardware channel.
+ */
 VQwHardwareChannel* QwLinearDiodeArray::GetSubelementByName(TString ch_name)
 {
   VQwHardwareChannel* tmpptr = NULL;
@@ -232,6 +265,15 @@ void QwLinearDiodeArray::SetSingleEventCuts(TString ch_name, Double_t minX, Doub
 	    << "Does not do anything yet." << QwLog::endl;
 }*/
 
+/**
+ * \brief Configure detailed single-event cuts for a named subelement.
+ * \param ch_name Subelement name.
+ * \param errorflag Device-specific error flag mask to set.
+ * \param minX Lower limit.
+ * \param maxX Upper limit.
+ * \param stability Stability threshold.
+ * \param burplevel Burp detection threshold.
+ */
 void QwLinearDiodeArray::SetSingleEventCuts(TString ch_name, UInt_t errorflag,Double_t minX, Double_t maxX, Double_t stability, Double_t burplevel){
   errorflag|=kBPMErrorFlag;//update the device flag (Do not have a error flag yet)
   //  QwWarning << "QwLinearDiodeArray::SetSingleEventCuts:  " << "Does not do anything yet." << QwLog::endl;
@@ -253,6 +295,11 @@ void QwLinearDiodeArray::SetSingleEventCuts(TString ch_name, UInt_t errorflag,Do
   }
 }
 
+/**
+ * \brief Check for burp failures against another linear array of same type.
+ * \param ev_error Reference array to compare against.
+ * \return kTRUE if a burp failure was detected; otherwise kFALSE.
+ */
 Bool_t QwLinearDiodeArray::CheckForBurpFail(const VQwDataElement *ev_error){
   Short_t i=0;
   Bool_t burpstatus = kFALSE;
@@ -267,7 +314,7 @@ Bool_t QwLinearDiodeArray::CheckForBurpFail(const VQwDataElement *ev_error){
         for(i=0;i<8;i++){
           burpstatus |= fPhotodiode[i].CheckForBurpFail(&(value_lin->fPhotodiode[i]));
         }
-        burpstatus |= fEffectiveCharge.CheckForBurpFail(&(value_lin->fEffectiveCharge)); 
+        burpstatus |= fEffectiveCharge.CheckForBurpFail(&(value_lin->fEffectiveCharge));
       }
     } else {
       TString loc="Standard exception from QwLinearDiodeArray::CheckForBurpFail :"+
@@ -304,7 +351,7 @@ void QwLinearDiodeArray::UpdateErrorFlag(const VQwBPM *ev_error){
     }
   } catch (std::exception& e) {
     std::cerr<< e.what()<<std::endl;
-  }  
+  }
 };
 
 void  QwLinearDiodeArray::ProcessEvent()
@@ -322,17 +369,17 @@ void  QwLinearDiodeArray::ProcessEvent()
 
 
   ApplyHWChecks();
-  //first apply HW checks and update HW  error flags. 
-  // Calling this routine here and not in ApplySingleEventCuts  
-  //makes a difference for a LinearArrays because they have derrived devices.
+  //first apply HW checks and update HW  error flags.
+  // Calling this routine here and not in ApplySingleEventCuts
+  //makes a difference for a LinearArrays because they have derived devices.
 
   fEffectiveCharge.ClearEventData();
   for(i=0;i<8;i++){
     fPhotodiode[i].ProcessEvent();
     fEffectiveCharge+=fPhotodiode[i];
   }
-  
-  
+
+
   //  First calculate the mean pad position and mean of squared pad position
   //  with respect to the center of the array, in units of pad spacing.
   mean.ClearEventData();
@@ -361,11 +408,11 @@ void  QwLinearDiodeArray::ProcessEvent()
     for(Int_t i = 0; i<8; i++)
       std::cout<<" pad"<<i<<" ="<<fPhotodiode[i].GetValue()<<std::endl;
     std::cout<<" mean ="<<fRelPos[0].GetValue()<<std::endl;
-    std::cout<<" varaiance ="<<fRelPos[1].GetValue()<<std::endl;
+    std::cout<<" variance ="<<fRelPos[1].GetValue()<<std::endl;
     std::cout<<" total charge ="<<fEffectiveCharge.GetValue()<<std::endl;
 
   }
-  
+
   return;
 }
 
@@ -379,7 +426,7 @@ Int_t QwLinearDiodeArray::ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_i
   else
     {
     std::cerr <<
-      "QwLinearDiodeArray::ProcessEvBuffer(): attemp to fill in raw data for a pad that doesn't exist \n";
+      "QwLinearDiodeArray::ProcessEvBuffer(): attempt to fill in raw data for a pad that doesn't exist \n";
     }
   return word_position_in_buffer;
 }
@@ -518,7 +565,7 @@ QwLinearDiodeArray& QwLinearDiodeArray::operator-= (const QwLinearDiodeArray &va
 
 void QwLinearDiodeArray::Ratio(QwLinearDiodeArray &numer, QwLinearDiodeArray &denom)
 {
-  // this function is called when forming asymmetries. In this case waht we actually want for the
+  // this function is called when forming asymmetries. In this case what we actually want for the
   // LinearArray is the difference only not the asymmetries
 
   *this=numer;
@@ -526,6 +573,10 @@ void QwLinearDiodeArray::Ratio(QwLinearDiodeArray &numer, QwLinearDiodeArray &de
   return;
 }
 
+void QwLinearDiodeArray::Ratio(VQwBPM &numer, VQwBPM &denom)
+{
+  Ratio(*(dynamic_cast<QwLinearDiodeArray*>(&numer)), *(dynamic_cast<QwLinearDiodeArray*>(&denom)));
+}
 
 
 void QwLinearDiodeArray::Scale(Double_t factor)
@@ -619,7 +670,7 @@ void  QwLinearDiodeArray::FillHistograms()
   return;
 }
 
-void  QwLinearDiodeArray::ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values)
+void  QwLinearDiodeArray::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
   if (GetElementName()==""){
     //  This channel is not used, so skip constructing trees.
@@ -707,7 +758,7 @@ void  QwLinearDiodeArray::ConstructBranch(TTree *tree, TString &prefix, QwParame
   return;
 }
 
-void  QwLinearDiodeArray::FillTreeVector(std::vector<Double_t> &values) const
+void  QwLinearDiodeArray::FillTreeVector(QwRootTreeBranchVector &values) const
 {
   if (GetElementName()=="") {
     //  This channel is not used, so skip filling the tree.
@@ -724,6 +775,51 @@ void  QwLinearDiodeArray::FillTreeVector(std::vector<Double_t> &values) const
   }
   return;
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void  QwLinearDiodeArray::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  if (GetElementName()==""){
+    //  This channel is not used, so skip constructing.
+  }
+  else {
+    TString thisprefix=prefix;
+    if(prefix.Contains("asym_"))
+      thisprefix.ReplaceAll("asym_","diff_");
+
+    SetRootSaveStatus(prefix);
+
+    fEffectiveCharge.ConstructNTupleAndVector(model,prefix,values,fieldPtrs);
+    size_t i = 0;
+    if(bFullSave) {
+      for(i=0;i<8;i++) fPhotodiode[i].ConstructNTupleAndVector(model,thisprefix,values,fieldPtrs);
+    }
+    for(i=kXAxis;i<kNumAxes;i++) {
+      fRelPos[i].ConstructNTupleAndVector(model,thisprefix,values,fieldPtrs);
+    }
+
+  }
+  return;
+}
+
+void  QwLinearDiodeArray::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  if (GetElementName()=="") {
+    //  This channel is not used, so skip filling.
+  }
+  else {
+    fEffectiveCharge.FillNTupleVector(values);
+    size_t i = 0;
+    if(bFullSave) {
+      for(i=0;i<8;i++) fPhotodiode[i].FillNTupleVector(values);
+    }
+    for(i=kXAxis;i<kNumAxes;i++){
+      fRelPos[i].FillNTupleVector(values);
+    }
+  }
+  return;
+}
+#endif
 
 
 void QwLinearDiodeArray::SetEventCutMode(Int_t bcuts)
@@ -787,7 +883,7 @@ void  QwLinearDiodeArray::SetRandomEventParameters(Double_t meanX, Double_t sigm
   Double_t sumX = 1.1e8; // These are just guesses, but I made X and Y different
   Double_t sumY = 0.9e8; // to make it more interesting for the analyzer...
 
-  
+
   // Determine the asymmetry from the position
   Double_t meanXP = (1.0 + meanX) * sumX / 2.0;
   Double_t meanXM = (1.0 - meanX) * sumX / 2.0; // = sumX - meanXP;
@@ -852,4 +948,3 @@ void QwLinearDiodeArray::SetSubElementCalibrationFactor(Int_t j, Double_t value)
   fPhotodiode[j].SetCalibrationFactor(value);
   return;
 }
-

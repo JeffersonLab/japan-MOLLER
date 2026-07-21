@@ -7,11 +7,11 @@ ROC=2
 Bank=0x0202
 !same sample size for ADCs in a given bank
 !use 480 for 1kHz
-!use 2000 for 240Hz 
+!use 2000 for 240Hz
 !sample_size=480
 !sample_size=2000
 !for 960Hz
-sample_size=464  
+sample_size=464
 
 !
 !
@@ -116,24 +116,24 @@ Bank=0x6103
 !  VPMT, 45,  4, CombinationPMT,  uslumi3_uslumi7_sum,	 qwk_uslumi3Pos,  qwk_uslumi3Neg,  qwk_uslumi7Pos,  qwk_uslumi7Neg, 1.0,  1.0, 1.0,  1.0
 !  VPMT, 46,  4, CombinationPMT,  uslumi1_uslumi5_diff,	 qwk_uslumi1Pos,  qwk_uslumi1Neg,  qwk_uslumi5Pos,  qwk_uslumi5Neg, 1.0,  1.0, -1.0,  -1.0
 !  VPMT, 47,  4, CombinationPMT,  uslumi3_uslumi7_diff,	 qwk_uslumi3Pos,  qwk_uslumi3Neg,  qwk_uslumi7Pos,  qwk_uslumi7Neg, 1.0,  1.0, -1.0,  -1.0
-  
+
 VPMT, 48,  8, CombinationPMT,  uslumi_sum,         qwk_uslumi1Pos,  qwk_uslumi1Neg,  qwk_uslumi3Pos,  qwk_uslumi3Neg,  qwk_uslumi5Pos,  qwk_uslumi5Neg,  qwk_uslumi7Pos,  qwk_uslumi7Neg, 1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0
-  
+
 !VPMT, 48,  6, CombinationPMT,  uslumi_sum,         qwk_uslumi1Pos,  qwk_uslumi1Neg,  qwk_uslumi3Pos,  qwk_uslumi3Neg,  qwk_uslumi5Pos,  qwk_uslumi5Neg,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0
 
 !  VPMT, 49, 2, CombinationPMT, dslumi1_dslumi5_sum, qwk_dslumi1, qwk_dslumi5, 1.0, 1.0
 !  VPMT, 50, 2, CombinationPMT, dslumi2_dslumi6_sum, qwk_dslumi2, qwk_dslumi6, 1.0, 1.0
 !  VPMT, 51, 2, CombinationPMT, dslumi3_dslumi7_sum, qwk_dslumi3, qwk_dslumi7, 1.0, 1.0
 !  VPMT, 52, 2, CombinationPMT, dslumi4_dslumi8_sum, qwk_dslumi4, qwk_dslumi8, 1.0, 1.0
-  
+
 !  VPMT, 53, 2, CombinationPMT, dslumi1_dslumi5_diff, qwk_dslumi1, qwk_dslumi5, 1.0, -1.0
 !  VPMT, 54, 2, CombinationPMT, dslumi2_dslumi6_diff, qwk_dslumi2, qwk_dslumi6, 1.0, -1.0
 !  VPMT, 55, 2, CombinationPMT, dslumi3_dslumi7_diff, qwk_dslumi3, qwk_dslumi7, 1.0, -1.0
 !  VPMT, 56, 2, CombinationPMT, dslumi4_dslumi8_diff, qwk_dslumi4, qwk_dslumi8, 1.0, -1.0
-  
+
 !  VPMT, 57, 4, CombinationPMT, dslumi_odd, qwk_dslumi1, qwk_dslumi3, qwk_dslumi5, qwk_dslumi7, 1.0, 1.0, 1.0, 1.0
 !  VPMT, 58, 4, CombinationPMT, dslumi_even, qwk_dslumi2, qwk_dslumi4, qwk_dslumi6, qwk_dslumi8, 1.0, 1.0, 1.0, 1.0
-  
+
 !  VPMT, 59, 8, CombinationPMT, dslumi_sum, qwk_dslumi1, qwk_dslumi2, qwk_dslumi3, qwk_dslumi4, qwk_dslumi5, qwk_dslumi6, qwk_dslumi7, qwk_dslumi8, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
 
 

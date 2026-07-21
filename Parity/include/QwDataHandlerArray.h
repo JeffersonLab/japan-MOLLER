@@ -1,12 +1,11 @@
-/**********************************************************\
-* File: QwDataHandlerArray.h                           *
-*                                                          *
-* Author: P. M. King                                       *
-* Time-stamp: <2009-02-04 10:30>                           *
-\**********************************************************/
+/*!
+ * \file   QwDataHandlerArray.h
+ * \brief  Array container for managing multiple data handlers
+ * \author P. M. King
+ * \date   2009-02-04
+ */
 
-#ifndef __QWDATAHANDLERARRAY__
-#define __QWDATAHANDLERARRAY__
+#pragma once
 
 #include <vector>
 #include <map>
@@ -15,9 +14,12 @@
 #include "TDirectory.h"
 #include <TTree.h>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/mem_fn.hpp>
+// ROOT headers
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
+// Qweak headers
 #include "QwDataHandlerArray.h"
 #include "VQwDataHandler.h"
 #include "QwOptions.h"
@@ -41,11 +43,11 @@ class QwPromptSummary;
  *
  */
 class QwDataHandlerArray:
-    public std::vector<boost::shared_ptr<VQwDataHandler> >,
+    public std::vector<std::shared_ptr<VQwDataHandler> >,
     public MQwPublishable<QwDataHandlerArray,VQwDataHandler>
 {
  private:
-  typedef std::vector<boost::shared_ptr<VQwDataHandler> >  HandlerPtrs;
+  typedef std::vector<std::shared_ptr<VQwDataHandler> >  HandlerPtrs;
  public:
   using HandlerPtrs::const_iterator;
   using HandlerPtrs::iterator;
@@ -66,20 +68,30 @@ class QwDataHandlerArray:
     /// Copy constructor by reference
     QwDataHandlerArray(const QwDataHandlerArray& source);
     /// Default destructor
-    virtual ~QwDataHandlerArray();
+    ~QwDataHandlerArray() override;
 
     /// \brief Define configuration options for global array
     static void DefineOptions(QwOptions &options);
     /// \brief Process configuration options for the datahandler array itself
     void ProcessOptions(QwOptions &options);
 
-    /// \brief Load from mapfile with T = helicity pattern or subsystem array
-    template<class T>
-    void LoadDataHandlersFromParameterFile(QwParameterFile& mapfile, T& detectors, const TString &run);
+  /**
+   * \brief Load data handlers from a parameter file.
+   *
+   * Parses the map file and constructs/initializes handlers, connecting
+   * them to the provided source container.
+   *
+   * @tparam T           Source type (QwHelicityPattern or QwSubsystemArrayParity).
+   * @param mapfile      Parameter file describing handlers and settings.
+   * @param detectors    Source object to connect handlers to.
+   * @param run          Run label used for per-run configuration.
+   */
+  template<class T>
+  void LoadDataHandlersFromParameterFile(QwParameterFile& mapfile, T& detectors, const TString &run);
 
     /// \brief Add the datahandler to this array
     void push_back(VQwDataHandler* handler);
-    void push_back(boost::shared_ptr<VQwDataHandler> handler);
+    void push_back(std::shared_ptr<VQwDataHandler> handler);
 
     /// \brief Get the handler with the specified name
     VQwDataHandler* GetDataHandlerByName(const TString& name);
@@ -92,11 +104,19 @@ class QwDataHandlerArray:
         const std::string& branchprefix = "");
 
     /// \brief Construct a branch and vector for this handler with a prefix
-    void ConstructBranchAndVector(TTree *tree, TString& prefix, std::vector <Double_t> &values);
+    void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values);
 
     void FillTreeBranches(QwRootFile *treerootfile);
     /// \brief Fill the vector for this handler
-    void FillTreeVector(std::vector<Double_t>& values) const;
+    void FillTreeVector(QwRootTreeBranchVector &values) const;
+
+    /// RNTuple methods
+    void ConstructNTupleFields(
+        QwRootFile *treerootfile,
+        const std::string& treeprefix = "",
+        const std::string& branchprefix = "");
+
+    void FillNTupleFields(QwRootFile *treerootfile);
 
     /// Construct the histograms for this subsystem
     void  ConstructHistograms() {
@@ -115,7 +135,6 @@ class QwDataHandlerArray:
     /// \brief Fill the database
     void FillDB(QwParityDB *db, TString type);
     //    void FillErrDB(QwParityDB *db, TString type);
-    //    const QwDataHandlerArray *dummy_source;
 
     void  ClearEventData();
     void  ProcessEvent();
@@ -161,10 +180,10 @@ class QwDataHandlerArray:
     /// \brief Print value of all channels
     void PrintValue() const;
 
-    
+
     void WritePromptSummary(QwPromptSummary *ps, TString type);
-    
-    
+
+
     void ProcessDataHandlerEntry();
 
     void FinishDataHandler();
@@ -206,5 +225,3 @@ class QwDataHandlerArray:
     };
 
 }; // class QwDataHandlerArray
-
-#endif // __QWDATAHANDLERARRAY__

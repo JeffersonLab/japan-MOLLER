@@ -1,6 +1,6 @@
-// Injector BPMs Plot Macro 
+// Injector BPMs Plot Macro
 // Source from Caryn Palatchi
-// Adapted by Tao Ye for JAPAN 
+// Adapted by Tao Ye for JAPAN
 // Adapted by KDP and PK for panguin
 // Last Update : 05-2019
 
@@ -39,7 +39,7 @@ void PlotHallBPMSprojected(TString ucut){
 
   TString lcut = ucut +  Form(" && Entry$>(%d-%d)",nument,intper) ;
 
-  //Right now we're using: 5.725m = distance between the target and 4a; 4.083m = distance betweeen 4a and 4e 
+  //Right now we're using: 5.725m = distance between the target and 4a; 4.083m = distance betweeen 4a and 4e
   mul_tree -> SetAlias("T_x","diff_bpm4eX-diff_bpm4aX*5.725/4.083 + diff_bpm4aX");
   mul_tree -> SetAlias("T_y","diff_bpm4eY-diff_bpm4aY*5.725/4.083 + diff_bpm4aY");
   mul_tree -> SetAlias("Tp_x","diff_bpm4eX-diff_bpm4aX/4.083");
@@ -51,16 +51,16 @@ void PlotHallBPMSprojected(TString ucut){
   pad1->Draw();
   TH1D* thishist;
   TString objnam;
-  for(Int_t dd=0;dd<ndeti;dd++) {    
+  for(Int_t dd=0;dd<ndeti;dd++) {
 
     //This is for the BPMs
-    if(dd<3){ 
+    if(dd<3){
     mul_tree->Draw(Form("1e6*asym_%sWS>>hista%d",vBPMHall[dd],dd),lcut,"goff");
     objnam = Form("hista%d",dd);
     thishist = (TH1D*)gDirectory->FindObject(objnam);
     Aq[dd] = thishist->GetMean();
     eAq[dd]= thishist->GetMeanError();
-    rmsAq[dd]= thishist->GetRMS();    
+    rmsAq[dd]= thishist->GetRMS();
     zero[dd]=0;
     // delete thishist;
     mul_tree->Draw(Form("1e3*diff_%sX>>histx%d",vBPMHall[dd],dd),lcut,"goff");
@@ -84,7 +84,7 @@ void PlotHallBPMSprojected(TString ucut){
     else if(dd==3||dd==4){
     Aq[dd] = 0;
     eAq[dd]= 0;
-    rmsAq[dd]= 0;    
+    rmsAq[dd]= 0;
     zero[dd]= 0;
 
     mul_tree->Draw(Form("1e3*%s_x>>histx%d",vBPMHall[dd],dd),lcut,"goff");
@@ -106,7 +106,7 @@ void PlotHallBPMSprojected(TString ucut){
     else if(dd==5){
     Aq[dd] = 0;
     eAq[dd]= 0;
-    rmsAq[dd]= 0;    
+    rmsAq[dd]= 0;
     zero[dd]= 0;
 
     mul_tree->Draw(Form("1e3*%s_x>>histx%d",vBPMHall[dd],dd),lcut,"goff");
@@ -145,7 +145,7 @@ void PlotHallBPMSprojected(TString ucut){
   Aqgraph= new TGraphErrors(numchains-3,chain,&(Aq[0]),chainerr,&(eAq[0]));
   Aqrmsgraph = new TGraphErrors(numchains-3,chain,&(rmsAq[0]),chainerr,&(zero[0]));
 
-  
+
   TMultiGraph *xygraph = new TMultiGraph();
   TMultiGraph *xyrmsgraph = new TMultiGraph();
 
@@ -246,4 +246,3 @@ void PlotHallBPMSprojected(TString ucut){
   pad_buff->SetGrid();
 
 }
-

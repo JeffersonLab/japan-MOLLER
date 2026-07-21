@@ -1,11 +1,24 @@
-#ifndef	CODA3EVENTDECODER_H
-#define CODA3EVENTDECODER_H
+/*!
+ * \file   Coda3EventDecoder.h
+ * \brief  CODA version 3 event decoder implementation
+ */
+
+#pragma once
 
 #include "VEventDecoder.h"
 #include "Rtypes.h"
 
 #include <vector>
 
+/**
+ * \class Coda3EventDecoder
+ * \ingroup QwAnalysis
+ * \brief CODA version 3 event decoder implementation
+ *
+ * Concrete decoder for CODA 3.x format event streams, handling the specific
+ * data structures, bank formats, and trigger information used in CODA 3.
+ * Provides encoding and decoding capabilities for both real and mock data.
+ */
 class Coda3EventDecoder : public VEventDecoder
 {
 public:
@@ -15,26 +28,60 @@ public:
 		evt_time(0),
 		trigger_bits(0),
 		TSROCNumber(0) { }
-	~Coda3EventDecoder() { }
+	~Coda3EventDecoder() override { }
 public:
 	// Encoding Functions
-	virtual std::vector<UInt_t> EncodePHYSEventHeader(std::vector<ROCID_t> &ROCList);
-	virtual void EncodePrestartEventHeader(int* buffer, int runnumber, int runtype, int localtime);
-	virtual void EncodeGoEventHeader(int* buffer, int eventcount, int localtime);
-	virtual void EncodePauseEventHeader(int* buffer, int eventcount, int localtime);
-	virtual void EncodeEndEventHeader(int* buffer, int eventcount, int localtime);
+	/** Create a PHYS event EVIO header.
+	 *  @param ROCList List of ROC IDs.
+	 *  @return Vector of 32-bit words containing the header.
+	 */
+	std::vector<UInt_t> EncodePHYSEventHeader(std::vector<ROCID_t> &ROCList) override;
+	/** Create a PRESTART event EVIO header.
+	 *  @param buffer    Output buffer (>= 5 words).
+	 *  @param runnumber Run number.
+	 *  @param runtype   Run type.
+	 *  @param localtime Event time.
+	 */
+	void EncodePrestartEventHeader(int* buffer, int runnumber, int runtype, int localtime) override;
+	/** Create a GO event EVIO header.
+	 *  @param buffer     Output buffer (>= 5 words).
+	 *  @param eventcount Number of events.
+	 *  @param localtime  Event time.
+	 */
+	void EncodeGoEventHeader(int* buffer, int eventcount, int localtime) override;
+	/** Create a PAUSE event EVIO header.
+	 *  @param buffer     Output buffer (>= 5 words).
+	 *  @param eventcount Number of events.
+	 *  @param localtime  Event time.
+	 */
+	void EncodePauseEventHeader(int* buffer, int eventcount, int localtime) override;
+	/** Create an END event EVIO header.
+	 *  @param buffer     Output buffer (>= 5 words).
+	 *  @param eventcount Number of events.
+	 *  @param localtime  Event time.
+	 */
+	void EncodeEndEventHeader(int* buffer, int eventcount, int localtime) override;
 
 public:
 	// Decoding Functions
-	virtual Int_t DecodeEventIDBank(UInt_t *buffer);
+	/** Determine if a buffer contains a PHYS, control, or other event.
+	 *  @param buffer Event buffer to decode.
+	 *  @return CODA_OK on success.
+	 */
+        Int_t DecodeEventIDBank(UInt_t *buffer) override;
 private:
 	// Debugging Functions
+	/** Print non-PHYS, non-control "user" events. */
 	void printUserEvent(const UInt_t *buffer);
-	virtual void PrintDecoderInfo(QwLog& out);
+	/** Print internal decoder state for diagnostics. */
+        void PrintDecoderInfo(QwLog& out) override;
 protected:
 	// TI Decoding Functions
+	/** Determine event type and set control/physics flags based on bank tag. */
 	UInt_t InterpretBankTag(UInt_t tag);
+	/** Decode the TI trigger bank for PHYS events. */
 	Int_t trigBankDecode(UInt_t* buffer);
+	/** Display a warning and reset state for a given TI error flag. */
 	void trigBankErrorHandler( Int_t flag );
 
 	ULong64_t GetEvTime() const { return evt_time; }
@@ -50,7 +97,7 @@ public:
 		explicit coda_format_error( const std::string& what_arg ) : std::runtime_error(what_arg) {}
 		explicit coda_format_error( const char* what_arg )        : std::runtime_error(what_arg) {}
 	};
-	
+
 	// Trigger Bank OBJect
 	class TBOBJ {
 	public:
@@ -77,6 +124,7 @@ public:
 	};
 
 protected:
+	/** Load TI trigger bank info for the i-th event in block. */
 	Int_t LoadTrigBankInfo( UInt_t index_buffer );
 	TBOBJ tbank;
 
@@ -102,4 +150,3 @@ protected:
 	// Currently implemented as 0
 	uint32_t TSROCNumber;
 };
-#endif

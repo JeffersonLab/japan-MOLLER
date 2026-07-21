@@ -1,6 +1,6 @@
 ! this file contains the pedestals for the ADCS
 ! respect the format of the file
-! name of chanel, pedestal, gain
+! name of channel, pedestal, gain
 ! if this is a Triumf ADC enter the hardware sum pedestal
 ! the pedestal will be subtracted to the data
 QWK_BCM0L00 ,	            0   ,  76.293e-2

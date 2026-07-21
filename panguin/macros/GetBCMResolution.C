@@ -4,7 +4,7 @@ void GetBCMResolution(Int_t runnumber,TString treeName){
   gStyle->SetStatH(0.15);
   TFile *postpanFile = TFile::Open(Form("./postpan/japanOutput/prexRespin1_%d_regress_bcm_%s.root",runnumber,treeName.Data()));
   TTree *reg = (TTree*)postpanFile->Get("reg");
-  
+
   TString bcm_name[] = {"asym_bcm_an_us","asym_bcm_an_ds","asym_bcm_an_ds3",
   			"asym_bcm_dg_us","asym_bcm_dg_ds"};
 
@@ -13,7 +13,7 @@ void GetBCMResolution(Int_t runnumber,TString treeName){
   Double_t c_width = 400;
   TCanvas *c_sam = new TCanvas("c_sam","c_sam",2*c_width,2*c_width);
   c_sam->Divide(2,2);
-  
+
   c_sam->cd(1);
   reg->Draw("reg_asym_sam2+reg_asym_sam4","ok_cut");
   c_sam->cd(2);
@@ -65,7 +65,7 @@ void GetBCMResolution(Int_t runnumber,TString treeName){
   }
 
   for(int ibcm=0;ibcm<5;ibcm++){
-    cout <<"(asym_sam2 +asym_sam6 +asym_sam4 +asym_sam8)/4 - "  
+    cout <<"(asym_sam2 +asym_sam6 +asym_sam4 +asym_sam8)/4 - "
 	 << bcm_name[ibcm] << ":\t" << sam_bcm_rms[ibcm]<<"\t"
 	 << sam_bcm_slope[ibcm] << "+/-" << sam_bcm_slope_err[ibcm]<<  endl;
   }
@@ -93,7 +93,7 @@ void GetBCMResolution(Int_t runnumber,TString treeName){
   double rms = bcm3->GetRMS();
   bcmdd_rms[2] = 1e6*rms;
 
-  c_bcm->SaveAs(Form("run%d_bcm_dd.png",runnumber));  
+  c_bcm->SaveAs(Form("run%d_bcm_dd.png",runnumber));
 
   cout << "asym_bcm_an_us - asym_bcm_an_ds" << ":\t" << bcmdd_rms[0] <<endl;
   cout << "asym_bcm_an_us - asym_bcm_an_ds3" << ":\t" << bcmdd_rms[1] <<endl;

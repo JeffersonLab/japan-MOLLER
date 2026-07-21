@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
   Printf("data == %f",data);
 
   /*TString ana = "help";
-  TString tree = "mul"; 
+  TString tree = "mul";
   TString branch = "asym_vqwk_04_0ch0";
   TString leaf = "hw_sum";
   TString cut = "defaultCuts";
@@ -48,21 +48,21 @@ int main(int argc, char **argv) {
   getAlarmStatus_h();
   getAggregatorStatus_h();
   if (debug>0) Printf("Analysis: %s",(const char*) ana);
-  if( 
-       ana == "Integral" 
-    || ana == "integral" 
-    || ana == "Sum" 
+  if(
+       ana == "Integral"
+    || ana == "integral"
+    || ana == "Sum"
     || ana == "sum"){
     //writeInt_loop_h( tree, branch, leaf, cut, runNumber, splitNumber, nRuns );
     writeInt_leafHist_h( tree, branch, leaf, cut, overWriteCut, histMode, runNumber, splitNumber, nRuns );
     if (debug>1) Printf("Done with integral ana");
   }
-  else if( 
+  else if(
        ana == "intloop"){
     writeInt_loop_h( tree, branch, leaf, cut, overWriteCut, runNumber, splitNumber, nRuns );
     if (debug>1) Printf("Done with intloop ana");
   }
-  else if( 
+  else if(
        ana == "nevents"
     || ana == "NeventsCuts"
     || ana == "eventscuts"
@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
     writeNEvents_Loop_h( tree, branch, leaf, cut, overWriteCut, stabilityRing, runNumber, splitNumber, nRuns );
     if (debug>1) Printf("Done with nEvents loop ana");
   }
-  else if( 
+  else if(
        ana == "eventsloopn"
     || ana == "eventloopn"
     || ana == "eventloopN"
@@ -87,17 +87,17 @@ int main(int argc, char **argv) {
     writeEventLoopN_Loop_h( tree, branch, leaf, cut, overWriteCut, stabilityRing, runNumber, splitNumber, nRuns );
     if (debug>1) Printf("Done with EventLoopNs loop ana");
   }
-  else if ( 
-       ana == "rms" 
-    || ana == "Rms" 
-    || ana == "width" 
-    || ana == "Width" 
-    || ana == "RMS" 
-    || ana == "Stddev" 
-    || ana == "stddev" 
-    || ana == "Stdv" 
-    || ana == "stdv" 
-    || ana == "Sigma" 
+  else if (
+       ana == "rms"
+    || ana == "Rms"
+    || ana == "width"
+    || ana == "Width"
+    || ana == "RMS"
+    || ana == "Stddev"
+    || ana == "stddev"
+    || ana == "Stdv"
+    || ana == "stdv"
+    || ana == "Sigma"
     || ana == "sigma"
     || ana == "Sig"
     || ana == "sig"){

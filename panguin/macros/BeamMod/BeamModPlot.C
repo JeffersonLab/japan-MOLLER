@@ -3,7 +3,7 @@
 /////---- Quinn Campgana ----
 ////-----Carrington Metts------
 //// ----- June-July 2019 --------E
-///Panguin gui compatible diagnostic plots for shift taking online replay 
+///Panguin gui compatible diagnostic plots for shift taking online replay
 /// Three Pads
 //Pad one: trim card readback vs. time for full run (up to the point of replay)
 //Pad two: X bpm correlations (strong correlations = bad)
@@ -11,11 +11,11 @@
 
 
 void BeamModPlot(TString type="evt",TString type2="mul", TString ref="CodaEventNumber", Bool_t ldebug = kFALSE){
-  
+
   gStyle->SetOptStat(0);
   TTree* tree_R = (TTree*)gDirectory->Get(type);
   TTree* tree_M = (TTree*)gDirectory->Get(type2);
-  
+
   /*
   if (1==1){
     //if(ldebug) std::cerr << "No entries with 'bmwcycnum>0' in this run." << std::endl;
@@ -23,14 +23,14 @@ void BeamModPlot(TString type="evt",TString type2="mul", TString ref="CodaEventN
     return 0;
   }
   */
-  
-  
+
+
   tree_R->Draw(">>elist","bmwcycnum>0","entrylist"); //should pick out unique cycle numbers
   TEntryList *elist = (TEntryList*)gDirectory->Get("elist");
   tree_R->SetEntryList(elist);
   TLeaf *l_bmwcycnum = tree_R->GetLeaf("bmwcycnum");
-  
-  
+
+
 
   TString bmwcut = "bmwcycnum>0";
   TString evcut = "(ErrorFlag & 0xda7e6bff)==0";
@@ -71,8 +71,8 @@ void BeamModPlot(TString type="evt",TString type2="mul", TString ref="CodaEventN
 
     cBMWPlot2->cd(3);
     line3.DrawLatex(.2,.5,":(");
-    
-    
+
+
   }
   else{
 
@@ -102,10 +102,10 @@ void BeamModPlot(TString type="evt",TString type2="mul", TString ref="CodaEventN
         tGraphBMWPlot3[i]->GetYaxis()->SetTitle("Trim Cards");
       }
     }
-  
+
     cBMWPlot2->cd(1);
     tGraphBMWPlot3[0]->Draw("AL");
-  
+
     for(int i=1;i<7;i++){
       tGraphBMWPlot3[i]->Draw("same");
     }
@@ -130,7 +130,7 @@ void BeamModPlot(TString type="evt",TString type2="mul", TString ref="CodaEventN
     cBMWPlot2->cd(3);
     //    tree_M->Draw("(diff_bpm4eY-diff_bpm4aY):(diff_bpm4aY+diff_bpm4eY)","yield_bmwobj<0");
     tree_M->Draw("diff_bpm4eY-0.65*diff_bpm4aY:0.65*diff_bpm4aY+diff_bpm4eY","ErrorFlag==0 && diff_bpm4eY>-5 && diff_bpm4eY<5 && diff_bpm4aY>-5 && diff_bpm4aY<5","goff");
-    
+
   }
 
 }

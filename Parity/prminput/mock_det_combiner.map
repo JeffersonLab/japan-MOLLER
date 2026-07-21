@@ -1,0 +1,1741 @@
+# Rules for this file
+# - no repeating dependent variables in the same section
+#   (probably also not in different sections, come to think of it)
+#
+# - Alias names start with "@" after the "asym" or "diff" prefix.
+#   They should also be all lower case.
+#
+
+# Differences
+# [diff:@diff_bcm1h02a_bcm1h15]
+# diff:bcm1h02a, 1
+# diff:bcm1h15, -1
+#
+# [diff:@diff_bcm_target_bcm1h15]
+# diff:bcm_target, 1
+# diff:bcm1h15, -1
+#
+# [diff:@diff_bpm1h04x_bpm1h14x]
+# diff:bpm1h04X, 1
+# diff:bpm1h14X, -1
+#
+# [diff:@diff_bpm1h04x_bpm1h14y]
+# diff:bpm1h04X, 1
+# diff:bpm1h14Y, -1
+
+
+## Averages
+
+# Ring 1 all
+[asym:@asym_tq_r1]
+asym:tq01_r1, 0.03571
+asym:tq02_r1, 0.03571
+asym:tq03_r1, 0.03571
+asym:tq04_r1, 0.03571
+asym:tq05_r1, 0.03571
+asym:tq06_r1, 0.03571
+asym:tq07_r1, 0.03571
+asym:tq08_r1, 0.03571
+asym:tq09_r1, 0.03571
+asym:tq10_r1, 0.03571
+asym:tq11_r1, 0.03571
+asym:tq12_r1, 0.03571
+asym:tq13_r1, 0.03571
+asym:tq14_r1, 0.03571
+asym:tq15_r1, 0.03571
+asym:tq16_r1, 0.03571
+asym:tq17_r1, 0.03571
+asym:tq18_r1, 0.03571
+asym:tq19_r1, 0.03571
+asym:tq20_r1, 0.03571
+asym:tq21_r1, 0.03571
+asym:tq22_r1, 0.03571
+asym:tq23_r1, 0.03571
+asym:tq24_r1, 0.03571
+asym:tq25_r1, 0.03571
+asym:tq26_r1, 0.03571
+asym:tq27_r1, 0.03571
+asym:tq28_r1, 0.03571
+
+# Ring 2 all
+[asym:@asym_tq_r2]
+asym:tq01_r2, 0.03571
+asym:tq02_r2, 0.03571
+asym:tq03_r2, 0.03571
+asym:tq04_r2, 0.03571
+asym:tq05_r2, 0.03571
+asym:tq06_r2, 0.03571
+asym:tq07_r2, 0.03571
+asym:tq08_r2, 0.03571
+asym:tq09_r2, 0.03571
+asym:tq10_r2, 0.03571
+asym:tq11_r2, 0.03571
+asym:tq12_r2, 0.03571
+asym:tq13_r2, 0.03571
+asym:tq14_r2, 0.03571
+asym:tq15_r2, 0.03571
+asym:tq16_r2, 0.03571
+asym:tq17_r2, 0.03571
+asym:tq18_r2, 0.03571
+asym:tq19_r2, 0.03571
+asym:tq20_r2, 0.03571
+asym:tq21_r2, 0.03571
+asym:tq22_r2, 0.03571
+asym:tq23_r2, 0.03571
+asym:tq24_r2, 0.03571
+asym:tq25_r2, 0.03571
+asym:tq26_r2, 0.03571
+asym:tq27_r2, 0.03571
+asym:tq28_r2, 0.03571
+
+# Ring 3 all
+[asym:@asym_tq_r3]
+asym:tq01_r3, 0.03571
+asym:tq02_r3, 0.03571
+asym:tq03_r3, 0.03571
+asym:tq04_r3, 0.03571
+asym:tq05_r3, 0.03571
+asym:tq06_r3, 0.03571
+asym:tq07_r3, 0.03571
+asym:tq08_r3, 0.03571
+asym:tq09_r3, 0.03571
+asym:tq10_r3, 0.03571
+asym:tq11_r3, 0.03571
+asym:tq12_r3, 0.03571
+asym:tq13_r3, 0.03571
+asym:tq14_r3, 0.03571
+asym:tq15_r3, 0.03571
+asym:tq16_r3, 0.03571
+asym:tq17_r3, 0.03571
+asym:tq18_r3, 0.03571
+asym:tq19_r3, 0.03571
+asym:tq20_r3, 0.03571
+asym:tq21_r3, 0.03571
+asym:tq22_r3, 0.03571
+asym:tq23_r3, 0.03571
+asym:tq24_r3, 0.03571
+asym:tq25_r3, 0.03571
+asym:tq26_r3, 0.03571
+asym:tq27_r3, 0.03571
+asym:tq28_r3, 0.03571
+
+# Ring 4 all
+[asym:@asym_tq_r4]
+asym:tq01_r4, 0.03571
+asym:tq02_r4, 0.03571
+asym:tq03_r4, 0.03571
+asym:tq04_r4, 0.03571
+asym:tq05_r4, 0.03571
+asym:tq06_r4, 0.03571
+asym:tq07_r4, 0.03571
+asym:tq08_r4, 0.03571
+asym:tq09_r4, 0.03571
+asym:tq10_r4, 0.03571
+asym:tq11_r4, 0.03571
+asym:tq12_r4, 0.03571
+asym:tq13_r4, 0.03571
+asym:tq14_r4, 0.03571
+asym:tq15_r4, 0.03571
+asym:tq16_r4, 0.03571
+asym:tq17_r4, 0.03571
+asym:tq18_r4, 0.03571
+asym:tq19_r4, 0.03571
+asym:tq20_r4, 0.03571
+asym:tq21_r4, 0.03571
+asym:tq22_r4, 0.03571
+asym:tq23_r4, 0.03571
+asym:tq24_r4, 0.03571
+asym:tq25_r4, 0.03571
+asym:tq26_r4, 0.03571
+asym:tq27_r4, 0.03571
+asym:tq28_r4, 0.03571
+
+# Ring 5 all
+[asym:@asym_tq_r5]
+asym:tq01_r5l, 0.0119
+asym:tq01_r5c, 0.0119
+asym:tq01_r5r, 0.0119
+asym:tq02_r5l, 0.0119
+asym:tq02_r5c, 0.0119
+asym:tq02_r5r, 0.0119
+asym:tq03_r5l, 0.0119
+asym:tq03_r5c, 0.0119
+asym:tq03_r5r, 0.0119
+asym:tq04_r5l, 0.0119
+asym:tq04_r5c, 0.0119
+asym:tq04_r5r, 0.0119
+asym:tq05_r5l, 0.0119
+asym:tq05_r5c, 0.0119
+asym:tq05_r5r, 0.0119
+asym:tq06_r5l, 0.0119
+asym:tq06_r5c, 0.0119
+asym:tq06_r5r, 0.0119
+asym:tq07_r5l, 0.0119
+asym:tq07_r5c, 0.0119
+asym:tq07_r5r, 0.0119
+asym:tq08_r5l, 0.0119
+asym:tq08_r5c, 0.0119
+asym:tq08_r5r, 0.0119
+asym:tq09_r5l, 0.0119
+asym:tq09_r5c, 0.0119
+asym:tq09_r5r, 0.0119
+asym:tq10_r5l, 0.0119
+asym:tq10_r5c, 0.0119
+asym:tq10_r5r, 0.0119
+asym:tq11_r5l, 0.0119
+asym:tq11_r5c, 0.0119
+asym:tq11_r5r, 0.0119
+asym:tq12_r5l, 0.0119
+asym:tq12_r5c, 0.0119
+asym:tq12_r5r, 0.0119
+asym:tq13_r5l, 0.0119
+asym:tq13_r5c, 0.0119
+asym:tq13_r5r, 0.0119
+asym:tq14_r5l, 0.0119
+asym:tq14_r5c, 0.0119
+asym:tq14_r5r, 0.0119
+asym:tq15_r5l, 0.0119
+asym:tq15_r5c, 0.0119
+asym:tq15_r5r, 0.0119
+asym:tq16_r5l, 0.0119
+asym:tq16_r5c, 0.0119
+asym:tq16_r5r, 0.0119
+asym:tq17_r5l, 0.0119
+asym:tq17_r5c, 0.0119
+asym:tq17_r5r, 0.0119
+asym:tq18_r5l, 0.0119
+asym:tq18_r5c, 0.0119
+asym:tq18_r5r, 0.0119
+asym:tq19_r5l, 0.0119
+asym:tq19_r5c, 0.0119
+asym:tq19_r5r, 0.0119
+asym:tq20_r5l, 0.0119
+asym:tq20_r5c, 0.0119
+asym:tq20_r5r, 0.0119
+asym:tq21_r5l, 0.0119
+asym:tq21_r5c, 0.0119
+asym:tq21_r5r, 0.0119
+asym:tq22_r5l, 0.0119
+asym:tq22_r5c, 0.0119
+asym:tq22_r5r, 0.0119
+asym:tq23_r5l, 0.0119
+asym:tq23_r5c, 0.0119
+asym:tq23_r5r, 0.0119
+asym:tq24_r5l, 0.0119
+asym:tq24_r5c, 0.0119
+asym:tq24_r5r, 0.0119
+asym:tq25_r5l, 0.0119
+asym:tq25_r5c, 0.0119
+asym:tq25_r5r, 0.0119
+asym:tq26_r5l, 0.0119
+asym:tq26_r5c, 0.0119
+asym:tq26_r5r, 0.0119
+asym:tq27_r5l, 0.0119
+asym:tq27_r5c, 0.0119
+asym:tq27_r5r, 0.0119
+asym:tq28_r5l, 0.0119
+asym:tq28_r5c, 0.0119
+asym:tq28_r5r, 0.0119
+
+# Ring 6 all
+[asym:@asym_tq_r6]
+asym:tq01_r6, 0.03571
+asym:tq02_r6, 0.03571
+asym:tq03_r6, 0.03571
+asym:tq04_r6, 0.03571
+asym:tq05_r6, 0.03571
+asym:tq06_r6, 0.03571
+asym:tq07_r6, 0.03571
+asym:tq08_r6, 0.03571
+asym:tq09_r6, 0.03571
+asym:tq10_r6, 0.03571
+asym:tq11_r6, 0.03571
+asym:tq12_r6, 0.03571
+asym:tq13_r6, 0.03571
+asym:tq14_r6, 0.03571
+asym:tq15_r6, 0.03571
+asym:tq16_r6, 0.03571
+asym:tq17_r6, 0.03571
+asym:tq18_r6, 0.03571
+asym:tq19_r6, 0.03571
+asym:tq20_r6, 0.03571
+asym:tq21_r6, 0.03571
+asym:tq22_r6, 0.03571
+asym:tq23_r6, 0.03571
+asym:tq24_r6, 0.03571
+asym:tq25_r6, 0.03571
+asym:tq26_r6, 0.03571
+asym:tq27_r6, 0.03571
+asym:tq28_r6, 0.03571
+
+# Rings / Septants
+[asym:@asym_tq_r1_spt1]
+asym:tq01_r1, 0.25
+asym:tq02_r1, 0.25
+asym:tq03_r1, 0.25
+asym:tq04_r1, 0.25
+
+[asym:@asym_tq_r1_spt2]
+asym:tq05_r1, 0.25
+asym:tq06_r1, 0.25
+asym:tq07_r1, 0.25
+asym:tq08_r1, 0.25
+
+[asym:@asym_tq_r1_spt3]
+asym:tq09_r1, 0.25
+asym:tq10_r1, 0.25
+asym:tq11_r1, 0.25
+asym:tq12_r1, 0.25
+
+[asym:@asym_tq_r1_spt4]
+asym:tq13_r1, 0.25
+asym:tq14_r1, 0.25
+asym:tq15_r1, 0.25
+asym:tq16_r1, 0.25
+
+[asym:@asym_tq_r1_spt5]
+asym:tq17_r1, 0.25
+asym:tq18_r1, 0.25
+asym:tq19_r1, 0.25
+asym:tq20_r1, 0.25
+
+[asym:@asym_tq_r1_spt6]
+asym:tq21_r1, 0.25
+asym:tq22_r1, 0.25
+asym:tq23_r1, 0.25
+asym:tq24_r1, 0.25
+
+[asym:@asym_tq_r1_spt7]
+asym:tq25_r1, 0.25
+asym:tq26_r1, 0.25
+asym:tq27_r1, 0.25
+asym:tq28_r1, 0.25
+
+[asym:@asym_tq_r2_spt1]
+asym:tq01_r2, 0.25
+asym:tq02_r2, 0.25
+asym:tq03_r2, 0.25
+asym:tq04_r2, 0.25
+
+[asym:@asym_tq_r2_spt2]
+asym:tq05_r2, 0.25
+asym:tq06_r2, 0.25
+asym:tq07_r2, 0.25
+asym:tq08_r2, 0.25
+
+[asym:@asym_tq_r2_spt3]
+asym:tq09_r2, 0.25
+asym:tq10_r2, 0.25
+asym:tq11_r2, 0.25
+asym:tq12_r2, 0.25
+
+[asym:@asym_tq_r2_spt4]
+asym:tq13_r2, 0.25
+asym:tq14_r2, 0.25
+asym:tq15_r2, 0.25
+asym:tq16_r2, 0.25
+
+[asym:@asym_tq_r2_spt5]
+asym:tq17_r2, 0.25
+asym:tq18_r2, 0.25
+asym:tq19_r2, 0.25
+asym:tq20_r2, 0.25
+
+[asym:@asym_tq_r2_spt6]
+asym:tq21_r2, 0.25
+asym:tq22_r2, 0.25
+asym:tq23_r2, 0.25
+asym:tq24_r2, 0.25
+
+[asym:@asym_tq_r2_spt7]
+asym:tq25_r2, 0.25
+asym:tq26_r2, 0.25
+asym:tq27_r2, 0.25
+asym:tq28_r2, 0.25
+
+[asym:@asym_tq_r3_spt1]
+asym:tq01_r3, 0.25
+asym:tq02_r3, 0.25
+asym:tq03_r3, 0.25
+asym:tq04_r3, 0.25
+
+[asym:@asym_tq_r3_spt2]
+asym:tq05_r3, 0.25
+asym:tq06_r3, 0.25
+asym:tq07_r3, 0.25
+asym:tq08_r3, 0.25
+
+[asym:@asym_tq_r3_spt3]
+asym:tq09_r3, 0.25
+asym:tq10_r3, 0.25
+asym:tq11_r3, 0.25
+asym:tq12_r3, 0.25
+
+[asym:@asym_tq_r3_spt4]
+asym:tq13_r3, 0.25
+asym:tq14_r3, 0.25
+asym:tq15_r3, 0.25
+asym:tq16_r3, 0.25
+
+[asym:@asym_tq_r3_spt5]
+asym:tq17_r3, 0.25
+asym:tq18_r3, 0.25
+asym:tq19_r3, 0.25
+asym:tq20_r3, 0.25
+
+[asym:@asym_tq_r3_spt6]
+asym:tq21_r3, 0.25
+asym:tq22_r3, 0.25
+asym:tq23_r3, 0.25
+asym:tq24_r3, 0.25
+
+[asym:@asym_tq_r3_spt7]
+asym:tq25_r3, 0.25
+asym:tq26_r3, 0.25
+asym:tq27_r3, 0.25
+asym:tq28_r3, 0.25
+
+[asym:@asym_tq_r4_spt1]
+asym:tq01_r4, 0.25
+asym:tq02_r4, 0.25
+asym:tq03_r4, 0.25
+asym:tq04_r4, 0.25
+
+[asym:@asym_tq_r4_spt2]
+asym:tq05_r4, 0.25
+asym:tq06_r4, 0.25
+asym:tq07_r4, 0.25
+asym:tq08_r4, 0.25
+
+[asym:@asym_tq_r4_spt3]
+asym:tq09_r4, 0.25
+asym:tq10_r4, 0.25
+asym:tq11_r4, 0.25
+asym:tq12_r4, 0.25
+
+[asym:@asym_tq_r4_spt4]
+asym:tq13_r4, 0.25
+asym:tq14_r4, 0.25
+asym:tq15_r4, 0.25
+asym:tq16_r4, 0.25
+
+[asym:@asym_tq_r4_spt5]
+asym:tq17_r4, 0.25
+asym:tq18_r4, 0.25
+asym:tq19_r4, 0.25
+asym:tq20_r4, 0.25
+
+[asym:@asym_tq_r4_spt6]
+asym:tq21_r4, 0.25
+asym:tq22_r4, 0.25
+asym:tq23_r4, 0.25
+asym:tq24_r4, 0.25
+
+[asym:@asym_tq_r4_spt7]
+asym:tq25_r4, 0.25
+asym:tq26_r4, 0.25
+asym:tq27_r4, 0.25
+asym:tq28_r4, 0.25
+
+[asym:@asym_tq_r5_spt1]
+asym:tq01_r5l, 0.08333
+asym:tq01_r5c, 0.08333
+asym:tq01_r5r, 0.08333
+asym:tq02_r5l, 0.08333
+asym:tq02_r5c, 0.08333
+asym:tq02_r5r, 0.08333
+asym:tq03_r5l, 0.08333
+asym:tq03_r5c, 0.08333
+asym:tq03_r5r, 0.08333
+asym:tq04_r5l, 0.08333
+asym:tq04_r5c, 0.08333
+asym:tq04_r5r, 0.08333
+
+[asym:@asym_tq_r5_spt2]
+asym:tq05_r5l, 0.08333
+asym:tq05_r5c, 0.08333
+asym:tq05_r5r, 0.08333
+asym:tq06_r5l, 0.08333
+asym:tq06_r5c, 0.08333
+asym:tq06_r5r, 0.08333
+asym:tq07_r5l, 0.08333
+asym:tq07_r5c, 0.08333
+asym:tq07_r5r, 0.08333
+asym:tq08_r5l, 0.08333
+asym:tq08_r5c, 0.08333
+asym:tq08_r5r, 0.08333
+
+[asym:@asym_tq_r5_spt3]
+asym:tq09_r5l, 0.08333
+asym:tq09_r5c, 0.08333
+asym:tq09_r5r, 0.08333
+asym:tq10_r5l, 0.08333
+asym:tq10_r5c, 0.08333
+asym:tq10_r5r, 0.08333
+asym:tq11_r5l, 0.08333
+asym:tq11_r5c, 0.08333
+asym:tq11_r5r, 0.08333
+asym:tq12_r5l, 0.08333
+asym:tq12_r5c, 0.08333
+asym:tq12_r5r, 0.08333
+
+[asym:@asym_tq_r5_spt4]
+asym:tq13_r5l, 0.08333
+asym:tq13_r5c, 0.08333
+asym:tq13_r5r, 0.08333
+asym:tq14_r5l, 0.08333
+asym:tq14_r5c, 0.08333
+asym:tq14_r5r, 0.08333
+asym:tq15_r5l, 0.08333
+asym:tq15_r5c, 0.08333
+asym:tq15_r5r, 0.08333
+asym:tq16_r5l, 0.08333
+asym:tq16_r5c, 0.08333
+asym:tq16_r5r, 0.08333
+
+[asym:@asym_tq_r5_spt5]
+asym:tq17_r5l, 0.08333
+asym:tq17_r5c, 0.08333
+asym:tq17_r5r, 0.08333
+asym:tq18_r5l, 0.08333
+asym:tq18_r5c, 0.08333
+asym:tq18_r5r, 0.08333
+asym:tq19_r5l, 0.08333
+asym:tq19_r5c, 0.08333
+asym:tq19_r5r, 0.08333
+asym:tq20_r5l, 0.08333
+asym:tq20_r5c, 0.08333
+asym:tq20_r5r, 0.08333
+
+[asym:@asym_tq_r5_spt6]
+asym:tq21_r5l, 0.08333
+asym:tq21_r5c, 0.08333
+asym:tq21_r5r, 0.08333
+asym:tq22_r5l, 0.08333
+asym:tq22_r5c, 0.08333
+asym:tq22_r5r, 0.08333
+asym:tq23_r5l, 0.08333
+asym:tq23_r5c, 0.08333
+asym:tq23_r5r, 0.08333
+asym:tq24_r5l, 0.08333
+asym:tq24_r5c, 0.08333
+asym:tq24_r5r, 0.08333
+
+[asym:@asym_tq_r5_spt7]
+asym:tq25_r5l, 0.08333
+asym:tq25_r5c, 0.08333
+asym:tq25_r5r, 0.08333
+asym:tq26_r5l, 0.08333
+asym:tq26_r5c, 0.08333
+asym:tq26_r5r, 0.08333
+asym:tq27_r5l, 0.08333
+asym:tq27_r5c, 0.08333
+asym:tq27_r5r, 0.08333
+asym:tq28_r5l, 0.08333
+asym:tq28_r5c, 0.08333
+asym:tq28_r5r, 0.08333
+
+[asym:@asym_tq_r6_spt1]
+asym:tq01_r6, 0.25
+asym:tq02_r6, 0.25
+asym:tq03_r6, 0.25
+asym:tq04_r6, 0.25
+
+[asym:@asym_tq_r6_spt2]
+asym:tq05_r6, 0.25
+asym:tq06_r6, 0.25
+asym:tq07_r6, 0.25
+asym:tq08_r6, 0.25
+
+[asym:@asym_tq_r6_spt3]
+asym:tq09_r6, 0.25
+asym:tq10_r6, 0.25
+asym:tq11_r6, 0.25
+asym:tq12_r6, 0.25
+
+[asym:@asym_tq_r6_spt4]
+asym:tq13_r6, 0.25
+asym:tq14_r6, 0.25
+asym:tq15_r6, 0.25
+asym:tq16_r6, 0.25
+
+[asym:@asym_tq_r6_spt5]
+asym:tq17_r6, 0.25
+asym:tq18_r6, 0.25
+asym:tq19_r6, 0.25
+asym:tq20_r6, 0.25
+
+[asym:@asym_tq_r6_spt6]
+asym:tq21_r6, 0.25
+asym:tq22_r6, 0.25
+asym:tq23_r6, 0.25
+asym:tq24_r6, 0.25
+
+[asym:@asym_tq_r6_spt7]
+asym:tq25_r6, 0.25
+asym:tq26_r6, 0.25
+asym:tq27_r6, 0.25
+asym:tq28_r6, 0.25
+
+# Ring 1 Closed, Transitions, Opens
+[asym:@asym_tq_r1_c]
+asym:tq01_r1, 0.1429
+asym:tq05_r1, 0.1429
+asym:tq09_r1, 0.1429
+asym:tq13_r1, 0.1429
+asym:tq17_r1, 0.1429
+asym:tq21_r1, 0.1429
+asym:tq25_r1, 0.1429
+
+[asym:@asym_tq_r1_tl]
+asym:tq02_r1, 0.1429
+asym:tq06_r1, 0.1429
+asym:tq10_r1, 0.1429
+asym:tq14_r1, 0.1429
+asym:tq18_r1, 0.1429
+asym:tq22_r1, 0.1429
+asym:tq26_r1, 0.1429
+
+[asym:@asym_tq_r1_t]
+asym:tq02_r1, 0.07143
+asym:tq06_r1, 0.07143
+asym:tq10_r1, 0.07143
+asym:tq14_r1, 0.07143
+asym:tq18_r1, 0.07143
+asym:tq22_r1, 0.07143
+asym:tq26_r1, 0.07143
+asym:tq04_r1, 0.07143
+asym:tq08_r1, 0.07143
+asym:tq12_r1, 0.07143
+asym:tq16_r1, 0.07143
+asym:tq20_r1, 0.07143
+asym:tq24_r1, 0.07143
+asym:tq28_r1, 0.07143
+
+[asym:@asym_tq_r1_tr]
+asym:tq04_r1, 0.1429
+asym:tq08_r1, 0.1429
+asym:tq12_r1, 0.1429
+asym:tq16_r1, 0.1429
+asym:tq20_r1, 0.1429
+asym:tq24_r1, 0.1429
+asym:tq28_r1, 0.1429
+
+[asym:@asym_tq_r1_o]
+asym:tq03_r1, 0.1429
+asym:tq07_r1, 0.1429
+asym:tq11_r1, 0.1429
+asym:tq15_r1, 0.1429
+asym:tq19_r1, 0.1429
+asym:tq23_r1, 0.1429
+asym:tq27_r1, 0.1429
+
+# Ring 2 Closed, Transitions, Opens
+[asym:@asym_tq_r2_c]
+asym:tq01_r2, 0.1429
+asym:tq05_r2, 0.1429
+asym:tq09_r2, 0.1429
+asym:tq13_r2, 0.1429
+asym:tq17_r2, 0.1429
+asym:tq21_r2, 0.1429
+asym:tq25_r2, 0.1429
+
+[asym:@asym_tq_r2_tl]
+asym:tq02_r2, 0.1429
+asym:tq06_r2, 0.1429
+asym:tq10_r2, 0.1429
+asym:tq14_r2, 0.1429
+asym:tq18_r2, 0.1429
+asym:tq22_r2, 0.1429
+asym:tq26_r2, 0.1429
+
+[asym:@asym_tq_r2_t]
+asym:tq02_r2, 0.07143
+asym:tq06_r2, 0.07143
+asym:tq10_r2, 0.07143
+asym:tq14_r2, 0.07143
+asym:tq18_r2, 0.07143
+asym:tq22_r2, 0.07143
+asym:tq26_r2, 0.07143
+asym:tq04_r2, 0.07143
+asym:tq08_r2, 0.07143
+asym:tq12_r2, 0.07143
+asym:tq16_r2, 0.07143
+asym:tq20_r2, 0.07143
+asym:tq24_r2, 0.07143
+asym:tq28_r2, 0.07143
+
+[asym:@asym_tq_r2_tr]
+asym:tq04_r2, 0.1429
+asym:tq08_r2, 0.1429
+asym:tq12_r2, 0.1429
+asym:tq16_r2, 0.1429
+asym:tq20_r2, 0.1429
+asym:tq24_r2, 0.1429
+asym:tq28_r2, 0.1429
+
+[asym:@asym_tq_r2_o]
+asym:tq03_r2, 0.1429
+asym:tq07_r2, 0.1429
+asym:tq11_r2, 0.1429
+asym:tq15_r2, 0.1429
+asym:tq19_r2, 0.1429
+asym:tq23_r2, 0.1429
+asym:tq27_r2, 0.1429
+
+# Ring 3 Closed, Transitions, Opens
+[asym:@asym_tq_r3_c]
+asym:tq01_r3, 0.1429
+asym:tq05_r3, 0.1429
+asym:tq09_r3, 0.1429
+asym:tq13_r3, 0.1429
+asym:tq17_r3, 0.1429
+asym:tq21_r3, 0.1429
+asym:tq25_r3, 0.1429
+
+[asym:@asym_tq_r3_tl]
+asym:tq02_r3, 0.1429
+asym:tq06_r3, 0.1429
+asym:tq10_r3, 0.1429
+asym:tq14_r3, 0.1429
+asym:tq18_r3, 0.1429
+asym:tq22_r3, 0.1429
+asym:tq26_r3, 0.1429
+
+[asym:@asym_tq_r3_t]
+asym:tq02_r3, 0.07143
+asym:tq06_r3, 0.07143
+asym:tq10_r3, 0.07143
+asym:tq14_r3, 0.07143
+asym:tq18_r3, 0.07143
+asym:tq22_r3, 0.07143
+asym:tq26_r3, 0.07143
+asym:tq04_r3, 0.07143
+asym:tq08_r3, 0.07143
+asym:tq12_r3, 0.07143
+asym:tq16_r3, 0.07143
+asym:tq20_r3, 0.07143
+asym:tq24_r3, 0.07143
+asym:tq28_r3, 0.07143
+
+[asym:@asym_tq_r3_tr]
+asym:tq04_r3, 0.1429
+asym:tq08_r3, 0.1429
+asym:tq12_r3, 0.1429
+asym:tq16_r3, 0.1429
+asym:tq20_r3, 0.1429
+asym:tq24_r3, 0.1429
+asym:tq28_r3, 0.1429
+
+[asym:@asym_tq_r3_o]
+asym:tq03_r3, 0.1429
+asym:tq07_r3, 0.1429
+asym:tq11_r3, 0.1429
+asym:tq15_r3, 0.1429
+asym:tq19_r3, 0.1429
+asym:tq23_r3, 0.1429
+asym:tq27_r3, 0.1429
+
+# Ring 1 Closed, Transitions, Opens
+[asym:@asym_tq_r4_c]
+asym:tq01_r4, 0.1429
+asym:tq05_r4, 0.1429
+asym:tq09_r4, 0.1429
+asym:tq13_r4, 0.1429
+asym:tq17_r4, 0.1429
+asym:tq21_r4, 0.1429
+asym:tq25_r4, 0.1429
+
+[asym:@asym_tq_r4_tl]
+asym:tq02_r4, 0.1429
+asym:tq06_r4, 0.1429
+asym:tq10_r4, 0.1429
+asym:tq14_r4, 0.1429
+asym:tq18_r4, 0.1429
+asym:tq22_r4, 0.1429
+asym:tq26_r4, 0.1429
+
+[asym:@asym_tq_r4_t]
+asym:tq02_r4, 0.07143
+asym:tq06_r4, 0.07143
+asym:tq10_r4, 0.07143
+asym:tq14_r4, 0.07143
+asym:tq18_r4, 0.07143
+asym:tq22_r4, 0.07143
+asym:tq26_r4, 0.07143
+asym:tq04_r4, 0.07143
+asym:tq08_r4, 0.07143
+asym:tq12_r4, 0.07143
+asym:tq16_r4, 0.07143
+asym:tq20_r4, 0.07143
+asym:tq24_r4, 0.07143
+asym:tq28_r4, 0.07143
+
+[asym:@asym_tq_r4_tr]
+asym:tq04_r4, 0.1429
+asym:tq08_r4, 0.1429
+asym:tq12_r4, 0.1429
+asym:tq16_r4, 0.1429
+asym:tq20_r4, 0.1429
+asym:tq24_r4, 0.1429
+asym:tq28_r4, 0.1429
+
+[asym:@asym_tq_r4_o]
+asym:tq03_r4, 0.1429
+asym:tq07_r4, 0.1429
+asym:tq11_r4, 0.1429
+asym:tq15_r4, 0.1429
+asym:tq19_r4, 0.1429
+asym:tq23_r4, 0.1429
+asym:tq27_r4, 0.1429
+
+# Ring 5 Closed, Transitions, Opens
+[asym:@asym_tq_r5_c]
+asym:tq01_r5l, 0.04762
+asym:tq01_r5c, 0.04762
+asym:tq01_r5r, 0.04762
+asym:tq05_r5l, 0.04762
+asym:tq05_r5c, 0.04762
+asym:tq05_r5r, 0.04762
+asym:tq09_r5l, 0.04762
+asym:tq09_r5c, 0.04762
+asym:tq09_r5r, 0.04762
+asym:tq13_r5l, 0.04762
+asym:tq13_r5c, 0.04762
+asym:tq13_r5r, 0.04762
+asym:tq17_r5l, 0.04762
+asym:tq17_r5c, 0.04762
+asym:tq17_r5r, 0.04762
+asym:tq21_r5l, 0.04762
+asym:tq21_r5c, 0.04762
+asym:tq21_r5r, 0.04762
+asym:tq25_r5l, 0.04762
+asym:tq25_r5c, 0.04762
+asym:tq25_r5r, 0.04762
+
+[asym:@asym_tq_r5_tl]
+asym:tq02_r5l, 0.04762
+asym:tq02_r5c, 0.04762
+asym:tq02_r5r, 0.04762
+asym:tq06_r5l, 0.04762
+asym:tq06_r5c, 0.04762
+asym:tq06_r5r, 0.04762
+asym:tq10_r5l, 0.04762
+asym:tq10_r5c, 0.04762
+asym:tq10_r5r, 0.04762
+asym:tq14_r5l, 0.04762
+asym:tq14_r5c, 0.04762
+asym:tq14_r5r, 0.04762
+asym:tq18_r5l, 0.04762
+asym:tq18_r5c, 0.04762
+asym:tq18_r5r, 0.04762
+asym:tq22_r5l, 0.04762
+asym:tq22_r5c, 0.04762
+asym:tq22_r5r, 0.04762
+asym:tq26_r5l, 0.04762
+asym:tq26_r5c, 0.04762
+asym:tq26_r5r, 0.04762
+
+[asym:@asym_tq_r5_t]
+asym:tq02_r5l, 0.02381
+asym:tq02_r5c, 0.02381
+asym:tq02_r5r, 0.02381
+asym:tq04_r5l, 0.02381
+asym:tq04_r5c, 0.02381
+asym:tq04_r5r, 0.02381
+asym:tq06_r5l, 0.02381
+asym:tq06_r5c, 0.02381
+asym:tq06_r5r, 0.02381
+asym:tq08_r5l, 0.02381
+asym:tq08_r5c, 0.02381
+asym:tq08_r5r, 0.02381
+asym:tq10_r5l, 0.02381
+asym:tq10_r5c, 0.02381
+asym:tq10_r5r, 0.02381
+asym:tq12_r5l, 0.02381
+asym:tq12_r5c, 0.02381
+asym:tq12_r5r, 0.02381
+asym:tq14_r5l, 0.02381
+asym:tq14_r5c, 0.02381
+asym:tq14_r5r, 0.02381
+asym:tq16_r5l, 0.02381
+asym:tq16_r5c, 0.02381
+asym:tq16_r5r, 0.02381
+asym:tq18_r5l, 0.02381
+asym:tq18_r5c, 0.02381
+asym:tq18_r5r, 0.02381
+asym:tq20_r5l, 0.02381
+asym:tq20_r5c, 0.02381
+asym:tq20_r5r, 0.02381
+asym:tq22_r5l, 0.02381
+asym:tq22_r5c, 0.02381
+asym:tq22_r5r, 0.02381
+asym:tq24_r5l, 0.02381
+asym:tq24_r5c, 0.02381
+asym:tq24_r5r, 0.02381
+asym:tq26_r5l, 0.02381
+asym:tq26_r5c, 0.02381
+asym:tq26_r5r, 0.02381
+asym:tq28_r5l, 0.02381
+asym:tq28_r5c, 0.02381
+asym:tq28_r5r, 0.02381
+
+[asym:@asym_tq_r5_tr]
+asym:tq04_r5l, 0.04762
+asym:tq04_r5c, 0.04762
+asym:tq04_r5r, 0.04762
+asym:tq08_r5l, 0.04762
+asym:tq08_r5c, 0.04762
+asym:tq08_r5r, 0.04762
+asym:tq12_r5l, 0.04762
+asym:tq12_r5c, 0.04762
+asym:tq12_r5r, 0.04762
+asym:tq16_r5l, 0.04762
+asym:tq16_r5c, 0.04762
+asym:tq16_r5r, 0.04762
+asym:tq20_r5l, 0.04762
+asym:tq20_r5c, 0.04762
+asym:tq20_r5r, 0.04762
+asym:tq24_r5l, 0.04762
+asym:tq24_r5c, 0.04762
+asym:tq24_r5r, 0.04762
+asym:tq28_r5l, 0.04762
+asym:tq28_r5c, 0.04762
+asym:tq28_r5r, 0.04762
+
+[asym:@asym_tq_r5_o]
+asym:tq03_r5l, 0.04762
+asym:tq03_r5c, 0.04762
+asym:tq03_r5r, 0.04762
+asym:tq07_r5l, 0.04762
+asym:tq07_r5c, 0.04762
+asym:tq07_r5r, 0.04762
+asym:tq11_r5l, 0.04762
+asym:tq11_r5c, 0.04762
+asym:tq11_r5r, 0.04762
+asym:tq15_r5l, 0.04762
+asym:tq15_r5c, 0.04762
+asym:tq15_r5r, 0.04762
+asym:tq19_r5l, 0.04762
+asym:tq19_r5c, 0.04762
+asym:tq19_r5r, 0.04762
+asym:tq23_r5l, 0.04762
+asym:tq23_r5c, 0.04762
+asym:tq23_r5r, 0.04762
+asym:tq27_r5l, 0.04762
+asym:tq27_r5c, 0.04762
+asym:tq27_r5r, 0.04762
+
+# Ring 6 Closed, Transitions, Opens
+[asym:@asym_tq_r6_c]
+asym:tq01_r6, 0.1429
+asym:tq05_r6, 0.1429
+asym:tq09_r6, 0.1429
+asym:tq13_r6, 0.1429
+asym:tq17_r6, 0.1429
+asym:tq21_r6, 0.1429
+asym:tq25_r6, 0.1429
+
+[asym:@asym_tq_r6_tl]
+asym:tq02_r6, 0.1429
+asym:tq06_r6, 0.1429
+asym:tq10_r6, 0.1429
+asym:tq14_r6, 0.1429
+asym:tq18_r6, 0.1429
+asym:tq22_r6, 0.1429
+asym:tq26_r6, 0.1429
+
+[asym:@asym_tq_r6_t]
+asym:tq02_r6, 0.07143
+asym:tq06_r6, 0.07143
+asym:tq10_r6, 0.07143
+asym:tq14_r6, 0.07143
+asym:tq18_r6, 0.07143
+asym:tq22_r6, 0.07143
+asym:tq26_r6, 0.07143
+asym:tq04_r6, 0.07143
+asym:tq08_r6, 0.07143
+asym:tq12_r6, 0.07143
+asym:tq16_r6, 0.07143
+asym:tq20_r6, 0.07143
+asym:tq24_r6, 0.07143
+asym:tq28_r6, 0.07143
+
+[asym:@asym_tq_r6_tr]
+asym:tq04_r6, 0.1429
+asym:tq08_r6, 0.1429
+asym:tq12_r6, 0.1429
+asym:tq16_r6, 0.1429
+asym:tq20_r6, 0.1429
+asym:tq24_r6, 0.1429
+asym:tq28_r6, 0.1429
+
+[asym:@asym_tq_r6_o]
+asym:tq03_r6, 0.1429
+asym:tq07_r6, 0.1429
+asym:tq11_r6, 0.1429
+asym:tq15_r6, 0.1429
+asym:tq19_r6, 0.1429
+asym:tq23_r6, 0.1429
+asym:tq27_r6, 0.1429
+
+# Ring 5 / Segments
+[asym:@asym_tq_r5_spt1_c]
+asym:tq01_r5l, 0.3333
+asym:tq01_r5c, 0.3333
+asym:tq01_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt1_tl]
+asym:tq02_r5l, 0.3333
+asym:tq02_r5c, 0.3333
+asym:tq02_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt1_o]
+asym:tq03_r5l, 0.3333
+asym:tq03_r5c, 0.3333
+asym:tq03_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt1_tr]
+asym:tq04_r5l, 0.3333
+asym:tq04_r5c, 0.3333
+asym:tq04_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt2_c]
+asym:tq05_r5l, 0.3333
+asym:tq05_r5c, 0.3333
+asym:tq05_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt2_tl]
+asym:tq06_r5l, 0.3333
+asym:tq06_r5c, 0.3333
+asym:tq06_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt2_o]
+asym:tq07_r5l, 0.3333
+asym:tq07_r5c, 0.3333
+asym:tq07_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt2_tr]
+asym:tq08_r5l, 0.3333
+asym:tq08_r5c, 0.3333
+asym:tq08_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt3_c]
+asym:tq09_r5l, 0.3333
+asym:tq09_r5c, 0.3333
+asym:tq09_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt3_tl]
+asym:tq10_r5l, 0.3333
+asym:tq10_r5c, 0.3333
+asym:tq10_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt3_o]
+asym:tq11_r5l, 0.3333
+asym:tq11_r5c, 0.3333
+asym:tq11_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt3_tr]
+asym:tq12_r5l, 0.3333
+asym:tq12_r5c, 0.3333
+asym:tq12_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt4_c]
+asym:tq13_r5l, 0.3333
+asym:tq13_r5c, 0.3333
+asym:tq13_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt4_tl]
+asym:tq14_r5l, 0.3333
+asym:tq14_r5c, 0.3333
+asym:tq14_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt4_o]
+asym:tq15_r5l, 0.3333
+asym:tq15_r5c, 0.3333
+asym:tq15_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt4_tr]
+asym:tq16_r5l, 0.3333
+asym:tq16_r5c, 0.3333
+asym:tq16_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt5_c]
+asym:tq17_r5l, 0.3333
+asym:tq17_r5c, 0.3333
+asym:tq17_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt5_tl]
+asym:tq18_r5l, 0.3333
+asym:tq18_r5c, 0.3333
+asym:tq18_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt5_o]
+asym:tq19_r5l, 0.3333
+asym:tq19_r5c, 0.3333
+asym:tq19_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt5_tr]
+asym:tq20_r5l, 0.3333
+asym:tq20_r5c, 0.3333
+asym:tq20_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt6_c]
+asym:tq21_r5l, 0.3333
+asym:tq21_r5c, 0.3333
+asym:tq21_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt6_tl]
+asym:tq22_r5l, 0.3333
+asym:tq22_r5c, 0.3333
+asym:tq22_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt6_o]
+asym:tq23_r5l, 0.3333
+asym:tq23_r5c, 0.3333
+asym:tq23_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt6_tr]
+asym:tq24_r5l, 0.3333
+asym:tq24_r5c, 0.3333
+asym:tq24_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt7_c]
+asym:tq25_r5l, 0.3333
+asym:tq25_r5c, 0.3333
+asym:tq25_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt7_tl]
+asym:tq26_r5l, 0.3333
+asym:tq26_r5c, 0.3333
+asym:tq26_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt7_o]
+asym:tq27_r5l, 0.3333
+asym:tq27_r5c, 0.3333
+asym:tq27_r5r, 0.3333
+
+[asym:@asym_tq_r5_spt7_tr]
+asym:tq28_r5l, 0.3333
+asym:tq28_r5c, 0.3333
+asym:tq28_r5r, 0.3333
+
+[asym:@asym_tq_r1_spt1_t]
+asym:tq02_r1, 0.5
+asym:tq04_r1, 0.5
+
+[asym:@asym_tq_r1_spt2_t]
+asym:tq06_r1, 0.5
+asym:tq08_r1, 0.5
+
+[asym:@asym_tq_r1_spt3_t]
+asym:tq10_r1, 0.5
+asym:tq12_r1, 0.5
+
+[asym:@asym_tq_r1_spt4_t]
+asym:tq14_r1, 0.5
+asym:tq16_r1, 0.5
+
+[asym:@asym_tq_r1_spt5_t]
+asym:tq18_r1, 0.5
+asym:tq20_r1, 0.5
+
+[asym:@asym_tq_r1_spt6_t]
+asym:tq22_r1, 0.5
+asym:tq24_r1, 0.5
+
+[asym:@asym_tq_r1_spt7_t]
+asym:tq26_r1, 0.5
+asym:tq28_r1, 0.5
+
+# Ring 2 transitions
+[asym:@asym_tq_r2_spt1_t]
+asym:tq02_r2, 0.5
+asym:tq04_r2, 0.5
+
+[asym:@asym_tq_r2_spt2_t]
+asym:tq06_r2, 0.5
+asym:tq08_r2, 0.5
+
+[asym:@asym_tq_r2_spt3_t]
+asym:tq10_r2, 0.5
+asym:tq12_r2, 0.5
+
+[asym:@asym_tq_r2_spt4_t]
+asym:tq14_r2, 0.5
+asym:tq16_r2, 0.5
+
+[asym:@asym_tq_r2_spt5_t]
+asym:tq18_r2, 0.5
+asym:tq20_r2, 0.5
+
+[asym:@asym_tq_r2_spt6_t]
+asym:tq22_r2, 0.5
+asym:tq24_r2, 0.5
+
+[asym:@asym_tq_r2_spt7_t]
+asym:tq26_r2, 0.5
+asym:tq28_r2, 0.5
+
+# Ring 3 transitions
+[asym:@asym_tq_r3_spt1_t]
+asym:tq02_r3, 0.5
+asym:tq04_r3, 0.5
+
+[asym:@asym_tq_r3_spt2_t]
+asym:tq06_r3, 0.5
+asym:tq08_r3, 0.5
+
+[asym:@asym_tq_r3_spt3_t]
+asym:tq10_r3, 0.5
+asym:tq12_r3, 0.5
+
+[asym:@asym_tq_r3_spt4_t]
+asym:tq14_r3, 0.5
+asym:tq16_r3, 0.5
+
+[asym:@asym_tq_r3_spt5_t]
+asym:tq18_r3, 0.5
+asym:tq20_r3, 0.5
+
+[asym:@asym_tq_r3_spt6_t]
+asym:tq22_r3, 0.5
+asym:tq24_r3, 0.5
+
+[asym:@asym_tq_r3_spt7_t]
+asym:tq26_r3, 0.5
+asym:tq28_r3, 0.5
+
+# Ring 4 transitions
+[asym:@asym_tq_r4_spt1_t]
+asym:tq02_r4, 0.5
+asym:tq04_r4, 0.5
+
+[asym:@asym_tq_r4_spt2_t]
+asym:tq06_r4, 0.5
+asym:tq08_r4, 0.5
+
+[asym:@asym_tq_r4_spt3_t]
+asym:tq10_r4, 0.5
+asym:tq12_r4, 0.5
+
+[asym:@asym_tq_r4_spt4_t]
+asym:tq14_r4, 0.5
+asym:tq16_r4, 0.5
+
+[asym:@asym_tq_r4_spt5_t]
+asym:tq18_r4, 0.5
+asym:tq20_r4, 0.5
+
+[asym:@asym_tq_r4_spt6_t]
+asym:tq22_r4, 0.5
+asym:tq24_r4, 0.5
+
+[asym:@asym_tq_r4_spt7_t]
+asym:tq26_r4, 0.5
+asym:tq28_r4, 0.5
+
+# Ring 5 transitions
+[asym:@asym_tq_r5_spt1_t]
+asym:tq02_r5c, 0.166667
+asym:tq02_r5l, 0.166667
+asym:tq02_r5r, 0.166667
+asym:tq04_r5c, 0.166667
+asym:tq04_r5l, 0.166667
+asym:tq04_r5r, 0.166667
+
+[asym:@asym_tq_r5_spt2_t]
+asym:tq06_r5c, 0.166667
+asym:tq06_r5l, 0.166667
+asym:tq06_r5r, 0.166667
+asym:tq08_r5c, 0.166667
+asym:tq08_r5l, 0.166667
+asym:tq08_r5r, 0.166667
+
+[asym:@asym_tq_r5_spt3_t]
+asym:tq10_r5c, 0.166667
+asym:tq10_r5l, 0.166667
+asym:tq10_r5r, 0.166667
+asym:tq12_r5c, 0.166667
+asym:tq12_r5l, 0.166667
+asym:tq12_r5r, 0.166667
+
+[asym:@asym_tq_r5_spt4_t]
+asym:tq14_r5c, 0.166667
+asym:tq14_r5l, 0.166667
+asym:tq14_r5r, 0.166667
+asym:tq16_r5c, 0.166667
+asym:tq16_r5l, 0.166667
+asym:tq16_r5r, 0.166667
+
+[asym:@asym_tq_r5_spt5_t]
+asym:tq18_r5c, 0.166667
+asym:tq18_r5l, 0.166667
+asym:tq18_r5r, 0.166667
+asym:tq20_r5c, 0.166667
+asym:tq20_r5l, 0.166667
+asym:tq20_r5r, 0.166667
+
+[asym:@asym_tq_r5_spt6_t]
+asym:tq22_r5c, 0.166667
+asym:tq22_r5l, 0.166667
+asym:tq22_r5r, 0.166667
+asym:tq24_r5c, 0.166667
+asym:tq24_r5l, 0.166667
+asym:tq24_r5r, 0.166667
+
+[asym:@asym_tq_r5_spt7_t]
+asym:tq26_r5c, 0.166667
+asym:tq26_r5l, 0.166667
+asym:tq26_r5r, 0.166667
+asym:tq28_r5c, 0.166667
+asym:tq28_r5l, 0.166667
+asym:tq28_r5r, 0.166667
+
+# Ring 6 transitions
+[asym:@asym_tq_r6_spt1_t]
+asym:tq02_r6, 0.5
+asym:tq04_r6, 0.5
+
+[asym:@asym_tq_r6_spt2_t]
+asym:tq06_r6, 0.5
+asym:tq08_r6, 0.5
+
+[asym:@asym_tq_r6_spt3_t]
+asym:tq10_r6, 0.5
+asym:tq12_r6, 0.5
+
+[asym:@asym_tq_r6_spt4_t]
+asym:tq14_r6, 0.5
+asym:tq16_r6, 0.5
+
+[asym:@asym_tq_r6_spt5_t]
+asym:tq18_r6, 0.5
+asym:tq20_r6, 0.5
+
+[asym:@asym_tq_r6_spt6_t]
+asym:tq22_r6, 0.5
+asym:tq24_r6, 0.5
+
+[asym:@asym_tq_r6_spt7_t]
+asym:tq26_r6, 0.5
+asym:tq28_r6, 0.5
+
+# Weighted averages
+[asym:@asym_tq_r5_cos]
+asym:tq02_r5l, 0.9518
+asym:tq04_r5l, 0.8435
+asym:tq06_r5l, 0.3734
+asym:tq08_r5l, 0.1115
+asym:tq10_r5l, -0.4864
+asym:tq12_r5l, -0.7042
+asym:tq14_r5l, -0.9794
+asym:tq16_r5l, -0.9893
+asym:tq18_r5l, -0.7353
+asym:tq20_r5l, -0.5304
+asym:tq22_r5l, 0.0630
+asym:tq24_r5l, 0.3284
+asym:tq26_r5l, 0.8132
+asym:tq28_r5l, 0.9393
+asym:tq02_r5c, 0.9446
+asym:tq04_r5c, 0.8360
+asym:tq06_r5c, 0.3429
+asym:tq08_r5c, 0.0976
+asym:tq10_r5c, -0.5187
+asym:tq12_r5c, -0.7144
+asym:tq14_r5c, -0.9883
+asym:tq16_r5c, -0.9883
+asym:tq18_r5c, -0.7136
+asym:tq20_r5c, -0.5175
+asym:tq22_r5c, 0.0974
+asym:tq24_r5c, 0.3422
+asym:tq26_r5c, 0.8363
+asym:tq28_r5c, 0.9443
+asym:tq02_r5r, 0.9398
+asym:tq04_r5r, 0.8121
+asym:tq06_r5r, 0.3276
+asym:tq08_r5r, 0.0603
+asym:tq10_r5r, -0.5301
+asym:tq12_r5r, -0.7363
+asym:tq14_r5r, -0.9895
+asym:tq16_r5r, -0.9793
+asym:tq18_r5r, -0.7047
+asym:tq20_r5r, -0.4851
+asym:tq22_r5r, 0.1118
+asym:tq24_r5r, 0.3746
+asym:tq26_r5r, 0.8428
+asym:tq28_r5r, 0.9508
+asym:tq01_r5l, 0.9604
+asym:tq03_r5l, 0.9331
+asym:tq05_r5l, 0.7142
+asym:tq07_r5l, 0.3111
+asym:tq09_r5l, -0.0745
+asym:tq11_r5l, -0.5454
+asym:tq13_r5l, -0.8009
+asym:tq15_r5l, -0.9911
+asym:tq17_r5l, -0.9297
+asym:tq19_r5l, -0.6908
+asym:tq21_r5l, -0.3540
+asym:tq23_r5l, 0.1298
+asym:tq25_r5l, 0.4801
+asym:tq27_r5l, 0.8522
+asym:tq01_r5c, 0.9641
+asym:tq03_r5c, 0.8968
+asym:tq05_r5c, 0.6008
+asym:tq07_r5c, 0.2208
+asym:tq09_r5c, -0.2148
+asym:tq11_r5c, -0.6206
+asym:tq13_r5c, -0.8690
+asym:tq15_r5c, -0.9953
+asym:tq17_r5c, -0.8697
+asym:tq19_r5c, -0.6204
+asym:tq21_r5c, -0.2154
+asym:tq23_r5c, 0.2215
+asym:tq25_r5c, 0.6009
+asym:tq27_r5c, 0.8963
+asym:tq01_r5r, 0.9605
+asym:tq03_r5r, 0.8521
+asym:tq05_r5r, 0.4852
+asym:tq07_r5r, 0.1302
+asym:tq09_r5r, -0.3569
+asym:tq11_r5r, -0.6910
+asym:tq13_r5r, -0.9282
+asym:tq15_r5r, -0.9906
+asym:tq17_r5r, -0.8010
+asym:tq19_r5r, -0.5448
+asym:tq21_r5r, -0.0714
+asym:tq23_r5r, 0.3109
+asym:tq25_r5r, 0.7132
+asym:tq27_r5r, 0.9330
+
+[asym:@asym_tq_r5_sin]
+asym:tq02_r5l, 0.2816
+asym:tq04_r5l, 0.5291
+asym:tq06_r5l, 0.9196
+asym:tq08_r5l, 0.9894
+asym:tq10_r5l, 0.8651
+asym:tq12_r5l, 0.7038
+asym:tq14_r5l, 0.1604
+asym:tq16_r5l, -0.1112
+asym:tq18_r5l, -0.6664
+asym:tq20_r5l, -0.8426
+asym:tq22_r5l, -0.9903
+asym:tq24_r5l, -0.9397
+asym:tq26_r5l, -0.5683
+asym:tq28_r5l, -0.3297
+asym:tq02_r5c, 0.3165
+asym:tq04_r5c, 0.5417
+asym:tq06_r5c, 0.9354
+asym:tq08_r5c, 0.9912
+asym:tq10_r5c, 0.8505
+asym:tq12_r5c, 0.6945
+asym:tq14_r5c, 0.1250
+asym:tq16_r5c, -0.1250
+asym:tq18_r5c, -0.6949
+asym:tq20_r5c, -0.8513
+asym:tq22_r5c, -0.9913
+asym:tq24_r5c, -0.9354
+asym:tq26_r5c, -0.5411
+asym:tq28_r5c, -0.3159
+asym:tq02_r5r, 0.3296
+asym:tq04_r5r, 0.5694
+asym:tq06_r5r, 0.9401
+asym:tq08_r5r, 0.9902
+asym:tq10_r5r, 0.8429
+asym:tq12_r5r, 0.6646
+asym:tq14_r5r, 0.1107
+asym:tq16_r5r, -0.1611
+asym:tq18_r5r, -0.7031
+asym:tq20_r5r, -0.8656
+asym:tq22_r5r, -0.9893
+asym:tq24_r5r, -0.9190
+asym:tq26_r5r, -0.5295
+asym:tq28_r5r, -0.2790
+asym:tq01_r5l, -0.1472
+asym:tq03_r5l, 0.3463
+asym:tq05_r5l, 0.6586
+asym:tq07_r5l, 0.9455
+asym:tq09_r5l, 0.9681
+asym:tq11_r5l, 0.8323
+asym:tq13_r5l, 0.5504
+asym:tq15_r5l, 0.0930
+asym:tq17_r5l, -0.2833
+asym:tq19_r5l, -0.7167
+asym:tq21_r5l, -0.9042
+asym:tq23_r5l, -0.9868
+asym:tq25_r5l, -0.8421
+asym:tq27_r5l, -0.5139
+asym:tq01_r5c, 0.0010
+asym:tq03_r5c, 0.4318
+asym:tq05_r5c, 0.7543
+asym:tq07_r5c, 0.9703
+asym:tq09_r5c, 0.9404
+asym:tq11_r5c, 0.7779
+asym:tq13_r5c, 0.4184
+asym:tq15_r5c, -0.0002
+asym:tq17_r5c, -0.4164
+asym:tq19_r5c, -0.7779
+asym:tq21_r5c, -0.9396
+asym:tq23_r5c, -0.9702
+asym:tq25_r5c, -0.7539
+asym:tq27_r5c, -0.4323
+asym:tq01_r5r, 0.1456
+asym:tq03_r5r, 0.5139
+asym:tq05_r5r, 0.8413
+asym:tq07_r5r, 0.9866
+asym:tq09_r5r, 0.9034
+asym:tq11_r5r, 0.7165
+asym:tq13_r5r, 0.2854
+asym:tq15_r5r, -0.0927
+asym:tq17_r5r, -0.5488
+asym:tq19_r5r, -0.8327
+asym:tq21_r5r, -0.9692
+asym:tq23_r5r, -0.9453
+asym:tq25_r5r, -0.6595
+asym:tq27_r5r, -0.3461
+
+[asym:@asym_tq_r2_cos] # ep elastic
+asym:tq02_r2, 0.9522
+asym:tq04_r2, 0.8203
+asym:tq06_r2, 0.3654
+asym:tq08_r2, 0.0747
+asym:tq10_r2, -0.4982
+asym:tq12_r2, -0.7337
+asym:tq14_r2, -0.9858
+asym:tq16_r2, -0.9537
+asym:tq18_r2, -0.7320
+asym:tq20_r2, -0.4964
+asym:tq22_r2, 0.0727
+asym:tq24_r2, 0.3679
+asym:tq26_r2, 0.8210
+asym:tq28_r2, 0.9544
+asym:tq01_r2, 0.9725
+asym:tq03_r2, 0.8943
+asym:tq05_r2, 0.6720
+asym:tq07_r2, 0.2226
+asym:tq09_r2, -0.2803
+asym:tq11_r2, -0.6155
+asym:tq13_r2, -0.8868
+asym:tq15_r2, -0.9918
+asym:tq17_r2, -0.8661
+asym:tq19_r2, -0.6132
+asym:tq21_r2, -0.1889
+asym:tq23_r2, 0.2188
+asym:tq25_r2, 0.6080
+asym:tq27_r2, 0.8928
+
+[asym:@asym_tq_r2_sin]
+asym:tq02_r2, 0.2935
+asym:tq04_r2, 0.5644
+asym:tq06_r2, 0.9282
+asym:tq08_r2, 0.9958
+asym:tq10_r2, 0.8630
+asym:tq12_r2, 0.6760
+asym:tq14_r2, 0.1526
+asym:tq16_r2, -0.1695
+asym:tq18_r2, -0.6770
+asym:tq20_r2, -0.8662
+asym:tq22_r2, -0.9957
+asym:tq24_r2, -0.9282
+asym:tq26_r2, -0.5624
+asym:tq28_r2, -0.2930
+asym:tq01_r2, 0.0166
+asym:tq03_r2, 0.4295
+asym:tq05_r2, 0.6687
+asym:tq07_r2, 0.9667
+asym:tq09_r2, 0.9292
+asym:tq11_r2, 0.7753
+asym:tq13_r2, 0.3998
+asym:tq15_r2, -0.0038
+asym:tq17_r2, -0.4306
+asym:tq19_r2, -0.7771
+asym:tq21_r2, -0.9540
+asym:tq23_r2, -0.9662
+asym:tq25_r2, -0.7563
+asym:tq27_r2, -0.4315
+
+[asym:@asym_tq_r5_o_cos]
+asym:tq03_r5l, 0.9331
+asym:tq07_r5l, 0.3111
+asym:tq11_r5l, -0.5454
+asym:tq15_r5l, -0.9911
+asym:tq19_r5l, -0.6908
+asym:tq23_r5l, 0.1298
+asym:tq27_r5l, 0.8522
+asym:tq03_r5c, 0.8968
+asym:tq07_r5c, 0.2208
+asym:tq11_r5c, -0.6206
+asym:tq15_r5c, -0.9953
+asym:tq19_r5c, -0.6204
+asym:tq23_r5c, 0.2215
+asym:tq27_r5c, 0.8963
+asym:tq03_r5r, 0.8521
+asym:tq07_r5r, 0.1302
+asym:tq11_r5r, -0.6910
+asym:tq15_r5r, -0.9906
+asym:tq19_r5r, -0.5448
+asym:tq23_r5r, 0.3109
+asym:tq27_r5r, 0.9330
+
+[asym:@asym_tq_r5_o_sin]
+asym:tq03_r5l, 0.3463
+asym:tq07_r5l, 0.9455
+asym:tq11_r5l, 0.8323
+asym:tq15_r5l, 0.0930
+asym:tq19_r5l, -0.7167
+asym:tq23_r5l, -0.9868
+asym:tq27_r5l, -0.5139
+asym:tq03_r5c, 0.4318
+asym:tq07_r5c, 0.9703
+asym:tq11_r5c, 0.7779
+asym:tq15_r5c, -0.0002
+asym:tq19_r5c, -0.7779
+asym:tq23_r5c, -0.9702
+asym:tq27_r5c, -0.4323
+asym:tq03_r5r, 0.5139
+asym:tq07_r5r, 0.9866
+asym:tq11_r5r, 0.7165
+asym:tq15_r5r, -0.0927
+asym:tq19_r5r, -0.8327
+asym:tq23_r5r, -0.9453
+asym:tq27_r5r, -0.3461
+
+[asym:@asym_tq_r5_c_cos]
+asym:tq01_r5l, 0.9604
+asym:tq05_r5l, 0.7142
+asym:tq09_r5l, -0.0745
+asym:tq13_r5l, -0.8009
+asym:tq17_r5l, -0.9297
+asym:tq21_r5l, -0.3540
+asym:tq25_r5l, 0.4801
+asym:tq01_r5c, 0.9641
+asym:tq05_r5c, 0.6008
+asym:tq09_r5c, -0.2148
+asym:tq13_r5c, -0.8690
+asym:tq17_r5c, -0.8697
+asym:tq21_r5c, -0.2154
+asym:tq25_r5c, 0.6009
+asym:tq01_r5r, 0.9605
+asym:tq05_r5r, 0.4852
+asym:tq09_r5r, -0.3569
+asym:tq13_r5r, -0.9282
+asym:tq17_r5r, -0.8010
+asym:tq21_r5r, -0.0714
+asym:tq25_r5r, 0.7132
+
+[asym:@asym_tq_r5_c_sin]
+asym:tq01_r5l, -0.1472
+asym:tq05_r5l, 0.6586
+asym:tq09_r5l, 0.9681
+asym:tq13_r5l, 0.5504
+asym:tq17_r5l, -0.2833
+asym:tq21_r5l, -0.9042
+asym:tq25_r5l, -0.8421
+asym:tq01_r5c, 0.0010
+asym:tq05_r5c, 0.7543
+asym:tq09_r5c, 0.9404
+asym:tq13_r5c, 0.4184
+asym:tq17_r5c, -0.4164
+asym:tq21_r5c, -0.9396
+asym:tq25_r5c, -0.7539
+asym:tq01_r5r, 0.1456
+asym:tq05_r5r, 0.8413
+asym:tq09_r5r, 0.9034
+asym:tq13_r5r, 0.2854
+asym:tq17_r5r, -0.5488
+asym:tq21_r5r, -0.9692
+asym:tq25_r5r, -0.6595
+
+[asym:@asym_tq_r5_t_cos]
+asym:tq02_r5l, 0.9518
+asym:tq04_r5l, 0.8435
+asym:tq06_r5l, 0.3734
+asym:tq08_r5l, 0.1115
+asym:tq10_r5l, -0.4864
+asym:tq12_r5l, -0.7042
+asym:tq14_r5l, -0.9794
+asym:tq16_r5l, -0.9893
+asym:tq18_r5l, -0.7353
+asym:tq20_r5l, -0.5304
+asym:tq22_r5l, 0.0630
+asym:tq24_r5l, 0.3284
+asym:tq26_r5l, 0.8132
+asym:tq28_r5l, 0.9393
+asym:tq02_r5c, 0.9446
+asym:tq04_r5c, 0.8360
+asym:tq06_r5c, 0.3429
+asym:tq08_r5c, 0.0976
+asym:tq10_r5c, -0.5187
+asym:tq12_r5c, -0.7144
+asym:tq14_r5c, -0.9883
+asym:tq16_r5c, -0.9883
+asym:tq18_r5c, -0.7136
+asym:tq20_r5c, -0.5175
+asym:tq22_r5c, 0.0974
+asym:tq24_r5c, 0.3422
+asym:tq26_r5c, 0.8363
+asym:tq28_r5c, 0.9443
+asym:tq02_r5r, 0.9398
+asym:tq04_r5r, 0.8121
+asym:tq06_r5r, 0.3276
+asym:tq08_r5r, 0.0603
+asym:tq10_r5r, -0.5301
+asym:tq12_r5r, -0.7363
+asym:tq14_r5r, -0.9895
+asym:tq16_r5r, -0.9793
+asym:tq18_r5r, -0.7047
+asym:tq20_r5r, -0.4851
+asym:tq22_r5r, 0.1118
+asym:tq24_r5r, 0.3746
+asym:tq26_r5r, 0.8428
+asym:tq28_r5r, 0.9508
+
+[asym:@asym_tq_r5_t_sin]
+asym:tq02_r5l, 0.2816
+asym:tq04_r5l, 0.5291
+asym:tq06_r5l, 0.9196
+asym:tq08_r5l, 0.9894
+asym:tq10_r5l, 0.8651
+asym:tq12_r5l, 0.7038
+asym:tq14_r5l, 0.1604
+asym:tq16_r5l, -0.1112
+asym:tq18_r5l, -0.6664
+asym:tq20_r5l, -0.8426
+asym:tq22_r5l, -0.9903
+asym:tq24_r5l, -0.9397
+asym:tq26_r5l, -0.5683
+asym:tq28_r5l, -0.3297
+asym:tq02_r5c, 0.3165
+asym:tq04_r5c, 0.5417
+asym:tq06_r5c, 0.9354
+asym:tq08_r5c, 0.9912
+asym:tq10_r5c, 0.8505
+asym:tq12_r5c, 0.6945
+asym:tq14_r5c, 0.1250
+asym:tq16_r5c, -0.1250
+asym:tq18_r5c, -0.6949
+asym:tq20_r5c, -0.8513
+asym:tq22_r5c, -0.9913
+asym:tq24_r5c, -0.9354
+asym:tq26_r5c, -0.5411
+asym:tq28_r5c, -0.3159
+asym:tq02_r5r, 0.3296
+asym:tq04_r5r, 0.5694
+asym:tq06_r5r, 0.9401
+asym:tq08_r5r, 0.9902
+asym:tq10_r5r, 0.8429
+asym:tq12_r5r, 0.6646
+asym:tq14_r5r, 0.1107
+asym:tq16_r5r, -0.1611
+asym:tq18_r5r, -0.7031
+asym:tq20_r5r, -0.8656
+asym:tq22_r5r, -0.9893
+asym:tq24_r5r, -0.9190
+asym:tq26_r5r, -0.5295
+asym:tq28_r5r, -0.2790
+
+
+# [PUBLISH]
+# ! new.tree.variable.name, analysis.class, old.tree.variable.name, element.to.store
+#   asym_avg, asym, asym_left_avg, c
+#   asym_avg, asym, asym_right_avg, c

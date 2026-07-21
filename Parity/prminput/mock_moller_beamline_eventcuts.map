@@ -1,2 +1,7 @@
 EVENTCUTS = 3
 !combinedbpm,	bpm_target,	absx,	0,	200,	g,	0,	0
+
+!! The cuts below are used to make the grand correlator use the same event
+!! selection as the standard correlation.
+combinedbpm,	bpm_target,     absx, -200,	200,	g,	0,	0
+combinedbcm     bcm_target              5       70      g       0       0

@@ -76,6 +76,12 @@ CHECK_REQUIRED_VARIABLE(GIT_EXECUTABLE)
 # Description: this function is executed when the state of the git
 #              repo changes (e.g. a commit is made).
 function(GitStateChangedAction _state_as_list)
+    # Ensure we have enough elements in the state list.
+    LIST(LENGTH _state_as_list _len)
+    if(_len LESS 7)
+        execute_process(COMMAND ${CMAKE_COMMAND} -E cat "${_state_as_list}")
+        message(FATAL_ERROR "GitStateChangedAction: _state_as_list must have at least 7 elements.")
+    endif()
     # Set variables by index, then configure the file w/ these variables defined.
     LIST(GET _state_as_list 0 GIT_RETRIEVED_STATE)
     LIST(GET _state_as_list 1 GIT_HEAD_SHA1)
@@ -123,6 +129,7 @@ function(GetGitState _working_dir _state)
     if(NOT res EQUAL 0)
         set(_success "false")
         set(_dirty "false")
+        set(_git_status "GIT-NOTFOUND")
     else()
         if(NOT "${_git_status}" STREQUAL "")
             set(_dirty "true")

@@ -104,7 +104,7 @@ Double_t determinant_h(vector<vector<Double_t>> input, Int_t size){
   }
   Int_t sign = 1;                // For sign multiplier
   for (Int_t i = 0 ; i < size ; i++){
-    if (debug > 2) Printf("Determinant computation %f%% done",100.0*i/size); 
+    if (debug > 2) Printf("Determinant computation %f%% done",100.0*i/size);
     temp=cofactor_h(input,temp,0,i,size);
     determinant+=sign*input[0][i]*determinant_h(temp,size-1);
     sign=-1*sign;
@@ -133,7 +133,7 @@ vector<vector<Double_t>> adjoint_h(vector<vector<Double_t>> input, vector<vector
     temp2.clear();
   }
   for (Int_t j = 0; j<input.size() ; j++){
-    if (debug > 2) Printf("Adjoint computation %f%% done",(100.0*j/input.size())); 
+    if (debug > 2) Printf("Adjoint computation %f%% done",(100.0*j/input.size()));
     for (Int_t k = 0; k<input.size() ; k++){
       temp=cofactor_h(input,temp,j,k,input.size());
       if (debug > 3) {

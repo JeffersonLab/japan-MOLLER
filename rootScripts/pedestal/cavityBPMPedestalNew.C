@@ -4,7 +4,7 @@ File Name: cavityBPMPedestalNew.C
 Created by: Grace Eichler
 Email: ge277520@ohio.edu
 
-Description:  
+Description:
 
 Last Modified: June
 *****************************************************************************/
@@ -40,7 +40,7 @@ void cavityBPMPedestalNew(int runnum = 1, int pass = 1) {
   #include <sstream>
   #include <algorithm>
   #include <string>
-  
+
 //getting vector from input file (from japan/Parity/prminput/mock_beamline_geometry.map)
 //std::vector <input> name (define and name empty vector)
 //loop through geometry file and take name into vector
@@ -77,9 +77,9 @@ for (int i = 0; i < bsz; i++){
 }
 
 
-//} 
+//}
 
- 
+
 
 //creating arrays storing bcm positions/coordinate axes
 //string bcmPos[5] = {"04","05","06", "11", "14"};
@@ -110,11 +110,11 @@ for (int i=0; i<5 ; i++) {
         else {
 
     mytree->SetAlias(Form("proj_1h%s%s_using_1h%s%s_and_1h%s%s", bpmpos[k].c_str(), axis[j].c_str(),  bpmpos[i].c_str(), axis[j].c_str(),  bpmpos[m].c_str(), axis[j].c_str()), Form("qwk_1h%s%s + (qwk_1h%s%s - qwk_1h%s%s)", bpmpos[i].c_str(), axis[j].c_str(), bpmpos[m].c_str(), axis[j].c_str(), bpmpos[i].c_str(), axis[j].c_str()));
-    
+
     canvas->cd(x);
-    
-    mytree->Draw(Form("proj_1h%s%s_using_1h%s%s_and_1h%s%s - qwk_1h%s%s >> H%d%d%d(201, -1.005e-3, 1.005e-3)", bpmpos[k].c_str(), axis[j].c_str(),bpmpos[i].c_str(), axis[j].c_str(), bpmpos[m].c_str(), axis[j].c_str(), bpmpos[k].c_str(), axis[j].c_str(), x, j, i)); 
-    
+
+    mytree->Draw(Form("proj_1h%s%s_using_1h%s%s_and_1h%s%s - qwk_1h%s%s >> H%d%d%d(201, -1.005e-3, 1.005e-3)", bpmpos[k].c_str(), axis[j].c_str(),bpmpos[i].c_str(), axis[j].c_str(), bpmpos[m].c_str(), axis[j].c_str(), bpmpos[k].c_str(), axis[j].c_str(), x, j, i));
+
     h1 = (TH1*)gROOT->FindObject(Form("H%d%d%d", x, j, i));
     //cout << Form("H%d%d%d", x, j, i) << endl;
 //canvas->Close();
@@ -141,7 +141,7 @@ xyRMS.push_back(valsRMS[0]);
  // int j = 0;
  // int k = 0;
  // int x = 0;
- 
+
  for (int i = 0; k < 5; k++){
   int x = 1;
   string axis[2] = {"X", "Y"};
@@ -157,8 +157,8 @@ xyRMS.push_back(valsRMS[0]);
     mytree->Draw(Form("qwk_1h%s%s + (qwk_1h%s%s - qwk_1h%s%s) >> H%d%d%d(200, %f, %f)", bpmpos[i].c_str(), axis[k].c_str(), bpmpos[j].c_str(), axis[k].c_str(), bpmpos[m].c_str(), axis[k].c_str(), x, i, k, negfXRMS, fiveXRMS));
              x++;
 }
-}   
-} 
+}
+}
   }
  }
 }

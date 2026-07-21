@@ -14,13 +14,13 @@ class bmoddata:
     self.df=pd.read_csv(filepath_or_buffer=source, engine="python",delimiter='\t',header=0, skiprows=3)
     self.df.insert(0,'RunID',self.runinfo.iloc[0][0])
     self.df['Variable']=self.df.DV_name+'_vs_'+self.df.IV_name
-    self.df=self.df.drop(["#comment","DV_name","IV_name","unit"],axis=1) #Getting rid of unnecesary columns 
+    self.df=self.df.drop(["#comment","DV_name","IV_name","unit"],axis=1) #Getting rid of unnecesary columns
   def returndf(self): #return the data frame with coefficient and values
     return self.df.loc[:,['RunID','CycleID','Variable','coeff','error','status']]
   #function returns unique list of variables
   def returnlov(self):
     return self.df['Variable'].unique().tolist()
-  
+
 class plotobj:
   def __init__(self,name):
     self.name=name
@@ -64,16 +64,16 @@ class plotobj:
       graph[status].SetMarkerStyle(style[status])
       graph[status].SetMarkerSize(1)
       mg.Add(graph[status])
-    
+
     axis=mg.GetXaxis()
     axis.Set(n,-0.5,n+0.5)
     axis.SetNdivisions(-n)
     for i in range(0,n):
       binindex=axis.FindBin(i)
-      axis.SetBinLabel(binindex,"R"+str(self.run[i])+"C"+str(self.cycle[i]))        
+      axis.SetBinLabel(binindex,"R"+str(self.run[i])+"C"+str(self.cycle[i]))
     return mg
-    
-  
+
+
 
 path=sys.argv[1]
 outputpath=sys.argv[2]
@@ -87,7 +87,7 @@ pobj=[]
 
 for f in range(0,filecount):
   bmod=bmoddata(filelist[f])
-  df=bmoddata.returndf(bmod) 
+  df=bmoddata.returndf(bmod)
 
   if f==0:
     varlist=bmoddata.returnlov(bmod)
@@ -104,19 +104,19 @@ output=R.TFile(outputpath+"/bmod_aggregator.root","recreate")
 for l in range(0,varcount):
     c=R.TCanvas(pobj[l].name, pobj[l].name, 800,600)
     c.SetGrid()
-    graph=plotobj.returngraph(pobj[l])    
+    graph=plotobj.returngraph(pobj[l])
     graph.Draw("AP")
     c.Print(outputpath+"/"+pobj[l].name+".png")
     graph.Write(pobj[l].name)
 
-    
+
 output.Close()
 
 
 
 
 
-  
+
 
 #sensitivity_df= source_pd_df[source_pd_df['CycleID']<0]
 #print(source_pd_df)

@@ -76,7 +76,7 @@ void TreeGetter::parseTextFile(std::string fileName = "input.txt"){
   }
 }
 
-Int_t TreeGetter::getData() { 
+Int_t TreeGetter::getData() {
   Printf("Getting input file for run %d, minirun %d",runNumber, miniRunNumber);
   if (parameterVectors.count("ROOT input path") != 0 ) {
     infile = parameterVectors["ROOT input path"].at(0);
@@ -144,7 +144,7 @@ void TreeGetter::stripData(){
   Printf("Done getting trees\n");
 }
 
-Int_t TreeGetter::getBaseData() { 
+Int_t TreeGetter::getBaseData() {
   Printf("Getting base tree for run");
   if (parameterVectors.count("ROOT base input path") != 0 ) {
     baseinfile = parameterVectors["ROOT base input path"].at(0);
@@ -199,9 +199,9 @@ void TreeGetter::eraseOldDuplicate(TChain* tree, TString indicator1 = "run_numbe
   //TTree* baseTree;
   //fileBaseInput->ls();
   //fileBaseInput->GetObject(tree->GetName(), baseTree);
-  if (!baseTree) { 
+  if (!baseTree) {
     Printf("No tree named %s in %s",tree->GetName(),baseinfile.c_str());
-    return; 
+    return;
   }
   const auto nentries = baseTree->GetEntries();
   if (nentries>0){
@@ -262,11 +262,11 @@ void TreeGetter::mergeData() {
     Printf("Smart adding tree \"%s\"",parameterVectors["Trees"].at(n).c_str());
     // FIXME new things here, also conditions on appending new entries
     // Loop over new input file's entries
-    // If the new input file's entry to be editted exists already in the old input file 
+    // If the new input file's entry to be editted exists already in the old input file
     //    then replace the previously existing entry in the old input file one with the new one in the new input file
-    // Else 
+    // Else
     //    just add a new entry at the end
-    // In both cases 
+    // In both cases
     //    write the branches existing in the union of both inputs
     //    For each branch that didn't have an entry fill with -1e6
     worked = smartAdd(parameterVectors["Trees"].at(n));
@@ -371,7 +371,7 @@ Int_t TreeGetter::smartAdd(std::string tree) {
     //outTree->AddFriend(inTree);
     // FIXME Try to figure out how to do a lateral tree merging thing here
     tmpTree->AddFile(infile.c_str());
-    // FIXME IF no index1 branch exists then make my own and use runNumber as the indexer 
+    // FIXME IF no index1 branch exists then make my own and use runNumber as the indexer
     // FIXME IF no index2 branch exists then make my own and use miniRunNumber as the indexer (defaults -1)
     //if (0 != tmpTree->SetBranchAddress(index1.c_str(),&ind1)) {
     if (!tmpTree->GetListOfBranches()->FindObject(index1.c_str())) {
@@ -398,10 +398,10 @@ Int_t TreeGetter::smartAdd(std::string tree) {
       tmpTree->GetEntry(i);
       std::pair <Int_t,Int_t> pr = {(Int_t)ind1,(Int_t)ind2};
       //Printf("Checking entry, ind1 = %d, ind2 = %d, deleted status == %d",(Int_t)ind1, (Int_t)ind2, deleted[pr]);
-      if (deleted[pr] == false && -1 != baseTree->GetEntryNumberWithIndex((Int_t)ind1,(Int_t)ind2) && -1 != inTree->GetEntryNumberWithIndex((Int_t)ind1,(Int_t)ind2)) { 
+      if (deleted[pr] == false && -1 != baseTree->GetEntryNumberWithIndex((Int_t)ind1,(Int_t)ind2) && -1 != inTree->GetEntryNumberWithIndex((Int_t)ind1,(Int_t)ind2)) {
         deleted[pr] = true;
         Printf("Skipping entry, ind1 = %d, ind2 = %d",(Int_t)ind1, (Int_t)ind2);
-        continue; 
+        continue;
       }
       tmpTree->GetEntry(i);
       outTree->Fill();

@@ -1,7 +1,7 @@
 # Just Another Parity ANalyzer
-   
+
 ## Doxygen
-Doxygen output can be found at: http://hallaweb.jlab.org/parity/prex/japan/Doxygen/html. This will get updated from time to time. 
+Doxygen output can be found at: https://jeffersonlab.github.io/japan-MOLLER/index.html. This gets updated on pushes to the main branch.
 
 You can also generated your own locally (with your latest changes) by installing doxygen on your system (from the root directory of this code) and running:
 ```
@@ -9,7 +9,7 @@ You can also generated your own locally (with your latest changes) by installing
 ```
 
 ## Workflow
-To get the repository from a remote you "clone" -> once you have the repository you "pull" to get changes from the remote repository locally -> to change branches locally you "checkout" to the other branch  -> you "commit" your changes to the local repository -> you propagate your local commits to the remote repository by a "push" 
+To get the repository from a remote you "clone" -> once you have the repository you "pull" to get changes from the remote repository locally -> to change branches locally you "checkout" to the other branch  -> you "commit" your changes to the local repository -> you propagate your local commits to the remote repository by a "push"
 
 ### To get repository
 Use this if you plan to do work and want to propagate changes to the repository for others to see:
@@ -66,7 +66,7 @@ Create a branch (see https://git-scm.com/book/en/v2/Git-Branching-Basic-Branchin
  ```
  git checkout -b issueName
  ```
-  
+
 You are now in new branch named "issueName". If you want others to see your work make sure you setup tracking of this branch on the remote repository:
   ```
   git push -u origin issueName
@@ -76,7 +76,7 @@ Modfiy any file you need. For the modified files:
   git add folder/modifiedFile.hh
   git commit -m "Message for this commit"
   ```
-  
+
 At this point your code is tracked and committed on the local repository. To make changes available to others:
   ```
   git push

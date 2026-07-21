@@ -29,7 +29,7 @@ void plotdata(){
           //,"asym_bcm_an_us_bcm_an_ds_agg_dd","asym_bcm_dg_us_bcm_an_ds_agg_dd","asym_bcm_dg_ds_bcm_an_ds_agg_dd","asym_bcm_dg_us_bcm_an_us_agg_dd","asym_bcm_dg_us_bcm_dg_ds_agg_dd"};
   TString title_s[]={"diff_bpm4aX","diff_bpm4aY","diff_bpm4eX","diff_bpm4eY","diff_bpm11X","asym_bcm_an_ds","asym_bcm_an_us","asym_bcm_dg_us","asym_bcm_dg_ds"};
           //,"dd-an_us_an_ds","dd-dg_us_an_ds","dd-dg_ds_an_ds","dd-dg_us_an_us","dd-dg_us_dg_ds"};
-  static const Int_t var = sizeof(device)/sizeof(*device); 
+  static const Int_t var = sizeof(device)/sizeof(*device);
   TString unit[var]={"nm","nm","nm","nm","nm","ppb","ppb","ppb","ppb"};//,"ppb","ppb","ppb","ppb","ppb"};
   Int_t flag[var][sl]={{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
                        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -41,7 +41,7 @@ void plotdata(){
                        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
                        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}};
   //up until here needs to be changed manually
-  
+
   int i=0,j=0,k=0,m=0,n=0,o=0,p=0,q=(sl+1)*100,lin=0,lout=0,rin=0,rout=0;
   Int_t IHWP[sl],Wien[sl],HRS[sl];
   Double_t slug[sl];
@@ -69,14 +69,14 @@ void plotdata(){
   for(j=0;j<sl;j++){
     slug[j]=(j+1)*1.0;
     agg->GetEntry(j);
-    tl = agg->GetLeaf("ihwp");  
+    tl = agg->GetLeaf("ihwp");
     IHWP[j]=tl->GetValue(0);
     tl = agg->GetLeaf("wein");  https://prex.jlab.org/wiki/index.php/Information_for_Shift_Takers
     Wien[j]=tl->GetValue(0);
     for(i=0;i<var;i++){
-      tl = agg->GetLeaf(Form("%s_mean",device[i].Data()));  
+      tl = agg->GetLeaf(Form("%s_mean",device[i].Data()));
       mean[i][j]=tl->GetValue(0);
-      tl = agg->GetLeaf(Form("%s_mean_error",device[i].Data()));  
+      tl = agg->GetLeaf(Form("%s_mean_error",device[i].Data()));
       err[i][j]=tl->GetValue(0);
     }//IHWP IN=1 OUT=2 / Wien R=1 L=?
     if(Wien[j]==2){
@@ -95,9 +95,9 @@ void plotdata(){
   }
 
   //putting mean and err to x,y,ex,ey array, to plot 4 separated TGraphErrors(IHWP IN/OUT WIEN L/R)
-  Double_t x_lin[sl];  Double_t ex_lin[sl];  Double_t y_lin[sl];   Double_t ey_lin[sl]; 
+  Double_t x_lin[sl];  Double_t ex_lin[sl];  Double_t y_lin[sl];   Double_t ey_lin[sl];
   Double_t x_lout[sl];  Double_t ex_lout[sl];  Double_t y_lout[sl];   Double_t ey_lout[sl];
-  Double_t x_rin[sl];  Double_t ex_rin[sl];  Double_t y_rin[sl];   Double_t ey_rin[sl]; 
+  Double_t x_rin[sl];  Double_t ex_rin[sl];  Double_t y_rin[sl];   Double_t ey_rin[sl];
   Double_t x_rout[sl];  Double_t ex_rout[sl];  Double_t y_rout[sl];   Double_t ey_rout[sl];
   TGraphErrors *slin;   TGraphErrors *slout;   TGraphErrors *srin;   TGraphErrors *srout;
   TCanvas *c1;
@@ -146,8 +146,8 @@ void plotdata(){
       slin->Fit("pol0");
       TF1 *fitslin=slin->GetFunction("pol0");
       fitslin->SetLineColor(6);
-      ave_lin = fitslin->GetParameter(0);  
-      error_lin = fitslin->GetParError(0); 
+      ave_lin = fitslin->GetParameter(0);
+      error_lin = fitslin->GetParError(0);
       ndf_lin = fitslin->GetNDF();
       ksq_lin = fitslin->GetChisquare();
       p_lin = fitslin->GetProb();
@@ -159,7 +159,7 @@ void plotdata(){
       slout->Fit("pol0");
       TF1 *fitslout=slout->GetFunction("pol0");
       fitslout->SetLineColor(4);
-      ave_lout = fitslout->GetParameter(0);  
+      ave_lout = fitslout->GetParameter(0);
       error_lout = fitslout->GetParError(0);
       ndf_lout = fitslout->GetNDF();
       ksq_lout = fitslout->GetChisquare();
@@ -172,8 +172,8 @@ void plotdata(){
       srin->Fit("pol0");
       TF1 *fitsrin=srin->GetFunction("pol0");
       fitsrin->SetLineColor(6);
-      ave_rin = fitsrin->GetParameter(0);  
-      error_rin = fitsrin->GetParError(0); 
+      ave_rin = fitsrin->GetParameter(0);
+      error_rin = fitsrin->GetParError(0);
       ndf_rin = fitsrin->GetNDF();
       ksq_rin = fitsrin->GetChisquare();
       p_rin = fitsrin->GetProb();
@@ -185,7 +185,7 @@ void plotdata(){
       srout->Fit("pol0");
       TF1 *fitsrout=srout->GetFunction("pol0");
       fitsrout->SetLineColor(4);
-      ave_rout = fitsrout->GetParameter(0);  
+      ave_rout = fitsrout->GetParameter(0);
       error_rout = fitsrout->GetParError(0);
       ndf_rout = fitsrout->GetNDF();
       ksq_rout = fitsrout->GetChisquare();

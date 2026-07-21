@@ -5,16 +5,21 @@
 * Time-stamp: <2010-05-24>                                 *
 \**********************************************************/
 
+/*!
+ * \file   VQwBPM.h
+ * \brief  Virtual base class for beam position monitors
+ */
 
-#ifndef __VQWBPM__
-#define __VQWBPM__
-
-// System headers
-#include <boost/shared_ptr.hpp>
+#pragma once
 
 // ROOT headers
 #include <TTree.h>
 #include <TMath.h>
+
+// RNTuple headers
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "VQwDataElement.h"
@@ -33,32 +38,43 @@ class QwErrDBInterface;
 /// \ingroup QwAnalysis_BeamLine
 ///
 
+/**
+ * \class VQwBPM
+ * \ingroup QwAnalysis_BeamLine
+ * \brief Abstract base for beam position monitors (BPMs)
+ *
+ * Defines the common interface for BPM-like data elements, including decoding
+ * of position channels, per-event cuts, error propagation, and output. Concrete
+ * implementations such as QwBPMStripline<T> and QwCombinedBPM<T> inherit from
+ * this base to provide hardware-specific logic while sharing the higher-level
+ * processing contract.
+ */
 class VQwBPM : public VQwDataElement {
   /******************************************************************
    *  Class: VQwBPM
    *         Virtual base class for the BPMs in the beamline.
    *         This will define a set of functions that are used by the
    *         BPMStripline and CombinedBPM classes for data decoding.
-   *         This parent class will define the basic structure of a 
+   *         This parent class will define the basic structure of a
    *         BPM. The basic object doesn't care about the inputs.
-   *         It only defines absoloute positions and an effective charge.
+   *         It only defines absolute positions and an effective charge.
    *           BPMs  have 4 input wires for position: XP, XM, YP, YM
    *           Cavityy monitors have 3 wires: X, Y and I
    *           CombinedBPM use absolute X and Y derived from BPM X and Ys.
    ******************************************************************/
   template <typename TT> friend class QwBPMStripline;
   template <typename TT> friend class QwCombinedBPM;
-  friend class QwEnergyCalculator;  
+  friend class QwEnergyCalculator;
 
  public:
-  ///  Axis enumerator for the BPMs; 
+  ///  Axis enumerator for the BPMs;
   ///  Z will never be an instrumented axis.
   enum EBeamPositionMonitorAxis{kXAxis=0, kYAxis, kNumAxes};
 
  public:
   // Default constructor
   VQwBPM() {InitializeChannel_base();};
-  VQwBPM(TString& name) {InitializeChannel_base();};
+  VQwBPM(TString& /*name*/) {InitializeChannel_base();};
   VQwBPM(const VQwBPM& source)
   : VQwDataElement(source),
     bRotated(source.bRotated),
@@ -67,19 +83,19 @@ class VQwBPM : public VQwDataElement {
     for (size_t i = 0; i < 3; i++)
       fPositionCenter[i] = source.fPositionCenter[i];
   }
-  virtual ~VQwBPM() { };
+  ~VQwBPM() override { };
 
 
   void   InitializeChannel(TString name);
   //  virtual void   ClearEventData() = 0;
 
-  virtual void LoadChannelParameters(QwParameterFile &paramfile) = 0;
+  void LoadChannelParameters(QwParameterFile &paramfile) override = 0;
 
 //-------------------------------------------------------------------------------------
 
-  virtual  void    GetProjectedPosition(VQwBPM *device){}; // The base class function GetProjectedPosition is defined to have no effect.
+  virtual  void    GetProjectedPosition(VQwBPM * /*device*/){}; // The base class function GetProjectedPosition is defined to have no effect.
   virtual  size_t  GetNumberOfElements(){return size_t(1);}
-  virtual  void    FillRawEventData() 
+  virtual  void    FillRawEventData()
     {std::cerr << "FillRawEventData for VQwBPM not implemented for device " << GetElementName() << "!\n";};
 
 //-------------------------------------------------------------------------------------
@@ -91,10 +107,10 @@ class VQwBPM : public VQwDataElement {
 
   void    SetSingleEventCuts(TString, Double_t, Double_t);
   void    SetSingleEventCuts(TString, UInt_t, Double_t, Double_t, Double_t, Double_t);
-  virtual UInt_t UpdateErrorFlag() = 0;
+  UInt_t UpdateErrorFlag() override = 0;
   virtual void UpdateErrorFlag(const VQwBPM *ev_error) = 0;
 
-  virtual void Scale(Double_t factor) {
+  virtual void Scale(Double_t /*factor*/) {
     std::cerr << "Scale for VQwBPM not implemented!\n";
   }
   void SetGains(TString pos, Double_t value);
@@ -125,8 +141,8 @@ class VQwBPM : public VQwDataElement {
      return const_cast<VQwBPM*>(this)->GetPosition(axis);
    }
 
-   
- 
+
+
 
 protected:
    virtual VQwHardwareChannel* GetPosition(EBeamPositionMonitorAxis axis){
@@ -139,7 +155,7 @@ protected:
        TString loc="VQwBPM::GetPosition for "
          +this->GetElementName()+" failed for axis value "+Form("%d",axis);
        throw std::out_of_range(loc.Data());
-     } 
+     }
      return tmpptr;
    }
 
@@ -159,29 +175,40 @@ public:
 /*   void PrintValue() const; */
 /*   void PrintInfo() const; */
   virtual void CalculateRunningAverage() = 0;
-  virtual void AccumulateRunningSum(const VQwBPM& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) {
+  virtual void AccumulateRunningSum(const VQwBPM& /*value*/, Int_t /*count*/=0, Int_t /*ErrorMask*/=0xFFFFFFF) {
     std::cerr << "AccumulateRunningSum not implemented for BPM named="
       <<GetElementName()<<"\n";
   };
   virtual void DeaccumulateRunningSum(VQwBPM& value, Int_t ErrorMask=0xFFFFFFF) = 0;
 
-  virtual void ConstructHistograms(TDirectory *folder, TString &prefix) = 0;
-  virtual void FillHistograms() = 0;
+  void ConstructHistograms(TDirectory *folder, TString &prefix) override = 0;
+  void FillHistograms() override = 0;
 
   virtual void ConstructBranchAndVector(TTree *tree, TString &prefix,
-      std::vector<Double_t> &values) = 0;
+      QwRootTreeBranchVector &values) = 0;
   virtual void ConstructBranch(TTree *tree, TString &prefix) = 0;
   virtual void ConstructBranch(TTree *tree, TString &prefix,
       QwParameterFile& modulelist) = 0;
-  virtual void FillTreeVector(std::vector<Double_t> &values) const = 0;
+  virtual void FillTreeVector(QwRootTreeBranchVector &values) const = 0;
+
+#ifdef HAS_RNTUPLE_SUPPORT
+  virtual void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) = 0;
+  virtual void FillNTupleVector(std::vector<Double_t>& values) const = 0;
+#endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef __USE_DATABASE__
   virtual std::vector<QwDBInterface> GetDBEntry() = 0;
   virtual std::vector<QwErrDBInterface> GetErrDBEntry() = 0;
 #endif // __USE_DATABASE__
 
-  virtual void Ratio(VQwBPM &numer, VQwBPM &denom) {
-    std::cerr << "Ratio() is not defined for BPM named="<<GetElementName()<<"\n";
+  virtual void Ratio(VQwBPM & /*numer*/, VQwBPM & /*denom*/) {
+    throw std::runtime_error(std::string("Ratio() is not defined for BPM named ") + GetElementName().Data());
+  }
+
+  // Ensure polymorphic dispatch of burp-failure checks when called via VQwBPM*
+  virtual Bool_t CheckForBurpFail(const VQwDataElement *ev_error) {
+    // Default: delegate to VQwDataElement (throws). Derived classes should override.
+    return VQwDataElement::CheckForBurpFail(ev_error);
   }
 
   // Stuff required for QwBPMStripLine
@@ -190,7 +217,7 @@ public:
 /*       <<GetElementName()<< "!!\n"; */
 /*     return 0; */
 /*   } */
-  virtual TString GetSubElementName(Int_t subindex) {
+  virtual TString GetSubElementName(Int_t /*subindex*/) {
     std::cerr << "GetSubElementName()  is not implemented!! for device: " << GetElementName() << "\n";
     return TString("OBJECT_UNDEFINED"); // Return an erroneous TString
   }
@@ -198,10 +225,10 @@ public:
     std::cerr << "GetAbsolutePosition() is not implemented!!\n";
   }
   virtual void SetEventCutMode(Int_t bcuts) = 0;
-  virtual void PrintErrorCounters() const {// report number of events failed due to HW and event cut faliure
+  void PrintErrorCounters() const override {// report number of events failed due to HW and event cut failure
     std::cerr << "PrintErrorCounters() is not implemented!!\n";
   }
-  virtual Bool_t ApplySingleEventCuts() = 0;//Check for good events by stting limits on the devices readings
+  virtual Bool_t ApplySingleEventCuts() = 0;//Check for good events by setting limits on the devices readings
   virtual void IncrementErrorCounters() = 0;
   virtual void ProcessEvent() = 0;
 
@@ -216,13 +243,13 @@ public:
       "used in a CombinedBPM!\n";
     return 0;
   }
-  virtual void SetBPMForCombo(const VQwBPM* bpm, Double_t charge_weight,
-      Double_t x_weight, Double_t y_weight,Double_t sumqw) {
+  virtual void SetBPMForCombo(const VQwBPM* /*bpm*/, Double_t /*charge_weight*/,
+      Double_t /*x_weight*/, Double_t /*y_weight*/,Double_t /*sumqw*/) {
     std::cerr << "VQwBPM::SetBPMForCombo only defined for CombinedBPM's!!!\n";
   }
 
 
-  virtual void SetDefaultSampleSize(Int_t sample_size) {
+  virtual void SetDefaultSampleSize(Int_t /*sample_size*/) {
     std::cerr << "SetDefaultSampleSize() is undefined!!!\n";
   }
 
@@ -231,34 +258,34 @@ public:
     fResolution[kYAxis] = resolutionY;
   }
 
-  virtual void SetRandomEventParameters(Double_t meanX, Double_t sigmaX, Double_t meanY, Double_t sigmaY) {
+  virtual void SetRandomEventParameters(Double_t /*meanX*/, Double_t /*sigmaX*/, Double_t /*meanY*/, Double_t /*sigmaY*/) {
     std::cerr<< "SetRandomEventParameters undefined!!\n";
   }
-  virtual void SetRandomEventParameters(Double_t meanX, Double_t sigmaX, Double_t meanY, Double_t sigmaY,Double_t meanXslope, Double_t sigmaXslope, Double_t meanYslope, Double_t sigmaYslope) {
+  virtual void SetRandomEventParameters(Double_t /*meanX*/, Double_t /*sigmaX*/, Double_t /*meanY*/, Double_t /*sigmaY*/,Double_t /*meanXslope*/, Double_t /*sigmaXslope*/, Double_t /*meanYslope*/, Double_t /*sigmaYslope*/) {
     std::cerr<< "SetRandomEventParameters undefined!!\n";
   }
-  virtual void SetRandomEventAsymmetry(Double_t asymmetry) {
+  virtual void SetRandomEventAsymmetry(Double_t /*asymmetry*/) {
     std::cerr<< "SetRandomEventAsymmetry undefined!!\n";
   }
-  virtual void RandomizeEventData(int helicity = 0, double time = 0.0) {
+  virtual void RandomizeEventData(int /*helicity*/ = 0, double /*time*/ = 0.0) {
     std::cerr << "RandomizeEventData is undefined for device" << GetElementName() << "!!!\n";
   }
   virtual void ApplyResolutionSmearing(){
     std::cerr << "ApplyResolutionSmearing is undefined" << GetElementName() << "!!!\n";
   }
-  virtual void ApplyResolutionSmearing(EBeamPositionMonitorAxis iaxis){
+  virtual void ApplyResolutionSmearing(EBeamPositionMonitorAxis /*iaxis*/){
     std::cerr << "ApplyResolutionSmearing(EBeamPositionMonitorAxis iaxis) is undefined!!!\n";
   }
-  virtual void EncodeEventData(std::vector<UInt_t> &buffer) {
+  virtual void EncodeEventData(std::vector<UInt_t> & /*buffer*/) {
     std::cerr << "EncodeEventData is undefined!!!\n";
   }
-  virtual void SetSubElementPedestal(Int_t j, Double_t value) {
+  virtual void SetSubElementPedestal(Int_t /*j*/, Double_t /*value*/) {
     std::cerr << "SetSubElementPedestal is undefined!!!\n";
   }
-  virtual void SetSubElementCalibrationFactor(Int_t j, Double_t value) {
+  virtual void SetSubElementCalibrationFactor(Int_t /*j*/, Double_t /*value*/) {
     std::cerr << "SetSubElementCalibrationFactor is undefined!!!\n";
   }
-  virtual void PrintInfo() const { 
+  void PrintInfo() const override {
     std::cout<<"PrintInfo() for VQwBPM not impletemented\n";
   };
 
@@ -297,7 +324,7 @@ public:
   protected:
   std::vector<TString> fSubelementNames;
 
-  // Position calculation related paramters
+  // Position calculation related parameters
   Double_t fPositionCenter[3];
   Double_t fQwStriplineCalibration;
   Double_t fQwStriplineCorrection;
@@ -305,7 +332,7 @@ public:
   Double_t fGains[2];
   static const TString axis[3];
 
-  // Rotation related paramters
+  // Rotation related parameters
   Bool_t   bRotated;
   Double_t fRotationAngle;
   Double_t fCosRotation;
@@ -324,8 +351,4 @@ public:
 
 };
 
-typedef boost::shared_ptr<VQwBPM> VQwBPM_ptr;
-
-#endif
-
-
+typedef std::shared_ptr<VQwBPM> VQwBPM_ptr;

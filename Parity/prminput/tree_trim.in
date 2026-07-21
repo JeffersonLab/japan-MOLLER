@@ -1,4 +1,4 @@
-#  Wildcard the susbsystem name, but the channel designators
+#  Wildcard the subsystem name, but the channel designators
 #  below are specific to QwBeamLine subsystems.  They will
 #  be used by all QwBeamLine subsystems, irrespective of the name
 #  If you wanted different behavior for the hall and injector, you'd

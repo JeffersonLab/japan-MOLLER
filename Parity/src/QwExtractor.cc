@@ -22,16 +22,6 @@
 #include "QwParameterFile.h"
 #include "QwRootFile.h"
 
-#define MYSQLPP_SSQLS_NO_STATICS
-#ifdef __USE_DATABASE__
-#include "QwParitySSQLS.h"
-#include "QwParityDB.h"
-#endif // __USE_DATABASE__
-
-
-// Register this handler with the factory
-RegisterHandlerFactory(QwExtractor);
-
 
 /// \brief Constructor with name
 QwExtractor::QwExtractor(const TString& name)
@@ -58,11 +48,7 @@ QwExtractor::~QwExtractor() {delete fSourceCopy;}
 
 Int_t QwExtractor::LoadChannelMap(const std::string& mapfile) {return 0;}
 
-/** Connect to the dependent and independent channels
- *
- * @param even Helicity event structure
- * @return Zero on success
- */
+/** Connect to the dependent and independent channels (implementation) */
 Int_t QwExtractor::ConnectChannels(QwSubsystemArrayParity& event)
 {
   // Keep a pointer to the source Detectors/RingOutput
@@ -123,4 +109,3 @@ void QwExtractor::FillTreeBranches(QwRootFile *treerootfile)
   //  QwMessage << fLocalFlag << " failed mask " << "0x" << fErrorFlagMask << std::dec << QwLog::endl;
   //}
 }
-

@@ -21,8 +21,8 @@ using namespace std;
 Int_t getpostpanStatus_h(){
 // Get environment variable agg status
   if (debug>0) Printf("Post Pan Status: %d",postpanStatus);
-  if ( postpanStatus == -1 ) 
-  { 
+  if ( postpanStatus == -1 )
+  {
     TString aggStatusStr = gSystem->Getenv("CAM_POSTPAN");
     postpanStatus = aggStatusStr.Atoi();
   }
@@ -37,8 +37,8 @@ Int_t getpostpanStatus_h(){
 Int_t getAggregatorStatus_h(){
 // Get environment variable agg status
   if (debug>0) Printf("Aggregator Status: %d",aggregatorStatus);
-  if ( aggregatorStatus == -1 ) 
-  { 
+  if ( aggregatorStatus == -1 )
+  {
     TString aggStatusStr = gSystem->Getenv("CAM_AGGREGATE");
     aggregatorStatus = aggStatusStr.Atoi();
   }
@@ -53,8 +53,8 @@ Int_t getAggregatorStatus_h(){
 Int_t getAlarmStatus_h(){
 // Get environment variable alarm status (if 1 then print to stdout)
   if (debug>0) Printf("Alarm Status: %d",alarmStatus);
-  if ( alarmStatus == -1 ) 
-  { 
+  if ( alarmStatus == -1 )
+  {
     TString alarmStr = gSystem->Getenv("CAM_ALARM");
     alarmStatus = alarmStr.Atoi();
   }
@@ -69,8 +69,8 @@ Int_t getAlarmStatus_h(){
 Int_t getDebug_h(){
 // Get environment variable debug level
   if (debug>0) Printf("Debug Level: %d",debug);
-  if ( debug == -1 ) 
-  { 
+  if ( debug == -1 )
+  {
     TString debugStr = gSystem->Getenv("CAM_DEBUG");
     debug = debugStr.Atoi();
   }
@@ -84,8 +84,8 @@ Int_t getDebug_h(){
 
 TString getOutputDir_h(TString outDir = "./"){
 // Get environment variable number of runs to chain
-  if ( outDir == "./" ) 
-  { 
+  if ( outDir == "./" )
+  {
     TString out_dir = gSystem->Getenv("CAM_OUTPUTDIR");
     outDir = out_dir;
   }
@@ -100,8 +100,8 @@ TString getOutputDir_h(TString outDir = "./"){
 Int_t getRunNumber_h(Int_t runNumber = 0){
 // Get environment variable run number
   if (debug>0) Printf("Run number: %d",runNumber);
-  if ( runNumber == 0 ) 
-  { 
+  if ( runNumber == 0 )
+  {
     TString run = gSystem->Getenv("RUNNUM");
     runNumber = run.Atoi();
   }
@@ -117,8 +117,8 @@ Int_t getRunNumber_h(Int_t runNumber = 0){
 
 Int_t getSplitNumber_h(Int_t splitNumber = -1){
 // Get environment variable split number
-  if ( splitNumber == -1 ) 
-  { 
+  if ( splitNumber == -1 )
+  {
     TString split = gSystem->Getenv("SPLITNUM");
     splitNumber = split.Atoi();
   }
@@ -132,8 +132,8 @@ Int_t getSplitNumber_h(Int_t splitNumber = -1){
 
 Int_t getMinirunNumber_h(Int_t minirunNumber = -2){
 // Get environment variable minirun number
-  if ( minirunNumber == -2 ) 
-  { 
+  if ( minirunNumber == -2 )
+  {
     TString minirun = gSystem->Getenv("MINIRUNNUM");
     minirunNumber = minirun.Atoi();
   }
@@ -149,8 +149,8 @@ Int_t getMinirunNumber_h(Int_t minirunNumber = -2){
 
 Double_t getNruns_h(Double_t n_runs = -1){
 // Get environment variable number of runs to chain
-  if ( n_runs == -1 ) 
-  { 
+  if ( n_runs == -1 )
+  {
     TString nRuns = gSystem->Getenv("NRUNS");
     n_runs = nRuns.Atof();
   }
@@ -162,11 +162,11 @@ Double_t getNruns_h(Double_t n_runs = -1){
   return n_runs;
 }
 
-void getAggregateVars_h(TTree * rootTree, std::vector<TString>* aggVars, std::vector<Double_t>* oldValues, std::vector<Double_t>* newValues) 
+void getAggregateVars_h(TTree * rootTree, std::vector<TString>* aggVars, std::vector<Double_t>* oldValues, std::vector<Double_t>* newValues)
 {
   // Utility to find all of the variables (leaf's/branches) within a
   // Specified TTree and put them within the aggVars vector.
-  // It is possible to generalize this up a level to loop over 
+  // It is possible to generalize this up a level to loop over
   // a vector full of TTrees, but for now lets assume just one tree
   //std::vector<TString> aggVars;
   //aggVars->clear();
@@ -219,7 +219,7 @@ vector<vector<string>> textFileParse_h(TString fileName, char delim = ',')
 
       while ( getline(ss,word,delim) ){
         // break line into comma delimitted fields
-        words.push_back(word); 
+        words.push_back(word);
       }
       filearray.push_back(words);  // add the 1D array to the 2D array
     }
@@ -251,7 +251,7 @@ TChain* getMuls(TString tree = "mul", Int_t runNumber = 0, Int_t minirunNumber =
   TChain *mulsChain = new TChain("muls");
   const int num_daqConfigs = 5;
   const int num_analyses = 3;
-  TString daqConfigs[num_daqConfigs] = {"prexPrompt_pass2","prexPrompt_pass1","prexCH","prexINJ","prex_tedf"}; 
+  TString daqConfigs[num_daqConfigs] = {"prexPrompt_pass2","prexPrompt_pass1","prexCH","prexINJ","prex_tedf"};
   TString analyses[num_analyses] = {".","_regress_prFIXME.","_regress_mul."};
   TString suffix[2] = {"root",Form("%03d.root",splitNumber)};
 
@@ -500,7 +500,7 @@ TLeaf * getLeaf_h(TString tree = "mul", TString branch = "asym_vqwk_04_0ch0",TSt
       //getBranchLeaf_h(tree,leaf,runNumber,minirunNumber,splitNumber,nRuns,filenamebase);
       if (!Leaf){
         Leaf = Chain->GetLeaf(leaf); //Try again
-        if (!Leaf){ 
+        if (!Leaf){
           Printf("Error, leaf %s missing",(const char*)(tree+"_"+leaf));
           return 0;
         }
@@ -515,7 +515,7 @@ TLeaf * getLeaf_h(TString tree = "mul", TString branch = "asym_vqwk_04_0ch0",TSt
       //getBranchLeaf_h(tree,leaf,runNumber,minirunNumber,splitNumber,nRuns,filenamebase);
       if (!Leaf){
         Leaf = Chain->GetLeaf(branch); //Try again
-        if (!Leaf){ 
+        if (!Leaf){
           Printf("Error, branch %s missing",(const char*)(tree+"_"+branch));
           return 0;
         }
@@ -603,7 +603,7 @@ void writeAlarmFile_h(){
       return; // If the user sets it too far back continue
     }
     filearraycopy = filearray;
-    for (Int_t i = 0 ; i > fAlarmData.changeIndex ; i--){    
+    for (Int_t i = 0 ; i > fAlarmData.changeIndex ; i--){
       filearray[fAlarmData.indexEnd+i]=filearraycopy[fAlarmData.indexStart-1+i];
     }
     for (Int_t i = fAlarmData.indexStart ; i < fAlarmData.indexEnd+1 ; i++){
@@ -619,7 +619,7 @@ void writeAlarmFile_h(){
       return; // If the user sets it too far forward continue
     }
     filearraycopy = filearray;
-    for (Int_t i = 0 ; i < fAlarmData.changeIndex ; i++){    
+    for (Int_t i = 0 ; i < fAlarmData.changeIndex ; i++){
       filearray[fAlarmData.indexStart+i]=filearraycopy[fAlarmData.indexEnd+1+i];
     }
     for (Int_t i = fAlarmData.indexStart ; i < fAlarmData.indexEnd+1 ; i++){ // Swap remaining contents into gap
@@ -641,7 +641,7 @@ void writeAlarmFile_h(){
 }
 /*
 struct units_t
-{ 
+{
   double ppm;
   double ppb;
   double mm;
@@ -660,7 +660,7 @@ void addUnits(TFile file) {
   unit.um=1e-3;
   unit.nm=1e-6;
   unit.V_uA=1;
-  unit.mV_uA=1e-3;  
+  unit.mV_uA=1e-3;
   TTree *T=(TTree*)file->Get("agg");
   T->Branch("units", &unit, "ppm/D:ppb/D:mm/D:nm/D:um/D:V_uA/D:mV_uA/D");
 
@@ -682,9 +682,9 @@ void writeFile_h(TString valueName = "value", Double_t new_value = 0.0, Int_t ne
   if (new_minirunNumber <= -1) {
     if(new_runNumber <= -1) {
       aggregatorFileName = Form("%s/grand_aggregator.root", outputDir.Data());
-    } else {  
+    } else {
       aggregatorFileName = Form("%s/run_aggregator_%d.root",outputDir.Data(),new_runNumber);
-    }  
+    }
   }
   else{
     aggregatorFileName = Form("%s/minirun_aggregator_%d_%d.root",outputDir.Data(),new_runNumber,new_minirunNumber);
@@ -719,17 +719,17 @@ void writeFile_h(TString valueName = "value", Double_t new_value = 0.0, Int_t ne
     newValues.push_back( -1.0e6);
     newValues.push_back( -1.0e6);
     newValues.push_back( -1.0e6);
-    oldValues.push_back( -1.0e6); 
-    oldValues.push_back( -1.0e6); 
-    oldValues.push_back( -1.0e6); 
-    oldValues.push_back( -1.0e6); 
+    oldValues.push_back( -1.0e6);
+    oldValues.push_back( -1.0e6);
+    oldValues.push_back( -1.0e6);
+    oldValues.push_back( -1.0e6);
     tempValues.push_back(-1.0e6);
     tempValues.push_back(-1.0e6);
-    tempValues.push_back(-1.0e6); 
-    tempValues.push_back(-1.0e6); 
+    tempValues.push_back(-1.0e6);
+    tempValues.push_back(-1.0e6);
   }
   else {
-    // Open existing file 
+    // Open existing file
     oldTree = (TTree*) aggregatorFile->Get("agg");
     //oldTree->SetName("old_agg");
     if (!oldTree) {
@@ -744,14 +744,14 @@ void writeFile_h(TString valueName = "value", Double_t new_value = 0.0, Int_t ne
       newValues.push_back( -1.0e6);
       newValues.push_back( -1.0e6);
       newValues.push_back( -1.0e6);
-      oldValues.push_back( -1.0e6); 
-      oldValues.push_back( -1.0e6); 
-      oldValues.push_back( -1.0e6); 
-      oldValues.push_back( -1.0e6); 
+      oldValues.push_back( -1.0e6);
+      oldValues.push_back( -1.0e6);
+      oldValues.push_back( -1.0e6);
+      oldValues.push_back( -1.0e6);
       tempValues.push_back(-1.0e6);
       tempValues.push_back(-1.0e6);
-      tempValues.push_back(-1.0e6); 
-      tempValues.push_back(-1.0e6); 
+      tempValues.push_back(-1.0e6);
+      tempValues.push_back(-1.0e6);
     }
     if (debug>0) Printf("Updating tree %s",(const char*)oldTree->GetName());
     TObjArray *aggVars = oldTree->GetListOfBranches();
@@ -827,7 +827,7 @@ void writeFile_h(TString valueName = "value", Double_t new_value = 0.0, Int_t ne
     if (debug>5) Printf("Examining Entry Number %d",entryN);
 	  oldTree->GetEntry(entryN);
 	  //newTree->GetEntry(entryN);
-    
+
 	  // Set the "old" values to placeholder values
     for (size_t l = 0; l < branchList.size(); l++){
       if (debug>4) Printf("NOTE: Examining branch %s = %f (old value)",(const char*) branchList[l],oldValues[l]);
@@ -868,7 +868,7 @@ void writeFile_h(TString valueName = "value", Double_t new_value = 0.0, Int_t ne
     for (size_t l = 0; l < branchList.size(); l++){
       // If the user is currently writing an entry then assume all other values besides run_number and n_runs are not specified and leave them as oldValues initialization
   	  if (writeEntry){
-  	    if ( branchList[l] == "run_number" ) { 
+  	    if ( branchList[l] == "run_number" ) {
           if (debug > 5) Printf("NOTE: RunNumber %d getting written by user",new_runNumber);
   	      tempValues[l] = (Double_t)new_runNumber;
   	    }
@@ -909,7 +909,7 @@ void writeFile_h(TString valueName = "value", Double_t new_value = 0.0, Int_t ne
       oldValues[l] = -1.0e6;
 	  }
     // Reset the triggers for writing
-    writeEntry = false; 
+    writeEntry = false;
     editEntry = false;
     NRunsCheck=false;
     RunNCheck=false;
@@ -917,7 +917,7 @@ void writeFile_h(TString valueName = "value", Double_t new_value = 0.0, Int_t ne
     MinirunNumberCheck = false;
  	  // And then be done writing the user passed input
     if (newFile || entryN<=numEntries){
-	    newTree->Fill();  
+	    newTree->Fill();
     }
 	  entryN++;
   }

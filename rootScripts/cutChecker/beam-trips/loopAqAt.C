@@ -192,7 +192,7 @@ void loopAqAt() {
       if (pr_ErrorFlag!=0) {
         hr1_EF->Fill(r1_run_number,1.0);
         ndiff_plus += 1;
-        if (previousRun == 0) { 
+        if (previousRun == 0) {
           previousRun = r1_run_number;
           counter_plus++;
         }
@@ -267,7 +267,7 @@ void loopAqAt() {
       if (r1_ErrorFlag != 0) {
         hr1_EF->Fill(r1_run_number,-1.0);
         ndiff_minus -= 1;
-        if (previousRun == 0) { 
+        if (previousRun == 0) {
           previousRun = r1_run_number;
           counter_minus--;
         }

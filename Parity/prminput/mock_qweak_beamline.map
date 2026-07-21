@@ -36,7 +36,7 @@ sample_size=15000
   MollerADC, 2, 6,  bpmstripline,  QWK_1H04YP
   MollerADC, 2, 7,  bpmstripline,  QWK_1H04YM
 
-!ADC14 
+!ADC14
   MollerADC, 3, 0, bpmstripline, QWK_1H05XP
   MollerADC, 3, 1, bpmstripline, QWK_1H05XM
   MollerADC, 3, 2, bpmstripline, QWK_1H05YP
@@ -56,7 +56,7 @@ sample_size=15000
   MollerADC, 4, 6, bpmstripline, QWK_1H06YP
   MollerADC, 4, 7, bpmstripline, QWK_1H06YM
 
-!ADCxx 
+!ADCxx
   MollerADC, 5, 0, bpmstripline, QWK_1H11XP
   MollerADC, 5, 1, bpmstripline, QWK_1H11XM
   MollerADC, 5, 2, bpmstripline, QWK_1H11YP
@@ -107,9 +107,9 @@ end=combinedbcm
 
 begin=energycalculator
 name=target_energy
-!name          type            ratios     property  
- qwk_1c12,     bpmstripline,   0.00024,   beamposition 
- bpm_target,   combinedbpm,   -0.00017,   targetbeamposition          
+!name          type            ratios     property
+ qwk_1c12,     bpmstripline,   0.00024,   beamposition
+ bpm_target,   combinedbpm,   -0.00017,   targetbeamposition
  bpm_target,   combinedbpm,    2.6,       targetbeamangle
 end=energycalculator
 

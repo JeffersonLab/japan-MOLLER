@@ -23,10 +23,10 @@
 #include <string.h>
 #include <TEntryList.h>
 #include <TTreeReader.h>
-using namespace std; 
+using namespace std;
 class TF1 *f1trap[42];
-int japan_plot_beammod_quartz_cyc(int runNo=0) { 
-  gStyle->SetOptStat(0); 
+int japan_plot_beammod_quartz_cyc(int runNo=0) {
+  gStyle->SetOptStat(0);
 /*int filenum=1;
  if (inputfile_name.find("_",0) != string::npos) {
       filenum=atof(inputfile_name.substr(inputfile_name.find("_")+1,inputfile_name.find("_")).c_str());
@@ -42,7 +42,7 @@ int japan_plot_beammod_quartz_cyc(int runNo=0) {
  // sprintf(infile,"/chafs2/work1/apar/japanOutput/prexALL_%d.000.root",runNo);
   sprintf(infile,"/chafs2/work1/apar/japanOutput/prexPrompt_pass2_%d.000.root",runNo);
   TFile *file1=new TFile(infile);
-  
+
   TGraphErrors *test;
   TTree *tree_R = (TTree*) file1->Get("evt");
   Double_t        CodaEventNumber;
@@ -142,7 +142,7 @@ int japan_plot_beammod_quartz_cyc(int runNo=0) {
    Double_t        dsl_block2_raw;
    Double_t        dsl_block3_raw;
    Double_t        dsl_sequence_number;
-  
+
    TBranch        *b_usr;   //!
    TBranch        *b_dsr;   //!
    TBranch        *b_usl;   //!
@@ -176,13 +176,13 @@ int japan_plot_beammod_quartz_cyc(int runNo=0) {
   TBranch        *b_bmod_trim5;   //!
   TBranch        *b_bmod_trim6;   //!
   TBranch        *b_bmod_trim7;   //!
-  
+
   TBranch        *b_bmwphase;   //!
   TBranch        *b_bmwperiod;   //!
   TBranch        *b_bmwobj;   //!
   TBranch        *b_bmwfreq;   //!
   TBranch        *b_bmwcycnum;   //!
-  
+
   TBranch        *b_ErrorFlag;
   tree_R->SetBranchAddress("CodaEventNumber", &CodaEventNumber, &b_CodaEventNumber);
   tree_R->SetBranchAddress("ErrorFlag", &ErrorFlag, &b_ErrorFlag);
@@ -205,10 +205,10 @@ int japan_plot_beammod_quartz_cyc(int runNo=0) {
   tree_R->SetBranchAddress("sam8", &sam8_hw_sum, &b_sam8);
   tree_R->SetBranchAddress("usl", &usl_hw_sum, &b_usl);
   tree_R->SetBranchAddress("dsl", &dsl_hw_sum, &b_dsl);
-  
+
   tree_R->SetBranchAddress("usr", &usr_hw_sum, &b_usr);
   tree_R->SetBranchAddress("dsr", &dsr_hw_sum, &b_dsr);
-  
+
   tree_R->SetBranchAddress("bmwphase", &bmwphase, &b_bmwphase);
   tree_R->SetBranchAddress("bmwperiod", &bmwperiod, &b_bmwperiod);
   tree_R->SetBranchAddress("bmwobj", &bmwobj, &b_bmwobj);
@@ -235,22 +235,22 @@ int japan_plot_beammod_quartz_cyc(int runNo=0) {
       Double_t cyclenum = l_bmwcycnum->GetValue();
       if(i==0){
   cycles.push_back(cyclenum);
-      }   
+      }
       else{
   int sizeVec = cycles.size();
   if(cyclenum != cycles[sizeVec-1]){
     cycles.push_back(cyclenum);
   }
-      }   
-    }   
+      }
+    }
 
   int n=cycles.size();//number of cycle
-  
+
                   Double_t supercyc[n];
                      for(int i=0;i<n;i++){
-                           supercyc[i]=cycles[i]; 
+                           supercyc[i]=cycles[i];
                                cout<<"i="<<i<<"  "<<"supercyc="<<supercyc[i]<<endl;
-                                  }    
+                                  }
                        Double_t supercycslope[n];
                          Double_t supercyc_err[n];
                            for(int i=0;i<n;i++ ){
@@ -320,13 +320,13 @@ int japan_plot_beammod_quartz_cyc(int runNo=0) {
   char name_ax[50];
   char name_ex[50];
 
-  
+
   char name_ey[50];
   char name_ay[50];
-  
+
   char name_r12x[50];
 
-  
+
   for(int j=0;j<7;j++){
    for(int i=0;i<n;i++){
 
@@ -335,7 +335,7 @@ int japan_plot_beammod_quartz_cyc(int runNo=0) {
     sprintf(name_ay,"funslopay_coil%d_cyc%d",j,i);
     sprintf(name_ey,"funslopey_coil%d_cyc%d",j,i);
     sprintf(name_r12x,"funslop12x_coil%d_cyc%d",j,i);
-    
+
     funslopax[j][i]= new TF1(name_ax,"[0]+[1]*x",0,10000);
     funslopex[j][i]= new TF1(name_ex,"[0]+[1]*x",0,10000);
     funslopay[j][i]= new TF1(name_ay,"[0]+[1]*x",0,10000);
@@ -378,7 +378,7 @@ int japan_plot_beammod_quartz_cyc(int runNo=0) {
     hist_4ax_coil_nor[j][i]->GetXaxis()->SetTitleSize(0.05);
     hist_4ax_coil_nor[j][i]->GetYaxis()->SetTitleSize(0.05);
     mean_coil4ax[j][i]= hist_4ax_coil_nor[j][i]->GetMean(2);
-  
+
     int num_4ex_nor = tree_R->Draw(Form("(dsl/bcm_an_ds3):(%s*%lf)",wire[j].Data(),chtov),Form("(ErrorFlag & 0x7bfe6fff)==0 && bmod_ramp>0 && bmwobj==%d && abs(%s-%f)>20&& bmwcycnum==%f",j+1,wire[j].Data(),trim_base[j],supercyc[i]));
     hist_4ex_coil_nor[j][i] = new TGraph(num_4ex_nor, tree_R->GetV2(),tree_R->GetV1());
     hist_4ex_coil_nor[j][i]->GetXaxis()->SetTitle(Form("%s",wire[j].Data()));
@@ -393,7 +393,7 @@ int japan_plot_beammod_quartz_cyc(int runNo=0) {
     hist_4ay_coil_nor[j][i]->GetXaxis()->SetTitleSize(0.05);
     hist_4ay_coil_nor[j][i]->GetYaxis()->SetTitleSize(0.05);
     mean_coil4ay[j][i]= hist_4ay_coil_nor[j][i]->GetMean(2);
-    
+
     int num_4ey_nor =tree_R->Draw(Form("(dsr/bcm_an_ds3):(%s*%lf)",wire[j].Data(),chtov),Form("(ErrorFlag & 0x7bfe6fff)==0 && bmod_ramp>0 && bmwobj==%d && abs(%s-%f)>20&& bmwcycnum==%f",j+1,wire[j].Data(),trim_base[j],supercyc[i]));
     hist_4ey_coil_nor[j][i] = new TGraph(num_4ey_nor, tree_R->GetV2(),tree_R->GetV1());
     hist_4ey_coil_nor[j][i]->GetXaxis()->SetTitle(Form("%s",wire[j].Data()));
@@ -409,7 +409,7 @@ int japan_plot_beammod_quartz_cyc(int runNo=0) {
     hist_4ax_coil[j][i]->GetXaxis()->SetTitleSize(0.05);
     hist_4ax_coil[j][i]->GetYaxis()->SetTitleSize(0.05);
 
-  
+
     int num_4ex = tree_R->Draw(Form("(%lf/%lf)*(dsl/bcm_an_ds3):(%s*%lf)",factor,mean_coil4ex[j][i],wire[j].Data(),chtov),Form("(ErrorFlag & 0x7bfe6fff)==0 && bmod_ramp>0 && bmwobj==%d && abs(%s-%f)>20&& bmwcycnum==%f",j+1,wire[j].Data(),trim_base[j],supercyc[i]));
     hist_4ex_coil[j][i] = new TGraph(num_4ex, tree_R->GetV2(),tree_R->GetV1());
     hist_4ex_coil[j][i]->GetXaxis()->SetTitle(Form("%s",wire[j].Data()));
@@ -424,7 +424,7 @@ int japan_plot_beammod_quartz_cyc(int runNo=0) {
     hist_4ay_coil[j][i]->GetXaxis()->SetTitleSize(0.05);
     hist_4ay_coil[j][i]->GetYaxis()->SetTitleSize(0.05);
 
-    
+
     int num_4ey =tree_R->Draw(Form("(%lf/%lf)*(dsr/bcm_an_ds3):(%s*%lf)",factor,mean_coil4ey[j][i],wire[j].Data(),chtov),Form("(ErrorFlag & 0x7bfe6fff)==0 && bmod_ramp>0 && bmwobj==%d && abs(%s-%f)>20&& bmwcycnum==%f",j+1,wire[j].Data(),trim_base[j],supercyc[i]));
     hist_4ey_coil[j][i] = new TGraph(num_4ey, tree_R->GetV2(),tree_R->GetV1());
     hist_4ey_coil[j][i]->GetXaxis()->SetTitle(Form("%s",wire[j].Data()));
@@ -433,7 +433,7 @@ int japan_plot_beammod_quartz_cyc(int runNo=0) {
     hist_4ey_coil[j][i]->GetYaxis()->SetTitleSize(0.05);
 
 
-    
+
    }
   }
 
@@ -455,14 +455,14 @@ int japan_plot_beammod_quartz_cyc(int runNo=0) {
     b4ax_rslop[j][i]=funslopax[j][i]->GetParameter(1);
     b4ax_rslop_err[j][i]=funslopax[j][i]->GetParError(1);
     entry_bpm4ax[j][i]=hist_4ax_coil[j][i]->GetN();
- 
+
     c[1]->cd(i*7+j+1);
     hist_4ex_coil[j][i]->Draw("A p*");
     hist_4ex_coil[j][i]->Fit(funslopex[j][i],"R+");
     b4ex_rslop[j][i]=funslopex[j][i]->GetParameter(1);
     b4ex_rslop_err[j][i]=funslopex[j][i]->GetParError(1);
     entry_bpm4ex[j][i]=hist_4ex_coil[j][i]->GetN();
-    
+
     c[2]->cd(i*7+j+1);
     hist_4ay_coil[j][i]->Draw("A p*");
     hist_4ay_coil[j][i]->Fit(funslopay[j][i],"R+");
@@ -476,11 +476,11 @@ int japan_plot_beammod_quartz_cyc(int runNo=0) {
     b4ey_rslop_err[j][i]=funslopey[j][i]->GetParError(1);
     entry_bpm4ey[j][i]=hist_4ey_coil[j][i]->GetN();
 
-     } 
-    outfile0<<setw(20)<<setiosflags(ios::left)<<supercyc[i]<<setw(20)<<setiosflags(ios::left)<<"usl"<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop[0][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop_err[0][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ax[0][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop[1][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop_err[1][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ax[1][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop[2][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop_err[2][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ax[2][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop[3][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop_err[3][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ax[3][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop[4][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop_err[4][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ax[4][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop[5][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop_err[5][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ax[5][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop[6][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop_err[6][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ax[6][i]<<endl;  
+     }
+    outfile0<<setw(20)<<setiosflags(ios::left)<<supercyc[i]<<setw(20)<<setiosflags(ios::left)<<"usl"<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop[0][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop_err[0][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ax[0][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop[1][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop_err[1][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ax[1][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop[2][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop_err[2][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ax[2][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop[3][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop_err[3][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ax[3][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop[4][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop_err[4][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ax[4][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop[5][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop_err[5][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ax[5][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop[6][i]<<setw(20)<<setiosflags(ios::left)<<b4ax_rslop_err[6][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ax[6][i]<<endl;
 
     outfile0<<setw(20)<<setiosflags(ios::left)<<supercyc[i]<<setw(20)<<setiosflags(ios::left)<<"dsl"<<setw(20)<<setiosflags(ios::left)<<b4ex_rslop[0][i]<<setw(20)<<setiosflags(ios::left)<<b4ex_rslop_err[0][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ex[0][i]<<setw(20)<<setiosflags(ios::left)<<b4ex_rslop[1][i]<<setw(20)<<setiosflags(ios::left)<<b4ex_rslop_err[1][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ex[1][i]<<setw(20)<<setiosflags(ios::left)<<b4ex_rslop[2][i]<<setw(20)<<setiosflags(ios::left)<<b4ex_rslop_err[2][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ex[2][i]<<setw(20)<<setiosflags(ios::left)<<b4ex_rslop[3][i]<<setw(20)<<setiosflags(ios::left)<<b4ex_rslop_err[3][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ex[3][i]<<setw(20)<<setiosflags(ios::left)<<b4ex_rslop[4][i]<<setw(20)<<setiosflags(ios::left)<<b4ex_rslop_err[4][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ex[4][i]<<setw(20)<<setiosflags(ios::left)<<b4ex_rslop[5][i]<<setw(20)<<setiosflags(ios::left)<<b4ex_rslop_err[5][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ex[5][i]<<setw(20)<<setiosflags(ios::left)<<b4ex_rslop[6][i]<<setw(20)<<setiosflags(ios::left)<<b4ex_rslop_err[6][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ex[6][i]<<endl;
-    
+
   outfile0<<setw(20)<<setiosflags(ios::left)<<supercyc[i]<<setw(20)<<setiosflags(ios::left)<<"usr"<<setw(20)<<setiosflags(ios::left)<<b4ay_rslop[0][i]<<setw(20)<<setiosflags(ios::left)<<b4ay_rslop_err[0][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ay[0][i]<<setw(20)<<setiosflags(ios::left)<<b4ay_rslop[1][i]<<setw(20)<<setiosflags(ios::left)<<b4ay_rslop_err[1][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ay[1][i]<<setw(20)<<setiosflags(ios::left)<<b4ay_rslop[2][i]<<setw(20)<<setiosflags(ios::left)<<b4ay_rslop_err[2][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ay[2][i]<<setw(20)<<setiosflags(ios::left)<<b4ay_rslop[3][i]<<setw(20)<<setiosflags(ios::left)<<b4ay_rslop_err[3][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ay[3][i]<<setw(20)<<setiosflags(ios::left)<<b4ay_rslop[4][i]<<setw(20)<<setiosflags(ios::left)<<b4ay_rslop_err[4][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ay[4][i]<<setw(20)<<setiosflags(ios::left)<<b4ay_rslop[5][i]<<setw(20)<<setiosflags(ios::left)<<b4ay_rslop_err[5][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ay[5][i]<<setw(20)<<setiosflags(ios::left)<<b4ay_rslop[6][i]<<setw(20)<<setiosflags(ios::left)<<b4ay_rslop_err[6][i]<<setw(20)<<setiosflags(ios::left)<<entry_bpm4ay[6][i]<<endl;
 
 
@@ -491,4 +491,3 @@ int japan_plot_beammod_quartz_cyc(int runNo=0) {
    }
 
   }
-  

@@ -51,7 +51,7 @@ Int_t main(Int_t argc, Char_t* argv[])
   //QwParameterFile::AppendToSearchPath(getenv_safe_string("QWANALYSIS") + "/Analysis/prminput");
 
 
-  // Then set the command line arguments and the configuration filename, 
+  // Then set the command line arguments and the configuration filename,
   // and we define the options that can be used in them (using QwOptions).
   gQwOptions.SetCommandLine(argc, argv);
   gQwOptions.AddConfigFile("qwfeedback.conf");
@@ -84,7 +84,7 @@ Int_t main(Int_t argc, Char_t* argv[])
   ///  Start loop over all runs
   //  QwRootFile* rootfile = 0;
 
-  
+
   /*
   ///  Create an EPICS control event
   QwEPICSControl fEPICSCtrl;
@@ -97,14 +97,14 @@ Int_t main(Int_t argc, Char_t* argv[])
   fScanCtrl.CheckScan();
   fScanCtrl.PrintScanInfo();
   fScanCtrl.Close();
-  
+
   fEPICSCtrl.Print_Qasym_Ctrls();
   */
-    
+
   // Loop over all runs
   while (eventbuffer.OpenNextStream() == CODA_OK){
     //  Begin processing for the first run.
- 
+
     ///  Set the current event number for parameter file lookup
     QwParameterFile::SetCurrentRunNumber(eventbuffer.GetRunNumber());
 
@@ -144,7 +144,7 @@ Int_t main(Int_t argc, Char_t* argv[])
     helicitypattern.ClearBurstSum();
 
 
-    
+
 
     // Loop over events in this CODA file
     while (eventbuffer.GetNextEvent() == CODA_OK) {
@@ -163,7 +163,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 	QwMessage << "Number of events processed at end of run: " << eventbuffer.GetEventNumber() << std::endl;
 	break;
       }
-      
+
       //  Now, if this is not a physics event, go back and get a new event.
       if (!eventbuffer.IsPhysicsEvent()) continue;
 
@@ -197,7 +197,7 @@ Int_t main(Int_t argc, Char_t* argv[])
           helicitypattern.LoadEventData(eventring.pop());
 
           // Calculate helicity pattern asymmetry
-          if (helicitypattern.IsCompletePattern()) { 
+          if (helicitypattern.IsCompletePattern()) {
 
             // Update the blinder if conditions have changed
             helicitypattern.UpdateBlinder(detectors);
@@ -207,7 +207,7 @@ Int_t main(Int_t argc, Char_t* argv[])
             if (helicitypattern.IsGoodAsymmetry()) {
 	      helicitypattern.ApplyFeedbackCorrections();//apply IA feedback
               // Clear the data
-              helicitypattern.ClearEventData();	      
+              helicitypattern.ClearEventData();
             }
 
           } // helicitypattern.IsCompletePattern()
@@ -221,9 +221,9 @@ Int_t main(Int_t argc, Char_t* argv[])
       }
 
 
-      
 
-    }   // end of loop over events  
+
+    }   // end of loop over events
 
     QwMessage << "Number of events processed at end of run: "
               << eventbuffer.GetEventNumber() << std::endl;
@@ -258,7 +258,7 @@ Int_t main(Int_t argc, Char_t* argv[])
   } //end of run loop
 
 
-  QwMessage << "I have done everything I can do..." << QwLog::endl; 
- 
+  QwMessage << "I have done everything I can do..." << QwLog::endl;
+
   return 0;
 }

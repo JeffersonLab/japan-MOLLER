@@ -1,5 +1,9 @@
-#ifndef __QwRint_h__
-#define __QwRint_h__
+/*!
+ * \file   QwRint.h
+ * \brief  ROOT interactive interface for Qweak analysis
+ */
+
+#pragma once
 
 // ROOT headers
 #include <TRint.h>
@@ -34,8 +38,6 @@ class QwRint : public TRint {
 		void* options = 0, int numOptions = 0, bool noLogo = kFALSE);
 
     /// \brief Destructor
-    virtual ~QwRint();
+    ~QwRint() override;
 
 }; // class QwRint
-
-#endif // __QwRint_h__

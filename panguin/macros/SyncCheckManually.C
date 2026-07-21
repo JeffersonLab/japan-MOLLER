@@ -68,13 +68,13 @@ void SyncCheckManually(Int_t runNum = 999999){
 
     //TLatex text;
     //text.SetTextSize(0.08);
-    //a1->cd(); 
+    //a1->cd();
     //Float_t iniY = 0.90, diffY = 0.05;
-    //text.DrawLatex(0.10, 0.93, "Sync Stats, Full Run"); 
+    //text.DrawLatex(0.10, 0.93, "Sync Stats, Full Run");
     //text.SetTextSize(0.06);
     for (Int_t j = 0 ; j < Nstats ; j++){
-      //  text.DrawLatex(0.10, iniY - (j*2.5+1)*diffY, statStr[j]); 
-      //  text.DrawLatex(0.10, iniY - (j*2.5+2)*diffY, statStrNumbers[j]); 
+      //  text.DrawLatex(0.10, iniY - (j*2.5+1)*diffY, statStr[j]);
+      //  text.DrawLatex(0.10, iniY - (j*2.5+2)*diffY, statStrNumbers[j]);
       string = string + statStr[j] + statStrNumbers[j] + "\n\n";
     }
     gSystem->Exec(Form("echo \"%s\"",alarmString.Data()));

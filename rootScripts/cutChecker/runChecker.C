@@ -8,7 +8,7 @@
 #include <string>
 #include <TEntryList.h>
 
-//using namespace std; 
+//using namespace std;
 
 class Run{
   public:
@@ -40,9 +40,9 @@ Checker::~Checker(){
   outfile0.close();
 };
 
-Int_t Checker::getData(Int_t runNo) { 
+Int_t Checker::getData(Int_t runNo) {
   Printf("Getting Checker Data for run %d",runNo);
-  runNumber = runNo; 
+  runNumber = runNo;
   if (parameterVectors.count("ROOT input path") != 0 ) {
     infile = parameterVectors["ROOT input path"].at(0);
     if (!((TString)parameterVectors["ROOT input path"].at(0)).Contains("#") || parameterVectors["ROOT input path"].at(0).size() == 0) {
@@ -110,7 +110,7 @@ void Checker::parseTextFile(std::string fileName = "input.txt"){
       if (tokens.size() < 2){
         Printf("Error: invalid input file");
         continue;
-        //return 1; 
+        //return 1;
       }
       if (tokens.size() == 2){
         std::string detail;
@@ -189,17 +189,17 @@ void Checker::printRunData() {
     outfile0.open(Form("%s/Runs.csv",parameterVectors["Output path"].at(0).c_str()));
   }
   outfile0
-    << setw(8) << setiosflags(ios::left) 
+    << setw(8) << setiosflags(ios::left)
     << "Run Number,"
-    << setw(8) << setiosflags(ios::left) 
+    << setw(8) << setiosflags(ios::left)
     << "N Entries,"
-    << setw(tab_width) << setiosflags(ios::left) 
+    << setw(tab_width) << setiosflags(ios::left)
     << "Draws,"
-    << setw(tab_width) << setiosflags(ios::left) 
+    << setw(tab_width) << setiosflags(ios::left)
     << "Cuts,"
-    << setw(14) << setiosflags(ios::left) 
+    << setw(14) << setiosflags(ios::left)
     << "Ratio Passing Cut,"
-    << setw(14) << setiosflags(ios::left) 
+    << setw(14) << setiosflags(ios::left)
     << "Ratio Error" << std::endl;
   for (Int_t i = 0 ; i<runs.size() ; i++) {
     Printf("Printing data for run %d",runs.at(i)->runNumber);
@@ -208,17 +208,17 @@ void Checker::printRunData() {
     //}
     for (Int_t draw = 0 ; draw<parameterVectors["Draws"].size(); draw++){
       outfile0
-        << setw(8) << setiosflags(ios::left) 
+        << setw(8) << setiosflags(ios::left)
         << runs.at(i)->runNumber << ","
-        << setw(8) << setiosflags(ios::left) 
+        << setw(8) << setiosflags(ios::left)
         << runs.at(i)->numEntries << ","
-        << setw(tab_width) << setiosflags(ios::left) 
+        << setw(tab_width) << setiosflags(ios::left)
         << parameterVectors["Draws"].at(draw) << ","
-        << setw(tab_width) << setiosflags(ios::left) 
+        << setw(tab_width) << setiosflags(ios::left)
         << parameterVectors["Cuts"].at(draw) << ","
-        << setw(14) << setiosflags(ios::left) 
+        << setw(14) << setiosflags(ios::left)
         << runs.at(i)->metricsData.at(draw) << ","
-        << setw(14) << setiosflags(ios::left) 
+        << setw(14) << setiosflags(ios::left)
         << runs.at(i)->metricsDataErrors.at(draw) << std::endl;
     }
     outfile0 << std::endl;

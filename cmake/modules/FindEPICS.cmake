@@ -24,7 +24,7 @@ find_library(EPICS_GDD_LIBRARY gdd
   NO_DEFAULT_PATH
   DOC "EPICS GDD library"
   )
-#  Needs to build this line: -L/adaqfs/apps/epics/lib/linux-x86_64 -lca -lcas -lCom -lgdd 
+#  Needs to build this line: -L/adaqfs/apps/epics/lib/linux-x86_64 -lca -lcas -lCom -lgdd
 
 find_path(EPICS_INCLUDE_DIR
   NAMES cadef.h

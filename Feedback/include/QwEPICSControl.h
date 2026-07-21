@@ -24,7 +24,7 @@
 
 class QwEPICSControl{
 public:
-  
+
   QwEPICSControl();
   ~QwEPICSControl();
 
@@ -68,7 +68,7 @@ public:
     status = ca_get(DBR_DOUBLE, fIDHall_C_IA_A3, &value);
     status = ca_pend_io(10);
     std::cout << "Hall C IA value A3: " << value << std::endl;
-    
+
   };
 
   void Set_HallCIA(Int_t mode, Double_t &value){
@@ -81,7 +81,7 @@ public:
       status = ca_get(DBR_DOUBLE, fIDHall_C_IA_A0, &value);
       status = ca_pend_io(10);
 #endif
-      std::cout << "Hall C IA value A0: " << value << std::endl; 
+      std::cout << "Hall C IA value A0: " << value << std::endl;
       break;
     case 1:
 #ifdef(__QWFEEDBACK_ALLOW_EPICS_CA_PUT)
@@ -90,7 +90,7 @@ public:
       status = ca_get(DBR_DOUBLE, fIDHall_C_IA_A1, &value);
       status = ca_pend_io(10);
 #endif
-      std::cout << "Hall C IA value A1: " << value << std::endl;      
+      std::cout << "Hall C IA value A1: " << value << std::endl;
       break;
     case 2:
 #ifdef(__QWFEEDBACK_ALLOW_EPICS_CA_PUT)
@@ -111,7 +111,7 @@ public:
       std::cout << "Hall C IA value A3: " << value << std::endl;
       break;
     }
- 
+
   };
 
   void Set_HallAIA(Int_t mode, Double_t &value){
@@ -124,7 +124,7 @@ public:
       status = ca_get(DBR_DOUBLE, fIDHall_A_IA_A0, &value);
       status = ca_pend_io(10);
 #endif
-      std::cout << "Hall A IA value A0: " << value << std::endl; 
+      std::cout << "Hall A IA value A0: " << value << std::endl;
       break;
     case 1:
 #ifdef(__QWFEEDBACK_ALLOW_EPICS_CA_PUT)
@@ -133,7 +133,7 @@ public:
       status = ca_get(DBR_DOUBLE, fIDHall_A_IA_A1, &value);
       status = ca_pend_io(10);
 #endif
-      std::cout << "Hall A IA value A1: " << value << std::endl;      
+      std::cout << "Hall A IA value A1: " << value << std::endl;
       break;
     case 2:
 #ifdef(__QWFEEDBACK_ALLOW_EPICS_CA_PUT)
@@ -154,7 +154,7 @@ public:
       std::cout << "Hall A IA value A3: " << value << std::endl;
       break;
     }
- 
+
   };
 
   void Set_HelicityMagnet(size_t magnet_index, size_t helicity_index, Double_t &value){
@@ -166,9 +166,9 @@ public:
       status = ca_get(DBR_DOUBLE, fIDHelMag[magnet_index][helicity_index], &value);
       status = ca_pend_io(10);
 #endif
-      std::cout << "Helicity Magnet, " << fHelMagNames[magnet_index] 
+      std::cout << "Helicity Magnet, " << fHelMagNames[magnet_index]
 		<< "," << fHelicityNames[helicity_index] << " setpoint: "
-		<< value << std::endl; 
+		<< value << std::endl;
     } else {
       std::cerr << "Set_HelicityMagnet():  "
 		<< "magnet_index must be less than 4, and is " << magnet_index
@@ -185,12 +185,12 @@ public:
     case 0:
       status = ca_get(DBR_DOUBLE, fIDHall_C_IA_A0, &value);
       status = ca_pend_io(10);
-      std::cout << "Hall C IA value A0: " << value << std::endl; 
+      std::cout << "Hall C IA value A0: " << value << std::endl;
       break;
     case 1:
       status = ca_get(DBR_DOUBLE, fIDHall_C_IA_A1, &value);
       status = ca_pend_io(10);
-      std::cout << "Hall C IA value A1: " << value << std::endl;      
+      std::cout << "Hall C IA value A1: " << value << std::endl;
       break;
     case 2:
       status = ca_get(DBR_DOUBLE, fIDHall_C_IA_A2, &value);
@@ -203,8 +203,8 @@ public:
       std::cout << "Hall C IA value A3: " << value << std::endl;
       break;
     }
- 
-    
+
+
   }
 
   void Get_HallAIA(Int_t mode, Double_t &value){
@@ -213,12 +213,12 @@ public:
     case 0:
       status = ca_get(DBR_DOUBLE, fIDHall_A_IA_A0, &value);
       status = ca_pend_io(10);
-      std::cout << "Hall A IA value A0: " << value << std::endl; 
+      std::cout << "Hall A IA value A0: " << value << std::endl;
       break;
     case 1:
       status = ca_get(DBR_DOUBLE, fIDHall_A_IA_A1, &value);
       status = ca_pend_io(10);
-      std::cout << "Hall A IA value A1: " << value << std::endl;      
+      std::cout << "Hall A IA value A1: " << value << std::endl;
       break;
     case 2:
       status = ca_get(DBR_DOUBLE, fIDHall_A_IA_A2, &value);
@@ -231,8 +231,8 @@ public:
       std::cout << "Hall A IA value A3: " << value << std::endl;
       break;
     }
- 
-    
+
+
   }
 
   void Get_HelicityMagnet(size_t magnet_index, size_t helicity_index, Double_t &value){
@@ -240,9 +240,9 @@ public:
     if (magnet_index<4 && helicity_index<2){
       status = ca_get(DBR_DOUBLE, fIDHelMag[magnet_index][helicity_index], &value);
       status = ca_pend_io(10);
-      std::cout << "Helicity Magnet, " << fHelMagNames[magnet_index] 
+      std::cout << "Helicity Magnet, " << fHelMagNames[magnet_index]
 		<< "," << fHelicityNames[helicity_index] << " setpoint: "
-		<< value << std::endl; 
+		<< value << std::endl;
     } else {
       std::cerr << "Get_HelicityMagnet():  "
 		<< "magnet_index must be less than 4, and is " << magnet_index
@@ -274,7 +274,7 @@ public:
     std::cout << "Pockels Cell minus HW-count value: " << value << std::endl;
   };
 
-  void Get_Pockels_Cell_plus(Double_t &value){ 
+  void Get_Pockels_Cell_plus(Double_t &value){
     Int_t status;
     status = ca_get(DBR_DOUBLE, fIDPockels_Cell_plus, &value);
     status = ca_pend_io(10);
@@ -341,7 +341,7 @@ public:
     std::cout << "EPICS HA Charge asymmetry updated " << value <<" +/- "<<value_error<<" width "<<value_width<< std::endl;
 
   };
- 
+
   void Get_HAChargeAsymmetry(Double_t &value, Double_t &value_error, Double_t &value_width){
     Int_t status;
     status = ca_get(DBR_DOUBLE,fHAChargeAsymmetry , &value);
@@ -488,7 +488,7 @@ public:
   }
 
 
-  
+
   void Set_BCM78DDAsymmetry(Double_t &value, Double_t &value_error, Double_t &value_width){
     Int_t status;
 #ifdef(__QWFEEDBACK_ALLOW_EPICS_CA_PUT)
@@ -514,7 +514,7 @@ public:
 
   };
 
-  
+
   void Set_BCM8Yield(Double_t &value){
     Int_t status;
 #ifdef(__QWFEEDBACK_ALLOW_EPICS_CA_PUT)
@@ -547,7 +547,7 @@ public:
     status = ca_get(DBR_DOUBLE,fUSLumiSumAsymmetryError , &value_error);
     status = ca_get(DBR_DOUBLE,fUSLumiSumAsymmetryWidth , &value_width);
   }
-  
+
   void Set_FeedbackStatus(Double_t value){
     Int_t status;
 #ifdef(__QWFEEDBACK_ALLOW_EPICS_CA_PUT)
@@ -558,12 +558,12 @@ public:
     std::cout << "Feedback status updated " << value << std::endl;
 #endif
   };
-  
+
   Double_t Get_FeedbackStatus(){
    Int_t status;
    Double_t fbstat;
    status = ca_get(DBR_DOUBLE, fFeedbackStatus, &fbstat);
-   status = ca_pend_io(10); 
+   status = ca_pend_io(10);
    return fbstat;
   }
 
@@ -584,7 +584,7 @@ public:
     }
   };
 
-  /*  
+  /*
       static const Double_t kOn;
       static const Double_t kOff;
       static const Double_t kQAsymCut;
@@ -601,7 +601,7 @@ public:
       void GetFeedbackValuesPos();
       Bool_t BeamCut(QwTriggerSupervisor*);
       Bool_t ASYCut();
-      Bool_t ASYCutPos();	
+      Bool_t ASYCutPos();
       void AccumulateFeedbackValues();
       void AccumulateFeedbackValuesPos();
       void GetFeedbackValues();
@@ -612,14 +612,14 @@ public:
       void FeedbackLoggerCharge();
       void FeedbackLogger(const UShort_t chargefeed=1, const UShort_t f33=1);
       void FeedbackLoggerPos();
-  
+
       void GetFeedbackValues33(const Bool_t oneshot=kTRUE);
 
       Bool_t ChargeFeedbackIsOn(void) const {
       if(log_qonoff==kOn) return kTRUE;
       else return kFALSE;
       }
-  
+
       Bool_t PositionFeedbackIsOn(void) const {
       if(log_ponoff==kOn) return kTRUE;
       else return kFALSE;
@@ -630,7 +630,7 @@ public:
       //for Mark's revised 3x3 feedback plan
       Bool_t TimeIsUpForFastFeedBack();
       Bool_t TimeIsUpForSlowFeedBack();
-      
+
       Bool_t ASYCutHallA() const;
       Bool_t CurrentCutHallA(QwTriggerSupervisor*);
       Bool_t TimeIsUpForHallAFeedBack();
@@ -667,7 +667,7 @@ public:
   chid fIDHall_A_IA_A2;//hallA IA A2
   chid fIDHall_A_IA_A3;//hallA IA A3
 
-  
+
 
   chid fIDPockels_Cell_plus;
   chid fIDPockels_Cell_minus;
@@ -696,7 +696,7 @@ public:
   chid fTargetYPDiffError;
   chid fTargetYPDiffWidth;
 
-  
+
   chid f3C12XDiff;
   chid f3C12XDiffError;
   chid f3C12XDiffWidth;
@@ -710,7 +710,7 @@ public:
   chid f3C12YQWidth;
 
   chid fBCM8DDAsymmetry;
-  chid fBCM8DDAsymmetryError;  
+  chid fBCM8DDAsymmetryError;
   chid fBCM8DDAsymmetryWidth;
 
   chid fBCM8Yield;
@@ -724,13 +724,13 @@ public:
   chid fFeedbackStatus;
 
   chid fHalfWavePlateStatus;
-  
+
   chid fIDHelMag[4][2];    ///< EPICS control setpoints for helicity magnets indexed by magnet and helicity state
   TString fHelMagNames[4]; ///< Device names of the helicity magnets
   TString fHelicityNames[2];
 
 
-  
+
 
 
 
@@ -738,10 +738,10 @@ public:
   /*
     Int_t loopIteration;
     Double_t loopLimit;
-    
+
     Int_t ploopIteration;
     Double_t ploopLimit;
-    
+
     time_t currentTime;
     Int_t ncount;
     Int_t pncount;
@@ -749,8 +749,8 @@ public:
     char  * qtime_cha;
     dbr_double_t  ptime;
     char  * ptime_cha;
-	
-		
+
+
     Int_t IHWP_status;
     Double_t hallc_I;
     dbr_double_t bcm_threshold_feed;
@@ -762,7 +762,7 @@ public:
     dbr_double_t q_asy;
     dbr_double_t g0_IA_voltage_corrected;
     dbr_double_t g0_IA_voltage_read;
-    
+
     dbr_double_t g0_hm1_DAC_corrected;
     dbr_double_t g0_hm1_DAC_read;
     dbr_double_t g0_hm2_DAC_corrected;
@@ -771,19 +771,19 @@ public:
     dbr_double_t g0_hm3_DAC_read;
     dbr_double_t g0_hm4_DAC_corrected;
     dbr_double_t g0_hm4_DAC_read;
-    
+
     dbr_double_t p_asy_x;
     dbr_double_t p_asy_y;
-    double bpm_const_feed; 
+    double bpm_const_feed;
     int status;
     int stat;
 
     Double_t bcm_scale_feed;
     Double_t bcm_offset_feed;
     Double_t bcm_readout_feed;
- 	
-    Double_t x_feed;  
-    Double_t y_feed;  
+
+    Double_t x_feed;
+    Double_t y_feed;
     Double_t E_feed;
 
     Double_t qasy;
@@ -805,7 +805,7 @@ public:
     Double_t p_diff_E_d;
 
     Double_t log_bcm1;
-    Double_t log_bcm2;	
+    Double_t log_bcm2;
     Double_t log_qonoff;
     Double_t log_ponoff;
     Double_t log_ia;
@@ -818,28 +818,28 @@ public:
     Double_t log_ia_slope;
 
     //2 by 2 matrix
-    Double_t log_m11; 
+    Double_t log_m11;
     Double_t log_m12;
     Double_t log_m21;
     Double_t log_m22;
     //3 by 3 matrix
     Double_t fMatIAHM[3][3];
-    
+
     UInt_t numFastFeedback;//fast feedback loop counter
     Bool_t fTimeIsUpForSlowFeedback;
     UInt_t fNumFastLoopsInSlowLoop; //limit of fast feedbacks in the
     //slow feedback loop
-    
+
     Double_t log_halla_i, halla_I, halla_bcm_readout_feed;
     Double_t fAsym_q_halla, fAsym_q_halla_sum, fAsym_q_halla_sq_sum;
-    
+
     Double_t fHallA_IA_voltage_corrected, fHallA_IA_voltage_read;
     Double_t fHallA_IA_slope;
-    
+
     Double_t fHallAFeedbackTConst;
-    
+
     Double_t fHallAFeedbackIsOn;
-	
+
     Double_t fAsym_q_halla_ave_log, fAsym_q_halla_err_log;
 
     Double_t fAsym_q_halla_ave, fAsym_q_halla_ave_err;
@@ -851,7 +851,7 @@ public:
 
     Double_t fCurrentCutHallA;
   */
-  
+
 };
 
 #endif

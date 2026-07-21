@@ -6,8 +6,7 @@
  * \date   2009-11-25
  */
 
-#ifndef QWLOG_HH
-#define QWLOG_HH
+#pragma once
 
 // System headers
 #include <iostream>
@@ -52,28 +51,24 @@ class QwOptions;
 /*! \def QwVerbose
  *  \brief Predefined log drain for verbose messages
  */
-#define QwVerbose  gQwLog(QwLog::kVerbose,__PRETTY_FUNCTION__)
+#define QwVerbose  if (gQwLog.GetLogLevel() >= QwLog::kVerbose) gQwLog(QwLog::kVerbose,__PRETTY_FUNCTION__)
 
 /*! \def QwDebug
  *  \brief Predefined log drain for debugging output
  */
-#define QwDebug    gQwLog(QwLog::kDebug,__PRETTY_FUNCTION__)
+#define QwDebug    if (gQwLog.GetLogLevel() >= QwLog::kDebug) gQwLog(QwLog::kDebug,__PRETTY_FUNCTION__)
 
 
 /**
  *  \class QwLog
  *  \ingroup QwAnalysis
- *  \brief A logfile class
+ *  \brief Logging and output management system with configurable verbosity levels
  *
- * This class should not be used directly. Instead one can write text to the
- * screen or a log file via the predefined log drains QwError, QwWarning,
- * QwMessage, QwVerbose and QwDebug.  A special log drain QwOut will always
- * be printed and is reserved for output \b explicitly requested by the user.
- *
- * An example could be:
-\verbatim
- QwMessage << "Hello World !!!" << QwLog::endl;
-\endverbatim
+ * Provides a hierarchical logging system with multiple output levels
+ * (Error, Warning, Message, Verbose, Debug) and predefined log drains
+ * (QwError, QwWarning, QwMessage, QwVerbose, QwDebug). Supports output
+ * redirection to files, colored output, and function-specific debugging.
+ * Should not be used directly; use the predefined macros instead.
  */
 class QwLog : public std::ostream {
 
@@ -109,7 +104,7 @@ class QwLog : public std::ostream {
 
     /*! \brief The destructor
      */
-    virtual ~QwLog();
+    ~QwLog() override;
 
     /*! \brief Determine whether the function name matches a specified list of regular expressions
      */
@@ -130,6 +125,12 @@ class QwLog : public std::ostream {
     /*! \brief Set the file log level
      */
     void                        SetFileThreshold(int thr);
+
+    /*! \brief Get highest log level
+     */
+    QwLogLevel                  GetLogLevel() const {
+      return std::max(fScreenThreshold, fFileThreshold);
+    };
 
     /*! \brief Set the stream log level
      */
@@ -197,5 +198,3 @@ class QwLog : public std::ostream {
 };
 
 extern QwLog gQwLog;
-
-#endif

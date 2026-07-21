@@ -1,4 +1,4 @@
-To Collect: 
+To Collect:
 1) login as apar@adaq3
 2) cd into ~/PREX/prompt/collector
 3) source ../../setup_japan.tcsh
@@ -11,7 +11,7 @@ WAC List Creation
 Collector:
 1) run the command: ./collector -d ../results/ -l test.list (Note:replace test with your file name)
 2) a root file named prexPrompt_test.root will be stored in the rootfiles directory
-3) to produce plots stay in the collector directory and run ./aggregate 
+3) to produce plots stay in the collector directory and run ./aggregate
 4) you will be asked to enter a test part of the rootfile, enter it and hit Enter
 5) a aggregate_plots_test.pdf file will be created in the plots directory.
 

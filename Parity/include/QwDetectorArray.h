@@ -1,14 +1,13 @@
-/**********************************************************\
-* File: QwDetectorArray.h                          *
-*                                                          *
-* Author: Kevin Ward (Original Code by P. M. King)                                       *
-* Time-stamp: <2007-05-08 15:40>                           *
-\**********************************************************/
+/*!
+ * \file   QwDetectorArray.h
+ * \brief  Detector array for PMT analysis with integration and combination
+ * \author Kevin Ward (Original Code by P. M. King)
+ * \date   2007-05-08
+ */
 
 /// \ingroup QwAnalysis_ADC
 
-#ifndef __QWDETECTORARRAY__
-#define __QWDETECTORARRAY__
+#pragma once
 
 // System headers
 #include <vector>
@@ -22,9 +21,19 @@
 // Forward declarations
 class QwDetectorArrayID;
 
-class QwDetectorArray: 
- public VQwDetectorArray, 
- virtual public VQwSubsystemParity, 
+/**
+ * \class QwDetectorArray
+ * \ingroup QwAnalysis_ADC
+ * \brief Subsystem for managing arrays of PMT detectors with integration and combination
+ *
+ * Manages collections of integration PMTs and combined PMT channels,
+ * providing coordinated event processing, calibration, and output for
+ * detector array measurements. Supports various PMT configurations
+ * and combination schemes.
+ */
+class QwDetectorArray:
+ public VQwDetectorArray,
+ virtual public VQwSubsystemParity,
  public MQwSubsystemCloneable<QwDetectorArray> {
 
 /******************************************************************
@@ -41,7 +50,7 @@ QwDetectorArray();
 public:
 
 /// Constructor with name
-QwDetectorArray(const TString& name) 
+QwDetectorArray(const TString& name)
  :VQwSubsystem(name), VQwSubsystemParity(name), VQwDetectorArray(name){};
 
 
@@ -51,8 +60,13 @@ QwDetectorArray(const QwDetectorArray& source)
 
 
 /// Virtual destructor
-~QwDetectorArray() {};
+~QwDetectorArray() override;
+
+
+/// Inherit assignment operator on base class
+using VQwDetectorArray::operator=;
 
 };
 
-#endif
+// Register this subsystem with the factory
+REGISTER_SUBSYSTEM_FACTORY(QwDetectorArray);

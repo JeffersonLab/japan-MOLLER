@@ -1,9 +1,9 @@
-///Panguin gui compatible diagnostic plots for shift taking online replay 
+///Panguin gui compatible diagnostic plots for shift taking online replay
 void correlationCheck() {
   gStyle->SetOptFit(1);
   gStyle->SetOptStat(0);
   TTree* tree_R = (TTree*)gDirectory->Get("mul");
-  
+
   const Int_t nVar = 5;
   TString drawBPMs[nVar] = {"diff_bpm1X","diff_bpm4aY","diff_bpm4eX","diff_bpm4eY","diff_bpm12X"};
   Double_t iv_mean[nVar];

@@ -2,15 +2,13 @@
 
  \file QwMockDataGenerator.cc
 
- \brief Parity mock data generator, test code
+ \brief Parity mock data generator
 
 *//*-------------------------------------------------------------------------*/
 
 // C and C++ headers
 #include <iostream>
-
-// Boost math library for random number generation
-#include <boost/random.hpp>
+#include <random>
 
 // Qweak headers
 #include "QwLog.h"
@@ -24,6 +22,8 @@
 #include "QwSubsystemArrayParity.h"
 #include "QwDetectorArray.h"
 
+// ROOT headers
+#include "TStopwatch.h"
 
 // Number of variables to correlate
 #define NVARS 3
@@ -81,25 +81,9 @@ int main(int argc, char* argv[])
   QwHelicity* helicity = dynamic_cast<QwHelicity*>(detectors.GetSubsystemByName("Helicity Info"));
   if (! helicity) QwWarning << "No helicity subsystem defined!" << QwLog::endl;
 
-  // Possible scenarios:
-  // - everything is random, no correlations at all, no asymmetries at all
-  // - variations in the mean of position, current, yield over the course of
-  //   a run (linearly with run number, change mean/sigma as function of event
-  //   number)
-  // - one parameter has a helicity-correlated asymmetry, every other parameter
-  //   is random and independently distributed
-  // - two parameters have independent helicity-correlated asymmetries
-  // - two parameters have correlated helicity-correlated asymmetries
-  // - beam modulation
 
   // Get the beamline channels we want to correlate
   detectors.LoadMockDataParameters("mock_parameters_list.map");
-
-//-----------------------------------------------------------------------------------------------
-  // Get the main detector channels we want to correlate
-//  QwDetectorArray* maindetector = 
-//    dynamic_cast<QwDetectorArray*>(detectors.GetSubsystemByName("Main Detector"));
-//  if (! maindetector) QwWarning << "No main detector subsystem defined!" << QwLog::endl;
 
   // new vectors for GetSubsystemByType
   std::vector <QwDetectorArray*> detchannels;
@@ -112,55 +96,8 @@ int main(int argc, char* argv[])
   //return detchannels;
   }
 
-/*
-if(1==2){
-  Double_t bar_mean = 2.0e4;
-  Double_t bar_sigma = 3.0e2;
-  Double_t bar_asym = 4.0e-4;
-  maindetector->SetRandomEventParameters(bar_mean, bar_sigma);
-  maindetector->SetRandomEventAsymmetry(bar_asym);
-  // Specific values
-  // disabled, wdc, 2010-07-23
-  maindetector->GetIntegrationPMT("MD2Neg")->SetRandomEventAsymmetry(2.0e-2);
-  maindetector->GetIntegrationPMT("MD2Pos")->SetRandomEventAsymmetry(2.0e-2);
-  maindetector->GetIntegrationPMT("MD3Neg")->SetRandomEventAsymmetry(3.0e-3);
-  maindetector->GetIntegrationPMT("MD3Pos")->SetRandomEventAsymmetry(3.0e-3);
-  maindetector->GetIntegrationPMT("MD4Neg")->SetRandomEventAsymmetry(4.0e-4);
-  maindetector->GetIntegrationPMT("MD4Pos")->SetRandomEventAsymmetry(4.0e-4);
-  maindetector->GetIntegrationPMT("MD5Neg")->SetRandomEventAsymmetry(5.0e-5);
-  maindetector->GetIntegrationPMT("MD5Pos")->SetRandomEventAsymmetry(5.0e-5);
-  maindetector->GetIntegrationPMT("MD6Neg")->SetRandomEventAsymmetry(6.0e-6);
-  maindetector->GetIntegrationPMT("MD6Pos")->SetRandomEventAsymmetry(6.0e-6);
-  maindetector->GetIntegrationPMT("MD7Neg")->SetRandomEventAsymmetry(7.0e-7);
-  maindetector->GetIntegrationPMT("MD7Pos")->SetRandomEventAsymmetry(7.0e-7);
-  maindetector->GetIntegrationPMT("MD8Neg")->SetRandomEventAsymmetry(8.0e-8);
-  maindetector->GetIntegrationPMT("MD8Pos")->SetRandomEventAsymmetry(8.0e-8);
-
-  // Set a asymmetric helicity asymmetry on one of the bars
-  maindetector->GetIntegrationPMT("MD1Neg")->SetRandomEventAsymmetry(5.0e-5);
-  maindetector->GetIntegrationPMT("MD1Pos")->SetRandomEventAsymmetry(-5.0e-5);
-
-  // Set a drift component (amplitude, phase, frequency)
-  maindetector->GetIntegrationPMT("MD3Neg")->AddRandomEventDriftParameters(3.0e6, 0, 60*Qw::Hz);
-  maindetector->GetIntegrationPMT("MD3Neg")->AddRandomEventDriftParameters(6.0e5, 0, 120*Qw::Hz);
-  maindetector->GetIntegrationPMT("MD3Neg")->AddRandomEventDriftParameters(4.5e5, 0, 240*Qw::Hz);
-  
-} //end if(1==2)
-*/
-
-
-  // Initialize randomness provider and distribution
-  boost::mt19937 randomnessGenerator(999); // Mersenne twister with seed (see below)
-  boost::normal_distribution<double> normalDistribution;
-  boost::variate_generator
-    < boost::mt19937, boost::normal_distribution<double> >
-      normal(randomnessGenerator, normalDistribution);
-  // WARNING: This variate_generator will return the SAME random values as the
-  // variate_generator in QwVQWK_Channel when used with the same default seed!
-  // Therefore you really should give an explicitly different seed for the
-  // mt19937 randomness generator.
-
-
+  // Initialize the stopwatch
+  TStopwatch stopwatch;
 
   // Loop over all runs
   UInt_t runnumber_min = (UInt_t) gQwOptions.GetIntValuePairFirst("run");
@@ -169,16 +106,25 @@ if(1==2){
               run <= runnumber_max;
               run++) {
 
-     QwCombinedBCM<QwVQWK_Channel>::SetTripSeed(0x56781234 ^ (run*run));
+    // Set the random seed for this run
+    MQwMockable::Seed(run);
+    QwCombinedBCM<QwVQWK_Channel>::SetTripSeed(0x56781234 ^ (run*run));
 
     // Open new output file
     // (giving run number as argument to OpenDataFile confuses the segment search)
-  
-    
+
+
     TString filename = Form("%sQwMock_%u.log", eventbuffer.GetDataDirectory().Data(), run);
-    if (eventbuffer.OpenDataFile(filename,"W") != CODA_OK) {
-      std::cout << "Error: could not open file!" << std::endl;
-      return 0;
+    if (eventbuffer.IsOnline()) {
+      if (eventbuffer.ReOpenStream() != CODA_OK) {
+        std::cout << "Error: could not open ET stream!" << std::endl;
+        return 0;
+      }
+    } else {
+      if (eventbuffer.OpenDataFile(filename,"W") != CODA_OK) {
+        std::cout << "Error: could not open file!" << std::endl;
+        return 0;
+      }
     }
     eventbuffer.ResetControlParameters();
     eventbuffer.EncodePrestartEvent(run, 0); // prestart: runnumber, runtype
@@ -238,70 +184,37 @@ if(1==2){
       double time = event * detectors.GetWindowPeriod();
 
       // Fill the detectors with randomized data
-      
+
       int myhelicity = helicity->GetHelicityActual() ? +1 : -1;
       //std::cout << myhelicity << std::endl;
-
-      // Secondly introduce correlations between variables
-      //
-      // N-dimensional correlated normal random variables:
-      //   X = C' * Z
-      // with
-      //   X correlated and normally distributed,
-      //   Z independent and normally distributed,
-      //   C the Cholesky decomposition of the positive-definite covariance matrix
-      //     (C should probably be calculated offline)
-      //
-      /* Sigma =
-           1.00000   0.50000   0.50000
-           0.50000   2.00000   0.30000
-           0.50000   0.30000   1.50000
-
-         C =
-           1.00000   0.50000   0.50000
-           0.00000   1.32288   0.03780
-           0.00000   0.00000   1.11739
-
-         Sigma = C' * C
-       */
-      double z[NVARS], x[NVARS];
-      double C[NVARS][NVARS];
-      for (int var = 0; var < NVARS; var++) {
-        x[var] = 0.0;
-        z[var] = normal();
-        C[var][var] = 1.0;
-      }
-      C[0][0] = 1.0; C[0][1] = 0.5;     C[0][2] = 0.5;
-      C[1][0] = 0.0; C[1][1] = 1.32288; C[1][2] = 0.03780;
-      C[2][0] = 0.0; C[2][1] = 0.0;     C[2][2] = 1.11739;
-      for (int i = 0; i < NVARS; i++)
-        for (int j = 0; j < NVARS; j++)
-          x[i] += C[j][i] * z[j];
-
-      // Assign to data elements
-      //maindetector->GetChannel("MD2Neg")->SetExternalRandomVariable(x[0]);
-      //lumidetector->GetChannel("dlumi1")->SetExternalRandomVariable(x[1]);
-      //beamline->GetBCM("qwk_bcm0l07")->SetExternalRandomVariable(x[2]);
-
 
       // Randomize data for this event
       detectors.RandomizeEventData(myhelicity, time);
 //      detectors.ProcessEvent();
 //      beamline-> ProcessEvent(); //Do we need to keep this line now?  Check the maindetector correlation with beamline devices with and without it.
-      
+
      for (std::size_t i = 0; i < detchannels.size(); i++){
       detchannels[i]->ExchangeProcessedData();
       detchannels[i]->RandomizeMollerEvent(myhelicity);
       }
 
       // Write this event to file
-      eventbuffer.EncodeSubsystemData(detectors);
+      Int_t status = eventbuffer.EncodeSubsystemData(detectors);
+      if (status != CODA_OK) {
+        QwError << "Error: could not write event " << event << QwLog::endl;
+        break;
+      }
 
       // Periodically print event number
-      if ((kDebug && event % 1000 == 0)
-                  || event % 10000 == 0)
-        std::cout << "Generated " << event << " events." << std::endl;
-
+      constexpr int nevents = kDebug ? 1000 : 10000;
+      if (event % nevents == 0) {
+        QwMessage << "Generated " << event << " events ";
+        stopwatch.Stop();
+        QwMessage << "(" << stopwatch.RealTime()*1e3/nevents << " ms per event)";
+        stopwatch.Reset();
+        stopwatch.Start();
+        QwMessage << QwLog::endl;
+      }
 
     } // end of event loop
 
@@ -310,7 +223,11 @@ if(1==2){
     eventbuffer.CloseDataFile();
     eventbuffer.ReportRunSummary();
 
-    QwMessage << "Wrote mock data run " << filename << " successfully." << QwLog::endl;
+    if (eventbuffer.IsOnline()) {
+      QwMessage << "Wrote mock data run to ET stream successfully." << QwLog::endl;
+    } else {
+      QwMessage << "Wrote mock data run " << filename << " successfully." << QwLog::endl;
+    }
 
   } // end of run loop
 

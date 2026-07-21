@@ -1,12 +1,12 @@
-/*
- * QwDBInterface.h
- *
- *  Created on: Dec 14, 2010
- *      Author: jhlee
+
+/*!
+ * \file   QwDBInterface.h
+ * \brief  Database interface for QwIntegrationPMT and subsystems
+ * \author jhlee
+ * \date   2010-12-14
  */
 
-#ifndef QWDBINTERFACE_H_
-#define QWDBINTERFACE_H_
+#pragma once
 
 // System headers
 #include <iostream>
@@ -21,10 +21,15 @@
 
 // Qweak headers
 #include "QwLog.h"
-//#include "QwParityDB.h"
 
 // Forward declarations
 class QwParityDB;
+
+#ifdef __USE_DATABASE__
+#include "QwDatabase.h"
+#include "QwParitySchema.h"
+#include "QwParitySchemaRow.h"
+#endif // __USE_DATABASE__
 
 // QwDBInterface  GetDBEntry(TString subname);
 
@@ -37,7 +42,7 @@ class QwParityDB;
 
 class QwDBInterface {
  public:
-  enum EQwDBIDataTableType{kQwDBI_OtherTable, kQwDBI_BeamTable, 
+  enum EQwDBIDataTableType{kQwDBI_OtherTable, kQwDBI_BeamTable,
 			   kQwDBI_MDTable, kQwDBI_LumiTable};
  private:
   static std::map<TString, TString> fPrefix;
@@ -144,13 +149,8 @@ inline void QwDBInterface::AddThisEntryToList(std::vector<T> &list)
   }
   if (okay) {
     T row = TypedDBClone<T>();
-    if (row.analysis_id == 0){
-      QwError << "QwDBInterface::AddDBEntryToList:  Unknown list type; entry dropped"
-              << QwLog::endl;
-      okay = kFALSE;
-    } else {
-      list.push_back(row);
-    }
+    // Note: analysis_id validation done above with fAnalysisId check
+    list.push_back(row);
   }
   if (okay == kFALSE) {
     PrintStatus(kTRUE);
@@ -209,7 +209,6 @@ class QwErrDBInterface {
     template <class T> inline
     void AddThisEntryToList(std::vector<T> &list);
 
-
     void PrintStatus(Bool_t print_flag) {
       if(print_flag) {
         QwMessage << std::setw(12)
@@ -239,17 +238,10 @@ inline void QwErrDBInterface::AddThisEntryToList(std::vector<T> &list)
   }
   if (okay) {
     T row = TypedDBClone<T>();
-    if (row.analysis_id == 0){
-      QwError << "QwErrDBInterface::AddDBEntryToList:  Unknown list type; entry dropped"
-              << QwLog::endl;
-      okay = kFALSE;
-    } else {
-      list.push_back(row);
-    }
+    // Note: analysis_id validation done above with fAnalysisId check
+    list.push_back(row);
   }
   if (okay == kFALSE) {
     PrintStatus(kTRUE);
   };
 }
-
-#endif /* QWDBINTERFACE_H_ */

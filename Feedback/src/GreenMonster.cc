@@ -21,7 +21,7 @@ GreenMonster::GreenMonster():fVerbose(kTRUE)
   fCrateNames[3] = new TString("Right Spect");
   fCrateNumbers[3] = Crate_RightSpect;
 
-  
+
   fUseCrate[4]= kTRUE;
   fCrateNames[4] = new TString("Qw VME TS");
   fCrateNumbers[4] = Crate_Qwvmets;
@@ -47,9 +47,9 @@ void GreenMonster::CheckScan() {
 
 
 
-void GreenMonster::SCNUpdateStatus(Int_t id) {    
-  
-  switch (id) 
+void GreenMonster::SCNUpdateStatus(Int_t id) {
+
+  switch (id)
     {
     case SCN_INT_CLN:
       {
@@ -78,7 +78,7 @@ Bool_t GreenMonster::SCNCheckStatus() {
   char *msgReq = "SCN status check";
   char *reply = "Y";
   Int_t iclean;
-  
+
   //  printf("SCN Status =");
   command_type = COMMAND_SCAN;   gRequest.command_type = command_type;
   command = SCAN_GET_STATUS;     gRequest.command = command;
@@ -98,9 +98,9 @@ Bool_t GreenMonster::SCNCheckStatus() {
     printf("ERROR accessing socket!");
     return kFALSE;
   }
-  
+
   //  printf("% d  %d\n",par1,par2);
-  
+
   SCNUpdateStatus(iclean);
   return kTRUE;
 }
@@ -136,11 +136,11 @@ void GreenMonster::SCNSetValue(Int_t which, Int_t value) {
   int command, par1, par2, command_type;
   char *msgReq = "Set SCN Data Value";
   char *reply = "Y";
-  
+
   if (which==1)      setpoint1SCN=value;
   else if (which==2) setpoint2SCN=value;
 
-  if (fVerbose) std::cout << " writing new SCAN set point " << value 
+  if (fVerbose) std::cout << " writing new SCAN set point " << value
 			  << " to data" << which <<std::endl;
   //
   // send set message for obj, value
@@ -155,7 +155,7 @@ void GreenMonster::SCNSetValue(Int_t which, Int_t value) {
     par1 = gRequest.par1;
     par2 = gRequest.par2;
   } else {
-    printf("ERROR accessing socket!"); 
+    printf("ERROR accessing socket!");
     return;
   }
   return;
@@ -181,7 +181,7 @@ void GreenMonster::SCNCheckValues() {
     par2 = gRequest.par2;
     value = par2;
   } else {
-    printf("ERROR accessing socket!"); 
+    printf("ERROR accessing socket!");
     return;
   }
 
@@ -203,7 +203,7 @@ void GreenMonster::SCNCheckValues() {
     par2 = gRequest.par2;
     value = par2;
   } else {
-    printf("ERROR accessing socket!"); 
+    printf("ERROR accessing socket!");
     return;
   }
 
@@ -214,4 +214,3 @@ void GreenMonster::SCNCheckValues() {
 
   return;
 }
-

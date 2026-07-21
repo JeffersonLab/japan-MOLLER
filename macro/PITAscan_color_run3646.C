@@ -5,14 +5,14 @@ void PITAscan_color_run3646(int run_num = 3646, TString mainBCM = "bcm_dg_ds", T
   gROOT->SetStyle("Plain");
   gStyle->SetStatH(0.15);
   gStyle->SetStatW(0.37);
-  gStyle->SetOptStat(0); 
+  gStyle->SetOptStat(0);
   gStyle->SetOptFit(111);
   gStyle->SetStatX(0.9);
   gStyle->SetStatY(0.9);
   gStyle->SetFrameBorderMode(0);
   gStyle->SetFrameBorderSize(0);
-  gStyle->SetPadColor(39); 
-  gStyle->SetPadColor(0); 
+  gStyle->SetPadColor(39);
+  gStyle->SetPadColor(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetPadBorderSize(0);
   gStyle->SetPadBottomMargin(0.15);
@@ -22,10 +22,10 @@ void PITAscan_color_run3646(int run_num = 3646, TString mainBCM = "bcm_dg_ds", T
   gStyle->SetLabelSize(0.035,"y");
   gStyle->SetTitleSize(0.05,"hxyz");
   gStyle->SetTitleOffset(1.3,"y");
-  gROOT->ForceStyle();  
+  gROOT->ForceStyle();
 
   TString mydir = "~/PREX/japan/plots/parityOutputs";
-  
+
   //  TString rf_name =Form("$QW_ROOTFILES/prexPrompt_pass2_%d.000.root",run_num);
    TString rf_name =Form("$QW_ROOTFILES/prexALL_%d.000.root",run_num);
 
@@ -43,7 +43,7 @@ void PITAscan_color_run3646(int run_num = 3646, TString mainBCM = "bcm_dg_ds", T
     {"asym_bcm_dg_us","asym_cav4cQ","asym_bpm4aWS","asym_bpm4eWS","asym_bpm11WS"};
 
   const int nDET = sizeof(device_name)/sizeof(*device_name);
- 
+
   const int nBCM = sizeof(bcm_name)/sizeof(*bcm_name);
 
   TCanvas *c_col = new TCanvas("c_col","c_col",200,200,1700,1000);
@@ -89,7 +89,7 @@ void PITAscan_color_run3646(int run_num = 3646, TString mainBCM = "bcm_dg_ds", T
   double bcm_dev[nBCM];
   TString my_cut = Form("%s&&cleandata",ucut.Data());
 
-  
+
   c_col->SaveAs(Form("%s/PITAscan_color_run%d.pdf",mydir.Data(),run_num));
   // c_res->SaveAs(Form("%s/PITAscan_color_run%d.pdf",mydir.Data(),run_num));
 

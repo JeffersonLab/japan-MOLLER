@@ -97,7 +97,7 @@ TH1 * getHistogram_h(TString tree = "mul", TString branch = "asym_vqwk_04_0ch0",
   minirunNumber       = getMinirunNumber_h(minirunNumber);
   nRuns               = getNruns_h(nRuns);
   cut                 = getCuts_h(cut,overWriteCut,branch);
-  // Make an instance of the relevant data source 
+  // Make an instance of the relevant data source
   TLeaf   *Leaf       = getLeaf_h(tree,branch,leaf,runNumber,minirunNumber,splitNumber,nRuns);
   if (!Leaf){
     return 0;
@@ -123,7 +123,7 @@ TH1 * getHistogram_h(TString tree = "mul", TString branch = "asym_vqwk_04_0ch0",
   TH1 *h1 = (TH1*)gROOT->FindObject("htemp");
   if (debug > 2) Printf("Histogram mean = %f",h1->GetMean());
   TH1 *h2 = new TH1F();
-  
+
   if (mode == "defaultHist" || mode == "default" || mode == "normal"){
     if (debug > 1) Printf("Run %d histogram of branch %s returned",runNumber,(const char*)leafName);
     return h1;
@@ -138,7 +138,7 @@ TH1 * getHistogram_h(TString tree = "mul", TString branch = "asym_vqwk_04_0ch0",
   }
 
   if (debug > 1) Printf("Run %d histogram of branch %s returned",runNumber,(const char*)leafName);
-  return h2; 
+  return h2;
 }
 
 TH1 * getWeightedHistogram_h(TString tree = "mul", TString branch = "asym_vqwk_04_0ch0", TString leaf = "hw_sum", TString weight = "1", TString cut = "defaultCut", Int_t overWriteCut = 0, TString mode = "defaultHist", Int_t runNumber = 0, Int_t minirunNumber = -2, Int_t splitNumber = -1, Double_t nRuns = -1){
@@ -147,7 +147,7 @@ TH1 * getWeightedHistogram_h(TString tree = "mul", TString branch = "asym_vqwk_0
   minirunNumber = getMinirunNumber_h(minirunNumber);
   nRuns               = getNruns_h(nRuns);
   cut                 = getCuts_h(cut,overWriteCut,branch);
-  // Make an instance of the relevant data source 
+  // Make an instance of the relevant data source
   TLeaf   *Leaf       = getLeaf_h(tree,branch,leaf,runNumber,minirunNumber,splitNumber,nRuns);
   if (!Leaf){
     return 0;
@@ -173,7 +173,7 @@ TH1 * getWeightedHistogram_h(TString tree = "mul", TString branch = "asym_vqwk_0
   TH1 *h1 = (TH1*)gROOT->FindObject("htemp");
   if (debug>2) Printf("Histogram mean = %f",h1->GetMean());
   TH1 *h2 = new TH1F();
-  
+
   if (mode == "defaultHist" || mode == "default" || mode == "normal"){
     if (debug>1) Printf("Run %d histogram of branch %s returned",runNumber,(const char*)leafName);
     return h1;
@@ -188,7 +188,7 @@ TH1 * getWeightedHistogram_h(TString tree = "mul", TString branch = "asym_vqwk_0
   }
 
   if (debug>1) Printf("Run %d histogram of branch %s returned",runNumber,(const char*)leafName);
-  return h2; 
+  return h2;
 }
 
 void writeInt_leafHist_h(TString tree = "mul", TString branch = "asym_vqwk_04_0ch0", TString leaf = "hw_sum", TString cut = "defaultCut", Int_t overWriteCut = 0, TString mode = "defaultHist", Int_t runNumber = 0, Int_t minirunNumber = -2, Int_t splitNumber = -1, Double_t nRuns = -1){
@@ -216,7 +216,7 @@ void writeInt_leafHist_h(TString tree = "mul", TString branch = "asym_vqwk_04_0c
   Double_t data_integral = 0.0;
   TH1 * h1_int = getWeightedHistogram_h(tree,branch,leaf,weight,cut,overWriteCut,mode,runNumber,minirunNumber,splitNumber,nRuns);
   if (h1_int ==0)
-  { 
+  {
     Printf("Error, Histogram failed");
   }
   else {
@@ -246,7 +246,7 @@ void writeMeanRms_muls(TString tree = "muls", TString branch_title = "asym_vqwk_
   Double_t data_rms = 0;
   Double_t data_rms_error = 0;
   TChain* mulsChain = getMuls(tree, runNumber, minirunNumber, splitNumber, nRuns);
-  cut = getCuts_h(cut, overWriteCut, "NULL"); 
+  cut = getCuts_h(cut, overWriteCut, "NULL");
   TBranch* this_branch = mulsChain->GetBranch(branch_title);
   TLeaf* mean_leaf= this_branch->GetLeaf("hw_sum");
   TLeaf* m2_leaf = this_branch->GetLeaf("hw_sum_m2");
@@ -259,7 +259,7 @@ void writeMeanRms_muls(TString tree = "muls", TString branch_title = "asym_vqwk_
     if(unit_branch!=NULL)
       unit_leaf= unit_branch->GetLeaf(units);
   }
-    
+
   mulsChain->GetEntry(0);
   if(unit_leaf!=NULL)
     scale_factor=unit_leaf->GetValue();
@@ -488,7 +488,7 @@ void writeSlope_h(Int_t runNumber = 0, Int_t minirunNumber = -2, Int_t splitNumb
   }
   if(minirunNumber<0){
     TString lrbFileNameBase = gSystem->Getenv("LRB_ROOTFILES");
-    TString lrbFileName = lrbFileNameBase + "/blueR"+runNumber+".000new.slope.root";  
+    TString lrbFileName = lrbFileNameBase + "/blueR"+runNumber+".000new.slope.root";
     TFile f(lrbFileName);
 
     std::map<TString, Int_t> IVname;
@@ -509,7 +509,7 @@ void writeSlope_h(Int_t runNumber = 0, Int_t minirunNumber = -2, Int_t splitNumb
 
     TMatrixT<double> slopes=*(TMatrixT<double>*) f.Get("slopes");
     TMatrixT<double> sigSlopes=*(TMatrixT<double>*) f.Get("sigSlopes");
-    for (auto& i: DVname){ 
+    for (auto& i: DVname){
       for (auto& j: IVname){
         writeFile_h("cor_"+i.first+"_"+j.first+ "_slope", slopes(j.second,i.second),runNumber, minirunNumber, splitNumber, nRuns);
         writeFile_h("cor_"+i.first+"_"+j.first+ "_slope_error", sigSlopes(j.second,i.second),runNumber, minirunNumber, splitNumber, nRuns);
@@ -544,9 +544,9 @@ void writeSlope_h(Int_t runNumber = 0, Int_t minirunNumber = -2, Int_t splitNumb
         writeFile_h("reg_"+comb.at(count)+ "_slope_error", slope_err[i], runNumber, minirunNumber, splitNumber, nRuns);
         count++;
       }
-      mini++; 
+      mini++;
     }
-  }	
+  }
 }
 
 // END NEW FIXME
@@ -656,8 +656,8 @@ void writeMean_leafHist_h(TString tree = "mul", TString branch = "asym_vqwk_04_0
   }
   if (alarmStatus){
     // Then the alarm handler wants to receive the output in stdout
-    Printf("%s=%f",(const char*)mean,data_mean); 
-    Printf("%s=%f",(const char*)mean_error,data_mean_error); 
+    Printf("%s=%f",(const char*)mean,data_mean);
+    Printf("%s=%f",(const char*)mean_error,data_mean_error);
   }
 }
 
@@ -703,8 +703,8 @@ void writeRMS_leafHist_h(TString tree = "mul", TString branch = "asym_vqwk_04_0c
   }
   if (alarmStatus){
     // Then the alarm handler wants to receive the output in stdout
-    Printf("%s=%f",(const char*)rms,data_rms); 
-    Printf("%s=%f",(const char*)rms_error,data_rms_error); 
+    Printf("%s=%f",(const char*)rms,data_rms);
+    Printf("%s=%f",(const char*)rms_error,data_rms_error);
   }
 }
 #endif // __CAMHIST__

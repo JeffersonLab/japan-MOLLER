@@ -26,7 +26,7 @@ optimalPCN = 5.2
 
 #Hall C IA Slopes for 4 modes
 
-#source POLOG entry 1543984 (M_Dalton) 
+#source POLOG entry 1543984 (M_Dalton)
 
 A0 = -4.482e-2
 DeltaA0 = 3.614e-4
@@ -41,7 +41,7 @@ A3 = -4.553e-2
 
 #Hall A IA Slopes for 4 modes from hclog - 228845
 #for IHWP IN
-#HAA0 = 0.0283573 
+#HAA0 = 0.0283573
 #for IHWP OUT
 #HAA1 = 0.0283573
 
@@ -66,18 +66,18 @@ IA_up  = 50000
 
 #PITA slopes
 #  From M.Dalton, as of 00:10,23oct2010, use a slope of:  -0.73 ppm/dac-tick
-# 
+#
 #PITASLOPE_OUT = +0.73
 #PITASLOPE_IN = -0.73
 
 #PITA slopes
-#  From M.Dalton, as of ,03Dec2010, 
+#  From M.Dalton, as of ,03Dec2010,
 #  units are ppm/dac-tick
 #PITASLOPE_OUT = +0.554
 #PITASLOPE_IN = -0.557
 
 #PITA slopes
-#  From John Leacock, as of ,19Dec2010, 
+#  From John Leacock, as of ,19Dec2010,
 #  units are ppm/dac-tick
 #PITASLOPE_OUT = -0.996422
 #PITASLOPE_IN = +0.996422
@@ -111,7 +111,7 @@ IA_up  = 50000
 #PITASLOPE_IN = 0.833674
 
 ### Run 2 ; IHWP IN slope is from the run 1 last setting
-### Run 2 ; IHWP OUT slope is from Mark D. 
+### Run 2 ; IHWP OUT slope is from Mark D.
 
 #PITASLOPE_OUT = -0.96
 
@@ -126,7 +126,7 @@ IA_up  = 50000
 
 ### Run 2 ; IHWP IN-OUT slope from run 15716
 ### Run 2 ; IHWP OUT-OUT slope from run 15712
-### Run 2 ; IHWP OUT-IN slope from run 15786 
+### Run 2 ; IHWP OUT-IN slope from run 15786
 ### See HCLOG 252279
 
 #PITASLOPE_IN = 0.8080
@@ -166,4 +166,3 @@ MIN_CHARGE_ASYM = 0.005
 
 #To enable correction damping see QwHelicityCorrelatedFeedback::FeedPITASetPoints()
 DAMPING = 0
-

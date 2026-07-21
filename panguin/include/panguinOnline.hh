@@ -6,6 +6,17 @@
 
 #include <TTree.h>
 #include <TFile.h>
+#ifdef QW_ENABLE_MAPFILE
+#include <TMapFile.h>
+#endif
+// RNTuple support - only if available in ROOT version
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTuple.hxx"
+#include "ROOT/RNTupleReader.hxx"
+#include "ROOT/RNTupleModel.hxx"
+#endif
+// RDataFrame support
+#include "ROOT/RDataFrame.hxx"
 #include <TGButton.h>
 #include <TGFrame.h>
 #include <TRootEmbeddedCanvas.h>
@@ -49,11 +60,29 @@ private:
   UInt_t                            current_page;
   TFile*                            fRootFile;
   TFile*                            fGoldenFile;
+#ifdef QW_ENABLE_MAPFILE
+  // When the configured rootfile is a TMapFile (shared-memory producer
+  // file, conventionally named *.map or living under /dev/shm/), fRootFile
+  // stays null and we read histograms from fMapFile instead.
+  TMapFile*                         fMapFile;
+  Bool_t                            fIsMapFile;
+#endif
   Bool_t                            doGolden;
   std::vector <TTree*>                   fRootTree;
   std::vector <Int_t>                    fTreeEntries;
-  std::vector < std::pair <TString,TString> > fileObjects;
+#ifdef HAS_RNTUPLE_SUPPORT
+  // RNTuple support
+  std::vector <std::unique_ptr<ROOT::RNTupleReader>> fRootNTuple;
+  std::vector <TString>                  fRootNTupleNames;
+  std::vector <Int_t>                    fNTupleEntries;
+#endif // HAS_RNTUPLE_SUPPORT
+  // RDataFrame support for large datasets
+  std::unique_ptr<ROOT::RDataFrame>      fDataFrame;
+#ifdef HAS_RNTUPLE_SUPPORT
+  std::vector < std::vector <TString> >       ntupleVars;
+#endif // HAS_RNTUPLE_SUPPORT
   std::vector < std::vector <TString> >       treeVars;
+  std::vector < std::pair <TString,TString> > fileObjects;
   UInt_t                            runNumber;
   TTimer                           *timer;
   TTimer                           *timerNow; // used to update time
@@ -83,9 +112,19 @@ public:
   void GetFileObjects();
   void GetTreeVars();
   void GetRootTree();
+#ifdef HAS_RNTUPLE_SUPPORT
+  // RNTuple support methods
+  void GetRootNTuple();
+  void GetNTupleVars();
+  UInt_t GetNTupleIndex(TString);
+  void NTupleDraw(std::vector <TString>);
+#endif // HAS_RNTUPLE_SUPPORT
+  // RDataFrame support methods
+  void InitializeDataFrame();
+  void DataFrameDraw(std::vector <TString>);
   UInt_t GetTreeIndex(TString);
   UInt_t GetTreeIndexFromName(TString);
-  void TreeDraw(std::vector <TString>); 
+  void TreeDraw(std::vector <TString>);
   void HistDraw(std::vector <TString>);
   void MacroDraw(std::vector <TString>);
   void LoadDraw(std::vector <TString>);
@@ -96,6 +135,15 @@ public:
   void BadDraw(TString);
   void CheckRootFile();
   Int_t OpenRootFile();
+#ifdef QW_ENABLE_MAPFILE
+  // Returns kTRUE when path looks like a TMapFile (i.e., ends in .map
+  // or lives under /dev/shm/).
+  static Bool_t LooksLikeMapFile(const TString& path);
+  // Fetch a histogram by name from whichever input is currently open.
+  // For a TFile this calls gDirectory->Get(); for a TMapFile it calls
+  // TMapFile::Get() which clones the object out of shared memory.
+  TObject* GetObjectFromFile(const TString& name);
+#endif
   void PrintToFile();
   void PrintPages();
   void MyCloseWindow();

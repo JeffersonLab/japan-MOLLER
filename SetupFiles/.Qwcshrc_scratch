@@ -8,7 +8,7 @@
 # Author :   P. M. King (pking@jlab.org)
 # Date :     07 November 2006
 #
-# 
+#
 #******************************************************************************
 
 if (! $?QWSCRATCH) then
@@ -47,4 +47,3 @@ setenv QW_PRMINPUT   ${QWSCRATCH}/setupfiles
 setenv QW_FIELDMAP   ${QWSCRATCH}/calib
 setenv QW_SEARCHTREE ${QWSCRATCH}/tree
 setenv QW_LOOKUP     ${QWSCRATCH}/calib
-

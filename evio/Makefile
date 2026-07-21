@@ -8,13 +8,13 @@
 #
 #
 # All the root stuff could be discarded (with a little surgery
-# on the sources), but I leave it in the Makefile, which was 
+# on the sources), but I leave it in the Makefile, which was
 # taken from another project.
 #
 # Note regarding software from DAQ group
 # evio.h, evio.C, swap_util.C, et.h are taken from DAQ group intact
-# (only a few tiny mod's by me).  For this reason I did not rename 
-# those modules with prefix "THa". 
+# (only a few tiny mod's by me).  For this reason I did not rename
+# those modules with prefix "THa".
 #
 # You need an environment variable to define ROOT. E.g.
 #   ROOTSYS = /apps/root/2.25-03/root
@@ -48,7 +48,7 @@ ifeq ($(OSNAME),Darwin)
    ROOTGLIBS     = $(shell root-config --glibs)
    CXX           = g++
 #   CXXFLAGS      = -O  -DSUNVERS -I$(ROOTSYS)/root/include
-   CXXFLAGS      = -O  -DSUNVERS 
+   CXXFLAGS      = -O  -DSUNVERS
    LD            = $(CXX)
    LDFLAGS       = -g -D
    SOFLAGS       = -dynamiclib
@@ -65,10 +65,10 @@ ifeq ($(OSNAME),Darwin)
 #    LIBS = $(EVIO_LIB) $(GLIB)
    ifdef ONLINE
      CXXFLAGS += -I$(CODA)/common/include
-     ALL_LIBS = $(LIBS) $(ONLIBS) 
+     ALL_LIBS = $(LIBS) $(ONLIBS)
 # ... finished, what ET needs.
    else
-     ALL_LIBS = $(LIBS) 
+     ALL_LIBS = $(LIBS)
    endif
    ALL_LIBS += $(ROOTLIBS) $(ROOTGLIBS)
 
@@ -81,7 +81,7 @@ ifeq ($(OSNAME),SunOS)
    ROOTGLIBS     = $(shell root-config --glibs)
    CXX           = CC
 #   CXXFLAGS      = -O  -DSUNVERS -I$(ROOTSYS)/root/include
-   CXXFLAGS      = -O  -DSUNVERS 
+   CXXFLAGS      = -O  -DSUNVERS
    LD            = CC
    LDFLAGS       = -g -D
    SOFLAGS       = -G
@@ -98,10 +98,10 @@ ifeq ($(OSNAME),SunOS)
    LIBS = $(EVIO_LIB) $(GLIB)
    ifdef ONLINE
      CXXFLAGS += -I$(CODA)/common/include
-     ALL_LIBS = $(LIBS) $(ONLIBS) 
+     ALL_LIBS = $(LIBS) $(ONLIBS)
 # ... finished, what ET needs.
    else
-     ALL_LIBS = $(LIBS) 
+     ALL_LIBS = $(LIBS)
    endif
    ALL_LIBS += $(ROOTLIBS) $(ROOTGLIBS)
 
@@ -125,7 +125,7 @@ ifeq ($(OSNAME),Linux)
    CXX           = g++
    CXXFLAGS      = -O2 -Wall -fno-exceptions -fPIC $(ROOTCFLAGS) $(INCLUDES)
    LD            = g++
-   LDFLAGS       = 
+   LDFLAGS       =
    SOFLAGS       = -shared
 
    ifdef OLDROOT
@@ -139,7 +139,7 @@ ifeq ($(OSNAME),Linux)
    endif
 
    EVIO_LIB=libevio.a
-   ALL_LIBS = $(EVIO_LIB) $(GLIBS) $(ROOTLIBS) 
+   ALL_LIBS = $(EVIO_LIB) $(GLIBS) $(ROOTLIBS)
 
 # ONLIBS is needed for ET
   ET_AC_FLAGS = -D_REENTRANT -D_POSIX_PTHREAD_SEMANTICS
@@ -167,7 +167,7 @@ ifdef CODA
 SRC = THaEtClient.C THaCodaFile.C THaCodaData.C
 ALL = etclient etHeartbeat tstio tstcoda libevio.a libmyevio.a libmyevio.so
 else
-SRC = THaCodaFile.C THaCodaData.C 
+SRC = THaCodaFile.C THaCodaData.C
 ALL = tstio libevio.a libmyevio.a libmyevio.so
 endif
 HEAD = $(SRC:.C=.h)
@@ -175,45 +175,45 @@ DEPS = $(SRC:.C=.d)
 DECODE_OBJS = $(SRC:.C=.o)
 
 
-ifdef STANDALONE 
+ifdef STANDALONE
   CXXFLAGS += -DSTANDALONE
 endif
 
 all: $(ALL)
 
 etclient: etclient_main.o THaEtClient.o THaCodaData.o $(MYINCDIR)/THaEtClient.h $(MYINCDIR)/THaCodaData.h libevio.a
-	$(CXX) $(CXXFLAGS) -o $@ etclient_main.o THaEtClient.o THaCodaData.o $(ALL_LIBS) 
+	$(CXX) $(CXXFLAGS) -o $@ etclient_main.o THaEtClient.o THaCodaData.o $(ALL_LIBS)
 
 etHeartbeat: etHeartbeat_main.o THaEtClient.o THaCodaData.o $(MYINCDIR)/THaEtClient.h $(MYINCDIR)/THaCodaData.h libevio.a
-	$(CXX) $(CXXFLAGS) -o $@ etHeartbeat_main.o THaEtClient.o THaCodaData.o $(ALL_LIBS) 
+	$(CXX) $(CXXFLAGS) -o $@ etHeartbeat_main.o THaEtClient.o THaCodaData.o $(ALL_LIBS)
 
 tstio: tstio_main.o THaCodaFile.o THaCodaData.o $(MYINCDIR)/THaCodaFile.h $(MYINCDIR)/THaCodaData.h libevio.a
-	$(CXX) $(CXXFLAGS) -o $@ tstio_main.o THaCodaFile.o THaCodaData.o $(ALL_LIBS) 
+	$(CXX) $(CXXFLAGS) -o $@ tstio_main.o THaCodaFile.o THaCodaData.o $(ALL_LIBS)
 
 tstcoda: tstcoda_main.o THaCodaFile.o THaCodaData.o THaEtClient.o $(MYINCDIR)/THaCodaFile.h $(MYINCDIR)/THaCodaData.h $(MYINCDIR)/THaEtClient.h libevio.a
-	$(CXX) $(CXXFLAGS) -o $@ tstcoda_main.o THaEtClient.o THaCodaFile.o THaCodaData.o $(ALL_LIBS) 
+	$(CXX) $(CXXFLAGS) -o $@ tstcoda_main.o THaEtClient.o THaCodaFile.o THaCodaData.o $(ALL_LIBS)
 
 
 # Here we build a library with all this stuff
-libmyevio.a: $(DECODE_OBJS) evio.o swap_util.o 
+libmyevio.a: $(DECODE_OBJS) evio.o swap_util.o
 	rm -f $@
-	ar cr $@ $(DECODE_OBJS) evio.o swap_util.o 
+	ar cr $@ $(DECODE_OBJS) evio.o swap_util.o
 
 # Here we build a library with all this stuff
-libmyevio.so: $(DECODE_OBJS) evio.o swap_util.o 
+libmyevio.so: $(DECODE_OBJS) evio.o swap_util.o
 	rm -f $@
-	$(LD) $(ROOTLIBS) $(SOFLAGS) -o $@ $(DECODE_OBJS) evio.o swap_util.o 
+	$(LD) $(ROOTLIBS) $(SOFLAGS) -o $@ $(DECODE_OBJS) evio.o swap_util.o
 
 %.dylib : %.a
 	cp $< $@
 	ranlib $@
 
-# Below is the evio library, which comes rather directly 
+# Below is the evio library, which comes rather directly
 # from CODA group with minor tweaking by R. Michaels & O. Hansen.
 
-libevio.a: clean_evio evio.o swap_util.o 
+libevio.a: clean_evio evio.o swap_util.o
 	rm -f $@
-	ar cr $@ evio.o swap_util.o 
+	ar cr $@ evio.o swap_util.o
 
 #evio.o: $(MYSRCDIR)/evio.C
 #	$(CXX) -fPIC $(MYINCLUDES) -c  $<
@@ -228,7 +228,7 @@ realclean:  clean
 	rm -f *.d
 
 clean_evio:
-	rm -f evio.o swap_util.o 
+	rm -f evio.o swap_util.o
 
 
 .SUFFIXES:
@@ -244,11 +244,3 @@ clean_evio:
 		[ -s $@ ] || rm -f $@'
 
 -include $(DEPS)
-
-
-
-
-
-
-
-

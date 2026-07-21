@@ -15,7 +15,7 @@ void BeamModExtractor(TString oldfilename,TString newfilename){
    oldfile.GetObject("evt", oldtree);
    // Deactivate all branches
    oldtree->SetBranchStatus("*", 1);
-  
+
    // Create a new file + a copy of old tree in new file, the new copy should only have modulated beam.
    TFile newfile(newfilename,"recreate");
    auto newtree = oldtree->CopyTree("bmwobj>0");

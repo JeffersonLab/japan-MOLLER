@@ -44,6 +44,8 @@ public:
   Int_t codaOpen( const char* computer, const char* session, Int_t mode = 1 ) override;
   Int_t codaClose() override;
   Int_t codaRead() override;    // codaRead() must be called once per event
+  Int_t codaWrite( const UInt_t* buffer, UInt_t buffer_length );  // Write event to ET
+  Int_t flushWrite();  // Flush pending writes to ET
   Bool_t isOpen() const override;
 
 private:

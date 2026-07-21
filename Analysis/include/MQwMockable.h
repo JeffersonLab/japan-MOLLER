@@ -5,18 +5,28 @@
 * Date:   Tue Mar 29 13:08:12 EDT 2011                     *
 \**********************************************************/
 
-#ifndef __MQWMOCKABLE__
-#define __MQWMOCKABLE__
+#pragma once
 
-// Boost math library for random number generation
-#include "boost/random.hpp"
+// System headers
+#include <functional>
+#include <random>
 
-//jpan: Mersenne Twistor: A 623-diminsionally equidistributed
-//uniform pseudorandom number generator
-#include "TRandom3.h"
+// ROOT headers
+#include <Rtypes.h>
 
 class QwParameterFile;
 
+/**
+ * \class MQwMockable
+ * \ingroup QwAnalysis
+ * \brief Mix-in class enabling mock data generation for hardware channels
+ *
+ * Provides infrastructure for generating simulated data with configurable
+ * asymmetries, noise characteristics, and harmonic drifts. Supports both
+ * internal random number generation and external random variables.
+ * Used by hardware channel classes to enable Monte Carlo studies and
+ * testing without real data acquisition hardware.
+ */
 class MQwMockable {
 /****************************************************************//**
  *  Class: MQwMockable
@@ -29,7 +39,7 @@ class MQwMockable {
 public:
   MQwMockable(): fUseExternalRandomVariable(false),
                  fCalcMockDataAsDiff(false),
-		 fMockAsymmetry(0.0), fMockGaussianMean(0.0),
+                 fMockAsymmetry(0.0), fMockGaussianMean(0.0),
                  fMockGaussianSigma(0.0)
   {
     // Mock drifts
@@ -58,6 +68,11 @@ public:
   /// Set the helicity asymmetry
   void  SetRandomEventAsymmetry(Double_t asymmetry);
 
+  ///  Seed the internal Random Variable
+  static void Seed(uint seedval){
+    fRandomnessGenerator.seed(seedval);
+  }
+
   /// Return a random value generated either from the internal or
   /// external Random Variable.
   Double_t GetRandomValue();
@@ -71,7 +86,7 @@ public:
 
   virtual void  SetRawEventData() = 0;
 
-  /// Encode the event data into a CODA buffer  
+  /// Encode the event data into a CODA buffer
   virtual void EncodeEventData(std::vector<UInt_t> &buffer) = 0;
 
   /// Set the flag to use an externally provided random variable
@@ -90,12 +105,11 @@ public:
   /// \name Parity mock data generation
   // @{
   /// Internal randomness generator
-  static boost::mt19937 fRandomnessGenerator;
+  static std::mt19937 fRandomnessGenerator;
   /// Internal normal probability distribution
-  static boost::normal_distribution<double> fNormalDistribution;
+  static std::normal_distribution<double> fNormalDistribution;
   /// Internal normal random variable
-  static boost::variate_generator
-    < boost::mt19937, boost::normal_distribution<double> > fNormalRandomVariable;
+  static std::function<double()> fNormalRandomVariable;
   /// Flag to use an externally provided normal random variable
   bool fUseExternalRandomVariable;
   /// Externally provided normal random variable
@@ -112,5 +126,3 @@ public:
   std::vector<Double_t> fMockDriftPhase;     ///< Harmonic drift phase
   // @}
 };
-
-#endif

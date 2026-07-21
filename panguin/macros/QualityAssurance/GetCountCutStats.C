@@ -10,7 +10,7 @@ void GetCountCutStats(Int_t nUserEvents = 0){
 
   TTree* r = (TTree*)gROOT->FindObject("evt");
   TH1D* hist = new TH1D("CodaEventNumber", "CodaEventNumber", 100, 0, 10e9);
- 
+
   statStr[0] = Form("Number of Previous Events Checked");
   r->Project(hist->GetName(), "CodaEventNumber", "1");
   Int_t tot = hist->GetEntries();
@@ -69,19 +69,18 @@ void GetCountCutStats(Int_t nUserEvents = 0){
 
   TLatex text;
   text.SetTextSize(0.08);
-  a1->cd(); 
+  a1->cd();
   Float_t iniY = 0.90, diffY = 0.045;
   if (nUserEvents == 0) {
-    text.DrawLatex(0.10, 0.93, Form("Total Run: %d events",nEvents)); 
+    text.DrawLatex(0.10, 0.93, Form("Total Run: %d events",nEvents));
   }
   else {
-    text.DrawLatex(0.10, 0.93, Form("Event Stats, %d events",nEvents)); 
+    text.DrawLatex(0.10, 0.93, Form("Event Stats, %d events",nEvents));
   }
   text.SetTextSize(0.05);
   for (Int_t j = 0 ; j < Nstats ; j++){
-    text.DrawLatex(0.10, iniY - (j*2.5+1)*diffY, statStr[j]); 
-    text.DrawLatex(0.10, iniY - (j*2.5+2)*diffY, statStrNumbers[j]); 
+    text.DrawLatex(0.10, iniY - (j*2.5+1)*diffY, statStr[j]);
+    text.DrawLatex(0.10, iniY - (j*2.5+2)*diffY, statStrNumbers[j]);
   }
   if(hist) delete hist;
 }
-

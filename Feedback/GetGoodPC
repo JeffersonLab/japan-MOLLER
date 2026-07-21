@@ -3,13 +3,13 @@
 # 01/16/2012
 # This bash script allows us to read norminal and current values for the PC and RHWP hardware counts
 # To use it,
-# compile using 
+# compile using
 # chmod +x GetGoodPC
 # and then run ./GetGoodPC
 # EPICS names PC [+] C1068_QDAC01PC [-] C1068_QDAC02
 
 # Reads text files,
-# /local/scratch/qweak/Last_good_PC_pos_OUT, 
+# /local/scratch/qweak/Last_good_PC_pos_OUT,
 # /local/scratch/qweak/Last_good_PC_neg_OUT
 # /local/scratch/qweak/Last_good_PC_pos_IN
 # /local/scratch/qweak/Last_good_PC_neg_IN
@@ -40,7 +40,7 @@ fi
 
 host_name=${HOSTNAME}
 case "$host_name" in
-     *cdaql5* ) 
+     *cdaql5* )
 	PC_pos_current="`caget -tf0 C1068_QDAC01`"
 	PC_neg_current="`caget -tf0 C1068_QDAC02`"
 	Midpoint=$(((PC_pos_current+PC_neg_current)/2))
@@ -63,7 +63,7 @@ case "$host_name" in
 	    echo "Current IHWP state is OUT"
 	    echo "Nominal Mid-point  = 40800"
 	    if [ "$IHWP2" == "IN" ];then
-		echo "Current IHWP2 state is $IHWP2"		
+		echo "Current IHWP2 state is $IHWP2"
 		PC_pos_t0_OUT="`cat /local/scratch/qweak/Last_good_PC_pos_OUT_IHWP2_IN`"
 		PC_neg_t0_OUT="`cat /local/scratch/qweak/Last_good_PC_neg_OUT_IHWP2_IN`"
 		echo "RHWP for IHWP OUT state = $RHWP_OUT_IN"
@@ -81,7 +81,7 @@ case "$host_name" in
 
 
 	else
-	    echo "Current IHWP state is IN"	
+	    echo "Current IHWP state is IN"
 	    echo "Nominal Mid-point  = 41215"
 	    if [ "$IHWP2" == "IN" ];then
 		echo "Current IHWP2 state is $IHWP2"

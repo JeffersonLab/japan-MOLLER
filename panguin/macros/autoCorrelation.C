@@ -60,12 +60,12 @@ void autoCorrelation(TString channel, TString drawoption, Int_t n_steps = 1, Boo
         else {
             for (int steps1 = nStepsToCheck-1; steps1 > 0; steps1--) {      // Shift all data by 1 upwards in the array
                 stepValues[steps1] = stepValues[steps-1];
-            } 
+            }
             stepValues[0] = dataValues->at(dataValues->size()-1);           // Grab the new data value - Get the last value in the branch for this event, because I am paranoid
             if ((current_event_number-prior_event_number)>nStepsToCheck){
                 for (int steps2 = 0; steps2 < nStepsToCheck; steps2++) {
                     noise_step = stepValues[steps2] - stepValues[0];    // Take the difference w.r.t. the step2-th previous value
-                    noise_rel  = (stepValues[steps2] - stepValues[0])/(stepValues[step2] + stepValues[0]);    
+                    noise_rel  = (stepValues[steps2] - stepValues[0])/(stepValues[step2] + stepValues[0]);
                     // Take the relative difference (pair asymmetry) w.r.t. the step2-th previous value
                     stepNoises[steps2].push_back(noise_step);
                     relNoises[steps2].push_back(noise_rel);

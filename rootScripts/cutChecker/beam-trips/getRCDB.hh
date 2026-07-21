@@ -20,7 +20,7 @@ void getRCDB(TTree * tree, Int_t runNumber, std::vector<Double_t> &singleEntries
     "energy_sig",     // = 1.4e-6
   };
   Int_t success = 0;
-  // Experimenting Function to Get slug number based on run number 
+  // Experimenting Function to Get slug number based on run number
   // Author : Tao Ye
 
   TSQLResult* res;

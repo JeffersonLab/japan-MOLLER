@@ -1,6 +1,6 @@
-// Hallector BPMs Plot Macro 
+// Hallector BPMs Plot Macro
 // Source from Caryn Palatchi
-// Adapted by Tao Ye for JAPAN 
+// Adapted by Tao Ye for JAPAN
 // Last Update : 05-2019
 
 //HOWTO: Must open the rootfile first, then run PlotHallBPMSprojected.C() in terminal with rootfile already open
@@ -13,13 +13,13 @@ vector<const char*> vBPM = {"bpm12","bpm4a","bpm4e", "T", "Tp", "E"};
 
 //FIXME : IHWPstatus should be able to obtain from slow tree. -TY
 
-void PlotHallBPMSprojected(vector<const char*> &vBPM , 
+void PlotHallBPMSprojected(vector<const char*> &vBPM ,
 		 Int_t IHWPstatus, TString ucut);  // Generic function
 void PlotHallBPMSprojected(Int_t IHWPstatus, TString ucut); // interface to panguin
 void PlotHallBPMSprojected();// interface to summary plots
 
 void PlotHallBPMSprojected(Int_t docaryn=1, Int_t run_number=0, Int_t IHWPstatus=0, TString ucut="1"){
-  
+
   TString rf_name =Form("$QW_ROOTFILES/prexALL_%d.000.root",run_number);
   TFile *rootfile = TFile::Open(rf_name);
 
@@ -35,9 +35,9 @@ void PlotHallBPMSprojected(Int_t docaryn=1, Int_t run_number=0, Int_t IHWPstatus
 
 void PlotHallBPMSprojected( Int_t IHWPstatus, TString ucut){
   PlotHallBPMSprojected(vBPM,IHWPstatus,ucut);
-} 
+}
 
-void PlotHallBPMSprojected(vector<const char*> &vBPM , 
+void PlotHallBPMSprojected(vector<const char*> &vBPM ,
 		 Int_t IHWPstatus, TString ucut){
 
   //collect data points from first run file
@@ -54,7 +54,7 @@ void PlotHallBPMSprojected(vector<const char*> &vBPM ,
   Double_t* rmsDy= new Double_t[ndeti];
   Double_t* zero= new Double_t[ndeti];
 
-  //Right now we're using: 5.725m = distance between the target and 4a; 4.083m = distance betweeen 4a and 4e 
+  //Right now we're using: 5.725m = distance between the target and 4a; 4.083m = distance betweeen 4a and 4e
   mul_tree -> SetAlias("diff_TX","diff_bpm4eX-diff_bpm4aX*5.725/4.083 + diff_bpm4aX");
   mul_tree -> SetAlias("diff_TY","diff_bpm4eY-diff_bpm4aY*5.725/4.083 + diff_bpm4aY");
   mul_tree -> SetAlias("diff_TpX","diff_bpm4eX-diff_bpm4aX/4.083");
@@ -66,13 +66,13 @@ void PlotHallBPMSprojected(vector<const char*> &vBPM ,
   pad1->Draw();
   TH1D* thishist;
   TString objnam;
-  
+
   //This is only for the really specific version of vBPM defined above.
   for(Int_t dd=0;dd<ndeti;dd++) {
-  
+
     //This is for the BPMs
-    if(dd<5){ 
-    
+    if(dd<5){
+
     mul_tree->Draw(Form("1e3*diff_%sX>>histx%d",vBPM[dd],dd),ucut,"goff");
     objnam = Form("histx%d",dd);
     thishist = (TH1D*)gDirectory->FindObject(objnam);
@@ -103,7 +103,7 @@ void PlotHallBPMSprojected(vector<const char*> &vBPM ,
     eDy[dd]= 0;
     rmsDy[dd]= 0;
     }
-  
+
     // cout<<vBPM[dd]<<" Aq[ppm](RMS)+-error,Dx[nm](RMS)+-err,Dy[nm](RMS)+-err: "<<Aq[dd]<<" "<<rmsAq[dd]<<" "<<eAq[dd]<<" "<<1e3*Dx[dd]<<" "<<1e3*rmsDx[dd]<<" "<<1e3*eDx[dd]<<" "<<1e3*Dy[dd]<<" "<<1e3*rmsDy[dd]<<" "<<1e3*eDy[dd]<<endl;
 
   cout<<vBPM[dd]<<" Dx[nm](RMS)+-err,Dy[nm](RMS)+-err: "<<1e3*Dx[dd]<<" "<<1e3*rmsDx[dd]<<" "<<1e3*eDx[dd]<<" "<<1e3*Dy[dd]<<" "<<1e3*rmsDy[dd]<<" "<<1e3*eDy[dd]<<endl;
@@ -126,7 +126,7 @@ void PlotHallBPMSprojected(vector<const char*> &vBPM ,
   Dygraph= new TGraphErrors(numchains-1,chain,&(Dy[0]),chainerr,&(eDy[0]));
   Dxrmsgraph = new TGraphErrors(numchains,chain,&(rmsDx[0]),chainerr,&(zero[0]));
   Dyrmsgraph= new TGraphErrors(numchains-1,chain,&(rmsDy[0]),chainerr,&(zero[0]));
-  
+
   TMultiGraph *xygraph = new TMultiGraph();
   TMultiGraph *xyrmsgraph = new TMultiGraph();
 
@@ -193,4 +193,3 @@ void PlotHallBPMSprojected(vector<const char*> &vBPM ,
   pad_buff->SetGrid();
 
 }
-

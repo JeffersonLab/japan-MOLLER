@@ -17,7 +17,7 @@ Using the JAPAN-MOLLER repository, run the following commands in a
 terminal:
 
         $  build/qwmockdatagenerator -r 4 -e 1:20000 --config qwparity_simple.conf --detectors mock_newdets.map --data <Data>
-        
+
         $  build/qwparity -r 4 --config qwparity_simple.conf --detectors mock_newdets.map --datahandlers mock_datahandlers.map --data <Data> --rootfiles <Rootfiles>
 
 General ROOT TTree Format
@@ -128,20 +128,20 @@ misc. meta-data.
     (TList*) 0x55a04178aa0
     root[3] condition->ls()
     OBJ:  TList     4_condition     Doubly linked list : 0
-     OBJ: TObjString  ROOT Version : 6.26/10, Date: 20221115, GIT: 4dddea35 heads/latest-stable 
+     OBJ: TObjString  ROOT Version : 6.26/10, Date: 20221115, GIT: 4dddea35 heads/latest-stable
           Collectable string class : 0 at: 0x55fa041adbf0
-     OBJ: TObjString  QwAnalyzer Name : test_build/qwparity  Colectable string class : 0 
+     OBJ: TObjString  QwAnalyzer Name : test_build/qwparity  Colectable string class : 0
           at: 0x55fa0414486b0
-    OBJ: TObjString  ROOT file created on Hostname : Ryan-dellXPS  Collectable string class : 0 
+    OBJ: TObjString  ROOT file created on Hostname : Ryan-dellXPS  Collectable string class : 0
          at: 0x55fa040bf620
-    OBJ: TObjString  ROOT file created by the user : 20221116  Collectable string class : 0 
+    OBJ: TObjString  ROOT file created by the user : 20221116  Collectable string class : 0
          at: 0x55fa041a0540
     OBJ: TObjString  QwAnalyzer Options: -r4-e1:20000--configqwparity_simple.conf--
-         detectorsmock_newdets.map--data/home/mrc/Data--rootfiles/home/mrc/Rootfiles  
+         detectorsmock_newdets.map--data/home/mrc/Data--rootfiles/home/mrc/Rootfiles
          Collectable string class : 0 at: 0x55fa04143f20
-    OBJ: TObjString  ROOT file creating time: Mon, 29 Apr 2024 15:48:58 -0400 (EDT) +62870700 nsec 
+    OBJ: TObjString  ROOT file creating time: Mon, 29 Apr 2024 15:48:58 -0400 (EDT) +62870700 nsec
          Collectable string class : 0 at: 0x55a03abaeb0
-    OBJ: TObjString 
+    OBJ: TObjString
     commit 0692b13a79ce5376fb1c2226be8f62af8ef9112b
     Author: Paul King <pking@jlab.org>
     Date:   Mon Apr 1 11:15:22 2024 -0400
@@ -358,7 +358,7 @@ We see the branch name, `asym_la14`.
  --- | ---
   asym\_ |      Asymmetry calculation
   la14 |  Large Angle Monitor (See Detector section)
-  
+
 
 We can see that this branch corresponds to the helicity multiplet
 asymmetry calculated for the large angle monitor device.
@@ -568,7 +568,7 @@ segments, ring 5 segments are denoted by `a,b,c (left,center,right)`.
     *         | SumSq1_3/D:SumSq2_3/D:RawMin_3/D:RawMax_3/D:sequence_number/D    *
     *Entries :    19989 : Total  Size=    4668242 bytes  File Size  =    2411788 *
     *Baskets :      294 : Basket Size=      16000 bytes  Compression=   1.93     *
-    *............................................................................*    
+    *............................................................................*
 ```
 
 We see the branch name, `tq24_r5a`
@@ -577,7 +577,7 @@ We see the branch name, `tq24_r5a`
   tq |    thin quartz
   24 | segment 24
   \_r5a |    ring 5 subsection a (left)
-  
+
 
 We can see that this branch corresponds to a ring 5 thin quartz
 detector, in segment 24, and in the additional ring 5 sub-segment a (left).
@@ -806,7 +806,7 @@ This is a BCM that monitors the transverse phase of the beam.
 
 ### Batery
 
-This is a physical battery that is connected to the ADC channels. It provides a constant voltage to the ADCs. 
+This is a physical battery that is connected to the ADC channels. It provides a constant voltage to the ADCs.
 
 ### Units
 
@@ -985,7 +985,7 @@ Info in <TCanvas::MakeDefCanvas>:  created default TCanvas with name c1
 
 And voila! We can now draw two trees from two different files against
 each other. Just like in section 5.8.2, we can do binary
-operations on the two trees when we invoke `Draw("...")`. 
+operations on the two trees when we invoke `Draw("...")`.
 
 Note: You can only draw two branches against each other if they have the same number
 of entries.

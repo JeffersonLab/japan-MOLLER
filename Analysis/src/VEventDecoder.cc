@@ -1,11 +1,13 @@
+/*!
+ * \file   VEventDecoder.cc
+ * \brief  Virtual base class implementation for event decoder functionality
+ */
+
 #include "VEventDecoder.h"
 #include "QwOptions.h"
 
-/**
- * @brief Decodes the Subbank Header for PHYS Events
- * @param buffer Event buffer that contains the subbanks
- * @return okay
- */
+// Decodes the Subbank Header for PHYS Events.
+// Parameters and return value are documented in the header.
 Bool_t VEventDecoder::DecodeSubbankHeader(UInt_t *buffer){
 	//  This function will decode the header information from
 	//  either a ROC bank or a subbank.  It will also bump
@@ -32,7 +34,7 @@ Bool_t VEventDecoder::DecodeSubbankHeader(UInt_t *buffer){
 			<< ", fAllowLowSubbankIDs==" << fAllowLowSubbankIDs
 			<< QwLog::endl;
 
-		if (fSubbankTag<=31 
+		if (fSubbankTag<=31
 			&& ( (fAllowLowSubbankIDs==kFALSE)
 			|| (fAllowLowSubbankIDs==kTRUE && fSubbankType==0x10) ) ){
 			//  Subbank tags between 0 and 31 indicate this is
@@ -49,7 +51,7 @@ Bool_t VEventDecoder::DecodeSubbankHeader(UInt_t *buffer){
 		}
 		fWordsSoFar   += 2;
 	}
-	QwDebug << "QwEventBuffer::DecodeSubbankHeader: " 
+	QwDebug << "QwEventBuffer::DecodeSubbankHeader: "
 			<< "fROC=="<<fROC << ", fSubbankTag==" << fSubbankTag <<": "
 			<<  std::hex
 			<< buffer[0] << " "
@@ -59,16 +61,12 @@ Bool_t VEventDecoder::DecodeSubbankHeader(UInt_t *buffer){
 			<< buffer[4] << std::dec << " "
 			<< fWordsSoFar << " "<< fEvtLength
 			<< QwLog::endl;
-	//  There is no final else, because any bank type other than 
+	//  There is no final else, because any bank type other than
 	//  0x10 should just return okay.
 	return okay;
 }
 
-/**
- * @brief Prints internal decoder information
- * @param out Output buffer to use to dispay internal Decoder Information.\n Can be QwMessage, QwVerbose, QwWarning, or QwErrror.
- * @return okay
- */
+// Prints internal decoder information. See header for details.
 void VEventDecoder::PrintDecoderInfo(QwLog& out)
 {
 	out << "\n-------\n" << std::hex <<

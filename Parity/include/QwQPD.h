@@ -1,18 +1,19 @@
-/**********************************************************\
-* File: QwQPD.h                                           *
-*                                                         *
-* Author: B.Waidyawansa                                   *
-* Time-stamp: 09-14-2010                                  *
-\**********************************************************/
+/*!
+ * \file   QwQPD.h
+ * \brief  Quadrant photodiode beam position monitor implementation
+ *
+ * \author B.Waidyawansa
+ * \date   09-14-2010
+ */
 
-#ifndef __QwQPD__
-#define __QwQPD__
+#pragma once
 
 // System headers
 #include <vector>
 
 // ROOT headers
 #include <TTree.h>
+#include <ROOT/RNTupleModel.hxx>
 
 // Qweak headers
 #include "QwVQWK_Channel.h"
@@ -29,9 +30,11 @@ class QwErrDBInterface;
 /*****************************************************************
 *  Class:
 ******************************************************************/
-///
-/// \ingroup QwAnalysis_BL
-
+/**
+ * \class QwQPD
+ * \ingroup QwAnalysis_BL
+ * \brief Quadrant photodiode BPM computing X/Y and effective charge
+ */
 class QwQPD : public VQwBPM {
 
  public:
@@ -56,25 +59,25 @@ class QwQPD : public VQwBPM {
     QwCopyArray(source.fRelPos, fRelPos);
     QwCopyArray(source.fAbsPos, fAbsPos);
   }
-  virtual ~QwQPD() { };
+  ~QwQPD() override { };
 
   void    InitializeChannel(TString name);
   // new routine added to update necessary information for tree trimming
   void    InitializeChannel(TString subsystem, TString name);
 
-  void LoadChannelParameters(QwParameterFile &paramfile){
+  void LoadChannelParameters(QwParameterFile &paramfile) override{
     for(Short_t i=0;i<4;i++)
       fPhotodiode[i].LoadChannelParameters(paramfile);
   }
 
   void    GetCalibrationFactors(Double_t AlphaX, Double_t AlphaY);
 
-  void    ClearEventData();
+  void    ClearEventData() override;
   Int_t   ProcessEvBuffer(UInt_t* buffer,
-			UInt_t word_position_in_buffer,UInt_t indexnumber);
-  void    ProcessEvent();
+			UInt_t word_position_in_buffer,UInt_t indexnumber) override;
+  void    ProcessEvent() override;
 
-  const VQwHardwareChannel* GetPosition(EBeamPositionMonitorAxis axis) const {
+  const VQwHardwareChannel* GetPosition(EBeamPositionMonitorAxis axis) const override {
     if (axis<0 || axis>2){
       TString loc="QwQPD::GetPosition for "
         +this->GetElementName()+" failed for axis value "+Form("%d",axis);
@@ -82,69 +85,74 @@ class QwQPD : public VQwBPM {
     }
     return &fAbsPos[axis];
   }
-  const VQwHardwareChannel* GetEffectiveCharge() const {return &fEffectiveCharge;}
+  const VQwHardwareChannel* GetEffectiveCharge() const override {return &fEffectiveCharge;}
 
-  TString GetSubElementName(Int_t subindex);
-  void    GetAbsolutePosition(){};
+  TString GetSubElementName(Int_t subindex) override;
+  void    GetAbsolutePosition() override{};
 
-  Bool_t  ApplyHWChecks();//Check for harware errors in the devices
-  Bool_t  ApplySingleEventCuts();//Check for good events by stting limits on the devices readings
+  Bool_t  ApplyHWChecks();//Check for hardware errors in the devices
+  Bool_t  ApplySingleEventCuts() override;//Check for good events by setting limits on the devices readings
   //void    SetSingleEventCuts(TString ch_name, Double_t minX, Double_t maxX);
   /*! \brief Inherited from VQwDataElement to set the upper and lower limits (fULimit and fLLimit), stability % and the error flag on this channel */
-  void    SetSingleEventCuts(TString ch_name, UInt_t errorflag,Double_t min, Double_t max, Double_t stability, Double_t burplevel);
-  void    SetEventCutMode(Int_t bcuts);
-  void IncrementErrorCounters();
-  void PrintErrorCounters() const;// report number of events failed due to HW and event cut faliure
-  UInt_t  GetEventcutErrorFlag();
-  UInt_t  UpdateErrorFlag();
-  void UpdateErrorFlag(const VQwBPM *ev_error);
+  void    SetSingleEventCuts(TString ch_name, UInt_t errorflag,Double_t minX, Double_t maxX, Double_t stability, Double_t burplevel);
+  void    SetEventCutMode(Int_t bcuts) override;
+  void IncrementErrorCounters() override;
+  void PrintErrorCounters() const override;// report number of events failed due to HW and event cut failure
+  UInt_t  GetEventcutErrorFlag() override;
+  UInt_t  UpdateErrorFlag() override;
+  void UpdateErrorFlag(const VQwBPM *ev_error) override;
 
-  Bool_t  CheckForBurpFail(const VQwDataElement *ev_error);
+  Bool_t  CheckForBurpFail(const VQwDataElement *ev_error) override;
 
-  void    SetDefaultSampleSize(Int_t sample_size);
-  void    SetRandomEventParameters(Double_t meanX, Double_t sigmaX, Double_t meanY, Double_t sigmaY);
-  void    RandomizeEventData(int helicity = 0, double time = 0.0);
+  void    SetDefaultSampleSize(Int_t sample_size) override;
+  void    SetRandomEventParameters(Double_t meanX, Double_t sigmaX, Double_t meanY, Double_t sigmaY) override;
+  void    RandomizeEventData(int helicity = 0, double time = 0.0) override;
   void    SetEventData(Double_t* block, UInt_t sequencenumber);
-  void    EncodeEventData(std::vector<UInt_t> &buffer);
-  void    SetSubElementPedestal(Int_t j, Double_t value);
-  void    SetSubElementCalibrationFactor(Int_t j, Double_t value);
+  void    EncodeEventData(std::vector<UInt_t> &buffer) override;
+  void    SetSubElementPedestal(Int_t j, Double_t value) override;
+  void    SetSubElementCalibrationFactor(Int_t j, Double_t value) override;
 
+  void    Ratio(VQwBPM &numer, VQwBPM &denum) override;
   void    Ratio(QwQPD &numer, QwQPD &denom);
-  void    Scale(Double_t factor);
+  void    Scale(Double_t factor) override;
 
-  VQwBPM& operator=  (const VQwBPM &value);
-  VQwBPM& operator+= (const VQwBPM &value);
-  VQwBPM& operator-= (const VQwBPM &value);
+  VQwBPM& operator=  (const VQwBPM &value) override;
+  VQwBPM& operator+= (const VQwBPM &value) override;
+  VQwBPM& operator-= (const VQwBPM &value) override;
 
   virtual QwQPD& operator=  (const QwQPD &value);
   virtual QwQPD& operator+= (const QwQPD &value);
   virtual QwQPD& operator-= (const QwQPD &value);
 
   void    AccumulateRunningSum(const QwQPD& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
-  void    AccumulateRunningSum(const VQwBPM& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF);
-  void    DeaccumulateRunningSum(VQwBPM &value, Int_t ErrorMask=0xFFFFFFF);
+  void    AccumulateRunningSum(const VQwBPM& value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override;
+  void    DeaccumulateRunningSum(VQwBPM &value, Int_t ErrorMask=0xFFFFFFF) override;
   void    DeaccumulateRunningSum(QwQPD& value, Int_t ErrorMask=0xFFFFFFF);
-  void    CalculateRunningAverage();
+  void    CalculateRunningAverage() override;
 
-  void    ConstructHistograms(TDirectory *folder, TString &prefix);
-  void    FillHistograms();
+  void    ConstructHistograms(TDirectory *folder, TString &prefix) override;
+  void    FillHistograms() override;
 
-  void    ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
-  void    ConstructBranch(TTree *tree, TString &prefix);
-  void    ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist);
-  void    FillTreeVector(std::vector<Double_t> &values) const;
+  void    ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override;
+  void    ConstructBranch(TTree *tree, TString &prefix) override;
+  void    ConstructBranch(TTree *tree, TString &prefix, QwParameterFile& modulelist) override;
+  void    FillTreeVector(QwRootTreeBranchVector &values) const override;
+#ifdef HAS_RNTUPLE_SUPPORT
+  void    ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
+  void    FillNTupleVector(std::vector<Double_t>& values) const override;
+#endif
 
 
 #ifdef __USE_DATABASE__
-  std::vector<QwDBInterface> GetDBEntry();
-  std::vector<QwErrDBInterface> GetErrDBEntry();
+  std::vector<QwDBInterface> GetDBEntry() override;
+  std::vector<QwErrDBInterface> GetErrDBEntry() override;
 #endif // __USE_DATABASE__
 
   void    MakeQPDList();
 
 
   protected:
-  VQwHardwareChannel* GetSubelementByName(TString ch_name);
+  VQwHardwareChannel* GetSubelementByName(TString ch_name) override;
 
 
   /////
@@ -168,6 +176,3 @@ class QwQPD : public VQwBPM {
   std::vector<QwVQWK_Channel> fQPDElementList;
 
 };
-
-
-#endif

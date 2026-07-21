@@ -39,19 +39,46 @@ endif()
 # Add the project include directory
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
-# Load ROOT and setup include directory
-find_package(ROOT 6 REQUIRED Gui Minuit2)
-include_directories(${ROOT_INCLUDE_DIR})
+# Load ROOT and setup include directory.  'New' provides TMapFile (libNew.so).
+find_package(ROOT 6 REQUIRED COMPONENTS Gui Minuit2 Tree RIO ROOTDataFrame ROOTNTuple New)
+include_directories(${ROOT_INCLUDE_DIRS})
+link_directories(${ROOT_LIBRARY_DIR})
 
-add_definitions(-std=c++11)
+# Check ROOT version for RNTuple support (available in ROOT 6.36+)
+if(${ROOT_VERSION} VERSION_GREATER_EQUAL "6.36.0")
+    message(STATUS "ROOT version ${ROOT_VERSION} supports RNTuple - enabling RNTuple functionality in panguin")
+    add_definitions(-DHAS_RNTUPLE_SUPPORT)
+else()
+    message(STATUS "ROOT version ${ROOT_VERSION} does not support RNTuple - disabling RNTuple functionality in panguin")
+    message(STATUS "RNTuple support requires ROOT 6.36 or higher")
+endif()
+
+# ROOT 6.36+ requires C++17
+if(${ROOT_VERSION} VERSION_GREATER_EQUAL "6.36.0")
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    message(STATUS "Using C++17 for ROOT 6.36+")
+else()
+    add_definitions(-std=c++11)
+endif()
+
+# TMapFile consumer support.  Match the gating used by the parent project:
+# TMapFile is broken with C++17 or higher and ROOT < 6.32.
+if(${CMAKE_CXX_STANDARD} LESS 17 OR ${ROOT_VERSION} VERSION_GREATER_EQUAL "6.32.0")
+    message(STATUS "Enabling TMapFile consumer support in panguin (linking ROOT::New)")
+    add_definitions(-DQW_ENABLE_MAPFILE)
+    set(LIBMAPFILE ROOT::New)
+else()
+    message(STATUS "TMapFile consumer support disabled (ROOT < 6.32 with C++17)")
+    set(LIBMAPFILE "")
+endif()
 
 
-build_root_dictionary(
-    panguin                         # path to dictionary to generate
+ROOT_GENERATE_DICTIONARY(
+    panguinDict
     ${PROJECT_SOURCE_DIR}/include/panguinOnlineConfig.hh
     ${PROJECT_SOURCE_DIR}/include/panguinOnline.hh
-    TARGETS panguin
-    LINKDEF "${PROJECT_SOURCE_DIR}/include/panguinOnlineLinkDef.h"  # ROOT linkDef file
+    LINKDEF "${PROJECT_SOURCE_DIR}/include/panguinOnlineLinkDef.h"
     OPTIONS -p
 )
 
@@ -73,7 +100,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 #
 add_library(panguin-lib SHARED ${sources} ${headers} panguinDict.cxx)
 set_target_properties(panguin-lib PROPERTIES OUTPUT_NAME panguin)
-target_link_libraries(panguin-lib PUBLIC  ROOT::Libraries)
+target_link_libraries(panguin-lib PUBLIC ${ROOT_LIBRARIES} ${LIBMAPFILE})
 
 add_executable(panguin-bin panguin.cc)
 set_target_properties(panguin-bin PROPERTIES OUTPUT_NAME panguin)
