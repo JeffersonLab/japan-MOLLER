@@ -1,4 +1,4 @@
-! Name          Offset          Gain            NormRate(Hz/uA) VoltPerHz       Asym            C_x             C_y             C_xp            C_yp            C_e
+! Name          Offset          Gain
 SM01              0.000        7.62930e-05
 SM02              0.000        7.62930e-05
 SM03              0.000        7.62930e-05
