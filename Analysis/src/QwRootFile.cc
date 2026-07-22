@@ -10,6 +10,9 @@
 #include <unistd.h>
 #include <cstdio>
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 std::string QwRootFile::fDefaultRootFileDir = ".";
 std::string QwRootFile::fDefaultRootFileStem = "Qweak_";
 
@@ -66,8 +69,8 @@ QwRootFile::QwRootFile(const TString& run_label)
       + Form("/%s%s.root", fRootFileStem.Data(), run_label.Data());
     if (fUseTemporaryFile){
       rootfilename += Form("/%s%s.%s.%d.root",
-			   fRootFileStem.Data(), run_label.Data(),
-			   hostname.Data(), pid);
+                           fRootFileStem.Data(), run_label.Data(),
+                           hostname.Data(), pid);
       // Delete permanent file if it exists to prevent accumulation across segments
       if (gSystem->AccessPathName(fPermanentName.Data()) == 0) {
         QwVerbose << "Removing existing permanent file: " << fPermanentName << QwLog::endl;
@@ -111,7 +114,7 @@ QwRootFile::QwRootFile(const TString& run_label)
       return;
     } else {
       QwMessage << "Opened "<< (fUseTemporaryFile?"temporary ":"")
-		<<"rootfile " << rootfilename << QwLog::endl;
+                <<"rootfile " << rootfilename << QwLog::endl;
     }
 
     TString run_condition_name = Form("condition_%s", run_label.Data());
@@ -164,23 +167,23 @@ QwRootFile::~QwRootFile()
     const char* action;
     if (fUseTemporaryFile){
       if (fMakePermanent) {
-	// Delete existing permanent file first to avoid accumulation
-	if (gSystem->AccessPathName(fPermanentName.Data()) == 0) {
-	  remove(fPermanentName.Data());
-	}
-	action = " rename ";
-	err = rename( rootfilename.Data(), fPermanentName.Data() );
+        // Delete existing permanent file first to avoid accumulation
+        if (gSystem->AccessPathName(fPermanentName.Data()) == 0) {
+          remove(fPermanentName.Data());
+        }
+        action = " rename ";
+        err = rename( rootfilename.Data(), fPermanentName.Data() );
       } else {
-	action = " remove ";
-	err = remove( rootfilename.Data() );
+        action = " remove ";
+        err = remove( rootfilename.Data() );
       }
       // It'd be proper to "extern int errno" and strerror() here,
       // but that doesn't seem very C++-ish.
       if (err) {
-	QwWarning << "Couldn't" << action << rootfilename << QwLog::endl;
+        QwWarning << "Couldn't" << action << rootfilename << QwLog::endl;
       } else {
-	QwMessage << "Was able to" << action << rootfilename << QwLog::endl;
-	QwMessage << "Root file is " << fPermanentName << QwLog::endl;
+        QwMessage << "Was able to" << action << rootfilename << QwLog::endl;
+        QwMessage << "Root file is " << fPermanentName << QwLog::endl;
       }
     }
   }
@@ -307,6 +310,13 @@ void QwRootFile::ProcessOptions(QwOptions &options)
 {
   // Option 'rootfiles' to specify ROOT files dir
   fRootFileDir = TString(options.GetValue<std::string>("rootfiles"));
+  fs::path tmppath(fRootFileDir.Data());
+  if( ! fs::exists(tmppath) || ! fs::is_directory(tmppath)) {
+    QwError << "ERROR:  The rootfile directory path, " << fRootFileDir
+            << ", does not exist.  Exiting."
+            << QwLog::endl;
+    exit(2);
+  }
 
   // Option 'root-stem' to specify ROOT file stem
   fRootFileStem = TString(options.GetValue<std::string>("rootfile-stem"));
