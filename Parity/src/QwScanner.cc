@@ -5,11 +5,17 @@
 
 #include "QwScanner.h"
 
+#ifdef HAS_RNTUPLE_SUPPORT
+// ROOT headers for RNTuple support
+#include <ROOT/RNTupleModel.hxx>
+#include <ROOT/RNTupleWriter.hxx>
+#endif
+
 // Qweak headers
 #include "QwParameterFile.h"
 
 // Register this subsystem with the factory
-RegisterSubsystemFactory(QwScanner);
+//RegisterSubsystemFactory(QwScanner);
 
 
 void QwScanner::DefineOptions(QwOptions &options)
@@ -308,7 +314,8 @@ Int_t QwScanner::LoadChannelMap(TString mapfile) {
 
     // Now load the variables to publish
     mapstr.RewindToFileStart();
-    QwParameterFile *section;
+//    QwParameterFile *section;
+    auto section = mapstr.ReadNextSection(varvalue);
     std::vector<TString> publishinfo;
     while ((section = mapstr.ReadNextSection(varvalue))) {
         if (varvalue == "PUBLISH") {
@@ -1172,7 +1179,57 @@ void QwScanner::FillHistograms()
   fPosVal.second.FillHistograms();
 }
 
-void QwScanner::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values)
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwScanner::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  for (size_t i = 0; i < fScannerID.size(); i++) {
+    if (fScannerID[i].fTypeID == kScannerPMT) {
+      fScanner.at(i).ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+    } else if (fScannerID[i].fTypeID == kScannerPosition) {
+      if (fScannerID[i].fIndex==1) {
+        fPosVolt.first.ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+      } else if (fScannerID[i].fIndex==2) {
+        fPosVolt.second.ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+      }
+    } else if (fScannerID[i].fTypeID == kScannerReference) {
+      if (fScannerID[i].fIndex==1) {
+        fPosRef.first.ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+      } else if (fScannerID[i].fIndex==2) {
+        fPosRef.second.ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+      }
+    }
+  }
+  fPosVal.first.ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+  fPosVal.second.ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+}
+
+void QwScanner::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  for (size_t i = 0; i < fScannerID.size(); i++) {
+    if (fScannerID[i].fTypeID == kScannerPMT) {
+      fScanner.at(i).FillNTupleVector(values);
+    } else if (fScannerID[i].fTypeID == kScannerPosition) {
+      if (fScannerID[i].fIndex==1) {
+        fPosVolt.first.FillNTupleVector(values);
+      } else if (fScannerID[i].fIndex==2) {
+        fPosVolt.second.FillNTupleVector(values);
+      }
+    } else if (fScannerID[i].fTypeID == kScannerReference) {
+      if (fScannerID[i].fIndex==1) {
+        fPosRef.first.FillNTupleVector(values);
+      } else if (fScannerID[i].fIndex==2) {
+        fPosRef.second.FillNTupleVector(values);
+      }
+    }
+  }
+  fPosVal.first.FillNTupleVector(values);
+  fPosVal.second.FillNTupleVector(values);
+
+}
+#endif // HAS_RNTUPLE_SUPPORT
+
+void QwScanner::ConstructBranchAndVector(TTree *tree, TString & prefix, QwRootTreeBranchVector &values)
+//void QwScanner::ConstructBranchAndVector(TTree *tree, TString & prefix, std::vector <Double_t> &values)
 {
   for (size_t i = 0; i < fScannerID.size(); i++) {
     if (fScannerID[i].fTypeID == kScannerPMT) {
@@ -1220,7 +1277,8 @@ void QwScanner::ConstructBranch(TTree *tree, TString & prefix)
 
 }
 
-void QwScanner::FillTreeVector(std::vector<Double_t> &values) const
+void QwScanner::FillTreeVector(QwRootTreeBranchVector &values) const
+//void QwScanner::FillTreeVector(std::vector<Double_t> &values) const
 {
   for (size_t i = 0; i < fScannerID.size(); i++) {
     if (fScannerID[i].fTypeID == kScannerPMT) {

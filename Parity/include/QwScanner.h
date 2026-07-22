@@ -107,10 +107,17 @@ class QwScanner: public VQwSubsystemParity, public MQwSubsystemCloneable<QwScann
     void  FillHistograms();
 
     using VQwSubsystem::ConstructBranchAndVector;
-    void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
+//    void  ConstructBranchAndVector(TTree *tree, TString &prefix, std::vector<Double_t> &values);
+    void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override;
     void  ConstructBranch(TTree *tree, TString& prefix);
     void  ConstructBranch(TTree *tree, TString& prefix, QwParameterFile& trim_file) {};
-    void  FillTreeVector(std::vector<Double_t> &values) const;
+//    void  FillTreeVector(std::vector<Double_t> &values) const;
+    void  FillTreeVector(QwRootTreeBranchVector &values) const override;
+
+#ifdef HAS_RNTUPLE_SUPPORT
+    void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs) override;
+    void FillNTupleVector(std::vector<Double_t>& values) const override;
+#endif // HAS_RNTUPLE_SUPPORT
 
     Bool_t Compare(VQwSubsystem *source);
 
@@ -270,5 +277,8 @@ class QwScanner: public VQwSubsystemParity, public MQwSubsystemCloneable<QwScann
     Double_t o;
     Double_t z;
 };
+
+// Register this subsystem with the factory
+REGISTER_SUBSYSTEM_FACTORY(QwScanner);
 
 #endif
