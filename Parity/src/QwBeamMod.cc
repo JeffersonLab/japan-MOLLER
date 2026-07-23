@@ -925,19 +925,19 @@ void QwBeamMod::FillDB_MPS(QwParityDB *db, TString datatype)
     for(size_t pattern = 0; pattern < 5; pattern++) {
       //  Explicitly zero the beam optics ID to ensure a non-sensical default
       //  is not picked up.
-      QwParitySchema::beam_optics table;
+      QwParitySchema::BeamOptics table;
       QwParitySchema::beam_optics_row row;
-      row[table.analysis_id] = analysis_id;
-      row[table.monitor_id] = 0; // placeholder
-      row[table.modulation_type_id] = pattern;
+      row[table.analysisId] = analysis_id;
+      row[table.detectorId] = 0; // placeholder
+      row[table.modulationTypeId] = pattern;
       row[table.n] = 0; // placeholder
       row[table.offset] = 0.0; // placeholder
       row[table.amplitude] = 0.0; // placeholder
       row[table.phase] = 0.0; // placeholder
-      row[table.o_error] = 0.0; // placeholder
-      row[table.a_error] = 0.0; // placeholder
-      row[table.p_error] = 0.0; // placeholder
-      row[table.gof_para] = 0.0; // placeholder
+      row[table.oError] = 0.0; // placeholder
+      row[table.aError] = 0.0; // placeholder
+      row[table.pError] = 0.0; // placeholder
+      row[table.gofPara] = 0.0; // placeholder
 
       entrylist.push_back(row);
     }

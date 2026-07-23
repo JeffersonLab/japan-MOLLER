@@ -566,9 +566,7 @@ void VQwDataHandler::FillDB(QwParityDB *db, TString datatype)
 
   std::vector<QwDBInterface> interface;
 
-  std::vector<QwParitySchema::beam_row>      beamlist;
-  std::vector<QwParitySchema::md_data_row>   mdlist;
-  std::vector<QwParitySchema::lumi_data_row> lumilist;
+  std::vector<QwParitySchema::detector_data_row> detectorlist;
 
   QwDBInterface::EQwDBIDataTableType tabletype;
 
@@ -586,12 +584,8 @@ void VQwDataHandler::FillDB(QwParityDB *db, TString datatype)
 	      interface.at(j).SetDetectorName(tmp_name);
 	      tabletype = interface.at(j).SetDetectorID( db );
       }
-      if (tabletype==QwDBInterface::kQwDBI_BeamTable){
-	      interface.at(j).AddThisEntryToList( beamlist );
-      } else if (tabletype==QwDBInterface::kQwDBI_MDTable){
-	      interface.at(j).AddThisEntryToList( mdlist );
-      } else if (tabletype==QwDBInterface::kQwDBI_LumiTable){
-	      interface.at(j).AddThisEntryToList( lumilist );
+      if (tabletype==QwDBInterface::kQwDBI_DetectorTable){
+	      interface.at(j).AddThisEntryToList( detectorlist );
       } else {
 	      QwError << "QwCombiner::FillDB:  Unrecognized detector name:  "
 		            << interface.at(j).GetDeviceName() << QwLog::endl;
@@ -605,29 +599,13 @@ void VQwDataHandler::FillDB(QwParityDB *db, TString datatype)
     auto c = db->GetScopedConnection();
 
     // Check the entrylist size, if it isn't zero, start to query..
-    if( beamlist.size() ) {
-      for (const auto& entry: beamlist) {
+    if( detectorlist.size() ) {
+      for (const auto& entry: detectorlist) {
         c->QueryExecute(entry.insert_into());
       }
     } else {
-      QwMessage << "QwCombiner::FillDB :: This is the case when the beamlist contains nothing for type="<< measurement_type.Data()
+      QwMessage << "QwCombiner::FillDB :: This is the case when the detectorlist contains nothing for type="<< measurement_type.Data()
                 << QwLog::endl;
-    }
-    if( mdlist.size() ) {
-      for (const auto& entry: mdlist) {
-        c->QueryExecute(entry.insert_into());
-      }
-    } else {
-      QwMessage << "QwCombiner::FillDB :: This is the case when the mdlist contains nothing for type="<< measurement_type.Data()
-                << QwLog::endl;
-    }
-    if( lumilist.size() ) {
-      for (const auto& entry: lumilist) {
-        c->QueryExecute(entry.insert_into());
-      }
-    } else {
-      QwMessage << "QwCombiner::FillDB :: This is the case when the lumilist contains nothing for type="<< measurement_type.Data()
-          << QwLog::endl;
     }
   }
   return;
