@@ -18,6 +18,7 @@
 #include "QwHelicity.h"
 #include "QwHelicityPattern.h"
 #include "QwBlindDetectorArray.h"
+#include "QwScanner.h"
 #include "QwSubsystemArrayParity.h"
 #include "QwDetectorArray.h"
 
