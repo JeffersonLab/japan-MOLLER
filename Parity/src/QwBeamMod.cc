@@ -917,7 +917,7 @@ void QwBeamMod::FillDB_MPS(QwParityDB *db, TString datatype)
     QwMessage << " --------------------------------------------------------------- " << QwLog::endl;
   }
 
-  std::vector<QwParitySchema::beam_optics_row> entrylist;
+  std::vector<QwParitySchema::beam_modulation_row> entrylist;
 
   UInt_t analysis_id = db->GetAnalysisID();
 
@@ -925,12 +925,12 @@ void QwBeamMod::FillDB_MPS(QwParityDB *db, TString datatype)
     for(size_t pattern = 0; pattern < 5; pattern++) {
       //  Explicitly zero the beam optics ID to ensure a non-sensical default
       //  is not picked up.
-      QwParitySchema::BeamOptics table;
-      QwParitySchema::beam_optics_row row;
+      QwParitySchema::BeamModulation table;
+      QwParitySchema::beam_modulation_row row;
       row[table.analysisId] = analysis_id;
-      row[table.detectorId] = 0; // placeholder
+      row[table.monitorId] = 0; // placeholder
       row[table.modulationTypeId] = pattern;
-      row[table.n] = 0; // placeholder
+      row[table.numEvents] = 0; // placeholder
       row[table.offset] = 0.0; // placeholder
       row[table.amplitude] = 0.0; // placeholder
       row[table.phase] = 0.0; // placeholder

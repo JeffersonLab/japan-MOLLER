@@ -793,7 +793,7 @@ void QwEPICSEvent::FillDB(QwParityDB *db)
     bool recordsExist = c->QueryExists(
         sqlpp::select(SlowControlsSettings.slowControlsSettingsId)
         .from(SlowControlsSettings)
-        .where(SlowControlsSettings.runletId == db->GetRunletID())
+        .where(SlowControlsSettings.periodId == db->GetRunletID())
     );
 
     if (recordsExist) {
@@ -811,7 +811,6 @@ void QwEPICSEvent::FillDB(QwParityDB *db)
 
   if (! fDisableDatabase) {
     FillSlowControlsData(db);
-    FillSlowControlsStrings(db);
     FillSlowControlsSettings(db);
   }
   fDisableDatabase=hold_fDisableDatabase;
@@ -856,8 +855,8 @@ void QwEPICSEvent::FillSlowControlsData(QwParityDB *db)
       //  Now get the current sc_detector_id for the above runlet_id.
       sc_detector_id = db->GetSlowControlDetectorID(fEPICSVariableList[tagindex]);
 
-      tmp_row[SlowControlsData.runletId] = runlet_id;
-      tmp_row[SlowControlsData.scDetectorId] = sc_detector_id;
+      tmp_row[SlowControlsData.periodId] = runlet_id;
+      tmp_row[SlowControlsData.slowControlDetectorId] = sc_detector_id;
 
       if (!sc_detector_id) continue;
 
@@ -880,7 +879,7 @@ void QwEPICSEvent::FillSlowControlsData(QwParityDB *db)
           n_records = fEPICSCumulativeData[tagindex].NumberRecords;
 
 	  //  Build the row and submit it to the list
-	  tmp_row[SlowControlsData.n] = static_cast<UInt_t>(n_records);
+	  tmp_row[SlowControlsData.numEvents] = static_cast<UInt_t>(n_records);
 	  tmp_row[SlowControlsData.value] = mean;
 	  tmp_row[SlowControlsData.error] = sigma;
 	  tmp_row[SlowControlsData.minValue] = fEPICSCumulativeData[tagindex].Minimum;
@@ -914,64 +913,7 @@ void QwEPICSEvent::FillSlowControlsData(QwParityDB *db)
 
 void QwEPICSEvent::FillSlowControlsStrings(QwParityDB *db)
 {
-  QwParitySchema::SlowControlsStrings SlowControlsStrings;
-  std::vector<QwParitySchema::row<QwParitySchema::SlowControlsStrings>> entrylist;
-  UInt_t sc_detector_id;
-  UInt_t runlet_id = db->GetRunletID();
-  string table = "polarized_source";
-
-  // QwError << "Step 1 Entering the loop " << QwLog::endl;
-  // Loop over EPICS variables
-  for (size_t tagindex = 0; tagindex < fEPICSVariableList.size(); tagindex++) {
-    // Look for variables to write into this table
-
-    if (fEPICSTableList[tagindex] == table) {
-      QwParitySchema::row<QwParitySchema::SlowControlsStrings> tmp_row;
-
-      //  Now get the current sc_detector_id for the above runlet_id.
-      sc_detector_id = db->GetSlowControlDetectorID(fEPICSVariableList[tagindex]);
-
-      tmp_row[SlowControlsStrings.runletId] = runlet_id;
-      tmp_row[SlowControlsStrings.scDetectorId] = sc_detector_id;
-
-      if (!sc_detector_id) continue;
-
-      if (fEPICSVariableType[tagindex] == kEPICSString) {
-
-    	if (fEPICSDataEvent[tagindex].Filled) {
-	  if(fEPICSDataEvent[tagindex].StringValue.Contains("***") ){
-	    QwWarning<<"fEPICSDataEvent[tagindex].StringValue.Data() is not defined, tmp_row.value is set to an empty string."<<QwLog::endl;
-	    tmp_row[SlowControlsStrings.value] = std::string("");
-	  }
-	  else {
-	    //std::cout<<" Just a test value: "<<fEPICSDataEvent[tagindex].StringValue.Data()<<QwLog::endl;
-	    tmp_row[SlowControlsStrings.value] = std::string(fEPICSDataEvent[tagindex].StringValue.Data());
-	  }
-	  //  Only add rows for filled variables
-	  entrylist.push_back(tmp_row);
-	}
-      }
-    }
-  }
-
-  // Check the entrylist size, if it isn't zero, start to query.
-  if( entrylist.size() ) {
-    auto c = db->GetScopedConnection();
-    QwDebug << "QwEPICSEvent::FillSlowControlsStrigs Writing to database now" << QwLog::endl;
-
-    // Convert to sqlpp11 bulk insert
-    try {
-      for (const auto& entry : entrylist) {
-        c->QueryExecute(entry.insert_into());
-      }
-      QwDebug << "Done executing sqlpp11 bulk insert for FillSlowControlsStrings"
-		  << QwLog::endl;
-    } catch (const std::exception &er) {
-      QwError << "SQLite exception: " << er.what() << QwLog::endl;
-    }
-  } else {
-    QwDebug << "QwEPICSEvent::FillSlowControlsData :: This is the case when the entrylist contains nothing " << QwLog::endl;
-  }
+  (void)db;
 }
 
 
@@ -983,7 +925,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
 
   // Initialize values
   UInt_t runlet_id = db->GetRunletID();
-  tmp_row[SlowControlsSettings.runletId] = runlet_id;
+  tmp_row[SlowControlsSettings.periodId] = runlet_id;
 
   std::string precession_reversal;
 
@@ -997,36 +939,6 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
   Int_t tagindex;
 
   // Add as many blocks as needed in the following for all slow_controls_settings.
-
-  ////////////////////////////////////////////////////////////
-
-  // For QTOR current
-  tagindex = FindIndex("qw:qt_mps_i_dcct");
-  if (tagindex != kEPICS_Error) {
-    QwDebug << "tagindex for  = qw:qt_mps_i_dcct" << tagindex << QwLog::endl;
-    if (! fEPICSCumulativeData[tagindex].Filled) {
-      //  No data for this run.
-      tmp_row[SlowControlsSettings.qtorCurrent] = sqlpp::null;
-    } else if (fEPICSCumulativeData[tagindex].NumberRecords <= 0) {
-      // No events in this variable
-      QwWarning << "The value of "
-		<< fEPICSVariableList[tagindex]
-		<< " had no events during this run.  "
-		<< "Send NULL word to the database."
-		<< QwLog::endl;
-      tmp_row[SlowControlsSettings.qtorCurrent] = sqlpp::null;
-    } else {
-      Double_t qtorcurrent = (fEPICSCumulativeData[tagindex].Sum)/
-	((Double_t) fEPICSCumulativeData[tagindex].NumberRecords);
-      QwDebug << "Send the value of "
-	      << fEPICSVariableList[tagindex]
-	      << ", "
-	      << qtorcurrent
-	      << ", to the database."
-	      << QwLog::endl;
-      tmp_row[SlowControlsSettings.qtorCurrent] = qtorcurrent;
-    }
-  }
 
   ////////////////////////////////////////////////////////////
 
@@ -1265,7 +1177,7 @@ void QwEPICSEvent::FillSlowControlsSettings(QwParityDB *db)
 
     // Create the insert statement with required fields first
     auto insert_stmt = sqlpp::insert_into(SlowControlsSettings).set(
-        SlowControlsSettings.runletId = runlet_id,
+        SlowControlsSettings.periodId = runlet_id,
         SlowControlsSettings.precessionReversal = precession_reversal
     );
     c->QueryExecute(insert_stmt);

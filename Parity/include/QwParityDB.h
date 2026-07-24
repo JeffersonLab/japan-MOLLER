@@ -63,6 +63,7 @@ class QwParityDB: public QwDatabase {
     void         FillParameterFiles(QwSubsystemArrayParity& subsys);
 
     UInt_t GetDetectorID(const string& name, Bool_t zero_id_is_error=kTRUE);         //<! Get detector_id for detector name
+    UInt_t GetDetectorTypeID(const string& detector_type); //!< Get detector_type_id for detector type key (md/beam/lumi/bkg)
     const string GetMeasurementID(const Int_t index);
     UInt_t GetSlowControlDetectorID(const string& name);         //<! Get slow_controls_data_id for epics name
     UInt_t GetErrorCodeID(const string& name);         //<! Get error_code_id for error code name
@@ -89,6 +90,7 @@ class QwParityDB: public QwDatabase {
     UInt_t SetAnalysisID(QwEventBuffer& qwevt);   //<! Set fAnalysisID using data from CODA event buffer
     void StoreDetectorIDs();                             //<! Retrieve detector IDs from database and populate fDetectorIDs
     void StoreMeasurementIDs();
+    void StoreDetectorTypeIDs();
     void StoreSlowControlDetectorIDs();                  //<! Retrieve slow controls data IDs from database and populate fSlow_Controls_DataIDs
     void StoreErrorCodeIDs();                             //<! Retrieve error code IDs from database and populate fErrorCodeIDs
 
@@ -100,6 +102,7 @@ class QwParityDB: public QwDatabase {
     bool fDisableAnalysisCheck; //!< Flag to disable pre-existing analysis_id check
 
     static std::map<string, unsigned int> fDetectorIDs; //!< Associative array of detector IDs.  This declaration will be a problem if QwDatabase is used to connect to two databases simultaneously.
+    static std::map<string, unsigned int> fDetectorTypeIDs; //!< Associative array of detector_type IDs.
     static std::map<string, unsigned int> fSlowControlDetectorIDs; //!< Associative array of slow controls data IDs.  This declaration will be a problem if QwDatabase is used to connect to two databases simultaneously.
     static std::map<string, unsigned char> fErrorCodeIDs; //!< Associative array of error code IDs.  This declaration will be a problem if QwDatabase is used to connect to two databases simultaneously.
     static std::vector<string>            fMeasurementIDs;

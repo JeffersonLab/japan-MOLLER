@@ -49,7 +49,7 @@ TString QwDBInterface::DetermineMeasurementTypeID(TString type, TString suffix,
 #ifdef __USE_DATABASE__
 void QwDBInterface::SetDetectorID(QwParityDB *db, const TString& detector_type)
 {
-  fDetectorType = detector_type;
+  fDetectorType = Form("%u", db->GetDetectorTypeID(detector_type.Data()));
   fDeviceId = db->GetDetectorID(fDeviceName.Data());
 }
 
@@ -61,18 +61,18 @@ QwDBInterface::EQwDBIDataTableType QwDBInterface::SetDetectorID(QwParityDB *db)
   if (fDeviceId != 0) {
     // Auto-detect detector type based on naming convention
     // Note: In production, this should query the detector table to get actual detector_type
-    if (fDeviceName.Contains("bcm", TString::kIgnoreCase) || 
+    if (fDeviceName.Contains("bcm", TString::kIgnoreCase) ||
         fDeviceName.Contains("bpm", TString::kIgnoreCase) ||
         fDeviceName.Contains("clock", TString::kIgnoreCase) ||
         fDeviceName.Contains("energy", TString::kIgnoreCase)) {
-      fDetectorType = "beam";
+      fDetectorType = Form("%u", db->GetDetectorTypeID("beam"));
     } else if (fDeviceName.Contains("lumi", TString::kIgnoreCase)) {
-      fDetectorType = "lumi";
+      fDetectorType = Form("%u", db->GetDetectorTypeID("lumi"));
     } else if (fDeviceName.Contains("bkg", TString::kIgnoreCase) ||
                fDeviceName.Contains("background", TString::kIgnoreCase)) {
-      fDetectorType = "bkg";
+      fDetectorType = Form("%u", db->GetDetectorTypeID("bkg"));
     } else {
-      fDetectorType = "md";  // default to main detector
+      fDetectorType = Form("%u", db->GetDetectorTypeID("md"));  // default to main detector
     }
     return kQwDBI_DetectorTable;
   }
@@ -100,16 +100,13 @@ QwDBInterface::TypedDBClone<QwParitySchema::detector_data_row>() {
   
   row[DetectorData.analysisId]       = fAnalysisId;
   row[DetectorData.detectorId]       = fDeviceId;
-  row[DetectorData.detectorTypeId]  = fDetectorType.Data();  // "md", "beam", "lumi", "bkg"
-  row[DetectorData.measureTypeId]   = fMeasurementTypeId;
-  row[DetectorData.subblock]          = fSubblock;
-  row[DetectorData.n]                 = fN;
+  row[DetectorData.detectorTypeId]  = static_cast<UInt_t>(fDetectorType.Atoi());
+  row[DetectorData.measurementTypeId]   = fMeasurementTypeId;
+  row[DetectorData.subBlock]          = fSubblock;
+  row[DetectorData.numMinipulses]                 = fN;
   row[DetectorData.value]             = fValue;
   row[DetectorData.error]             = fError;
-  
-  // Set default values for new fields not in old schema
-  // TODO: slug_id should be obtained from analysis context (run.slug)
-  row[DetectorData.slugId]           = 0;
+
   // error_code fields default to 0 (no error)
   row[DetectorData.errorCodeId]     = 0;
   row[DetectorData.errorCodeN]      = 0;
@@ -129,7 +126,7 @@ QwDBInterface::TypedDBClone<QwParitySchema::detector_data_row>() {
 #ifdef __USE_DATABASE__
 void QwErrDBInterface::SetDetectorID(QwParityDB *db, const TString& detector_type)
 {
-  fDetectorType = detector_type;
+  fDetectorType = Form("%u", db->GetDetectorTypeID(detector_type.Data()));
   fDeviceId = db->GetDetectorID(fDeviceName.Data());
 }
 #endif // __USE_DATABASE__
@@ -150,15 +147,14 @@ QwErrDBInterface::TypedDBClone<QwParitySchema::detector_data_row>() {
   
   row[DetectorData.analysisId]       = fAnalysisId;
   row[DetectorData.detectorId]       = fDeviceId;
-  row[DetectorData.detectorTypeId]  = fDetectorType.Data();
-  row[DetectorData.measureTypeId]   = "";  // Not applicable for errors
-  row[DetectorData.subblock]          = 0;   // Not applicable for errors
-  row[DetectorData.n]                 = fN;
+  row[DetectorData.detectorTypeId]  = static_cast<UInt_t>(fDetectorType.Atoi());
+  row[DetectorData.measurementTypeId]   = "err";
+  row[DetectorData.subBlock]          = 0;
+  row[DetectorData.numMinipulses]                 = fN;
   row[DetectorData.value]             = 0.0; // Not applicable for errors
   row[DetectorData.error]             = 0.0; // Not applicable for errors
-  
+
   // Error tracking fields
-  row[DetectorData.slugId]           = 0;  // TODO: Get from analysis context
   row[DetectorData.errorCodeId]     = fErrorCodeId;
   row[DetectorData.errorCodeN]      = fN;  // Error count
   
@@ -174,7 +170,7 @@ QwErrDBInterface::TypedDBClone<QwParitySchema::general_errors_row>() {
   QwParitySchema::general_errors_row row;
   row[GeneralErrors.analysisId]         = fAnalysisId;
   row[GeneralErrors.errorCodeId]       = fErrorCodeId;
-  row[GeneralErrors.n]                   = fN;
+  row[GeneralErrors.numEvents]                   = fN;
   return row;
 }
 #endif // __USE_DATABASE__

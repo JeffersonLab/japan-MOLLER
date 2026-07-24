@@ -19,6 +19,7 @@ using namespace QwParitySchema;
 
 // Definition of static class members in QwParityDB
 std::map<string, unsigned int> QwParityDB::fDetectorIDs;
+std::map<string, unsigned int> QwParityDB::fDetectorTypeIDs;
 std::vector<string>            QwParityDB::fMeasurementIDs;
 std::map<string, unsigned int> QwParityDB::fSlowControlDetectorIDs;// for epics
 std::map<string, unsigned char> QwParityDB::fErrorCodeIDs;
@@ -109,10 +110,11 @@ bool QwParityDB::SetRunNumber(const UInt_t runnum)
 
     auto c = GetScopedConnection();
 
-    const auto& Run = QwParitySchema::Run{};
-    auto query = sqlpp::select(sqlpp::all_of(Run))
-                 .from(Run)
-                 .where(Run.runNumber == runnum);
+    const auto& DataTakingPeriod = QwParitySchema::DataTakingPeriod{};
+    auto query = sqlpp::select(sqlpp::all_of(DataTakingPeriod))
+                 .from(DataTakingPeriod)
+                 .where(DataTakingPeriod.periodType == "run"
+                        and DataTakingPeriod.runNumber == runnum);
 
     auto results = QuerySelect(query);
     size_t result_count = CountResults(results);
@@ -128,7 +130,7 @@ bool QwParityDB::SetRunNumber(const UInt_t runnum)
     // Access first row from result
     UInt_t found_run_id = 0;
     ForFirstResult(results, [&](const auto& row) {
-      found_run_id = row.runId;
+      found_run_id = row.periodId;
     });
     QwDebug << "Run ID = " << found_run_id << QwLog::endl;
 
@@ -154,17 +156,18 @@ UInt_t QwParityDB::SetRunID(QwEventBuffer& qwevt)
   try {
       auto c = GetScopedConnection();
 
-      const auto& Run = QwParitySchema::Run{};
-      auto query = sqlpp::select(sqlpp::all_of(Run))
-                   .from(Run)
-                   .where(Run.runNumber == qwevt.GetRunNumber());
+      const auto& DataTakingPeriod = QwParitySchema::DataTakingPeriod{};
+      auto query = sqlpp::select(sqlpp::all_of(DataTakingPeriod))
+                   .from(DataTakingPeriod)
+                   .where(DataTakingPeriod.periodType == "run"
+                          and DataTakingPeriod.runNumber == qwevt.GetRunNumber());
       auto results = QuerySelect(query);
 
       size_t result_count = CountResults(results);
       UInt_t first_run_id = 0;
       UInt_t first_run_number = 0;
       ForFirstResult(results, [&](const auto& row) {
-        first_run_id = row.runId;
+        first_run_id = row.periodId;
         first_run_number = row.runNumber;
       });
 
@@ -189,22 +192,23 @@ UInt_t QwParityDB::SetRunID(QwEventBuffer& qwevt)
 
       // If we reach here, Run is not in database so insert pertinent data and retrieve Run ID
       // Right now this does not insert start/stop times or info on number of events.
-      QwParitySchema::row<QwParitySchema::Run> run_row;
-      run_row[Run.runNumber] = qwevt.GetRunNumber();
-      run_row[Run.runType] = "good"; // qwevt.GetRunType(); RunType is the confused name because we have also a CODA Run type.
+      QwParitySchema::row<QwParitySchema::DataTakingPeriod> run_row;
+      run_row[DataTakingPeriod.periodType] = "run";
+      run_row[DataTakingPeriod.runNumber] = qwevt.GetRunNumber();
+      run_row[DataTakingPeriod.goodForId] = 1;
+      run_row[DataTakingPeriod.dataQuality] = "good";
+      run_row[DataTakingPeriod.slugNumber] = 9999;
+      run_row[DataTakingPeriod.wienNumber] = 9999;
+      run_row[DataTakingPeriod.fullRun] = true;
       // Convert Unix timestamps to sqlpp11 datetime using chrono time_point
       // FIXME (wdconinc) verify conversion
-      run_row[Run.startTime] = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::from_time_t(qwevt.GetStartUnixTime()));
-      run_row[Run.endTime] = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::from_time_t(qwevt.GetEndUnixTime()));
-      run_row[Run.nMps] = 0;
-      run_row[Run.nQrt] = 0;
-      // Set following quantities to 9999 as "uninitialized value".  DTS 8/3/2012
-      run_row[Run.slug] = 9999;
-      run_row[Run.wienSlug] = 9999;
-      run_row[Run.injectorSlug] = 9999;
-      run_row[Run.comment] = "";
+      run_row[DataTakingPeriod.startTime] = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::from_time_t(qwevt.GetStartUnixTime()));
+      run_row[DataTakingPeriod.endTime] = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::from_time_t(qwevt.GetEndUnixTime()));
+      run_row[DataTakingPeriod.numMinipulses] = 0;
+      run_row[DataTakingPeriod.numQuartets] = 0;
+      run_row[DataTakingPeriod.comment] = "";
 
-      QwDebug << "QwParityDB::SetRunID() => Executing sqlpp11 Run insert" << QwLog::endl;
+      QwDebug << "QwParityDB::SetRunID() => Executing sqlpp11 DataTakingPeriod(run) insert" << QwLog::endl;
       auto insert_id = QueryInsertAndGetId(run_row.insert_into());
 
       if (insert_id != 0) {
@@ -256,23 +260,24 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
   try {
       auto c = GetScopedConnection();
 
-      QwParitySchema::Runlet Runlet{};
+      QwParitySchema::DataTakingPeriod DataTakingPeriod{};
 
       // Query is slightly different if file segments are being chained together for replay or not.
       if (qwevt.AreRunletsSplit()) {
         fSegmentNumber = qwevt.GetSegmentNumber();
-        auto query = sqlpp::select(sqlpp::all_of(Runlet))
-                     .from(Runlet)
-                     .where(Runlet.runId == fRunID
-                            and Runlet.fullRun == "false"
-                            and Runlet.segmentNumber == fSegmentNumber);
+        auto query = sqlpp::select(sqlpp::all_of(DataTakingPeriod))
+                     .from(DataTakingPeriod)
+                     .where(DataTakingPeriod.periodType == "runlet"
+                            and DataTakingPeriod.parentId == fRunID
+                            and DataTakingPeriod.fullRun == false
+                            and DataTakingPeriod.segmentNumber == fSegmentNumber);
         auto results = QuerySelect(query);
 
         // Count results and process using helper functions
         size_t result_count = CountResults(results);
         UInt_t found_runlet_id = 0;
         ForFirstResult(results, [&](const auto& row) {
-          found_runlet_id = row.runletId;
+          found_runlet_id = row.periodId;
         });
 
         QwDebug << "QwParityDB::SetRunletID => Number of rows returned:  " << result_count << QwLog::endl;
@@ -293,17 +298,18 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
         }
 
       } else {
-        auto query = sqlpp::select(sqlpp::all_of(Runlet))
-                     .from(Runlet)
-                     .where(Runlet.runId == fRunID
-                            and Runlet.fullRun == "true");
+        auto query = sqlpp::select(sqlpp::all_of(DataTakingPeriod))
+                     .from(DataTakingPeriod)
+                     .where(DataTakingPeriod.periodType == "runlet"
+                            and DataTakingPeriod.parentId == fRunID
+                            and DataTakingPeriod.fullRun == true);
         auto results = QuerySelect(query);
 
         // Count results and process using helper functions
         size_t result_count = CountResults(results);
         UInt_t found_runlet_id = 0;
         ForFirstResult(results, [&](const auto& row) {
-          found_runlet_id = row.runletId;
+          found_runlet_id = row.periodId;
         });
 
         QwDebug << "QwParityDB::SetRunletID => Number of rows returned:  " << result_count << QwLog::endl;
@@ -326,27 +332,31 @@ UInt_t QwParityDB::SetRunletID(QwEventBuffer& qwevt)
 
       // If we reach here, Runlet is not in database so insert pertinent data and retrieve Run ID
       // Right now this does not insert start/stop times or info on number of events.
-      QwParitySchema::Runlet runlet_table{};
-      QwParitySchema::row<QwParitySchema::Runlet> row;
-      row[runlet_table.runId]      = fRunID;
-      row[runlet_table.runNumber]      = qwevt.GetRunNumber();
-      // Note: start_time and end_time are nullable fields but we need to use proper sqlpp11 null types
-      // row[runlet_table.startTime]      = sqlpp::null;
-      // row[runlet_table.endTime]        = sqlpp::null;
-      row[runlet_table.firstMps] = 0;
-      row[runlet_table.lastMps]	= 0;
+      QwParitySchema::DataTakingPeriod runlet_table{};
+      QwParitySchema::row<QwParitySchema::DataTakingPeriod> row;
+      row[runlet_table.periodType] = "runlet";
+      row[runlet_table.parentId] = fRunID;
+      row[runlet_table.runNumber] = qwevt.GetRunNumber();
+      row[runlet_table.goodForId] = 1;
+      row[runlet_table.dataQuality] = "good";
+      row[runlet_table.slugNumber] = 9999;
+      row[runlet_table.wienNumber] = 9999;
+      row[runlet_table.firstMinipulses] = 0;
+      row[runlet_table.lastMinipulses] = 0;
+      row[runlet_table.numMinipulses] = 0;
+      row[runlet_table.numQuartets] = 0;
 
       // Handle segment_number based on Runlet split condition
       if (qwevt.AreRunletsSplit()) {
         row[runlet_table.segmentNumber]  = fSegmentNumber;
-        row[runlet_table.fullRun] = "false";
-        QwDebug << "QwParityDB::SetRunletID() => Executing sqlpp11 Runlet insert (with segment)" << QwLog::endl;
+        row[runlet_table.fullRun] = false;
+        QwDebug << "QwParityDB::SetRunletID() => Executing sqlpp11 DataTakingPeriod(runlet) insert (with segment)" << QwLog::endl;
       } else {
         // Note: segment_number is nullable, but row assignment might need special handling for null
         // For now, use 0 or another default value
         // row[runlet_table.segmentNumber]  = sqlpp::null;
-        row[runlet_table.fullRun] = "true";
-        QwDebug << "QwParityDB::SetRunletID() => Executing sqlpp11 Runlet insert (no segment)" << QwLog::endl;
+        row[runlet_table.fullRun] = true;
+        QwDebug << "QwParityDB::SetRunletID() => Executing sqlpp11 DataTakingPeriod(runlet) insert (no segment)" << QwLog::endl;
       }
 
       auto insert_id = QueryInsertAndGetId(row.insert_into());
@@ -393,9 +403,7 @@ UInt_t QwParityDB::SetAnalysisID(QwEventBuffer& qwevt)
     auto query = sqlpp::select(Analysis.analysisId)
                  .from(Analysis)
                  .where(Analysis.beamMode == "nbm"
-                        and Analysis.slopeCalculation == "off"
-                        and Analysis.slopeCorrection == "off"
-                        and Analysis.runletId == this->GetRunletID(qwevt));
+                        and Analysis.periodId == this->GetRunletID(qwevt));
     auto results = QuerySelect(query);
     size_t result_count = CountResults(results);
     if (result_count > 0) {
@@ -426,22 +434,16 @@ UInt_t QwParityDB::SetAnalysisID(QwEventBuffer& qwevt)
     QwParitySchema::Analysis Analysis;
     QwParitySchema::row<QwParitySchema::Analysis> analysis_row;
 
-    analysis_row[Analysis.runletId]  = GetRunletID(qwevt);
-    analysis_row[Analysis.seedId] = 1;
-
-    std::pair<UInt_t, UInt_t> event_range;
-    event_range = qwevt.GetEventRange();
+    analysis_row[Analysis.periodId]  = GetRunletID(qwevt);
+    analysis_row[Analysis.eeSeedId] = 1;
+    analysis_row[Analysis.epSeedId] = 1;
 
     analysis_row[Analysis.time]        = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
-    analysis_row[Analysis.bfChecksum] = "empty"; // we will match this as a real one later
+    analysis_row[Analysis.eeBfChecksum] = "empty"; // updated after blinder step
+    analysis_row[Analysis.epBfChecksum] = "empty"; // updated after blinder step
     analysis_row[Analysis.beamMode]   = "nbm";   // we will match this as a real one later
-    analysis_row[Analysis.nMps]       = 0;       // we will match this as a real one later
-    analysis_row[Analysis.nQrt]       = 4;       // we will match this as a real one later
-    analysis_row[Analysis.firstEvent] = event_range.first;
-    analysis_row[Analysis.lastEvent]  = event_range.second;
-    analysis_row[Analysis.segment]     = 0;       // we will match this as a real one later
-    analysis_row[Analysis.slopeCalculation] = "off";  // we will match this as a real one later
-    analysis_row[Analysis.slopeCorrection]  = "off"; // we will match this as a real one later
+    analysis_row[Analysis.regressionStatus] = false;
+    analysis_row[Analysis.rntupleEnabled] = false;
 
     // Analyzer Information Parsing
     QwRunCondition run_condition(
@@ -513,18 +515,38 @@ void QwParityDB::FillParameterFiles(QwSubsystemArrayParity& subsys){
   TList* param_file_list = subsys.GetParamFileNameList("mapfiles");
   try {
     auto c = GetScopedConnection();
-
-    QwParitySchema::ParameterFiles ParameterFiles;
-    QwParitySchema::row<QwParitySchema::ParameterFiles> parameter_file_row;
-    parameter_file_row[ParameterFiles.analysisId] = GetAnalysisID();
+    QwParitySchema::Analysis Analysis;
 
     param_file_list->Print();
     TIter next(param_file_list);
     TList *pfl_elem;
+    std::vector<std::string> files;
     while ((pfl_elem = (TList *) next())) {
-      parameter_file_row[ParameterFiles.filename] = pfl_elem->GetName();
-      QueryExecute(parameter_file_row.insert_into());
+      files.emplace_back(pfl_elem->GetName());
     }
+
+    auto escape_json = [](const std::string& input) {
+      std::string out;
+      out.reserve(input.size());
+      for (char ch : input) {
+        if (ch == '\\' || ch == '"') out.push_back('\\');
+        out.push_back(ch);
+      }
+      return out;
+    };
+    std::string json = "[";
+    for (size_t i = 0; i < files.size(); ++i) {
+      if (i) json += ",";
+      json += "\"";
+      json += escape_json(files[i]);
+      json += "\"";
+    }
+    json += "]";
+
+    auto update_query = sqlpp::update(Analysis)
+      .set(Analysis.parameterFiles = json)
+      .where(Analysis.analysisId == GetAnalysisID());
+    QueryExecute(update_query);
     delete param_file_list;
   }
   catch (const std::exception& er) {
@@ -569,6 +591,19 @@ UInt_t QwParityDB::GetDetectorID(const string& name, Bool_t zero_id_is_error)
     StoreDetectorIDs();
   }
 
+  UInt_t QwParityDB::GetDetectorTypeID(const string& detector_type)
+  {
+    if (fDetectorTypeIDs.empty()) {
+      StoreDetectorTypeIDs();
+    }
+    auto it = fDetectorTypeIDs.find(detector_type);
+    if (it == fDetectorTypeIDs.end()) {
+      QwError << "QwParityDB::GetDetectorTypeID() => Unable to determine detector_type_id for " << detector_type << QwLog::endl;
+      return 0;
+    }
+    return it->second;
+  }
+
   UInt_t detector_id = fDetectorIDs[name];
 
   if (zero_id_is_error && detector_id==0) {
@@ -579,10 +614,23 @@ UInt_t QwParityDB::GetDetectorID(const string& name, Bool_t zero_id_is_error)
         auto c = GetScopedConnection();
 
         QwParitySchema::Detector Detector;
+        QwParitySchema::DetectorType DetectorType;
         QwParitySchema::row<QwParitySchema::Detector> detector_row;
+        UInt_t default_detector_type_id = 0;
+        auto detector_type_query = sqlpp::select(DetectorType.detectorTypeId)
+          .from(DetectorType)
+          .where(DetectorType.detector == "md");
+        auto detector_type_results = QuerySelect(detector_type_query);
+        ForFirstResult(detector_type_results, [&](const auto& row) {
+          default_detector_type_id = row.detectorTypeId;
+        });
+        if (default_detector_type_id == 0) {
+          QwError << "Failed to resolve detector_type_id for detector='md'; cannot insert detector " << name << QwLog::endl;
+          return 0;
+        }
         detector_row[Detector.name] = name;
         detector_row[Detector.description] = "unknown";
-        detector_row[Detector.detectorType] = "md";  // default to main Detector type
+        detector_row[Detector.detectorTypeId] = default_detector_type_id;  // default to main detector type
 
         auto insert_id = QueryInsertAndGetId(detector_row.insert_into());
 
@@ -618,8 +666,8 @@ void QwParityDB::StoreDetectorIDs()
     QwParitySchema::Detector Detector{};
     auto query = sqlpp::select(sqlpp::all_of(Detector)).from(Detector).where(sqlpp::value(true));
     QuerySelectForEachResult(query, [&](const auto& row) {
-      QwDebug << "StoreDetectorID:  detector_id = " << row.detector_id << " name = " << row.name << QwLog::endl;
-      QwParityDB::fDetectorIDs.insert(std::make_pair(row.name, row.detector_id));
+      QwDebug << "StoreDetectorID:  detector_id = " << row.detectorId << " name = " << row.name << QwLog::endl;
+      QwParityDB::fDetectorIDs.insert(std::make_pair(row.name, row.detectorId));
     });
   }
   catch (const std::exception& er) {
@@ -627,6 +675,24 @@ void QwParityDB::StoreDetectorIDs()
     exit(1);
   }
   return;
+}
+
+void QwParityDB::StoreDetectorTypeIDs()
+{
+  try {
+    auto c = GetScopedConnection();
+    QwParitySchema::DetectorType DetectorType{};
+    auto query = sqlpp::select(sqlpp::all_of(DetectorType)).from(DetectorType).where(sqlpp::value(true));
+    QuerySelectForEachResult(query, [&](const auto& row) {
+      QwDebug << "StoreDetectorTypeID: detector_type_id = " << row.detectorTypeId
+              << " detector = " << row.detector << QwLog::endl;
+      QwParityDB::fDetectorTypeIDs.insert(std::make_pair(row.detector, row.detectorTypeId));
+    });
+  }
+  catch (const std::exception& er) {
+    QwError << er.what() << QwLog::endl;
+    exit(1);
+  }
 }
 
 
@@ -645,24 +711,24 @@ UInt_t QwParityDB::GetSlowControlDetectorID(const string& name)
     QwError << "QwParityDB::GetSlowControlDetectorID() => Unable to determine valid ID for the epics variable " << name << QwLog::endl;
 
     if (fDBInsertMissingKeys) {
-      QwWarning << "Inserting missing variable " << name << " into ScDetector table." << QwLog::endl;
+      QwWarning << "Inserting missing variable " << name << " into SlowControlDetector table." << QwLog::endl;
       try {
         auto c = GetScopedConnection();
 
-        QwParitySchema::ScDetector ScDetector;
-        QwParitySchema::row<QwParitySchema::ScDetector> sc_detector_row;
-        sc_detector_row[ScDetector.name] = name;
-        sc_detector_row[ScDetector.units] = "unknown";
-        sc_detector_row[ScDetector.comment] = "unknown";
+        QwParitySchema::SlowControlDetector SlowControlDetector;
+        QwParitySchema::row<QwParitySchema::SlowControlDetector> sc_detector_row;
+        sc_detector_row[SlowControlDetector.name] = name;
+        sc_detector_row[SlowControlDetector.units] = "unknown";
+        sc_detector_row[SlowControlDetector.comment] = "unknown";
 
         auto insert_id = QueryInsertAndGetId(sc_detector_row.insert_into());
 
         if (insert_id != 0) {
           fSlowControlDetectorIDs[name] = insert_id;
           sc_detector_id = insert_id;
-          QwWarning << "Successfully inserted variable " << name << " into ScDetector table with ID " << insert_id << QwLog::endl;
+          QwWarning << "Successfully inserted variable " << name << " into SlowControlDetector table with ID " << insert_id << QwLog::endl;
         } else {
-          QwError << "Failed to insert variable " << name << " into ScDetector table." << QwLog::endl;
+          QwError << "Failed to insert variable " << name << " into SlowControlDetector table." << QwLog::endl;
         }
       }
       catch (const std::exception& er) {
@@ -704,11 +770,11 @@ void QwParityDB::StoreSlowControlDetectorIDs()
   try {
     auto c = GetScopedConnection();
 
-    QwParitySchema::ScDetector ScDetector{};
-    auto query = sqlpp::select(sqlpp::all_of(ScDetector)).from(ScDetector).where(sqlpp::value(true));
+    QwParitySchema::SlowControlDetector SlowControlDetector{};
+    auto query = sqlpp::select(sqlpp::all_of(SlowControlDetector)).from(SlowControlDetector).where(sqlpp::value(true));
     QuerySelectForEachResult(query, [&](const auto& row) {
-      QwDebug << "StoreSlowControlDetectorID: sc_detector_id = " << row.scDetectorId << " name = " << row.name << QwLog::endl;
-      QwParityDB::fSlowControlDetectorIDs.insert(std::make_pair(row.name, row.scDetectorId));
+      QwDebug << "StoreSlowControlDetectorID: slow_control_detector_id = " << row.slowControlDetectorId << " name = " << row.name << QwLog::endl;
+      QwParityDB::fSlowControlDetectorIDs.insert(std::make_pair(row.name, row.slowControlDetectorId));
     });
   }
   catch (const std::exception& er) {
@@ -729,8 +795,8 @@ void QwParityDB::StoreErrorCodeIDs()
     QwParitySchema::ErrorCode ErrorCode{};
     auto query = sqlpp::select(sqlpp::all_of(ErrorCode)).from(ErrorCode).where(sqlpp::value(true));
     QuerySelectForEachResult(query, [&](const auto& row) {
-      QwDebug << "StoreErrorCodeID: error_code_id = " << row.errorCodeId << " quantity = " << row.quantity << QwLog::endl;
-      QwParityDB::fErrorCodeIDs.insert(std::make_pair(row.quantity, row.errorCodeId));
+      QwDebug << "StoreErrorCodeID: error_code_id = " << row.errorCodeId << " description = " << row.description << QwLog::endl;
+      QwParityDB::fErrorCodeIDs.insert(std::make_pair(row.description, row.errorCodeId));
     });
   }
   catch (const std::exception& er) {
