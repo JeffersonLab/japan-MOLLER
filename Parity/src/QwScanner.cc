@@ -465,7 +465,7 @@ void QwScanner::LoadMockDataParameters(TString pedestalfile) {
         }
     }
 
-    fFileForHist = TFile::Open(varrootfile);
+    fFileForHist = TFile::Open("Parity/prminput/"+varrootfile);
     if (fFileForHist->IsZombie()) {
         QwError << "could not open root file" << QwLog::endl;
     }
