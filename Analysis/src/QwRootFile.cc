@@ -246,6 +246,12 @@ void QwRootFile::DefineOptions(QwOptions &options)
   options.AddOptions("ROOT output options")
     ("disable-slow-tree", po::value<bool>()->default_bool_value(false),
      "disable slow control tree");
+  options.AddOptions("ROOT output options")
+    ("disable-redundant-trees", po::value<bool>()->default_bool_value(false),
+     "disable the per-entry trees whose content is already captured by a "
+     "matching histogram directory (evt/mul/burst).  Histograms, the "
+     "running-sum trees (evts/muls/bursts), the pair tree (pr) and the slow "
+     "control tree (slow) are kept.");
 
 #ifdef HAS_RNTUPLE_SUPPORT
   // Define the RNTuple options
@@ -270,6 +276,12 @@ void QwRootFile::DefineOptions(QwOptions &options)
   options.AddOptions("ROOT output options")
     ("mapfile-update-interval", po::value<int>()->default_value(-1),
      "Events between a map file update");
+  options.AddOptions("ROOT output options")
+    ("fill-prescale", po::value<int>()->default_value(1),
+     "Fill trees and histograms only on every Nth processed event (physics is "
+     "still computed every event).  Roughly multiplies live (mapfile) throughput "
+     "by N at the cost of fewer accumulated monitoring entries.  Default 1 = "
+     "fill every event.");
 
   // Define the autoflush and autosave option (default values by ROOT)
   options.AddOptions("ROOT performance options")
@@ -410,12 +422,44 @@ void QwRootFile::ProcessOptions(QwOptions &options)
   if (options.GetValue<bool>("disable-burst-tree"))  DisableTree("^burst$");
   if (options.GetValue<bool>("disable-slow-tree")) DisableTree("^slow$");
 
+  // Option 'disable-redundant-trees' disables the per-entry trees that are
+  // fully captured by their matching histogram directories
+  // (evt->evt_histo, mul->mul_histo, burst->burst_histo).  The running-sum
+  // trees (evts/muls/bursts) hold the unbinned moments, and the pair (pr)
+  // and slow (EPICS) trees have no histogram equivalent, so they are left
+  // untouched.
+  if (options.GetValue<bool>("disable-redundant-trees")) {
+    DisableTree("^evt$");
+    DisableTree("^mul$");
+    DisableTree("^burst$");
+  }
+
   // Options 'num-accepted-events' and 'num-discarded-events' for
   // prescaling of the tree output
   fNumMpsEventsToSave = options.GetValue<int>("num-mps-accepted-events");
   fNumMpsEventsToSkip = options.GetValue<int>("num-mps-discarded-events");
   fNumHelEventsToSave = options.GetValue<int>("num-mps-accepted-events");
   fNumHelEventsToSkip = options.GetValue<int>("num-mps-discarded-events");
+
+  // Live-output fill prescale.  Filling trees and histograms is a sizeable
+  // fraction of the per-event cost, so thinning it to 1-in-N raises throughput
+  // (e.g. for live mapfile monitoring) while physics is still processed every
+  // event.  The histogram side is gated in FillHistograms() via
+  // fHistoFillPrescale; the tree side reuses the existing per-tree prescale.
+  // If the user explicitly set a tree prescale we leave it untouched.
+  int fillPrescale = options.GetValue<int>("fill-prescale");
+  if (fillPrescale < 1) fillPrescale = 1;
+  fHistoFillPrescale = fillPrescale;
+  if (fillPrescale > 1) {
+    if (fNumMpsEventsToSave == 0 && fNumMpsEventsToSkip == 0) {
+      fNumMpsEventsToSave = 1;
+      fNumMpsEventsToSkip = fillPrescale - 1;
+    }
+    if (fNumHelEventsToSave == 0 && fNumHelEventsToSkip == 0) {
+      fNumHelEventsToSave = 1;
+      fNumHelEventsToSkip = fillPrescale - 1;
+    }
+  }
 
   // Update interval for the map file
   fUpdateInterval = options.GetValue<int>("mapfile-update-interval");

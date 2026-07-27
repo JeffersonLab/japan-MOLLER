@@ -475,6 +475,16 @@ class QwRootTree {
     /// Fill the branches for generic objects
     template < class T >
     void FillTreeBranches(const T& object) {
+      // Prescale peek.  Gathering the branch vector (FillTreeVector) copies
+      // every channel value and is a sizeable fraction of the per-event cost.
+      // When the tree is prescaled, Fill() will discard this event anyway, so
+      // skip the gather as well.  This mirrors Fill()'s computation exactly
+      // (Fill() does ++fCurrentEvent then %= fNumEventsCycle), so the gather
+      // and the write always agree on which events are kept.
+      if (fNumEventsCycle > 0) {
+        UInt_t predicted = (fCurrentEvent + 1) % fNumEventsCycle;
+        if (predicted > fNumEventsToSave) return;
+      }
       if (typeid(object).name() == fType) {
         // Fill the branch vector
         object.FillTreeVector(fVector);
@@ -920,6 +930,15 @@ class QwRootFile {
       update_count++;
       if ((fUpdateInterval > 0) && ( update_count % fUpdateInterval == 0)) Update();
 
+      // Histogram fill prescaling.  Physics is processed every event, but the
+      // (relatively expensive) histogram fill is performed only on every Nth
+      // event.  This thins the live monitoring output to gain throughput; the
+      // visual refresh rate is unaffected because the displayed histograms
+      // simply accumulate slightly fewer entries.
+      if (fHistoFillPrescale > 1) {
+        if (++fHistoFillCount % fHistoFillPrescale != 0) return;
+      }
+
       // Debug directory registration
       std::string type = typeid(object).name();
       bool hasDir = HasDirByType(object);
@@ -1335,6 +1354,12 @@ class QwRootFile {
     UInt_t fNumHelEventsToSave;
     UInt_t fCircularBufferSize;
     UInt_t fCurrentEvent;
+
+    /// Live-output fill prescale: fill histograms (and, via the per-tree
+    /// prescale, the trees) only on every Nth processed event.  Default 1
+    /// fills on every event.  Used to raise throughput in live mapfile mode.
+    UInt_t fHistoFillPrescale = 1;
+    UInt_t fHistoFillCount = 0;
 
     /// Maximum tree size
     static const Long64_t kMaxTreeSize;
