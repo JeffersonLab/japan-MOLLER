@@ -8,6 +8,8 @@
 #include <fstream>
 #include <iostream>
 #include <list>
+#include <functional>
+#include <cstdint>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctime>
@@ -20,6 +22,8 @@
 #include <TGImageMap.h>
 #include <TGFileDialog.h>
 #include <TKey.h>
+#include <TMemFile.h>
+#include <TObjString.h>
 #include <TSystem.h>
 #include <TLatex.h>
 #include <TText.h>
@@ -95,13 +99,17 @@ void OnlineGUI::CreateGUI(const TGWindow *p, UInt_t w, UInt_t h)
     } else {
       fFileAlive = kTRUE;
       runNumber  = fConfig->GetRunNumber();
-      // TMapFile hosts directly-stored objects: histograms and (when the
-      // producer publishes them) TTrees whose live in-memory baskets ride
-      // along through TTree::Streamer.  RNTuples and DataFrame need a real
-      // TFile so they remain unavailable here.
+      // TMapFile hosts directly-stored objects: histograms and TTrees can be
+      // read directly, while RNTuples require a serialized TMemFile snapshot.
       GetFileObjects();
       GetRootTree();
       GetTreeVars();
+#ifdef HAS_RNTUPLE_SUPPORT
+      if(LoadRNTupleSnapshot()) {
+        GetRootNTuple();
+        GetNTupleVars();
+      }
+#endif // HAS_RNTUPLE_SUPPORT
       for(UInt_t i=0; i<fRootTree.size(); i++) {
         if(fRootTree[i]==0) {
           fRootTree.erase(fRootTree.begin() + i);
@@ -444,14 +452,24 @@ void OnlineGUI::DoDraw()
       UInt_t ntupleIndex = GetNTupleIndex(drawcommand[0]);
 #endif
 
-      if (treeIndex <= fRootTree.size()) {
+      if (treeIndex < fRootTree.size()) {
         TreeDraw(drawcommand);
 #ifdef HAS_RNTUPLE_SUPPORT
-      } else if (ntupleIndex <= fRootNTuple.size()) {
-        // Always use DataFrame for RNTuple variables
-        if(fVerbosity>=2)
-          cout << "Using DataFrame for RNTuple variable: " << drawcommand[0] << endl;
-        DataFrameDraw(drawcommand);
+      } else if (ntupleIndex < fRootNTuple.size()) {
+#ifdef QW_ENABLE_MAPFILE
+        if(fIsMapFile) {
+          if(fVerbosity>=2)
+            cout << "Using NTupleDraw for mapfile RNTuple variable: "
+                 << drawcommand[0] << endl;
+          NTupleDraw(drawcommand);
+        } else
+#endif
+        {
+          // Use DataFrame for file-backed RNTuple variables.
+          if(fVerbosity>=2)
+            cout << "Using DataFrame for RNTuple variable: " << drawcommand[0] << endl;
+          DataFrameDraw(drawcommand);
+        }
 #endif // HAS_RNTUPLE_SUPPORT
       } else {
         TreeDraw(drawcommand); // Fallback to TreeDraw for backwards compatibility
@@ -824,33 +842,63 @@ void OnlineGUI::GetRootNTuple() {
   fRootNTupleNames.clear();
 
   std::list<TString> found;
+#ifdef QW_ENABLE_MAPFILE
+  if(fIsMapFile && fRNTupleMemFile) {
+    TIter nextKey(fRNTupleMemFile->GetListOfKeys());
+    TKey *key = nullptr;
+    while((key = static_cast<TKey*>(nextKey())) != nullptr) {
+      TString keyName = key->GetName();
+      auto *anchor = fRNTupleMemFile->Get<ROOT::RNTuple>(keyName.Data());
+      if(anchor != nullptr) {
+        found.push_back(keyName);
+      }
+    }
+  } else
+#endif
+  {
   for(UInt_t i=0; i<fileObjects.size(); i++) {
-
     if(fVerbosity>=2)
       cout << "Object = " << fileObjects[i].second <<
         "     Name = " << fileObjects[i].first << endl;
 
-    if(fileObjects[i].second.Contains("RNTuple"))
+    if(fileObjects[i].second.Contains("RNTuple")) {
       found.push_back(fileObjects[i].first);
+    }
+  }
   }
 
-  // Remove duplicates, then insert into fRootNTuple
+  found.sort();
   found.unique();
-  UInt_t nNTuples = found.size();
+  while(!found.empty()) {
+    TString ntupleName = found.front();
+    found.pop_front();
 
-  for(UInt_t i=0; i<nNTuples; i++) {
     try {
-      // Get the file name to use with RNTupleReader
-      TString fileName = fRootFile->GetName();
-      TString ntupleName = found.front();
-      auto ntuple = ROOT::RNTupleReader::Open(ntupleName.Data(), fileName.Data());
-      fRootNTuple.push_back(std::move(ntuple));
-      fRootNTupleNames.push_back(ntupleName);
-      found.pop_front();
+      std::unique_ptr<ROOT::RNTupleReader> ntuple;
+#ifdef QW_ENABLE_MAPFILE
+      if(fIsMapFile && fRNTupleMemFile) {
+        auto *anchor = fRNTupleMemFile->Get<ROOT::RNTuple>(ntupleName.Data());
+        if(anchor != nullptr) {
+          ntuple = ROOT::RNTupleReader::Open(*anchor);
+        }
+      } else
+#endif
+      {
+        TString fileName = fRootFile ? fRootFile->GetName() : "";
+        if(!fileName.IsNull()) {
+          ntuple = ROOT::RNTupleReader::Open(ntupleName.Data(), fileName.Data());
+        }
+      }
+
+      if(ntuple != nullptr) {
+        fRootNTuple.push_back(std::move(ntuple));
+        fRootNTupleNames.push_back(ntupleName);
+      } else if(fVerbosity>=1) {
+        cout << "Failed to open RNTuple " << ntupleName << ": null reader" << endl;
+      }
     } catch (std::exception& e) {
       if(fVerbosity>=1)
-        cout << "Failed to open RNTuple " << found.front() << ": " << e.what() << endl;
-      found.pop_front();
+        cout << "Failed to open RNTuple " << ntupleName << ": " << e.what() << endl;
     }
   }
 
@@ -952,6 +1000,34 @@ UInt_t OnlineGUI::GetNTupleIndex(TString var) {
 
   return fRootNTuple.size()+1;
 }
+#ifdef QW_ENABLE_MAPFILE
+Bool_t OnlineGUI::LoadRNTupleSnapshot() {
+  if(fMapFile == nullptr) {
+    return kFALSE;
+  }
+  TObject *blob = fMapFile->Get("rntuple_snap");
+  if(blob == nullptr) {
+    fRNTupleMemFile.reset();
+    return kFALSE;
+  }
+  auto *payload = dynamic_cast<TObjString*>(blob);
+  if(payload == nullptr) {
+    delete blob;
+    fRNTupleMemFile.reset();
+    return kFALSE;
+  }
+  const TString &data = payload->String();
+  fRNTupleMemFile = std::make_unique<TMemFile>("rntuple_snap.root",
+      const_cast<char*>(data.Data()), data.Length(), "READ");
+  delete blob;
+  if(fRNTupleMemFile == nullptr || fRNTupleMemFile->IsZombie()) {
+    fRNTupleMemFile.reset();
+    return kFALSE;
+  }
+  return kTRUE;
+}
+#endif
+
 #endif // HAS_RNTUPLE_SUPPORT
 
 void OnlineGUI::MacroDraw(vector <TString> command) {
@@ -1247,6 +1323,58 @@ Int_t OnlineGUI::OpenRootFile() {
 
 }
 
+TH1* OnlineGUI::MakeDelta(TH1* current, const TString& key, Int_t nIter)
+{
+  // Build the "what's new" histogram for the -delta option.
+  //
+  // Returns a private clone holding (current - snapshot from nIter updates
+  // ago), and pushes the current state onto the rolling per-key history so
+  // the next update again shows only the addition over the last nIter
+  // refreshes.  Only the last nIter snapshots are kept, so the oldest stored
+  // snapshot is exactly the one from nIter updates ago once the history has
+  // filled.  Until then (and on the first call for a key) the oldest
+  // available snapshot -- or nothing, giving the full histogram -- is used.
+  //
+  // The returned histogram and the stored snapshots are detached from any
+  // directory (SetDirectory(0)) and owned by us; the drawn clone is
+  // intentionally long-lived so it stays alive for the pad, mirroring the
+  // existing mapfile draw path.
+  static Long64_t counter = 0;
+
+  if (nIter < 1) nIter = 1;
+
+  std::deque<TH1*>& history = fPrevHist[key];
+
+  // Baseline = oldest snapshot we keep, which is the one from nIter updates
+  // ago once the history has filled to nIter entries.
+  TH1* prev = history.empty() ? 0 : history.front();
+
+  TH1* delta = static_cast<TH1*>(current->Clone(Form("__panguin_delta_%lld", counter++)));
+  delta->SetDirectory(0);
+  if (prev) {
+    // Same binning is guaranteed because both come from the same object.
+    delta->Add(prev, -1.0);
+  }
+  if (nIter == 1) {
+    delta->SetTitle(TString(current->GetTitle()) + " (new since last update)");
+  } else {
+    delta->SetTitle(TString(current->GetTitle()) +
+                    Form(" (new over last %d updates)", nIter));
+  }
+
+  // Record the current state as the newest snapshot, then keep only the last
+  // nIter snapshots so history.front() stays nIter updates behind.
+  TH1* snapshot = static_cast<TH1*>(current->Clone(Form("__panguin_snap_%lld", counter++)));
+  snapshot->SetDirectory(0);
+  history.push_back(snapshot);
+  while (history.size() > (size_t)nIter) {
+    delete history.front();
+    history.pop_front();
+  }
+
+  return delta;
+}
+
 void OnlineGUI::HistDraw(vector <TString> command) {
   // Called by DoDraw(), this will plot a histogram.
 
@@ -1257,6 +1385,17 @@ void OnlineGUI::HistDraw(vector <TString> command) {
     if(command[1]=="noshowgolden") {
       showGolden = kFALSE;
     }
+
+  // -delta[ N]: draw what is new over the last N updates (default N=1, i.e.
+  // since the previous update).  This is incompatible with the golden
+  // overlay, so the golden reference is suppressed when a delta is requested.
+  Bool_t doDelta = (command.size()>6 && command[6]=="delta");
+  Int_t deltaN = 1;
+  if(doDelta && command.size()>7 && command[7].IsDigit() && command[7].Atoi()>0)
+    deltaN = command[7].Atoi();
+  if(doDelta) showGolden = kFALSE;
+  TString deltaKey = Form("%u_%s", current_page, command[0].Data());
+
   cout<<"showGolden= "<<showGolden<<endl;
 
   // Determine dimensionality of histogram
@@ -1276,6 +1415,8 @@ void OnlineGUI::HistDraw(vector <TString> command) {
 #endif
 	if(mytemp1d==NULL || mytemp1d->GetEntries()==0) {
 	  BadDraw("Empty Histogram");
+	} else if(doDelta) {
+	  MakeDelta(mytemp1d, deltaKey, deltaN)->Draw();
 	} else {
 	  if(showGolden) {
 	    fGoldenFile->cd();
@@ -1308,6 +1449,8 @@ void OnlineGUI::HistDraw(vector <TString> command) {
 #endif
 	if(mytemp2d==NULL || mytemp2d->GetEntries()==0) {
 	  BadDraw("Empty Histogram");
+	} else if(doDelta) {
+	  MakeDelta(mytemp2d, deltaKey, deltaN)->Draw();
 	} else {
 	  // These are commented out for some reason (specific to DVCS?)
 	  // 	  if(showGolden) {
@@ -1336,6 +1479,8 @@ void OnlineGUI::HistDraw(vector <TString> command) {
 #endif
 	if(mytemp3d==NULL || mytemp3d->GetEntries()==0) {
 	  BadDraw("Empty Histogram");
+	} else if(doDelta) {
+	  MakeDelta(mytemp3d, deltaKey, deltaN)->Draw();
 	} else {
 	  mytemp3d->Draw();
 	  if(showGolden) {
@@ -1531,8 +1676,49 @@ void OnlineGUI::NTupleDraw(vector <TString> command) {
         return;
       }
 
-      // Create a view for double values
-      auto view = ntuple->GetView<Double_t>(var.Data());
+      // RNTuple views are strongly typed, so create a view matching the
+      // field's actual on-disk type and expose the values as Double_t for
+      // histogramming.  Without this, non-double fields (e.g. int) fail to
+      // draw because GetView<Double_t> rejects them.
+      const std::string typeName = descriptor.GetFieldDescriptor(fieldId).GetTypeName();
+
+      std::function<Double_t(std::uint64_t)> getValue;
+      auto makeAccessor = [&](auto typeTag) {
+        using FieldT = decltype(typeTag);
+        auto v = std::make_shared<decltype(ntuple->GetView<FieldT>(var.Data()))>(
+            ntuple->GetView<FieldT>(var.Data()));
+        getValue = [v](std::uint64_t i) {
+          return static_cast<Double_t>((*v)(i));
+        };
+      };
+
+      if (typeName == "double" || typeName == "Double_t") {
+        makeAccessor(double{});
+      } else if (typeName == "float" || typeName == "Float_t") {
+        makeAccessor(float{});
+      } else if (typeName == "std::int32_t" || typeName == "int" || typeName == "Int_t") {
+        makeAccessor(std::int32_t{});
+      } else if (typeName == "std::uint32_t" || typeName == "unsigned int" || typeName == "UInt_t") {
+        makeAccessor(std::uint32_t{});
+      } else if (typeName == "std::int64_t" || typeName == "long" || typeName == "long long" || typeName == "Long64_t") {
+        makeAccessor(std::int64_t{});
+      } else if (typeName == "std::uint64_t" || typeName == "unsigned long" || typeName == "unsigned long long" || typeName == "ULong64_t") {
+        makeAccessor(std::uint64_t{});
+      } else if (typeName == "std::int16_t" || typeName == "short" || typeName == "Short_t") {
+        makeAccessor(std::int16_t{});
+      } else if (typeName == "std::uint16_t" || typeName == "unsigned short" || typeName == "UShort_t") {
+        makeAccessor(std::uint16_t{});
+      } else if (typeName == "std::int8_t" || typeName == "char" || typeName == "signed char" || typeName == "Char_t") {
+        makeAccessor(std::int8_t{});
+      } else if (typeName == "std::uint8_t" || typeName == "unsigned char" || typeName == "UChar_t") {
+        makeAccessor(std::uint8_t{});
+      } else if (typeName == "bool" || typeName == "Bool_t") {
+        makeAccessor(bool{});
+      } else {
+        // Fall back to a double view; if the field really is not convertible
+        // the exception is caught below and reported via BadDraw.
+        makeAccessor(double{});
+      }
 
       // Determine histogram bounds from data
       auto nEntries = ntuple->GetNEntries();
@@ -1550,14 +1736,14 @@ void OnlineGUI::NTupleDraw(vector <TString> command) {
         decltype(nEntries) step = nEntries / sampleSize;
         for (decltype(nEntries) i = 0; i < sampleSize; i++) {
           decltype(nEntries) sampleIndex = (i * step) % nEntries;
-          Double_t val = view(sampleIndex);
+          Double_t val = getValue(sampleIndex);
           if (val < minVal) minVal = val;
           if (val > maxVal) maxVal = val;
         }
       } else {
         // For smaller datasets, sample sequentially from the beginning
         for (decltype(nEntries) i = 0; i < sampleSize; i++) {
-          Double_t val = view(i);
+          Double_t val = getValue(i);
           if (val < minVal) minVal = val;
           if (val > maxVal) maxVal = val;
         }
@@ -1570,7 +1756,7 @@ void OnlineGUI::NTupleDraw(vector <TString> command) {
       // Fill histogram
       decltype(nEntries) entriesFilled = 0;
       for (decltype(nEntries) i = 0; i < nEntries; i++) {
-        Double_t val = view(i);
+        Double_t val = getValue(i);
 
         // Apply cuts if specified (simplified implementation)
         Bool_t passCut = kTRUE;
@@ -1661,6 +1847,7 @@ void OnlineGUI::PrintPages() {
 #ifdef QW_ENABLE_MAPFILE
   fIsMapFile = LooksLikeMapFile(fConfig->GetRootFile());
   if(fIsMapFile) {
+    fRootFile = nullptr;
     fMapFile = TMapFile::Create(fConfig->GetRootFile(), "READ");
     if(fMapFile == nullptr) {
       cout << "ERROR:  mapfile: " << fConfig->GetRootFile()
@@ -1669,11 +1856,14 @@ void OnlineGUI::PrintPages() {
     } else {
       fFileAlive = kTRUE;
       GetFileObjects();
-      // Same as CreateGUI: TTrees published into the mapfile via Add/Update
-      // can be enumerated and drawn; RNTuples and DataFrame still need a
-      // real TFile and remain unavailable.
       GetRootTree();
       GetTreeVars();
+#ifdef HAS_RNTUPLE_SUPPORT
+      if(LoadRNTupleSnapshot()) {
+        GetRootNTuple();
+        GetNTupleVars();
+      }
+#endif // HAS_RNTUPLE_SUPPORT
       for(UInt_t i=0; i<fRootTree.size(); i++) {
         if(fRootTree[i]==0) {
           fRootTree.erase(fRootTree.begin() + i);
@@ -1693,9 +1883,11 @@ void OnlineGUI::PrintPages() {
     GetFileObjects();
     GetRootTree();
     GetTreeVars();
+#ifdef HAS_RNTUPLE_SUPPORT
     // Initialize RNTuples
     GetRootNTuple();
     GetNTupleVars();
+#endif // HAS_RNTUPLE_SUPPORT
     // Initialize DataFrame for large dataset support
     InitializeDataFrame();
     for(UInt_t i=0; i<fRootTree.size(); i++) {
@@ -1824,6 +2016,7 @@ void OnlineGUI::MyCloseWindow()
   if(fGoldenFile!=NULL) delete fGoldenFile;
   if(fRootFile!=NULL) delete fRootFile;
 #ifdef QW_ENABLE_MAPFILE
+  fRNTupleMemFile.reset();
   if(fMapFile!=nullptr) { fMapFile->Close(); fMapFile = nullptr; }
 #endif
   delete fConfig;
@@ -2058,6 +2251,7 @@ OnlineGUI::~OnlineGUI()
   if(fIsMapFile) {
     for(auto *t : fRootTree) delete t;
     fRootTree.clear();
+    fRNTupleMemFile.reset();
   }
   if(fMapFile!=nullptr) { fMapFile->Close(); fMapFile = nullptr; }
 #endif
