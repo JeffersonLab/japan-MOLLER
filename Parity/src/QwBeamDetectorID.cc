@@ -58,7 +58,8 @@ QwBeamDetectorID::QwBeamDetectorID(Int_t subbankid,
     }
   } else if (fmoduletype == "MOLLERADC") {
     UInt_t decode_mode = 0;
-    paramfile.ReturnValue("decode_mode", decode_mode);
+    paramfile.ReturnValue("molleradc_decode_mode", decode_mode)
+      || paramfile.ReturnValue("decode_mode", decode_mode);
     QwMollerADC_Channel::SetDecodeMode(decode_mode);
 
     fWordInSubbank = QwMollerADC_Channel::GetBufferOffset(modnum, channum);

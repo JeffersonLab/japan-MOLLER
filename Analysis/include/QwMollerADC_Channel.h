@@ -360,6 +360,7 @@ private:
   static constexpr Int_t kNewReshuffledDefaultBlocks = kMaxBlock;
   static constexpr Int_t kOldMockWordsPerChannel = 30;
   static constexpr Int_t kNewReshuffledWordsPerChannel = 14;
+  static Bool_t fDecodeModeHasBeenSet;
   static Int_t GetWordsPerChannel();
   static Int_t GetChannelsPerModule();
   static Int_t GetModuleHeaderWords();

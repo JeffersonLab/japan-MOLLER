@@ -342,7 +342,8 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
         if (modtype=="MOLLERADC") {
 
             UInt_t decode_mode = 0;
-            mapstr.ReturnValue("decode_mode", decode_mode);
+            mapstr.ReturnValue("molleradc_decode_mode", decode_mode)
+              || mapstr.ReturnValue("decode_mode", decode_mode);
             QwMollerADC_Channel::SetDecodeMode(decode_mode);
 
 	        Int_t offset = QwMollerADC_Channel::GetBufferOffset(modnum, channum)+vqwk_buffer_offset;

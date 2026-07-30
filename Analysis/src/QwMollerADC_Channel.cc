@@ -24,6 +24,7 @@ const Bool_t QwMollerADC_Channel::kDEBUG = kFALSE;
 const Int_t  QwMollerADC_Channel::kMaxChannels     = 16;
 const Int_t  QwMollerADC_Channel::kModuleHeaderWords = 8;
 QwMollerADC_Channel::EDecodeMode QwMollerADC_Channel::fDecodeMode = QwMollerADC_Channel::kOldMock;
+Bool_t QwMollerADC_Channel::fDecodeModeHasBeenSet = kFALSE;
 
 const Double_t QwMollerADC_Channel::kTimePerSample = (2.0/30.0) * Qw::us; //2.0 originally
 
@@ -254,7 +255,7 @@ Int_t QwMollerADC_Channel::GetWordsPerChannel()
       return kNewReshuffledWordsPerChannel;
   }
 
-  return kNewReshuffledWordsPerChannel;
+  return kOldMockWordsPerChannel;
 }
 
 Int_t QwMollerADC_Channel::GetChannelsPerModule()
@@ -266,7 +267,7 @@ Int_t QwMollerADC_Channel::GetChannelsPerModule()
       return kNewReshuffledChannelsPerModule;
   }
 
-  return kNewReshuffledChannelsPerModule;
+  return kOldMockChannelsPerModule;
 }
 
 Int_t QwMollerADC_Channel::GetModuleHeaderWords()
@@ -278,7 +279,7 @@ Int_t QwMollerADC_Channel::GetModuleHeaderWords()
       return kModuleHeaderWords;
   }
 
-  return kModuleHeaderWords;
+  return 0;
 }
 
 Int_t QwMollerADC_Channel::GetDefaultBlocksPerEvent()
@@ -290,20 +291,42 @@ Int_t QwMollerADC_Channel::GetDefaultBlocksPerEvent()
       return kNewReshuffledDefaultBlocks;
   }
 
-  return kNewReshuffledDefaultBlocks;
+  return kOldMockDefaultBlocks;
 }
 
 void QwMollerADC_Channel::SetDecodeMode(UInt_t input)
 {
-  fDecodeMode = static_cast<EDecodeMode>(input);
+  if (input != static_cast<UInt_t>(kOldMock)
+      && input != static_cast<UInt_t>(kNewReshuffled)) {
+    QwError << "QwMollerADC_Channel::SetDecodeMode: Invalid "
+            << "MOLLERADC_decode_mode " << input
+            << ". Valid values are 0 (old mock) and 1 (new reshuffled)."
+            << QwLog::endl;
+    throw std::runtime_error("Invalid MOLLERADC_decode_mode");
+  }
+
+  const EDecodeMode requested_mode = static_cast<EDecodeMode>(input);
+  if (fDecodeModeHasBeenSet && requested_mode != fDecodeMode) {
+    QwError << "QwMollerADC_Channel::SetDecodeMode: Inconsistent "
+            << "MOLLERADC_decode_mode. First mode was "
+            << static_cast<UInt_t>(fDecodeMode)
+            << ", but a later map/config requested " << input
+            << ". Mixed MOLLERADC decode modes are not supported "
+            << "in one datastream." << QwLog::endl;
+    throw std::runtime_error("Inconsistent MOLLERADC_decode_mode");
+  }
+
+  fDecodeMode = requested_mode;
+  fDecodeModeHasBeenSet = kTRUE;
 }
 
 void QwMollerADC_Channel::LoadChannelParameters(QwParameterFile &paramfile){
   UInt_t value = 0;
-  if (paramfile.ReturnValue("decode_mode", value)){
-     SetDecodeMode(value);
-     SetNumberOfDataWords(GetWordsPerChannel());
-     }
+  if (paramfile.ReturnValue("molleradc_decode_mode", value)
+      || paramfile.ReturnValue("decode_mode", value)) {
+    SetDecodeMode(value);
+    SetNumberOfDataWords(GetWordsPerChannel());
+  }
 
   if (paramfile.ReturnValue("sample_size", value)) {
     SetDefaultSampleSize(value);
@@ -335,12 +358,6 @@ void QwMollerADC_Channel::LoadChannelParameters(QwParameterFile &paramfile){
     }
     fBlocksPerEvent = NumberOfBlocks;
   } else {
-    QwWarning << "MollerADC Channel "
-              << GetElementName()
-              << " cannot set NumberOfBlocks. Defaulting to "
-              << GetDefaultBlocksPerEvent() << "."
-              << QwLog::endl;
-
     fBlocksPerEvent = GetDefaultBlocksPerEvent();
   }
 };
@@ -731,9 +748,9 @@ int blockindex = static_cast<int>(std::round(static_cast<double>(ch_sample_count
     return v20;
   };
 
-  int32_t ch_max_20 = sign_extend20(
-                        static_cast<int32_t>((ch_misc >> 20) & 0xFFFFF));
   int32_t ch_min_20 = sign_extend20(
+                        static_cast<int32_t>((ch_misc >> 20) & 0xFFFFF));
+  int32_t ch_max_20 = sign_extend20(
                         static_cast<int32_t>( ch_misc        & 0xFFFFF));
 
 

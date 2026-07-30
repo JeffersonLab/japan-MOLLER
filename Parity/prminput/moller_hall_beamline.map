@@ -1,38 +1,39 @@
-! Helicity Decoder signals input to intadcse08 and intadcse09
-decode_mode = 1
+! mapping connections for run 1309 in the hall
+MOLLERADC_decode_mode = 1
 
-
-Bank = 212
 sample_size = 7201
 NumberOfBlocks = 4
+
+! connections to intadcse08
 ROC = 25
-
-MollerADC 0 0 bcm pair_sync_1
-MollerADC 0 4 bcm reported_helicity_1
-MollerADC 0 6 bcm pattern_sync_1
-MollerADC 0 8 bcm tsettle_1
-
-
-
-ROC = 21
-
-MollerADC 0 0 bcm pair_sync_2
-MollerADC 0 4 bcm reported_helicity_2
-MollerADC 0 6 bcm pattern_sync_2
-MollerADC 0 8 bcm tsettle_2
+Bank = 212
+MollerADC 0 0 bcm hd_Pair_Sync_1
+MollerADC 0 2 bcm hd_Hel_State_1
+MollerADC 0 4 bcm hd_Pat_Sync_1
+MollerADC 0 6 bcm hd_TSettle_1
 
 
-! battery input connections to intadcse12
-
+! connections to intadcse12
 ROC = 06
+Bank = 212
+MollerADC 0 0 bcm hd_Pair_Sync_2
+MollerADC 0 2 bcm hd_Hel_State_2
+MollerADC 0 4 bcm hd_Pat_Sync_2
+MollerADC 0 6 bcm hd_TSettle_2
 
-MollerADC 0 0 bcm battery_hall_1
-MollerADC 0 2 bcm battery_hall_2
 
+! battery input connections to intadcse10
+ROC = 09
+Bank = 212
+MollerADC 0 0 bcm terminator_1
+MollerADC 0 1 bcm terminator_2
+MollerADC 0 2 bcm terminator_3
+MollerADC 0 3 bcm terminator_4
 
 
 ! battery input connections to intadcse11
-
 ROC = 11
-
-MollerADC 0 0 bcm battery_hall_3
+Bank = 212
+MollerADC 0 0 bcm battery_hall_1
+MollerADC 0 3 bcm battery_hall_2
+MollerADC 0 4 bcm terminator_5

@@ -1,4 +1,4 @@
-decode_mode = 1
+MOLLERADC_decode_mode = 1
 
 NumberOfBlocks = 4
 sample_size = 7201

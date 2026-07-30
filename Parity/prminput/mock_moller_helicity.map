@@ -21,7 +21,7 @@
 
 
 !  HelicityDecodingMode=InputRegisterMode
-PatternPhase=4
+PatternPhase=8
 RandSeedBits=30
 
 
