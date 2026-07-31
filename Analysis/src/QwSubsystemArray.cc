@@ -72,6 +72,10 @@ void QwSubsystemArray::InvalidateResolvedDispatchCache()
 void QwSubsystemArray::BuildResolvedSelf() const
 {
   if (fResolvedSelf.size() == this->size()) return;
+  // Self layout changed: any peer cache built against the old layout is stale.
+  fResolvedPeer = nullptr;
+  fResolvedPeerSlots.clear();
+  fResolvedPairCompatible.clear();
   fResolvedSelf.assign(this->size(), nullptr);
   for (size_t i = 0; i < this->size(); ++i) {
     if (this->at(i) != nullptr) {

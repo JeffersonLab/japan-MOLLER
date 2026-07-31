@@ -47,6 +47,10 @@ QwSubsystemArrayParity::~QwSubsystemArrayParity()
 void QwSubsystemArrayParity::BuildResolvedParitySelf() const
 {
   if (fResolvedParitySelf.size() == this->size()) return;
+  // Self layout changed: any peer cache built against the old layout is stale.
+  fResolvedParityPeer = nullptr;
+  fResolvedParityPeerSlots.clear();
+  fResolvedParityCompatible.clear();
   fResolvedParitySelf.assign(this->size(), nullptr);
   for (size_t i = 0; i < this->size(); ++i) {
     if (this->at(i) != nullptr) {
