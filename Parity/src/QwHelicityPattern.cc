@@ -235,13 +235,21 @@ QwHelicityPattern::QwHelicityPattern(const QwHelicityPattern &source)
   fPatternIsGood(false),
   fIsDataLoaded(false)
 {
+  // Properly snapshot each phase: use GetEventForPhase() so we pick up
+  // ring-owned events (fEventPtrs entries) as well as locally stored ones.
+  // Then point fEventPtrs at *this* object's fEvents to avoid dangling
+  // pointers if the source or the ring is modified later.
   fEvents.resize(fPatternSize, source.fYield);
   fEventPtrs.resize(fPatternSize, nullptr);
   fHelicity.resize(fPatternSize, -9999);
   fEventNumber.resize(fPatternSize, -1);
   fEventLoaded.resize(fPatternSize, kFALSE);
   for (size_t i = 0; i < fPatternSize; ++i) {
-    fEventPtrs[i] = &(fEvents[i]);
+    fEvents[i]      = source.GetEventForPhase(i);
+    fEventPtrs[i]   = &(fEvents[i]);
+    fHelicity[i]    = source.fHelicity[i];
+    fEventNumber[i] = source.fEventNumber[i];
+    fEventLoaded[i] = source.fEventLoaded[i];
   }
   fCurrentPatternNumber = -1;
   fQuartetNumber = 0;

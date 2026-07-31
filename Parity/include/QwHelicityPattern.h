@@ -53,6 +53,10 @@ class QwHelicityPattern {
   QwHelicityPattern(QwSubsystemArrayParity &event, const TString &run = "0");
   /// \brief Copy constructor by reference
   QwHelicityPattern(const QwHelicityPattern& source);
+  /// \brief Copy-assignment deleted: fEventPtrs are raw pointers into fEvents;
+  /// a compiler-generated assignment would shallow-copy them, leaving the
+  /// target pointing at the source's (or ring-owned) storage.
+  QwHelicityPattern& operator=(const QwHelicityPattern&) = delete;
   /// Virtual destructor
   virtual ~QwHelicityPattern() { };
 
