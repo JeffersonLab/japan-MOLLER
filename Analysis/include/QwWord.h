@@ -42,7 +42,25 @@ public:
     TString GetModType() const {return fModuleType;};
 
 
-
+	QwWord& operator=(QwWord const&) = default;
+	QwWord& operator+=(QwWord const& other) {
+		fValue += other.fValue;
+		return *this;
+	}
+	QwWord& operator-=(QwWord const& other) {
+		fValue -= other.fValue;
+		return *this;
+	}
+	QwWord operator+(QwWord const& other) const{
+		QwWord tmp = *this;
+		tmp.fValue += other.fValue;
+		return tmp;
+	}
+	QwWord operator-(QwWord const& other) const {
+		QwWord tmp = *this;
+		tmp.fValue -= other.fValue;
+		return tmp;
+	}
 
 
     void PrintID() const {
