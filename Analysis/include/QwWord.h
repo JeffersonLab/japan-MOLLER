@@ -29,17 +29,13 @@
  */
 class QwWord
 {
-  public:
-    QwWord()
-    : fSubbankIndex(-1),fWordInSubbank(-1),fModuleType(""),
-      fWordName(""),fWordType(""),fValue(-1){};
-
-    Int_t fSubbankIndex;
-    Int_t fWordInSubbank;
-    TString fModuleType;
-    TString fWordName;
-    TString fWordType;
-    Int_t fValue;
+public:
+    Int_t fSubbankIndex{-1};
+    Int_t fWordInSubbank{-1};
+    TString fModuleType{""};
+    TString fWordName{""};
+    TString fWordType{""};
+    Int_t fValue{-1};
 
     Double_t GetValue() const       {return this->GetValue(0);};
     Double_t GetValue(size_t element) const      { return fValue; };
