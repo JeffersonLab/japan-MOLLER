@@ -1630,8 +1630,15 @@ void QwRootFile::ConstructObjects(const std::string& name, T& object)
 	      << " and its name " << name
 	      << QwLog::endl;
 
+    // TMapFile does not support subdirectories: objects created inside a
+    // mkdir'd directory are NOT retrievable via TMapFile::Get (readers get
+    // NULL).  We must cd() into the map's top-level directory so that objects
+    // created by object.ConstructObjects() attach there and are streamed into
+    // shared memory by TMapFile::Update(); otherwise only empty name stubs
+    // reach the map.
     std::string type = typeid(object).name();
-    fDirsByName[name] = fMapFile->GetDirectory()->mkdir(name.c_str());
+    fMapFile->cd();
+    fDirsByName[name] = fMapFile->GetDirectory();
     fDirsByType[type].push_back(name);
     object.ConstructObjects();
   }
@@ -1668,8 +1675,15 @@ void QwRootFile::ConstructHistograms(const std::string& name, T& object)
 	      << " and its name " << name
 	      << QwLog::endl;
 
+    // TMapFile does not support subdirectories: histograms created inside a
+    // mkdir'd directory are NOT retrievable via TMapFile::Get (readers such as
+    // panguin get NULL).  We must cd() into the map's top-level directory so
+    // that histograms created by object.ConstructHistograms() attach there and
+    // are streamed into shared memory by TMapFile::Update(); otherwise only
+    // empty name stubs (class=NULL, size=0) reach the map.
     std::string type = typeid(object).name();
-    fDirsByName[name] = fMapFile->GetDirectory()->mkdir(name.c_str());
+    fMapFile->cd();
+    fDirsByName[name] = fMapFile->GetDirectory();
     fDirsByType[type].push_back(name);
     //object.ConstructHistograms(fDirsByName[name]);
     object.ConstructHistograms();

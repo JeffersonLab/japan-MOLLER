@@ -586,7 +586,10 @@ Bool_t OnlineGUI::IsHistogram(TString objectname)
 	cout << fileObjects[i].first << "      "
 	     << fileObjects[i].second << endl;
 
-      if(fileObjects[i].second.Contains("TH"))
+      // TProfile/TProfile2D derive from TH1D/TH2D but their class names do
+      // not contain "TH", so match them explicitly.
+      if(fileObjects[i].second.Contains("TH") ||
+	 fileObjects[i].second.Contains("TProfile"))
 	return kTRUE;
     }
   }
@@ -1398,10 +1401,15 @@ void OnlineGUI::HistDraw(vector <TString> command) {
 
   cout<<"showGolden= "<<showGolden<<endl;
 
-  // Determine dimensionality of histogram
+  // Determine dimensionality of histogram.  TProfile derives from TH1D and
+  // TProfile2D from TH2D, so a stored profile is drawn through the matching
+  // 1D/2D branch (the (TH1D*)/(TH2D*) casts are valid upcasts and Draw() is
+  // virtual, so it renders as a profile).
   for(UInt_t i=0; i<fileObjects.size(); i++) {
     if (fileObjects[i].first.Contains(command[0])) {
-      if(fileObjects[i].second.Contains("TH1")) {
+      if(fileObjects[i].second.Contains("TH1") ||
+	 (fileObjects[i].second.Contains("TProfile") &&
+	  !fileObjects[i].second.Contains("TProfile2D"))) {
 #ifdef QW_ENABLE_MAPFILE
 	if(fIsMapFile) {
 	  mytemp1d = (TH1D*)GetObjectFromFile(command[0]);
@@ -1435,7 +1443,8 @@ void OnlineGUI::HistDraw(vector <TString> command) {
 	}
 	break;
       }
-      if(fileObjects[i].second.Contains("TH2")) {
+      if(fileObjects[i].second.Contains("TH2") ||
+	 fileObjects[i].second.Contains("TProfile2D")) {
 #ifdef QW_ENABLE_MAPFILE
 	if(fIsMapFile) {
 	  mytemp2d = (TH2D*)GetObjectFromFile(command[0]);

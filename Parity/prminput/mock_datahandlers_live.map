@@ -1,0 +1,11 @@
+# Minimal data-handler map for the LIVE trend demo.
+# A single event-scope QwTrendHandler so the strip charts fill on every MPS
+# event and stream continuously into the live TMapFile.  scope = event routes
+# this handler into the per-MPS (event) data-handler array only (a single
+# instance, so no flat-mapfile name collision).
+
+[QwTrendHandler]
+  name  = trend
+  scope = event
+  priority = 100
+  map   = mock_trend_live.map
