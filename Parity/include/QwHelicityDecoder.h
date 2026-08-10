@@ -65,7 +65,7 @@ class QwHelicityDecoder: public QwHelicityBase, public MQwSubsystemCloneable<QwH
   };
 
   Int_t  ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id,
-				   UInt_t* buffer, UInt_t num_words) override;
+                                   UInt_t* buffer, UInt_t num_words) override;
   Int_t  ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) {
     return ProcessEvBuffer(0x1,roc_id,bank_id,buffer,num_words);
   };
@@ -112,7 +112,7 @@ class QwHelicityDecoder: public QwHelicityBase, public MQwSubsystemCloneable<QwH
 // protected:
   void CheckPatternNum(VQwSubsystem *value);
   void MergeCounters(VQwSubsystem *value);
-  
+
   Bool_t CheckIORegisterMask(const UInt_t& ioregister, const UInt_t& mask) const {
     return ((mask != 0)&&((ioregister & mask) == mask));
   };
