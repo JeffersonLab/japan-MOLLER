@@ -38,7 +38,8 @@
 
 // Qweak headers
 #ifdef __USE_DATABASE__
-#include "QwParitySchema.h"
+// Prefer the generated schema header from the build include path.
+#include <QwParitySchema.h>
 #ifdef __USE_SQLPP11__
 #include <sqlpp11/sqlpp11.h>
 #endif // __USE_SQLPP11__

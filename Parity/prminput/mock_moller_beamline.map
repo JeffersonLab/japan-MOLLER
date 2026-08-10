@@ -138,7 +138,7 @@ name=target_energy
  BPM1C16,      bpmstripline,   0.00004,   beamposition
  BPM1C20,      bpmstripline,   0.00002,   beamposition
  bpm_target,   combinedbpm,   -0.00017,   targetbeamposition
- bpm_target,   combinedbpm,    2.6,       targetbeamangle
+ bpm_target,   combinedbpm,    0.0026,    targetbeamangle      ! was 2.6 (rad); /1000 for mrad slope (z in meters)
 end=energycalculator
 
 
