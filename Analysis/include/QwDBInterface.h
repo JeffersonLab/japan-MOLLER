@@ -42,8 +42,7 @@ class QwParityDB;
 
 class QwDBInterface {
  public:
-  enum EQwDBIDataTableType{kQwDBI_OtherTable, kQwDBI_BeamTable,
-			   kQwDBI_MDTable, kQwDBI_LumiTable};
+  enum EQwDBIDataTableType{kQwDBI_OtherTable, kQwDBI_DetectorTable};
  private:
   static std::map<TString, TString> fPrefix;
 
@@ -56,6 +55,7 @@ class QwDBInterface {
   Char_t fMeasurementTypeId[4];
 
   TString fDeviceName;
+  TString fDetectorType; // "md", "beam", "lumi", or "bkg"
 
  private:
   template <class T>
@@ -69,16 +69,14 @@ class QwDBInterface {
 
     QwDBInterface()
     : fAnalysisId(0),fDeviceId(0),fSubblock(0),fN(0),fValue(0.0),fError(0.0) {
-      std::strcpy(fMeasurementTypeId, "");fDeviceName ="";
+      std::strcpy(fMeasurementTypeId, "");fDeviceName ="";fDetectorType="";
     }
     virtual ~QwDBInterface() { }
 
     void SetAnalysisID(UInt_t id) {fAnalysisId = id;};
     void SetDetectorName(TString &in) {fDeviceName = in;};
     void SetDeviceID(UInt_t id) {fDeviceId = id;};
-    void SetMonitorID(QwParityDB *db);
-    void SetMainDetectorID(QwParityDB *db);
-    void SetLumiDetectorID(QwParityDB *db);
+    void SetDetectorID(QwParityDB *db, const TString& detector_type);
     EQwDBIDataTableType SetDetectorID(QwParityDB *db);
     void SetMeasurementTypeID(const TString& in) {
       std::strncpy(fMeasurementTypeId, in.Data(), 3);
@@ -94,6 +92,8 @@ class QwDBInterface {
     void SetError(Double_t in)  {fError = in;};
 
     TString GetDeviceName() {return fDeviceName;};
+    TString GetDetectorType() const {return fDetectorType;};
+    void SetDetectorType(const TString& type) {fDetectorType = type;};
 
     void Reset() {
       fAnalysisId = 0;
@@ -104,6 +104,7 @@ class QwDBInterface {
       fError = 0.0;
       std::strcpy(fMeasurementTypeId,"");
       fDeviceName = "";
+      fDetectorType = "";
     };
 
     template <class T> inline
@@ -172,6 +173,7 @@ class QwErrDBInterface {
   UInt_t fN;
 
   TString fDeviceName;
+  TString fDetectorType; // "md", "beam", "lumi", or "bkg"
 
   template <class T>
   T TypedDBClone();
@@ -181,7 +183,7 @@ class QwErrDBInterface {
 
     QwErrDBInterface()
     : fAnalysisId(0),fDeviceId(0),fErrorCodeId(0),fN(0) {
-      fDeviceName ="";
+      fDeviceName ="";fDetectorType="";
     }
     virtual ~QwErrDBInterface() { }
 
@@ -189,14 +191,14 @@ class QwErrDBInterface {
     void SetDeviceName(TString &in) {fDeviceName = in;};
     void SetDeviceID(UInt_t id) {fDeviceId = id;};
 
-    void SetMonitorID(QwParityDB *db);
-    void SetMainDetectorID(QwParityDB *db);
-    void SetLumiDetectorID(QwParityDB *db);
+    void SetDetectorID(QwParityDB *db, const TString& detector_type);
 
     void SetErrorCodeId(UInt_t in) {fErrorCodeId = in;};
     void SetN(UInt_t in)        {fN = in;};
 
     TString GetDeviceName() {return fDeviceName;};
+    TString GetDetectorType() const {return fDetectorType;};
+    void SetDetectorType(const TString& type) {fDetectorType = type;};
 
     void Reset() {
       fAnalysisId = 0;
@@ -204,6 +206,7 @@ class QwErrDBInterface {
       fErrorCodeId = 0;
       fN = 0;
       fDeviceName = "";
+      fDetectorType = "";
     };
 
     template <class T> inline
