@@ -482,6 +482,15 @@ void GrandCorrelator::ConstructTreeBranches(
   branchv(fTree,this->mSY,  "dMY");  // Uncorrected mean error
   branchv(fTree,this->mSYp, "dMYp"); // Corrected mean error
 
+  //mNij, mSij, mMij, mCij, mVij, mRij, sigma_ij
+  branchm(fTree,this->mNij, "Nij");
+  branchm(fTree,this->mSij, "Sij");
+  branchm(fTree,this->mMij, "Mij");
+  branchm(fTree,this->mCij, "Cij");
+  branchm(fTree,this->mVij, "Vij");
+  branchm(fTree,this->mRij, "Rij");
+  branchm(fTree,this->sigma_ij, "sigma_ij");
+
 }
 
 /// \brief Construct the histograms in a folder with a prefix
@@ -659,6 +668,18 @@ void GrandCorrelator::WriteAlphaFile()
 
   this->Axy.Write("A_xy");
   this->Ayx.Write("A_yx");
+
+  this->mNij.Write("N_ij");
+  this->mSij.Write("S_ij");
+  this->mMij.Write("M_ij");
+  this->mCij.Write("C_ij");
+  this->mVij.Write("V_ij");
+  this->mRij.Write("R_ij");
+  this->sigma_ij.Write("sigma_ij");
+
+  fAlphaOutputFile->WriteObject(&(this->fDependentName), "Dependent_Names");
+  fAlphaOutputFile->WriteObject(&(this->fIndependentName), "Independent_Names");
+
 }
 
 void GrandCorrelator::OpenAlphaFile(const std::string& prefix)
@@ -805,6 +826,9 @@ void GrandCorrelator::init()
   mSY.ResizeTo(nY);
   mSYp.ResizeTo(nY);
 
+  mMPP.ResizeTo(nP,nP);
+  mMYY.ResizeTo(nY,nY);
+
   mRPP.ResizeTo(mVPP);
   mRPY.ResizeTo(mVPY);
   mRYP.ResizeTo(mVYP);
@@ -818,7 +842,6 @@ void GrandCorrelator::init()
   mVij.ResizeTo(nP+nY,nP+nY);
   mRij.ResizeTo(nP+nY,nP+nY);
   sigma_ij.ResizeTo(nP+nY,nP+nY);
-  sigma_ji.ResizeTo(nP+nY,nP+nY);
   mVFULL.ResizeTo(nP+nY,nP+nY);
   mRFULL.ResizeTo(nP+nY,nP+nY);
   mSFULL.ResizeTo(nP+nY,nP+nY);
@@ -835,6 +858,9 @@ void GrandCorrelator::clear()
   mMP.Zero();
   mMY.Zero();
   mMYp.Zero();
+
+  mMYY.Zero();
+  mMPP.Zero();
 
   mVPP.Zero();
   mVPY.Zero();
@@ -873,7 +899,6 @@ void GrandCorrelator::clear()
   mVij.Zero();
   mRij.Zero();
   sigma_ij.Zero();
-  sigma_ji.Zero();
   mVFULL.Zero();
   mRFULL.Zero();
   mSFULL.Zero();
@@ -1220,50 +1245,28 @@ void GrandCorrelator::solve()
 {
 //==========================================================
 //Solve step 1
+
 for(int i = 0; i < fAllVar.size(); ++i){
     for(int j = i; j < fAllVar.size(); ++j){
       if(mNij(i,j) >= 2){
         mVij(i,j) = mCij(i,j) / (mNij(i,j) - 1.);
-        sigma_ij(i,j) = sqrt((mSij(i,j)) / (mNij(i,j) - 1.));
-        sigma_ji(j,i) = sqrt((mSij(j,i)) / (mNij(j,i) - 1.));
-
-        if(sigma_ij(i,j) > 0.0 && sigma_ji(j,i) > 0.0){
-        mRij(i,j) = mVij(i,j) / (sigma_ij(i,j) * sigma_ji(j,i));
-        } else {
-            mRij(i,j) = 0.0;
-        }
-
-        if(j > i){
         mVij(j,i) = mVij(i,j);
-        sigma_ij(j,i) = sqrt((mSij(j,i)) / (mNij(j,i) - 1.));
-        sigma_ji(i,j) = sqrt((mSij(i,j)) / (mNij(i,j) - 1.));
+        sigma_ij(i,j) = sqrt((mSij(i,j)) / (mNij(i,j) - 1.));
+        sigma_ij(j,i) = sigma_ij(i,j);
 
-        if(sigma_ij(j,i) > 0.0 && sigma_ji(i,j) > 0.0){
-        mRij(j,i) = mVij(j,i) / (sigma_ij(j,i) * sigma_ji(i,j));
+        if(sigma_ij(i,j) > 0.0){
+        mRij(i,j) = mVij(i,j) / (sigma_ij(i,j) * sigma_ij(j,i));
+        mRij(j,i) = mRij(i,j);
         } else {
             mRij(i,j) = 0.0;
-        }
         }
       }
       else {
         mVij(i,j) = 0;
         sigma_ij(i,j) = 0;
-        sigma_ji(j,i) = 0;
         mRij(i,j) = 0;
+        //should have the equivalent zeros for the (j,i) elements too
       }
-
-      //Bottom half matrix
-
-      mVij(j,i) = mVij(i,j);
-
-        // Correlation
-        if (sigma_ij(i,j) > 0.0 && sigma_ji(j,i) > 0.0) {
-            mRij(i,j) = mVij(i,j) / (sigma_ij(i,j) * sigma_ji(j,i));
-            mRij(j,i) = mRij(i,j); // mirror
-        } else {
-            mRij(i,j) = 0.0;
-            mRij(j,i) = 0.0;
-        }
     }
 }
 
@@ -1285,6 +1288,11 @@ for(int i = 0; i < fAllVar.size(); ++i){
   mSPP = mSFULL.GetSub(0,nP-1,0,nP-1);
   mSYY = mSFULL.GetSub(nP,nP+nY-1,nP,nP+nY-1);
 
+  //create the diagonal of mMij, and then take the sub elemnts to fill mMP and mMY
+  mMPP = mMij.GetSub(0,nP-1,0,nP-1);
+  mMYY = mMij.GetSub(nP,nP+nY-1,nP,nP+nY-1);
+  mMP = TMatrixDDiag(mMPP);
+  mMY = TMatrixDDiag(mMYY);
 
   // off-diagonal raw covariance
   mVYP.Transpose(mVPY);
@@ -1299,11 +1307,9 @@ for(int i = 0; i < fAllVar.size(); ++i){
   // "Clean" matrices
   for(int i = 0; i < fAllVar.size(); ++i){
     for(int j = i; j < fAllVar.size(); ++j){
-      if(i < 5 && j < 5){
-      }
-        mVFULL_clean(i,j) = mRij(i,j) * sigma_ij(i,j) * sigma_ji(j,i) * (fGoodEventNumber - 1);
+        mVFULL_clean(i,j) = mRij(i,j) * sigma_ij(i,j) * sigma_ij(j,i) * (fGoodEventNumber - 1);
         mVFULL_clean(j,i) = mVFULL_clean(i,j);
-        mSFULL_clean(i,j) = mRij(i,j) * sigma_ij(i,j) * sigma_ji(j,i);
+        mSFULL_clean(i,j) = mRij(i,j) * sigma_ij(i,j) * sigma_ij(j,i);
         mSFULL_clean(j,i) = mSFULL_clean(i,j);
     }
 }
