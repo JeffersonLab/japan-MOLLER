@@ -53,6 +53,10 @@ class QwHelicityPattern {
   QwHelicityPattern(QwSubsystemArrayParity &event, const TString &run = "0");
   /// \brief Copy constructor by reference
   QwHelicityPattern(const QwHelicityPattern& source);
+  /// \brief Copy-assignment deleted: fEventPtrs are raw pointers into fEvents;
+  /// a compiler-generated assignment would shallow-copy them, leaving the
+  /// target pointing at the source's (or ring-owned) storage.
+  QwHelicityPattern& operator=(const QwHelicityPattern&) = delete;
   /// Virtual destructor
   virtual ~QwHelicityPattern() { };
 
@@ -222,6 +226,7 @@ class QwHelicityPattern {
  protected:
 
   std::vector<QwSubsystemArrayParity> fEvents;
+  std::vector<const QwSubsystemArrayParity*> fEventPtrs;
   std::vector<Bool_t> fEventLoaded;
   std::vector<Int_t> fHelicity;// this is here up to when we code the Helicity decoding routine
   std::vector<Int_t> fEventNumber;
@@ -287,6 +292,13 @@ class QwHelicityPattern {
   // Flag to indicate that the pattern contains data
   Bool_t fIsDataLoaded;
   void SetDataLoaded(Bool_t flag) { fIsDataLoaded = flag; };
+
+  const QwSubsystemArrayParity& GetEventForPhase(size_t phase) const {
+    if (phase < fEventPtrs.size() && fEventPtrs[phase] != nullptr) {
+      return *(fEventPtrs[phase]);
+    }
+    return fEvents.at(phase);
+  }
 
   friend class QwDataHandlerArray;
 };
