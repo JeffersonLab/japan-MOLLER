@@ -279,8 +279,8 @@ class QwSubsystemArray:
   UInt_t fCodaEventType;     ///< CODA event type as provided by QwEventBuffer
 
   Double_t fCleanParameter[3];
-  UInt_t fEventTypeMask;   ///< Mask of event types
-  Bool_t fHasDataLoaded;   ///< Has this array gotten data to be processed?
+  UInt_t fEventTypeMask;         ///< Mask of event types
+  Bool_t fHasDataLoaded{kFALSE}; ///< Has this array gotten data to be processed?
 
  protected:
   /// Function to determine which subsystems we can accept
