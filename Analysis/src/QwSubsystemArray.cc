@@ -20,7 +20,7 @@
  * Create a subsystem array based on the configuration option 'detectors'
  */
 QwSubsystemArray::QwSubsystemArray(QwOptions& options, CanContainFn myCanContain)
-: fCleanParameter{0,0,0},fEventTypeMask(0x0),fnCanContain(myCanContain)
+: fEventTypeMask(0x0),fnCanContain(myCanContain)
 {
   ProcessOptionsToplevel(options);
   QwParameterFile detectors(fSubsystemsMapFile.c_str());
@@ -47,8 +47,6 @@ QwSubsystemArray::QwSubsystemArray(const QwSubsystemArray& source)
   fSubsystemsDisabledByName(source.fSubsystemsDisabledByName),
   fSubsystemsDisabledByType(source.fSubsystemsDisabledByType)
 {
-  for (size_t i = 0; i < 3; i++)
-    fCleanParameter[i] = source.fCleanParameter[i];
 
   // Make copies of all subsystems rather than copying just the pointers
   for (const_iterator subsys = source.begin(); subsys != source.end(); ++subsys) {
@@ -562,15 +560,9 @@ void  QwSubsystemArray::ConstructBranchAndVector(
   // FillTreeVector().
   values.push_back("CodaEventNumber", 'i');
   values.push_back("CodaEventType", 'i');
-  values.push_back("Coda_CleanData", 'D');
-  values.push_back("Coda_ScanData1", 'D');
-  values.push_back("Coda_ScanData2", 'D');
   if (prefix == "" || prefix.Index("yield_") == 0) {
     tree->Branch("CodaEventNumber",&(values[fTreeArrayIndex]),"CodaEventNumber/i");
     tree->Branch("CodaEventType",&(values[fTreeArrayIndex+1]),"CodaEventType/i");
-    tree->Branch("Coda_CleanData",&(values[fTreeArrayIndex+2]),"Coda_CleanData/D");
-    tree->Branch("Coda_ScanData1",&(values[fTreeArrayIndex+3]),"Coda_ScanData1/D");
-    tree->Branch("Coda_ScanData2",&(values[fTreeArrayIndex+4]),"Coda_ScanData2/D");
   }
   for (iterator subsys = begin(); subsys != end(); ++subsys) {
     VQwSubsystem* subsys_ptr = dynamic_cast<VQwSubsystem*>(subsys->get());
@@ -653,9 +645,6 @@ void QwSubsystemArray::FillTreeVector(QwRootTreeBranchVector &values) const
   size_t index = fTreeArrayIndex;
   values.SetValue(index++, this->GetCodaEventNumber());
   values.SetValue(index++, this->GetCodaEventType());
-  values.SetValue(index++, this->fCleanParameter[0]);
-  values.SetValue(index++, this->fCleanParameter[1]);
-  values.SetValue(index++, this->fCleanParameter[2]);
 
   // Fill the subsystem data
   for (const_iterator subsys = begin(); subsys != end(); ++subsys) {
@@ -691,20 +680,11 @@ void QwSubsystemArray::ConstructNTupleAndVector(
   if (prefix == "" || prefix.Index("yield_") == 0) {
     auto eventNumField = model->MakeField<Double_t>("CodaEventNumber");
     auto eventTypeField = model->MakeField<Double_t>("CodaEventType");
-    auto cleanDataField = model->MakeField<Double_t>("Coda_CleanData");
-    auto scanData1Field = model->MakeField<Double_t>("Coda_ScanData1");
-    auto scanData2Field = model->MakeField<Double_t>("Coda_ScanData2");
 
     fieldPtrs.push_back(eventNumField);
     fieldPtrs.push_back(eventTypeField);
-    fieldPtrs.push_back(cleanDataField);
-    fieldPtrs.push_back(scanData1Field);
-    fieldPtrs.push_back(scanData2Field);
   } else {
     // Still reserve space but don't create duplicate fields
-    fieldPtrs.push_back(nullptr);
-    fieldPtrs.push_back(nullptr);
-    fieldPtrs.push_back(nullptr);
     fieldPtrs.push_back(nullptr);
     fieldPtrs.push_back(nullptr);
   }
@@ -728,9 +708,6 @@ void QwSubsystemArray::FillNTupleVector(std::vector<Double_t>& values) const
   size_t index = fTreeArrayIndex;
   values[index++] = this->GetCodaEventNumber();
   values[index++] = this->GetCodaEventType();
-  values[index++] = this->fCleanParameter[0];
-  values[index++] = this->fCleanParameter[1];
-  values[index++] = this->fCleanParameter[2];
 
   // Fill the subsystem data
   for (const_iterator subsys = begin(); subsys != end(); ++subsys) {
