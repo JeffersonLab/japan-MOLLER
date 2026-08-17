@@ -593,9 +593,6 @@ void QwHelicity::EncodeEventData(std::vector<UInt_t> &buffer)
     if (fHelicityDelayed == 1)    userbit |= 0x40000000;
 
     // Write the words to the buffer
-    localbuffer.push_back(0x1); // cleandata
-    localbuffer.push_back(0xa); // scandata1
-    localbuffer.push_back(0xa); // scandata2
     localbuffer.push_back(0x0); // scalerheader
     localbuffer.push_back(0x20); // scalercounter (32)
     localbuffer.push_back(userbit); // userbit
