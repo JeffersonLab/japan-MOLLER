@@ -20,7 +20,7 @@
  * Create a subsystem array based on the configuration option 'detectors'
  */
 QwSubsystemArray::QwSubsystemArray(QwOptions& options, CanContainFn myCanContain)
-: fCleanParameter{0,0,0},fEventTypeMask(0x0),fnCanContain(myCanContain)
+: fEventTypeMask(0x0),fnCanContain(myCanContain)
 {
   ProcessOptionsToplevel(options);
   QwParameterFile detectors(fSubsystemsMapFile.c_str());
@@ -47,8 +47,6 @@ QwSubsystemArray::QwSubsystemArray(const QwSubsystemArray& source)
   fSubsystemsDisabledByName(source.fSubsystemsDisabledByName),
   fSubsystemsDisabledByType(source.fSubsystemsDisabledByType)
 {
-  for (size_t i = 0; i < 3; i++)
-    fCleanParameter[i] = source.fCleanParameter[i];
 
   // Make copies of all subsystems rather than copying just the pointers
   for (const_iterator subsys = source.begin(); subsys != source.end(); ++subsys) {
@@ -647,9 +645,6 @@ void QwSubsystemArray::FillTreeVector(QwRootTreeBranchVector &values) const
   size_t index = fTreeArrayIndex;
   values.SetValue(index++, this->GetCodaEventNumber());
   values.SetValue(index++, this->GetCodaEventType());
-  values.SetValue(index++, this->fCleanParameter[0]);
-  values.SetValue(index++, this->fCleanParameter[1]);
-  values.SetValue(index++, this->fCleanParameter[2]);
 
   // Fill the subsystem data
   for (const_iterator subsys = begin(); subsys != end(); ++subsys) {
@@ -713,9 +708,6 @@ void QwSubsystemArray::FillNTupleVector(std::vector<Double_t>& values) const
   size_t index = fTreeArrayIndex;
   values[index++] = this->GetCodaEventNumber();
   values[index++] = this->GetCodaEventType();
-  values[index++] = this->fCleanParameter[0];
-  values[index++] = this->fCleanParameter[1];
-  values[index++] = this->fCleanParameter[2];
 
   // Fill the subsystem data
   for (const_iterator subsys = begin(); subsys != end(); ++subsys) {

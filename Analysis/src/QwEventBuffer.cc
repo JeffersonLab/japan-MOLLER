@@ -905,20 +905,6 @@ Bool_t QwEventBuffer::FillSubsystemData(QwSubsystemArray &subsystems)
     //  After trying the data in each subsystem, bump the
     //  fWordsSoFar to move to the next bank.
 
-                // TODO:
-                // What is special about this subbank?
-    if( decoder->GetROC() == 0 && decoder->GetSubbankTag()==0x6101) {
-      //std::cout << "ProcessEventBuffer: ROC="<<GetROC()<<", SubbankTag="<< GetSubbankTag()<<", FragLength="<<GetFragLength() <<std::endl;
-      fCleanParameter[0]=localbuff[decoder->GetWordsSoFar()+decoder->GetFragLength()-4];//clean data
-      fCleanParameter[1]=localbuff[decoder->GetWordsSoFar()+decoder->GetFragLength()-3];//scan data 1
-      fCleanParameter[2]=localbuff[decoder->GetWordsSoFar()+decoder->GetFragLength()-2];//scan data 2
-      //std::cout << "ProcessEventBuffer: ROC="<<GetROC()<<", SubbankTag="<< GetSubbankTag()
-      //                <<", FragLength="<<GetFragLength() << " " <<fCleanParameter[0]<< " " <<fCleanParameter[1]<< " " <<fCleanParameter[2]<<std::endl;
-
-    }
-
-    subsystems.SetCleanParameters(fCleanParameter);
-
     std::size_t nmarkers = CheckForMarkerWords(subsystems);
     if (nmarkers>0) {
       //  There are markerwords for this ROC/Bank
