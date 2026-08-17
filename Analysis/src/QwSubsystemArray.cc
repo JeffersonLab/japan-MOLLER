@@ -562,15 +562,9 @@ void  QwSubsystemArray::ConstructBranchAndVector(
   // FillTreeVector().
   values.push_back("CodaEventNumber", 'i');
   values.push_back("CodaEventType", 'i');
-  values.push_back("Coda_CleanData", 'D');
-  values.push_back("Coda_ScanData1", 'D');
-  values.push_back("Coda_ScanData2", 'D');
   if (prefix == "" || prefix.Index("yield_") == 0) {
     tree->Branch("CodaEventNumber",&(values[fTreeArrayIndex]),"CodaEventNumber/i");
     tree->Branch("CodaEventType",&(values[fTreeArrayIndex+1]),"CodaEventType/i");
-    tree->Branch("Coda_CleanData",&(values[fTreeArrayIndex+2]),"Coda_CleanData/D");
-    tree->Branch("Coda_ScanData1",&(values[fTreeArrayIndex+3]),"Coda_ScanData1/D");
-    tree->Branch("Coda_ScanData2",&(values[fTreeArrayIndex+4]),"Coda_ScanData2/D");
   }
   for (iterator subsys = begin(); subsys != end(); ++subsys) {
     VQwSubsystem* subsys_ptr = dynamic_cast<VQwSubsystem*>(subsys->get());
@@ -691,20 +685,11 @@ void QwSubsystemArray::ConstructNTupleAndVector(
   if (prefix == "" || prefix.Index("yield_") == 0) {
     auto eventNumField = model->MakeField<Double_t>("CodaEventNumber");
     auto eventTypeField = model->MakeField<Double_t>("CodaEventType");
-    auto cleanDataField = model->MakeField<Double_t>("Coda_CleanData");
-    auto scanData1Field = model->MakeField<Double_t>("Coda_ScanData1");
-    auto scanData2Field = model->MakeField<Double_t>("Coda_ScanData2");
 
     fieldPtrs.push_back(eventNumField);
     fieldPtrs.push_back(eventTypeField);
-    fieldPtrs.push_back(cleanDataField);
-    fieldPtrs.push_back(scanData1Field);
-    fieldPtrs.push_back(scanData2Field);
   } else {
     // Still reserve space but don't create duplicate fields
-    fieldPtrs.push_back(nullptr);
-    fieldPtrs.push_back(nullptr);
-    fieldPtrs.push_back(nullptr);
     fieldPtrs.push_back(nullptr);
     fieldPtrs.push_back(nullptr);
   }
