@@ -1,0 +1,20 @@
+! defines values for variables in the header file
+VoltPerHz = 3.0E-12
+
+! Type, rootfile, hist path, histogram
+
+histogram, us_test_XY_r_EG1_65.root, det175, det175_XY_evt_epiM_rate_EG1
+
+! Type,             name,  asym,volts,sigma
+
+positionreference, usrefx, 0.0, 3.0, 0.01
+positionreference, usrefy, 0.0, 3.0, 0.01
+
+! Define scan parameters
+ScanSpeed = 3810
+PrincipleAxis = x
+SecAxisStep = 10
+PrintPrescale = 0
+
+! Type, Xmin, Xman, Ymin, Ymax
+range, -600, 600, -1200, -600
