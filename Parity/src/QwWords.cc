@@ -32,10 +32,8 @@ Int_t QwWords::LoadChannelMap(TString mapfile)
 		TString modtype = mapstr.GetTypedNextToken<TString>();
 		UInt_t  modnum  = mapstr.GetTypedNextToken<UInt_t>();
 		UInt_t  channum = mapstr.GetTypedNextToken<UInt_t>();
-		TString dettype = mapstr.GetTypedNextToken<TString>();
 		TString name    = mapstr.GetTypedNextToken<TString>();
 		modtype.ToUpper();
-		dettype.ToUpper();
 
 		if(modtype != "WORD") {
 			QwError << "Unrecognized module type " << modtype << QwLog::endl;
@@ -49,7 +47,7 @@ Int_t QwWords::LoadChannelMap(TString mapfile)
                   << std::dec
                   << " at mod " << modnum << ", chan " << channum
                   << QwLog::endl;
-		fWords.emplace_back( QwWord{subbank, 0, modtype, name, dettype, -1} );
+		fWords.emplace_back( QwWord{subbank, 0, modtype, name, "", -1} );
 	}
 	return 0;
 }
@@ -61,7 +59,6 @@ VQwSubsystem&  QwWords::operator=  (VQwSubsystem *value)
 		VQwSubsystem::operator=(value);
 		QwWords* input = dynamic_cast<QwWords*>(value);
 		fWords = input->fWords;
-		fTreeArrayIndex = input->fTreeArrayIndex;
 	}
 	return *this;
 }
@@ -110,7 +107,79 @@ Int_t QwWords::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UIn
 	return words_read;
 }
 
-void  QwWords::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
+void QwWords::ProcessEvent()
+{
+	// Do post-processing here
+	// By Default, we have none
+	return;
+}
+
+Bool_t QwWords::ApplySingleEventCuts()
+{
+	// Apply cuts here
+	// By Default, we have none
+	return true;
+}
+
+UInt_t QwWords::GetEventcutErrorFlag()
+{
+	// Return errors here
+	// By default, we have none
+	return 0;
+}
+void QwWords::AccumulateRunningSum(VQwSubsystem* value, Int_t count, Int_t ErrorMask)
+{
+	// No-op
+	return;
+}
+Bool_t QwWords::CheckForBurpFail(const VQwSubsystem *subsys)
+{
+	// Check for Burb failure
+	// By default, we succeed
+	return kFALSE;
+}
+
+void QwWords::DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask)
+{
+	// No-op
+	return;
+}
+
+void QwWords::IncrementErrorCounters()
+{
+	// No-op
+	return;
+}
+void QwWords::Scale(Double_t factor)
+{
+	// No-op
+	return;
+}
+
+void QwWords::UpdateErrorFlag(const VQwSubsystem *ev_error)
+{
+	// No-op
+	return;
+}
+
+void QwWords::Ratio(VQwSubsystem *numer, VQwSubsystem *denom)
+{
+	// No-op
+	return;
+}
+
+void QwWords::CalculateRunningAverage()
+{
+	// No-op
+	return;
+}
+
+void QwWords::PrintErrorCounters() const
+{
+	// No-op
+	return;
+}
+void QwWords::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values)
 {
 	TString basename;
 	fTreeArrayIndex  = values.size();
@@ -126,9 +195,8 @@ void  QwWords::ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTree
 void QwWords::FillTreeVector(QwRootTreeBranchVector &values) const 
 {
 
-	std::size_t index = fTreeArrayIndex;
+	int index = fTreeArrayIndex;
 	for (auto& word : fWords){
-		QwMessage << index << ") Setting " << word.fWordName << " = " << word.fValue << '\n';
 		values.SetValue(index++, word.fValue);
 	}
 }
@@ -148,7 +216,7 @@ void QwWords::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& mode
 
 void QwWords::FillNTupleVector(std::vector<Double_t>& values) const
 {
-  size_t index = fTreeArrayIndex;
+  int index = fTreeArrayIndex;
   for (auto& word : fWords){
     values[index++] = word.fValue;
   }

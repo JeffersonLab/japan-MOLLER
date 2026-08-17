@@ -26,11 +26,11 @@ public:
 	void FillDB(QwParityDB*    , TString) override { throw std::runtime_error("QwWords::FillDB() is not supported"    ); }
 	void FillErrDB(QwParityDB* , TString) override { throw std::runtime_error("QwWords::FillErrDB() is not supported");  }
 
-	void Ratio(VQwSubsystem *numer, VQwSubsystem *denom) override { throw std::runtime_error("QwWords::Ratio() is not supported");  }
-	void Scale(Double_t factor) override { throw std::runtime_error("QwWords::Scale() is not supported");  }
-	void AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override { throw std::runtime_error("QwWords::AccumulateRunningSum() is not supported");  }
-	void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF) override { throw std::runtime_error("QwWords::DeaccumulateRunningSum() is not supported");  }
-	void CalculateRunningAverage() override { throw std::runtime_error("QwWords::CalculateRunningAverage() is not supported");  }
+	void Ratio(VQwSubsystem *numer, VQwSubsystem *denom) override;
+	void Scale(Double_t factor) override;
+	void AccumulateRunningSum(VQwSubsystem* value, Int_t count=0, Int_t ErrorMask=0xFFFFFFF) override;
+	void DeaccumulateRunningSum(VQwSubsystem* value, Int_t ErrorMask=0xFFFFFFF) override;
+	void CalculateRunningAverage() override;
 	using VQwSubsystemParity::LoadEventCuts;
 	using VQwSubsystemParity::LoadEventCuts_Init;
 	using VQwSubsystemParity::LoadEventCuts_Line;
@@ -46,7 +46,7 @@ public:
 	Int_t LoadInputParameters(TString mapfile) override { throw std::runtime_error("QwWords::LoadInputParameters() is not supported"); return 0; }
 	Int_t ProcessConfigurationBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words) override { throw std::runtime_error("QwWords::ProcessConfigurationBuffer() is not supported"); return 0; }
     Int_t ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t *buffer, UInt_t num_words) override;
-	void ProcessEvent() override { throw std::runtime_error("QwWords::ProcessEvent() is not supported"); }
+	void ProcessEvent() override;
     void ConstructHistograms() override { std::runtime_error("QwWords::ConstructHistograms() is not supported"); }
     void ConstructHistograms(TDirectory *folder, TString &prefix) override { std::runtime_error("QwWords::ConstructHistograms() is not supported"); }
 	void FillHistograms() override { std::runtime_error("QwWords::FillHistograms() is not supported"); }
@@ -62,16 +62,13 @@ public:
 	void FillNTupleVector(std::vector<Double_t>& values) const override;
 #endif
 
-    void  ClearEventData() override;
-    Bool_t ApplySingleEventCuts() override { throw std::runtime_error("QwWords::ApplySingleEventCuts() is not supported"); return true; }
-    Bool_t CheckForBurpFail(const VQwSubsystem *subsys) override { throw std::runtime_error("QwWords::CheckForBurpFail() is not supported"); return true; }
-    void PrintErrorCounters() const override { throw std::runtime_error("QwWords::PrintErrorCounters() is not supported"); }
-    void IncrementErrorCounters() override { throw std::runtime_error("QwWords::IncrementErrorCounters() is not supported"); }
-    UInt_t GetEventcutErrorFlag() override { throw std::runtime_error("QwWords::GetEventcutErrorFlag() is not supported"); return 0; }
-    void UpdateErrorFlag(const VQwSubsystem *ev_error) override { throw std::runtime_error("QwWords::UpdateErrorFlag() is not supported"); }
-
-
-
+	void  ClearEventData() override;
+	Bool_t ApplySingleEventCuts() override;
+	Bool_t CheckForBurpFail(const VQwSubsystem *subsys) override;
+	void PrintErrorCounters() const override;
+	void IncrementErrorCounters() override;
+	UInt_t GetEventcutErrorFlag() override;
+	void UpdateErrorFlag(const VQwSubsystem *ev_error) override;
 };
 // Register this subsystem with the factory
 REGISTER_SUBSYSTEM_FACTORY(QwWords);
