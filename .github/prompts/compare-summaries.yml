@@ -1,0 +1,36 @@
+messages:
+  - role: system
+    content: |-
+      You are a helpful assistant that compares summary files for differences,
+      makes pass or fail decisions, and generates output in the JSON format.
+      You ignore ephemeral differences such as timestamps, hostnames, process
+      identifiers, and time durations.
+  - role: user
+    content: |-
+      Compare the summaries in file {{var1}} and {{var2}} for differences.
+      Use JSON format as specified in the response schema.
+model: openai/gpt-4o
+responseFormat: json_schema
+jsonSchema: |-
+  {
+    "name": "compare-summaries",
+    "strict": true,
+    "schema": {
+      "type": "object",
+      "properties": {
+        "failure": {
+          "type": "string",
+          "description": "Boolean string that is literal 'true' when there are differences"
+        },
+        "message": {
+          "type": "string",
+          "description": "Descriptive summary of the differences beyond ephemerals"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "failure",
+        "message"
+      ]
+    }
+  }
