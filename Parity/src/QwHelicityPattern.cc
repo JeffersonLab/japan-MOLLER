@@ -835,20 +835,27 @@ void  QwHelicityPattern::ConstructObjects(TDirectory *folder)
 //*****************************************************************
 void  QwHelicityPattern::ConstructHistograms(TDirectory *folder)
 {
-  TString prefix = "yield_";
-  fYield.ConstructHistograms(folder,prefix);
-  prefix = "asym_";
-  fAsymmetry.ConstructHistograms(folder,prefix);
+  TString prefix = "";
+  ConstructHistograms(folder, prefix);
+}
+
+//*****************************************************************
+void  QwHelicityPattern::ConstructHistograms(TDirectory *folder, TString &prefix)
+{
+  TString subprefix = prefix + "yield_";
+  fYield.ConstructHistograms(folder,subprefix);
+  subprefix = prefix + "asym_";
+  fAsymmetry.ConstructHistograms(folder,subprefix);
 
   if (fEnableDifference) {
-    prefix = "diff_";
-    fDifference.ConstructHistograms(folder,prefix);
+    subprefix = prefix + "diff_";
+    fDifference.ConstructHistograms(folder,subprefix);
   }
   if (fEnableAlternateAsym) {
-    prefix = "asym1_";
-    fAsymmetry1.ConstructHistograms(folder,prefix);
-    prefix = "asym2_";
-    fAsymmetry2.ConstructHistograms(folder,prefix);
+    subprefix = prefix + "asym1_";
+    fAsymmetry1.ConstructHistograms(folder,subprefix);
+    subprefix = prefix + "asym2_";
+    fAsymmetry2.ConstructHistograms(folder,subprefix);
   }
 }
 

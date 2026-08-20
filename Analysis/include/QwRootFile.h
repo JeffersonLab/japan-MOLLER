@@ -1688,8 +1688,15 @@ void QwRootFile::ConstructHistograms(const std::string& name, T& object)
     fMapFile->cd();
     fDirsByName[name] = fMapFile->GetDirectory();
     fDirsByType[type].push_back(name);
-    //object.ConstructHistograms(fDirsByName[name]);
-    object.ConstructHistograms();
+    // TMapFile has no subdirectories, so every group's histograms share the
+    // map's single top-level directory.  Without a namespace, identically
+    // named histograms from different groups (evt_histo/mul_histo/burst_histo)
+    // collide: TDirectoryFile::Append replaces (and orphans) the earlier one,
+    // producing "Replacing existing TH1 (Potential memory leak)" warnings and
+    // dropping histograms from the live display.  Prefix each group's
+    // histograms with its directory name so they all coexist in the flat map.
+    TString prefix = TString(name.c_str()) + "_";
+    object.ConstructHistograms((TDirectory*)NULL, prefix);
   }
 }
 
