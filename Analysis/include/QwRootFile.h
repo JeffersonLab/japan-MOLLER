@@ -475,6 +475,16 @@ class QwRootTree {
     /// Fill the branches for generic objects
     template < class T >
     void FillTreeBranches(const T& object) {
+      // Prescale peek.  Gathering the branch vector (FillTreeVector) copies
+      // every channel value and is a sizeable fraction of the per-event cost.
+      // When the tree is prescaled, Fill() will discard this event anyway, so
+      // skip the gather as well.  This mirrors Fill()'s computation exactly
+      // (Fill() does ++fCurrentEvent then %= fNumEventsCycle), so the gather
+      // and the write always agree on which events are kept.
+      if (fNumEventsCycle > 0) {
+        UInt_t predicted = (fCurrentEvent + 1) % fNumEventsCycle;
+        if (predicted > fNumEventsToSave) return;
+      }
       if (typeid(object).name() == fType) {
         // Fill the branch vector
         object.FillTreeVector(fVector);
@@ -920,6 +930,15 @@ class QwRootFile {
       update_count++;
       if ((fUpdateInterval > 0) && ( update_count % fUpdateInterval == 0)) Update();
 
+      // Histogram fill prescaling.  Physics is processed every event, but the
+      // (relatively expensive) histogram fill is performed only on every Nth
+      // event.  This thins the live monitoring output to gain throughput; the
+      // visual refresh rate is unaffected because the displayed histograms
+      // simply accumulate slightly fewer entries.
+      if (fHistoFillPrescale > 1) {
+        if (++fHistoFillCount % fHistoFillPrescale != 0) return;
+      }
+
       // Debug directory registration
       std::string type = typeid(object).name();
       bool hasDir = HasDirByType(object);
@@ -1209,6 +1228,9 @@ class QwRootFile {
     /// Map file
     TMapFile* fMapFile;
     Bool_t fEnableMapFile;
+    /// Directory that holds the memory-mapped file (default "/dev/shm" on Linux;
+    /// override with --mapfile-dir on platforms without /dev/shm, e.g. macOS).
+    TString fMapFileDir;
     Int_t fUpdateInterval;
     Int_t fCompressionAlgorithm;
     Int_t fCompressionLevel;
@@ -1335,6 +1357,12 @@ class QwRootFile {
     UInt_t fNumHelEventsToSave;
     UInt_t fCircularBufferSize;
     UInt_t fCurrentEvent;
+
+    /// Live-output fill prescale: fill histograms (and, via the per-tree
+    /// prescale, the trees) only on every Nth processed event.  Default 1
+    /// fills on every event.  Used to raise throughput in live mapfile mode.
+    UInt_t fHistoFillPrescale = 1;
+    UInt_t fHistoFillCount = 0;
 
     /// Maximum tree size
     static const Long64_t kMaxTreeSize;
@@ -1605,8 +1633,15 @@ void QwRootFile::ConstructObjects(const std::string& name, T& object)
 	      << " and its name " << name
 	      << QwLog::endl;
 
+    // TMapFile does not support subdirectories: objects created inside a
+    // mkdir'd directory are NOT retrievable via TMapFile::Get (readers get
+    // NULL).  We must cd() into the map's top-level directory so that objects
+    // created by object.ConstructObjects() attach there and are streamed into
+    // shared memory by TMapFile::Update(); otherwise only empty name stubs
+    // reach the map.
     std::string type = typeid(object).name();
-    fDirsByName[name] = fMapFile->GetDirectory()->mkdir(name.c_str());
+    fMapFile->cd();
+    fDirsByName[name] = fMapFile->GetDirectory();
     fDirsByType[type].push_back(name);
     object.ConstructObjects();
   }
@@ -1643,11 +1678,25 @@ void QwRootFile::ConstructHistograms(const std::string& name, T& object)
 	      << " and its name " << name
 	      << QwLog::endl;
 
+    // TMapFile does not support subdirectories: histograms created inside a
+    // mkdir'd directory are NOT retrievable via TMapFile::Get (readers such as
+    // panguin get NULL).  We must cd() into the map's top-level directory so
+    // that histograms created by object.ConstructHistograms() attach there and
+    // are streamed into shared memory by TMapFile::Update(); otherwise only
+    // empty name stubs (class=NULL, size=0) reach the map.
     std::string type = typeid(object).name();
-    fDirsByName[name] = fMapFile->GetDirectory()->mkdir(name.c_str());
+    fMapFile->cd();
+    fDirsByName[name] = fMapFile->GetDirectory();
     fDirsByType[type].push_back(name);
-    //object.ConstructHistograms(fDirsByName[name]);
-    object.ConstructHistograms();
+    // TMapFile has no subdirectories, so every group's histograms share the
+    // map's single top-level directory.  Without a namespace, identically
+    // named histograms from different groups (evt_histo/mul_histo/burst_histo)
+    // collide: TDirectoryFile::Append replaces (and orphans) the earlier one,
+    // producing "Replacing existing TH1 (Potential memory leak)" warnings and
+    // dropping histograms from the live display.  Prefix each group's
+    // histograms with its directory name so they all coexist in the flat map.
+    TString prefix = TString(name.c_str()) + "_";
+    object.ConstructHistograms((TDirectory*)NULL, prefix);
   }
 }
 
