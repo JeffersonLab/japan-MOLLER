@@ -40,9 +40,20 @@ QwRootFile::QwRootFile(const TString& run_label)
   // Check for the memory-mapped file flag
   if (fEnableMapFile) {
 
-    TString mapfilename = "/dev/shm/";
+    // Verify the target directory exists and is writable before asking ROOT
+    // to mmap a file there.  On platforms without /dev/shm (e.g. macOS) the
+    // default location is absent; give an actionable message instead of a
+    // cryptic TMapFile failure.
+    if (gSystem->AccessPathName(fMapFileDir, kWritePermission)) {
+      QwError << "Memory-mapped file directory '" << fMapFileDir
+              << "' does not exist or is not writable." << QwLog::endl;
+      QwError << "Set --mapfile-dir to a writable directory (ideally a RAM "
+                 "disk).  /dev/shm does not exist on macOS; a normal directory "
+                 "or a hdiutil-mounted RAM disk works there." << QwLog::endl;
+      return;
+    }
 
-    mapfilename += "/QwMemMapFile.map";
+    TString mapfilename = fMapFileDir + "/QwMemMapFile.map";
 
     fMapFile = TMapFile::Create(mapfilename,"UPDATE", kMaxMapFileSize, "RealTime Producer File");
 
@@ -53,6 +64,7 @@ QwRootFile::QwRootFile(const TString& run_label)
     }
 
     QwMessage << "================== RealTime Producer Memory Map File =================" << QwLog::endl;
+    QwMessage << "Memory-mapped file: " << mapfilename << QwLog::endl;
     fMapFile->Print();
     QwMessage << "======================================================================" << QwLog::endl;
   } else
@@ -219,6 +231,11 @@ void QwRootFile::DefineOptions(QwOptions &options)
     ("enable-mapfile", po::value<bool>()->default_bool_value(false),
      "enable output to memory-mapped file\n(likely requires circular-buffer too)");
   options.AddOptions()
+    ("mapfile-dir", po::value<std::string>()->default_value("/dev/shm"),
+     "directory that holds the memory-mapped file (QwMemMapFile.map).  Defaults "
+     "to /dev/shm (Linux tmpfs).  Set this on platforms without /dev/shm "
+     "(e.g. macOS) to a writable directory, ideally a RAM disk.");
+  options.AddOptions()
     ("write-temporary-rootfiles", po::value<bool>()->default_bool_value(true),
      "When writing ROOT files, use the PID to create a temporary filename");
 
@@ -345,6 +362,9 @@ void QwRootFile::ProcessOptions(QwOptions &options)
     fEnableMapFile = false;
   }
 #endif
+  fMapFileDir = TString(options.GetValue<std::string>("mapfile-dir"));
+  while (fMapFileDir.Length() > 1 && fMapFileDir.EndsWith("/"))
+    fMapFileDir.Remove(fMapFileDir.Length() - 1);
   fUseTemporaryFile = options.GetValue<bool>("write-temporary-rootfiles");
 
 #ifdef HAS_RNTUPLE_SUPPORT

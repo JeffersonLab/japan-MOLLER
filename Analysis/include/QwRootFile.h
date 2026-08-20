@@ -1228,6 +1228,9 @@ class QwRootFile {
     /// Map file
     TMapFile* fMapFile;
     Bool_t fEnableMapFile;
+    /// Directory that holds the memory-mapped file (default "/dev/shm" on Linux;
+    /// override with --mapfile-dir on platforms without /dev/shm, e.g. macOS).
+    TString fMapFileDir;
     Int_t fUpdateInterval;
     Int_t fCompressionAlgorithm;
     Int_t fCompressionLevel;
