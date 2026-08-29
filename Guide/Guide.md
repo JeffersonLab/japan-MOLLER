@@ -1,14 +1,41 @@
-# QwMockData Root Guide
+# JAPAan-MOLLER Documentation Guide
 
-July 29, 2024\
-Version 1.1
-
-
+September 05, 2025\
+Version 1.1.1
 
 If you have any questions or suggestions for the guide, please send an
 email to:\
 Ryan Conaway\
-mrc@jlab.org
+mrc@jlab.org\
+Shashini Chandrasena\
+shashini@jlab.org
+
+## Resources:
+* JAPAn wiki: https://moller.jlab.org/wiki/index.php/Analyzer_Documentation_Portal
+* JAPan doxygen : https://hallaweb.jlab.org/parity/prex/japan/Doxygen/html/index.html 
+* Ryan’s talk : https://moller-docdb.physics.sunysb.edu/DocDB/0013/001396/001/JAPAN_INTRODUCTION_PDF.pdf 
+* MOLLER CDR Report
+
+## What is JAPAn-MOLLER
+Just Another Parity Analysis (JAPAn) - MOLLER is a data analysis software developed using C++ and CERN ROOT for the analysis of integrating mode data by the MOLLER experiment. It is based on the QwAnalysis framework JAPAn framework which was used for the Qweak, PREX-2, and CREX experiments. Its primary goal is to decode CODA format raw data from various subsystems (e.g. main detectors, beamline, etc) in the experimental setup and calculate event based and pattern based yields, differences and asymmetries relevant to individual detectors in the setup which are needed for online/offline data monitoring and final physics asymmetry extraction. Section XX contains more details about the type of data stored in the rootfiles produced by JAPAn. In addition to analyzing the 
+The data analyzed by JAPan-MOLLER are saved in rootfiles in the form of RNtuples. In addition, JAPAn-MOLLER comes with a mockdata generator which is capable of producing realistic mock data for testing and diagnostic purposes (see Ref [1] for more details on the generation of mock data).  
+
+## How to install
+Required ROOT data analysing framework and BOOST (C++ libraries) 
+Two ways to install- Using Github or using Docker.
+
+## Installing JAPAn-MOLLER from Github Code
+Information given in this section is for collaborators who want to have a copy of the analyzer in their own computers and are familiar with compiling a program from source. Make sure you have git installed to download the source code from the git repository. To do this you need to have a git account. 
+
+## Cloning the GitHub repository
+You can get a copy of the analyzer source code from JAPan-MOLLER@github repository to your own computer by cloning the repository. This will copy a full copy of the analyzer source code available in GitHub at the time of cloning. 
+
+* Option 01:
+
+Use the following cloning option if you plan to do work and want to propagate changes to the repository for others to see. 
+git clone git@github.com:JeffersonLab/japan-MOLLER
+
+# QwMockData Root Guide
 
 Running QwMockDataGenerator
 ===========================
