@@ -34,7 +34,7 @@ Bool_t VEventDecoder::DecodeSubbankHeader(UInt_t *buffer){
 			<< ", fAllowLowSubbankIDs==" << fAllowLowSubbankIDs
 			<< QwLog::endl;
 
-		if (fSubbankTag<=31
+		if (fSubbankTag<=64				//previously 31
 			&& ( (fAllowLowSubbankIDs==kFALSE)
 			|| (fAllowLowSubbankIDs==kTRUE && fSubbankType==0x10) ) ){
 			//  Subbank tags between 0 and 31 indicate this is

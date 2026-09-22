@@ -83,12 +83,28 @@ class QwBPMStripline : public VQwBPM {
   void    InitializeChannel(TString subsystem, TString name, TString type);
   void    ClearEventData() override;
 
+
+
+//added this
+void SetMollerADCHeaderData(UInt_t region_number,
+                            ULong64_t region_timestamp,
+                            UInt_t header_num_words,
+                            UInt_t header_block_number,
+                            ULong64_t header_packet_count,
+                            ULong64_t header_tsamples);
+void PropagateMollerADCHeaderToDerived();
+
   void LoadChannelParameters(QwParameterFile &paramfile) override{
     for(Short_t i=0;i<4;i++){
       fWire[i].LoadChannelParameters(paramfile);
     }
     fAbsPos[0].LoadChannelParameters(paramfile);
     fAbsPos[1].LoadChannelParameters(paramfile);
+    for(Short_t i=0;i<2;i++){
+      fRelPos[i].CopyParameters(&fAbsPos[i]);
+    }
+    fEffectiveCharge.CopyParameters(&fAbsPos[0]);
+    fEllipticity.CopyParameters(&fAbsPos[0]);
   }
 
   Int_t   ProcessEvBuffer(UInt_t* buffer,
@@ -203,7 +219,12 @@ class QwBPMStripline : public VQwBPM {
   static const Double_t kRotationCorrection;
   static const TString subelement[4];
 
-
+UInt_t    fMollerRegionNumber = 0;
+ULong64_t fMollerRegionTimestamp = 0;
+UInt_t    fMollerHeaderNumWords = 0;
+UInt_t    fMollerHeaderBlockNumber = 0;
+ULong64_t fMollerHeaderPacketCount = 0;
+ULong64_t fMollerHeaderTSamples = 0;
 
  protected:
   std::array<T,4> fWire;//[4];

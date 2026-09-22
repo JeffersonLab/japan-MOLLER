@@ -94,6 +94,15 @@ template<typename T> class QwBCM : public VQwBCM {
   void  UseExternalRandomVariable();
   void  SetExternalRandomVariable(Double_t random_variable);
 
+    //added this
+  void SetMollerADCHeaderData(UInt_t region_number,
+                            ULong64_t region_timestamp,
+                            UInt_t header_num_words,
+                            UInt_t header_block_number,
+                            ULong64_t header_packet_count,
+                            ULong64_t header_tsamples) override;
+
+
   void  ProcessEvent() override;
   Bool_t ApplyHWChecks();//Check for hardware errors in the devices
   Bool_t ApplySingleEventCuts() override;//Check for good events by setting limits on the devices readings
@@ -164,6 +173,7 @@ public:
 
   void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
   void  FillHistograms() override;
+
 
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values) override;
   void  ConstructBranch(TTree *tree, TString &prefix) override;

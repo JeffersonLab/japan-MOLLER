@@ -198,6 +198,7 @@ void  QwHelicityDecoder::ProcessEvent()
     firstpattern = kFALSE;
   }
 
+
   if((fEventNumberFirst!=-1) && (fEventNumber!=(fEventNumberOld+1))){
     Int_t nummissed(fEventNumber - (fEventNumberOld+1));
     QwError << "QwHelicityDecoder::ProcessEvent read event# ("
@@ -383,6 +384,7 @@ Int_t QwHelicityDecoder::ProcessEvBuffer(UInt_t event_type, const ROCID_t roc_id
             }
         }
       else                          /* normal typed word */
+
         {
           if(data & 0x80000000)     /* data type defining word */
             {
@@ -1036,6 +1038,7 @@ void QwHelicityDecoder::RunPredictor()
 
         /** then use it as the delayed helicity, */
         fHelicityDelayed = fDelayedPatternPolarity;
+
 
         /**if the helicity is delayed by a positive number of patterns then loop the delayed ranseed backward to get the ranseed
            for the actual helicity */

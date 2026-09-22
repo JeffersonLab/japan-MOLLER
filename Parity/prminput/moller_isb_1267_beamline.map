@@ -1,0 +1,121 @@
+NumberOfBlocks = 15
+sample_size = 480001
+
+ROC = 13
+BANK = 212
+MollerADC    0    0    bpmstripline    bpm2I00xp
+MollerADC    0    1    bpmstripline    bpm2I00xm
+MollerADC    0    2    bpmstripline    bpm2I00yp
+MollerADC    0    3    bpmstripline    bpm2I00ym
+MollerADC    0    4    bpmstripline    bpm2I00Axp
+MollerADC    0    5    bpmstripline    bpm2I00Axm
+MollerADC    0    6    bpmstripline    bpm2I00Ayp
+MollerADC    0    7    bpmstripline    bpm2I00Aym
+MollerADC    0    8    bpmstripline    bpm2I01Axp
+MollerADC    0    9    bpmstripline    bpm2I01Axm
+MollerADC    0   10    bpmstripline    bpm2I01Ayp
+MollerADC    0   11    bpmstripline    bpm2I01Aym
+MollerADC    0   12    bpmstripline    bpm1I02xp
+MollerADC    0   13    bpmstripline    bpm1I02xm
+MollerADC    0   14    bpmstripline    bpm1I02yp
+MollerADC    0   15    bpmstripline    bpm1I02ym
+
+
+ROC = 15
+BANK = 212
+MollerADC    0    0    bpmstripline    bpm1I04xp
+MollerADC    0    1    bpmstripline    bpm1I04xm
+MollerADC    0    2    bpmstripline    bpm1I04yp
+MollerADC    0    3    bpmstripline    bpm1I04ym
+MollerADC    0    4    bpmstripline    bpm1I05xp
+MollerADC    0    5    bpmstripline    bpm1I05xm
+MollerADC    0    6    bpmstripline    bpm1I05yp
+MollerADC    0    7    bpmstripline    bpm1I05ym
+MollerADC    0    8    bpmstripline    bpm1I07xp
+MollerADC    0    9    bpmstripline    bpm1I07xm
+MollerADC    0   10    bpmstripline    bpm1I07yp
+MollerADC    0   11    bpmstripline    bpm1I07ym
+MollerADC    0   12    bpmstripline    bpm0I07xp
+MollerADC    0   13    bpmstripline    bpm0I07xm
+MollerADC    0   14    bpmstripline    bpm0I07yp
+MollerADC    0   15    bpmstripline    bpm0I07ym
+
+
+ROC = 17
+Bank = 212
+MollerADC    0    0    bpmstripline    bpm0L01xp
+MollerADC    0    1    bpmstripline    bpm0L01xm
+MollerADC    0    2    bpmstripline    bpm0L01yp
+MollerADC    0    3    bpmstripline    bpm0L01ym
+MollerADC    0    4    bpmstripline    bpm0L02xp
+MollerADC    0    5    bpmstripline    bpm0L02xm
+MollerADC    0    6    bpmstripline    bpm0L02yp
+MollerADC    0    7    bpmstripline    bpm0L02ym
+MollerADC    0    8    bpmstripline    bpm0L03xp
+MollerADC    0    9    bpmstripline    bpm0L03xm
+MollerADC    0   10    bpmstripline    bpm0L03yp
+MollerADC    0   11    bpmstripline    bpm0L03ym
+MollerADC    0   12    bpmstripline    bpm0L04xp
+MollerADC    0   13    bpmstripline    bpm0L04xm
+MollerADC    0   14    bpmstripline    bpm0L04yp
+MollerADC    0   15    bpmstripline    bpm0L04ym
+
+
+ROC = 19
+Bank = 212
+MollerADC    0    0    bpmstripline    bpm0L05xp
+MollerADC    0    1    bpmstripline    bpm0L05xm
+MollerADC    0    2    bpmstripline    bpm0L05yp
+MollerADC    0    3    bpmstripline    bpm0L05ym
+MollerADC    0    4    bpmstripline    bpm0L06xp
+MollerADC    0    5    bpmstripline    bpm0L06xm
+MollerADC    0    6    bpmstripline    bpm0L06yp
+MollerADC    0    7    bpmstripline    bpm0L06ym
+MollerADC    0    8    bpmstripline    bpm0R05xp
+MollerADC    0    9    bpmstripline    bpm0R05xm
+MollerADC    0   10    bpmstripline    bpm0R05yp
+MollerADC    0   11    bpmstripline    bpm0R05ym
+MollerADC    0   12    bcm             BCM0L02
+MollerADC    0   13    bcm             Phase Monitor
+MollerADC    0   14    bcm             rack_battery_isb
+MollerADC    0   15    bcm             inj_laser_table_battery_3
+
+
+ROC = 23
+Bank = 212
+MollerADC    0    0    bpmstripline    bpm0L07xp
+MollerADC    0    1    bpmstripline    bpm0L07xm
+MollerADC    0    2    bpmstripline    bpm0L07yp
+MollerADC    0    3    bpmstripline    bpm0L07ym
+MollerADC    0    4    bpmstripline    bpm0L08xp
+MollerADC    0    5    bpmstripline    bpm0L08xm
+MollerADC    0    6    bpmstripline    bpm0L08yp
+MollerADC    0    7    bpmstripline    bpm0L08ym
+MollerADC    0    8    bpmstripline    bpm0L09xp
+MollerADC    0    9    bpmstripline    bpm0L09xm
+MollerADC    0   10    bpmstripline    bpm0L09yp
+MollerADC    0   11    bpmstripline    bpm0L09ym
+MollerADC    0   12    bpmstripline    bpm0L10xp
+MollerADC    0   13    bpmstripline    bpm0L10xm
+MollerADC    0   14    bpmstripline    bpm0L10yp
+MollerADC    0   15    bpmstripline    bpm0L10ym
+
+
+ROC = 16
+Bank = 212
+MollerADC    0    0    bpmstripline    bpm0R03xp
+MollerADC    0    1    bpmstripline    bpm0R03xm
+MollerADC    0    2    bpmstripline    bpm0R03yp
+MollerADC    0    3    bpmstripline    bpm0R03ym
+MollerADC    0    4    bpmstripline    bpm0I01xp
+MollerADC    0    5    bpmstripline    bpm0I01xm
+MollerADC    0    6    bpmstripline    bpm0I01yp
+MollerADC    0    7    bpmstripline    bpm0I01ym
+MollerADC    0    8    bpmstripline    bpm0I01Bxp
+MollerADC    0    9    bpmstripline    bpm0I01Bxm
+MollerADC    0   10    bpmstripline    bpm0I01Byp
+MollerADC    0   11    bpmstripline    bpm0I01Bym
+MollerADC    0   12    bpmstripline    bpm0I05xp
+MollerADC    0   13    bpmstripline    bpm0I05xm
+MollerADC    0   14    bpmstripline    bpm0I05yp
+MollerADC    0   15    bpmstripline    bpm0I05ym

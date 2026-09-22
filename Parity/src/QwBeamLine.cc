@@ -1164,6 +1164,7 @@ void QwBeamLine::EncodeEventData(std::vector<UInt_t> &buffer)
  */
 Int_t QwBeamLine::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, UInt_t* buffer, UInt_t num_words)
 {
+
   Bool_t lkDEBUG=kFALSE;
 
   Int_t index = GetSubbankIndex(roc_id,bank_id);
@@ -1181,6 +1182,75 @@ Int_t QwBeamLine::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, 
 		  << "Skipped padding word 0xf0f0f0f0 at beginning of buffer."
 		  << std::endl;
     }
+// added this
+// ------------------------------------------------------------
+// Decode MOLLERADC 4 x 64-bit header words.
+// buffer is UInt_t*, so each 64-bit word is stored as two
+// 32-bit words.
+// ------------------------------------------------------------
+
+auto read64_from_u32 = [](UInt_t* p)->ULong64_t {
+  ULong64_t hi = static_cast<ULong64_t>(p[1]);
+  ULong64_t lo = static_cast<ULong64_t>(p[0]);
+  return (hi << 32) | lo;
+};
+
+ULong64_t header0 = 0;
+ULong64_t header1 = 0;
+ULong64_t header2 = 0;
+ULong64_t header3 = 0;
+
+UInt_t    header_id        = 0;
+UInt_t    region_number    = 0;
+UInt_t    header_num_words = 0;
+ULong64_t region_timestamp = 0;
+UInt_t    block_number     = 0;
+ULong64_t packet_count     = 0;
+ULong64_t tsamples         = 0;
+
+Bool_t good_molleradc_header = kFALSE;
+
+if (num_words >= 8) {
+
+  header0 = read64_from_u32(buffer + 0);
+  header1 = read64_from_u32(buffer + 2);
+  header2 = read64_from_u32(buffer + 4);
+  header3 = read64_from_u32(buffer + 6);
+
+  header_id        = static_cast<UInt_t>((header0 >> 56) & 0xFF);
+  region_number    = static_cast<UInt_t>((header0 >> 16) & 0xFFFFFFFF);
+  header_num_words = static_cast<UInt_t>( header0        & 0xFFFF);
+
+  region_timestamp = header1;
+
+  block_number = static_cast<UInt_t>((header2 >> 60) & 0xF);
+  packet_count = static_cast<ULong64_t>(header2 & 0x0FFFFFFFFFFFFFFFULL);
+
+  tsamples = header3;
+
+  good_molleradc_header = (header_id == 0xAA);
+
+ /* static int beamline_header_debug = 0;
+  if (beamline_header_debug < 20) {
+    std::cerr << "[QwBeamLine MOLLERADC HEADER DEBUG] "
+              << "roc=" << roc_id
+              << " bank=" << bank_id
+              << " id=0x" << std::hex << header_id << std::dec
+              << " good=" << good_molleradc_header
+              << " region_number=" << region_number
+              << " timestamp=" << region_timestamp
+              << " header_num_words=" << header_num_words
+              << " block_number=" << block_number
+              << " packet_count=" << packet_count
+              << " tsamples=" << tsamples
+              << std::endl;
+  }
+  beamline_header_debug++;
+  */
+}
+
+
+
 
     for(size_t i=0;i<fBeamDetectorID.size();i++)
       {
@@ -1194,10 +1264,24 @@ Int_t QwBeamLine::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, 
 		    std::cout<<"found stripline data for "<<fBeamDetectorID[i].fdetectorname<<std::endl;
 		    std::cout<<"word left to read in this buffer:"<<num_words-fBeamDetectorID[i].fWordInSubbank<<std::endl;
 		  }
+
+
+
 		fStripline[fBeamDetectorID[i].fIndex].get()->
 		  ProcessEvBuffer(&(buffer[fBeamDetectorID[i].fWordInSubbank]),
 				  num_words-fBeamDetectorID[i].fWordInSubbank,
 				  fBeamDetectorID[i].fSubelement);
+				  //added this
+	if (good_molleradc_header) {
+  fStripline[fBeamDetectorID[i].fIndex].get()->SetMollerADCHeaderData(
+    region_number,
+    region_timestamp,
+    header_num_words,
+    block_number,
+    packet_count,
+    tsamples
+  );
+}
 	      }
 
 	    if(fBeamDetectorID[i].fTypeID==kQwQPD)
@@ -1247,6 +1331,19 @@ Int_t QwBeamLine::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, 
 		    std::cout<<"found bcm data for "<<fBeamDetectorID[i].fdetectorname<<std::endl;
 		    std::cout<<"word left to read in this buffer:"<<num_words-fBeamDetectorID[i].fWordInSubbank<<std::endl;
 		  }
+//added this
+	if (good_molleradc_header) {
+  fBCM[fBeamDetectorID[i].fIndex].get()->SetMollerADCHeaderData(
+    region_number,
+    region_timestamp,
+    header_num_words,
+    block_number,
+    packet_count,
+    tsamples
+  );
+}
+
+
 		fBCM[fBeamDetectorID[i].fIndex].get()->
 		  ProcessEvBuffer(&(buffer[fBeamDetectorID[i].fWordInSubbank]),
 				  num_words-fBeamDetectorID[i].fWordInSubbank);
