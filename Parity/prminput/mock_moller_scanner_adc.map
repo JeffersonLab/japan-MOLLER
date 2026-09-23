@@ -1,0 +1,12 @@
+ROC=17
+Bank=0x6110
+sample_size=15000
+!
+!
+! module.type, module.num, module.chan, det.type, det.name
+MollerADC,     0,          0,     IntegrationPMT,     US01
+MollerADC,     0,          1,     IntegrationPMT,     US02
+MollerADC,     0,          2,           Position,  USVoltX
+MollerADC,     0,          3,           Position,  USVoltY
+MollerADC,     0,          4,             Posref,   USRefX
+MollerADC,     0,          5,             Posref,   USRefy
