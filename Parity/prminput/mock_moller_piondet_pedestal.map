@@ -1,4 +1,4 @@
-! Name          Offset          Gain            NormRate(Hz/uA) VoltPerHz       Asym            C_x             C_y             C_xp            C_yp            C_e
+! Name          Offset          Gain
 PD01              0.000        7.62930e-05
 PD02              0.000        7.62930e-05
 PD03              0.000        7.62930e-05
