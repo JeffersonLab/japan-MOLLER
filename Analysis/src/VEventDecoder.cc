@@ -16,7 +16,7 @@ Bool_t VEventDecoder::DecodeSubbankHeader(UInt_t *buffer){
         //
         //  NOTE TO DAQ PROGRAMMERS:
         //      All internal subbank tags MUST be defined to
-        //      be greater than 31.
+        //      be greater than 64.
         Bool_t okay = kTRUE;
         if (fWordsSoFar >= fEvtLength){
                 //  We have reached the end of this event.
@@ -37,7 +37,7 @@ Bool_t VEventDecoder::DecodeSubbankHeader(UInt_t *buffer){
                 if (fSubbankTag<=64                             //previously 31
                         && ( (fAllowLowSubbankIDs==kFALSE)
                         || (fAllowLowSubbankIDs==kTRUE && fSubbankType==0x10) ) ){
-                        //  Subbank tags between 0 and 31 indicate this is
+                        //  Subbank tags between 0 and 64 indicate this is
                         //  a ROC bank.
                         fROC        = fSubbankTag;
                         fSubbankTag = 0;
