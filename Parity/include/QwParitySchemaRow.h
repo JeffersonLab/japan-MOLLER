@@ -462,14 +462,28 @@ private:
 };
 
 // Convenience type aliases for common tables
-using beam_optics_row = row<beam_optics>;
-using md_data_row = row<md_data>;
-using lumi_data_row = row<lumi_data>;
-using beam_row = row<beam>;
-using beam_errors_row = row<beam_errors>;
-using lumi_errors_row = row<lumi_errors>;
-using md_errors_row = row<md_errors>;
-using general_errors_row = row<general_errors>;
+using beam_modulation_row = row<BeamModulation>;
+using detector_data_row = row<DetectorData>;
+using grand_correlator_row = row<GrandCorrelator>;
+using general_errors_row = row<GeneralErrors>;
+using data_taking_period_row = row<DataTakingPeriod>;
+using ee_seeds_row = row<EeSeeds>;
+using ep_seeds_row = row<EpSeeds>;
+using ee_bf_test_row = row<EeBfTest>;
+using ep_bf_test_row = row<EpBfTest>;
+using selected_sensitivities_row = row<SelectedSensitivities>;
+using slow_control_detector_row = row<SlowControlDetector>;
+using slow_controls_data_row = row<SlowControlsData>;
+using slow_controls_settings_row = row<SlowControlsSettings>;
+
+// Legacy type aliases for backward compatibility
+using md_data_row = row<DetectorData>;
+using lumi_data_row = row<DetectorData>;
+using beam_row = row<DetectorData>;
+using md_errors_row = row<DetectorData>;
+using lumi_errors_row = row<DetectorData>;
+using beam_errors_row = row<DetectorData>;
+using beam_optics_row = row<BeamModulation>;
 
 } // namespace QwParitySchema
 
