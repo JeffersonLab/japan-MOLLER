@@ -24,6 +24,8 @@
 class QwDBInterface;
 class QwErrDBInterface;
 
+typedef VQwBPM_ptr QwLinearDiodeArray_ptr;
+
 /**
  * \class QwLinearDiodeArray
  * \ingroup QwAnalysis_BL
@@ -76,7 +78,7 @@ class QwLinearDiodeArray : public VQwBPM {
   }
 
   Int_t   ProcessEvBuffer(UInt_t* buffer,
-			UInt_t word_position_in_buffer,UInt_t indexnumber) override;
+                        UInt_t word_position_in_buffer,UInt_t indexnumber) override;
   void    ProcessEvent() override;
   void    PrintValue() const override;
   void    PrintInfo() const override;

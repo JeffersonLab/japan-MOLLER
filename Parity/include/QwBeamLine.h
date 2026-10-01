@@ -195,7 +195,7 @@ protected:
   std::vector <VQwClock_ptr> fClock;
 
   std::vector <QwQPD> fQPD;
-  std::vector <QwLinearDiodeArray<QwMollerADC_Channel>> fLinearArray;
+  std::vector <QwLinearDiodeArray_ptr> fLinearArray;
   std::vector <QwBPMCavity> fCavity;
   std::vector <QwHaloMonitor> fHaloMonitor;
 
