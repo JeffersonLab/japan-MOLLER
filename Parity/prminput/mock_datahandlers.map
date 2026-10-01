@@ -64,3 +64,8 @@
   map  = mock_det_combiner.map
   tree-name  = avgs
   tree-comment = Averages of detector combinations
+
+[QwTrendHandler]
+  name = trend
+  priority = 100
+  map  = mock_trend.map

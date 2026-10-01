@@ -1,0 +1,10 @@
+# Benchmark data-handler map: PROFILE method (per-pattern TProfile strip charts).
+# One QwTrendHandler at pattern scope trending the SAME 4 asym channels as the
+# GRAPH method (reuses mock_trend.map: nbins=200, binwidth=1, 4 asym channels).
+# In live TMapFile mode the profiles stream as rolling TH1D value traces.
+
+[QwTrendHandler]
+  name     = benchtrend
+  priority = 100
+  scope    = pattern
+  map      = mock_trend.map

@@ -1,0 +1,11 @@
+# Benchmark data-handler map: GRAPH method (per-burst TGraphs).
+# One QwBurstGraphHandler at pattern scope; it self-activates only in the
+# burst array and books the burst_graphs tree of per-burst TGraph branches.
+
+[QwBurstGraphHandler]
+  name         = benchgraph
+  priority     = 100
+  scope        = pattern
+  map          = bench_burstgraph.map
+  tree-name    = graphs
+  tree-comment = Per-burst pattern graphs (benchmark)

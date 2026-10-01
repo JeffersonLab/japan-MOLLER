@@ -8,6 +8,7 @@
 #include <TFile.h>
 #ifdef QW_ENABLE_MAPFILE
 #include <TMapFile.h>
+class TMemFile;
 #endif
 // RNTuple support - only if available in ROOT version
 #ifdef HAS_RNTUPLE_SUPPORT
@@ -25,6 +26,8 @@
 #include <RQ_OBJECT.h>
 #include <TQObject.h>
 #include <vector>
+#include <map>
+#include <deque>
 #include <TString.h>
 #include <TCut.h>
 #include <TTimer.h>
@@ -33,7 +36,7 @@
 #include "TH3.h"
 #include "panguinOnlineConfig.hh"
 
-#define UPDATETIME 10000
+#define UPDATETIME 1000
 
 class OnlineGUI {
   // Class that takes care of the GUI
@@ -65,6 +68,7 @@ private:
   // file, conventionally named *.map or living under /dev/shm/), fRootFile
   // stays null and we read histograms from fMapFile instead.
   TMapFile*                         fMapFile;
+  std::unique_ptr<TMemFile>         fRNTupleMemFile;
   Bool_t                            fIsMapFile;
 #endif
   Bool_t                            doGolden;
@@ -96,6 +100,13 @@ private:
   TH2D                             *mytemp2d_golden;
   TH3D                             *mytemp3d_golden;
 
+  // Baseline snapshots for the per-plot "-delta" option.  Keyed by
+  // page+object-name, each entry stores a rolling history of private clones
+  // of the histogram as it was on the previous updates (oldest at front,
+  // newest at back).  HistDraw() draws (current - snapshot from N updates
+  // ago) to show what has been added over the last N refreshes.
+  std::map<TString, std::deque<TH1*> > fPrevHist;
+
   int fVerbosity;
 
 public:
@@ -119,6 +130,9 @@ public:
   UInt_t GetNTupleIndex(TString);
   void NTupleDraw(std::vector <TString>);
 #endif // HAS_RNTUPLE_SUPPORT
+#ifdef QW_ENABLE_MAPFILE
+  Bool_t LoadRNTupleSnapshot();
+#endif
   // RDataFrame support methods
   void InitializeDataFrame();
   void DataFrameDraw(std::vector <TString>);
@@ -126,6 +140,13 @@ public:
   UInt_t GetTreeIndexFromName(TString);
   void TreeDraw(std::vector <TString>);
   void HistDraw(std::vector <TString>);
+  // Build the "what's new" histogram for the -delta option: returns a
+  // private clone of (current - snapshot from nIter updates ago) and pushes
+  // the current state onto the stored history for the given key.  Until
+  // nIter snapshots have accumulated, the oldest available snapshot is used
+  // as the baseline; on the very first call the full current histogram is
+  // returned (no baseline to subtract yet).
+  TH1* MakeDelta(TH1* current, const TString& key, Int_t nIter = 1);
   void MacroDraw(std::vector <TString>);
   void LoadDraw(std::vector <TString>);
   void LoadLib(std::vector <TString>);

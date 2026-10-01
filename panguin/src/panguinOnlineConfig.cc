@@ -411,8 +411,10 @@ vector <TString> OnlineConfig::GetDrawCommand(UInt_t page, UInt_t nCommand)
   //  3: title
   //  4: treename
   //  5: grid
+  //  6: delta   ("delta" when the -delta option is present)
+  //  7: deltaN  (number of updates to look back for -delta; default "1")
 
-  vector <TString> out_command(6);
+  vector <TString> out_command(8);
   vector <UInt_t> command_vector = GetDrawIndex(page);
   UInt_t index = command_vector[nCommand];
 
@@ -501,6 +503,22 @@ vector <TString> OnlineConfig::GetDrawCommand(UInt_t page, UInt_t nCommand)
         out_command[5] = "grid";
       } else {
         cout << "Error: Multiple setup of grid in Page: " << page << "--" << GetPageTitle(page).Data() << "\t coomand: " << nCommand << endl;
+        exit(1);
+      }
+    } else if(sConfFile[index][i]=="-delta") {
+      // -delta [N]: draw (current - snapshot from N updates ago) so the plot
+      // shows what has been added over the last N refreshes.  N is optional
+      // and defaults to 1 (the previous update).  Works with any histogram.
+      if (out_command[6].IsNull()){
+        out_command[6] = "delta";
+        out_command[7] = "1";
+        // Optional integer argument giving the look-back window.
+        if (i+1 < sConfFile[index].size() && sConfFile[index][i+1].IsDigit()) {
+          out_command[7] = sConfFile[index][i+1];
+          i = i+1;
+        }
+      } else {
+        cout << "Error: Multiple setup of delta in Page: " << page << "--" << GetPageTitle(page).Data() << "\t coomand: " << nCommand << endl;
         exit(1);
       }
     } else {  // every thing else is regarded as cut

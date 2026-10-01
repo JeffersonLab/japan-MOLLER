@@ -20,7 +20,7 @@
  * Create a subsystem array based on the configuration option 'detectors'
  */
 QwSubsystemArray::QwSubsystemArray(QwOptions& options, CanContainFn myCanContain)
-: fCleanParameter{0,0,0},fEventTypeMask(0x0),fnCanContain(myCanContain)
+: fEventTypeMask(0x0),fnCanContain(myCanContain)
 {
   ProcessOptionsToplevel(options);
   QwParameterFile detectors(fSubsystemsMapFile.c_str());
@@ -47,8 +47,6 @@ QwSubsystemArray::QwSubsystemArray(const QwSubsystemArray& source)
   fSubsystemsDisabledByName(source.fSubsystemsDisabledByName),
   fSubsystemsDisabledByType(source.fSubsystemsDisabledByType)
 {
-  for (size_t i = 0; i < 3; i++)
-    fCleanParameter[i] = source.fCleanParameter[i];
 
   // Make copies of all subsystems rather than copying just the pointers
   for (const_iterator subsys = source.begin(); subsys != source.end(); ++subsys) {
@@ -57,6 +55,60 @@ QwSubsystemArray::QwSubsystemArray(const QwSubsystemArray& source)
     if (this->back()->PublishInternalValues() == kFALSE) {
       QwError << "Not all variables for " << this->back()->GetName()
              << " could be published!" << QwLog::endl;
+    }
+  }
+}
+
+void QwSubsystemArray::InvalidateResolvedDispatchCache()
+{
+  fResolvedSelf.clear();
+  fResolvedPeer = nullptr;
+  fResolvedPeerSlots.clear();
+  fResolvedPairCompatible.clear();
+}
+
+void QwSubsystemArray::BuildResolvedSelf() const
+{
+  if (fResolvedSelf.size() == this->size()) return;
+  // Self layout changed: any peer cache built against the old layout is stale.
+  fResolvedPeer = nullptr;
+  fResolvedPeerSlots.clear();
+  fResolvedPairCompatible.clear();
+  fResolvedSelf.assign(this->size(), nullptr);
+  for (size_t i = 0; i < this->size(); ++i) {
+    if (this->at(i) != nullptr) {
+      fResolvedSelf[i] = this->at(i).get();
+    }
+  }
+}
+
+void QwSubsystemArray::ResolvePairing(const QwSubsystemArray& source, const char* context) const
+{
+  BuildResolvedSelf();
+  const Bool_t cache_valid =
+      (fResolvedPeer == &source)
+      && (fResolvedPeerSlots.size() == source.size())
+      && (fResolvedPairCompatible.size() == source.size());
+  if (cache_valid) return;
+
+  fResolvedPeer = &source;
+  fResolvedPeerSlots.assign(source.size(), nullptr);
+  fResolvedPairCompatible.assign(source.size(), kFALSE);
+  if (this->size() != source.size()) return;
+
+  for (size_t i = 0; i < source.size(); ++i) {
+    VQwSubsystem* ptr1 = fResolvedSelf[i];
+    VQwSubsystem* ptr2 = source.at(i).get();
+    fResolvedPeerSlots[i] = ptr2;
+    if (ptr1 == nullptr || ptr2 == nullptr) continue;
+
+    if (typeid(*ptr1) == typeid(*ptr2)) {
+      fResolvedPairCompatible[i] = kTRUE;
+    } else {
+      QwError << context << " types do not match at slot " << i << QwLog::endl;
+      QwError << " typeid(*ptr1)=" << typeid(*ptr1).name()
+              << " but typeid(*ptr2)=" << typeid(*ptr2).name()
+              << QwLog::endl;
     }
   }
 }
@@ -73,24 +125,10 @@ QwSubsystemArray& QwSubsystemArray::operator=(const QwSubsystemArray& source)
   this->fCodaEventType   = source.fCodaEventType;
   if (!source.empty()){
     if (this->size() == source.size()){
+      ResolvePairing(source, "QwSubsystemArray::operator=");
       for(size_t i=0;i<source.size();i++){
-        if (source.at(i)==NULL || this->at(i)==NULL){
-          //  Either the source or the destination subsystem
-          //  are null
-        } else {
-          VQwSubsystem *ptr1 =
-            dynamic_cast<VQwSubsystem*>(this->at(i).get());
-          VQwSubsystem *ptr2 = source.at(i).get();
-          if (typeid(*ptr1)==typeid(*(ptr2))){
-            *(ptr1) = source.at(i).get();
-          } else {
-            //  Subsystems don't match
-            QwError << " QwSubsystemArray::operator= types do not mach" << QwLog::endl;
-            QwError << " typeid(*ptr1)=" << typeid(*ptr1).name()
-                    << " but typeid(*ptr2)=" << typeid(*ptr2).name()
-                    << QwLog::endl;
-          }
-        }
+        if (!fResolvedPairCompatible[i]) continue;
+        *(fResolvedSelf[i]) = fResolvedPeerSlots[i];
       }
     } else {
       //  Array sizes don't match
@@ -217,6 +255,7 @@ void QwSubsystemArray::push_back(VQwSubsystem* subsys)
   } else {
     std::shared_ptr<VQwSubsystem> subsys_tmp(subsys);
     SubsysPtrs::push_back(subsys_tmp);
+    InvalidateResolvedDispatchCache();
 
     // Set the parent of the subsystem to this array
     subsys_tmp->SetParent(this);
@@ -562,15 +601,9 @@ void  QwSubsystemArray::ConstructBranchAndVector(
   // FillTreeVector().
   values.push_back("CodaEventNumber", 'i');
   values.push_back("CodaEventType", 'i');
-  values.push_back("Coda_CleanData", 'D');
-  values.push_back("Coda_ScanData1", 'D');
-  values.push_back("Coda_ScanData2", 'D');
   if (prefix == "" || prefix.Index("yield_") == 0) {
     tree->Branch("CodaEventNumber",&(values[fTreeArrayIndex]),"CodaEventNumber/i");
     tree->Branch("CodaEventType",&(values[fTreeArrayIndex+1]),"CodaEventType/i");
-    tree->Branch("Coda_CleanData",&(values[fTreeArrayIndex+2]),"Coda_CleanData/D");
-    tree->Branch("Coda_ScanData1",&(values[fTreeArrayIndex+3]),"Coda_ScanData1/D");
-    tree->Branch("Coda_ScanData2",&(values[fTreeArrayIndex+4]),"Coda_ScanData2/D");
   }
   for (iterator subsys = begin(); subsys != end(); ++subsys) {
     VQwSubsystem* subsys_ptr = dynamic_cast<VQwSubsystem*>(subsys->get());
@@ -653,9 +686,6 @@ void QwSubsystemArray::FillTreeVector(QwRootTreeBranchVector &values) const
   size_t index = fTreeArrayIndex;
   values.SetValue(index++, this->GetCodaEventNumber());
   values.SetValue(index++, this->GetCodaEventType());
-  values.SetValue(index++, this->fCleanParameter[0]);
-  values.SetValue(index++, this->fCleanParameter[1]);
-  values.SetValue(index++, this->fCleanParameter[2]);
 
   // Fill the subsystem data
   for (const_iterator subsys = begin(); subsys != end(); ++subsys) {
@@ -691,20 +721,11 @@ void QwSubsystemArray::ConstructNTupleAndVector(
   if (prefix == "" || prefix.Index("yield_") == 0) {
     auto eventNumField = model->MakeField<Double_t>("CodaEventNumber");
     auto eventTypeField = model->MakeField<Double_t>("CodaEventType");
-    auto cleanDataField = model->MakeField<Double_t>("Coda_CleanData");
-    auto scanData1Field = model->MakeField<Double_t>("Coda_ScanData1");
-    auto scanData2Field = model->MakeField<Double_t>("Coda_ScanData2");
 
     fieldPtrs.push_back(eventNumField);
     fieldPtrs.push_back(eventTypeField);
-    fieldPtrs.push_back(cleanDataField);
-    fieldPtrs.push_back(scanData1Field);
-    fieldPtrs.push_back(scanData2Field);
   } else {
     // Still reserve space but don't create duplicate fields
-    fieldPtrs.push_back(nullptr);
-    fieldPtrs.push_back(nullptr);
-    fieldPtrs.push_back(nullptr);
     fieldPtrs.push_back(nullptr);
     fieldPtrs.push_back(nullptr);
   }
@@ -728,9 +749,6 @@ void QwSubsystemArray::FillNTupleVector(std::vector<Double_t>& values) const
   size_t index = fTreeArrayIndex;
   values[index++] = this->GetCodaEventNumber();
   values[index++] = this->GetCodaEventType();
-  values[index++] = this->fCleanParameter[0];
-  values[index++] = this->fCleanParameter[1];
-  values[index++] = this->fCleanParameter[2];
 
   // Fill the subsystem data
   for (const_iterator subsys = begin(); subsys != end(); ++subsys) {
@@ -843,6 +861,7 @@ void QwSubsystemArray::push_back(std::shared_ptr<VQwSubsystem> subsys)
  } else {
    std::shared_ptr<VQwSubsystem> subsys_tmp(subsys);
    SubsysPtrs::push_back(subsys_tmp);
+   InvalidateResolvedDispatchCache();
 
    // Set the parent of the subsystem to this array
    subsys_tmp->SetParent(this);

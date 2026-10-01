@@ -287,7 +287,7 @@ jobs:
 
       - name: Download target branch artifacts (prompt summary)
         if: github.event_name == 'pull_request'
-        uses: dawidd6/action-download-artifact@v21
+        uses: dawidd6/action-download-artifact@v24
         with:
           workflow: build-lcg-cvmfs.yml
           branch: ${{ github.event.pull_request.base.ref }}
@@ -297,7 +297,7 @@ jobs:
 
       - name: Download target branch artifacts (regalias)
         if: github.event_name == 'pull_request'
-        uses: dawidd6/action-download-artifact@v21
+        uses: dawidd6/action-download-artifact@v24
         with:
           workflow: build-lcg-cvmfs.yml
           branch: ${{ github.event.pull_request.base.ref }}
