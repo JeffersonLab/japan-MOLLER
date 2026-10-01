@@ -83,6 +83,12 @@ Int_t QwBeamLine::AddToElementList<VQwBPM_ptr>(std::vector<VQwBPM_ptr> &elementl
 				detector_id.fmoduletype) );
     elementlist.push_back(element);
   }
+  if (detector_id.fTypeID == kQwLinearArray){
+    VQwBPM_ptr element(
+  VQwBPM::CreateLinearDiodeArray(GetName(),
+        detector_id.fmoduletype) );
+    elementlist.push_back(element);
+  }
   detector_id.fIndex = elementlist.size()-1;
   return detector_id.fIndex;
 }

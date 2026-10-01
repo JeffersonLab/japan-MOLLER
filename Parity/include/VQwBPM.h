@@ -294,6 +294,8 @@ public:
   static VQwBPM* CreateStripline(const VQwBPM& source);
   static VQwBPM* CreateCombo(TString subsystemname, TString type, TString name);
   static VQwBPM* CreateCombo(const VQwBPM& source);
+  static VQwBPM* CreateLinearDiodeArray(TString subsystemname, TString type);
+  static VQwBPM* CreateLinearDiodeArray(const VQwBPM& source);
 
   private:
 
