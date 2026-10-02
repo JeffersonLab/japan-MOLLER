@@ -1,0 +1,20 @@
+# This is the detectors map used for VQWK checks
+
+
+[QwHelicityDecoder]
+ name = Helicity Info
+ map  = moller_isb_helicity.map
+
+[QwBeamLine]
+ name     = Main BeamLine
+ map      = moller_hall_beamline.map
+ ! param    = mock_moller_beamline_pedestal.map
+ ! geom     = mock_moller_beamline_geometry.map
+ eventcut = empty_eventcuts.map
+
+[QwBeamLine]
+ name  = Injector BeamLine
+ map   = moller_inj_beamline.map
+ param = moller_inj_beamline_pedestal.map
+ ! geom  = mollinj_beamline_geometry.map
+ eventcut = empty_eventcuts.map
