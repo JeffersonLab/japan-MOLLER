@@ -12,16 +12,25 @@
 
 // ROOT headers
 #include <TTree.h>
-#include <ROOT/RNTupleModel.hxx>
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
+#include "QwMollerADC_Channel.h"
 #include "QwVQWK_Channel.h"
 #include "VQwBPM.h"
 #include "QwParameterFile.h"
+#include "QwUtil.h"
 
 // Forward declarations
+#ifdef __USE_DATABASE__
 class QwDBInterface;
 class QwErrDBInterface;
+#endif // __USE_DATABASE__
+
+typedef VQwBPM_ptr QwLinearDiodeArray_ptr;
 
 /**
  * \class QwLinearDiodeArray
@@ -32,6 +41,7 @@ class QwErrDBInterface;
  * Provides position calculation from diode array readouts with calibration
  * and error handling for linear array detectors.
  */
+template <typename ChannelType>
 class QwLinearDiodeArray : public VQwBPM {
 
  public:
@@ -45,17 +55,18 @@ class QwLinearDiodeArray : public VQwBPM {
     SetSubsystemName(subsystemname);
     InitializeChannel(subsystemname, name);
   };
+  QwLinearDiodeArray(TString subsystemname, TString name, TString type):VQwBPM(name){
+    SetSubsystemName(subsystemname);
+    SetModuleType(type);
+    InitializeChannel(subsystemname, name);
+  };
   QwLinearDiodeArray(const QwLinearDiodeArray& source)
   : VQwBPM(source),
     fEffectiveCharge(source.fEffectiveCharge)
   {
-    for (size_t i = 0; i < 2; i++) {
-      fRelPos[i] = source.fRelPos[i];
-      fAbsPos[i] = source.fAbsPos[i];
-    }
-    for (size_t i = 0; i < 8; i++) {
-      fPhotodiode[i] = source.fPhotodiode[i];
-    }
+    QwCopyArray(source.fPhotodiode, fPhotodiode);
+    QwCopyArray(source.fRelPos, fRelPos);
+    QwCopyArray(source.fAbsPos, fAbsPos);
   }
   ~QwLinearDiodeArray() override { };
 
@@ -70,7 +81,7 @@ class QwLinearDiodeArray : public VQwBPM {
   }
 
   Int_t   ProcessEvBuffer(UInt_t* buffer,
-			UInt_t word_position_in_buffer,UInt_t indexnumber) override;
+                        UInt_t word_position_in_buffer,UInt_t indexnumber) override;
   void    ProcessEvent() override;
   void    PrintValue() const override;
   void    PrintInfo() const override;
@@ -164,15 +175,15 @@ class QwLinearDiodeArray : public VQwBPM {
 
 
  protected:
-  // std::vector<QwVQWK_Channel> fPhotodiode;
-  QwVQWK_Channel fPhotodiode[8];
-  QwVQWK_Channel fRelPos[2];
+  // std::vector<ChannelType> fPhotodiode;
+  std::array<ChannelType,8> fPhotodiode; //[8];
+  std::array<ChannelType,2> fRelPos;     //[2];
 
   //  These are the "real" data elements, to which the base class
   //  fAbsPos_base and fEffectiveCharge_base are pointers.
-  QwVQWK_Channel fAbsPos[2];
-  QwVQWK_Channel fEffectiveCharge;
+  std::array<ChannelType,2> fAbsPos;    //[2];
+  ChannelType fEffectiveCharge;
 
-  std::vector<QwVQWK_Channel> fLinearArrayElementList;
+  std::vector<ChannelType> fLinearArrayElementList;
 
 };
