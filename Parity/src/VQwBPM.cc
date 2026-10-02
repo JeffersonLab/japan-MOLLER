@@ -141,7 +141,7 @@ void VQwBPM::SetSingleEventCuts(TString ch_name, Double_t minX, Double_t maxX)
 {
   VQwHardwareChannel* tmpptr = GetSubelementByName(ch_name);
   QwMessage << GetElementName() << " " << ch_name
-	    << " LL " <<  minX <<" UL " << maxX <<QwLog::endl;
+            << " LL " <<  minX <<" UL " << maxX <<QwLog::endl;
   tmpptr->SetSingleEventCuts(minX,maxX);
 }
 
@@ -150,7 +150,7 @@ void VQwBPM::SetSingleEventCuts(TString ch_name, UInt_t errorflag,Double_t minX,
   VQwHardwareChannel* tmpptr = GetSubelementByName(ch_name);
   errorflag|=kBPMErrorFlag;//update the device flag
   QwMessage << GetElementName() << " " << ch_name
-	    << " LL " <<  minX <<" UL " << maxX <<QwLog::endl;
+            << " LL " <<  minX <<" UL " << maxX <<QwLog::endl;
   tmpptr->SetSingleEventCuts(errorflag,minX,maxX,stability,burplevel);
 }
 
@@ -309,14 +309,14 @@ VQwBPM* VQwBPM::CreateStripline(const VQwBPM& source)
   }
 }
 
-VQwBPM* VQwBPM::CreateLinearDiodeArray(TString subsystemname, TString type) {
+VQwBPM* VQwBPM::CreateLinearDiodeArray(TString subsystemname, TString name, TString type) {
   Bool_t localdebug = kFALSE;
   type.ToUpper();
   if( localdebug ) QwMessage<<"Create Linear Diode Array of type: "<<type<<". Subsystem Name: "<<subsystemname<<"\n";
   if( type == "VQWK") {
-    return new QwLinearDiodeArray<QwVQWK_Channel>(subsystemname,type);
+    return new QwLinearDiodeArray<QwVQWK_Channel>(subsystemname, name, type);
   } else if( type == "MOLLERADC" ) {
-    return new QwLinearDiodeArray<QwMollerADC_Channel>(subsystemname,type);
+    return new QwLinearDiodeArray<QwMollerADC_Channel>(subsystemname, name, type);
   } else {
     QwWarning<<"Linear Diode Array of type="<<type<<" is UNSUPPORTED!!\n";
     exit(-1);

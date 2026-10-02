@@ -12,17 +12,23 @@
 
 // ROOT headers
 #include <TTree.h>
-#include <ROOT/RNTupleModel.hxx>
+#ifdef HAS_RNTUPLE_SUPPORT
+#include "ROOT/RNTupleModel.hxx"
+#include "ROOT/RField.hxx"
+#endif // HAS_RNTUPLE_SUPPORT
 
 // Qweak headers
 #include "QwMollerADC_Channel.h"
 #include "QwVQWK_Channel.h"
 #include "VQwBPM.h"
 #include "QwParameterFile.h"
+#include "QwUtil.h"
 
 // Forward declarations
+#ifdef __USE_DATABASE__
 class QwDBInterface;
 class QwErrDBInterface;
+#endif // __USE_DATABASE__
 
 typedef VQwBPM_ptr QwLinearDiodeArray_ptr;
 
@@ -51,19 +57,16 @@ class QwLinearDiodeArray : public VQwBPM {
   };
   QwLinearDiodeArray(TString subsystemname, TString name, TString type):VQwBPM(name){
     SetSubsystemName(subsystemname);
+    SetModuleType(type);
     InitializeChannel(subsystemname, name);
   };
   QwLinearDiodeArray(const QwLinearDiodeArray& source)
   : VQwBPM(source),
     fEffectiveCharge(source.fEffectiveCharge)
   {
-    for (size_t i = 0; i < 2; i++) {
-      fRelPos[i] = source.fRelPos[i];
-      fAbsPos[i] = source.fAbsPos[i];
-    }
-    for (size_t i = 0; i < 8; i++) {
-      fPhotodiode[i] = source.fPhotodiode[i];
-    }
+    QwCopyArray(source.fPhotodiode, fPhotodiode);
+    QwCopyArray(source.fRelPos, fRelPos);
+    QwCopyArray(source.fAbsPos, fAbsPos);
   }
   ~QwLinearDiodeArray() override { };
 
@@ -173,12 +176,12 @@ class QwLinearDiodeArray : public VQwBPM {
 
  protected:
   // std::vector<ChannelType> fPhotodiode;
-  ChannelType fPhotodiode[8];
-  ChannelType fRelPos[2];
+  std::array<ChannelType,8> fPhotodiode; //[8];
+  std::array<ChannelType,2> fRelPos;     //[2];
 
   //  These are the "real" data elements, to which the base class
   //  fAbsPos_base and fEffectiveCharge_base are pointers.
-  ChannelType fAbsPos[2];
+  std::array<ChannelType,2> fAbsPos;    //[2];
   ChannelType fEffectiveCharge;
 
   std::vector<ChannelType> fLinearArrayElementList;

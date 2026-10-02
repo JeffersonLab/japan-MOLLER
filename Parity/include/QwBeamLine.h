@@ -55,7 +55,6 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
   QwBeamLine(const QwBeamLine& source)
   : VQwSubsystem(source),VQwSubsystemParity(source),
     fQPD(source.fQPD),
-    fLinearArray(source.fLinearArray),
     fCavity(source.fCavity),
     fHaloMonitor(source.fHaloMonitor),
     fECalculator(source.fECalculator),

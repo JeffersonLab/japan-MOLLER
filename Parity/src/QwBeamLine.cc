@@ -86,7 +86,8 @@ Int_t QwBeamLine::AddToElementList<VQwBPM_ptr>(std::vector<VQwBPM_ptr> &elementl
   if (detector_id.fTypeID == kQwLinearArray){
     VQwBPM_ptr element(
   VQwBPM::CreateLinearDiodeArray(GetName(),
-        detector_id.fmoduletype) );
+                                 detector_id.fdetectorname,
+                                 detector_id.fmoduletype) );
     elementlist.push_back(element);
   }
   detector_id.fIndex = elementlist.size()-1;
@@ -2839,6 +2840,13 @@ void  QwBeamLine::CopyTemplatedDataElements(const VQwSubsystem *source)
     this->fBPMCombo.push_back(VQwBPM_ptr(
         VQwBPM::CreateCombo(*(input->fBPMCombo[i].get()))));
   }
+
+  this->fLinearArray.reserve(input->fLinearArray.size());
+  for(size_t i=0;i<input->fLinearArray.size();i++){
+    this->fLinearArray.push_back(VQwBPM_ptr(
+        VQwBPM::CreateLinearDiodeArray(*(input->fLinearArray[i].get()))));
+  }
+
 }
 
 //*****************************************************************//

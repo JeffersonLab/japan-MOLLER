@@ -275,7 +275,7 @@ VQwHardwareChannel* QwLinearDiodeArray<ChannelType>::GetSubelementByName(TString
 void QwLinearDiodeArray<ChannelType>::SetSingleEventCuts(TString ch_name, Double_t minX, Double_t maxX)
 {
   QwWarning << "QwLinearDiodeArray::SetSingleEventCuts:  "
-	    << "Does not do anything yet." << QwLog::endl;
+            << "Does not do anything yet." << QwLog::endl;
 }*/
 
 /**
@@ -351,13 +351,13 @@ void QwLinearDiodeArray<ChannelType>::UpdateErrorFlag(const VQwBPM *ev_error){
       // std::cout<<" Here in QwQPD::UpdateErrorFlag \n";
       if (this->GetElementName()!="") {
         const QwLinearDiodeArray* value_bpm = dynamic_cast<const QwLinearDiodeArray* >(ev_error);
-	for(i=0;i<4;i++){
-	  fPhotodiode[i].UpdateErrorFlag(value_bpm->fPhotodiode[i]);
-	}
-	for(i=kXAxis;i<kNumAxes;i++) {
-	  fRelPos[i].UpdateErrorFlag(value_bpm->fRelPos[i]);
-	}
-	fEffectiveCharge.UpdateErrorFlag(value_bpm->fEffectiveCharge);
+        for(i=0;i<4;i++){
+          fPhotodiode[i].UpdateErrorFlag(value_bpm->fPhotodiode[i]);
+        }
+        for(i=kXAxis;i<kNumAxes;i++) {
+          fRelPos[i].UpdateErrorFlag(value_bpm->fRelPos[i]);
+        }
+        fEffectiveCharge.UpdateErrorFlag(value_bpm->fEffectiveCharge);
       }
     } else {
       TString loc="Standard exception from QwLinearDiodeArray::UpdateErrorFlag :"+
@@ -480,8 +480,8 @@ TString QwLinearDiodeArray<ChannelType>::GetSubElementName(Int_t subindex)
     thisname=fPhotodiode[subindex].GetElementName();
   else
     std::cerr<< "QwLinearDiodeArray::GetSubElementName for "
-	     << GetElementName()<<" this subindex, "
-	     << subindex << ", doesn't exist \n";
+             << GetElementName()<<" this subindex, "
+             << subindex << ", doesn't exist \n";
 
   return thisname;
 }
@@ -502,7 +502,7 @@ UInt_t QwLinearDiodeArray<ChannelType>::GetSubElementIndex(TString subname)
   // localindex is unsigned int and always positive
   if (localindex > kMaxElements){
     std::cerr << "QwLinearDiodeArray::GetSubElementIndex is unable to associate the string -"
-	      <<subname<<"- to any index"<<std::endl;
+              <<subname<<"- to any index"<<std::endl;
     localindex=kInvalidSubelementIndex;
   }
   return localindex;
@@ -770,22 +770,22 @@ void  QwLinearDiodeArray<ChannelType>::ConstructBranch(TTree *tree, TString &pre
   } else
     {
       if (modulelist.HasValue(devicename)){
-	TString thisprefix=prefix;
-	if(prefix.Contains("asym_"))
-	  thisprefix.ReplaceAll("asym_","diff_");
+        TString thisprefix=prefix;
+        if(prefix.Contains("asym_"))
+          thisprefix.ReplaceAll("asym_","diff_");
 
-	SetRootSaveStatus(prefix);
+        SetRootSaveStatus(prefix);
 
-	fEffectiveCharge.ConstructBranch(tree,prefix);
-	size_t i = 0;
-	if(bFullSave) {
-	  for(i=0;i<8;i++) fPhotodiode[i].ConstructBranch(tree,thisprefix);
-	}
-	for(i=kXAxis;i<kNumAxes;i++) {
-	  fRelPos[i].ConstructBranch(tree,thisprefix);
-	}
+        fEffectiveCharge.ConstructBranch(tree,prefix);
+        size_t i = 0;
+        if(bFullSave) {
+          for(i=0;i<8;i++) fPhotodiode[i].ConstructBranch(tree,thisprefix);
+        }
+        for(i=kXAxis;i<kNumAxes;i++) {
+          fRelPos[i].ConstructBranch(tree,thisprefix);
+        }
 
-	QwMessage <<" Tree leaves added to "<<devicename<<" Corresponding channels"<<QwLog::endl;
+        QwMessage <<" Tree leaves added to "<<devicename<<" Corresponding channels"<<QwLog::endl;
       }
       // this functions doesn't do anything yet
     }
@@ -881,8 +881,8 @@ template<typename ChannelType>
 void QwLinearDiodeArray<ChannelType>::MakeLinearArrayList()
 {
   for (size_t i = kXAxis; i < kNumAxes; i++) {
-	ChannelType relpos(fRelPos[i]);
-	relpos = fRelPos[i];
+        ChannelType relpos(fRelPos[i]);
+        relpos = fRelPos[i];
     fLinearArrayElementList.push_back(relpos);
   }
   ChannelType effectivecharge(fEffectiveCharge);

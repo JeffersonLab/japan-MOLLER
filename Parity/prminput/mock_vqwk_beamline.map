@@ -1,0 +1,22 @@
+ROC=10
+Bank=0x1005
+# vqwk_buffer_offset = 0
+sample_size=5000
+
+VQWK 0 0 lineararray linarray1p1
+VQWK 0 1 lineararray linarray1p2
+VQWK 0 2 lineararray linarray1p3
+VQWK 0 3 lineararray linarray1p4
+VQWK 0 4 lineararray linarray1p5
+VQWK 0 5 lineararray linarray1p6
+VQWK 0 6 lineararray linarray1p7
+VQWK 0 7 lineararray linarray1p8
+
+#VQWK 0 0 bpmstripline dummy1XP
+#VQWK 0 1 bpmstripline dummy1XM
+#VQWK 0 2 bpmstripline dummy1YP
+#VQWK 0 3 bpmstripline dummy1YM
+#VQWK 0 4 bpmstripline dummy2XP
+#VQWK 0 5 bpmstripline dummy2XM
+#VQWK 0 6 bpmstripline dummy2YP
+#VQWK 0 7 bpmstripline dummy2YM
