@@ -1,0 +1,16 @@
+# QwTrendHandler channel list for the LIVE (event-scope) demo.
+# Event scope fills one point per MPS event, so the strip charts update
+# continuously in the live TMapFile (unlike pattern scope, which only fills
+# when a full helicity pattern completes).
+# Each non-comment line is one channel token: <type>:<name>
+# type = yield | mps  (asym/diff are skipped at event scope)
+# In live mapfile mode the chart is a rolling window spanning nbins*binwidth
+# event indices; here 500 bins x 20 events = a 10000-event sweep.
+nbins = 500
+binwidth = 20
+
+# Per-MPS yield strip charts: mean +/- RMS vs event index
+yield:bcm1h02a
+yield:bcm1h15
+yield:bcm_target
+yield:bpm1h04X

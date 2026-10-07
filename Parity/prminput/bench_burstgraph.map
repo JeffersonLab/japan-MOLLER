@@ -1,0 +1,12 @@
+# Benchmark channel list for QwBurstGraphHandler (per-burst TGraphs).
+# ALIGNED with the profile/tree benchmark to display the SAME 4 channels.
+# All four are asymmetry (pattern-scope) channels so every display method
+# (TGraph / TProfile / TTree) encodes identical data for a fair comparison.
+
+# Optional error-flag mask: skip a pattern's point when (errorflag & mask) != 0.
+mask = 0x0
+
+asym:bcm1h02a
+asym:bcm1h15
+asym:bcm_target
+asym:bpm1h04X

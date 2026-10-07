@@ -1,0 +1,9 @@
+!  Decoding for the helicity decoder board in the ISB
+
+PatternPhase=8
+RandSeedBits=30
+
+!  All we need for the HelicityDecoder board is the ROC ID and Bank ID.
+!  The data structure is known internally to the class.
+ROC=12
+Bank=0xdec

@@ -58,7 +58,7 @@ void VQwDetectorArray::ProcessOptions(QwOptions &options) {
     if (! bNormalization) {
 
         QwWarning << "QwDetectorArray::ProcessOptions:  "
-	     << "Detector yields WILL NOT be normalized."
+             << "Detector yields WILL NOT be normalized."
          << QwLog::endl;
 
     }
@@ -190,12 +190,12 @@ Bool_t VQwDetectorArray::PublishByRequest(TString device_name) {
         if (fMainDetID[i].fTypeID == kQwCombinedPMT){
 
             status = PublishInternalValue(device_name, "published-by-request",
-			 fCombinedPMT[fMainDetID[i].fIndex].GetChannel(device_name));
+                         fCombinedPMT[fMainDetID[i].fIndex].GetChannel(device_name));
 
         } else if (fMainDetID[i].fTypeID == kQwIntegrationPMT) {
 
             status = PublishInternalValue(device_name, "published-by-request",
-			 fIntegrationPMT[fMainDetID[i].fIndex].GetChannel(device_name));
+                         fIntegrationPMT[fMainDetID[i].fIndex].GetChannel(device_name));
 
         } else {
 
@@ -250,12 +250,12 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
 
         RegisterRocBankMarker(mapstr);
         if (mapstr.PopValue("abs_saturation_limit",value)) {
-	        abs_saturation_limit=value;
-	        bAssignedLimit = kTRUE;
+                abs_saturation_limit=value;
+                bAssignedLimit = kTRUE;
         }
 
         if (mapstr.PopValue("sample_size",value)) {
-	        sample_size=value;
+                sample_size=value;
         }
 
         if (mapstr.PopValue("vqwk_buffer_offset",value)) {
@@ -268,23 +268,23 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
         if (mapstr.LineIsEmpty())  continue;
 
         Bool_t  lineok   = kTRUE;
-	    TString keyword  = "";
-	    TString keyword2 = "";
+            TString keyword  = "";
+            TString keyword2 = "";
         TString modtype  = "";
         TString dettype  = "";
-	    TString namech   = "";
+            TString namech   = "";
         Int_t modnum     = 0;
-	    Int_t channum    = 0;
+            Int_t channum    = 0;
 
-	    modtype = mapstr.GetTypedNextToken<TString>();	// module type
+            modtype = mapstr.GetTypedNextToken<TString>();      // module type
 
         modtype.ToUpper();
 
         if (modtype == "VPMT") {
 
-            channum       = mapstr.GetTypedNextToken<Int_t>();	//channel number
-            Int_t combinedchans = mapstr.GetTypedNextToken<Int_t>();	//number of combined channels
-            dettype     = mapstr.GetTypedNextToken<TString>();	//type-purpose of the detector
+            channum       = mapstr.GetTypedNextToken<Int_t>();  //channel number
+            Int_t combinedchans = mapstr.GetTypedNextToken<Int_t>();    //number of combined channels
+            dettype     = mapstr.GetTypedNextToken<TString>();  //type-purpose of the detector
             dettype.ToLower();
             namech      = mapstr.GetTypedNextToken<TString>();  //name of the detector
             namech.ToLower();
@@ -305,23 +305,23 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
             }
 
             keyword  = mapstr.GetTypedNextToken<TString>();
-	        keyword.ToLower();
-	        keyword2 = mapstr.GetTypedNextToken<TString>();
-	        keyword2.ToLower();
+                keyword.ToLower();
+                keyword2 = mapstr.GetTypedNextToken<TString>();
+                keyword2.ToLower();
 
         } else {
 
-            modnum    = mapstr.GetTypedNextToken<Int_t>();	//slot number
-            channum   = mapstr.GetTypedNextToken<Int_t>();	//channel number
-            dettype = mapstr.GetTypedNextToken<TString>();	//type-purpose of the detector
+            modnum    = mapstr.GetTypedNextToken<Int_t>();      //slot number
+            channum   = mapstr.GetTypedNextToken<Int_t>();      //channel number
+            dettype = mapstr.GetTypedNextToken<TString>();      //type-purpose of the detector
             dettype.ToLower();
             namech  = mapstr.GetTypedNextToken<TString>();  //name of the detector
             namech.ToLower();
 
-	        keyword   = mapstr.GetTypedNextToken<TString>();
-	        keyword.ToLower();
-	        keyword2  = mapstr.GetTypedNextToken<TString>();
-	        keyword2.ToLower();
+                keyword   = mapstr.GetTypedNextToken<TString>();
+                keyword.ToLower();
+                keyword2  = mapstr.GetTypedNextToken<TString>();
+                keyword2.ToLower();
         }
 
 
@@ -337,18 +337,23 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
         localMainDetID.fSubbankIndex=currentsubbankindex;
         localMainDetID.fdetectortype=dettype;
 
-	    //localMainDetID.fWordInSubbank=wordsofar;
+            //localMainDetID.fWordInSubbank=wordsofar;
 
         if (modtype=="MOLLERADC") {
 
-	        Int_t offset = QwMollerADC_Channel::GetBufferOffset(modnum, channum)+vqwk_buffer_offset;
+            UInt_t decode_mode = 0;
+            mapstr.ReturnValue("molleradc_decode_mode", decode_mode)
+              || mapstr.ReturnValue("decode_mode", decode_mode);
+            QwMollerADC_Channel::SetDecodeMode(decode_mode);
 
-	        if (offset>=0){
+                Int_t offset = QwMollerADC_Channel::GetBufferOffset(modnum, channum)+vqwk_buffer_offset;
 
-	            localMainDetID.fWordInSubbank = wordsofar + offset;
-	        }
+                if (offset>=0){
 
-	    } else if (modtype=="VPMT") {
+                    localMainDetID.fWordInSubbank = wordsofar + offset;
+                }
+
+            } else if (modtype=="VPMT") {
 
             localMainDetID.fCombinedChannelNames = combinedchannelnames;
             localMainDetID.fWeight = weight;
@@ -357,22 +362,22 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
         } else {
 
             QwError << "VQwDetectorArray::LoadChannelMap:  Unknown module type: "
-		     << modtype <<", the detector "<<namech<<" will not be decoded "
-		     << QwLog::endl;
+                     << modtype <<", the detector "<<namech<<" will not be decoded "
+                     << QwLog::endl;
             lineok=kFALSE;
             continue;
         }
 
         localMainDetID.fTypeID=GetDetectorTypeID(dettype);
 
-	    if (localMainDetID.fTypeID==kQwUnknownPMT) {
+            if (localMainDetID.fTypeID==kQwUnknownPMT) {
 
-	        QwError << "VQwDetectorArray::LoadChannelMap:  Unknown detector type: "
-		     << dettype <<", the detector "<<namech<<" will not be decoded "
-		     << QwLog::endl;
-	        lineok=kFALSE;
-	        continue;
-	    }
+                QwError << "VQwDetectorArray::LoadChannelMap:  Unknown detector type: "
+                     << dettype <<", the detector "<<namech<<" will not be decoded "
+                     << QwLog::endl;
+                lineok=kFALSE;
+                continue;
+            }
 
         localMainDetID.fIndex= GetDetectorIndex(localMainDetID.fTypeID,
         localMainDetID.fdetectorname);
@@ -383,41 +388,41 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
 
                 QwIntegrationPMT localIntegrationPMT(GetName(),localMainDetID.fdetectorname);
 
-		        if (keyword=="not_blindable" || keyword2=="not_blindable")
-		         localIntegrationPMT.SetBlindability(kFALSE);
+                        if (keyword=="not_blindable" || keyword2=="not_blindable")
+                         localIntegrationPMT.SetBlindability(kFALSE);
 
-		        else
-		         localIntegrationPMT.SetBlindability(kTRUE);
+                        else
+                         localIntegrationPMT.SetBlindability(kTRUE);
 
-		        if (keyword=="not_normalizable" || keyword2=="not_normalizable")
-		  	     localIntegrationPMT.SetNormalizability(kFALSE);
+                        if (keyword=="not_normalizable" || keyword2=="not_normalizable")
+                             localIntegrationPMT.SetNormalizability(kFALSE);
 
-		        else
-		  	     localIntegrationPMT.SetNormalizability(kTRUE);
+                        else
+                             localIntegrationPMT.SetNormalizability(kTRUE);
 
-		        fIntegrationPMT.push_back(localIntegrationPMT);
+                        fIntegrationPMT.push_back(localIntegrationPMT);
                 fIntegrationPMT[fIntegrationPMT.size()-1].SetDefaultSampleSize(sample_size);
 
-		        if(bAssignedLimit)
-		         fIntegrationPMT[fIntegrationPMT.size()-1].SetSaturationLimit(abs_saturation_limit);
+                        if(bAssignedLimit)
+                         fIntegrationPMT[fIntegrationPMT.size()-1].SetSaturationLimit(abs_saturation_limit);
 
-		        localMainDetID.fIndex=fIntegrationPMT.size()-1;
+                        localMainDetID.fIndex=fIntegrationPMT.size()-1;
 
             } else if (localMainDetID.fTypeID==kQwCombinedPMT) {
 
-		        QwCombinedPMT localcombinedPMT(GetName(),localMainDetID.fdetectorname);
+                        QwCombinedPMT localcombinedPMT(GetName(),localMainDetID.fdetectorname);
 
-		        if (keyword=="not_normalizable" || keyword2=="not_normalizable")
-		         localcombinedPMT.SetNormalizability(kFALSE);
+                        if (keyword=="not_normalizable" || keyword2=="not_normalizable")
+                         localcombinedPMT.SetNormalizability(kFALSE);
 
-		        else
-		         localcombinedPMT.SetNormalizability(kTRUE);
+                        else
+                         localcombinedPMT.SetNormalizability(kTRUE);
 
-		        if (keyword=="not_blindable" || keyword2 =="not_blindable")
-		         localcombinedPMT.SetBlindability(kFALSE);
+                        if (keyword=="not_blindable" || keyword2 =="not_blindable")
+                         localcombinedPMT.SetBlindability(kFALSE);
 
-		        else
-		         localcombinedPMT.SetBlindability(kTRUE);
+                        else
+                         localcombinedPMT.SetBlindability(kTRUE);
 
                 fCombinedPMT.push_back(localcombinedPMT);
                 fCombinedPMT[fCombinedPMT.size()-1].SetDefaultSampleSize(sample_size);
@@ -541,7 +546,7 @@ Int_t VQwDetectorArray::LoadChannelMap(TString mapfile) {
 
         for (size_t jj = 0; jj < fPublishList.size(); jj++)
          QwMessage << fPublishList.at(jj).at(0) << " " << fPublishList.at(jj).at(1) << " "
-		  << fPublishList.at(jj).at(2) << " " << fPublishList.at(jj).at(3) << QwLog::endl;
+                  << fPublishList.at(jj).at(2) << " " << fPublishList.at(jj).at(3) << QwLog::endl;
     }
 
     if (ldebug) {
@@ -565,26 +570,26 @@ void VQwDetectorArray::LoadEventCuts_Line(QwParameterFile &mapstr, TString &varv
      device_name.ToLower();
 
     Int_t det_index = GetDetectorIndex(GetDetectorTypeID(device_type),device_name);
-	if (det_index == -1) {
-	    QwWarning << " Device not found " << device_name << " of type " << device_type << QwLog::endl;
+        if (det_index == -1) {
+            QwWarning << " Device not found " << device_name << " of type " << device_type << QwLog::endl;
         //continue;
-	}
+        }
 
-    Double_t LLX = mapstr.GetTypedNextToken<Double_t>();	//lower limit for IntegrationPMT value
-	Double_t ULX = mapstr.GetTypedNextToken<Double_t>();	//upper limit for IntegrationPMT value
-	varvalue = mapstr.GetTypedNextToken<TString>();//global/local
+    Double_t LLX = mapstr.GetTypedNextToken<Double_t>();        //lower limit for IntegrationPMT value
+        Double_t ULX = mapstr.GetTypedNextToken<Double_t>();    //upper limit for IntegrationPMT value
+        varvalue = mapstr.GetTypedNextToken<TString>();//global/local
     varvalue.ToLower();
 
     Double_t burplevel = mapstr.GetTypedNextToken<Double_t>();
-	Double_t stabilitycut = mapstr.GetTypedNextToken<Double_t>();
+        Double_t stabilitycut = mapstr.GetTypedNextToken<Double_t>();
 
     if (device_type == GetQwPMTInstrumentTypeName(kQwIntegrationPMT)){
-	    QwMessage << "VQwDetectorArray Error Code passing to QwIntegrationPMT " << GetGlobalErrorFlag(varvalue,eventcut_flag,stabilitycut) << QwLog::endl;
-	    fIntegrationPMT[det_index].SetSingleEventCuts(GetGlobalErrorFlag(varvalue,eventcut_flag,stabilitycut),LLX,ULX,stabilitycut,burplevel);
-	} else if (device_type == GetQwPMTInstrumentTypeName(kQwCombinedPMT)){
-	    QwMessage << "VQwDetectorArray Error Code passing to QwCombinedPMT " << GetGlobalErrorFlag(varvalue,eventcut_flag,stabilitycut) << QwLog::endl;
-	    fCombinedPMT[det_index].SetSingleEventCuts(GetGlobalErrorFlag(varvalue,eventcut_flag,stabilitycut),LLX,ULX,stabilitycut,burplevel);
-	}
+            QwMessage << "VQwDetectorArray Error Code passing to QwIntegrationPMT " << GetGlobalErrorFlag(varvalue,eventcut_flag,stabilitycut) << QwLog::endl;
+            fIntegrationPMT[det_index].SetSingleEventCuts(GetGlobalErrorFlag(varvalue,eventcut_flag,stabilitycut),LLX,ULX,stabilitycut,burplevel);
+        } else if (device_type == GetQwPMTInstrumentTypeName(kQwCombinedPMT)){
+            QwMessage << "VQwDetectorArray Error Code passing to QwCombinedPMT " << GetGlobalErrorFlag(varvalue,eventcut_flag,stabilitycut) << QwLog::endl;
+            fCombinedPMT[det_index].SetSingleEventCuts(GetGlobalErrorFlag(varvalue,eventcut_flag,stabilitycut),LLX,ULX,stabilitycut,burplevel);
+        }
 }
 
 void VQwDetectorArray::LoadEventCuts_Fin(Int_t &eventcut_flag) {
@@ -633,7 +638,7 @@ Int_t VQwDetectorArray::LoadInputParameters(TString pedestalfile) {
         if (mapstr.LineIsEmpty())  continue;
 
         else {
-            varname = mapstr.GetTypedNextToken<TString>();	//name of the channel
+            varname = mapstr.GetTypedNextToken<TString>();      //name of the channel
             varname.ToLower();
             varname.Remove(TString::kBoth,' ');
             varped  = mapstr.GetTypedNextToken<Double_t>(); // value of the pedestal
@@ -651,10 +656,10 @@ Int_t VQwDetectorArray::LoadInputParameters(TString pedestalfile) {
                        << ": C_xp="             << varcxp       << ": C_yp=" << varcyp  << "\n"
                        << ": C_e="              << varce        << "\n";
 
-	    // Bool_t notfound=kTRUE;
+            // Bool_t notfound=kTRUE;
 
-	    // if (notfound)
-	    for (size_t i=0;i<fIntegrationPMT.size();i++){
+            // if (notfound)
+            for (size_t i=0;i<fIntegrationPMT.size();i++){
               if (fIntegrationPMT[i].GetElementName()==varname) {
 
                 fIntegrationPMT[i].SetPedestal(varped);
@@ -666,10 +671,10 @@ Int_t VQwDetectorArray::LoadInputParameters(TString pedestalfile) {
                 // notfound=kFALSE;
                 // i=fIntegrationPMT.size()+1;
 
-		break;
+                break;
 
               }
-	    }
+            }
 
         }
 
@@ -727,12 +732,12 @@ void VQwDetectorArray::LoadMockDataParameters(TString pedestalfile) {
         if (mapstr.LineIsEmpty())  continue;
 
         else {
-            varname = mapstr.GetTypedNextToken<TString>();	//name of the channel
+            varname = mapstr.GetTypedNextToken<TString>();      //name of the channel
             varname.ToLower();
             varname.Remove(TString::kBoth,' ');
 
 
-	    varnormrate  = mapstr.GetTypedNextToken<Double_t>(); // value of the NormRate
+            varnormrate  = mapstr.GetTypedNextToken<Double_t>(); // value of the NormRate
             varvoltperhz = mapstr.GetTypedNextToken<Double_t>(); // value of the VoltPerHz
             varasym      = mapstr.GetTypedNextToken<Double_t>(); // value of the asymmetry
             varcx        = mapstr.GetTypedNextToken<Double_t>(); // value of the coefficient C_x
@@ -751,10 +756,10 @@ void VQwDetectorArray::LoadMockDataParameters(TString pedestalfile) {
                        << ": C_xp="             << varcxp       << ": C_yp=" << varcyp  << "\n"
                        << ": C_e="              << varce        << "\n";
 
-	    // Bool_t notfound=kTRUE;
+            // Bool_t notfound=kTRUE;
 
-	    // if (notfound)
-	    for (size_t i=0;i<fIntegrationPMT.size();i++){
+            // if (notfound)
+            for (size_t i=0;i<fIntegrationPMT.size();i++){
               if (fIntegrationPMT[i].GetElementName()==varname) {
 
 
@@ -771,10 +776,10 @@ void VQwDetectorArray::LoadMockDataParameters(TString pedestalfile) {
                 // notfound=kFALSE;
                 // i=fIntegrationPMT.size()+1;
 
-		break;
+                break;
 
               }
-	    }
+            }
 
         }
 
@@ -883,13 +888,13 @@ void VQwDetectorArray::EncodeEventData(std::vector<UInt_t> &buffer) {
 
         // Form CODA subbank header
         subbankheader.clear();
-        subbankheader.push_back(elements.size() + 1);	// subbank size
+        subbankheader.push_back(elements.size() + 1);   // subbank size
         subbankheader.push_back((fCurrentBank_ID << 16) | (0x01 << 8) | (1 & 0xff));
         // subbank tag | subbank type | event number
 
         // Form CODA bank/roc header
         rocheader.clear();
-        rocheader.push_back(subbankheader.size() + elements.size() + 1);	// bank/roc size
+        rocheader.push_back(subbankheader.size() + elements.size() + 1);        // bank/roc size
         rocheader.push_back((fCurrentROC_ID << 16) | (0x10 << 8) | (1 & 0xff));
         // bank tag == ROC | bank type | event number
 
@@ -923,7 +928,7 @@ void  VQwDetectorArray::RandomizeMollerEvent(int helicity /*, const QwBeamCharge
 
         bIsExchangedDataValid = kFALSE;
         QwError << GetName() << " could not get external value for "
-	     << fTargetX.GetElementName() << QwLog::endl;
+             << fTargetX.GetElementName() << QwLog::endl;
 
     }
 
@@ -938,7 +943,7 @@ void  VQwDetectorArray::RandomizeMollerEvent(int helicity /*, const QwBeamCharge
 
         bIsExchangedDataValid = kFALSE;
         QwError << GetName() << " could not get external value for "
-	     << fTargetY.GetElementName() << QwLog::endl;
+             << fTargetY.GetElementName() << QwLog::endl;
     }
 
     if(RequestExternalValue("xp_targ", &fTargetXprime)){
@@ -953,7 +958,7 @@ void  VQwDetectorArray::RandomizeMollerEvent(int helicity /*, const QwBeamCharge
 
         bIsExchangedDataValid = kFALSE;
         QwError << GetName() << " could not get external value for "
-	     << fTargetXprime.GetElementName() << QwLog::endl;
+             << fTargetXprime.GetElementName() << QwLog::endl;
 
     }
 
@@ -970,7 +975,7 @@ void  VQwDetectorArray::RandomizeMollerEvent(int helicity /*, const QwBeamCharge
 
         bIsExchangedDataValid = kFALSE;
         QwError << GetName() << " could not get external value for "
-	     << fTargetYprime.GetElementName() << QwLog::endl;
+             << fTargetYprime.GetElementName() << QwLog::endl;
 
     }
 
@@ -987,7 +992,7 @@ void  VQwDetectorArray::RandomizeMollerEvent(int helicity /*, const QwBeamCharge
 
         bIsExchangedDataValid = kFALSE;
         QwError << GetName() << " could not get external value for "
-	     << fTargetEnergy.GetElementName() << QwLog::endl;
+             << fTargetEnergy.GetElementName() << QwLog::endl;
 
     }
 
@@ -1008,7 +1013,7 @@ Int_t VQwDetectorArray::ProcessConfigurationBuffer(const ROCID_t roc_id, const B
       UInt_t words_read = 0;
       for (size_t i = 0; i < fMainDetID.size(); i++) {
         words_read += fIntegrationPMT[i].ProcessConfigurationBuffer(&(buffer[words_read]),
-  							   num_words-words_read);
+                                                           num_words-words_read);
       }
     }*/
   return 0;
@@ -1219,9 +1224,9 @@ void  VQwDetectorArray::ExchangeProcessedData() {
 
             if (bDEBUG) {
 
-	            QwWarning << "VQwDetectorArray::ExchangeProcessedData Found "<<fTargetCharge.GetElementName()<< QwLog::endl;
-	            //QwWarning <<"****VQwDetectorArray****"<< QwLog::endl;
-	            (dynamic_cast<QwMollerADC_Channel*>(&fTargetCharge))->PrintInfo();
+                    QwWarning << "VQwDetectorArray::ExchangeProcessedData Found "<<fTargetCharge.GetElementName()<< QwLog::endl;
+                    //QwWarning <<"****VQwDetectorArray****"<< QwLog::endl;
+                    (dynamic_cast<QwMollerADC_Channel*>(&fTargetCharge))->PrintInfo();
 
             }
 
@@ -1229,7 +1234,7 @@ void  VQwDetectorArray::ExchangeProcessedData() {
 
             bIsExchangedDataValid = kFALSE;
             QwError << GetName() << " could not get external value for "
-	         << fTargetCharge.GetElementName() << QwLog::endl;
+                 << fTargetCharge.GetElementName() << QwLog::endl;
 
         }
 
@@ -1256,7 +1261,7 @@ void  VQwDetectorArray::ProcessEvent_2() {
         }
 
         if (bNormalization && fTargetCharge.GetValue()>fNormThreshold)
-	     this->DoNormalization();
+             this->DoNormalization();
 
     } else {
 
@@ -1667,7 +1672,7 @@ void VQwDetectorArray::DoNormalization(Double_t factor) {
 
         try {
 
-	        this->Normalize(&fTargetCharge);
+                this->Normalize(&fTargetCharge);
 
         }
 
@@ -1732,10 +1737,10 @@ void  VQwDetectorArray::FillDB(QwParityDB *db, TString datatype) {
         for(j=0; j<interface.size(); j++) {
 
             interface.at(j).SetAnalysisID( analysis_id );
-	        interface.at(j).SetMainDetectorID( db );
-	        interface.at(j).SetMeasurementTypeID( measurement_type );
-	        interface.at(j).PrintStatus( local_print_flag );
-	        interface.at(j).AddThisEntryToList( entrylist );
+                interface.at(j).SetMainDetectorID( db );
+                interface.at(j).SetMeasurementTypeID( measurement_type );
+                interface.at(j).PrintStatus( local_print_flag );
+                interface.at(j).AddThisEntryToList( entrylist );
         }
 
     }
@@ -1743,7 +1748,7 @@ void  VQwDetectorArray::FillDB(QwParityDB *db, TString datatype) {
     if(local_print_flag) {
 
         QwMessage << QwColor(Qw::kGreen) << "Entrylist Size : "
-	     << QwColor(Qw::kBoldRed) << entrylist.size()
+             << QwColor(Qw::kBoldRed) << entrylist.size()
          << QwColor(Qw::kNormal) << QwLog::endl;
 
     }
@@ -1850,9 +1855,9 @@ void VQwDetectorArray::FillErrDB(QwParityDB *db, TString datatype) {
         for(j=0; j<interface.size(); j++) {
 
             interface.at(j).SetAnalysisID     ( analysis_id );
-	        interface.at(j).SetMainDetectorID ( db );
-	        interface.at(j).PrintStatus       ( local_print_flag );
-	        interface.at(j).AddThisEntryToList( entrylist );
+                interface.at(j).SetMainDetectorID ( db );
+                interface.at(j).PrintStatus       ( local_print_flag );
+                interface.at(j).AddThisEntryToList( entrylist );
 
         }
 
@@ -1861,7 +1866,7 @@ void VQwDetectorArray::FillErrDB(QwParityDB *db, TString datatype) {
     if(local_print_flag) {
 
         QwMessage << QwColor(Qw::kGreen)   << "Entrylist Size : "
-	              << QwColor(Qw::kBoldRed) << entrylist.size()
+                      << QwColor(Qw::kBoldRed) << entrylist.size()
                   << QwColor(Qw::kNormal)  << QwLog::endl;
 
     }
@@ -1923,18 +1928,18 @@ void VQwDetectorArray::WritePromptSummary(QwPromptSummary *ps, TString type) {
 
         if(local_ps_element) {
 
-	        element_value       = tmp_channel->GetValue();
-	        element_value_err   = tmp_channel->GetValueError();
-	        element_value_width = tmp_channel->GetValueWidth();
+                element_value       = tmp_channel->GetValue();
+                element_value_err   = tmp_channel->GetValueError();
+                element_value_width = tmp_channel->GetValueWidth();
 
-	        local_ps_element->Set(type, element_value, element_value_err, element_value_width);
+                local_ps_element->Set(type, element_value, element_value_err, element_value_width);
 
         }
 
         if( local_print_flag && local_ps_element) {
 
-	        printf("Type %12s, Element %32s, value %12.4e error %8.4e  width %12.4e\n",
-	         type.Data(), element_name.Data(), element_value, element_value_err, element_value_width);
+                printf("Type %12s, Element %32s, value %12.4e error %8.4e  width %12.4e\n",
+                 type.Data(), element_name.Data(), element_value, element_value_err, element_value_width);
 
         }
 

@@ -179,6 +179,7 @@ class QwHelicityPattern {
 
   void  ConstructHistograms(){ConstructHistograms((TDirectory*)NULL);};
   void  ConstructHistograms(TDirectory *folder);
+  void  ConstructHistograms(TDirectory *folder, TString &prefix);
   void  FillHistograms();
 
   void  ConstructBranchAndVector(TTree *tree, TString &prefix, QwRootTreeBranchVector &values);
