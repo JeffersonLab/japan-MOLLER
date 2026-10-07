@@ -48,3 +48,9 @@
  map   = mock_moller_largeang_adc.map
  param = pedestal_largeang.map
  eventcut = mock_moller_maindet_eventcuts.map
+
+[QwScanner]
+ name     = Upstream Scanner
+ map      = mock_moller_scanner_adc.map
+ eventcut = mock_moller_scanner_eventcuts.map
+ geom     = mock_scanner_geometry.map
