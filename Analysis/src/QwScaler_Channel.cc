@@ -274,13 +274,13 @@ void QwScaler_Channel<data_mask,data_shift>::ConstructBranchAndVector(TTree *tre
     if (fDataToSave == kMoments) {
       values.push_back("value_m2", 'D');
       values.push_back("value_err", 'D');
-      values.push_back("num_samples", 'I');
+      values.push_back("num_samples", 'i');
     }
     values.push_back("Device_Error_Code", 'i');
     if(fDataToSave==kRaw){
-      values.push_back("raw", 'I');
+      values.push_back("raw", 'i');
       if ((~data_mask) != 0){
-        values.push_back("header", 'I');
+        values.push_back("header", 'i');
       }
     }
     //std::cout << basename <<": first==" << fTreeArrayIndex << ", last==" << values.size() << std::endl;
