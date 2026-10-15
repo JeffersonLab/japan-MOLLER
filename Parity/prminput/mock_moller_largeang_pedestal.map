@@ -1,4 +1,4 @@
-! Name          Offset          Gain            NormRate(Hz/uA) VoltPerHz       Asym            C_x             C_y             C_xp            C_yp            C_e
+! Name          Offset          Gain
 LA01              0.000        7.62930e-05
 LA02              0.000        7.62930e-05
 LA03              0.000        7.62930e-05
