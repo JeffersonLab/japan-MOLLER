@@ -359,7 +359,15 @@ Int_t main(Int_t argc, Char_t* argv[])
 
         // Check to see ring is ready
         if (eventring.IsReady()) {
-	  ringoutput = eventring.pop();
+	  QwSubsystemArrayParity& ringevent = eventring.pop();
+	  // Copy ring event into ringoutput: this is required because ringoutput
+	  // has its tree branches, histograms, and RNTuple fields bound to its
+	  // internal memory layout (set up during initialization above).  The
+	  // copy populates that bound buffer each event.  The optimization in
+	  // this commit eliminates the separate per-phase deep copy that
+	  // LoadEventData previously performed (fEvents[phase] = event), not
+	  // this copy into ringoutput.
+	  ringoutput = ringevent;
 	  ringoutput.IncrementErrorCounters();
 
 
@@ -394,7 +402,8 @@ Int_t main(Int_t argc, Char_t* argv[])
 #endif
 
           // Load the event into the helicity pattern
-          helicitypattern.LoadEventData(ringoutput);
+          // ringoutput is reused each loop iteration; load from stable ring storage.
+          helicitypattern.LoadEventData(ringevent);
 
 	  if (helicitypattern.PairAsymmetryIsGood()) {
             patternsum.AccumulatePairRunningSum(helicitypattern);
