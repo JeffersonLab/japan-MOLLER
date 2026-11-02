@@ -131,12 +131,12 @@ class QwLogger : public VQwLogger
 public:
 
 	/*! \brief Default Ctor: Sets the QwLogLevel and stream sink to null
-	 *  \param QwLogLevel threshold: Threshold level
+	 *  \param [in] threshold: Threshold level
 	 */
 	explicit QwLogger(QwLogLevel threshold = QwLogLevel::kMessage);
 	/*! \brief Ctor: Sets the QwLogLevel and stream sink
-	 *  \param U&& Stream: Forwarding Reference to a PtrLike sink (raw, smart, etc)
-	 *  \param QwLogLevel threshold: Threshold level
+	 *  \param [in] stream: Forwarding Reference to a PtrLike sink (raw, smart, etc)
+	 *  \param [in] threshold: Threshold level
 	 */
 	template<typename U>
 	QwLogger(U&& stream, QwLogLevel threshold = QwLogLevel::kMessage);
