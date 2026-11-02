@@ -210,7 +210,7 @@ void QwThreadSafeMap<std::string, Value>::ForEach(Callable&& callable) const
 }
 
 template<typename Value>
-QwThreadSafeMap<std::string, Value>::QwThreadSafeMap(QwThreadSafeMap<std::string, Value> const& other)
+QwThreadSafeMap<std::string, Value>::QwThreadSafeMap(QwThreadSafeMap const& other)
 {
 	std::shared_lock<std::shared_mutex> lk(other.fRW_mutex);
 	fMap = other.fMap;
