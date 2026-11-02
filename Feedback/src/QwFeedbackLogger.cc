@@ -20,7 +20,7 @@ void QwFeedbackLogger::Write(QwLogLevel level, std::string_view log)
 	else gQwLogger::Instance().Write(level, log);
 }
 
-QwLogProxy QwFeedbackLogger::Log(QwLogLevel level, std::string const& msg)
+QwLogProxy QwFeedbackLogger::Log(QwLogLevel level, std::string_view msg)
 {
 	// Its up to the user to make sure this is not NULL
 	// But what to do if the user doesn't care? 

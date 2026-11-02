@@ -1,5 +1,5 @@
 #pragma once
-#include <string>
+#include <string_view>
 #include <fstream>
 #include <memory>
 #include "QwObserver.h"
@@ -19,7 +19,7 @@ public:
 
 public: // VQwLogger Inherited Functions
 	void Write(QwLogLevel level, std::string_view log) override;
-	QwLogProxy Log(QwLogLevel level, std::string const& msg = "") override;
+	QwLogProxy Log(QwLogLevel level, std::string_view msg = std::string_view{}) override;
 public: // Observer Inherited Functions
 	void Update(QwFeedbackLogPayload const& data) override;
 };
