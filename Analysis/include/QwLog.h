@@ -237,7 +237,7 @@ public:
 
 struct QwLog
 {
-	/*! \def QwLog::endl
+	/*! QwLog::endl
 	 *  \brief Backward compat.
 	 */
 	static std::ostream& endl(std::ostream& stream);
