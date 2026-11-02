@@ -142,15 +142,15 @@ gQwLogger& gQwLogger::Instance()
 	return instance;
 }
 
-QwLogProxy gQwLogger::Log(QwLogLevel level, std::string const& func_sig)
+QwLogProxy gQwLogger::Log(QwLogLevel level, std::string_view msg)
 {
 	QwLogProxy llog = QwLogProxy{*this, level};
 
   	// Override log level of this sink when in a debugged function
-  	if( IsDebugFunction(func_sig) ) { level = QwLogLevel::kAlways; }
+  	if( IsDebugFunction(msg) ) { level = QwLogLevel::kAlways; }
 	if( PrintWithColor() ) { llog.AddColor(); }
 	if(level != QwLogLevel::kPlain) { llog.AddHeader(); }
-	if( PrintFuncSignature() ) { llog << func_sig << "->"; 	}
+	if( PrintFuncSignature() ) { llog << msg << " -> "; }
 
 	return llog;
 }
@@ -169,8 +169,10 @@ void gQwLogger::InitLogFile(std::string const& name, const std::ios_base::openmo
 
 /*!
  *  Determine whether the function name matches a specified list of regular expressions
+ *  See https://lists.isocpp.org/std-proposals/att-0008/Dxxxx_string_view_support_for_regex.pdf
+ *  for using std::string_view with std::regex
  */
-bool gQwLogger::IsDebugFunction(std::string const& func_sig)
+bool gQwLogger::IsDebugFunction(std::string_view func_sig)
 {
 	// Using a temporary bool, we avoid acquiring the unique lock twice
 	// but risk of running this loop N times for N threads (unlikely)
@@ -178,9 +180,10 @@ bool gQwLogger::IsDebugFunction(std::string const& func_sig)
 	auto opt = fIsDebugFunction.Get(func_sig);
 	if( !opt.has_value() ) {
 		for (size_t i = 0; i < fDebugFunctionRegexString.size(); i++) {
-			// When we find a match, break
 			std::regex regex(fDebugFunctionRegexString.at(i));
-			if (std::regex_match(func_sig, regex)) {
+			std::match_results<std::string_view::const_iterator> match_res;
+			if (std::regex_match(func_sig.begin(), func_sig.end(), match_res, regex)) {
+			    // When we find a match, break
 				is_debug_func = true;
 				break;
 			}

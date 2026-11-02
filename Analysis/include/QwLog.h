@@ -85,7 +85,7 @@ class VQwLogger
 {
 public:
 	virtual void Write(QwLogLevel level, std::string_view log) = 0;
-	virtual QwLogProxy Log(QwLogLevel level, std::string const& msg = "") = 0;
+	virtual QwLogProxy Log(QwLogLevel level, std::string_view msg = std::string_view{}) = 0;
 };
 
 class QwLogProxy
@@ -145,7 +145,7 @@ public:
 
 	/*! \brief Create a LogProxy to handle logging
 	 */
-	QwLogProxy Log(QwLogLevel level, std::string const& msg = "") override;
+	QwLogProxy Log(QwLogLevel level, std::string_view msg = std::string_view{}) override;
 
     /*! \brief Write to stream
      */
@@ -194,7 +194,7 @@ public:
 	static gQwLogger& Instance();
 	/*! \brief Create a LogProxy to handle logging
 	 */
-	QwLogProxy Log(QwLogLevel level, std::string const& func_sig = "") override;
+	QwLogProxy Log(QwLogLevel level, std::string_view msg = std::string_view{}) override;
     /*! \brief Write to stream
      */
 	void Write(QwLogLevel level, std::string_view log) override;
@@ -215,7 +215,7 @@ public:
 	/*! Initialize the log file with name 'name'
 	*/
 	void InitLogFile(std::string const& name, const std::ios_base::openmode mode = std::ios::app);
-	bool IsDebugFunction(std::string const& func_sig);
+	bool IsDebugFunction(std::string_view func_sig);
 	bool PrintFuncSignature() const;
     /*! \brief Set the screen color mode
      */
@@ -317,7 +317,7 @@ QwLogger<PtrLikeType>::operator bool() const
 }
 
 template<typename PtrLikeType>
-QwLogProxy QwLogger<PtrLikeType>::Log(QwLogLevel level, std::string const& msg)
+QwLogProxy QwLogger<PtrLikeType>::Log(QwLogLevel level, std::string_view msg)
 {
 	QwLogProxy log = QwLogProxy{*this, level};
 	log.AddHeader();
