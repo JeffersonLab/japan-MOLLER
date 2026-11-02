@@ -16,6 +16,7 @@
 #include "QwEventBuffer.h"
 #include "QwRunCondition.h"
 using namespace QwParitySchema;
+using std::string;
 
 // Definition of static class members in QwParityDB
 std::map<string, unsigned int> QwParityDB::fMonitorIDs;
