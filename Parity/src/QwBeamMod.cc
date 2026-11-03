@@ -127,6 +127,83 @@ void QwBPMTansferMatrix::LoadMockDataParameters(){
   
 }
 
+
+//*****************************************************************
+void QwBPMTansferMatrix::SetElementName(TString bpmName){
+	this->name = bpmName;
+}
+
+void QwBPMTansferMatrix::SetTMatrixElement(Int_t i, Double_t value){
+	this->TMatrixElement[i] = value;
+}
+
+TString QwBPMTansferMatrix::GetElementName(){
+	return name;
+}
+
+Double_t QwBPMTansferMatrix::GetTMatrixElement(Int_t i){
+	return TMatrixElement[i];
+}
+
+void QwBPMTansferMatrix::LoadMockDataParameters(){
+	
+	TString mapfile = "mock_parameters_modulation.map";
+	
+  Bool_t   ldebug=kTRUE;
+  TString  devname, devtype;
+  Int_t    lineread=0;
+	//Double_t TransferMatrixElements[2] = {0,0};
+
+  if(ldebug) std::cout << "QwBPMTansferMatrix::LoadMockDataParameters(" << mapfile << ") \n" << std::endl;
+
+  QwParameterFile mapstr(mapfile.Data());  //Open the file
+  //fDetectorMaps.insert(mapstr.GetParamFileNameContents());
+
+  while (mapstr.ReadNextLine()) {
+    lineread+=1;
+    //    std::cerr << "Line:  " << mapstr.GetLine() << std::endl;
+    //if(ldebug) std::cout << "Line read so far = " << lineread << "\n" << std::endl;
+    mapstr.TrimComment('!');
+    mapstr.TrimWhitespace();
+    
+    if(mapstr.LineIsEmpty()) continue;
+    
+    devtype = mapstr.GetTypedNextToken<TString>();
+    devtype.ToLower();
+    devtype.Remove(TString::kBoth,' ');
+    devname = mapstr.GetTypedNextToken<TString>();
+    devname.ToLower();
+    devname.Remove(TString::kBoth,' ');
+    
+    
+    if(devname == this->GetElementName()){
+    	//std::cout << devname << std::endl;
+    	//mapstr.GetNextToken();
+    	//std::cout << "next token is " << mapstr.GetTypedNextToken<Double_t>() << std::endl;
+    	//std::cout << "next token is " << mapstr.GetTypedNextToken<Double_t>() << std::endl;
+    	if(devtype == "bmodtargetresponse"){
+    		for(int i = 0; i < 7; i++){
+    			this->SetTMatrixElement(i,mapstr.GetTypedNextToken<Double_t>());
+    		}
+    	}
+    	if(devtype == "bpmtransfer"){
+    		for(int i = 0; i < 2; i++){
+    			this->SetTMatrixElement(i,mapstr.GetTypedNextToken<Double_t>());
+    		}
+    	}
+    }
+    
+    /*
+    if(mapstr.GetLine().find(this->GetElementName())!=std::string::npos){
+		for(int i = 0; i < 2; i++){
+			mapstr.GetNextToken();
+			this->SetTMatrixElement(i,mapstr.GetTypedNextToken<Double_t>());
+			}
+		}
+		*/
+	}
+}
+
 //*****************************************************************
 void QwBeamMod::ProcessOptions(QwOptions &options){
       //Handle command line options
