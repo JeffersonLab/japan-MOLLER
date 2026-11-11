@@ -1,77 +1,64 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
+
+# Name of this project
+project(QwFeedback VERSION 2.0.0 LANGUAGES CXX)
+
 
 #----------------------------------------------------------------------------
-# ROOT
+# Sources and headers
 #
-set(minimum_root_version 6.0)
-find_package(ROOT ${minimum_root_version} REQUIRED)
-config_add_dependency(ROOT ${minimum_root_version})
+file(GLOB SRC CONFIGURE_DEPENDS
+		 src/*.cc
+)
+file(GLOB INC CONFIGURE_DEPENDS
+		 include/*.h
+)
 
 #----------------------------------------------------------------------------
-# CODA ET
+# Compiler flags
 #
-find_package(ET)
-
-#----------------------------------------------------------------------------
-# EPICS
-find_package(EPICS)
-
-message(STATUS "***********  In Feedback Cmake")
 set_compiler_flags("${ROOT_CXX_FLAGS}")
-#set_diagnostic_flags(WALL WEXTRA)
 set_diagnostic_flags(WALL)
-report_build_info()
 
 #----------------------------------------------------------------------------
-#  Feedback needs both ET and EPICS
-IF(ET_FOUND)
-IF(EPICS_FOUND)
-  include_directories(${ROOT_INCLUDE_DIR})
-  include_directories(${ET_INCLUDE_DIR})
-  include_directories(${EPICS_INCLUDE_DIR}
-                      ${EPICS_INCLUDE_DIR}/os/Linux
-		      ${EPICS_INCLUDE_DIR}/compiler/gcc)
-  include_directories(${PROJECT_SOURCE_DIR}/Analysis/include
-                      ${PROJECT_SOURCE_DIR}/Parity/include)
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+# ET library
+#
+if(NOT ET_FOUND)
+  message(WARNING "${PROJECT_NAME} Skipped: ET Not Found!")
+  # return()
+endif()
 
- set(feedback_sources
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/GreenMonster.cc
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/QwEPICSControl.cc
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/QwHelicityCorrelatedFeedback.cc
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/cfSockCli.cc
- )
- add_library(QwFeedback SHARED ${feedback_sources})
- target_include_directories(QwFeedback  PUBLIC
-			    ${CMAKE_CURRENT_SOURCE_DIR}/include
-			    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-			    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-			    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-			    )
- target_compile_options(QwFeedback
-   PUBLIC
-    ${${PROJECT_NAME_UC}_CXX_FLAGS_LIST}
-  PRIVATE
-    ${${PROJECT_NAME_UC}_DIAG_FLAGS_LIST}
-  )
-message (STATUS "${EPICS_CA_LIBRARY} ${EPICS_CAS_LIBRARY} ${EPICS_COM_LIBRARY} ${EPICS_GDD_LIBRARY}")
-target_link_libraries(QwFeedback
-  PUBLIC
-    EVIO::ET
-    ROOT::Libraries
-    ${PROJECT_NAME}
-    ${EPICS_CA_LIBRARY} ${EPICS_CAS_LIBRARY} ${EPICS_COM_LIBRARY} ${EPICS_GDD_LIBRARY}
-  )
+add_subdirectory(EPICS)
+if(NOT EPICS_FOUND)
+  message(WARNING "${PROJECT_NAME} Skipped: EPICS Not Found!")
+  return()
+endif()
+message(STATUS "NOTICE: ${PROJECT_NAME} will be built!")
 
-install(TARGETS QwFeedback
-  EXPORT ${MAIN_PROJECT_NAME_LC}-exports
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-  )
+add_library(${PROJECT_NAME} SHARED ${SRC})
+target_link_libraries(${PROJECT_NAME} PUBLIC
+	QwEPICS
+	${CMAKE_PROJECT_NAME}
+)
+
+target_sources(${PROJECT_NAME}
+	PUBLIC
+	FILE_SET HEADERS
+	BASE_DIRS include
+	FILES ${INC}
+)
+
+install(TARGETS ${PROJECT_NAME}
+    EXPORT ${CMAKE_PROJECT_NAME}
+    FILE_SET HEADERS
+)
 
 
-file(GLOB exefiles
+#----------------------------------------------------------------------------
+# executables
+#
+file(GLOB exefiles CONFIGURE_DEPENDS
+  main/*.cc
   main/*.cc
 )
 foreach(file ${exefiles})
@@ -82,8 +69,8 @@ foreach(file ${exefiles})
 
   target_link_libraries(${filelower}
     PRIVATE
-      QwFeedback
-      ${PROJECT_NAME}
+      ${CMAKE_PROJECT_NAME}
+	  ${PROJECT_NAME}
   )
   target_compile_options(${filelower}
     PUBLIC
@@ -100,8 +87,3 @@ foreach(file ${exefiles})
   )
 endforeach()
 
-
-install(FILES ${my_feedback_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-endif(EPICS_FOUND)
-endif(ET_FOUND)

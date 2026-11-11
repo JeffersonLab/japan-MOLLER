@@ -1,0 +1,5 @@
+type=target name=y_targ            descr=DIFFY
+type=ioc    name=RTPXPORT2Q1calc.A descr=PC_HV3 lower=-1.0 upper=36000
+type=ioc    name=RTPXPORT2Q4calc.A descr=PC_HV4 lower=-1.0 upper=36000
+type=ioc    name=RTPXPORT2Q2calc.A descr=PC_HV7 lower=-1.0 upper=36000
+type=ioc    name=RTPXPORT2Q3calc.A descr=PC_HV8 lower=-1.0 upper=36000
