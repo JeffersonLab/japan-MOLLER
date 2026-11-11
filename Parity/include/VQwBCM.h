@@ -36,6 +36,9 @@ class QwErrDBInterface;
 template<typename T> class QwCombinedBCM;
 template<typename T> class QwBCM;
 
+class VQwBCM;
+typedef std::shared_ptr<VQwBCM> VQwBCM_ptr;
+
 /**
  * \ingroup QwAnalysis_BeamLine
  */
@@ -66,6 +69,8 @@ protected:
 
 public:
   ~VQwBCM() override { };
+
+  virtual VQwBCM_ptr Clone() = 0;
 
   // VQwDataElement virtual functions
   Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0) override = 0;
@@ -180,5 +185,3 @@ protected:
   VQwDataElement& fBeamCurrent_ref;
 
 };
-
-typedef std::shared_ptr<VQwBCM> VQwBCM_ptr;

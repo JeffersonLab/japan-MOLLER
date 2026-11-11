@@ -53,6 +53,8 @@ class QwCombinedBCM : public QwBCM<T> {
   { }
   ~QwCombinedBCM() override { };
 
+  VQwBCM_ptr Clone() override {return VQwBCM_ptr(new QwCombinedBCM<T>(*this));};
+
   // This is to setup one of the used BCM's in this combo
   void SetBCMForCombo(VQwBCM* bcm, Double_t weight, Double_t sumqw ) override;
 
@@ -133,7 +135,7 @@ class QwCombinedBCM : public QwBCM<T> {
   static std::uniform_real_distribution<double> fDistribution;
   /// Internal normal random variable
   static std::function<double()> fRandomVariable;
-public: 
+public:
   static void SetTripSeed(uint seedval);
   // @}
 };

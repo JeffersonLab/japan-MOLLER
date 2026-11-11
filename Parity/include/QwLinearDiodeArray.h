@@ -70,6 +70,8 @@ class QwLinearDiodeArray : public VQwBPM {
   }
   ~QwLinearDiodeArray() override { };
 
+  VQwBPM_ptr Clone() override {return VQwBPM_ptr(new QwLinearDiodeArray<ChannelType>(*this));};
+
   void    InitializeChannel(TString name);
   // new routine added to update necessary information for tree trimming
   void    InitializeChannel(TString subsystem, TString name);

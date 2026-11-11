@@ -77,6 +77,8 @@ class QwBPMStripline : public VQwBPM {
   }
   ~QwBPMStripline() override { };
 
+  VQwBPM_ptr Clone() override {return VQwBPM_ptr(new QwBPMStripline<T>(*this));};
+
   void    InitializeChannel(TString name);
   // new routine added to update necessary information for tree trimming
   void    InitializeChannel(TString subsystem, TString name);
@@ -92,7 +94,7 @@ class QwBPMStripline : public VQwBPM {
   }
 
   Int_t   ProcessEvBuffer(UInt_t* buffer,
-			UInt_t word_position_in_buffer,UInt_t indexnumber) override;
+                        UInt_t word_position_in_buffer,UInt_t indexnumber) override;
   void    ProcessEvent() override;
   void    PrintValue() const override;
   void    PrintInfo() const override;

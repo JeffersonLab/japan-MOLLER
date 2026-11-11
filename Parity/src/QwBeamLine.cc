@@ -2813,38 +2813,32 @@ void  QwBeamLine::CopyTemplatedDataElements(const VQwSubsystem *source)
 
   this->fClock.reserve(input->fClock.size());
   for(size_t i=0;i<input->fClock.size();i++) {
-    this->fClock.push_back(VQwClock_ptr(VQwClock::Create(*(input->fClock[i].get()))));
+    this->fClock.push_back(input->fClock[i].get()->Clone());
   }
 
   this->fStripline.reserve(input->fStripline.size());
   for(size_t i=0;i<input->fStripline.size();i++) {
-    this->fStripline.push_back(VQwBPM_ptr(
-        VQwBPM::CreateStripline(*(input->fStripline[i].get()))));
+    this->fStripline.push_back(input->fStripline[i].get()->Clone());
   }
 
   this->fBCM.reserve(input->fBCM.size());
   for(size_t i=0;i<input->fBCM.size();i++) {
-    this->fBCM.push_back(VQwBCM_ptr(
-        VQwBCM::Create(*(input->fBCM[i].get()))));
+    this->fBCM.push_back(input->fBCM[i].get()->Clone());
   }
 
   this->fBCMCombo.reserve(input->fBCMCombo.size());
   for(size_t i=0;i<input->fBCMCombo.size();i++) {
-    this->fBCMCombo.push_back(VQwBCM_ptr(
-        VQwBCM::CreateCombo(*(
-            input->fBCMCombo[i].get()))));
+    this->fBCMCombo.push_back(input->fBCMCombo[i].get()->Clone());
   }
 
   this->fBPMCombo.reserve(input->fBPMCombo.size());
   for(size_t i=0;i<input->fBPMCombo.size();i++){
-    this->fBPMCombo.push_back(VQwBPM_ptr(
-        VQwBPM::CreateCombo(*(input->fBPMCombo[i].get()))));
+    this->fBPMCombo.push_back(input->fBPMCombo[i].get()->Clone());
   }
 
   this->fLinearArray.reserve(input->fLinearArray.size());
   for(size_t i=0;i<input->fLinearArray.size();i++){
-    this->fLinearArray.push_back(VQwBPM_ptr(
-        VQwBPM::CreateLinearDiodeArray(*(input->fLinearArray[i].get()))));
+    this->fLinearArray.push_back(input->fLinearArray[i].get()->Clone()) ;
   }
 
 }

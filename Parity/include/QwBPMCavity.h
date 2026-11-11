@@ -43,7 +43,7 @@ class QwBPMCavity : public VQwBPM {
   enum ECavElements{kXElem=0, kYElem, kQElem, kNumElements};
   static UInt_t GetSubElementIndex(TString subname);
   static Bool_t ParseChannelName(const TString &channel, TString &detname,
-				 TString &subname, UInt_t &localindex);
+                                 TString &subname, UInt_t &localindex);
  public:
   QwBPMCavity() { };
   QwBPMCavity(TString name):VQwBPM(name){
@@ -51,8 +51,8 @@ class QwBPMCavity : public VQwBPM {
   };
   QwBPMCavity(TString subsystemname, TString name)
   : VQwBPM(name) {
-	  SetSubsystemName(subsystemname);
-	  InitializeChannel(subsystemname, name);
+          SetSubsystemName(subsystemname);
+          InitializeChannel(subsystemname, name);
   };
   QwBPMCavity(const QwBPMCavity& source)
   : VQwBPM(source)
@@ -62,6 +62,8 @@ class QwBPMCavity : public VQwBPM {
     QwCopyArray(source.fAbsPos, fAbsPos);
   }
   ~QwBPMCavity() override { };
+
+  VQwBPM_ptr Clone() override {return VQwBPM_ptr(new QwBPMCavity(*this));};
 
   void    InitializeChannel(TString name);
   // new routine added to update necessary information for tree trimming
@@ -74,7 +76,7 @@ class QwBPMCavity : public VQwBPM {
   }
 
   Int_t   ProcessEvBuffer(UInt_t* buffer,
-			UInt_t word_position_in_buffer,UInt_t indexnumber) override;
+                        UInt_t word_position_in_buffer,UInt_t indexnumber) override;
   void    ProcessEvent() override;
   void    PrintValue() const override;
   void    PrintInfo() const override;

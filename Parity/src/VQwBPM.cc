@@ -287,28 +287,6 @@ VQwBPM* VQwBPM::CreateStripline(TString subsystemname, TString name, TString typ
   }
 }
 
-VQwBPM* VQwBPM::CreateStripline(const VQwBPM& source)
-{
-  Bool_t localDebug = kFALSE;
-  TString type = source.GetModuleType();
-  type.ToUpper();
-  if( localDebug ) QwMessage<<"Creating BPM of type: "<<type << QwLog::endl;
-  // (jc2) As a first try, let's do this the ugly way (but rather very
-  // simple), just list out the types of BPM's supported by this code!!!
-  if( type == "VQWK") {
-    return new QwBPMStripline<QwVQWK_Channel>(dynamic_cast<const QwBPMStripline<QwVQWK_Channel>&>(source));
-  } else if ( type == "SIS3801" ) {
-    return new QwBPMStripline<QwSIS3801_Channel>(dynamic_cast<const QwBPMStripline<QwSIS3801_Channel>&>(source));
-  } else if ( type == "SCALER" || type == "SIS3801D24" ) {
-    return new QwBPMStripline<QwSIS3801D24_Channel>(dynamic_cast<const QwBPMStripline<QwSIS3801D24_Channel>&>(source));
-  } else if ( type == "MOLLERADC" ) {
-    return new QwBPMStripline<QwMollerADC_Channel>(dynamic_cast<const QwBPMStripline<QwMollerADC_Channel>&>(source));
-  } else { // Unsupported one!
-    QwWarning << "BPM of type="<<type<<" is UNSUPPORTED!!\n";
-    exit(-1);
-  }
-}
-
 VQwBPM* VQwBPM::CreateLinearDiodeArray(TString subsystemname, TString name, TString type) {
   Bool_t localdebug = kFALSE;
   type.ToUpper();
@@ -317,21 +295,6 @@ VQwBPM* VQwBPM::CreateLinearDiodeArray(TString subsystemname, TString name, TStr
     return new QwLinearDiodeArray<QwVQWK_Channel>(subsystemname, name, type);
   } else if( type == "MOLLERADC" ) {
     return new QwLinearDiodeArray<QwMollerADC_Channel>(subsystemname, name, type);
-  } else {
-    QwWarning<<"Linear Diode Array of type="<<type<<" is UNSUPPORTED!!\n";
-    exit(-1);
-  }
-}
-
-VQwBPM* VQwBPM::CreateLinearDiodeArray(const VQwBPM& source) {
-  Bool_t localdebug = kFALSE;
-  TString type = source.GetModuleType();
-  type.ToUpper();
-  if( localdebug ) QwMessage<<"Create Linear Diode Array of type: "<<type<<QwLog::endl;
-  if( type == "VQWK") {
-    return new QwLinearDiodeArray<QwVQWK_Channel>(dynamic_cast<const QwLinearDiodeArray<QwVQWK_Channel>&>(source));
-  } else if( type == "MOLLERADC" ) {
-    return new QwLinearDiodeArray<QwMollerADC_Channel>(dynamic_cast<const QwLinearDiodeArray<QwMollerADC_Channel>&>(source));
   } else {
     QwWarning<<"Linear Diode Array of type="<<type<<" is UNSUPPORTED!!\n";
     exit(-1);
@@ -358,28 +321,6 @@ VQwBPM* VQwBPM::CreateCombo(TString subsystemname, TString name,
     return new QwCombinedBPM<QwSIS3801D24_Channel>(subsystemname,name,type);
   } else if ( type == "MOLLERADC" ) {
     return new QwCombinedBPM<QwMollerADC_Channel>(subsystemname,name,type);
-  } else { // Unsupported one!
-    QwWarning << "BPM of type="<<type<<" is UNSUPPORTED!!\n";
-    exit(-1);
-  }
-}
-
-VQwBPM* VQwBPM::CreateCombo(const VQwBPM& source)
-{
-  Bool_t localDebug = kFALSE;
-  TString type = source.GetModuleType();
-  type.ToUpper();
-  if( localDebug ) QwMessage<<"Creating CombinedBCM of type: "<<type<< QwLog::endl;
-  // (jc2) As a first try, let's do this the ugly way (but rather very
-  // simple), just list out the types of BCM's supported by this code!!!
-  if( type == "VQWK") {
-    return new QwCombinedBPM<QwVQWK_Channel>(dynamic_cast<const QwCombinedBPM<QwVQWK_Channel>&>(source));
-  } else if ( type == "SIS3801" ) { // Default SCALER channel
-    return new QwCombinedBPM<QwSIS3801_Channel>(dynamic_cast<const QwCombinedBPM<QwSIS3801_Channel>&>(source));
-  } else if ( type == "SCALER" || type == "SIS3801D24" ) {
-    return new QwCombinedBPM<QwSIS3801D24_Channel>(dynamic_cast<const QwCombinedBPM<QwSIS3801D24_Channel>&>(source));
-  } else if ( type == "MOLLERADC" ) {
-    return new QwCombinedBPM<QwMollerADC_Channel>(dynamic_cast<const QwCombinedBPM<QwMollerADC_Channel>&>(source));
   } else { // Unsupported one!
     QwWarning << "BPM of type="<<type<<" is UNSUPPORTED!!\n";
     exit(-1);

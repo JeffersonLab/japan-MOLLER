@@ -27,6 +27,9 @@ class QwDBInterface;
 
 template<typename T> class QwClock;
 
+class VQwClock;
+typedef std::shared_ptr<VQwClock> VQwClock_ptr;
+
 /**
  * \ingroup QwAnalysis_BeamLine
  */
@@ -58,6 +61,8 @@ public:
   : VQwDataElement(source)
   { }
   ~VQwClock() override {};
+
+  virtual VQwClock_ptr Clone() = 0;
 
   // VQwDataElement virtual functions
   Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0) override = 0;
@@ -117,5 +122,3 @@ public:
   virtual Bool_t CheckForBurpFail(const VQwClock* ev_error) = 0;
 
 };
-
-typedef std::shared_ptr<VQwClock> VQwClock_ptr;

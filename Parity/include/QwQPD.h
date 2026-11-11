@@ -61,6 +61,8 @@ class QwQPD : public VQwBPM {
   }
   ~QwQPD() override { };
 
+  VQwBPM_ptr Clone() override {return VQwBPM_ptr(new QwQPD(*this));};
+
   void    InitializeChannel(TString name);
   // new routine added to update necessary information for tree trimming
   void    InitializeChannel(TString subsystem, TString name);
@@ -74,7 +76,7 @@ class QwQPD : public VQwBPM {
 
   void    ClearEventData() override;
   Int_t   ProcessEvBuffer(UInt_t* buffer,
-			UInt_t word_position_in_buffer,UInt_t indexnumber) override;
+                        UInt_t word_position_in_buffer,UInt_t indexnumber) override;
   void    ProcessEvent() override;
 
   const VQwHardwareChannel* GetPosition(EBeamPositionMonitorAxis axis) const override {

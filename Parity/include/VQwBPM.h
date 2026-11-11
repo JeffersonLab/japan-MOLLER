@@ -38,6 +38,9 @@ class QwErrDBInterface;
 /// \ingroup QwAnalysis_BeamLine
 ///
 
+class VQwBPM;
+typedef std::shared_ptr<VQwBPM> VQwBPM_ptr;
+
 /**
  * \class VQwBPM
  * \ingroup QwAnalysis_BeamLine
@@ -85,6 +88,7 @@ class VQwBPM : public VQwDataElement {
   }
   ~VQwBPM() override { };
 
+  virtual VQwBPM_ptr Clone() = 0;
 
   void   InitializeChannel(TString name);
   //  virtual void   ClearEventData() = 0;
@@ -291,11 +295,8 @@ public:
 
   // Factory function to produce appropriate BCM
   static VQwBPM* CreateStripline(TString subsystemname, TString name, TString type);
-  static VQwBPM* CreateStripline(const VQwBPM& source);
   static VQwBPM* CreateCombo(TString subsystemname, TString name, TString type);
-  static VQwBPM* CreateCombo(const VQwBPM& source);
   static VQwBPM* CreateLinearDiodeArray(TString subsystemname, TString name, TString type);
-  static VQwBPM* CreateLinearDiodeArray(const VQwBPM& source);
 
   private:
 
@@ -352,5 +353,3 @@ public:
   const static Bool_t bDEBUG=kFALSE;//debugging display purposes
 
 };
-
-typedef std::shared_ptr<VQwBPM> VQwBPM_ptr;

@@ -71,6 +71,8 @@ class QwCombinedBPM : public VQwBPM {
   }
   ~QwCombinedBPM() override { };
 
+  VQwBPM_ptr Clone() override {return VQwBPM_ptr(new QwCombinedBPM<T>(*this));};
+
   using VQwBPM::EBeamPositionMonitorAxis;
 
   void    InitializeChannel(TString name);
@@ -84,7 +86,7 @@ class QwCombinedBPM : public VQwBPM {
   void    LoadChannelParameters(QwParameterFile &paramfile) override{};
   void    ClearEventData() override;
   Int_t   ProcessEvBuffer(UInt_t* buffer,
-			UInt_t word_position_in_buffer,UInt_t indexnumber) override;
+                        UInt_t word_position_in_buffer,UInt_t indexnumber) override;
   void    ProcessEvent() override;
   void    PrintValue() const override;
   void    PrintInfo() const override;

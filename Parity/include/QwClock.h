@@ -56,6 +56,8 @@ class QwClock : public VQwClock {
   { }
   ~QwClock() override { };
 
+  VQwClock_ptr Clone() override {return VQwClock_ptr(new QwClock<T>(*this));};
+
   void LoadChannelParameters(QwParameterFile &paramfile) override{
     fClock.LoadChannelParameters(paramfile);
   };

@@ -58,6 +58,8 @@ template<typename T> class QwBCM : public VQwBCM {
   { }
   ~QwBCM() override { };
 
+  VQwBCM_ptr Clone() override {return VQwBCM_ptr(new QwBCM<T>(*this));};
+
   Int_t ProcessEvBuffer(UInt_t* buffer, UInt_t word_position_in_buffer, UInt_t subelement=0) override;
 
   void  InitializeChannel(TString name, TString datatosave) override;
