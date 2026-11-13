@@ -16,8 +16,10 @@
 #include "TDirectory.h"
 #include "TTree.h"
 
+#ifdef HAS_RNTUPLE_SUPPORT
 // RNTuple headers
 #include "ROOT/RNTupleModel.hxx"
+#endif
 
 // Qweak headers
 #include "MQwPublishable.h"
