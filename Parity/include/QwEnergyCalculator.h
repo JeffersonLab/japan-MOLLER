@@ -63,6 +63,12 @@ class QwEnergyCalculator : public VQwDataElement{
   : VQwDataElement(source),fEnergyChange(source.fEnergyChange)
   { }
   ~QwEnergyCalculator() override { };
+  
+   void AddMockOffset(int index, double offset){
+      if (index == 1){
+        fEnergyChange.AddChannelOffset(offset);
+      }
+    };
 
     void    InitializeChannel(TString name,TString datatosave);
     // new routine added to update necessary information for tree trimming

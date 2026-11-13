@@ -27,7 +27,7 @@
 #include "QwLinearDiodeArray.h"
 #include "VQwClock.h"
 #include "QwBeamDetectorID.h"
-
+#include "QwBeamMod.h"
 
 /**
  * \class QwBeamLine
@@ -75,6 +75,7 @@ class QwBeamLine : public VQwSubsystemParity, public MQwSubsystemCloneable<QwBea
   void LoadEventCuts_Fin(Int_t &eventcut_flag) override;
   Int_t  LoadGeometryDefinition(TString mapfile) override;
   void  LoadMockDataParameters(TString mapfile) override;
+  void  LoadBmodControlParameters(TString mapfile);
   void   AssignGeometry(QwParameterFile* mapstr, VQwBPM * bpm);
 
   Bool_t ApplySingleEventCuts() override;//derived from VQwSubsystemParity
@@ -201,6 +202,16 @@ protected:
 
   std::vector <QwEnergyCalculator> fECalculator;
   std::vector <QwBeamDetectorID> fBeamDetectorID;
+  
+  std::vector<QwBPMTansferMatrix>   fTrimResponse;   // forward response coil -> target, 7 entries, index = coil-1 (bmod_trimN)
+  std::vector<QwBPMTansferMatrix>   fBPMTransfer;    //  reverse matrix target -> BPM, parallel to fStripline (same index)
+  std::vector<Int_t>                fBmodControlPar; // the 10 bmodcontrolpar numbers (see mock_parameters_modulation.map)
+  std::vector<Double_t>             fBmodCoilAmp;    // DAC amplitude per coil (coilAmp record)
+  std::vector<Double_t>             fBmodKickX;      // fraction of kick in x'
+  std::vector<Double_t>             fBmodKickY;      // fraction of kick in y'
+  QwBPMTansferMatrix                fBmodDispersion; // MAT1C01H column 6
+  static const Int_t bmodNFlagWords = 13;            // 13 BMW flag words; ORDER must match mock_moller_beammod.map
+  Double_t bmwValue[bmodNFlagWords];
 
 
 

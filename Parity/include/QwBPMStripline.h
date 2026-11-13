@@ -132,6 +132,24 @@ class QwBPMStripline : public VQwBPM {
   void    SetDefaultSampleSize(Int_t sample_size) override;
   void    SetRandomEventParameters(Double_t meanX, Double_t sigmaX, Double_t meanY, Double_t sigmaY) override;
   void    RandomizeEventData(int helicity = 0, double time = 0.0) override;
+  
+  void    AddMockOffset(int index, double offset) override {
+    if (index == 1) {
+      fAbsPos[0].AddChannelOffset(offset);
+    } else if (index == 2) {
+      fAbsPos[1].AddChannelOffset(offset);
+    }
+  };
+  
+  void    SetMockValue(int index, double value) override {
+    if (index == 1) {
+      fAbsPos[0].ClearEventData();
+      fAbsPos[0].AddChannelOffset(value);
+    } else if (index == 2) {
+      fAbsPos[1].ClearEventData();
+      fAbsPos[1].AddChannelOffset(value);
+    }
+  };
   void    LoadMockDataParameters(QwParameterFile &paramfile) override;
   void    ApplyResolutionSmearing() override;
   void    ApplyResolutionSmearing(EBeamPositionMonitorAxis iaxis) override;

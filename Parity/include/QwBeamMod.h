@@ -32,6 +32,38 @@ class QwBeamMod;
 // this emun vector needs to be coherent with the DetectorTypes declaration in the QwBeamLine constructor
 
 
+ /**
+      * class QwBPMTansferMatrix 
+      * 2 x 5 coefficient table read from mock_parameters_modulation.map
+      * Columns are (x, x', y, y', dE/E).
+      * Used for:
+      *  - bmod_trimN        forward response coil -> target;
+      *                      row X = response to an x' kick (col 2 of the
+      *                      optics matrix), row Y = response to a y' kick (col 4)
+      *  - <stripline name>  reverse matrix target -> BPM;
+      *                      row X = R1, row Y = R3, cols 1,2,3,4,6
+      *  - target_dispersion MAT1C01H column 6 (row X only)
+      *  - coilN             (coilAmp record) row 0 = amplitude, kick x', kick y'
+      * Units: m/rad == mm/mrad for cols 1-4; col 5 (dE/E) is in m, x1000 in code.
+ **/
+class QwBPMTansferMatrix {
+	public:
+		QwBPMTansferMatrix(){};
+		~QwBPMTansferMatrix(){};
+		TString GetElementName();
+		Double_t GetTMatrixElement(Int_t row, Int_t col);
+		void LoadMockDataParameters();
+		void SetElementName(TString bpmName);
+		void SetTMatrixElement(Int_t row, Int_t col, Double_t value);
+		Bool_t IsFilled(){return fFilled;};
+		Bool_t IsEmpty(){return !fFilled;};
+	protected:
+	private:
+		TString fName = "unknown";
+		Double_t fTMatrixElement[2][5] = {{0,0,0,0,0},{0,0,0,0,0}};   // row 0 = X, row 1 = Y
+		Bool_t fFilled = kFALSE;
+}; 
+ 
 
 /*****************************************************************
 *  Class:
@@ -91,6 +123,8 @@ class QwModChannelID
  * Decodes modulation ramp and pattern words, maintains channels affected
  * by modulation, and computes relevant summaries for regression.
  */
+
+ 
 class QwBeamMod: public VQwSubsystemParity, public MQwSubsystemCloneable<QwBeamMod> {
 
  private:
@@ -163,7 +197,6 @@ class QwBeamMod: public VQwSubsystemParity, public MQwSubsystemCloneable<QwBeamM
 
   void  ProcessEvent() override;
   void  ProcessEvent_2() override;
-
   VQwSubsystem&  operator=  (VQwSubsystem *value) override;
   VQwSubsystem&  operator+= (VQwSubsystem *value) override;
   VQwSubsystem&  operator-= (VQwSubsystem *value) override;

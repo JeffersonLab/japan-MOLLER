@@ -39,10 +39,43 @@ class QwParameterFile;
 template<typename T>
 class QwCombinedBPM : public VQwBPM {
   friend class QwEnergyCalculator;
+  friend class QwBeamLine;
 
   /////
  public:
-
+ 
+ void AddMockOffset(int index, double offset){
+ 		if (index == 1){
+ 			//fAbsPos[0].PrintValue();
+ 			fAbsPos[0].AddChannelOffset(offset);
+ 			//fAbsPos[0].PrintValue();
+ 		}
+ 		else if (index == 2){
+ 			fAbsPos[1].AddChannelOffset(offset);
+ 		}
+ 		else if (index == 3){
+ 			fSlope[0].AddChannelOffset(offset);
+ 		}
+ 		else if (index == 4){
+ 			fSlope[1].AddChannelOffset(offset);
+ 		}
+ };
+ 
+ void ReCalcIntercept(){
+ 	double zpos = this->GetPositionInZ();
+ 	static T tmp1("tmp1","derived");
+ 	for (size_t axis=kXAxis; axis<kNumAxes; axis++)
+  	{
+ 		
+    //std::cout << "In QwCombinedBPM: zpos= " << zpos << std::endl;
+    //UInt_t err_flag=fAbsPos[axis].GetEventcutErrorFlag();
+    fIntercept[axis] = fAbsPos[axis]; // b =  X
+    //fAbsPos[axis].ResetErrorFlag(err_flag);
+    tmp1.AssignScaledValue(fSlope[axis],zpos); //az
+    fIntercept[axis] -= tmp1;  //b = X - az
+    //    std::cout << axis << " " << fAbsPos[axis].GetValue() << "-" << fSlope[axis].GetValue() <<"*"<<zpos <<"=?" << fIntercept[axis].GetValue() << std::endl;
+ 		}
+ 	}
 //-------------------------------------------------------------------------
   size_t GetNumberOfElements() override {return fElement.size();};
   TString GetSubElementName(Int_t index) override {return fElement.at(index)->GetElementName();};

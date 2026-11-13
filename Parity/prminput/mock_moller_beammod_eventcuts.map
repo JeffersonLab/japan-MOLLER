@@ -1,0 +1,5 @@
+! Beam modulation event cut (QwBeamMod::ApplySingleEventCuts).
+
+EVENTCUTS = 3
+ 
+WORD  bmwobj -2 0
