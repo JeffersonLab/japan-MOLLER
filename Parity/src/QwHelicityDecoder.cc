@@ -303,7 +303,12 @@ Int_t QwHelicityDecoder::LoadChannelMap(TString mapfile)
     fMaxPatternPhase=value;
     //QwMessage << " fMaxPatternPhase " << fMaxPatternPhase << QwLog::endl;
   }
-
+  if (mapstr.PopValue("numberpatternsdelayed",value)) {
+    SetHelicityDelay(value);
+  }
+  if (mapstr.PopValue("randseedbits",value)) {
+    if (value==24 || value==30) fRandBits = value;
+  }
 
   //PrintInfo();
   return 0;
