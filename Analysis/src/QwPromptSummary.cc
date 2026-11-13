@@ -7,6 +7,7 @@
  */
 
 #include "QwPromptSummary.h"
+#include "QwTypes.h"
 
 // System headers
 #include <iostream>

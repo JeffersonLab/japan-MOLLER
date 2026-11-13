@@ -157,9 +157,7 @@ Int_t Coda3EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 
 	fFragLength = fEvtLength - fWordsSoFar;
 	QwDebug << Form("buffer[0-1] 0x%x 0x%x ; ", buffer[0], buffer[1]);
-	if (gQwLog.GetLogLevel() >= QwLog::kDebug) {
-  	  PrintDecoderInfo(gQwLog(QwLog::kDebug,__PRETTY_FUNCTION__));
-	}
+  	PrintDecoderInfo();
 
 	return CODA_OK;
 }
@@ -259,10 +257,10 @@ void Coda3EventDecoder::printUserEvent(const UInt_t *buffer)
 }
 
 // Print internal decoder information. See header for details.
-void Coda3EventDecoder::PrintDecoderInfo(QwLog& out)
+void Coda3EventDecoder::PrintDecoderInfo()
 {
 
-	out << Form("Event Number: %d; Length: %d; Tag: 0x%x; Bank data type: 0x%x ",
+	QwDebug << Form("Event Number: %d; Length: %d; Tag: 0x%x; Bank data type: 0x%x ",
 			fEvtNumber, fEvtLength, fEvtTag, fBankDataType)
 		<< Form("Evt type: 0x%x; Evt number %d; fWordsSoFar %d",
 				fEvtType, fEvtNumber, fWordsSoFar )

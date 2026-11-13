@@ -8,7 +8,7 @@
 ///  It could be repurposed to have a single instance per class,
 ///  but that would probably involve increasing the number of
 ///  histogram parameter files.
-
+#include <string>
 #include "QwHistogramHelper.h"
 
 // Qweak headers
@@ -34,7 +34,7 @@ void QwHistogramHelper::DefineOptions(QwOptions &options)
 
   options.AddOptions()(
 		       "tree-trim-file",
-		       po::value<string>()->default_value("tree_trim.in"),
+		       po::value<std::string>()->default_value("tree_trim.in"),
 		       "trimmed tree file name"
 		       );
 
@@ -42,7 +42,7 @@ void QwHistogramHelper::DefineOptions(QwOptions &options)
   // Monday, October 18 23:19:09 EDT 2010, jhlee
   options.AddOptions()(
 		       "histo-trim-file",
-		       po::value<string>()->default_value("parity_hist.in"),
+		       po::value<std::string>()->default_value("parity_hist.in"),
 		       "trimmed histo file name"
 		       );
 
@@ -68,9 +68,9 @@ void QwHistogramHelper::ProcessOptions(QwOptions &options)
 
   // Process trim file options
   if (options.HasValue("tree-trim-file"))
-    LoadTreeParamsFromFile(options.GetValue<string>("tree-trim-file"));
+    LoadTreeParamsFromFile(options.GetValue<std::string>("tree-trim-file"));
   if (options.HasValue("histo-trim-file"))
-    LoadHistParamsFromFile(options.GetValue<string>("histo-trim-file"));
+    LoadHistParamsFromFile(options.GetValue<std::string>("histo-trim-file"));
 }
 
 

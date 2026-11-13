@@ -62,12 +62,12 @@ class QwParityDB: public QwDatabase {
     void         SetupOneRun(QwEventBuffer& qwevt);        //<! Initialize run ID, runlet ID, and analysis ID using data from CODA event buffer
     void         FillParameterFiles(QwSubsystemArrayParity& subsys);
 
-    UInt_t GetMonitorID(const string& name, Bool_t zero_id_is_error=kTRUE);         //<! Get monitor_id for beam monitor name
-    UInt_t GetMainDetectorID(const string& name, Bool_t zero_id_is_error=kTRUE);    //<! Get main_detector_id for main detector name
-    UInt_t GetLumiDetectorID(const string& name, Bool_t zero_id_is_error=kTRUE);    //<! Get lumi_detector_id for lumi detector name
-    const string GetMeasurementID(const Int_t index);
-    UInt_t GetSlowControlDetectorID(const string& name);         //<! Get slow_controls_data_id for epics name
-    UInt_t GetErrorCodeID(const string& name);         //<! Get error_code_id for error code name
+    UInt_t GetMonitorID(const std::string& name, Bool_t zero_id_is_error=kTRUE);         //<! Get monitor_id for beam monitor name
+    UInt_t GetMainDetectorID(const std::string& name, Bool_t zero_id_is_error=kTRUE);    //<! Get main_detector_id for main detector name
+    UInt_t GetLumiDetectorID(const std::string& name, Bool_t zero_id_is_error=kTRUE);    //<! Get lumi_detector_id for lumi detector name
+    const std::string GetMeasurementID(const Int_t index);
+    UInt_t GetSlowControlDetectorID(const std::string& name);         //<! Get slow_controls_data_id for epics name
+    UInt_t GetErrorCodeID(const std::string& name);         //<! Get error_code_id for error code name
 
     UInt_t GetRunNumber() {return fRunNumber;}       //<! Run number getter
     UInt_t GetSegmentNumber() {return fSegmentNumber;}       //<! CODA File segment number getter
@@ -103,12 +103,12 @@ class QwParityDB: public QwDatabase {
     UInt_t fAnalysisID;      //!< analysis_id of current analysis pass
     bool fDisableAnalysisCheck; //!< Flag to disable pre-existing analysis_id check
 
-    static std::map<string, unsigned int> fMonitorIDs; //!< Associative array of beam monitor IDs.  This declaration will be a problem if QwDatabase is used to connect to two databases simultaneously.
-    static std::map<string, unsigned int> fMainDetectorIDs; //!< Associative array of main detector IDs.  This declaration will be a problem if QwDatabase is used to connect to two databases simultaneously.
-    static std::map<string, unsigned int> fLumiDetectorIDs; //!< Associative array of LUMI detector IDs.  This declaration will be a problem if QwDatabase is used to connect to two databases simultaneously.
-    static std::map<string, unsigned int> fSlowControlDetectorIDs; //!< Associative array of slow controls data IDs.  This declaration will be a problem if QwDatabase is used to connect to two databases simultaneously.
-    static std::map<string, unsigned char> fErrorCodeIDs; //!< Associative array of error code IDs.  This declaration will be a problem if QwDatabase is used to connect to two databases simultaneously.
-    static std::vector<string>            fMeasurementIDs;
+    static std::map<std::string, unsigned int> fMonitorIDs; //!< Associative array of beam monitor IDs.  This declaration will be a problem if QwDatabase is used to connect to two databases simultaneously.
+    static std::map<std::string, unsigned int> fMainDetectorIDs; //!< Associative array of main detector IDs.  This declaration will be a problem if QwDatabase is used to connect to two databases simultaneously.
+    static std::map<std::string, unsigned int> fLumiDetectorIDs; //!< Associative array of LUMI detector IDs.  This declaration will be a problem if QwDatabase is used to connect to two databases simultaneously.
+    static std::map<std::string, unsigned int> fSlowControlDetectorIDs; //!< Associative array of slow controls data IDs.  This declaration will be a problem if QwDatabase is used to connect to two databases simultaneously.
+    static std::map<std::string, unsigned char> fErrorCodeIDs; //!< Associative array of error code IDs.  This declaration will be a problem if QwDatabase is used to connect to two databases simultaneously.
+    static std::vector<std::string>            fMeasurementIDs;
 
     friend class StoreMonitorID;
     friend class StoreMainDetectorID;

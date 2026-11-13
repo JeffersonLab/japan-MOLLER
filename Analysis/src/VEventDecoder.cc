@@ -67,22 +67,22 @@ Bool_t VEventDecoder::DecodeSubbankHeader(UInt_t *buffer){
 }
 
 // Prints internal decoder information. See header for details.
-void VEventDecoder::PrintDecoderInfo(QwLog& out)
+void VEventDecoder::PrintDecoderInfo()
 {
-        out << "\n-------\n" << std::hex <<
-                "fWordsSoFar " << fWordsSoFar <<
-                "\n fEvtLength; " << fEvtLength <<
-                "\n fEvtType " << fEvtType <<
-                "\n fEvtTag " << fEvtTag <<
-                "\n fBankDataType " << fBankDataType <<
-                "\n fPhysicsEventFlag " << fPhysicsEventFlag <<
-                "\n fEvtNumber;   " << fEvtNumber <<
-                "\n fFragLength " << fFragLength <<
-                "\n fSubbankTag " << fSubbankTag <<
-                "\n fSubbankType " << fSubbankType <<
-                "\n fSubbankNum " << fSubbankNum <<
-                "\n fROC " << fROC <<
-                "\n fAllowLowSubbankIDs " << fAllowLowSubbankIDs <<
-                "\n-------\n" << std::dec <<
-                QwLog::endl;
+	QwDebug << "\n-------\n" << std::hex <<
+		"fWordsSoFar " << fWordsSoFar <<
+		"\n fEvtLength; " << fEvtLength <<
+		"\n fEvtType " << fEvtType <<
+		"\n fEvtTag " << fEvtTag <<
+		"\n fBankDataType " << fBankDataType <<
+		"\n fPhysicsEventFlag " << fPhysicsEventFlag <<
+		"\n fEvtNumber;   " << fEvtNumber <<
+		"\n fFragLength " << fFragLength <<
+		"\n fSubbankTag " << fSubbankTag <<
+		"\n fSubbankType " << fSubbankType <<
+		"\n fSubbankNum " << fSubbankNum <<
+		"\n fROC " << fROC <<
+		"\n fAllowLowSubbankIDs " << fAllowLowSubbankIDs <<
+		"\n-------\n" << std::dec <<
+		QwLog::endl;
 }

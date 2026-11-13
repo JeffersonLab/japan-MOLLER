@@ -5,6 +5,7 @@
 
 #include "MQwMockable.h"
 #include "QwParameterFile.h"
+#include "QwUnits.h"
 
 // Randomness generator: Mersenne twister with period 2^19937 - 1
 //
