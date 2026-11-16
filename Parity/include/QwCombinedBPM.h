@@ -39,12 +39,11 @@ class QwParameterFile;
 template<typename T>
 class QwCombinedBPM : public VQwBPM {
   friend class QwEnergyCalculator;
-  friend class QwBeamLine;
 
   /////
  public:
  
- void AddMockOffset(int index, double offset){
+ void AddMockOffset(int index, double offset) override{
  		if (index == 1){
  			//fAbsPos[0].PrintValue();
  			fAbsPos[0].AddChannelOffset(offset);
@@ -61,7 +60,7 @@ class QwCombinedBPM : public VQwBPM {
  		}
  };
  
- void ReCalcIntercept(){
+ void ReCalcIntercept() override{
  	double zpos = this->GetPositionInZ();
  	static T tmp1("tmp1","derived");
  	for (size_t axis=kXAxis; axis<kNumAxes; axis++)

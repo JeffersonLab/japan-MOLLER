@@ -40,7 +40,7 @@ class QwBeamMod;
       *  - bmod_trimN        forward response coil -> target;
       *                      row X = response to an x' kick (col 2 of the
       *                      optics matrix), row Y = response to a y' kick (col 4)
-      *  - <stripline name>  reverse matrix target -> BPM;
+      *  - stripline name  reverse matrix target -> BPM;
       *                      row X = R1, row Y = R3, cols 1,2,3,4,6
       *  - target_dispersion MAT1C01H column 6 (row X only)
       *  - coilN             (coilAmp record) row 0 = amplitude, kick x', kick y'

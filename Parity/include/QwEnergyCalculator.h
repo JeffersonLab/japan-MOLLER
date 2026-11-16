@@ -64,7 +64,7 @@ class QwEnergyCalculator : public VQwDataElement{
   { }
   ~QwEnergyCalculator() override { };
   
-   void AddMockOffset(int index, double offset){
+   void AddMockOffset(int index, double offset) {
       if (index == 1){
         fEnergyChange.AddChannelOffset(offset);
       }
