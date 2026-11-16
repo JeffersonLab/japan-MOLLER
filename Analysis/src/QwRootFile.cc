@@ -6,11 +6,13 @@
 #include "QwRootFile.h"
 #include "QwRunCondition.h"
 #include "TH1.h"
+#include "TFileCacheWrite.h"
 
 #include <unistd.h>
 #include <cstdio>
 
 #include <filesystem>
+#include <algorithm>
 namespace fs = std::filesystem;
 
 std::string QwRootFile::fDefaultRootFileDir = ".";
@@ -146,6 +148,14 @@ QwRootFile::QwRootFile(const TString& run_label)
 
     fRootFile->SetCompressionAlgorithm(fCompressionAlgorithm);
     fRootFile->SetCompressionLevel(fCompressionLevel);
+
+    // Coalesce the many small sequential writes (RNTuple pages, TTree
+    // baskets) into large ones; this matters on filesystems with a high
+    // per-call cost (network shares, WSL /mnt drives).  ROOT already attaches
+    // a write cache to remote files.  The TFile takes ownership of the cache.
+    if (fWriteCacheSize > 0 && fRootFile->GetCacheWrite() == nullptr) {
+      new TFileCacheWrite(fRootFile, fWriteCacheSize * 1024);
+    }
   }
 }
 
@@ -323,11 +333,36 @@ void QwRootFile::DefineOptions(QwOptions &options)
     ("compression-level", po::value<int>()->default_value(1),
      "TFile compression level (default = 1, no compression = 0)");
   options.AddOptions("ROOT performance options")
-    ("rntuple-compression-algorithm", po::value<int>()->default_value(4),
-     "RNTuple compression algorithm (1=ZLIB, 2=LZMA, 4=LZ4, 5=ZSTD, default=4 LZ4)");
+    ("rntuple-compression-algorithm", po::value<int>()->default_value(5),
+     "RNTuple compression algorithm (1=ZLIB, 2=LZMA, 4=LZ4, 5=ZSTD, default=5 ZSTD)");
   options.AddOptions("ROOT performance options")
-    ("rntuple-compression-level", po::value<int>()->default_value(0),
-     "RNTuple compression level (0-12, default=0 for maximum performance)");
+    ("rntuple-compression-level", po::value<int>()->default_value(5),
+     "RNTuple compression level (0-12, default=5; 0 disables compression)");
+  options.AddOptions("ROOT performance options")
+    ("rntuple-cluster-size", po::value<int>()->default_value(0),
+     "RNTuple approximate compressed cluster size in MiB (0 = ROOT default)");
+  options.AddOptions("ROOT performance options")
+    ("rntuple-max-unzipped-cluster-size", po::value<int>()->default_value(0),
+     "RNTuple maximum uncompressed cluster size in MiB (0 = ROOT default, "
+     "or 10x rntuple-cluster-size when that is set)");
+  options.AddOptions("ROOT performance options")
+    ("rntuple-page-buffer-budget", po::value<int>()->default_value(1024),
+     "RNTuple memory budget in MiB for buffered pages of one RNTuple; wide "
+     "RNTuples with many fields need a large budget to avoid tiny pages "
+     "(default=1024, 0 = ROOT default of 256)");
+  options.AddOptions("ROOT performance options")
+    ("rntuple-max-page-size", po::value<int>()->default_value(0),
+     "RNTuple maximum uncompressed page size in KiB (0 = ROOT default)");
+  options.AddOptions("ROOT performance options")
+    ("rntuple-channel-arrays", po::value<bool>()->default_bool_value(false),
+     "Store each channel's values in one std::array<double,N> RNTuple field "
+     "named after the channel (like the TTree leaflist branch), with the "
+     "element names in the field description, instead of one field per "
+     "value; much faster to write for wide RNTuples");
+  options.AddOptions("ROOT performance options")
+    ("write-cache-size", po::value<int>()->default_value(4096),
+     "Size in KiB of the TFile write cache that coalesces small writes of "
+     "TTree baskets and RNTuple pages (default=4096, 0 = disabled)");
 }
 
 
@@ -387,7 +422,7 @@ void QwRootFile::ProcessOptions(QwOptions &options)
   // Options 'disable-trees' and 'disable-histos' for disabling
   // tree and histogram output
   auto v = options.GetValueVector<std::string>("disable-tree");
-  std::for_each(v.begin(), v.end(), [&](const std::string& s){ this->DisableTree(s); });
+  std::for_each(v.begin(), v.end(), [&](const std::string& s){ this->DisableTreeAndNTuple(s); });
   if (options.GetValue<bool>("disable-trees"))  DisableTree(".*");
   if (options.GetValue<bool>("disable-histos")) DisableHisto(".*");
 
@@ -445,12 +480,12 @@ void QwRootFile::ProcessOptions(QwOptions &options)
 #endif // HAS_RNTUPLE_SUPPORT
 
   // Options 'disable-mps' and 'disable-hel' for disabling
-  // helicity window and helicity pattern output
-  if (options.GetValue<bool>("disable-mps-tree"))  DisableTree("^evt$");
-  if (options.GetValue<bool>("disable-pair-tree"))  DisableTree("^pr$");
-  if (options.GetValue<bool>("disable-hel-tree"))  DisableTree("^mul$");
-  if (options.GetValue<bool>("disable-burst-tree"))  DisableTree("^burst$");
-  if (options.GetValue<bool>("disable-slow-tree")) DisableTree("^slow$");
+  // helicity window and helicity pattern output (TTrees and RNTuples)
+  if (options.GetValue<bool>("disable-mps-tree"))  DisableTreeAndNTuple("^evt$");
+  if (options.GetValue<bool>("disable-pair-tree"))  DisableTreeAndNTuple("^pr$");
+  if (options.GetValue<bool>("disable-hel-tree"))  DisableTreeAndNTuple("^mul$");
+  if (options.GetValue<bool>("disable-burst-tree"))  DisableTreeAndNTuple("^burst$");
+  if (options.GetValue<bool>("disable-slow-tree")) DisableTreeAndNTuple("^slow$");
 
   // Option 'disable-redundant-trees' disables the per-entry trees that are
   // fully captured by their matching histogram directories
@@ -459,9 +494,9 @@ void QwRootFile::ProcessOptions(QwOptions &options)
   // and slow (EPICS) trees have no histogram equivalent, so they are left
   // untouched.
   if (options.GetValue<bool>("disable-redundant-trees")) {
-    DisableTree("^evt$");
-    DisableTree("^mul$");
-    DisableTree("^burst$");
+    DisableTreeAndNTuple("^evt$");
+    DisableTreeAndNTuple("^mul$");
+    DisableTreeAndNTuple("^burst$");
   }
 
   // Options 'num-accepted-events' and 'num-discarded-events' for
@@ -497,6 +532,16 @@ void QwRootFile::ProcessOptions(QwOptions &options)
   fCompressionLevel = options.GetValue<int>("compression-level");
   fRNTupleCompressionAlgorithm = options.GetValue<int>("rntuple-compression-algorithm");
   fRNTupleCompressionLevel = options.GetValue<int>("rntuple-compression-level");
+  fRNTupleClusterSize = options.GetValue<int>("rntuple-cluster-size");
+  fRNTupleMaxUnzippedClusterSize = options.GetValue<int>("rntuple-max-unzipped-cluster-size");
+  fRNTuplePageBufferBudget = options.GetValue<int>("rntuple-page-buffer-budget");
+  fRNTupleMaxPageSize = options.GetValue<int>("rntuple-max-page-size");
+#ifdef HAS_RNTUPLE_SUPPORT
+  QwRootNTupleFields::SetLayout(options.GetValue<bool>("rntuple-channel-arrays")
+                                ? QwRootNTupleFields::Layout::kArrayPerChannel
+                                : QwRootNTupleFields::Layout::kFieldPerValue);
+#endif // HAS_RNTUPLE_SUPPORT
+  fWriteCacheSize = options.GetValue<int>("write-cache-size");
   fBasketSize = options.GetValue<int>("basket-size");
 
   // Autoflush and autosave
@@ -511,6 +556,48 @@ void QwRootFile::ProcessOptions(QwOptions &options)
   fAutoSave  = options.GetValue<int>("autosave");
   return;
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+/**
+ * Build the RNTuple write options from the configured compression and
+ * cluster/page settings.  Invalid combinations fall back to the ROOT
+ * defaults for the cluster/page settings.
+ */
+ROOT::RNTupleWriteOptions QwRootFile::GetRNTupleWriteOptions() const
+{
+  const auto algorithm =
+    static_cast<ROOT::RCompressionSetting::EAlgorithm::EValues>(fRNTupleCompressionAlgorithm);
+  ROOT::RNTupleWriteOptions options;
+  options.SetCompression(algorithm, fRNTupleCompressionLevel);
+
+  constexpr std::size_t kMiB = 1024 * 1024;
+  try {
+    if (fRNTupleMaxUnzippedClusterSize > 0) {
+      options.SetMaxUnzippedClusterSize(fRNTupleMaxUnzippedClusterSize * kMiB);
+    }
+    if (fRNTupleClusterSize > 0) {
+      // Keep ROOT's default ratio of 10 between unzipped and zipped cluster size
+      if (fRNTupleMaxUnzippedClusterSize <= 0) {
+        options.SetMaxUnzippedClusterSize(
+          std::max(options.GetMaxUnzippedClusterSize(), 10 * fRNTupleClusterSize * kMiB));
+      }
+      options.SetApproxZippedClusterSize(fRNTupleClusterSize * kMiB);
+    }
+    if (fRNTupleMaxPageSize > 0) {
+      options.SetMaxUnzippedPageSize(fRNTupleMaxPageSize * std::size_t(1024));
+    }
+    if (fRNTuplePageBufferBudget > 0) {
+      options.SetPageBufferBudget(fRNTuplePageBufferBudget * kMiB);
+    }
+  } catch (const std::exception& e) {
+    QwError << "QwRootFile::GetRNTupleWriteOptions:  invalid RNTuple cluster/page "
+            << "settings (" << e.what() << "); using ROOT defaults" << QwLog::endl;
+    options = ROOT::RNTupleWriteOptions();
+    options.SetCompression(algorithm, fRNTupleCompressionLevel);
+  }
+  return options;
+}
+#endif // HAS_RNTUPLE_SUPPORT
 
 /**
  * Determine whether the rootfile object has any non-empty trees or

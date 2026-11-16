@@ -176,6 +176,13 @@ Int_t main(Int_t argc, Char_t* argv[])
     database.SetupOneRun(eventbuffer);
     #endif // __USE_DATABASE__
 
+    //  All options are defined now; report typos once
+    static bool warned_unrecognized_options = false;
+    if (! warned_unrecognized_options) {
+      gQwOptions.WarnUnrecognizedOptions();
+      warned_unrecognized_options = true;
+    }
+
     //  Open the ROOT file (close when scope ends)
     QwRootFile *treerootfile  = NULL;
     QwRootFile *burstrootfile = NULL;
