@@ -1025,6 +1025,13 @@ class QwRootFile {
       }
       fNTupleByName[name].push_back(ntuple);
     }
+
+    /// \brief Create an RNTuple with a custom model, for output that is not a
+    /// flat list of values (e.g. the correlator matrices).  The writer is
+    /// owned by this file and finalized when it is closed.  Returns nullptr
+    /// when RNTuple output is disabled for this name.
+    ROOT::RNTupleWriter* NewNTupleWriter(const std::string& name,
+                                         std::unique_ptr<ROOT::RNTupleModel> model);
 #endif // HAS_RNTUPLE_SUPPORT
 
     /// Get the tree with name
@@ -1189,7 +1196,7 @@ class QwRootFile {
         // which would create duplicate cycles. The histograms are already
         // safely written to disk in Step 2.
 #ifdef HAS_RNTUPLE_SUPPORT
-        if (!fNTupleByName.empty()) {
+        if (!fNTupleByName.empty() || !fNTupleWriters.empty()) {
           ClearInMemoryObjects(fRootFile);
         }
 #endif // HAS_RNTUPLE_SUPPORT
@@ -1204,6 +1211,7 @@ class QwRootFile {
           if (ntuple) ntuple->Close();
         }
       }
+      fNTupleWriters.clear();
 #endif // HAS_RNTUPLE_SUPPORT
 
       // Step 5: Close the file
@@ -1356,6 +1364,10 @@ class QwRootFile {
     std::map< const std::string, std::vector<QwRootNTuple*> > fNTupleByName;
     std::map< const void*      , std::vector<QwRootNTuple*> > fNTupleByAddr;
     std::map< const std::type_index , std::vector<QwRootNTuple*> > fNTupleByType;
+
+    /// RNTuples with custom models (see NewNTupleWriter), in creation order
+    std::vector<std::unique_ptr<ROOT::RNTupleWriter>> fNTupleWriters;
+    std::vector<std::string> fNTupleWriterNames;
 
     /// RNTuple support flag
     Bool_t fEnableRNTuples;

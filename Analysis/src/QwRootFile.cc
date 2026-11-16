@@ -181,6 +181,10 @@ QwRootFile::~QwRootFile()
   if (fRootFile) {
     TString rootfilename = fRootFile->GetName();
 
+#ifdef HAS_RNTUPLE_SUPPORT
+    // RNTuple writers must be finalized while their file is still open
+    fNTupleWriters.clear();
+#endif // HAS_RNTUPLE_SUPPORT
     fRootFile->Close();
     delete fRootFile;
     fRootFile = 0;
@@ -597,6 +601,36 @@ ROOT::RNTupleWriteOptions QwRootFile::GetRNTupleWriteOptions() const
   }
   return options;
 }
+
+/**
+ * Create an RNTuple with a custom model in this file.  The writer is owned by
+ * this file and finalized in Close() (or the destructor) before the file is
+ * closed.
+ */
+ROOT::RNTupleWriter* QwRootFile::NewNTupleWriter(
+    const std::string& name,
+    std::unique_ptr<ROOT::RNTupleModel> model)
+{
+  if (!fEnableRNTuples || !fRootFile || !model || IsNTupleDisabled(name)) return nullptr;
+  if (HasNTupleByName(name) ||
+      std::find(fNTupleWriterNames.begin(), fNTupleWriterNames.end(), name) != fNTupleWriterNames.end()) {
+    QwError << "Cannot create duplicate RNTuple: " << name << QwLog::endl;
+    return nullptr;
+  }
+  size_t nfields = 0;
+  for (auto it = model->GetDefaultEntry().begin(); it != model->GetDefaultEntry().end(); ++it) nfields++;
+  try {
+    fNTupleWriters.push_back(
+      ROOT::RNTupleWriter::Append(std::move(model), name, *fRootFile, GetRNTupleWriteOptions()));
+    fNTupleWriterNames.push_back(name);
+  } catch (const std::exception& e) {
+    QwError << "Failed to create RNTuple writer for '" << name << "': " << e.what() << QwLog::endl;
+    return nullptr;
+  }
+  QwMessage << "Created RNTuple '" << name << "' with " << nfields
+            << " fields in file " << fRootFile->GetName() << QwLog::endl;
+  return fNTupleWriters.back().get();
+}
 #endif // HAS_RNTUPLE_SUPPORT
 
 /**
@@ -634,6 +668,9 @@ Bool_t QwRootFile::HasAnyFilled(TDirectory* d) {
         return true;
       }
     }
+  }
+  for (auto& writer : fNTupleWriters) {
+    if (writer && writer->GetNEntries() > 0) return true;
   }
 #endif // HAS_RNTUPLE_SUPPORT
 

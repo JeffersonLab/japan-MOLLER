@@ -14,6 +14,7 @@ class QwRootFile;
 // ROOT headers
 #include <TVectorD.h>
 #include <TMatrixD.h>
+#include "QwCorrelatorNTuple.h"
 /**
  * \class QwCorrelatorNew
  * \ingroup QwAnalysis
@@ -61,6 +62,16 @@ class QwCorrelatorNew : public VQwDataHandler, public MQwDataHandlerCloneable<Qw
   /// \brief Fill the tree branches
   void FillTreeBranches(QwRootFile *treerootfile) override { };
 
+#ifdef HAS_RNTUPLE_SUPPORT
+  /// \brief Construct the RNTuple with the same content as the tree
+  void ConstructNTupleFields(
+      QwRootFile *treerootfile,
+      const std::string& treeprefix = "",
+      const std::string& branchprefix = "") override;
+  /// \brief The RNTuple is filled in CalcCorrelations, like the tree
+  void FillNTupleFields(QwRootFile *treerootfile) override { };
+#endif // HAS_RNTUPLE_SUPPORT
+
   /// \brief Construct the histograms in a folder with a prefix
   void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
   /// \brief Fill the histograms
@@ -93,6 +104,9 @@ class QwCorrelatorNew : public VQwDataHandler, public MQwDataHandlerCloneable<Qw
   void CloseAlphaFile();
 
   TTree* fTree;
+#ifdef HAS_RNTUPLE_SUPPORT
+  QwCorrelatorNTuple fNTuple;
+#endif // HAS_RNTUPLE_SUPPORT
 
   std::string fAliasOutputFileBase;
   std::string fAliasOutputFileSuff;
@@ -211,6 +225,9 @@ class QwCorrelatorNew : public VQwDataHandler, public MQwDataHandlerCloneable<Qw
 
   /// \brief Output stream operator
   friend std::ostream& operator<< (std::ostream& stream, const QwCorrelatorNew& h);
+
+  /// RNTuple output reads the regression results
+  friend class QwCorrelatorNTuple;
 };
 
 /// Output stream operator
