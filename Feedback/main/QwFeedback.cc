@@ -1,171 +1,199 @@
-
 /*------------------------------------------------------------------------*//*!
 
- \file QwFeedback.cc
+ \file QwParity.cc
 
- \brief main(...) function for the qwanalysis feedback executable to set IA and/or PITA slopes
+ \brief main(...) function for the qwparity executable
 
 *//*-------------------------------------------------------------------------*/
 
-// System headers
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <new>
-
-// Boost headers
-#include <boost/shared_ptr.hpp>
-
 // Qweak headers
 #include "QwLog.h"
-#include "QwRootFile.h"
 #include "QwOptionsParity.h"
 #include "QwEventBuffer.h"
 #include "QwHistogramHelper.h"
 #include "QwSubsystemArrayParity.h"
-#include "QwHelicityCorrelatedFeedback.h"
+#include "QwHelicityPattern.h"
 #include "QwEventRing.h"
 #include "QwEPICSEvent.h"
-//#include "QwEPICSControl.h"
-//#include "GreenMonster.h"
+#include "QwCombiner.h"
+#include "QwCombinerSubsystem.h"
+#include "QwCorrelator.h"
+#include "QwCorrelatorNew.h"
+#include "GrandCorrelator.h"
+#include "LRBCorrector.h"
+#include "QwExtractor.h"
+#include "QwDataHandlerArray.h"
 
 // Qweak subsystems
 // (for correct dependency generation)
 #include "QwHelicity.h"
 #include "QwFakeHelicity.h"
 #include "QwBeamLine.h"
-#include "QwVQWK_Channel.h"
+#include "QwBeamMod.h"
 
-
-
+// Valgrind headers
+#if __has_include(<valgrind/callgrind.h>)
+#include <valgrind/callgrind.h>
+#endif
 
 Int_t main(Int_t argc, Char_t* argv[])
 {
+  ///  Define the command line options
+  DefineOptionsParity(gQwOptions);
+
+  ///  Define additional command line arguments and the configuration filename,
+  ///  and we define the options that can be used in them (using QwOptions).
+  gQwOptions.AddOptions()("callgrind-instr-start-event-loop", po::value<bool>()->default_bool_value(false), "Start callgrind instrumentation with main event loop (with --instr-atstart=no)");
+  gQwOptions.AddOptions()("callgrind-instr-stop-event-loop", po::value<bool>()->default_bool_value(false), "Stop callgrind instrumentation with main event loop (with --instr-atstart=no)");
+
+  ///  Without anything, print usage
+  if (argc == 1) {
+    gQwOptions.Usage();
+    exit(0);
+  }
+
   ///  First, fill the search paths for the parameter files; this sets a
   ///  static variable within the QwParameterFile class which will be used by
   ///  all instances.
   ///  The "scratch" directory should be first.
-  //QwParameterFile::AppendToSearchPath(getenv_safe_string("QW_PRMINPUT"));
-  QwParameterFile::AppendToSearchPath(getenv_safe_string("QWANALYSIS") + "/Extensions/QwFeedback/prminput");
-  //QwParameterFile::AppendToSearchPath(getenv_safe_string("QWANALYSIS") + "/Parity/prminput");
-  //QwParameterFile::AppendToSearchPath(getenv_safe_string("QWANALYSIS") + "/Analysis/prminput");
+  QwParameterFile::AppendToSearchPath(getenv_safe_string("QW_PRMINPUT"));
+  QwParameterFile::AppendToSearchPath(getenv_safe_string("QWANALYSIS") + "/Feedback/prminput");
+  QwParameterFile::AppendToSearchPath(getenv_safe_string("QWANALYSIS") + "/Parity/prminput");
+  QwParameterFile::AppendToSearchPath(getenv_safe_string("QWANALYSIS") + "/Analysis/prminput");
 
-
-  // Then set the command line arguments and the configuration filename,
-  // and we define the options that can be used in them (using QwOptions).
   gQwOptions.SetCommandLine(argc, argv);
-  gQwOptions.AddConfigFile("qwfeedback.conf");
-  //gQwOptions.ListConfigFiles();
-  //gQwOptions.AddConfigFile("qweak_mysql.conf");
-    // Define the command line options
-  DefineOptionsParity(gQwOptions);
-  QwHelicityCorrelatedFeedback::DefineOptions(gQwOptions);
-  //Load command line options for the histogram/tree helper class
-  gQwHists.ProcessOptions(gQwOptions);
-   /// Setup screen and file logging
-  gQwLog.ProcessOptions(&gQwOptions);
+  gQwOptions.AddConfigFile("qweak_mysql.conf");
 
-  ///  Load the histogram parameter definitions (from parity_hists.txt) into the global
-  ///  histogram helper: QwHistogramHelper
-  //gQwHists.LoadHistParamsFromFile("qweak_parity_hists.in");
-  //gQwHists.LoadTreeParamsFromFile("Qweak_Tree_Trim_List.in");
+  gQwOptions.ListConfigFiles();
+
+  /// Load command line options for the histogram/tree helper class
+  gQwHists.ProcessOptions(gQwOptions);
+  /// Setup screen and file logging
+  gQwLogger::Instance().ProcessOptions(&gQwOptions);
 
 
   ///  Create the event buffer
   QwEventBuffer eventbuffer;
   eventbuffer.ProcessOptions(gQwOptions);
 
-
-
-  ///  Create the database connection
-  //  QwDatabase database(gQwOptions);
-
-
   ///  Start loop over all runs
-  //  QwRootFile* rootfile = 0;
+  Int_t run_number = 0;
+  while (eventbuffer.OpenNextStream() == CODA_OK) {
 
+    ///  Begin processing for the first run
 
-  /*
-  ///  Create an EPICS control event
-  QwEPICSControl fEPICSCtrl;
-  GreenMonster   fScanCtrl;
-  //  Let's clear the values for the scan data & set "not clean".
-  fScanCtrl.Open();
-  fScanCtrl.SCNSetStatus(SCN_INT_NOT);
-  fScanCtrl.SCNSetValue(1,0);
-  fScanCtrl.SCNSetValue(2,0);
-  fScanCtrl.CheckScan();
-  fScanCtrl.PrintScanInfo();
-  fScanCtrl.Close();
-
-  fEPICSCtrl.Print_Qasym_Ctrls();
-  */
-
-  // Loop over all runs
-  while (eventbuffer.OpenNextStream() == CODA_OK){
-    //  Begin processing for the first run.
+    run_number = eventbuffer.GetRunNumber();
+    TString run_label = eventbuffer.GetRunLabel();
 
     ///  Set the current event number for parameter file lookup
-    QwParameterFile::SetCurrentRunNumber(eventbuffer.GetRunNumber());
-
+    QwParameterFile::SetCurrentRunNumber(run_number);
+    //  Parse the options again, in case there are run-ranged config files
+    gQwOptions.Parse(kTRUE);
+    eventbuffer.ProcessOptions(gQwOptions);
 
     ///  Create an EPICS event
     QwEPICSEvent epicsevent;
+    epicsevent.ProcessOptions(gQwOptions);
     epicsevent.LoadChannelMap("EpicsTable.map");
+
 
     ///  Load the detectors from file
     QwSubsystemArrayParity detectors(gQwOptions);
     detectors.ProcessOptions(gQwOptions);
+    detectors.ListPublishedValues();
 
-    ///  Create the helicity pattern
-    QwHelicityCorrelatedFeedback helicitypattern(detectors);
+    /// Create event-based correction subsystem
+    //    TString name = "EvtCorrector";
+    //    QwCombinerSubsystem corrector_sub(gQwOptions, detectors, name);
+    //    detectors.push_back(corrector_sub.GetSharedPointerToStaticObject());
+
+    /// Create the helicity pattern
+    //    Instead of having run_label in the constructor of helicitypattern, it might
+    //    make since to have it be an option for use globally
+    QwHelicityPattern helicitypattern(detectors,run_label);
     helicitypattern.ProcessOptions(gQwOptions);
-    helicitypattern.LoadParameterFile("qweak_fb_prm.in");
-    /*
-      helicitypattern.UpdateGMClean(0);
-      helicitypattern.FeedIASetPoint(0);
-      helicitypattern.UpdateGMClean(1);
-    */
 
-    ///  Create the event ring with the subsysten array
+    ///  Create the event ring with the subsystem array
     QwEventRing eventring(gQwOptions,detectors);
+    //  Make a copy of the detectors object to hold the
+    //  events which pass through the ring.
+    QwSubsystemArrayParity ringoutput(detectors);
+
+    /// Create the data handler arrays
+    QwDataHandlerArray datahandlerarray_mul(gQwOptions,helicitypattern,run_label);
 
     ///  Create the running sum
-    QwSubsystemArrayParity runningsum(detectors);
-
-
-    Int_t failed_events_counts = 0; // count failed total events
-
+    QwSubsystemArrayParity eventsum(detectors);
+    QwHelicityPattern patternsum(helicitypattern);
+    patternsum.DisablePairs();
 
     //  Clear the single-event running sum at the beginning of the runlet
-    runningsum.ClearEventData();
-    helicitypattern.ClearRunningSum();
+    eventsum.ClearEventData();
+    patternsum.ClearEventData();
     //  Clear the running sum of the burst values at the beginning of the runlet
-    helicitypattern.ClearBurstSum();
+    helicitypattern.ClearEventData();
 
 
 
+    //  Load the blinder seed from a random number generator for online mode
+    if (eventbuffer.IsOnline() ){
+      helicitypattern.UpdateBlinder();//this routine will call update blinder mechanism using a random number
+    }
 
-    // Loop over events in this CODA file
+
+    //  Find the first EPICS event and try to initialize
+    //  the blinder, but only for disk files, not online.
+    if (! eventbuffer.IsOnline() ){
+      QwMessage << "Finding first EPICS event" << QwLog::endl;
+      while (eventbuffer.GetNextEvent() == CODA_OK) {
+	if (eventbuffer.IsEPICSEvent()) {
+	  eventbuffer.FillEPICSData(epicsevent);
+	  if (epicsevent.HasDataLoaded()) {
+	    helicitypattern.UpdateBlinder(epicsevent);
+	    // and break out of this event loop
+	    break;
+	  }
+	}
+      }
+      epicsevent.ResetCounters();
+      //  Rewind stream
+      QwMessage << "Rewinding stream" << QwLog::endl;
+      eventbuffer.ReOpenStream();
+    }
+
+    // Start event loop instrumentation
+#ifdef CALLGRIND_START_INSTRUMENTATION
+    if (gQwOptions.GetValue<bool>("callgrind-instr-start-event-loop")) {
+      QwMessage << "Starting callgrind instrumentation" << QwLog::endl;
+      CALLGRIND_START_INSTRUMENTATION;
+    }
+#endif
+
+    ///  Start loop over events
     while (eventbuffer.GetNextEvent() == CODA_OK) {
 
-      if (eventbuffer.GetEventNumber()%1000)
-	std::cout<<std::flush;
-
       //  First, do processing of non-physics events...
-      if (eventbuffer.IsROCConfigurationEvent()){
-	//  Send ROC configuration event data to the subsystem objects.
-	eventbuffer.FillSubsystemConfigurationData(detectors);
+      if (eventbuffer.IsROCConfigurationEvent()) {
+        //  Send ROC configuration event data to the subsystem objects.
+        eventbuffer.FillSubsystemConfigurationData(detectors);
       }
 
-      //  Dump out of the loop when we see the end event.
-      if (eventbuffer.GetEndEventCount()>0){
-	QwMessage << "Number of events processed at end of run: " << eventbuffer.GetEventNumber() << std::endl;
-	break;
+      //  Secondly, process EPICS events, but not for online running,
+      //  because the EPICS events get messed up by our 32-bit to 64-bit
+      //  double ET system.
+      if (! eventbuffer.IsOnline() && eventbuffer.IsEPICSEvent()) {
+        eventbuffer.FillEPICSData(epicsevent);
+	if (epicsevent.HasDataLoaded()){
+	  epicsevent.CalculateRunningValues();
+	  helicitypattern.UpdateBlinder(epicsevent);
+
+
+	}
       }
+
 
       //  Now, if this is not a physics event, go back and get a new event.
-      if (!eventbuffer.IsPhysicsEvent()) continue;
+      if (! eventbuffer.IsPhysicsEvent()) continue;
 
 
       //  Fill the subsystem objects with their respective data for this event.
@@ -174,89 +202,107 @@ Int_t main(Int_t argc, Char_t* argv[])
       //  Process the subsystem data
       detectors.ProcessEvent();
 
-       // The event pass the event cut constraints
+
+      // The event pass the event cut constraints
       if (detectors.ApplySingleEventCuts()) {
-
-        // Accumulate the running sum to calculate the event based running average
-        runningsum.AccumulateRunningSum(detectors);
-
-//         // Fill the histograms
-//         rootfile->FillHistograms(detectors);
-
-//         // Fill the tree branches
-//         rootfile->FillTreeBranches(detectors);
-//         rootfile->FillTree("Mps_Tree");
 
         // Add event to the ring
         eventring.push(detectors);
 
         // Check to see ring is ready
         if (eventring.IsReady()) {
+	  ringoutput = eventring.pop();
+	  ringoutput.IncrementErrorCounters();
+
+
+	  // Accumulate the running sum to calculate the event based running average
+	  eventsum.AccumulateRunningSum(ringoutput);
 
           // Load the event into the helicity pattern
-          helicitypattern.LoadEventData(eventring.pop());
+          helicitypattern.LoadEventData(ringoutput);
 
-          // Calculate helicity pattern asymmetry
-          if (helicitypattern.IsCompletePattern()) {
+	  if (helicitypattern.PairAsymmetryIsGood()) {
+            patternsum.AccumulatePairRunningSum(helicitypattern);
 
-            // Update the blinder if conditions have changed
-            helicitypattern.UpdateBlinder(detectors);
+	    // Clear the data
+	    helicitypattern.ClearPairData();
+	  }
 
-            // Calculate the asymmetry
-            helicitypattern.CalculateAsymmetry();
-            if (helicitypattern.IsGoodAsymmetry()) {
-	      helicitypattern.ApplyFeedbackCorrections();//apply IA feedback
+          // Check to see if we can calculate helicity pattern asymmetry, do so, and report if it worked
+          if (helicitypattern.IsGoodAsymmetry()) {
+              patternsum.AccumulateRunningSum(helicitypattern);
+
+
+              // Process data handlers
+              datahandlerarray_mul.ProcessDataHandlerEntry();
+
               // Clear the data
               helicitypattern.ClearEventData();
-            }
 
-          } // helicitypattern.IsCompletePattern()
+	  } // helicitypattern.IsGoodAsymmetry()
 
         } // eventring.IsReady()
 
+      } // detectors.ApplySingleEventCuts()
 
-      // Failed single event cuts
-      } else {
-	failed_events_counts++;
-      }
+    } // end of loop over events
 
+    // Unwind event ring
+    QwMessage << "Unwinding event ring" << QwLog::endl;
+    eventring.Unwind();
 
+    // Stop event loop instrumentation
+#ifdef CALLGRIND_START_INSTRUMENTATION
+    if (gQwOptions.GetValue<bool>("callgrind-instr-stop-event-loop")) {
+      CALLGRIND_STOP_INSTRUMENTATION;
+      QwMessage << "Stapped callgrind instrumentation" << QwLog::endl;
+    }
+#endif
 
+    //  TODO Drain event run
 
-    }   // end of loop over events
+    //  Perform actions at the end of the event loop on the
+    //  detectors object, which ought to have handles for the
+    //  MPS based histograms.
+    ringoutput.AtEndOfEventLoop();
 
     QwMessage << "Number of events processed at end of run: "
-              << eventbuffer.GetEventNumber() << std::endl;
+              << eventbuffer.GetPhysicsEventNumber() << QwLog::endl;
 
+    // Finish data handlers
+    datahandlerarray_mul.FinishDataHandler();
 
+    // Calculate running averages
+    eventsum.CalculateRunningAverage();
+    patternsum.CalculateRunningAverage();
+
+    // This will calculate running averages over single helicity events
+    if (gQwOptions.GetValue<bool>("print-runningsum")) {
+      QwMessage << " Running average of events" << QwLog::endl;
+      QwMessage << " =========================" << QwLog::endl;
+      eventsum.PrintValue();
+    }
+
+    if (gQwOptions.GetValue<bool>("print-patternsum")) {
+      QwMessage << " Running average of patterns" << QwLog::endl;
+      QwMessage << " =========================" << QwLog::endl;
+      patternsum.PrintValue();
+    }
+
+    //  Print the event cut error summary for each subsystem
+    if (gQwOptions.GetValue<bool>("print-errorcounters")) {
+      QwMessage << " ------------ error counters ------------------ " << QwLog::endl;
+      ringoutput.PrintErrorCounters();
+    }
 
     //  Close event buffer stream
     eventbuffer.CloseStream();
 
 
-
-    //  Print the event cut error summery for each subsystem
-    //    detectors.GetEventcutErrorCounters();
-
-
-    //  Read from the datebase
-    //    database.SetupOneRun(eventbuffer);
-
-    // Each sussystem has its own Connect() and Disconnect() functions.
-    //    if (database.AllowsWriteAccess()) {
-    //      helicitypattern.FillDB(&database);
-    //      epicsevent.FillDB(&database);
-    //    }
-
-
-    QwMessage << "Total events failed " << failed_events_counts << QwLog::endl;
-
     //  Report run summary
     eventbuffer.ReportRunSummary();
     eventbuffer.PrintRunTimes();
-
-  } //end of run loop
-
+  } // end of loop over runs
 
   QwMessage << "I have done everything I can do..." << QwLog::endl;
 

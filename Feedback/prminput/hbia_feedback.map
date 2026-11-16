@@ -1,0 +1,6 @@
+type=target name=q_targB      descr=ASYM
+type=ioc    name=C1068_QDAC07 descr=PC_HV1 lower=-1.0 upper=36000
+type=ioc    name=C1068_QDAC08 descr=PC_HV2 lower=-1.0 upper=36000
+type=ioc    name=C1068_QDAC09 descr=PC_HV3 lower=-1.0 upper=36000
+type=ioc    name=C1068_QDAC10 descr=PC_HV4 lower=-1.0 upper=36000
+
