@@ -1150,7 +1150,7 @@ void QwBeamLine::RandomizeEventData(int helicity, double time)
   const Bool_t bmodCountFullLastPeriod = kFALSE;
   const Int_t  bmodLastCountedEvent = bmodCountFullLastPeriod
                       ? bmodWinPerCoil - 1                               // 399
-                      : (bmodPeriodsPerCoil - 1) * bmodWinPerPeriod;      // 392
+                      : (bmodPeriodsPerCoil) * bmodWinPerPeriod - 1;      // 392
  
   const Int_t  bmodRampChannel = bmodNCoils + 1;   // BMW_COIL2: FG channel of the ramp (placeholder: 8)
   
