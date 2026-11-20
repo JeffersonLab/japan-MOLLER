@@ -10,6 +10,7 @@
 #include "QwDatabase.h"
 
 // System headers
+#include <string>
 
 // Third-party headers
 #ifdef __USE_SQLPP11__
@@ -23,6 +24,8 @@
 
 // Qweak headers
 #include "QwParitySchema.h"
+
+using std::string;
 
 // QwScopedConnection implementation
 QwScopedConnection::QwScopedConnection(QwDatabase* db)
