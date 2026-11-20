@@ -10,6 +10,7 @@
 #include "QwScaler_Channel.h"
 #include "QwHistogramHelper.h"
 #include "QwRootFile.h"
+#include "QwRootNTupleFields.h"
 
 #include <stdexcept>
 #include <QwLog.h>
@@ -353,38 +354,19 @@ void QwScaler_Channel<data_mask,data_shift>::ConstructNTupleAndVector(std::uniqu
     TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
     fTreeArrayIndex  = values.size();
 
-    // Calculate how many elements we need to avoid multiple push_back calls
-    size_t numElements = 2; // value + Device_Error_Code
-    if (fDataToSave == kMoments) numElements += 3; // _m2 + _err + num_samples
-    if (fDataToSave == kRaw) {
-      numElements += 1; // raw
-      if ((~data_mask) != 0) numElements += 1; // header
-    }
-
-    // Resize vectors once to avoid reallocation
-    size_t oldSize = values.size();
-    values.resize(oldSize + numElements, 0.0);
-    fieldPtrs.reserve(fieldPtrs.size() + numElements);
-
-    // Main value
-    fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
-
+    // Same order as FillNTupleVector; the main value is named basename
+    std::vector<std::string> suffixes = {""};
     if (fDataToSave == kMoments) {
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_m2").Data()));
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_err").Data()));
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_num_samples").Data()));
+      suffixes.push_back("_m2");
+      suffixes.push_back("_err");
+      suffixes.push_back("_num_samples");
     }
-
-    // Device error code
-    fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_Device_Error_Code").Data()));
-
-    if(fDataToSave==kRaw){
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_raw").Data()));
-
-      if ((~data_mask) != 0){
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_header").Data()));
-      }
+    suffixes.push_back("_Device_Error_Code");
+    if (fDataToSave == kRaw) {
+      suffixes.push_back("_raw");
+      if ((~data_mask) != 0) suffixes.push_back("_header");
     }
+    QwRootNTupleFields::AddChannel(model, basename, suffixes, values, fieldPtrs);
 
     fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
   }

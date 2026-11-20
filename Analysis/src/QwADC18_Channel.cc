@@ -17,6 +17,7 @@
 #include "QwBlinder.h"
 #include "QwHistogramHelper.h"
 #include "QwRootFile.h"
+#include "QwRootNTupleFields.h"
 #ifdef __USE_DATABASE__
 #include "QwDBInterface.h"
 #endif
@@ -658,33 +659,20 @@ void  QwADC18_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleMod
     TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
     fTreeArrayIndex  = values.size();
 
-    // Calculate how many elements we need to avoid multiple push_back calls
-    size_t numElements = 2; // value + Device_Error_Code
-    if (fDataToSave == kMoments) numElements += 2; // _m2 + _err
-    if (fDataToSave == kRaw) numElements += 4; // _raw + _diff + _peak + _base
-
-    // Resize vectors once to avoid reallocation
-    size_t oldSize = values.size();
-    values.resize(oldSize + numElements, 0.0);
-    fieldPtrs.reserve(fieldPtrs.size() + numElements);
-
-    // Main value
-    fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
-
+    // Same order as FillNTupleVector; the main value is named basename
+    std::vector<std::string> suffixes = {""};
     if (fDataToSave == kMoments) {
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_m2").Data()));
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_err").Data()));
+      suffixes.push_back("_m2");
+      suffixes.push_back("_err");
     }
-
-    // Device error code
-    fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_Device_Error_Code").Data()));
-
-    if (fDataToSave == kRaw){
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_raw").Data()));
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_diff").Data()));
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_peak").Data()));
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_base").Data()));
+    suffixes.push_back("_Device_Error_Code");
+    if (fDataToSave == kRaw) {
+      suffixes.push_back("_raw");
+      suffixes.push_back("_diff");
+      suffixes.push_back("_peak");
+      suffixes.push_back("_base");
     }
+    QwRootNTupleFields::AddChannel(model, basename, suffixes, values, fieldPtrs);
 
     fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
   }
