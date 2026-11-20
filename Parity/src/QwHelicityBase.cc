@@ -1394,11 +1394,9 @@ Bool_t QwHelicityBase::CollectRandBits30()
       events with the minimum pattern phase.*/
 
   if (n_ranbits < ranbit_goal && fPatternPhaseNumber == fMinPatternPhase) {
-    QwMessage << "Collecting information (";
-    if (fHelicityReported == 1) QwMessage << "+";
-    else                        QwMessage << "-";
-    QwMessage << ") from event #" << fEventNumber << " to generate helicity seed ";
-    QwMessage << "(need " << ranbit_goal << " bit, so far got " << n_ranbits << " bits )" << QwLog::endl;
+    QwMessage << "Collecting information (" << ( (fHelicityReported == 1) ? '+' : '-' )
+              << ") from event #" << fEventNumber << " to generate helicity seed "
+              << "(need " << ranbit_goal << " bit, so far got " << n_ranbits << " bits )" << QwLog::endl;
   }
 
   /** If the events are continuous, start to make the ranseed for the helicity

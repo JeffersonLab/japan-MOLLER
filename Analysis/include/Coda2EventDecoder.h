@@ -67,9 +67,8 @@ public:
 	 */
 	Int_t DecodeEventIDBank(UInt_t *buffer) override;
 	/** Print internal decoder state for diagnostics.
-	 *  @param out Logging stream.
 	 */
-	void PrintDecoderInfo(QwLog& out) override;
+	void PrintDecoderInfo() override;
 
 private:
 	// Event Information (CODA 2 Specific)

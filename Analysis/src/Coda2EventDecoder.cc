@@ -168,10 +168,10 @@ Int_t Coda2EventDecoder::DecodeEventIDBank(UInt_t *buffer)
 }
 
 // Print internal decoder information. See header for details.
-void Coda2EventDecoder::PrintDecoderInfo(QwLog& out)
+void Coda2EventDecoder::PrintDecoderInfo()
 {
 
-	out << Form("Length: %d; Tag: 0x%x; Bank data type: 0x%x; Bank ID num: 0x%x; ",
+	QwDebug << Form("Length: %d; Tag: 0x%x; Bank data type: 0x%x; Bank ID num: 0x%x; ",
 			fEvtLength, fEvtTag, fBankDataType, fIDBankNum)
 		<< Form("Evt type: 0x%x; Evt number %d; Evt Class 0x%.8x; ",
 				fEvtType, fEvtNumber, fEvtClass)

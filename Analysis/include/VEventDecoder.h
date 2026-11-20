@@ -106,9 +106,8 @@ public:
 	virtual Bool_t DecodeSubbankHeader(UInt_t *buffer);
 	/**
 	 * \brief Print internal decoder state for diagnostics.
-	 * @param out Logging stream to receive the formatted state (QwMessage/QwWarning/etc.).
 	 */
-	virtual void PrintDecoderInfo(QwLog& out);
+	virtual void PrintDecoderInfo();
 
 public:
 	// Boolean Functions

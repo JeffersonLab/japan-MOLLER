@@ -95,7 +95,7 @@ Int_t main(Int_t argc, Char_t* argv[])
   /// Load command line options for the histogram/tree helper class
   gQwHists.ProcessOptions(gQwOptions);
   /// Setup screen and file logging
-  gQwLog.ProcessOptions(&gQwOptions);
+  gQwLogger::Instance().ProcessOptions(&gQwOptions);
 
 
   ///  Create the event buffer

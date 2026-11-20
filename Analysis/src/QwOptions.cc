@@ -67,7 +67,7 @@ QwOptions::QwOptions()
 void QwOptions::DefineOptions(QwOptions& options)
 {
   // Define logging options (Note: only QwLog takes a pointer argument!!!)
-  QwLog::DefineOptions(&options);
+  gQwLogger::Instance().DefineOptions(&options);
 
   // Define execution options
   QwEventBuffer::DefineOptions(options);

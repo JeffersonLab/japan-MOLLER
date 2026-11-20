@@ -514,14 +514,13 @@ Int_t QwEventBuffer::GetNextEvent()
   //  Progress meter (this should probably produce less output in production)
   int nevents = 10000;
   if (IsPhysicsEvent() && decoder->GetEvtNumber() > 0 && decoder->GetEvtNumber() % nevents == 0) {
-    QwMessage << "Processing event " << decoder->GetEvtNumber() << " ";
     fStopwatch.Stop();
     double efficiency = 100.0 * fStopwatch.CpuTime() / fStopwatch.RealTime();
-    QwMessage << "(" << fStopwatch.CpuTime()*1e3/nevents << " ms per event with ";
-    QwMessage << efficiency << "% efficiency)";
+    QwMessage << "Processing event " << decoder->GetEvtNumber() << " "
+              << "(" << fStopwatch.CpuTime()*1e3/nevents << " ms per event with "
+              << efficiency << "% efficiency)" << QwLog::endl;
     fStopwatch.Reset();
     fStopwatch.Start();
-    QwMessage << QwLog::endl;
   } else if (decoder->GetEvtNumber() > 0 && decoder->GetEvtNumber() % 100 == 0) {
     QwVerbose << "Processing event " << decoder->GetEvtNumber() << QwLog::endl;
   }
@@ -808,7 +807,7 @@ Bool_t QwEventBuffer::FillSubsystemConfigurationData(QwSubsystemArray &subsystem
             << "Found configuration event for ROC"
             << rocnum
             << QwLog::endl;
-        decoder->PrintDecoderInfo(QwMessage);
+        decoder->PrintDecoderInfo();
   //  Loop through the data buffer in this event.
   UInt_t *localbuff = (UInt_t*)(fEvStream->getEvBuffer());
         decoder->DecodeEventIDBank(localbuff);

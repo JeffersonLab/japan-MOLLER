@@ -24,6 +24,7 @@ using std::string;
 
 // Qweak headers
 #include "QwOptions.h"
+#include "QwTypes.h"
 
 // Forward declarations
 class QwParityDB;

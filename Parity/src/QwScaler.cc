@@ -103,9 +103,9 @@ Int_t QwScaler::LoadChannelMap(TString mapfile)
       UInt_t value = QwParameterFile::GetUInt(varvalue);
       if (varname == "norm") {
         // Normalization line of format: norm = [ 1 | channel / factor ]
-        string dummy = mapstr.GetNextToken("=");
-        string channame = mapstr.GetNextToken("/");
-        string channorm = mapstr.GetNextToken("/");
+		std::string dummy = mapstr.GetNextToken("=");
+        std::string channame = mapstr.GetNextToken("/");
+        std::string channorm = mapstr.GetNextToken("/");
         if (fName_Map.count(channame) == 0) {
           // assign a temporarily pointer
           fName_Map[channame] = -1;

@@ -74,7 +74,7 @@ private:
 	/** Print non-PHYS, non-control "user" events. */
 	void printUserEvent(const UInt_t *buffer);
 	/** Print internal decoder state for diagnostics. */
-        void PrintDecoderInfo(QwLog& out) override;
+        void PrintDecoderInfo() override;
 protected:
 	// TI Decoding Functions
 	/** Determine event type and set control/physics flags based on bank tag. */

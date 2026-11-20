@@ -299,12 +299,12 @@ class QwDatabase {
 
   public:
 
-    QwDatabase(const string &major = "00", const string &minor = "00", const string &point = "0000"); //!< Simple constructor
-    QwDatabase(QwOptions &options, const string &major = "00", const string &minor = "00", const string &point = "0000"); //!< Constructor with QwOptions object
+    QwDatabase(const std::string &major = "00", const std::string &minor = "00", const std::string &point = "0000"); //!< Simple constructor
+    QwDatabase(QwOptions &options, const std::string &major = "00", const std::string &minor = "00", const std::string &point = "0000"); //!< Constructor with QwOptions object
 
     virtual ~QwDatabase(); //!< Destructor
 
-    void         SetAccessLevel(string accesslevel);  //!< Sets the access level flag based on string labels:  "off", "ro", "rw".
+    void         SetAccessLevel(std::string accesslevel);  //!< Sets the access level flag based on string labels:  "off", "ro", "rw".
 
     Bool_t       AllowsReadAccess(){return (fAccessLevel==kQwDatabaseReadOnly || fAccessLevel==kQwDatabaseReadWrite);};
     Bool_t       AllowsWriteAccess(){return (fAccessLevel==kQwDatabaseReadWrite);};
@@ -335,7 +335,7 @@ class QwDatabase {
     QwScopedConnection GetScopedConnection() {
       return QwScopedConnection(this);
     }
-    const string GetServerVersion() {
+    const std::string GetServerVersion() {
       // FIXME (wdconinc) implement server_version();
       return "";
     }; //<! Get database server version
@@ -407,11 +407,11 @@ class QwDatabase {
       });
     } //<! Execute an INSERT statement and return the auto-increment ID.
 
-    const string GetVersion();                             //! Return a full version string for the DB schema
-    const string GetVersionMajor() {return fVersionMajor;} //<! fVersionMajor getter
-    const string GetVersionMinor() {return fVersionMinor;} //<! fVersionMinor getter
-    const string GetVersionPoint() {return fVersionPoint;} //<! fVersionPoint getter
-    const string GetValidVersion();                        //<! Return a full required version string.
+    const std::string GetVersion();                             //! Return a full version std::string for the DB schema
+    const std::string GetVersionMajor() {return fVersionMajor;} //<! fVersionMajor getter
+    const std::string GetVersionMinor() {return fVersionMinor;} //<! fVersionMinor getter
+    const std::string GetVersionPoint() {return fVersionPoint;} //<! fVersionPoint getter
+    const std::string GetValidVersion();                        //<! Return a full required version string.
 
     void         PrintServerInfo();                        //<! Print Server Information
 
@@ -430,20 +430,20 @@ class QwDatabase {
 
     EQwDBAccessLevel fAccessLevel;  //!< Access level of the database instance
 
-    string fDatabase;        //!< Name of database to connect to
-    string fDBServer;        //!< Name of server carrying DB to connect to
-    string fDBUsername;      //!< Name of account to connect to DB server with
-    string fDBPassword;      //!< DB account password
+    std::string fDatabase;        //!< Name of database to connect to
+    std::string fDBServer;        //!< Name of server carrying DB to connect to
+    std::string fDBUsername;      //!< Name of account to connect to DB server with
+    std::string fDBPassword;      //!< DB account password
     UInt_t fDBPortNumber;    //!< Port number to connect to on server (mysql default port is 3306)
     Bool_t fValidConnection; //!< True if a valid connection was established using defined connection information
     Bool_t fDBDebug;         //!< True if database debug information should be printed to stdout
 
-    string fVersionMajor;    //!< Major version number of current DB schema
-    string fVersionMinor;    //!< Minor version number of current DB schema
-    string fVersionPoint;    //!< Point version number of current DB schema
-    const string kValidVersionMajor;
-    const string kValidVersionMinor;
-    const string kValidVersionPoint;
+    std::string fVersionMajor;    //!< Major version number of current DB schema
+    std::string fVersionMinor;    //!< Minor version number of current DB schema
+    std::string fVersionPoint;    //!< Point version number of current DB schema
+    const std::string kValidVersionMajor;
+    const std::string kValidVersionMinor;
+    const std::string kValidVersionPoint;
 
   protected:
     Bool_t fDBInsertMissingKeys; //!< True if missing keys should be inserted into the database automatically
