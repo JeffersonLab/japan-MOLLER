@@ -10,7 +10,10 @@
 
 // ROOT headers
 #include <TTree.h>
+
+#ifdef HAS_RNTUPLE_SUPPORT
 #include <ROOT/RNTupleModel.hxx>
+#endif
 
 #include "QwParameterFile.h"
 #include "VQwDataElement.h"

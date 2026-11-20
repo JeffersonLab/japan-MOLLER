@@ -13,7 +13,9 @@
 
 // ROOT headers
 #include <TTree.h>
+#ifdef HAS_RNTUPLE_SUPPORT
 #include <ROOT/RNTupleModel.hxx>
+#endif
 
 // Qweak headers
 #include "QwVQWK_Channel.h"
