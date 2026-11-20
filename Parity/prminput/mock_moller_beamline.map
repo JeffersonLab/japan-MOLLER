@@ -108,6 +108,17 @@ sample_size=15000
   MollerADC, 7, 7,  bcm,  BCM1H15
 
 
+!Trim cards & ramp
+  MollerADC, 8, 0, bcm, bmod_trim1
+  MollerADC, 8, 1, bcm, bmod_trim2
+  MollerADC, 8, 2, bcm, bmod_trim3
+  MollerADC, 8, 3, bcm, bmod_trim4
+  MollerADC, 8, 4, bcm, bmod_trim5
+  MollerADC, 8, 5, bcm, bmod_trim6
+  MollerADC, 8, 6, bcm, bmod_trim7
+  MollerADC, 8, 7, bcm, bmod_ramp
+
+
 begin=combinedbpm
 name=bpm_target
 bpm1h04, bpmstripline, 1.0, 1.0, 1.0
@@ -129,17 +140,20 @@ bcm1h13, bcm, 1.0
 bcm1h15, bcm, 1.0
 end=combinedbcm
 
+
 begin=energycalculator
 name=target_energy
 !name          type            ratios     property
  !BPM1C10,      bpmstripline,   0.00008,   beamposition
- BPM1C11,      bpmstripline,   0.00012,   beamposition
- BPM1C12,      bpmstripline,   0.00024,   beamposition
- BPM1C16,      bpmstripline,   0.00004,   beamposition
- BPM1C20,      bpmstripline,   0.00002,   beamposition
- bpm_target,   combinedbpm,   -0.00017,   targetbeamposition
- bpm_target,   combinedbpm,    0.0026,    targetbeamangle      ! was 2.6 (rad); /1000 for mrad slope (z in meters)
+ !BPM1C11,      bpmstripline,   0.00012,   beamposition
+ BPM1C12,      bpmstripline,   2.485412290402330e-04,   beamposition       ! 1/R16, R16 = 4023.477327530731 mm
+ !BPM1C16,      bpmstripline,   0.00004,   beamposition
+ !BPM1C20,      bpmstripline,   0.00002,   beamposition
+ bpm_target,   combinedbpm,   -3.617642460493571e-04,   targetbeamposition   ! -R11/R16, bpm1c12 
+ bpm_target,   combinedbpm,    6.250022431065755e-04,   targetbeamangle      ! -R12/R16, per mrad
+ 
 end=energycalculator
+
 
 
 [PUBLISH]

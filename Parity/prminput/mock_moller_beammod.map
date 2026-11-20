@@ -1,0 +1,21 @@
+! Mock beam modulation flag words.
+! (ROC 1, bank 0x41). Trims and ramp stay in mock_moller_beamline.map for now.
+! ROC/bank and the word ORDER are hard-coded in QwBeamLine::EncodeEventData
+! (bmwValue[0..12]); change both together.
+
+ROC=1
+Bank=0x41
+ 
+WORD, 0,  0,  bmod_trig
+WORD, 0,  0,  bmod_4mhz
+WORD, 0,  0,  bmwphase
+WORD, 0,  0,  bmwperiod
+WORD, 0,  0,  bmwobj
+WORD, 0,  0,  bmwfreq
+WORD, 0,  0,  bmwcycnum
+WORD, 0,  0,  bmwcoil1
+WORD, 0,  0,  bmwamp1
+WORD, 0,  0,  bmwcoil2
+WORD, 0,  0,  bmwamp2
+WORD, 0,  0,  bmw_max_period
+WORD, 0,  0,  bmw_ffb_pause

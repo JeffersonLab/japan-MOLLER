@@ -18,7 +18,7 @@
  param = mollinj_beamline_pedestal.map
  geom  = mollinj_beamline_geometry.map
  eventcut = mollinj_beamline_eventcuts.map
-
+ 
 [QwDetectorArray]
  name  = Thin Quartz Detector
  map   = mock_moller_thinqtz_adc.map
@@ -48,3 +48,9 @@
  map   = mock_moller_largeang_adc.map
  param = mock_moller_largeang_pedestal.map
  eventcut = mock_moller_largeang_eventcuts.map
+ 
+[QwBeamMod]
+ name = Beam Modulation
+ map  = mock_moller_beammod.map
+ eventcut = mock_moller_beammod_eventcuts.map
+

@@ -34,6 +34,98 @@
 #include "TF1.h"
 #include "TMath.h"
 
+//*****************************************************************
+void QwBPMTansferMatrix::SetElementName(TString bpmName){
+	this->fName = bpmName;
+}
+
+void QwBPMTansferMatrix::SetTMatrixElement(Int_t row, Int_t col, Double_t value){
+	if(row >= 0 && row < 2 && col >= 0 && col < 5){
+		this->fTMatrixElement[row][col] = value;
+		this->fFilled = kTRUE;
+	}
+}
+
+TString QwBPMTansferMatrix::GetElementName(){
+	return fName;
+}
+
+Double_t QwBPMTansferMatrix::GetTMatrixElement(Int_t row, Int_t col){
+	return fTMatrixElement[row][col];
+}
+
+void QwBPMTansferMatrix::LoadMockDataParameters(){
+	
+	TString mapfile = "mock_parameters_modulation.map";
+	
+  Bool_t   ldebug=kFALSE;
+  TString  devname, devtype, rownum;
+  Int_t    lineread=0;
+  
+
+  if(ldebug) std::cout << "QwBPMTansferMatrix::LoadMockDataParameters(" << mapfile << ") \n" << std::endl;
+
+  QwParameterFile mapstr(mapfile.Data());  //Open the file
+  //fDetectorMaps.insert(mapstr.GetParamFileNameContents());
+
+  while (mapstr.ReadNextLine()) {
+    lineread+=1;
+    //    std::cerr << "Line:  " << mapstr.GetLine() << std::endl;
+    //if(ldebug) std::cout << "Line read so far = " << lineread << "\n" << std::endl;
+    mapstr.TrimComment('!');
+    mapstr.TrimWhitespace();
+    
+    if(mapstr.LineIsEmpty()) continue;
+    
+    devtype = mapstr.GetTypedNextToken<TString>();
+    devtype.ToLower();
+    devtype.Remove(TString::kBoth,' ');
+    
+    if (devtype == "bmodcontrolpar") continue;
+    devname = mapstr.GetTypedNextToken<TString>();
+    devname.ToLower();
+    devname.Remove(TString::kBoth,' ');
+    
+    
+    if(devname != this->GetElementName()) continue;
+    	
+    	
+    if (devtype == "coilamp"){
+    		for(int i = 0; i < 3; i++)
+			this->SetTMatrixElement(0, i, mapstr.GetTypedNextToken<Double_t>());
+		}
+		else if (devtype == "bpmtransfermatrix"){
+			rownum = mapstr.GetTypedNextToken<TString>();
+			rownum.ToLower();
+			rownum.Remove(TString::kBoth,' ');
+ 
+			Int_t row = -1;
+			if (rownum == "x") row = 0;
+			else if (rownum == "y") row = 1;
+ 
+			if (row < 0){
+				QwWarning << "Unknown transfer matrix row '" << rownum
+				          << "' for " << devname << QwLog::endl;
+				continue;
+			}
+			for(int i = 0; i < 5; i++)
+				this->SetTMatrixElement(row, i,
+				                        mapstr.GetTypedNextToken<Double_t>());
+			continue;      // a BPM has TWO lines, keep reading for the other
+		}
+		else continue;
+ 
+		if (ldebug){
+			std::cout << "QwBPMTansferMatrix: " << devname << " (" << devtype << ")";
+			for(int r = 0; r < 2; r++) for(int i = 0; i < 5; i++) std::cout << "  " << GetTMatrixElement(r, i);
+			std::cout << std::endl;
+		}
+		return;
+    
+    
+    }
+  
+}
 
 //*****************************************************************
 void QwBeamMod::ProcessOptions(QwOptions &options){
@@ -385,6 +477,8 @@ Int_t QwBeamMod::ProcessEvBuffer(const ROCID_t roc_id, const BankID_t bank_id, U
   Bool_t lkDEBUG=kFALSE;
 
   Int_t index = GetSubbankIndex(roc_id,bank_id);
+  
+  //std::cout<< roc_id << " " << bank_id << " " << index << std::endl;
 
 
   if (index>=0 && num_words>0){
