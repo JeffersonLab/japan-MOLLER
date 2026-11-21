@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdint>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -650,17 +651,43 @@ class QwRootNTuple {
       // Create RNTuple model
       fModel = ROOT::RNTupleModel::Create();
 
-      // Construct fields and vector
-      ConstructFieldsAndVector(object);
+      // Construct fields and vector, with the units fields like the TTree
+      fVector.reserve(BRANCH_VECTOR_MAX_SIZE);
+      ConstructUnitsFields();
+      ConstructFieldsAndVector(object, prefix);
     }
 
     /// Destructor
     virtual ~QwRootNTuple() {
-      Close();
+      fWriter.reset();
+      fEntry.reset();
+    }
+
+    /// Set the file and write options; the writer is created at the first
+    /// Fill(), or at Close() for an RNTuple without entries
+    void SetOutput(TFile* file, const ROOT::RNTupleWriteOptions& options) {
+      fFile = file;
+      fOptions = options;
+    }
+
+    /// \brief Add the fields of another object to this RNTuple, like the
+    /// branches of several objects in one TTree (e.g. pair yields and
+    /// asymmetries in "pr").  Only possible before the first Fill().
+    template < class T >
+    bool AddObject(T& object, const std::string& prefix) {
+      if (fWriter || !fModel) {
+        QwError << "Cannot add fields to RNTuple " << fName
+                << " after it has been filled" << QwLog::endl;
+        return false;
+      }
+      ConstructFieldsAndVector(object, prefix);
+      return true;
     }
 
     /// Close and finalize the RNTuple writer
     void Close() {
+      // An RNTuple that was never filled is still written, without entries
+      if (!fWriter && fModel && fFile) InitializeWriter(fFile, fOptions);
       if (fWriter) {
         // Explicitly commit any remaining data and close the writer
         // This ensures all data is written to the file before destruction
@@ -691,19 +718,14 @@ class QwRootNTuple {
 
     /// Construct the fields and vector for generic objects
     template < class T >
-    void ConstructFieldsAndVector(T& object) {
-      // Reserve space for the field vector
-      fVector.reserve(BRANCH_VECTOR_MAX_SIZE);
-
-      // Constant units fields, as in the TTree "units" branch
-      ConstructUnitsFields();
-
+    void ConstructFieldsAndVector(T& object, const std::string& objectPrefix) {
       // Associate fields with vector - now using shared field pointers
-      TString prefix = Form("%s", fPrefix.c_str());
+      TString prefix = Form("%s", objectPrefix.c_str());
       object.ConstructNTupleAndVector(fModel, prefix, fVector, fFieldPtrs);
 
       // Store the type of object
-      fType = typeid(object).name();
+      if (fTypes.empty()) fType = typeid(object).name();
+      fTypes.insert(typeid(object).name());
 
       // Check memory reservation
       if (fVector.size() > BRANCH_VECTOR_MAX_SIZE) {
@@ -788,26 +810,12 @@ class QwRootNTuple {
       }
     }
 
-    /// Fill the fields for generic objects
+    /// Fill the field vector for generic objects; Fill() writes the entry
     template < class T >
     void FillNTupleFields(const T& object) {
-      if (typeid(object).name() == fType) {
-        // Fill the field vector
+      if (fTypes.count(typeid(object).name()) > 0) {
+        // Each object fills its own slots of the field vector
         object.FillNTupleVector(fVector);
-
-        // The entry's fields are bound to the fVector slots
-        if (fWriter && fEntry) {
-          fWriter->Fill(*fEntry);
-
-          // Update event counter
-          fCurrentEvent++;
-          // RNTuple prescaling
-          if (fNumEventsCycle > 0) {
-            fCurrentEvent %= fNumEventsCycle;
-          }
-        } else {
-          QwError << "RNTuple writer not initialized for " << fName << QwLog::endl;
-        }
       } else {
         QwError << "Attempting to fill RNTuple vector for type " << fType << " with "
                 << "object of type " << typeid(object).name() << QwLog::endl;
@@ -815,10 +823,25 @@ class QwRootNTuple {
       }
     }
 
-    /// Fill the RNTuple (called by FillTree wrapper methods)
+    /// Write one entry with the values filled by FillNTupleFields, like
+    /// TTree::Fill after the branches of all objects have been filled
     void Fill() {
-      // This method is now called indirectly - the actual filling happens in FillNTupleFields
-      // Just here for compatibility with the tree interface
+      // All objects have added their fields by now: create the writer
+      if (!fWriter && fModel && fFile) InitializeWriter(fFile, fOptions);
+
+      // The entry's fields are bound to the fVector slots
+      if (fWriter && fEntry) {
+        fWriter->Fill(*fEntry);
+
+        // Update event counter
+        fCurrentEvent++;
+        // RNTuple prescaling
+        if (fNumEventsCycle > 0) {
+          fCurrentEvent %= fNumEventsCycle;
+        }
+      } else {
+        QwError << "RNTuple writer not initialized for " << fName << QwLog::endl;
+      }
     }
 
     /// Get the name of the RNTuple
@@ -862,8 +885,13 @@ class QwRootNTuple {
     const std::string fDesc;
     const std::string fPrefix;
 
-    /// Object type
+    /// Object type (of the first object), and the types of all objects
     std::string fType;
+    std::set<std::string> fTypes;
+
+    /// File and options for the writer, created at the first Fill()
+    TFile* fFile = nullptr;
+    ROOT::RNTupleWriteOptions fOptions;
 
     /// RNTuple prescaling parameters
     UInt_t fCurrentEvent;
@@ -1016,8 +1044,7 @@ class QwRootFile {
       QwRootNTuple *ntuple = 0;
       if (! HasNTupleByName(name)) {
         ntuple = new QwRootNTuple(name, desc);
-        // Initialize the writer with our file
-        ntuple->InitializeWriter(fRootFile, GetRNTupleWriteOptions());
+        ntuple->SetOutput(fRootFile, GetRNTupleWriteOptions());
       } else {
         // For simplicity, don't support copying existing RNTuples yet
         QwError << "Cannot create duplicate RNTuple: " << name << QwLog::endl;
@@ -1332,10 +1359,8 @@ class QwRootFile {
     }
     /// Does this RNTuple name match a disabled RNTuple (or tree) name?
     bool IsNTupleDisabled(const std::string& name) {
-      // The "pr" tree is written as the pr_yield and pr_asym RNTuples
-      const bool pair = (name == "pr_yield" || name == "pr_asym");
       for (size_t i = 0; i < fDisabledNTuples.size(); i++)
-        if (fDisabledNTuples.at(i).Match(name) || (pair && fDisabledNTuples.at(i).Match("pr")))
+        if (fDisabledNTuples.at(i).Match(name))
           return true;
       return false;
     }
@@ -1614,8 +1639,9 @@ void QwRootFile::ConstructNTupleFields(
     // New RNTuple with name, description, object, prefix
     ntuple = new QwRootNTuple(name, desc, object, prefix);
 
-    // Initialize the writer with our file
-    ntuple->InitializeWriter(fRootFile, GetRNTupleWriteOptions());
+    // The writer is created with the first entry, after all objects of
+    // this RNTuple have added their fields
+    ntuple->SetOutput(fRootFile, GetRNTupleWriteOptions());
 
     // Settings only relevant for new RNTuples
     if (name == "evt")
@@ -1623,17 +1649,19 @@ void QwRootFile::ConstructNTupleFields(
     else if (name == "mul")
       ntuple->SetPrescaling(fNumHelEventsToSave, fNumHelEventsToSkip);
 
+    fNTupleByName[name].push_back(ntuple);
+
   } else {
 
-    // For simplicity, don't support multiple RNTuples with same name yet
-    QwError << "Cannot create duplicate RNTuple: " << name << QwLog::endl;
-    return;
+    // Another object in the same RNTuple, like the pair yields and
+    // asymmetries that share the "pr" tree
+    ntuple = fNTupleByName[name].front();
+    if (! ntuple->AddObject(object, prefix)) return;
   }
 
-   // Add the fields to the list of RNTuples by name, object, type
+   // Add the fields to the list of RNTuples by object, type
   const void* addr = static_cast<const void*>(&object);
   const std::type_index type = typeid(object);
-  fNTupleByName[name].push_back(ntuple);
   fNTupleByAddr[addr].push_back(ntuple);
   fNTupleByType[type].push_back(ntuple);
 }
