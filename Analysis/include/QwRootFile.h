@@ -1079,6 +1079,15 @@ class QwRootFile {
     /// Fill histograms of the subsystem array
     template < class T >
     void FillHistograms(T& object) {
+      if (ShouldFillHistograms(object)) object.FillHistograms();
+    }
+
+    /// \brief The bookkeeping of FillHistograms (map file updates, fill
+    /// prescaling, registered directory): returns whether the histograms of
+    /// the object are to be filled now.  The caller then calls
+    /// object.FillHistograms(), possibly in another thread.
+    template < class T >
+    bool ShouldFillHistograms(T& object) {
       // Update regularly
       static Int_t update_count = 0;
       update_count++;
@@ -1090,16 +1099,11 @@ class QwRootFile {
       // visual refresh rate is unaffected because the displayed histograms
       // simply accumulate slightly fewer entries.
       if (fHistoFillPrescale > 1) {
-        if (++fHistoFillCount % fHistoFillPrescale != 0) return;
+        if (++fHistoFillCount % fHistoFillPrescale != 0) return false;
       }
 
-      // Debug directory registration
-      std::string type = typeid(object).name();
-      bool hasDir = HasDirByType(object);
-
-      if (! hasDir) return;
-      // Fill histograms
-      object.FillHistograms();
+      // Only objects with a registered histogram directory
+      return HasDirByType(object);
     }
 
 
