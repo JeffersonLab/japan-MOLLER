@@ -666,11 +666,13 @@ void QwRootNTupleWriterThread::Push(QwRootNTuple* ntuple, const std::vector<Doub
   }
   // Copy outside the lock; a reused buffer keeps its memory
   buffer.assign(values.begin(), values.end());
+  bool wake;
   {
     std::lock_guard<std::mutex> lock(fMutex);
     fQueue.push_back(Item{ntuple, std::move(buffer)});
+    wake = fWaiting && fQueue.size() >= kBatch;
   }
-  fWork.notify_one();
+  if (wake) fWork.notify_one();
   ReportError();
 }
 
@@ -680,8 +682,16 @@ void QwRootNTupleWriterThread::Run()
     Item item;
     {
       std::unique_lock<std::mutex> lock(fMutex);
-      fWork.wait(lock, [this] { return !fQueue.empty() || fStop; });
-      if (fQueue.empty()) break;  // stopped, and everything is written
+      if (fQueue.empty()) {
+        // Everything is written: sleep until a batch of entries is queued
+        fIdle.notify_all();
+        fWaiting = true;
+        fWork.wait(lock, [this] {
+          return fQueue.size() >= kBatch || (fFlush && !fQueue.empty()) || fStop;
+        });
+        fWaiting = false;
+        if (fQueue.empty()) break;  // stopped, and everything is written
+      }
       item = std::move(fQueue.front());
       fQueue.pop_front();
       fBusy = true;
@@ -710,7 +720,10 @@ void QwRootNTupleWriterThread::Drain()
 {
   {
     std::unique_lock<std::mutex> lock(fMutex);
+    fFlush = true;
+    fWork.notify_one();
     fIdle.wait(lock, [this] { return (fQueue.empty() && !fBusy) || !fThread.joinable(); });
+    fFlush = false;
   }
   ReportError();
 }

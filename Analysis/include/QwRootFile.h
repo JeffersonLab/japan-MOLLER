@@ -669,6 +669,13 @@ class QwRootNTupleWriterThread {
     const size_t fCapacity;
     bool fBusy = false;
     bool fStop = false;
+    /// Drain() wants the queued entries written now
+    bool fFlush = false;
+    /// The thread waits for entries
+    bool fWaiting = false;
+    /// The thread is woken for this many queued entries (or by Drain/Stop),
+    /// not for every entry
+    static constexpr size_t kBatch = 16;
     std::thread fThread;
     /// First error of the thread, reported by the main thread
     std::string fError;
