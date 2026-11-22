@@ -15,6 +15,7 @@
 #include <deque>
 #include <exception>
 #include <functional>
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
@@ -176,6 +177,7 @@ Int_t main(Int_t argc, Char_t* argv[])
   gQwOptions.AddOptions()("callgrind-instr-start-event-loop", po::value<bool>()->default_bool_value(false), "Start callgrind instrumentation with main event loop (with --instr-atstart=no)");
   gQwOptions.AddOptions()("callgrind-instr-stop-event-loop", po::value<bool>()->default_bool_value(false), "Stop callgrind instrumentation with main event loop (with --instr-atstart=no)");
   gQwOptions.AddOptions()("async-histograms", po::value<bool>()->default_bool_value(false), "Fill the event histograms in a worker thread while the event is processed further");
+  gQwOptions.AddOptions()("histogram-threads", po::value<int>()->default_value(1), "With --async-histograms: number of worker threads that fill the event histograms (each fills whole subsystems)");
   gQwOptions.AddOptions()("pipeline", po::value<bool>()->default_bool_value(false), "Read, decode and cut the events and pass them through the event ring in a reader thread, while the main thread processes the events that leave the ring");
 
   ///  Without anything, print usage
@@ -260,14 +262,34 @@ Int_t main(Int_t argc, Char_t* argv[])
     //  events which pass through the ring.
     QwSubsystemArrayParity ringoutput(detectors);
 
-    ///  Thread that fills the event histograms from ringoutput
-    ///  (--async-histograms); declared after ringoutput, so it ends first
+    ///  Threads that fill the event histograms from ringoutput
+    ///  (--async-histograms); declared after ringoutput, so they end first.
+    ///  Each takes the next subsystem until all are filled, so the
+    ///  histograms of a subsystem are filled by one thread.
     const bool async_histograms = gQwOptions.GetValue<bool>("async-histograms");
-    QwWorkerThread evt_histo_filler;
+    std::vector<std::unique_ptr<QwWorkerThread>> evt_histo_fillers;
+    std::atomic<size_t> next_histo_subsystem(0);
     if (async_histograms) {
+      const int nthreads = std::max(1, gQwOptions.GetValue<int>("histogram-threads"));
+      for (int i = 0; i < nthreads; i++)
+        evt_histo_fillers.push_back(std::make_unique<QwWorkerThread>());
       // Created now: a histogram buffer flush in either thread may use it
       THLimitsFinder::GetLimitsFinder();
     }
+    auto wait_evt_histos = [&]() {
+      for (auto& filler : evt_histo_fillers) filler->Wait();
+    };
+    auto fill_evt_histos = [&]() {
+      // As QwSubsystemArrayParity::FillHistograms
+      if (ringoutput.GetEventcutErrorFlag() != 0) return;
+      next_histo_subsystem = 0;
+      for (auto& filler : evt_histo_fillers) {
+        filler->Run([&]() {
+          for (size_t i; (i = next_histo_subsystem++) < ringoutput.size(); )
+            ringoutput.at(i)->FillHistograms();
+        });
+      }
+    };
     /// Create the data handler arrays
     QwDataHandlerArray datahandlerarray_evt(gQwOptions,ringoutput,run_label);
     QwDataHandlerArray datahandlerarray_mul(gQwOptions,helicitypattern,run_label);
@@ -499,8 +521,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 	  // Fill the histograms: with --async-histograms in the worker thread,
 	  // while the code below only reads ringoutput, until the next event
 	  if (async_histograms) {
-	    if (historootfile->ShouldFillHistograms(ringoutput))
-	      evt_histo_filler.Run([&ringoutput] { ringoutput.FillHistograms(); });
+	    if (historootfile->ShouldFillHistograms(ringoutput)) fill_evt_histos();
 	  } else {
 	    historootfile->FillHistograms(ringoutput);
 	  }
@@ -650,7 +671,7 @@ Int_t main(Int_t argc, Char_t* argv[])
       ///  Loop over events
       read_events(process_epics, [&]() {
         // The histograms of the previous event are filled from ringoutput
-        evt_histo_filler.Wait();
+        wait_evt_histos();
         ringoutput = eventring.pop();
         process_event();
       });
@@ -684,7 +705,7 @@ Int_t main(Int_t argc, Char_t* argv[])
             continue;
           }
           // The histograms of the previous event are filled from ringoutput
-          evt_histo_filler.Wait();
+          wait_evt_histos();
           ringoutput = *item.event;
           pipeline.Recycle(item.event);
           process_event();
@@ -699,7 +720,7 @@ Int_t main(Int_t argc, Char_t* argv[])
     }
 
     // The event histograms of the last event
-    evt_histo_filler.Wait();
+    wait_evt_histos();
 
     // Unwind event ring
     QwMessage << "Unwinding event ring" << QwLog::endl;
