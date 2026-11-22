@@ -273,6 +273,13 @@ class QwOptions {
     /// \brief Get the vector of command line arguments
     char** GetArgv() { return (char**) fArgv; };
 
+    /// \brief Warn about command line options that no option block defines
+    ///
+    /// Unknown command line options are accepted silently by the parser
+    /// (options are defined in stages), so call this once all options have
+    /// been defined to report typos such as --disable-ttrees.
+    void WarnUnrecognizedOptions();
+
     /// \brief Clear the parsed variables
     void Clear() {
       fVariablesMap.clear();
@@ -314,6 +321,9 @@ class QwOptions {
 
     // Options descriptions
     po::variables_map fVariablesMap;
+
+    /// Command line options not defined by any option block at the last parse
+    std::vector<std::string> fUnrecognizedOptions;
 
     bool fParsed;
 };

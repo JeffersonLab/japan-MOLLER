@@ -34,6 +34,7 @@ QwSubsystemArrayParity::QwSubsystemArrayParity(const QwSubsystemArrayParity& sou
   // Copy error flags
   fErrorFlag = source.fErrorFlag;
   fErrorFlagTreeIndex = source.fErrorFlagTreeIndex;
+  fErrorFlagNTupleIndex = source.fErrorFlagNTupleIndex;
 }
 
 //*****************************************************************//
@@ -623,6 +624,28 @@ void QwSubsystemArrayParity::FillTreeVector(QwRootTreeBranchVector &values) cons
     values.SetValue(fErrorFlagTreeIndex, static_cast<double>(fErrorFlag));
   }
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+void QwSubsystemArrayParity::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
+{
+  QwSubsystemArray::ConstructNTupleAndVector(model, prefix, values, fieldPtrs);
+  if (prefix.Contains("yield_") || prefix==""){
+    values.push_back(0.0);
+    fieldPtrs.push_back(model->MakeField<Double_t>("ErrorFlag"));
+    fErrorFlagNTupleIndex = values.size()-1;
+  } else {
+    fErrorFlagNTupleIndex = -1;
+  }
+}
+
+void QwSubsystemArrayParity::FillNTupleVector(std::vector<Double_t>& values) const
+{
+  QwSubsystemArray::FillNTupleVector(values);
+  if (fErrorFlagNTupleIndex>=0 && fErrorFlagNTupleIndex<static_cast<int>(values.size())){
+    values[fErrorFlagNTupleIndex] = static_cast<double>(fErrorFlag);
+  }
+}
+#endif // HAS_RNTUPLE_SUPPORT
 
 
 //*****************************************************************//

@@ -39,6 +39,7 @@ VQwDataHandler::VQwDataHandler(const TString& name)
   fName(name),
   fMapFile(""),
   fTreeName(""),
+  fOutputTreeName(""),
   fTreeComment(""),
   fPrefix(""),
   fErrorFlagPtr(0),
@@ -54,6 +55,7 @@ VQwDataHandler::VQwDataHandler(const VQwDataHandler &source)
   fName(source.fName),
   fMapFile(source.fMapFile),
   fTreeName(source.fTreeName),
+  fOutputTreeName(source.fOutputTreeName),
   fTreeComment(source.fTreeComment),
   fPrefix(source.fPrefix),
   fSubsystemArray(source.fSubsystemArray),
@@ -285,11 +287,13 @@ void VQwDataHandler::ConstructTreeBranches(
       } else {
 	fRunningsumFillsTree = kFALSE;
       }
-      fTreeName = treeprefix+fTreeName;
+      // Both this and ConstructNTupleFields run: set the output name without
+      // changing fTreeName, so the prefix is not added twice
+      fOutputTreeName = treeprefix+fTreeName;
       if (fRunningsumFillsTree) {
-	treerootfile->ConstructTreeBranches(fTreeName, fTreeComment, *fRunningsum, fPrefix+branchprefix);
+	treerootfile->ConstructTreeBranches(fOutputTreeName, fTreeComment, *fRunningsum, fPrefix+branchprefix);
       }else {
-	treerootfile->ConstructTreeBranches(fTreeName, fTreeComment, *this, fPrefix+branchprefix);
+	treerootfile->ConstructTreeBranches(fOutputTreeName, fTreeComment, *this, fPrefix+branchprefix);
       }
     }
   }
@@ -313,7 +317,7 @@ void VQwDataHandler::FillTreeBranches(QwRootFile *treerootfile)
     } else {
       treerootfile->FillTreeBranches(*this);
     }
-    treerootfile->FillTree(fTreeName);
+    treerootfile->FillTree(fOutputTreeName);
   }
 }
 
@@ -335,12 +339,12 @@ void VQwDataHandler::ConstructNTupleFields(
       } else {
 	fRunningsumFillsTree = kFALSE;
       }
-      fTreeName = treeprefix+fTreeName;
+      fOutputTreeName = treeprefix+fTreeName;
 #ifdef HAS_RNTUPLE_SUPPORT
       if (fRunningsumFillsTree) {
-	treerootfile->ConstructNTupleFields(fTreeName, fTreeComment, *fRunningsum, fPrefix+branchprefix);
+	treerootfile->ConstructNTupleFields(fOutputTreeName, fTreeComment, *fRunningsum, fPrefix+branchprefix);
       }else {
-	treerootfile->ConstructNTupleFields(fTreeName, fTreeComment, *this, fPrefix+branchprefix);
+	treerootfile->ConstructNTupleFields(fOutputTreeName, fTreeComment, *this, fPrefix+branchprefix);
       }
 #endif
     }
@@ -356,6 +360,7 @@ void VQwDataHandler::FillNTupleFields(QwRootFile *treerootfile)
     } else {
       treerootfile->FillNTupleFields(*this);
     }
+    treerootfile->FillNTuple(fOutputTreeName);
 #endif
   }
 }
