@@ -224,6 +224,9 @@ class QwHelicityPattern {
 
   std::vector<QwSubsystemArrayParity> fEvents;
   std::vector<Bool_t> fEventLoaded;
+  /// The event slot has data since it was last cleared (ClearEventData
+  /// only clears these; all are set initially)
+  std::vector<Bool_t> fEventNeedsClear;
   std::vector<Int_t> fHelicity;// this is here up to when we code the Helicity decoding routine
   std::vector<Int_t> fEventNumber;
   Int_t fCurrentPatternNumber;

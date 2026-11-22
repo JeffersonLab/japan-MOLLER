@@ -177,6 +177,7 @@ QwHelicityPattern::QwHelicityPattern(QwSubsystemArrayParity &event, const TStrin
           fHelicity.resize(fPatternSize,-9999);
           fEventNumber.resize(fPatternSize,-1);
           fEventLoaded.resize(fPatternSize,kFALSE);
+          fEventNeedsClear.resize(fPatternSize,kTRUE);
 
           // Initialize the pattern number
           fQuartetNumber = 0;
@@ -334,6 +335,7 @@ std::cout << "local phase no: " << localPhaseNumber << " current pattern no: " <
     }
     fEvents[localPhaseNumber]      = event;
     fEventLoaded[localPhaseNumber] = kTRUE;
+    fEventNeedsClear[localPhaseNumber] = kTRUE;
     fHelicity[localPhaseNumber]    = localHelicityActual;
     fEventNumber[localPhaseNumber] = localEventNumber;
     // Check to see if we should ignore the helicity; this is
@@ -671,7 +673,13 @@ void QwHelicityPattern::ClearEventData()
   fIgnoreHelicity = kFALSE;
   for(size_t i=0; i<fEvents.size(); i++)
     {
-      fEvents[i].ClearEventData();
+      // Only the slots with data since they were last cleared (clearing a
+      // cleared slot changes nothing; the patterns are cleared twice, when
+      // complete and when the next one starts)
+      if (fEventNeedsClear[i]) {
+        fEvents[i].ClearEventData();
+        fEventNeedsClear[i]=kFALSE;
+      }
       fEventLoaded[i]=kFALSE;
       fHelicity[i]=-999;
     }
