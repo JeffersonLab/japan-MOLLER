@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdint>
+#include <atomic>
 #include <condition_variable>
 #include <deque>
 #include <mutex>
@@ -653,6 +654,12 @@ class QwRootNTupleWriterThread {
     /// Write the queued entries and end the thread
     void Stop();
 
+    /// For a thread that writes to the file itself (e.g. creates a writer)
+    /// while other threads queue entries: the queued entries are written,
+    /// and queueing waits until EndFileAccess()
+    void BeginFileAccess();
+    void EndFileAccess();
+
   private:
     void Run();
     void ReportError();
@@ -673,6 +680,9 @@ class QwRootNTupleWriterThread {
     bool fFlush = false;
     /// The thread waits for entries
     bool fWaiting = false;
+    /// Queueing waits for a thread that uses the file (BeginFileAccess)
+    bool fPaused = false;
+    std::mutex fAccessMutex;
     /// The thread is woken for this many queued entries (or by Drain/Stop),
     /// not for every entry
     static constexpr size_t kBatch = 16;
@@ -893,8 +903,9 @@ class QwRootNTuple {
       // writes the RNTuple header to the file, so a writer thread of this
       // file must be idle meanwhile.
       if (!fWriter && fModel && fFile) {
-        if (fWriterThread) fWriterThread->Drain();
+        if (fWriterThread) fWriterThread->BeginFileAccess();
         InitializeWriter(fFile, fOptions);
+        if (fWriterThread) fWriterThread->EndFileAccess();
       }
 
       // The entry's fields are bound to the fVector (or fWriteVector) slots
@@ -1096,9 +1107,9 @@ class QwRootFile {
     template < class T >
     bool ShouldFillHistograms(T& object) {
       // Update regularly
-      static Int_t update_count = 0;
-      update_count++;
-      if ((fUpdateInterval > 0) && ( update_count % fUpdateInterval == 0)) Update();
+      static std::atomic<Int_t> update_count(0);
+      const Int_t count = ++update_count;
+      if ((fUpdateInterval > 0) && ( count % fUpdateInterval == 0)) Update();
 
       // Histogram fill prescaling.  Physics is processed every event, but the
       // (relatively expensive) histogram fill is performed only on every Nth
@@ -1585,7 +1596,9 @@ class QwRootFile {
     /// prescale, the trees) only on every Nth processed event.  Default 1
     /// fills on every event.  Used to raise throughput in live mapfile mode.
     UInt_t fHistoFillPrescale = 1;
-    UInt_t fHistoFillCount = 0;
+    /// Counts the histogram fills (atomic: event and pattern histograms may
+    /// be filled from different threads)
+    std::atomic<UInt_t> fHistoFillCount{0};
 
     /// Maximum tree size
     static const Long64_t kMaxTreeSize;

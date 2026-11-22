@@ -68,11 +68,47 @@
 #include <valgrind/callgrind.h>
 #endif
 
+/// A queue between two threads; Pop() waits for an item
+template <class T>
+class QwBlockingQueue {
+  public:
+    void Push(T item) {
+      {
+        std::lock_guard<std::mutex> lock(fMutex);
+        fQueue.push_back(std::move(item));
+      }
+      fCond.notify_one();
+    }
+    T Pop() {
+      std::unique_lock<std::mutex> lock(fMutex);
+      fCond.wait(lock, [this] { return !fQueue.empty() || fCancelled; });
+      if (fQueue.empty()) throw std::runtime_error("event pipeline cancelled");
+      T item = std::move(fQueue.front());
+      fQueue.pop_front();
+      return item;
+    }
+    /// Pop() throws instead of waiting
+    void Cancel() {
+      {
+        std::lock_guard<std::mutex> lock(fMutex);
+        fCancelled = true;
+      }
+      fCond.notify_all();
+    }
+  private:
+    std::mutex fMutex;
+    std::condition_variable fCond;
+    std::deque<T> fQueue;
+    bool fCancelled = false;
+};
+
 /**
  * Events handed from the reader thread (first stage of the event loop:
- * decoding, event cuts, event ring) to the main thread (--pipeline).  The
- * events are copied into a few preallocated slots; EPICS events go through
- * the same queue, so that the main thread sees everything in order.
+ * decoding, event cuts, event ring) to the main thread (--pipeline), and
+ * from there to the pattern thread (--pattern-thread).  The events are
+ * copied into preallocated slots, which are reused when the last stage is
+ * done with them; EPICS events go through the same queues, so that each
+ * stage sees everything in order.
  */
 class QwEventPipeline {
   public:
@@ -85,82 +121,47 @@ class QwEventPipeline {
     QwEventPipeline(const QwSubsystemArrayParity& prototype, size_t nslots) {
       for (size_t i = 0; i < nslots; i++) {
         fSlots.push_back(std::make_unique<QwSubsystemArrayParity>(prototype));
-        fFree.push_back(fSlots.back().get());
+        fFree.Push(fSlots.back().get());
       }
     }
 
     /// Reader thread: a slot to copy the next event into (waits for one)
-    QwSubsystemArrayParity* GetFreeSlot() {
-      std::unique_lock<std::mutex> lock(fMutex);
-      fCond.wait(lock, [this] { return !fFree.empty() || fCancelled; });
-      if (fCancelled) throw std::runtime_error("event pipeline cancelled");
-      QwSubsystemArrayParity* slot = fFree.back();
-      fFree.pop_back();
-      return slot;
-    }
+    QwSubsystemArrayParity* GetFreeSlot() { return fFree.Pop(); }
+    /// Last stage: the slot can be reused
+    void Recycle(QwSubsystemArrayParity* slot) { fFree.Push(slot); }
+
     /// Reader thread: pass an event (or the end of the events)
-    void Push(Kind kind, QwSubsystemArrayParity* event = nullptr) {
-      {
-        std::lock_guard<std::mutex> lock(fMutex);
-        fQueue.push_back(Item{kind, event});
-      }
-      fCond.notify_all();
-    }
-    /// Reader thread: pass an EPICS event, and wait until the main thread
-    /// has processed it (the reader reuses the EPICS event object)
+    void Push(Kind kind, QwSubsystemArrayParity* event = nullptr) { fToMain.Push(Item{kind, event}); }
+    /// Reader thread: pass an EPICS event, and wait until it has been
+    /// processed (the reader reuses the EPICS event object)
     void PushEPICSAndWait() {
-      std::unique_lock<std::mutex> lock(fMutex);
-      const size_t sent = ++fEPICSSent;
-      fQueue.push_back(Item{kEPICS, nullptr});
-      fCond.notify_all();
-      fCond.wait(lock, [&] { return fEPICSDone >= sent || fCancelled; });
-      if (fCancelled) throw std::runtime_error("event pipeline cancelled");
+      fToMain.Push(Item{kEPICS, nullptr});
+      fEPICSDone.Pop();
     }
+    /// The stage that processes the EPICS events: done with it
+    void EPICSDone() { fEPICSDone.Push(1); }
 
     /// Main thread: the next item (waits for it)
-    Item Pop() {
-      std::unique_lock<std::mutex> lock(fMutex);
-      fCond.wait(lock, [this] { return !fQueue.empty(); });
-      Item item = fQueue.front();
-      fQueue.pop_front();
-      return item;
-    }
-    /// Main thread: the event of a slot has been copied
-    void Recycle(QwSubsystemArrayParity* slot) {
-      {
-        std::lock_guard<std::mutex> lock(fMutex);
-        fFree.push_back(slot);
-      }
-      fCond.notify_all();
-    }
-    /// Main thread: the EPICS event has been processed
-    void EPICSDone() {
-      {
-        std::lock_guard<std::mutex> lock(fMutex);
-        fEPICSDone++;
-      }
-      fCond.notify_all();
-    }
-    /// Main thread: stop the reader thread (after an error)
+    Item Pop() { return fToMain.Pop(); }
+    /// Main thread: pass an item to the pattern thread
+    void PushPattern(const Item& item) { fToPattern.Push(item); }
+    /// Pattern thread: the next item (waits for it)
+    Item PopPattern() { return fToPattern.Pop(); }
+
+    /// Stop all stages (after an error)
     void Cancel() {
-      {
-        std::lock_guard<std::mutex> lock(fMutex);
-        fCancelled = true;
-      }
-      fCond.notify_all();
+      fFree.Cancel();
+      fToMain.Cancel();
+      fToPattern.Cancel();
+      fEPICSDone.Cancel();
     }
 
   private:
-    std::mutex fMutex;
-    std::condition_variable fCond;
     std::vector<std::unique_ptr<QwSubsystemArrayParity>> fSlots;
-    std::vector<QwSubsystemArrayParity*> fFree;
-    std::deque<Item> fQueue;
-    size_t fEPICSSent = 0;
-    size_t fEPICSDone = 0;
-    bool fCancelled = false;
+    QwBlockingQueue<QwSubsystemArrayParity*> fFree;
+    QwBlockingQueue<Item> fToMain, fToPattern;
+    QwBlockingQueue<int> fEPICSDone;
 };
-
 Int_t main(Int_t argc, Char_t* argv[])
 {
   ///  Enable implicit multi-threading in e.g. TTree::Fill
@@ -179,6 +180,7 @@ Int_t main(Int_t argc, Char_t* argv[])
   gQwOptions.AddOptions()("async-histograms", po::value<bool>()->default_bool_value(false), "Fill the event histograms in a worker thread while the event is processed further");
   gQwOptions.AddOptions()("histogram-threads", po::value<int>()->default_value(1), "With --async-histograms: number of worker threads that fill the event histograms (each fills whole subsystems)");
   gQwOptions.AddOptions()("pipeline", po::value<bool>()->default_bool_value(false), "Read, decode and cut the events and pass them through the event ring in a reader thread, while the main thread processes the events that leave the ring");
+  gQwOptions.AddOptions()("pattern-thread", po::value<bool>()->default_bool_value(false), "With --pipeline, --enable-rntuples and --rntuple-writer-thread: process the helicity patterns (and EPICS events) in a third thread");
 
   ///  Without anything, print usage
   if (argc == 1) {
@@ -279,6 +281,25 @@ Int_t main(Int_t argc, Char_t* argv[])
     auto wait_evt_histos = [&]() {
       for (auto& filler : evt_histo_fillers) filler->Wait();
     };
+
+    ///  The event level and the helicity patterns fill different TTrees
+    ///  or RNTuples of the same files: from two threads only with RNTuples
+    ///  written by the writer thread (TTrees are disabled with RNTuples)
+    bool pattern_thread = gQwOptions.GetValue<bool>("pattern-thread");
+    if (pattern_thread) {
+      bool ok = gQwOptions.GetValue<bool>("pipeline");
+#ifdef HAS_RNTUPLE_SUPPORT
+      ok = ok && gQwOptions.GetValue<bool>("enable-rntuples")
+              && gQwOptions.GetValue<bool>("rntuple-writer-thread");
+#else
+      ok = false;
+#endif
+      if (!ok) {
+        QwWarning << "--pattern-thread requires --pipeline, --enable-rntuples "
+                  << "and --rntuple-writer-thread; not used" << QwLog::endl;
+        pattern_thread = false;
+      }
+    }
     auto fill_evt_histos = [&]() {
       // As QwSubsystemArrayParity::FillHistograms
       if (ringoutput.GetEventcutErrorFlag() != 0) return;
@@ -550,8 +571,14 @@ Int_t main(Int_t argc, Char_t* argv[])
           datahandlerarray_evt.FillNTupleFields(treerootfile);
 #endif
 
+    }; // process_event
+
+    ///  Second stage for the helicity patterns, with the events of
+    ///  process_event in the same order (ringoutput, or a copy of it in
+    ///  the pattern thread)
+    auto process_pattern = [&](QwSubsystemArrayParity& event) {
           // Load the event into the helicity pattern
-          helicitypattern.LoadEventData(ringoutput);
+          helicitypattern.LoadEventData(event);
 
 	  if (helicitypattern.PairAsymmetryIsGood()) {
             patternsum.AccumulatePairRunningSum(helicitypattern);
@@ -665,7 +692,7 @@ Int_t main(Int_t argc, Char_t* argv[])
               helicitypattern.ClearEventData();
 
 	  } // helicitypattern.IsGoodAsymmetry()
-    }; // process_event
+    }; // process_pattern
 
     if (! gQwOptions.GetValue<bool>("pipeline")) {
       ///  Loop over events
@@ -674,13 +701,17 @@ Int_t main(Int_t argc, Char_t* argv[])
         wait_evt_histos();
         ringoutput = eventring.pop();
         process_event();
+        process_pattern(ringoutput);
       });
     } else {
       ///  Loop over events with the first stage in a reader thread; the
       ///  reader copies the events that leave the ring into the slots of
-      ///  the pipeline, and the main thread processes them in order
-      QwEventPipeline pipeline(detectors, 8);
-      std::exception_ptr reader_error;
+      ///  the pipeline, and the main thread processes them in order.  With
+      ///  the pattern thread, the main thread does the event level
+      ///  (process_event) and passes the slots on; the pattern thread does
+      ///  the helicity patterns (process_pattern) and the EPICS events.
+      QwEventPipeline pipeline(detectors, pattern_thread ? 16 : 8);
+      std::exception_ptr reader_error, pattern_error;
       std::thread reader([&]() {
         try {
           read_events(
@@ -695,27 +726,68 @@ Int_t main(Int_t argc, Char_t* argv[])
         }
         pipeline.Push(QwEventPipeline::kEnd);
       });
+      std::thread patterner;
+      if (pattern_thread) {
+        patterner = std::thread([&]() {
+          try {
+            for (;;) {
+              QwEventPipeline::Item item = pipeline.PopPattern();
+              if (item.kind == QwEventPipeline::kEnd) break;
+              if (item.kind == QwEventPipeline::kEPICS) {
+                process_epics();
+                pipeline.EPICSDone();
+                continue;
+              }
+              process_pattern(*item.event);
+              pipeline.Recycle(item.event);
+            }
+          } catch (...) {
+            pattern_error = std::current_exception();
+            pipeline.Cancel();
+          }
+        });
+      }
+      auto join_all = [&]() {
+        reader.join();
+        if (patterner.joinable()) patterner.join();
+      };
       try {
         for (;;) {
           QwEventPipeline::Item item = pipeline.Pop();
-          if (item.kind == QwEventPipeline::kEnd) break;
+          if (item.kind == QwEventPipeline::kEnd) {
+            if (pattern_thread) pipeline.PushPattern(item);
+            break;
+          }
           if (item.kind == QwEventPipeline::kEPICS) {
-            process_epics();
-            pipeline.EPICSDone();
+            if (pattern_thread) {
+              pipeline.PushPattern(item);
+            } else {
+              process_epics();
+              pipeline.EPICSDone();
+            }
             continue;
           }
           // The histograms of the previous event are filled from ringoutput
           wait_evt_histos();
           ringoutput = *item.event;
-          pipeline.Recycle(item.event);
-          process_event();
+          if (pattern_thread) {
+            process_event();
+            pipeline.PushPattern(item);
+          } else {
+            pipeline.Recycle(item.event);
+            process_event();
+            process_pattern(ringoutput);
+          }
         }
       } catch (...) {
         pipeline.Cancel();
-        reader.join();
+        join_all();
+        if (pattern_error) std::rethrow_exception(pattern_error);
+        if (reader_error) std::rethrow_exception(reader_error);
         throw;
       }
-      reader.join();
+      join_all();
+      if (pattern_error) std::rethrow_exception(pattern_error);
       if (reader_error) std::rethrow_exception(reader_error);
     }
 

@@ -658,7 +658,7 @@ void QwRootNTupleWriterThread::Push(QwRootNTuple* ntuple, const std::vector<Doub
   {
     std::unique_lock<std::mutex> lock(fMutex);
     if (!fThread.joinable() && !fStop) fThread = std::thread(&QwRootNTupleWriterThread::Run, this);
-    fSpace.wait(lock, [this] { return fQueue.size() < fCapacity; });
+    fSpace.wait(lock, [this] { return fQueue.size() < fCapacity && !fPaused; });
     if (!fFree.empty()) {
       buffer = std::move(fFree.back());
       fFree.pop_back();
@@ -726,6 +726,26 @@ void QwRootNTupleWriterThread::Drain()
     fFlush = false;
   }
   ReportError();
+}
+
+void QwRootNTupleWriterThread::BeginFileAccess()
+{
+  fAccessMutex.lock();
+  {
+    std::lock_guard<std::mutex> lock(fMutex);
+    fPaused = true;
+  }
+  Drain();
+}
+
+void QwRootNTupleWriterThread::EndFileAccess()
+{
+  {
+    std::lock_guard<std::mutex> lock(fMutex);
+    fPaused = false;
+  }
+  fSpace.notify_all();
+  fAccessMutex.unlock();
 }
 
 void QwRootNTupleWriterThread::Stop()
