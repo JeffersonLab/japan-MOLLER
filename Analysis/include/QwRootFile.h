@@ -9,10 +9,14 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdint>
+#include <condition_variable>
+#include <deque>
+#include <mutex>
 #include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <typeindex>
 #include <unordered_map>
 #include <vector>
@@ -623,6 +627,54 @@ class QwRootTree {
 };
 
 #ifdef HAS_RNTUPLE_SUPPORT
+class QwRootNTuple;
+
+/**
+ *  \class QwRootNTupleWriterThread
+ *  \ingroup QwAnalysis
+ *  \brief Writes the RNTuple entries of one file in a separate thread
+ *
+ * With --rntuple-writer-thread, QwRootNTuple::Fill copies the values of the
+ * entry into a queue, and this thread writes them with RNTupleWriter::Fill
+ * (serialization into pages, cluster commits, file writes), so that the
+ * event loop continues meanwhile.  The writers of one TFile must be used from
+ * one thread, so each QwRootFile has its own writer thread.  The main thread
+ * calls Drain() before it uses the file itself.
+ */
+class QwRootNTupleWriterThread {
+  public:
+    explicit QwRootNTupleWriterThread(size_t capacity) : fCapacity(capacity) { }
+    ~QwRootNTupleWriterThread() { Stop(); }
+
+    /// Queue an entry of an RNTuple; waits while the queue is full
+    void Push(QwRootNTuple* ntuple, const std::vector<Double_t>& values);
+    /// Wait until all queued entries are written and the thread is idle
+    void Drain();
+    /// Write the queued entries and end the thread
+    void Stop();
+
+  private:
+    void Run();
+    void ReportError();
+
+    struct Item {
+      QwRootNTuple* ntuple;
+      std::vector<Double_t> values;
+    };
+    std::mutex fMutex;
+    std::condition_variable fWork, fSpace, fIdle;
+    std::deque<Item> fQueue;
+    /// Value buffers to reuse
+    std::vector< std::vector<Double_t> > fFree;
+    const size_t fCapacity;
+    bool fBusy = false;
+    bool fStop = false;
+    std::thread fThread;
+    /// First error of the thread, reported by the main thread
+    std::string fError;
+    bool fErrorReported = false;
+};
+
 /**
  *  \class QwRootNTuple
  *  \ingroup QwAnalysis
@@ -775,7 +827,11 @@ class QwRootNTuple {
 
         // Let the writer read every value straight from fVector, which is
         // never resized after construction, instead of copying each value
-        // into the field buffers on every fill
+        // into the field buffers on every fill.  With a writer thread, the
+        // writer reads fWriteVector, into which the thread copies each
+        // queued entry, while the event loop fills fVector.
+        if (fWriterThread) fWriteVector.assign(fVector.size(), 0.0);
+        std::vector<Double_t>& bound = fWriterThread ? fWriteVector : fVector;
         fEntry = fWriter->CreateEntry();
         for (size_t i = 0; i < fFieldPtrs.size() && i < fVector.size(); ++i) {
           if (!fFieldPtrs[i]) continue;
@@ -784,7 +840,7 @@ class QwRootNTuple {
             QwError << "RNTuple " << fName << ": no field for value " << i << QwLog::endl;
             continue;
           }
-          fEntry->BindRawPtr(it->second, &fVector[i]);
+          fEntry->BindRawPtr(it->second, &bound[i]);
         }
         // The default-entry buffers are no longer used
         fFieldPtrs.assign(fFieldPtrs.size(), nullptr);
@@ -826,12 +882,21 @@ class QwRootNTuple {
     /// Write one entry with the values filled by FillNTupleFields, like
     /// TTree::Fill after the branches of all objects have been filled
     void Fill() {
-      // All objects have added their fields by now: create the writer
-      if (!fWriter && fModel && fFile) InitializeWriter(fFile, fOptions);
+      // All objects have added their fields by now: create the writer.  It
+      // writes the RNTuple header to the file, so a writer thread of this
+      // file must be idle meanwhile.
+      if (!fWriter && fModel && fFile) {
+        if (fWriterThread) fWriterThread->Drain();
+        InitializeWriter(fFile, fOptions);
+      }
 
-      // The entry's fields are bound to the fVector slots
+      // The entry's fields are bound to the fVector (or fWriteVector) slots
       if (fWriter && fEntry) {
-        fWriter->Fill(*fEntry);
+        if (fWriterThread) {
+          fWriterThread->Push(this, fVector);
+        } else {
+          fWriter->Fill(*fEntry);
+        }
 
         // Update event counter
         fCurrentEvent++;
@@ -843,6 +908,15 @@ class QwRootNTuple {
         QwError << "RNTuple writer not initialized for " << fName << QwLog::endl;
       }
     }
+
+    /// Write an entry queued by Fill() (called in the writer thread)
+    void WriteEntry(const std::vector<Double_t>& values) {
+      std::copy(values.begin(), values.end(), fWriteVector.begin());
+      fWriter->Fill(*fEntry);
+    }
+
+    /// Queue the entries of Fill() for a writer thread (before the first Fill)
+    void SetWriterThread(QwRootNTupleWriterThread* thread) { fWriterThread = thread; }
 
     /// Get the name of the RNTuple
     const std::string& GetName() const { return fName; }
@@ -892,6 +966,11 @@ class QwRootNTuple {
     /// File and options for the writer, created at the first Fill()
     TFile* fFile = nullptr;
     ROOT::RNTupleWriteOptions fOptions;
+
+    /// Writer thread of the file (nullptr: Fill() writes the entry itself),
+    /// and the values of the entry it writes
+    QwRootNTupleWriterThread* fWriterThread = nullptr;
+    std::vector<Double_t> fWriteVector;
 
     /// RNTuple prescaling parameters
     UInt_t fCurrentEvent;
@@ -1045,6 +1124,7 @@ class QwRootFile {
       if (! HasNTupleByName(name)) {
         ntuple = new QwRootNTuple(name, desc);
         ntuple->SetOutput(fRootFile, GetRNTupleWriteOptions());
+        ntuple->SetWriterThread(fNTupleWriterThread.get());
       } else {
         // For simplicity, don't support copying existing RNTuples yet
         QwError << "Cannot create duplicate RNTuple: " << name << QwLog::endl;
@@ -1134,9 +1214,18 @@ class QwRootFile {
     template < class T >
     Int_t WriteObject(const T* obj, const char* name, Option_t* option = "", Int_t bufsize = 0) {
       Int_t retval = 0;
+      DrainNTupleWriterThread();
       // TMapFile has no support for WriteObject
       if (fRootFile) retval = fRootFile->WriteObject(obj,name,option,bufsize);
       return retval;
+    }
+
+    /// Wait until the RNTuple writer thread is idle, before the file is used
+    /// by the calling thread
+    void DrainNTupleWriterThread() {
+#ifdef HAS_RNTUPLE_SUPPORT
+      if (fNTupleWriterThread) fNTupleWriterThread->Drain();
+#endif // HAS_RNTUPLE_SUPPORT
     }
 
 
@@ -1197,6 +1286,12 @@ class QwRootFile {
 
   public:
     void Close()  {
+
+#ifdef HAS_RNTUPLE_SUPPORT
+      // Write the queued RNTuple entries and end the writer thread: from
+      // here on, this thread uses the file
+      if (fNTupleWriterThread) fNTupleWriterThread->Stop();
+#endif // HAS_RNTUPLE_SUPPORT
 
       if (fRootFile) {
         // Step 1: Write all trees explicitly
@@ -1261,6 +1356,7 @@ class QwRootFile {
 
     // Wrapped functionality
     TDirectory* mkdir(const char* name, const char* title = "") {
+      DrainNTupleWriterThread();
       // TMapFile has no support for mkdir
       if (fRootFile) return fRootFile->mkdir(name, title);
       else return 0;
@@ -1269,6 +1365,7 @@ class QwRootFile {
     // Wrapped functionality
     Int_t Write(const char* name = 0, Int_t option = 0, Int_t bufsize = 0) {
       Int_t retval = 0;
+      DrainNTupleWriterThread();
       // TMapFile has no support for Write
       if (fRootFile) retval = fRootFile->Write(name, option, bufsize);
       return retval;
@@ -1393,6 +1490,11 @@ class QwRootFile {
     /// RNTuples with custom models (see NewNTupleWriter), in creation order
     std::vector<std::unique_ptr<ROOT::RNTupleWriter>> fNTupleWriters;
     std::vector<std::string> fNTupleWriterNames;
+
+    /// Thread that writes the RNTuple entries (--rntuple-writer-thread)
+    std::unique_ptr<QwRootNTupleWriterThread> fNTupleWriterThread;
+    /// Entries in its queue (the event loop waits when it is full)
+    static constexpr size_t kNTupleWriterQueueSize = 256;
 
     /// RNTuple support flag
     Bool_t fEnableRNTuples;
@@ -1642,6 +1744,7 @@ void QwRootFile::ConstructNTupleFields(
     // The writer is created with the first entry, after all objects of
     // this RNTuple have added their fields
     ntuple->SetOutput(fRootFile, GetRNTupleWriteOptions());
+    ntuple->SetWriterThread(fNTupleWriterThread.get());
 
     // Settings only relevant for new RNTuples
     if (name == "evt")
@@ -1724,6 +1827,9 @@ void QwRootFile::FillNTupleFields(
 template < class T >
 void QwRootFile::ConstructObjects(const std::string& name, T& object)
 {
+  // A new directory takes space in the file
+  DrainNTupleWriterThread();
+
   // Create the objects in a directory
   if (fRootFile) {
     std::string type = typeid(object).name();
@@ -1767,6 +1873,9 @@ void QwRootFile::ConstructHistograms(const std::string& name, T& object)
 {
   // Return if we do not want this histogram information
   if (IsHistoDisabled(name)) return;
+
+  // A new directory takes space in the file
+  DrainNTupleWriterThread();
 
   // Create the histograms in a directory
   if (fRootFile) {
@@ -1814,6 +1923,7 @@ template < class T >
 Int_t QwRootFile::WriteParamFileList(const TString &name, T& object)
 {
   Int_t retval = 0;
+  DrainNTupleWriterThread();
   if (fRootFile) {
     TList *param_list = (TList*) fRootFile->FindObjectAny(name);
     if (not param_list) {

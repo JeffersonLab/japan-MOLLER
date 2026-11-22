@@ -7,6 +7,7 @@
 #include "QwRunCondition.h"
 #include "TH1.h"
 #include "TFileCacheWrite.h"
+#include "TROOT.h"
 
 #include <unistd.h>
 #include <cstdio>
@@ -37,6 +38,13 @@ QwRootFile::QwRootFile(const TString& run_label)
 {
   // Process the configuration options
   ProcessOptions(gQwOptions);
+#ifdef HAS_RNTUPLE_SUPPORT
+  if (fEnableRNTuples && gQwOptions.GetValue<bool>("rntuple-writer-thread")) {
+    // The writer thread and the event loop use ROOT at the same time
+    ROOT::EnableThreadSafety();
+    fNTupleWriterThread = std::make_unique<QwRootNTupleWriterThread>(kNTupleWriterQueueSize);
+  }
+#endif // HAS_RNTUPLE_SUPPORT
 
 #ifdef QW_ENABLE_MAPFILE
   // Check for the memory-mapped file flag
@@ -165,6 +173,11 @@ QwRootFile::QwRootFile(const TString& run_label)
  */
 QwRootFile::~QwRootFile()
 {
+#ifdef HAS_RNTUPLE_SUPPORT
+  // Write the queued RNTuple entries before the file is closed
+  if (fNTupleWriterThread) fNTupleWriterThread->Stop();
+#endif // HAS_RNTUPLE_SUPPORT
+
   // Keep the file on disk if any trees or histograms have been filled.
   // Also respect any other requests to keep the file around.
   if (!fMakePermanent) fMakePermanent = HasAnyFilled();
@@ -292,6 +305,11 @@ void QwRootFile::DefineOptions(QwOptions &options)
   options.AddOptions("ROOT output options")
     ("enable-rntuples", po::value<bool>()->default_bool_value(false),
      "enable RNTuple output");
+  options.AddOptions("ROOT output options")
+    ("rntuple-writer-thread", po::value<bool>()->default_bool_value(false),
+     "write the RNTuple entries in a separate thread (one per output file): "
+     "the event loop queues a copy of each entry's values and continues "
+     "while the thread serializes, compresses and writes them");
 #endif // HAS_RNTUPLE_SUPPORT
 
   // Define the tree output prescaling options
@@ -612,6 +630,8 @@ ROOT::RNTupleWriter* QwRootFile::NewNTupleWriter(
     std::unique_ptr<ROOT::RNTupleModel> model)
 {
   if (!fEnableRNTuples || !fRootFile || !model || IsNTupleDisabled(name)) return nullptr;
+  // Creating the writer writes the RNTuple header to the file
+  DrainNTupleWriterThread();
   if (HasNTupleByName(name) ||
       std::find(fNTupleWriterNames.begin(), fNTupleWriterNames.end(), name) != fNTupleWriterNames.end()) {
     QwError << "Cannot create duplicate RNTuple: " << name << QwLog::endl;
@@ -630,6 +650,93 @@ ROOT::RNTupleWriter* QwRootFile::NewNTupleWriter(
   QwMessage << "Created RNTuple '" << name << "' with " << nfields
             << " fields in file " << fRootFile->GetName() << QwLog::endl;
   return fNTupleWriters.back().get();
+}
+
+void QwRootNTupleWriterThread::Push(QwRootNTuple* ntuple, const std::vector<Double_t>& values)
+{
+  std::vector<Double_t> buffer;
+  {
+    std::unique_lock<std::mutex> lock(fMutex);
+    if (!fThread.joinable() && !fStop) fThread = std::thread(&QwRootNTupleWriterThread::Run, this);
+    fSpace.wait(lock, [this] { return fQueue.size() < fCapacity; });
+    if (!fFree.empty()) {
+      buffer = std::move(fFree.back());
+      fFree.pop_back();
+    }
+  }
+  // Copy outside the lock; a reused buffer keeps its memory
+  buffer.assign(values.begin(), values.end());
+  {
+    std::lock_guard<std::mutex> lock(fMutex);
+    fQueue.push_back(Item{ntuple, std::move(buffer)});
+  }
+  fWork.notify_one();
+  ReportError();
+}
+
+void QwRootNTupleWriterThread::Run()
+{
+  for (;;) {
+    Item item;
+    {
+      std::unique_lock<std::mutex> lock(fMutex);
+      fWork.wait(lock, [this] { return !fQueue.empty() || fStop; });
+      if (fQueue.empty()) break;  // stopped, and everything is written
+      item = std::move(fQueue.front());
+      fQueue.pop_front();
+      fBusy = true;
+    }
+    fSpace.notify_one();
+
+    std::string error;
+    try {
+      item.ntuple->WriteEntry(item.values);
+    } catch (const std::exception& e) {
+      error = "RNTuple " + item.ntuple->GetName() + ": " + e.what();
+    }
+
+    {
+      std::lock_guard<std::mutex> lock(fMutex);
+      if (!error.empty() && fError.empty()) fError = error;
+      fFree.push_back(std::move(item.values));
+      fBusy = false;
+    }
+    fIdle.notify_all();
+  }
+  fIdle.notify_all();
+}
+
+void QwRootNTupleWriterThread::Drain()
+{
+  {
+    std::unique_lock<std::mutex> lock(fMutex);
+    fIdle.wait(lock, [this] { return (fQueue.empty() && !fBusy) || !fThread.joinable(); });
+  }
+  ReportError();
+}
+
+void QwRootNTupleWriterThread::Stop()
+{
+  {
+    std::lock_guard<std::mutex> lock(fMutex);
+    fStop = true;
+  }
+  fWork.notify_all();
+  if (fThread.joinable()) fThread.join();
+  ReportError();
+}
+
+void QwRootNTupleWriterThread::ReportError()
+{
+  // Logging is done by the calling (main) thread only
+  std::string error;
+  {
+    std::lock_guard<std::mutex> lock(fMutex);
+    if (fError.empty() || fErrorReported) return;
+    fErrorReported = true;
+    error = fError;
+  }
+  QwError << "RNTuple writer thread: " << error << QwLog::endl;
 }
 #endif // HAS_RNTUPLE_SUPPORT
 

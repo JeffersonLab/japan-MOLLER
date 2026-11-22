@@ -46,8 +46,9 @@ The output is `rootfiles/rntuple/isu_sample_4.root`. The file name comes from `r
 
 Options:
 
-- `--enable-rntuples --disable-trees` writes RNTuples only. With `--enable-rntuples` alone, the file gets both TTrees and RNTuples, and panguin then draws from the TTrees.
+- `--enable-rntuples` writes RNTuples instead of TTrees: it turns TTree output off, because the two writers can't be used in the same run. `--disable-trees` makes that explicit.
 - `--rntuple-channel-arrays` writes one array field per channel instead of one field per value. panguin reads both layouts with the same configuration file. `--rntuple-compression-level 1` makes array-layout writing faster.
+- `--rntuple-writer-thread` writes the RNTuple entries in a separate thread: the event loop queues a copy of each entry and continues while the thread serializes, compresses and writes it. The output is identical.
 - `--disable-histos` skips histograms. The panguin configuration doesn't use them.
 
 The option names must be spelled exactly as shown (`--disable-trees`, not `--disable-ttrees`). `qwparity` prints a warning for unrecognized options.
