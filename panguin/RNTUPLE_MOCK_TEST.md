@@ -49,6 +49,11 @@ Options:
 - `--enable-rntuples` writes RNTuples instead of TTrees: it turns TTree output off, because the two writers can't be used in the same run. `--disable-trees` makes that explicit.
 - `--rntuple-channel-arrays` writes one array field per channel instead of one field per value. panguin reads both layouts with the same configuration file. `--rntuple-compression-level 1` makes array-layout writing faster.
 - `--rntuple-writer-thread` writes the RNTuple entries in a separate thread: the event loop queues a copy of each entry and continues while the thread serializes, compresses and writes it. The output is identical.
+- More options spread the event loop over threads; the output is identical with any combination of them:
+  - `--async-histograms` fills the event histograms in worker threads, while the event is processed further. `--histogram-threads N` sets the number of threads; 2 is a good choice for this configuration.
+  - `--pipeline` reads, decodes and cuts the events and passes them through the event ring in a reader thread, while the main thread processes the events that leave the ring.
+  - `--pattern-thread`, together with `--pipeline`, `--enable-rntuples` and `--rntuple-writer-thread`, processes the helicity patterns in a third thread.
+  - All of them together: `--rntuple-writer-thread --async-histograms --histogram-threads 2 --pipeline --pattern-thread`.
 - `--disable-histos` skips histograms. The panguin configuration doesn't use them.
 
 The option names must be spelled exactly as shown (`--disable-trees`, not `--disable-ttrees`). `qwparity` prints a warning for unrecognized options.
