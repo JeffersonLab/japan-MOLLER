@@ -62,6 +62,12 @@ class QwSubsystemArrayParity: public QwSubsystemArray {
     void ConstructBranchAndVector(TTree *tree, TString& prefix, QwRootTreeBranchVector &values);
     /// \brief Fill the vector for this subsystem
     void FillTreeVector(QwRootTreeBranchVector &values) const;
+#ifdef HAS_RNTUPLE_SUPPORT
+    /// \brief Construct RNTuple fields (including ErrorFlag) with a prefix
+    void ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs);
+    /// \brief Fill the RNTuple vector for this subsystem
+    void FillNTupleVector(std::vector<Double_t>& values) const;
+#endif // HAS_RNTUPLE_SUPPORT
     /// \brief Fill the histograms for this subsystem
     void FillHistograms();
 
@@ -154,6 +160,7 @@ class QwSubsystemArrayParity: public QwSubsystemArray {
 
     UInt_t fErrorFlag;
     Int_t  fErrorFlagTreeIndex;
+    Int_t  fErrorFlagNTupleIndex = -1;
 
     // One-time resolved dispatch cache for parity pairwise operations.
     mutable std::vector<VQwSubsystemParity*> fResolvedParitySelf;
