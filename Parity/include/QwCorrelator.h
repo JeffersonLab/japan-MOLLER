@@ -12,6 +12,7 @@
 
 // LinRegBlue Correlator Class
 #include "LinReg_Bevington_Pebay.h"
+#include "QwCorrelatorNTuple.h"
 
 // System headers
 #include <fstream>
@@ -68,6 +69,16 @@ class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCor
   /// \brief Fill the tree branches
   void FillTreeBranches(QwRootFile *treerootfile) override { };
 
+#ifdef HAS_RNTUPLE_SUPPORT
+  /// \brief Construct the RNTuple with the same content as the tree
+  void ConstructNTupleFields(
+      QwRootFile *treerootfile,
+      const std::string& treeprefix = "",
+      const std::string& branchprefix = "") override;
+  /// \brief The RNTuple is filled in CalcCorrelations, like the tree
+  void FillNTupleFields(QwRootFile *treerootfile) override { };
+#endif // HAS_RNTUPLE_SUPPORT
+
   /// \brief Construct the histograms in a folder with a prefix
   void  ConstructHistograms(TDirectory *folder, TString &prefix) override;
   /// \brief Fill the histograms
@@ -100,6 +111,9 @@ class QwCorrelator : public VQwDataHandler, public MQwDataHandlerCloneable<QwCor
   void CloseAlphaFile();
 
   TTree* fTree;
+#ifdef HAS_RNTUPLE_SUPPORT
+  QwCorrelatorNTuple fNTuple;
+#endif // HAS_RNTUPLE_SUPPORT
 
   std::string fAliasOutputFileBase;
   std::string fAliasOutputFileSuff;

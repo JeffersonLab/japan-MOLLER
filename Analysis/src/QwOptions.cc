@@ -204,7 +204,9 @@ void QwOptions::ParseCommandLine()
   //  passed through the parser.
   try {
     po::options_description* command_line_options = CombineOptions();
-    po::store(po::command_line_parser(fArgc, fArgv).options(*command_line_options).allow_unregistered().run(), fVariablesMap);
+    po::parsed_options parsed = po::command_line_parser(fArgc, fArgv).options(*command_line_options).allow_unregistered().run();
+    fUnrecognizedOptions = po::collect_unrecognized(parsed.options, po::exclude_positional);
+    po::store(parsed, fVariablesMap);
     delete command_line_options;
   } catch (std::exception const& e) {
     QwWarning << e.what() << " while parsing command line arguments" << QwLog::endl;
@@ -233,6 +235,21 @@ void QwOptions::ParseCommandLine()
   // If a configuration file is specified, load it.
   if (fVariablesMap.count("add-config") > 0) {
     AddConfigFile(fVariablesMap["add-config"].as<std::vector<std::string> >());
+  }
+}
+
+/**
+ * Warn about command line options that are not defined by any option block.
+ * The command line parser accepts unknown options because the options are
+ * defined in stages, so this should be called once all options are defined.
+ */
+void QwOptions::WarnUnrecognizedOptions()
+{
+  // Make sure the list reflects all options defined so far
+  Parse();
+  for (const auto& option : fUnrecognizedOptions) {
+    QwWarning << "Unrecognized command line option '" << option
+              << "' is ignored (see --help for the valid options)" << QwLog::endl;
   }
 }
 

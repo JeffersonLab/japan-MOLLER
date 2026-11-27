@@ -262,6 +262,8 @@ class QwHelicityPattern {
   Int_t fBurstMinGoodPatterns;
   Int_t fGoodPatterns;
   Short_t fBurstCounter;
+  /// Index of BurstCounter in the RNTuple value vector (-1 if none)
+  Int_t fBurstCounterNTupleIndex = -1;
   Bool_t fEnableBurstSum;
   Bool_t fPrintBurstSum;
 

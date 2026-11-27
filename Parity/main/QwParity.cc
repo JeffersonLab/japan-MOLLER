@@ -176,6 +176,13 @@ Int_t main(Int_t argc, Char_t* argv[])
     database.SetupOneRun(eventbuffer);
     #endif // __USE_DATABASE__
 
+    //  All options are defined now; report typos once
+    static bool warned_unrecognized_options = false;
+    if (! warned_unrecognized_options) {
+      gQwOptions.WarnUnrecognizedOptions();
+      warned_unrecognized_options = true;
+    }
+
     //  Open the ROOT file (close when scope ends)
     QwRootFile *treerootfile  = NULL;
     QwRootFile *burstrootfile = NULL;
@@ -224,8 +231,8 @@ Int_t main(Int_t argc, Char_t* argv[])
 #ifdef HAS_RNTUPLE_SUPPORT
     treerootfile->ConstructNTupleFields("evt", "MPS event data RNTuple", ringoutput);
     treerootfile->ConstructNTupleFields("mul", "Helicity event data RNTuple", helicitypattern);
-    burstrootfile->ConstructNTupleFields("pr_yield", "Pair yield RNTuple", helicitypattern.GetPairYield(),"yield_");
-    burstrootfile->ConstructNTupleFields("pr_asym", "Pair asymmetry RNTuple", helicitypattern.GetPairAsymmetry(),"asym_");
+    burstrootfile->ConstructNTupleFields("pr", "Pair RNTuple", helicitypattern.GetPairYield(),"yield_");
+    burstrootfile->ConstructNTupleFields("pr", "Pair RNTuple", helicitypattern.GetPairAsymmetry(),"asym_");
     treerootfile->ConstructNTupleFields("slow", "EPICS and slow control RNTuple", epicsevent);
     burstrootfile->ConstructNTupleFields("burst", "Burst level data RNTuple", patternsum_per_burst, "|stat");
 #endif
@@ -405,12 +412,11 @@ Int_t main(Int_t argc, Char_t* argv[])
 	    burstrootfile->FillTreeBranches(helicitypattern.GetPairDifference());
 	    burstrootfile->FillTree("pr");
 
-	    // Fill pair RNTuples if enabled
+	    // Fill the pair RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-	    burstrootfile->FillNTupleFields("pr_yield", helicitypattern.GetPairYield());
-	    burstrootfile->FillNTupleFields("pr_asym", helicitypattern.GetPairAsymmetry());
-	    burstrootfile->FillNTuple("pr_yield");
-	    burstrootfile->FillNTuple("pr_asym");
+	    burstrootfile->FillNTupleFields("pr", helicitypattern.GetPairYield());
+	    burstrootfile->FillNTupleFields("pr", helicitypattern.GetPairAsymmetry());
+	    burstrootfile->FillNTuple("pr");
 #endif
 
 	    // Clear the data

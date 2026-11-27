@@ -32,6 +32,11 @@
 #include "TEnv.h"
 #include "TRegexp.h"
 #include "TGraph.h"
+#include "TProfile.h"
+#include "THLimitsFinder.h"
+#include <algorithm>
+#include <cctype>
+#include <cmath>
 
 #define OLDTIMERUPDATE
 
@@ -58,6 +63,9 @@ OnlineGUI::OnlineGUI(OnlineConfig& config, Bool_t printonly=0, int ver=0):
   // Constructor.  Get the config pointer, and make the GUI.
 
   fConfig = &config;
+  fTreeLineAtt = TAttLine(gStyle->GetHistLineColor(), gStyle->GetHistLineStyle(), gStyle->GetHistLineWidth());
+  fTreeFillAtt = TAttFill(gStyle->GetHistFillColor(), gStyle->GetHistFillStyle());
+  fTreeMarkerAtt = TAttMarker(gStyle->GetMarkerColor(), gStyle->GetMarkerStyle(), gStyle->GetMarkerSize());
   int bin2Dx(0), bin2Dy(0);
   fConfig->Get2DnumberBins(bin2Dx,bin2Dy);
   if(bin2Dx>0 && bin2Dy>0){
@@ -449,13 +457,15 @@ void OnlineGUI::DoDraw()
       // Check if variable is in Trees or RNTuples
       UInt_t treeIndex = GetTreeIndex(drawcommand[0]);
 #ifdef HAS_RNTUPLE_SUPPORT
-      UInt_t ntupleIndex = GetNTupleIndex(drawcommand[0]);
+      UInt_t ntupleIndex = FindNTupleForExpression(drawcommand[0], drawcommand[4]);
+      // A file with RNTuples and no trees: let the RNTuple path report what is missing
+      const Bool_t ntupleOnly = fRootTree.empty() && !fRootNTuple.empty();
 #endif
 
       if (treeIndex < fRootTree.size()) {
         TreeDraw(drawcommand);
 #ifdef HAS_RNTUPLE_SUPPORT
-      } else if (ntupleIndex < fRootNTuple.size()) {
+      } else if (ntupleIndex < fRootNTuple.size() || ntupleOnly) {
 #ifdef QW_ENABLE_MAPFILE
         if(fIsMapFile) {
           if(fVerbosity>=2)
@@ -843,6 +853,8 @@ void OnlineGUI::GetRootNTuple() {
   // Fills the fRootNTuple vector
   fRootNTuple.clear();
   fRootNTupleNames.clear();
+  fNTupleFilters.clear();
+  fNTupleDataFrames.clear();
 
   std::list<TString> found;
 #ifdef QW_ENABLE_MAPFILE
@@ -872,6 +884,22 @@ void OnlineGUI::GetRootNTuple() {
 
   found.sort();
   found.unique();
+  // Search order for variables that exist in several RNTuples: like the
+  // TTree order in JAPAN files (evt, mul, pr first; running sums last)
+  {
+    auto priority = [](const TString& n) {
+      if (n == "evt") return 0;
+      if (n == "mul") return 1;
+      if (n == "pr" || n == "pr_yield") return 2;
+      if (n == "pr_asym") return 3;
+      if (n == "evts" || n == "muls" || n == "bursts") return 9;
+      return 5;
+    };
+    std::vector<TString> ordered(found.begin(), found.end());
+    std::stable_sort(ordered.begin(), ordered.end(),
+                     [&](const TString& a, const TString& b) { return priority(a) < priority(b); });
+    found.assign(ordered.begin(), ordered.end());
+  }
   while(!found.empty()) {
     TString ntupleName = found.front();
     found.pop_front();
@@ -941,6 +969,8 @@ void OnlineGUI::GetNTupleVars() {
     ntupleVars.push_back(currentNTuple);
   }
 
+  BuildNTupleAliases();
+
   if(fVerbosity>=5){
     for(UInt_t iNTuple=0; iNTuple<ntupleVars.size(); iNTuple++) {
       cout << "In RNTuple " << iNTuple << ": " << endl;
@@ -952,57 +982,231 @@ void OnlineGUI::GetNTupleVars() {
 }
 
 UInt_t OnlineGUI::GetNTupleIndex(TString var) {
-  // Utility to find out which RNTuple (in fRootNTuple) has the specified
-  // variable "var".  If the variable is a collection of variables
-  // (e.g. bcm1:lumi1), will only check the first (e.g. bcm1).
-  // Returns the correct index.  if not found returns an index 1
-  // larger than fRootNTuple.size()
+  // Utility to find out which RNTuple (in fRootNTuple) holds the variables
+  // of the draw expression "var" (TTree-style names; see
+  // TranslateNTupleExpression).  Returns an index 1 larger than
+  // fRootNTuple.size() if no RNTuple has all of them.
+  return FindNTupleForExpression(var, "");
+}
 
-  //  This is for 2d draws... look for the first only
-  if(var.Contains(":")) {
-    TString first_var = fConfig->SplitString(var,":")[0];
-    var = first_var;
-  }
-  if(var.Contains("-")) {
-    TString first_var = fConfig->SplitString(var,"-")[0];
-    var = first_var;
-  }
-  if(var.Contains("/")) {
-    TString first_var = fConfig->SplitString(var,"/")[0];
-    var = first_var;
-  }
-  if(var.Contains("*")) {
-    TString first_var = fConfig->SplitString(var,"*")[0];
-    var = first_var;
-  }
-  if(var.Contains("+")) {
-    TString first_var = fConfig->SplitString(var,"+")[0];
-    var = first_var;
-  }
-  if(var.Contains("(")) {
-    TString first_var = fConfig->SplitString(var,"(")[0];
-    var = first_var;
-  }
-  //  This is for variables with multiple dimensions.
-  if(var.Contains("[")) {
-    TString first_var = fConfig->SplitString(var,"[")[0];
-    var = first_var;
-  }
+void OnlineGUI::BuildNTupleAliases() {
+  // For every RNTuple, map the names a panguin configuration may use to the
+  // RDataFrame expression that reads the value:
+  //  - one field per value (default JAPAN layout): name -> name
+  //  - one std::array<double,N> field per channel (--rntuple-channel-arrays),
+  //    with the element names in the field description ("hw_sum:block0:..."):
+  //    channel_element -> channel[i], and channel -> its main value
+  //  - std::vector<double> fields (correlator matrices and vectors): name -> name
+  fNTupleAliases.assign(fRootNTuple.size(), std::map<TString,TString>());
+  fNTupleVectorFields.assign(fRootNTuple.size(), std::set<TString>());
+  fNTupleNEntries.assign(fRootNTuple.size(), 0);
 
-  if(fVerbosity>=3)
-    cout<<__PRETTY_FUNCTION__<<"\t"<<__LINE__<<endl
-        <<"\t looking for RNTuple variable: "<<var<<endl;
-
-  for(UInt_t iNTuple=0; iNTuple<ntupleVars.size(); iNTuple++) {
-    for(UInt_t ivar=0; ivar<ntupleVars[iNTuple].size(); ivar++) {
-      if(fVerbosity>=4)
-        cout<<"Checking RNTuple "<<iNTuple<<" \t var "<<ivar<<" >> "<<ntupleVars[iNTuple][ivar]<<endl;
-      if(var == ntupleVars[iNTuple][ivar]) return iNTuple;
+  for(UInt_t i=0; i<fRootNTuple.size(); i++) {
+    if(fRootNTuple[i] == nullptr) continue;
+    auto& aliases = fNTupleAliases[i];
+    try {
+      fNTupleNEntries[i] = fRootNTuple[i]->GetNEntries();
+      const auto& descriptor = fRootNTuple[i]->GetDescriptor();
+      for (const auto& fieldDesc : descriptor.GetTopLevelFields()) {
+        const TString field = fieldDesc.GetFieldName();
+        const std::string type = fieldDesc.GetTypeName();
+        if (type.rfind("std::array<", 0) == 0) {
+          // Number of elements from the type name, element names from the description
+          const size_t comma = type.rfind(',');
+          const UInt_t n = (comma == std::string::npos) ? 0 : std::stoul(type.substr(comma + 1));
+          std::vector<TString> names;
+          TString description = fieldDesc.GetFieldDescription();
+          if (!description.IsNull()) {
+            TObjArray* tokens = description.Tokenize(":");
+            for (Int_t t = 0; t < tokens->GetEntries(); t++)
+              names.push_back(((TObjString*)tokens->At(t))->GetString());
+            delete tokens;
+          }
+          Int_t main = -1;
+          for (UInt_t j = 0; j < n; j++) {
+            const TString element = (names.size() == n) ? names[j] : TString::Format("%u", j);
+            const TString key = (element == "value") ? field : field + "_" + element;
+            aliases[key] = TString::Format("%s[%u]", field.Data(), j);
+            if (main < 0 && (element == "hw_sum" || element == "value")) main = j;
+          }
+          // The channel name alone means its main value, like the first leaf
+          // of the channel's TTree branch
+          if (aliases.find(field) == aliases.end())
+            aliases[field] = TString::Format("%s[%d]", field.Data(), main < 0 ? 0 : main);
+        } else {
+          if (type.rfind("std::vector<", 0) == 0) fNTupleVectorFields[i].insert(field);
+          aliases[field] = field;
+        }
+      }
+    } catch (std::exception& e) {
+      if(fVerbosity>=1)
+        cout << "Error reading RNTuple fields: " << e.what() << endl;
     }
   }
-
-  return fRootNTuple.size()+1;
 }
+
+Bool_t OnlineGUI::ResolveNTupleName(UInt_t iNTuple, const TString& name, const TString& leaf, TString& expr) {
+  // Resolve a TTree-style variable of RNTuple iNTuple: "name", or "name.leaf"
+  // for one leaf of a channel's branch.  Returns kFALSE if it does not exist.
+  const auto& aliases = fNTupleAliases[iNTuple];
+  auto look = [&](const TString& key, TString& out) {
+    auto it = aliases.find(key);
+    if (it == aliases.end()) return kFALSE;
+    out = it->second;
+    return kTRUE;
+  };
+
+  if (leaf.IsNull()) {
+    if (look(name, expr)) return kTRUE;
+    // One field per value: the channel name means its main value (hw_sum),
+    // like the first leaf of the channel's TTree branch
+    if (look(name + "_hw_sum", expr)) return kTRUE;
+    // TTree also accepts a unique leaf name alone, e.g. ppm for units.ppm
+    return look("units_" + name, expr);
+  }
+
+  if (leaf == "value" && look(name, expr)) return kTRUE;
+  if (look(name + "_" + leaf, expr)) return kTRUE;
+  // ADC18 and scaler leaves value_m2/value_err are stored as name_m2/name_err
+  if (leaf.BeginsWith("value_") && look(name + "_" + leaf(6, leaf.Length()), expr)) return kTRUE;
+  // 64-bit sums of squares are stored as two exact 32-bit halves
+  if (leaf.BeginsWith("SumSq_")) {
+    const TString block = leaf(6, leaf.Length());
+    TString low, high;
+    if (look(name + "_sumsq" + block + "_low", low) && look(name + "_sumsq" + block + "_high", high)) {
+      expr = "(" + high + "*4294967296.0+" + low + ")";
+      return kTRUE;
+    }
+  }
+  if (leaf.BeginsWith("RawMin_") && look(name + "_min" + leaf(7, leaf.Length()), expr)) return kTRUE;
+  if (leaf.BeginsWith("RawMax_") && look(name + "_max" + leaf(7, leaf.Length()), expr)) return kTRUE;
+  return kFALSE;
+}
+
+Bool_t OnlineGUI::TranslateNTupleExpression(UInt_t iNTuple, const TString& in, TString& out, TString& missing) {
+  // Translate a TTree::Draw-style expression (variable or cut) into an
+  // RDataFrame expression for RNTuple iNTuple.  Variable names are resolved
+  // with ResolveNTupleName; Entry$ and Entries$ become the entry number and
+  // the number of entries; function and namespace names (abs, TMath::Abs)
+  // and numbers are kept.  On failure, missing holds the first unknown name.
+  out = "";
+  missing = "";
+  if (iNTuple >= fNTupleAliases.size()) return kFALSE;
+
+  const std::string s = in.Data();
+  const size_t n = s.size();
+  auto isIdStart = [](char c) { return std::isalpha((unsigned char)c) || c == '_'; };
+  auto isIdChar = [](char c) { return std::isalnum((unsigned char)c) || c == '_'; };
+  auto nextNonSpace = [&](size_t p) { while (p < n && std::isspace((unsigned char)s[p])) p++; return p; };
+
+  size_t i = 0;
+  while (i < n) {
+    const char c = s[i];
+
+    // Numbers, including exponents (1e6, 1.0e-4) and hexadecimal literals
+    if (std::isdigit((unsigned char)c) || (c == '.' && i + 1 < n && std::isdigit((unsigned char)s[i+1]))) {
+      const size_t start = i;
+      const bool hex = (c == '0' && i + 1 < n && (s[i+1] == 'x' || s[i+1] == 'X'));
+      i++;
+      while (i < n && (isIdChar(s[i]) || s[i] == '.' ||
+                       (!hex && (s[i] == '+' || s[i] == '-') && (s[i-1] == 'e' || s[i-1] == 'E'))))
+        i++;
+      out += TString(s.substr(start, i - start));
+      continue;
+    }
+
+    if (!isIdStart(c)) { out += c; i++; continue; }
+
+    // Identifier, possibly with a TTreeFormula '$' suffix
+    const size_t start = i;
+    while (i < n && isIdChar(s[i])) i++;
+    if (i < n && s[i] == '$') i++;
+    TString name(s.substr(start, i - start));
+
+    // Namespace qualifiers and members (TMath::Abs) and function calls (abs())
+    size_t before = start;
+    while (before > 0 && std::isspace((unsigned char)s[before-1])) before--;
+    const bool afterScope = (before >= 2 && s[before-1] == ':' && s[before-2] == ':');
+    const size_t after = nextNonSpace(i);
+    const bool beforeScope = (after + 1 < n && s[after] == ':' && s[after+1] == ':');
+    const bool isCall = (after < n && s[after] == '(');
+    if (name.EndsWith("$")) {
+      if (name == "Entry$") { out += "static_cast<Long64_t>(rdfentry_)"; continue; }
+      if (name == "Entries$") { out += TString::Format("static_cast<Long64_t>(%llu)", fNTupleNEntries[iNTuple]); continue; }
+      missing = name;   // other TTreeFormula specials are not supported
+      return kFALSE;
+    }
+    if (afterScope || beforeScope || isCall || name == "true" || name == "false") {
+      out += name;
+      continue;
+    }
+
+    // TTree leaf syntax: channel.leaf
+    TString leaf;
+    if (i + 1 < n && s[i] == '.' && isIdStart(s[i+1])) {
+      size_t j = i + 1;
+      while (j < n && isIdChar(s[j])) j++;
+      leaf = TString(s.substr(i + 1, j - i - 1));
+      i = j;
+    }
+
+    TString expr;
+    if (!ResolveNTupleName(iNTuple, name, leaf, expr)) {
+      missing = leaf.IsNull() ? name : name + "." + leaf;
+      return kFALSE;
+    }
+
+    // Matrices of the correlator RNTuples are stored row-major with their
+    // dimensions in <name>_ncols: name[i][j] -> name[(i)*name_ncols+(j)]
+    if (fNTupleVectorFields[iNTuple].count(expr)) {
+      const size_t open1 = nextNonSpace(i);
+      if (open1 < n && s[open1] == '[') {
+        const size_t close1 = s.find(']', open1);
+        const size_t open2 = (close1 == std::string::npos) ? n : nextNonSpace(close1 + 1);
+        TString ncols;
+        if (open2 < n && s[open2] == '[' && ResolveNTupleName(iNTuple, expr + "_ncols", "", ncols)) {
+          const size_t close2 = s.find(']', open2);
+          if (close2 != std::string::npos) {
+            out += expr + "[(" + TString(s.substr(open1 + 1, close1 - open1 - 1)) + ")*" + ncols +
+                   "+(" + TString(s.substr(open2 + 1, close2 - open2 - 1)) + ")]";
+            i = close2 + 1;
+            continue;
+          }
+        }
+      }
+    }
+    out += expr;
+  }
+  return kTRUE;
+}
+
+UInt_t OnlineGUI::FindNTupleForExpression(TString expr, const TString& ntupleName) {
+  // Index of the RNTuple to draw expr from: the one named ntupleName (from
+  // the -tree option), or else the first RNTuple that has every variable of
+  // expr.  Files from older JAPAN versions split the TTree "pr" into the
+  // RNTuples pr_yield and pr_asym; -tree pr then picks the one that has the
+  // variables.  Returns fRootNTuple.size()+1 if there is none.
+  const Ssiz_t projection = expr.Index(">>");
+  if (projection != kNPOS) expr.Remove(projection);
+
+  TString translated, missing;
+  if (!ntupleName.IsNull()) {
+    for (UInt_t i = 0; i < fRootNTupleNames.size(); i++)
+      if (fRootNTupleNames[i] == ntupleName) return i;
+    std::vector<UInt_t> parts;
+    for (const char* suffix : {"_yield", "_asym"})
+      for (UInt_t i = 0; i < fRootNTupleNames.size(); i++)
+        if (fRootNTupleNames[i] == ntupleName + suffix) parts.push_back(i);
+    for (UInt_t i : parts)
+      if (TranslateNTupleExpression(i, expr, translated, missing)) return i;
+    return parts.empty() ? fRootNTuple.size() + 1 : parts.front();
+  }
+
+  for (UInt_t i = 0; i < fRootNTuple.size(); i++)
+    if (TranslateNTupleExpression(i, expr, translated, missing)) return i;
+  return fRootNTuple.size() + 1;
+}
+
 #ifdef QW_ENABLE_MAPFILE
 Bool_t OnlineGUI::LoadRNTupleSnapshot() {
   if(fMapFile == nullptr) {
@@ -1209,7 +1413,8 @@ void OnlineGUI::BadDraw(TString errMessage) {
   pt->SetTextColor(2);
   pt->AddText(errMessage.Data());
   pt->Draw();
-  //   cout << errMessage << endl;
+  if(fPrintOnly || fVerbosity>=1)
+    cout << "Cannot draw: " << errMessage << endl;
 
 }
 
@@ -1677,6 +1882,14 @@ void OnlineGUI::NTupleDraw(vector <TString> command) {
       // Create RNTuple view for the variable - need to access raw pointer
       auto* ntuple = fRootNTuple[iNTuple].get();
 
+      // Accept TTree-style names when they map to a single field
+      {
+        TString translated, missing;
+        if (TranslateNTupleExpression(iNTuple, var, translated, missing) &&
+            translated.Contains(TRegexp("^[A-Za-z_][A-Za-z0-9_]*$")))
+          var = translated;
+      }
+
       // Get the descriptor to find field information
       const auto& descriptor = ntuple->GetDescriptor();
       auto fieldId = descriptor.FindFieldId(var.Data());
@@ -1980,6 +2193,32 @@ void OnlineGUI::PrintPages() {
   for(UInt_t i=0; i<fConfig->GetPageCount(); i++) {
     current_page=i;
     DoDraw();
+    if(fVerbosity>=1) {
+      // One line per plot, to compare outputs (e.g. TTree vs RNTuple files)
+      for(Int_t ipad=1; fCanvas->GetPad(ipad)!=nullptr; ipad++) {
+        TIter next(fCanvas->GetPad(ipad)->GetListOfPrimitives());
+        TH1* h = nullptr;
+        TGraph* g = nullptr;
+        while(TObject* obj = next()) {
+          if(!g && obj->InheritsFrom(TGraph::Class())) g = (TGraph*)obj;
+          if(!h && obj->InheritsFrom(TH1::Class())) h = (TH1*)obj;
+        }
+        if(g)
+          printf("PLOT page %u pad %d: graph points=%d meanx=%.10g meany=%.10g%s\n",
+                 i, ipad, g->GetN(), g->GetMean(1), g->GetMean(2),
+                 h ? TString::Format(" frame x=[%.10g,%.10g] y=[%.10g,%.10g]",
+                       h->GetXaxis()->GetXmin(), h->GetXaxis()->GetXmax(),
+                       h->GetYaxis()->GetXmin(), h->GetYaxis()->GetXmax()).Data() : "");
+        else if(h)
+          printf("PLOT page %u pad %d: %s entries=%.0f mean=%.10g rms=%.10g x=[%.10g,%.10g]%s\n",
+                 i, ipad, h->ClassName(), h->GetEntries(), h->GetMean(), h->GetRMS(),
+                 h->GetXaxis()->GetXmin(), h->GetXaxis()->GetXmax(),
+                 h->GetDimension() > 1 ? TString::Format(" meany=%.10g y=[%.10g,%.10g]", h->GetMean(2),
+                   h->GetYaxis()->GetXmin(), h->GetYaxis()->GetXmax()).Data() : "");
+        else
+          printf("PLOT page %u pad %d: nothing drawn\n", i, ipad);
+      }
+    }
     TString pagename = pagehead;
     pagename += " ";
     pagename += i;
@@ -2049,21 +2288,35 @@ void OnlineGUI::InitializeDataFrame() {
 }
 
 void OnlineGUI::DataFrameDraw(vector <TString> command) {
-  // Called by DoDraw(), this will plot an RNTuple Variable using RDataFrame
-  // for efficient processing of large datasets
+  // Called by DoDraw(), this plots from an RNTuple using RDataFrame.  It
+  // accepts the same draw commands as TreeDraw: "x", "y:x" or "z:y:x" with
+  // TTree-style variable names (see TranslateNTupleExpression), cuts, and the
+  // TTree::Draw options (prof, box, colz, scat, graph-style 2D plots), with
+  // the same default binning and axis ranges as TTree::Draw.
 
   TString var = command[0];
 
-  //  Check to see if we're projecting to a specific histogram
-  TString histoname = command[0](TRegexp(">>.+(?"));
-  if (histoname.Length()>0){
-    histoname.Remove(0,2);
-    Int_t bracketindex = histoname.First("(");
-    if (bracketindex>0) histoname.Remove(bracketindex);
-    if(fVerbosity>=3)
-      std::cout << histoname << " "<< command[0](TRegexp(">>.+(?")) <<std::endl;
-  } else {
-    histoname = "htemp";
+  //  Check to see if we're projecting to a specific histogram:
+  //  var>>name or var>>name(nbins,low,high[,nbins,low,high[,...]])
+  TString histoname = "htemp";
+  std::vector<Double_t> binning;
+  const Ssiz_t projection = var.Index(">>");
+  if (projection != kNPOS) {
+    TString target = var(projection + 2, var.Length());
+    var.Remove(projection);
+    target = target.Strip(TString::kBoth);
+    const Ssiz_t open = target.First('(');
+    if (open != kNPOS) {
+      TString args = target(open + 1, target.Length());
+      const Ssiz_t close = args.Last(')');
+      if (close != kNPOS) args.Remove(close);
+      TObjArray* tokens = args.Tokenize(",");
+      for (Int_t t = 0; t < tokens->GetEntries(); t++)
+        binning.push_back(((TObjString*)tokens->At(t))->GetString().Atof());
+      delete tokens;
+      target.Remove(open);
+    }
+    if (!target.IsNull()) histoname = target;
   }
 
   // Combine the cuts (definecuts and specific cuts)
@@ -2079,158 +2332,315 @@ void OnlineGUI::DataFrameDraw(vector <TString> command) {
     }
   }
 
-  // Determine which RNTuple the variable comes from
-  UInt_t iNTuple;
-  if(command[4].IsNull()) {
-    iNTuple = GetNTupleIndex(var);
-    if(fVerbosity>=2)
-      cout<<"got NTuple index from variable "<<iNTuple<<endl;
-  } else {
-    // Find RNTuple by name specified in -tree option
-    TString requestedNTuple = command[4];
-    iNTuple = fRootNTuple.size() + 1; // Default to not found
-    for(UInt_t i=0; i<fRootNTupleNames.size(); i++) {
-      if(fRootNTupleNames[i] == requestedNTuple) {
-        iNTuple = i;
-        break;
-      }
+  // Determine which RNTuple the variables come from
+  const UInt_t iNTuple = FindNTupleForExpression(var, command[4]);
+  if (iNTuple >= fRootNTuple.size() || fRootNTuple[iNTuple] == nullptr) {
+    TString message;
+    if (!command[4].IsNull()) {
+      message = "RNTuple " + command[4] + " not found";
+    } else {
+      TString translated, missing;
+      for (UInt_t i = 0; i < fRootNTuple.size() && missing.IsNull(); i++)
+        TranslateNTupleExpression(i, var, translated, missing);
+      message = (missing.IsNull() ? var : missing) + " not found";
     }
-    if(fVerbosity>=2)
-      cout<<"got NTuple index from command (-tree "<<requestedNTuple<<"): "<<iNTuple<<endl;
-  }
-
-  // Check if we found a valid RNTuple
-  if (iNTuple >= fRootNTuple.size()) {
-    BadDraw("Variable " + var + " not found in any RNTuple");
-    return;
-  }
-
-  TString drawopt = command[2];
-
-  if(fVerbosity>=3)
-    cout<<"\tDataFrame draw option:"<<drawopt<<" and histo name "<<histoname<<endl;
-
-  Int_t errcode=0;
-  if (iNTuple < fRootNTuple.size() && fRootNTuple[iNTuple] != nullptr) {
-    if(fVerbosity>=1){
-      cout<<__PRETTY_FUNCTION__<<"\t"<<__LINE__<<endl;
-      cout<<command[0]<<"\t"<<command[1]<<"\t"<<command[2]<<"\t"<<command[3]
-	  <<"\t"<<command[4]<<endl;
-      if(fVerbosity>=2)
-	cout<<"\tProcessing from RNTuple using DataFrame: "<<iNTuple<<endl;
-    }
-
-    // Get the correct RNTuple name for this index
-    TString ntupleName = fRootNTupleNames[iNTuple];
-    TString fileName = fRootFile->GetName();
-
-    if(fVerbosity>=2)
-      cout << "Using DataFrame with RNTuple: " << ntupleName << " for variable: " << var << endl;
-
-    try {
-      // Create DataFrame from the correct RNTuple
-      ROOT::RDataFrame df(ntupleName.Data(), fileName.Data());
-
-      // Apply cuts if specified
-      if (!cutExpression.IsNull()) {
-        auto filteredDf = df.Filter(cutExpression.Data());
-        if(fVerbosity>=2)
-          cout << "Applied cut: " << cutExpression << endl;
-
-        // Create histogram using DataFrame with proper model
-        auto histTitle = command[3].IsNull() ? var : command[3];
-        ROOT::RDF::TH1DModel model{histoname.Data(), histTitle.Data(), 100, 0., 0.};
-        auto hist = filteredDf.Histo1D(model, std::string(var.Data()));
-
-        // Force computation of the histogram
-        hist->GetEntries(); // This triggers computation
-
-        // Check if histogram has entries
-        if (hist->GetEntries() > 0) {
-          // Get the actual histogram pointer and clone it for safety
-          TH1D* histPtr = (TH1D*)hist->Clone();
-
-          // Set histogram title if specified
-          if(!command[3].IsNull()) {
-            TString tmpstring(var);
-            tmpstring += cutExpression;
-            tmpstring += drawopt;
-            tmpstring += command[3];
-            TString myMD5 = tmpstring.MD5();
-            histPtr->SetNameTitle(myMD5, command[3]);
-          }
-
-          // Draw the histogram to the current pad
-          histPtr->Draw(drawopt);
-          gPad->Update(); // Force canvas update
-          errcode = 1; // Success
-
-          if (command[5].EqualTo("grid")){
-            gPad->SetGrid();
-          }
-
-          if(fVerbosity>=3)
-            cout<<"Finished DataFrame drawing with "<<histPtr->GetEntries()<<" entries"<<endl;
-        } else {
-          BadDraw("No entries passed cuts in DataFrame");
-          errcode = 0;
-        }
-      } else {
-        // No cuts - create histogram directly
-        auto histTitle = command[3].IsNull() ? var : command[3];
-        ROOT::RDF::TH1DModel model{histoname.Data(), histTitle.Data(), 100, 0., 0.};
-        auto hist = df.Histo1D(model, std::string(var.Data()));
-
-        // Force computation of the histogram
-        hist->GetEntries(); // This triggers computation
-
-        // Check if histogram has entries
-        if (hist->GetEntries() > 0) {
-          // Get the actual histogram pointer and clone it for safety
-          TH1D* histPtr = (TH1D*)hist->Clone();
-
-          // Set histogram title if specified
-          if(!command[3].IsNull()) {
-            TString tmpstring(var);
-            tmpstring += drawopt;
-            tmpstring += command[3];
-            TString myMD5 = tmpstring.MD5();
-            histPtr->SetNameTitle(myMD5, command[3]);
-          }
-
-          // Draw the histogram to the current pad
-          histPtr->Draw(drawopt);
-          gPad->Update(); // Force canvas update
-          errcode = 1; // Success
-
-          if (command[5].EqualTo("grid")){
-            gPad->SetGrid();
-          }
-
-          if(fVerbosity>=3)
-            cout<<"Finished DataFrame drawing with "<<histPtr->GetEntries()<<" entries"<<endl;
-        } else {
-          BadDraw("No entries in DataFrame");
-          errcode = 0;
-        }
-      }
-
-    } catch (std::exception& e) {
-      BadDraw(TString("DataFrame error: ") + e.what());
-      errcode = -1;
-    }
-
-  } else {
-    BadDraw(var+" not found in RNTuple for DataFrame");
+    BadDraw(message);
     if (fConfig->IsMonitor()){
       // Maybe we missed it... look again
       GetFileObjects();
       GetRootNTuple();
       GetNTupleVars();
     }
+    return;
   }
-}
+  const TString ntupleName = fRootNTupleNames[iNTuple];
 
+  // Split "z:y:x" into its dimensions (TTree order: the last one is x),
+  // ignoring "::" and colons inside parentheses or brackets
+  std::vector<TString> dims;
+  {
+    Int_t depth = 0;
+    TString current;
+    for (Ssiz_t k = 0; k < var.Length(); k++) {
+      const char c = var[k];
+      if (c == '(' || c == '[') depth++;
+      if (c == ')' || c == ']') depth--;
+      if (c == ':' && depth == 0) {
+        const bool scope = (k + 1 < var.Length() && var[k+1] == ':') || (k > 0 && var[k-1] == ':');
+        if (!scope) { dims.push_back(current); current = ""; continue; }
+      }
+      current += c;
+    }
+    dims.push_back(current);
+  }
+  if (dims.size() > 3) {
+    BadDraw("Only 1D, 2D and 3D draws are supported for RNTuples");
+    return;
+  }
+
+  // Translate the variables and the cut into RDataFrame expressions
+  std::vector<TString> exprs;
+  TString cut, missing;
+  for (auto& d : dims) {
+    TString expr;
+    if (!TranslateNTupleExpression(iNTuple, d, expr, missing)) {
+      BadDraw(missing + " not found in RNTuple " + ntupleName);
+      return;
+    }
+    exprs.push_back(expr);
+  }
+  if (!cutExpression.IsNull() &&
+      !TranslateNTupleExpression(iNTuple, cutExpression, cut, missing)) {
+    BadDraw(missing + " (cut) not found in RNTuple " + ntupleName);
+    return;
+  }
+
+  TString drawopt = command[2];
+  TString opt = drawopt;
+  opt.ToLower();
+
+  if(fVerbosity>=1){
+    cout<<__PRETTY_FUNCTION__<<"\t"<<__LINE__<<endl;
+    cout<<command[0]<<"\t"<<command[1]<<"\t"<<command[2]<<"\t"<<command[3]
+        <<"\t"<<command[4]<<endl;
+    if(fVerbosity>=2) {
+      cout<<"\tProcessing from RNTuple "<<ntupleName<<":";
+      for (auto& e : exprs) cout<<" ["<<e<<"]";
+      if (!cut.IsNull()) cout<<" cut ["<<cut<<"]";
+      cout<<endl;
+    }
+  }
+
+  // Read the selected values
+  std::vector< std::vector<Double_t> > values;
+  try {
+    if (fNTupleDataFrames.size() < fRootNTuple.size()) {
+      fNTupleDataFrames.resize(fRootNTuple.size());
+      fNTupleFilters.resize(fRootNTuple.size());
+    }
+    if (!fNTupleDataFrames[iNTuple])
+      fNTupleDataFrames[iNTuple] = std::make_unique<ROOT::RDataFrame>(ntupleName.Data(), fRootFile->GetName());
+    ROOT::RDF::RNode node = *fNTupleDataFrames[iNTuple];
+    if (!cut.IsNull()) {
+      // Each cut is compiled once and its filter is shared by later plots
+      auto filter = fNTupleFilters[iNTuple].find(cut);
+      if (filter == fNTupleFilters[iNTuple].end())
+        filter = fNTupleFilters[iNTuple].emplace(cut,
+                   node.Filter(("static_cast<bool>(" + cut + ")").Data())).first;
+      node = filter->second;
+    }
+
+    // A whole correlator matrix or vector is drawn element by element, like
+    // an array leaf of a TTree
+    const bool wholeVector = (exprs.size() == 1 && fNTupleVectorFields[iNTuple].count(exprs[0]) > 0);
+    if (wholeVector) {
+      auto rows = node.Take<std::vector<Double_t>>(exprs[0].Data());
+      values.emplace_back();
+      for (const auto& row : *rows) values[0].insert(values[0].end(), row.begin(), row.end());
+    } else {
+      const auto& descriptor = fRootNTuple[iNTuple]->GetDescriptor();
+      std::vector< ROOT::RDF::RResultPtr< std::vector<Double_t> > > results;
+      for (size_t j = 0; j < exprs.size(); j++) {
+        // A double field is read directly; anything else needs a
+        // just-in-time compiled Define
+        const auto fieldId = descriptor.FindFieldId(exprs[j].Data());
+        if (fieldId != ROOT::kInvalidDescriptorId &&
+            descriptor.GetFieldDescriptor(fieldId).GetTypeName() == "double") {
+          results.push_back(node.Take<Double_t>(exprs[j].Data()));
+          continue;
+        }
+        const std::string column = "panguin_v" + std::to_string(j);
+        node = node.Define(column, ("static_cast<double>(" + exprs[j] + ")").Data());
+        results.push_back(node.Take<Double_t>(column));
+      }
+      for (auto& r : results) values.push_back(*r);
+    }
+  } catch (std::exception& e) {
+    // A failed just-in-time compilation leaves the RDataFrame unusable
+    if (iNTuple < fNTupleDataFrames.size()) {
+      fNTupleFilters[iNTuple].clear();
+      fNTupleDataFrames[iNTuple].reset();
+    }
+    BadDraw(TString("RNTuple draw error: ") + e.what());
+    return;
+  }
+
+  const size_t nValues = values[0].size();
+  if (nValues == 0) {
+    BadDraw("Empty Histogram");
+    return;
+  }
+
+  // Like TTree::Draw, an axis is an integer axis (bins aligned to whole
+  // numbers) when it shows a single variable with integer values; RNTuple
+  // fields of JAPAN store all channel values as double, so check the values
+  std::vector<bool> isInteger(dims.size(), false);
+  for (size_t j = 0; j < dims.size() && j < values.size(); j++) {
+    TString d = dims[j].Strip(TString::kBoth);
+    while (d.BeginsWith("(") && d.EndsWith(")")) d = TString(d(1, d.Length() - 2)).Strip(TString::kBoth);
+    if (!d.Contains(TRegexp("^[A-Za-z_][A-Za-z0-9_]*\\$?$")) &&
+        !d.Contains(TRegexp("^[A-Za-z_][A-Za-z0-9_]*\\.[A-Za-z_][A-Za-z0-9_]*$")))
+      continue;
+    bool integer = true;
+    for (Double_t x : values[j])
+      if (!std::isfinite(x) || x != std::floor(x) || std::fabs(x) > 9007199254740992.) { integer = false; break; }
+    isInteger[j] = integer;
+  }
+  auto markInteger = [&](TAxis* axis, size_t j) { if (isInteger[j]) axis->SetBit(TAxis::kIsInteger); };
+
+  // Data ranges for the axes, ignoring non-finite values
+  auto dataRange = [](const std::vector<Double_t>& v, Double_t& lo, Double_t& hi) {
+    lo = 0; hi = 0;
+    bool first = true;
+    for (Double_t x : v) {
+      if (!std::isfinite(x)) continue;
+      if (first) { lo = hi = x; first = false; }
+      else { if (x < lo) lo = x; if (x > hi) hi = x; }
+    }
+  };
+  // Binning from ">>name(...)" (axis a), or the TTree::Draw default
+  auto nbins = [&](size_t a, const char* envName, Int_t def) {
+    return (binning.size() > 3*a) ? (Int_t)binning[3*a] : gEnv->GetValue(envName, def);
+  };
+  auto explicitRange = [&](size_t a, Double_t& lo, Double_t& hi) {
+    if (binning.size() < 3*a + 3 || binning[3*a + 1] >= binning[3*a + 2]) return false;
+    lo = binning[3*a + 1]; hi = binning[3*a + 2];
+    return true;
+  };
+
+  TString title = var;
+  if (!cutExpression.IsNull()) title += " {" + cutExpression + "}";
+  TH1* hist = nullptr;
+
+  // TTree::Draw takes line, fill and marker attributes from the TTree, which
+  // has those of ROOT's default style when JAPAN wrote it; do the same, so
+  // that plots look alike whichever format the file holds
+  auto applyTreeStyle = [&](auto* obj) {
+    fTreeLineAtt.Copy(*obj);
+    fTreeFillAtt.Copy(*obj);
+    fTreeMarkerAtt.Copy(*obj);
+  };
+
+  if (dims.size() == 1) {
+    TH1D* h = new TH1D(histoname, title, nbins(0, "Hist.Binning.1D.x", 100), 0, 1);
+    h->SetDirectory(nullptr);
+    markInteger(h->GetXaxis(), 0);
+    Double_t lo, hi;
+    if (explicitRange(0, lo, hi)) h->SetBins(h->GetNbinsX(), lo, hi);
+    else { dataRange(values[0], lo, hi); THLimitsFinder::GetLimitsFinder()->FindGoodLimits(h, lo, hi); }
+    for (Double_t x : values[0]) h->Fill(x);
+    h->GetXaxis()->SetTitle(dims[0]);
+    hist = h;
+  } else if (dims.size() == 2) {
+    const std::vector<Double_t>& y = values[0];
+    const std::vector<Double_t>& x = values[1];
+    Double_t xlo, xhi, ylo, yhi;
+    if (opt.Contains("prof")) {
+      TString profopt = "";
+      if (opt.Contains("profs")) profopt = "s";
+      else if (opt.Contains("profi")) profopt = "i";
+      else if (opt.Contains("profg")) profopt = "g";
+      TProfile* p = new TProfile(histoname, title, nbins(0, "Hist.Binning.2D.Prof", 100), 0, 1, profopt);
+      p->SetDirectory(nullptr);
+      markInteger(p->GetXaxis(), 1);
+      if (explicitRange(0, xlo, xhi)) p->SetBins(p->GetNbinsX(), xlo, xhi);
+      else { dataRange(x, xlo, xhi); THLimitsFinder::GetLimitsFinder()->FindGoodLimits(p, xlo, xhi); }
+      for (size_t k = 0; k < nValues; k++) p->Fill(x[k], y[k]);
+      hist = p;
+    } else {
+      TH2D* h2 = new TH2D(histoname, title,
+                          nbins(0, "Hist.Binning.2D.x", 40), 0, 1,
+                          nbins(1, "Hist.Binning.2D.y", 40), 0, 1);
+      h2->SetDirectory(nullptr);
+      markInteger(h2->GetXaxis(), 1);
+      markInteger(h2->GetYaxis(), 0);
+      const bool xFixed = explicitRange(0, xlo, xhi), yFixed = explicitRange(1, ylo, yhi);
+      if (!xFixed) dataRange(x, xlo, xhi);
+      if (!yFixed) dataRange(y, ylo, yhi);
+      if (xFixed && yFixed) h2->SetBins(h2->GetNbinsX(), xlo, xhi, h2->GetNbinsY(), ylo, yhi);
+      else THLimitsFinder::GetLimitsFinder()->FindGoodLimits(h2, xlo, xhi, ylo, yhi);
+      h2->GetXaxis()->SetTitle(dims[1]);
+      h2->GetYaxis()->SetTitle(dims[0]);
+      h2->SetStats(kFALSE);
+      // Like TTree::Draw: without a histogram option, or with p, * or l,
+      // draw the points as a graph on an empty frame
+      bool graph = opt.IsNull() || opt.Contains("p") || opt.Contains("*") || opt.Contains("l");
+      if (opt.Contains("surf") || opt.Contains("lego") || opt.Contains("cont") ||
+          opt.Contains("col") || opt.Contains("hist") || opt.Contains("scat") || opt.Contains("box"))
+        graph = false;
+      if (graph) {
+        // As TTree::Draw: a lower axis limit of 0 is moved to the data minimum
+        // when that is inside the first bin, so log scales do not cut data
+        if (!(xFixed && yFixed)) {
+          TAxis* aX = h2->GetXaxis();
+          TAxis* aY = h2->GetYaxis();
+          Double_t xmin = aX->GetXmin(), ymin = aY->GetXmin();
+          if (xmin == 0 || ymin == 0) {
+            if (aX->GetBinUpEdge(aX->FindFixBin(0.01*aX->GetBinWidth(aX->GetFirst()))) > xlo) xmin = xlo;
+            if (aY->GetBinUpEdge(aY->FindFixBin(0.01*aY->GetBinWidth(aY->GetFirst()))) > ylo) ymin = ylo;
+            h2->SetBins(aX->GetNbins(), xmin, aX->GetXmax(), aY->GetNbins(), ymin, aY->GetXmax());
+          }
+        }
+        h2->SetBit(kCanDelete);
+        h2->Draw();
+        TGraph* g = new TGraph((Int_t)nValues, x.data(), y.data());
+        g->SetEditable(kFALSE);
+        g->SetBit(kCanDelete);
+        applyTreeStyle(g);
+        applyTreeStyle(h2);
+        TString gopt = drawopt;
+        gopt.ReplaceAll("same", "");
+        gopt.ReplaceAll("a", "");
+        gopt.ReplaceAll("A", "");
+        g->Draw(gopt.IsNull() ? "p" : gopt.Data());
+        if (!command[3].IsNull()) h2->SetTitle(command[3]);
+        if (command[5].EqualTo("grid")) gPad->SetGrid();
+        if(fVerbosity>=3)
+          cout<<"Finished RNTuple drawing with "<<nValues<<" points"<<endl;
+        return;
+      }
+      for (size_t k = 0; k < nValues; k++) h2->Fill(x[k], y[k]);
+      hist = h2;
+    }
+  } else {
+    const std::vector<Double_t>& z = values[0];
+    const std::vector<Double_t>& y = values[1];
+    const std::vector<Double_t>& x = values[2];
+    TH3D* h3 = new TH3D(histoname, title,
+                        nbins(0, "Hist.Binning.3D.x", 20), 0, 1,
+                        nbins(1, "Hist.Binning.3D.y", 20), 0, 1,
+                        nbins(2, "Hist.Binning.3D.z", 20), 0, 1);
+    h3->SetDirectory(nullptr);
+    markInteger(h3->GetXaxis(), 2);
+    markInteger(h3->GetYaxis(), 1);
+    markInteger(h3->GetZaxis(), 0);
+    Double_t xlo, xhi, ylo, yhi, zlo, zhi;
+    dataRange(x, xlo, xhi); dataRange(y, ylo, yhi); dataRange(z, zlo, zhi);
+    THLimitsFinder::GetLimitsFinder()->FindGoodLimits(h3, xlo, xhi, ylo, yhi, zlo, zhi);
+    for (size_t k = 0; k < nValues; k++) h3->Fill(x[k], y[k], z[k]);
+    h3->GetXaxis()->SetTitle(dims[2]);
+    h3->GetYaxis()->SetTitle(dims[1]);
+    h3->GetZaxis()->SetTitle(dims[0]);
+    hist = h3;
+  }
+
+  // Like TreeDraw: a unique name when a plot title is given
+  if(!command[3].IsNull()) {
+    TString tmpstring(command[0]);
+    tmpstring += cutExpression;
+    tmpstring += drawopt;
+    tmpstring += command[3];
+    hist->SetNameTitle(tmpstring.MD5(), command[3]);
+  }
+  hist->SetBit(kCanDelete);
+  applyTreeStyle(hist);
+  hist->Draw(drawopt);
+  if (command[5].EqualTo("grid")){
+    gPad->SetGrid();
+  }
+  if(fVerbosity>=3)
+    cout<<"Finished RNTuple drawing with "<<hist->GetEntries()<<" entries"<<endl;
+}
 OnlineGUI::~OnlineGUI()
 {
   //  fMain->SendCloseMessage();

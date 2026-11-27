@@ -15,6 +15,7 @@
 #include "QwUnits.h"
 #include "QwBlinder.h"
 #include "QwHistogramHelper.h"
+#include "QwRootNTupleFields.h"
 #ifdef __USE_DATABASE__
 #include "QwDBInterface.h"
 #endif
@@ -1269,148 +1270,94 @@ fill_debug_counter++; */
 #ifdef HAS_RNTUPLE_SUPPORT
 void  QwMollerADC_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
-  //For rntuple
-  if (IsNameEmpty()) {
-    //  This channel is not used, so skip setting up the RNTuple.
-  } else {
-    //  Decide what to store based on prefix
-    SetDataToSaveByPrefix(prefix);
+  //  This channel is not used, so skip setting up the RNTuple.
+  if (IsNameEmpty()) return;
 
-    // Set the boolean flags just like in ConstructBranchAndVector
-    bHw_sum =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum");
-    bHw_sum_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum_raw");
-    bBlock =      gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block");
-    bBlock_raw =  gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block_raw");
-    bNum_samples = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "num_samples");
-    bDevice_Error_Code = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "Device_Error_Code");
-    bSequence_number = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "sequence_number");
+  //  Decide what to store based on prefix
+  SetDataToSaveByPrefix(prefix);
 
-    // For kMoments mode (running sum trees), enable all statistical fields regardless of histogram configuration
-    if (fDataToSave == kMoments) {
-      bHw_sum = true;
-      bBlock = true;
-      bNum_samples = true;
-      bDevice_Error_Code = true;
-    }
+  // Set the boolean flags just like in ConstructBranchAndVector
+  bHw_sum =     gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum");
+  bHw_sum_raw = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "hw_sum_raw");
+  bBlock =      gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block");
+  bBlock_raw =  gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "block_raw");
+  bNum_samples = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "num_samples");
+  bDevice_Error_Code = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "Device_Error_Code");
+  bSequence_number = gQwHists.MatchVQWKElementFromList(GetSubsystemName().Data(), GetModuleType().Data(), "sequence_number");
 
-    TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
-    fTreeArrayIndex  = values.size();
-
-    // For derived data (yield_, asym_, diff_), store with _hw_sum suffix for consistency
-    if (fDataToSave == kDerived) {
-      // Store the main hardware sum value with explicit _hw_sum suffix
-      values.resize(values.size() + 1, 0.0);
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum").Data()));
-      fTreeArrayNumEntries = 1;
-      return;
-    }
-
-    // For moments data (stat prefix), use the same structure as TTree to get exact field count match
-    if (fDataToSave == kMoments) {
-      // Create the same structure as TTree kMoments mode
-      if (bHw_sum) {
-        values.push_back(0.0);
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum").Data()));
-        values.push_back(0.0);
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum_m2").Data()));
-        values.push_back(0.0);
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum_err").Data()));
-      }
-
-      if (bBlock) {
-        for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-          values.push_back(0.0);
-          fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_block%d", i)).Data()));
-        }
-      }
-
-      if (bNum_samples) {
-        values.push_back(0.0);
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_num_samples").Data()));
-      }
-
-      if (bDevice_Error_Code) {
-        values.push_back(0.0);
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_Device_Error_Code").Data()));
-      }
-
-      fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
-      return;
-    }
-
-    // For raw data, use the full detailed format
-    // Calculate how many elements we need to avoid multiple push_back calls
-    size_t numElements = 0;
-
-    // Count elements based on what will be saved
-    if (bHw_sum) {
-      numElements += 1; // hw_sum
-    }
-    if (bBlock) numElements += fBlocksPerEvent; // blocks
-    if (bNum_samples) numElements += 1; // num_samples
-    if (bDevice_Error_Code) numElements += 1; // error code
-
-    if (fDataToSave == kRaw) {
-      if (bHw_sum_raw) numElements += 1; // hw_sum_raw
-      if (bBlock_raw) numElements += fBlocksPerEvent; // block_raw
-      numElements += 4*fBlocksPerEvent; // fBlockSumSq_raw (4*fBlocksPerEvent)
-      if (bSequence_number) numElements += 1; // sequence_number
-    }
-
-    // Resize vectors once to avoid reallocation
-    size_t oldSize = values.size();
-    values.resize(oldSize + numElements, 0.0);
-    fieldPtrs.reserve(fieldPtrs.size() + numElements);
-
-    // Add fields in the same order as FillTreeVector
-    // hw_sum
-    if (bHw_sum) {
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum").Data()));
-    }
-
-    if (bBlock) {
-      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_block%d", i)).Data()));
-      }
-    }
-
-    // num_samples
-    if (bNum_samples) {
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_num_samples").Data()));
-    }
-
-    // Device_Error_Code
-    if (bDevice_Error_Code) {
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_Device_Error_Code").Data()));
-    }
-
-    if (fDataToSave == kRaw) {
-      // hw_sum_raw
-      if (bHw_sum_raw) {
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum_raw").Data()));
-      }
-
-      if (bBlock_raw) {
-        for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-          fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_block%d_raw", i)).Data()));
-        }
-      }
-
-      for(int i = 0; i < fBlocksPerEvent; i++){
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_sumsq%d_low", i)).Data()));
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_sumsq%d_high", i)).Data()));
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_min%d", i)).Data()));
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_max%d", i)).Data()));
-      }
-
-      // sequence_number
-      if (bSequence_number) {
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_sequence_number").Data()));
-      }
-    }
-
-    fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
+  // For kMoments mode (running sum trees), enable all statistical fields regardless of histogram configuration
+  if (fDataToSave == kMoments) {
+    bHw_sum = true;
+    bBlock = true;
+    bNum_samples = true;
+    bDevice_Error_Code = true;
   }
+
+  const Bool_t save_new_decoder_fields = (fDecodeMode == kNewReshuffled);
+  TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
+  fTreeArrayIndex  = values.size();
+
+  // Same values, in the same order, as ConstructBranchAndVector;
+  // FillNTupleVector writes the values in this order.  The 64-bit sums of
+  // squares are split into exact 32-bit halves so they survive the doubles.
+  std::vector<std::string> suffixes;
+  auto add_field = [&](const TString& suffix) { suffixes.push_back(suffix.Data()); };
+
+  if (bHw_sum) {
+    add_field("_hw_sum");
+    if (save_new_decoder_fields)
+      add_field("_hw_sum_rms");
+    if (fDataToSave == kMoments) {
+      add_field("_hw_sum_m2");
+      add_field("_hw_sum_err");
+    }
+  }
+
+  if (bBlock) {
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+      add_field(Form("_block%d", i));
+      if (save_new_decoder_fields)
+        add_field(Form("_block%d_rms", i));
+    }
+  }
+
+  if (bNum_samples)
+    add_field("_num_samples");
+
+  if (save_new_decoder_fields) {
+    add_field("_region_number");
+    add_field("_region_timestamp");
+    add_field("_header_num_words");
+    add_field("_header_block_number");
+    add_field("_header_packet_count");
+    add_field("_header_tsamples");
+  }
+
+  if (bDevice_Error_Code)
+    add_field("_Device_Error_Code");
+
+  if (fDataToSave == kRaw) {
+    if (bHw_sum_raw)
+      add_field("_hw_sum_raw");
+
+    if (bBlock_raw) {
+      for (Int_t i = 0; i < fBlocksPerEvent; i++)
+        add_field(Form("_block%d_raw", i));
+    }
+
+    for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+      add_field(Form("_sumsq%d_low", i));
+      add_field(Form("_sumsq%d_high", i));
+      add_field(Form("_min%d", i));
+      add_field(Form("_max%d", i));
+    }
+
+    if (bSequence_number)
+      add_field("_sequence_number");
+  }
+
+  QwRootNTupleFields::AddChannel(model, basename, suffixes, values, fieldPtrs);
+  fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
 }
 
 void  QwMollerADC_Channel::FillNTupleVector(std::vector<Double_t>& values) const
@@ -1429,24 +1376,24 @@ void  QwMollerADC_Channel::FillNTupleVector(std::vector<Double_t>& values) const
   } else {
 
     UInt_t index = fTreeArrayIndex;
+    const Bool_t save_new_decoder_fields = (fDecodeMode == kNewReshuffled);
 
-    // For derived data (yield_, asym_, diff_), only fill the main value to match TTree format
-    if (fDataToSave == kDerived) {
-      values[index] = this->GetHardwareSum();
-      return;
-    }
-
-
-    // For raw data, use the full detailed format
     // hw_sum
     if (bHw_sum) {
       values[index++] = this->GetHardwareSum();
+      if (save_new_decoder_fields)
+        values[index++] = this->GetHardwareSumRMS();
+      if (fDataToSave == kMoments) {
+        values[index++] = this->GetHardwareSumM2();
+        values[index++] = this->GetHardwareSumError();
+      }
     }
 
     if (bBlock) {
       for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-        // blocki
         values[index++] = this->GetBlockValue(i);
+        if (save_new_decoder_fields)
+          values[index++] = this->GetBlockRMS(i);
       }
     }
 
@@ -1454,33 +1401,49 @@ void  QwMollerADC_Channel::FillNTupleVector(std::vector<Double_t>& values) const
     if (bNum_samples)
       values[index++] = fDataToSave == kMoments ? this->fGoodEventCount : this->fNumberOfSamples;
 
+    if (save_new_decoder_fields) {
+      values[index++] = static_cast<Double_t>(this->fRegionNumber);
+      values[index++] = static_cast<Double_t>(this->fRegionTimestamp);
+      values[index++] = static_cast<Double_t>(this->fHeaderNumWords);
+      values[index++] = static_cast<Double_t>(this->fHeaderBlockNumber);
+      values[index++] = static_cast<Double_t>(this->fHeaderPacketCount);
+      values[index++] = static_cast<Double_t>(this->fHeaderTSamples);
+    }
+
     // Device_Error_Code
     if (bDevice_Error_Code)
       values[index++] = this->fErrorFlag;
 
-    if (fDataToSave == kRaw)
-      {
-        // hw_sum_raw
-        if (bHw_sum_raw)
+    if (fDataToSave == kRaw) {
+      // hw_sum_raw
+      if (bHw_sum_raw) {
+        if (save_new_decoder_fields)
+          values[index++] = this->fHardwareBlockSum_raw;
+        else
           values[index++] = this->GetRawHardwareSum();
+      }
 
-        if (bBlock_raw) {
-          for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-            // blocki_raw
+      if (bBlock_raw) {
+        for (Int_t i = 0; i < fBlocksPerEvent; i++) {
+          // blocki_raw
+          if (save_new_decoder_fields)
+            values[index++] = this->fBlock_raw[i];
+          else
             values[index++] = this->GetRawBlockValue(i);
-          }
         }
+      }
 
-        for(int i = 0; i < fBlocksPerEvent; i++){
+      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
         values[index++] = fBlockSumSq_raw[i] & 0xffffffff;
         values[index++] = fBlockSumSq_raw[i] >> 32;
         values[index++] = fBlock_min[i];
         values[index++] = fBlock_max[i];
-        }
-        // sequence_number
-        if (bSequence_number)
-          values[index++] = this->fSequenceNumber;
       }
+
+      // sequence_number
+      if (bSequence_number)
+        values[index++] = this->fSequenceNumber;
+    }
   }
 }
 #endif // HAS_RNTUPLE_SUPPORT
