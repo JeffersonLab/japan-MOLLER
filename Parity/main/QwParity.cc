@@ -16,6 +16,7 @@
 #include "Rtypes.h"
 #include "TROOT.h"
 #include "TFile.h"
+#include "THLimitsFinder.h"
 #ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTuple.hxx"
 #include "ROOT/RNTupleModel.hxx"
@@ -34,6 +35,7 @@
 #include "QwSubsystemArrayParity.h"
 #include "QwHelicityPattern.h"
 #include "QwEventRing.h"
+#include "QwWorkerThread.h"
 #include "QwEPICSEvent.h"
 #include "QwCombiner.h"
 #include "QwCombinerSubsystem.h"
@@ -72,6 +74,7 @@ Int_t main(Int_t argc, Char_t* argv[])
   gQwOptions.AddOptions()("write-promptsummary", po::value<bool>()->default_bool_value(false), "Write PromptSummary");
   gQwOptions.AddOptions()("callgrind-instr-start-event-loop", po::value<bool>()->default_bool_value(false), "Start callgrind instrumentation with main event loop (with --instr-atstart=no)");
   gQwOptions.AddOptions()("callgrind-instr-stop-event-loop", po::value<bool>()->default_bool_value(false), "Stop callgrind instrumentation with main event loop (with --instr-atstart=no)");
+  gQwOptions.AddOptions()("async-histograms", po::value<bool>()->default_bool_value(false), "Fill the event histograms in a worker thread while the event is processed further");
 
   ///  Without anything, print usage
   if (argc == 1) {
@@ -155,6 +158,14 @@ Int_t main(Int_t argc, Char_t* argv[])
     //  events which pass through the ring.
     QwSubsystemArrayParity ringoutput(detectors);
 
+    ///  Thread that fills the event histograms from ringoutput
+    ///  (--async-histograms); declared after ringoutput, so it ends first
+    const bool async_histograms = gQwOptions.GetValue<bool>("async-histograms");
+    QwWorkerThread evt_histo_filler;
+    if (async_histograms) {
+      // Created now: a histogram buffer flush in either thread may use it
+      THLimitsFinder::GetLimitsFinder();
+    }
     /// Create the data handler arrays
     QwDataHandlerArray datahandlerarray_evt(gQwOptions,ringoutput,run_label);
     QwDataHandlerArray datahandlerarray_mul(gQwOptions,helicitypattern,run_label);
@@ -175,6 +186,13 @@ Int_t main(Int_t argc, Char_t* argv[])
     #ifdef __USE_DATABASE__
     database.SetupOneRun(eventbuffer);
     #endif // __USE_DATABASE__
+
+    //  All options are defined now; report typos once
+    static bool warned_unrecognized_options = false;
+    if (! warned_unrecognized_options) {
+      gQwOptions.WarnUnrecognizedOptions();
+      warned_unrecognized_options = true;
+    }
 
     //  Open the ROOT file (close when scope ends)
     QwRootFile *treerootfile  = NULL;
@@ -224,8 +242,8 @@ Int_t main(Int_t argc, Char_t* argv[])
 #ifdef HAS_RNTUPLE_SUPPORT
     treerootfile->ConstructNTupleFields("evt", "MPS event data RNTuple", ringoutput);
     treerootfile->ConstructNTupleFields("mul", "Helicity event data RNTuple", helicitypattern);
-    burstrootfile->ConstructNTupleFields("pr_yield", "Pair yield RNTuple", helicitypattern.GetPairYield(),"yield_");
-    burstrootfile->ConstructNTupleFields("pr_asym", "Pair asymmetry RNTuple", helicitypattern.GetPairAsymmetry(),"asym_");
+    burstrootfile->ConstructNTupleFields("pr", "Pair RNTuple", helicitypattern.GetPairYield(),"yield_");
+    burstrootfile->ConstructNTupleFields("pr", "Pair RNTuple", helicitypattern.GetPairAsymmetry(),"asym_");
     treerootfile->ConstructNTupleFields("slow", "EPICS and slow control RNTuple", epicsevent);
     burstrootfile->ConstructNTupleFields("burst", "Burst level data RNTuple", patternsum_per_burst, "|stat");
 #endif
@@ -359,6 +377,8 @@ Int_t main(Int_t argc, Char_t* argv[])
 
         // Check to see ring is ready
         if (eventring.IsReady()) {
+	  // The histograms of the previous event are filled from ringoutput
+	  evt_histo_filler.Wait();
 	  ringoutput = eventring.pop();
 	  ringoutput.IncrementErrorCounters();
 
@@ -366,8 +386,14 @@ Int_t main(Int_t argc, Char_t* argv[])
 	  // Accumulate the running sum to calculate the event based running average
 	  eventsum.AccumulateRunningSum(ringoutput);
 
-	  // Fill the histograms
-	  historootfile->FillHistograms(ringoutput);
+	  // Fill the histograms: with --async-histograms in the worker thread,
+	  // while the code below only reads ringoutput, until the next event
+	  if (async_histograms) {
+	    if (historootfile->ShouldFillHistograms(ringoutput))
+	      evt_histo_filler.Run([&ringoutput] { ringoutput.FillHistograms(); });
+	  } else {
+	    historootfile->FillHistograms(ringoutput);
+	  }
 
 	  // Fill mps tree branches
 	  treerootfile->FillTreeBranches(ringoutput);
@@ -405,12 +431,11 @@ Int_t main(Int_t argc, Char_t* argv[])
 	    burstrootfile->FillTreeBranches(helicitypattern.GetPairDifference());
 	    burstrootfile->FillTree("pr");
 
-	    // Fill pair RNTuples if enabled
+	    // Fill the pair RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-	    burstrootfile->FillNTupleFields("pr_yield", helicitypattern.GetPairYield());
-	    burstrootfile->FillNTupleFields("pr_asym", helicitypattern.GetPairAsymmetry());
-	    burstrootfile->FillNTuple("pr_yield");
-	    burstrootfile->FillNTuple("pr_asym");
+	    burstrootfile->FillNTupleFields("pr", helicitypattern.GetPairYield());
+	    burstrootfile->FillNTupleFields("pr", helicitypattern.GetPairAsymmetry());
+	    burstrootfile->FillNTuple("pr");
 #endif
 
 	    // Clear the data
@@ -515,6 +540,9 @@ Int_t main(Int_t argc, Char_t* argv[])
       } // detectors.ApplySingleEventCuts()
 
     } // end of loop over events
+
+    // The event histograms of the last event
+    evt_histo_filler.Wait();
 
     // Unwind event ring
     QwMessage << "Unwinding event ring" << QwLog::endl;

@@ -176,6 +176,8 @@ class VQwDataHandler:  virtual public VQwDataHandlerCloneable, public MQwPublish
    TString fName;
    std::string fMapFile;
    std::string fTreeName;
+   /// Output tree/RNTuple name: the tree prefix (e.g. "burst_") + fTreeName
+   std::string fOutputTreeName;
    std::string fTreeComment;
 
    std::string fPrefix;

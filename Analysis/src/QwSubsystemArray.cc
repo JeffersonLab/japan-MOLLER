@@ -709,11 +709,9 @@ void QwSubsystemArray::ConstructNTupleAndVector(
 {
   fTreeArrayIndex = values.size();
 
-  // Debug output for eventsum
-  // Reserve space for event metadata
-  values.push_back(0.0);
-  values.push_back(0.0);
-  values.push_back(0.0);
+  // Reserve space for the event number and event type; every value must have
+  // a matching entry in fieldPtrs, since QwRootNTuple binds values[i] to the
+  // field of fieldPtrs[i]
   values.push_back(0.0);
   values.push_back(0.0);
 

@@ -119,6 +119,8 @@ class LinRegBevPeb {
 
   /// Friend class with correlator for ROOT tree output
   friend class QwCorrelator;
+  /// Friend class for RNTuple output
+  friend class QwCorrelatorNTuple;
 };
 
 /// Output stream operator
