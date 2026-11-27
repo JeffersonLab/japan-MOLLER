@@ -11,11 +11,21 @@
 #include <fstream>
 #include <vector>
 #include <new>
+#include <condition_variable>
+#include <deque>
+#include <exception>
+#include <functional>
+#include <atomic>
+#include <memory>
+#include <mutex>
+#include <stdexcept>
+#include <thread>
 
 // ROOT headers
 #include "Rtypes.h"
 #include "TROOT.h"
 #include "TFile.h"
+#include "THLimitsFinder.h"
 #ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTuple.hxx"
 #include "ROOT/RNTupleModel.hxx"
@@ -34,6 +44,7 @@
 #include "QwSubsystemArrayParity.h"
 #include "QwHelicityPattern.h"
 #include "QwEventRing.h"
+#include "QwWorkerThread.h"
 #include "QwEPICSEvent.h"
 #include "QwCombiner.h"
 #include "QwCombinerSubsystem.h"
@@ -57,6 +68,100 @@
 #include <valgrind/callgrind.h>
 #endif
 
+/// A queue between two threads; Pop() waits for an item
+template <class T>
+class QwBlockingQueue {
+  public:
+    void Push(T item) {
+      {
+        std::lock_guard<std::mutex> lock(fMutex);
+        fQueue.push_back(std::move(item));
+      }
+      fCond.notify_one();
+    }
+    T Pop() {
+      std::unique_lock<std::mutex> lock(fMutex);
+      fCond.wait(lock, [this] { return !fQueue.empty() || fCancelled; });
+      if (fQueue.empty()) throw std::runtime_error("event pipeline cancelled");
+      T item = std::move(fQueue.front());
+      fQueue.pop_front();
+      return item;
+    }
+    /// Pop() throws instead of waiting
+    void Cancel() {
+      {
+        std::lock_guard<std::mutex> lock(fMutex);
+        fCancelled = true;
+      }
+      fCond.notify_all();
+    }
+  private:
+    std::mutex fMutex;
+    std::condition_variable fCond;
+    std::deque<T> fQueue;
+    bool fCancelled = false;
+};
+
+/**
+ * Events handed from the reader thread (first stage of the event loop:
+ * decoding, event cuts, event ring) to the main thread (--pipeline), and
+ * from there to the pattern thread (--pattern-thread).  The events are
+ * copied into preallocated slots, which are reused when the last stage is
+ * done with them; EPICS events go through the same queues, so that each
+ * stage sees everything in order.
+ */
+class QwEventPipeline {
+  public:
+    enum Kind { kEvent, kEPICS, kEnd };
+    struct Item {
+      Kind kind;
+      QwSubsystemArrayParity* event;
+    };
+
+    QwEventPipeline(const QwSubsystemArrayParity& prototype, size_t nslots) {
+      for (size_t i = 0; i < nslots; i++) {
+        fSlots.push_back(std::make_unique<QwSubsystemArrayParity>(prototype));
+        fFree.Push(fSlots.back().get());
+      }
+    }
+
+    /// Reader thread: a slot to copy the next event into (waits for one)
+    QwSubsystemArrayParity* GetFreeSlot() { return fFree.Pop(); }
+    /// Last stage: the slot can be reused
+    void Recycle(QwSubsystemArrayParity* slot) { fFree.Push(slot); }
+
+    /// Reader thread: pass an event (or the end of the events)
+    void Push(Kind kind, QwSubsystemArrayParity* event = nullptr) { fToMain.Push(Item{kind, event}); }
+    /// Reader thread: pass an EPICS event, and wait until it has been
+    /// processed (the reader reuses the EPICS event object)
+    void PushEPICSAndWait() {
+      fToMain.Push(Item{kEPICS, nullptr});
+      fEPICSDone.Pop();
+    }
+    /// The stage that processes the EPICS events: done with it
+    void EPICSDone() { fEPICSDone.Push(1); }
+
+    /// Main thread: the next item (waits for it)
+    Item Pop() { return fToMain.Pop(); }
+    /// Main thread: pass an item to the pattern thread
+    void PushPattern(const Item& item) { fToPattern.Push(item); }
+    /// Pattern thread: the next item (waits for it)
+    Item PopPattern() { return fToPattern.Pop(); }
+
+    /// Stop all stages (after an error)
+    void Cancel() {
+      fFree.Cancel();
+      fToMain.Cancel();
+      fToPattern.Cancel();
+      fEPICSDone.Cancel();
+    }
+
+  private:
+    std::vector<std::unique_ptr<QwSubsystemArrayParity>> fSlots;
+    QwBlockingQueue<QwSubsystemArrayParity*> fFree;
+    QwBlockingQueue<Item> fToMain, fToPattern;
+    QwBlockingQueue<int> fEPICSDone;
+};
 Int_t main(Int_t argc, Char_t* argv[])
 {
   ///  Enable implicit multi-threading in e.g. TTree::Fill
@@ -72,6 +177,10 @@ Int_t main(Int_t argc, Char_t* argv[])
   gQwOptions.AddOptions()("write-promptsummary", po::value<bool>()->default_bool_value(false), "Write PromptSummary");
   gQwOptions.AddOptions()("callgrind-instr-start-event-loop", po::value<bool>()->default_bool_value(false), "Start callgrind instrumentation with main event loop (with --instr-atstart=no)");
   gQwOptions.AddOptions()("callgrind-instr-stop-event-loop", po::value<bool>()->default_bool_value(false), "Stop callgrind instrumentation with main event loop (with --instr-atstart=no)");
+  gQwOptions.AddOptions()("async-histograms", po::value<bool>()->default_bool_value(false), "Fill the event histograms in a worker thread while the event is processed further");
+  gQwOptions.AddOptions()("histogram-threads", po::value<int>()->default_value(1), "With --async-histograms: number of worker threads that fill the event histograms (each fills whole subsystems)");
+  gQwOptions.AddOptions()("pipeline", po::value<bool>()->default_bool_value(false), "Read, decode and cut the events and pass them through the event ring in a reader thread, while the main thread processes the events that leave the ring");
+  gQwOptions.AddOptions()("pattern-thread", po::value<bool>()->default_bool_value(false), "With --pipeline, --enable-rntuples and --rntuple-writer-thread: process the helicity patterns (and EPICS events) in a third thread");
 
   ///  Without anything, print usage
   if (argc == 1) {
@@ -155,6 +264,53 @@ Int_t main(Int_t argc, Char_t* argv[])
     //  events which pass through the ring.
     QwSubsystemArrayParity ringoutput(detectors);
 
+    ///  Threads that fill the event histograms from ringoutput
+    ///  (--async-histograms); declared after ringoutput, so they end first.
+    ///  Each takes the next subsystem until all are filled, so the
+    ///  histograms of a subsystem are filled by one thread.
+    const bool async_histograms = gQwOptions.GetValue<bool>("async-histograms");
+    std::vector<std::unique_ptr<QwWorkerThread>> evt_histo_fillers;
+    std::atomic<size_t> next_histo_subsystem(0);
+    if (async_histograms) {
+      const int nthreads = std::max(1, gQwOptions.GetValue<int>("histogram-threads"));
+      for (int i = 0; i < nthreads; i++)
+        evt_histo_fillers.push_back(std::make_unique<QwWorkerThread>());
+      // Created now: a histogram buffer flush in either thread may use it
+      THLimitsFinder::GetLimitsFinder();
+    }
+    auto wait_evt_histos = [&]() {
+      for (auto& filler : evt_histo_fillers) filler->Wait();
+    };
+
+    ///  The event level and the helicity patterns fill different TTrees
+    ///  or RNTuples of the same files: from two threads only with RNTuples
+    ///  written by the writer thread (TTrees are disabled with RNTuples)
+    bool pattern_thread = gQwOptions.GetValue<bool>("pattern-thread");
+    if (pattern_thread) {
+      bool ok = gQwOptions.GetValue<bool>("pipeline");
+#ifdef HAS_RNTUPLE_SUPPORT
+      ok = ok && gQwOptions.GetValue<bool>("enable-rntuples")
+              && gQwOptions.GetValue<bool>("rntuple-writer-thread");
+#else
+      ok = false;
+#endif
+      if (!ok) {
+        QwWarning << "--pattern-thread requires --pipeline, --enable-rntuples "
+                  << "and --rntuple-writer-thread; not used" << QwLog::endl;
+        pattern_thread = false;
+      }
+    }
+    auto fill_evt_histos = [&]() {
+      // As QwSubsystemArrayParity::FillHistograms
+      if (ringoutput.GetEventcutErrorFlag() != 0) return;
+      next_histo_subsystem = 0;
+      for (auto& filler : evt_histo_fillers) {
+        filler->Run([&]() {
+          for (size_t i; (i = next_histo_subsystem++) < ringoutput.size(); )
+            ringoutput.at(i)->FillHistograms();
+        });
+      }
+    };
     /// Create the data handler arrays
     QwDataHandlerArray datahandlerarray_evt(gQwOptions,ringoutput,run_label);
     QwDataHandlerArray datahandlerarray_mul(gQwOptions,helicitypattern,run_label);
@@ -175,6 +331,13 @@ Int_t main(Int_t argc, Char_t* argv[])
     #ifdef __USE_DATABASE__
     database.SetupOneRun(eventbuffer);
     #endif // __USE_DATABASE__
+
+    //  All options are defined now; report typos once
+    static bool warned_unrecognized_options = false;
+    if (! warned_unrecognized_options) {
+      gQwOptions.WarnUnrecognizedOptions();
+      warned_unrecognized_options = true;
+    }
 
     //  Open the ROOT file (close when scope ends)
     QwRootFile *treerootfile  = NULL;
@@ -224,8 +387,8 @@ Int_t main(Int_t argc, Char_t* argv[])
 #ifdef HAS_RNTUPLE_SUPPORT
     treerootfile->ConstructNTupleFields("evt", "MPS event data RNTuple", ringoutput);
     treerootfile->ConstructNTupleFields("mul", "Helicity event data RNTuple", helicitypattern);
-    burstrootfile->ConstructNTupleFields("pr_yield", "Pair yield RNTuple", helicitypattern.GetPairYield(),"yield_");
-    burstrootfile->ConstructNTupleFields("pr_asym", "Pair asymmetry RNTuple", helicitypattern.GetPairAsymmetry(),"asym_");
+    burstrootfile->ConstructNTupleFields("pr", "Pair RNTuple", helicitypattern.GetPairYield(),"yield_");
+    burstrootfile->ConstructNTupleFields("pr", "Pair RNTuple", helicitypattern.GetPairAsymmetry(),"asym_");
     treerootfile->ConstructNTupleFields("slow", "EPICS and slow control RNTuple", epicsevent);
     burstrootfile->ConstructNTupleFields("burst", "Burst level data RNTuple", patternsum_per_burst, "|stat");
 #endif
@@ -310,64 +473,79 @@ Int_t main(Int_t argc, Char_t* argv[])
     }
 #endif
 
-    ///  Start loop over events
-    while (eventbuffer.GetNextEvent() == CODA_OK) {
+    ///  First stage of the event loop: read and decode the events, apply
+    ///  the event cuts and pass the events through the event ring.
+    ///  on_epics() is called for each EPICS event with data (in
+    ///  epicsevent), and on_event() when the ring has an event ready.
+    auto read_events = [&](const std::function<void()>& on_epics,
+                           const std::function<void()>& on_event) {
+      while (eventbuffer.GetNextEvent() == CODA_OK) {
 
-      //  First, do processing of non-physics events...
-      if (eventbuffer.IsROCConfigurationEvent()) {
-        //  Send ROC configuration event data to the subsystem objects.
-        eventbuffer.FillSubsystemConfigurationData(detectors);
+        //  First, do processing of non-physics events...
+        if (eventbuffer.IsROCConfigurationEvent()) {
+          //  Send ROC configuration event data to the subsystem objects.
+          eventbuffer.FillSubsystemConfigurationData(detectors);
+        }
+
+        //  Secondly, process EPICS events, but not for online running,
+        //  because the EPICS events get messed up by our 32-bit to 64-bit
+        //  double ET system.
+        if (! eventbuffer.IsOnline() && eventbuffer.IsEPICSEvent()) {
+          eventbuffer.FillEPICSData(epicsevent);
+          if (epicsevent.HasDataLoaded()){
+            epicsevent.CalculateRunningValues();
+            on_epics();
+          }
+        }
+
+        //  Now, if this is not a physics event, go back and get a new event.
+        if (! eventbuffer.IsPhysicsEvent()) continue;
+
+        //  Fill the subsystem objects with their respective data for this event.
+        eventbuffer.FillSubsystemData(detectors);
+
+        //  Process the subsystem data
+        detectors.ProcessEvent();
+
+        // The event pass the event cut constraints
+        if (detectors.ApplySingleEventCuts()) {
+          // Add event to the ring
+          eventring.push(detectors);
+          // Check to see ring is ready
+          if (eventring.IsReady()) on_event();
+        }
       }
+    };
 
-      //  Secondly, process EPICS events, but not for online running,
-      //  because the EPICS events get messed up by our 32-bit to 64-bit
-      //  double ET system.
-      if (! eventbuffer.IsOnline() && eventbuffer.IsEPICSEvent()) {
-        eventbuffer.FillEPICSData(epicsevent);
-	if (epicsevent.HasDataLoaded()){
-	  epicsevent.CalculateRunningValues();
-	  helicitypattern.UpdateBlinder(epicsevent);
+    ///  Second stage for EPICS events
+    auto process_epics = [&]() {
+      helicitypattern.UpdateBlinder(epicsevent);
 
-	  treerootfile->FillTreeBranches(epicsevent);
-	  treerootfile->FillTree("slow");
+      treerootfile->FillTreeBranches(epicsevent);
+      treerootfile->FillTree("slow");
 
-	  // Fill RNTuple if enabled
+      // Fill RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-	  treerootfile->FillNTupleFields(epicsevent);
-	  treerootfile->FillNTuple("slow");
+      treerootfile->FillNTupleFields(epicsevent);
+      treerootfile->FillNTuple("slow");
 #endif
-	}
-      }
+    };
 
-
-      //  Now, if this is not a physics event, go back and get a new event.
-      if (! eventbuffer.IsPhysicsEvent()) continue;
-
-
-      //  Fill the subsystem objects with their respective data for this event.
-      eventbuffer.FillSubsystemData(detectors);
-
-      //  Process the subsystem data
-      detectors.ProcessEvent();
-
-
-      // The event pass the event cut constraints
-      if (detectors.ApplySingleEventCuts()) {
-
-        // Add event to the ring
-        eventring.push(detectors);
-
-        // Check to see ring is ready
-        if (eventring.IsReady()) {
-	  ringoutput = eventring.pop();
+    ///  Second stage for the events that leave the ring (in ringoutput)
+    auto process_event = [&]() {
 	  ringoutput.IncrementErrorCounters();
 
 
 	  // Accumulate the running sum to calculate the event based running average
 	  eventsum.AccumulateRunningSum(ringoutput);
 
-	  // Fill the histograms
-	  historootfile->FillHistograms(ringoutput);
+	  // Fill the histograms: with --async-histograms in the worker thread,
+	  // while the code below only reads ringoutput, until the next event
+	  if (async_histograms) {
+	    if (historootfile->ShouldFillHistograms(ringoutput)) fill_evt_histos();
+	  } else {
+	    historootfile->FillHistograms(ringoutput);
+	  }
 
 	  // Fill mps tree branches
 	  treerootfile->FillTreeBranches(ringoutput);
@@ -393,8 +571,14 @@ Int_t main(Int_t argc, Char_t* argv[])
           datahandlerarray_evt.FillNTupleFields(treerootfile);
 #endif
 
+    }; // process_event
+
+    ///  Second stage for the helicity patterns, with the events of
+    ///  process_event in the same order (ringoutput, or a copy of it in
+    ///  the pattern thread)
+    auto process_pattern = [&](QwSubsystemArrayParity& event) {
           // Load the event into the helicity pattern
-          helicitypattern.LoadEventData(ringoutput);
+          helicitypattern.LoadEventData(event);
 
 	  if (helicitypattern.PairAsymmetryIsGood()) {
             patternsum.AccumulatePairRunningSum(helicitypattern);
@@ -405,12 +589,11 @@ Int_t main(Int_t argc, Char_t* argv[])
 	    burstrootfile->FillTreeBranches(helicitypattern.GetPairDifference());
 	    burstrootfile->FillTree("pr");
 
-	    // Fill pair RNTuples if enabled
+	    // Fill the pair RNTuple if enabled
 #ifdef HAS_RNTUPLE_SUPPORT
-	    burstrootfile->FillNTupleFields("pr_yield", helicitypattern.GetPairYield());
-	    burstrootfile->FillNTupleFields("pr_asym", helicitypattern.GetPairAsymmetry());
-	    burstrootfile->FillNTuple("pr_yield");
-	    burstrootfile->FillNTuple("pr_asym");
+	    burstrootfile->FillNTupleFields("pr", helicitypattern.GetPairYield());
+	    burstrootfile->FillNTupleFields("pr", helicitypattern.GetPairAsymmetry());
+	    burstrootfile->FillNTuple("pr");
 #endif
 
 	    // Clear the data
@@ -509,12 +692,107 @@ Int_t main(Int_t argc, Char_t* argv[])
               helicitypattern.ClearEventData();
 
 	  } // helicitypattern.IsGoodAsymmetry()
+    }; // process_pattern
 
-        } // eventring.IsReady()
+    if (! gQwOptions.GetValue<bool>("pipeline")) {
+      ///  Loop over events
+      read_events(process_epics, [&]() {
+        // The histograms of the previous event are filled from ringoutput
+        wait_evt_histos();
+        ringoutput = eventring.pop();
+        process_event();
+        process_pattern(ringoutput);
+      });
+    } else {
+      ///  Loop over events with the first stage in a reader thread; the
+      ///  reader copies the events that leave the ring into the slots of
+      ///  the pipeline, and the main thread processes them in order.  With
+      ///  the pattern thread, the main thread does the event level
+      ///  (process_event) and passes the slots on; the pattern thread does
+      ///  the helicity patterns (process_pattern) and the EPICS events.
+      QwEventPipeline pipeline(detectors, pattern_thread ? 16 : 8);
+      std::exception_ptr reader_error, pattern_error;
+      std::thread reader([&]() {
+        try {
+          read_events(
+            [&]() { pipeline.PushEPICSAndWait(); },
+            [&]() {
+              QwSubsystemArrayParity* slot = pipeline.GetFreeSlot();
+              *slot = eventring.pop();
+              pipeline.Push(QwEventPipeline::kEvent, slot);
+            });
+        } catch (...) {
+          reader_error = std::current_exception();
+        }
+        pipeline.Push(QwEventPipeline::kEnd);
+      });
+      std::thread patterner;
+      if (pattern_thread) {
+        patterner = std::thread([&]() {
+          try {
+            for (;;) {
+              QwEventPipeline::Item item = pipeline.PopPattern();
+              if (item.kind == QwEventPipeline::kEnd) break;
+              if (item.kind == QwEventPipeline::kEPICS) {
+                process_epics();
+                pipeline.EPICSDone();
+                continue;
+              }
+              process_pattern(*item.event);
+              pipeline.Recycle(item.event);
+            }
+          } catch (...) {
+            pattern_error = std::current_exception();
+            pipeline.Cancel();
+          }
+        });
+      }
+      auto join_all = [&]() {
+        reader.join();
+        if (patterner.joinable()) patterner.join();
+      };
+      try {
+        for (;;) {
+          QwEventPipeline::Item item = pipeline.Pop();
+          if (item.kind == QwEventPipeline::kEnd) {
+            if (pattern_thread) pipeline.PushPattern(item);
+            break;
+          }
+          if (item.kind == QwEventPipeline::kEPICS) {
+            if (pattern_thread) {
+              pipeline.PushPattern(item);
+            } else {
+              process_epics();
+              pipeline.EPICSDone();
+            }
+            continue;
+          }
+          // The histograms of the previous event are filled from ringoutput
+          wait_evt_histos();
+          ringoutput = *item.event;
+          if (pattern_thread) {
+            process_event();
+            pipeline.PushPattern(item);
+          } else {
+            pipeline.Recycle(item.event);
+            process_event();
+            process_pattern(ringoutput);
+          }
+        }
+      } catch (...) {
+        pipeline.Cancel();
+        join_all();
+        if (pattern_error) std::rethrow_exception(pattern_error);
+        if (reader_error) std::rethrow_exception(reader_error);
+        throw;
+      }
+      join_all();
+      if (pattern_error) std::rethrow_exception(pattern_error);
+      if (reader_error) std::rethrow_exception(reader_error);
+    }
 
-      } // detectors.ApplySingleEventCuts()
-
-    } // end of loop over events
+    // The event histograms of the last event
+    wait_evt_histos();
 
     // Unwind event ring
     QwMessage << "Unwinding event ring" << QwLog::endl;

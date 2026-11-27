@@ -177,6 +177,7 @@ QwHelicityPattern::QwHelicityPattern(QwSubsystemArrayParity &event, const TStrin
           fHelicity.resize(fPatternSize,-9999);
           fEventNumber.resize(fPatternSize,-1);
           fEventLoaded.resize(fPatternSize,kFALSE);
+          fEventNeedsClear.resize(fPatternSize,kTRUE);
 
           // Initialize the pattern number
           fQuartetNumber = 0;
@@ -334,6 +335,7 @@ std::cout << "local phase no: " << localPhaseNumber << " current pattern no: " <
     }
     fEvents[localPhaseNumber]      = event;
     fEventLoaded[localPhaseNumber] = kTRUE;
+    fEventNeedsClear[localPhaseNumber] = kTRUE;
     fHelicity[localPhaseNumber]    = localHelicityActual;
     fEventNumber[localPhaseNumber] = localEventNumber;
     // Check to see if we should ignore the helicity; this is
@@ -671,7 +673,13 @@ void QwHelicityPattern::ClearEventData()
   fIgnoreHelicity = kFALSE;
   for(size_t i=0; i<fEvents.size(); i++)
     {
-      fEvents[i].ClearEventData();
+      // Only the slots with data since they were last cleared (clearing a
+      // cleared slot changes nothing; the patterns are cleared twice, when
+      // complete and when the next one starts)
+      if (fEventNeedsClear[i]) {
+        fEvents[i].ClearEventData();
+        fEventNeedsClear[i]=kFALSE;
+      }
       fEventLoaded[i]=kFALSE;
       fHelicity[i]=-999;
     }
@@ -958,8 +966,9 @@ void QwHelicityPattern::FillTreeVector(QwRootTreeBranchVector &values) const
 void QwHelicityPattern::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length())+"BurstCounter";
-  // Note: fBurstCounter is a Short_t, but we're only creating Double_t fields for now
-  // This maintains compatibility with the existing TTree structure
+  values.push_back(0.0);
+  fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+  fBurstCounterNTupleIndex = values.size() - 1;
 
   TString newprefix = "yield_" + prefix;
   fYield.ConstructNTupleAndVector(model, newprefix, values, fieldPtrs);
@@ -980,6 +989,9 @@ void QwHelicityPattern::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleMo
 
 void QwHelicityPattern::FillNTupleVector(std::vector<Double_t>& values) const
 {
+  // Like the TTree branch, which points at fBurstCounter, filled for every pattern
+  if (fBurstCounterNTupleIndex >= 0 && fBurstCounterNTupleIndex < static_cast<Int_t>(values.size()))
+    values[fBurstCounterNTupleIndex] = fBurstCounter;
   if (fPatternIsGood) {
     fYield.FillNTupleVector(values);
     fAsymmetry.FillNTupleVector(values);

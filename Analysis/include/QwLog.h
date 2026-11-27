@@ -11,6 +11,7 @@
 // System headers
 #include <iostream>
 #include <iomanip>
+#include <mutex>
 #include <string>
 #include <vector>
 using std::string;
@@ -140,6 +141,7 @@ class QwLog : public std::ostream {
     /*! \brief Stream an object to the output stream
      */
     template <class T> QwLog&   operator<<(const T &t) {
+      std::lock_guard<std::mutex> lock(fMutex);
       if (fScreen && fLogLevel <= fScreenThreshold) {
         *(fScreen) << t;
       }
@@ -177,8 +179,8 @@ class QwLog : public std::ostream {
     //! File thresholds and stream
     QwLogLevel    fFileThreshold;
     std::ostream *fFile;
-    //! Log level of this stream
-    QwLogLevel fLogLevel;
+    //! Log level of the current message (of each thread)
+    static thread_local QwLogLevel fLogLevel;
 
     //! Flag to print function signature on warning or error
     bool fPrintFunctionSignature;
@@ -190,10 +192,15 @@ class QwLog : public std::ostream {
     //! Flag to disable color
     bool fUseColor;
 
-    //! Flags only relevant for current line, but static for use in static function
-    static bool fFileAtNewLine;
-    static bool fScreenInColor;
-    static bool fScreenAtNewLine;
+    //! Flags only relevant for current line (of each thread), but static for
+    //! use in static function
+    static thread_local bool fFileAtNewLine;
+    static thread_local bool fScreenInColor;
+    static thread_local bool fScreenAtNewLine;
+
+    //! Serializes the writes of threads that log at the same time (their
+    //! lines may still interleave)
+    static std::mutex fMutex;
 
 };
 

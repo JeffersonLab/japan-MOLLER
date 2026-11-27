@@ -27,6 +27,7 @@ class TMemFile;
 #include <TQObject.h>
 #include <vector>
 #include <map>
+#include <set>
 #include <deque>
 #include <TString.h>
 #include <TCut.h>
@@ -34,6 +35,9 @@ class TMemFile;
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
+#include "TAttLine.h"
+#include "TAttFill.h"
+#include "TAttMarker.h"
 #include "panguinOnlineConfig.hh"
 
 #define UPDATETIME 1000
@@ -84,6 +88,17 @@ private:
   std::unique_ptr<ROOT::RDataFrame>      fDataFrame;
 #ifdef HAS_RNTUPLE_SUPPORT
   std::vector < std::vector <TString> >       ntupleVars;
+  // For each RNTuple: TTree-style variable names (channel, channel.leaf,
+  // channel_value) mapped to RDataFrame expressions (field or field[i])
+  std::vector < std::map <TString,TString> >  fNTupleAliases;
+  // For each RNTuple: std::vector<double> fields (correlator matrices/vectors)
+  std::vector < std::set <TString> >          fNTupleVectorFields;
+  std::vector < ULong64_t >                   fNTupleNEntries;
+  // For each RNTuple: RDataFrame reused by all plots, because opening one
+  // deserializes the page list of every column
+  std::vector < std::unique_ptr<ROOT::RDataFrame> > fNTupleDataFrames;
+  // For each RNTuple: compiled Filter nodes, keyed by the translated cut
+  std::vector < std::map <TString, ROOT::RDF::RNode> > fNTupleFilters;
 #endif // HAS_RNTUPLE_SUPPORT
   std::vector < std::vector <TString> >       treeVars;
   std::vector < std::pair <TString,TString> > fileObjects;
@@ -109,6 +124,13 @@ private:
 
   int fVerbosity;
 
+  // ROOT's default drawing attributes at start-up.  TTree::Draw uses the
+  // TTree's attributes, which JAPAN TTrees get from that style; RNTuple
+  // plots use these so they look the same (PrintPages changes gStyle).
+  TAttLine                          fTreeLineAtt;
+  TAttFill                          fTreeFillAtt;
+  TAttMarker                        fTreeMarkerAtt;
+
 public:
   OnlineGUI(OnlineConfig&, Bool_t,int);
   void CreateGUI(const TGWindow *p, UInt_t w, UInt_t h);
@@ -129,6 +151,11 @@ public:
   void GetNTupleVars();
   UInt_t GetNTupleIndex(TString);
   void NTupleDraw(std::vector <TString>);
+  // Translation of TTree-style draw expressions for RNTuples
+  void BuildNTupleAliases();
+  Bool_t ResolveNTupleName(UInt_t iNTuple, const TString& name, const TString& leaf, TString& expr);
+  Bool_t TranslateNTupleExpression(UInt_t iNTuple, const TString& in, TString& out, TString& missing);
+  UInt_t FindNTupleForExpression(TString expr, const TString& ntupleName);
 #endif // HAS_RNTUPLE_SUPPORT
 #ifdef QW_ENABLE_MAPFILE
   Bool_t LoadRNTupleSnapshot();
