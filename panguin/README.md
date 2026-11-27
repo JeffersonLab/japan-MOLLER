@@ -79,6 +79,14 @@ Panguin will search the Ttrees that it finds in the file you specified and will 
 - **var1:var2**; draw a 2D histogram (above options can also be used)
 - **var1:var2 CodaEventNumber>10**; same as above with the extra cut based on variables available in the Ttree;
 - **macro someMacro.C**; for more complicated plots you can write your own macro and then output the result in the PANGUIN tab. The macro needs to create only one plot.
+### RNTuple files
+Files written by `qwparity --enable-rntuples --disable-trees` hold RNTuples instead of TTrees. Panguin draws from them with the same configuration files, through RDataFrame:
+- TTree-style names are translated to the RNTuple fields: a channel name (`yield_bcm0l02`) means its main value (`hw_sum`), `channel.leaf` (`yield_bcm0l02.Device_Error_Code`) means one of its values, and a units leaf alone (`ppm`) means `units.ppm`. Both RNTuple layouts are supported: one field per value (`yield_bcm0l02_hw_sum`), and one array field per channel (`--rntuple-channel-arrays`, element names in the field description). The RNTuple field names can also be used directly.
+- Expressions, functions (`abs`, `sqrt`, `TMath::Abs`), cuts, `Entry$` and `Entries$` work as for TTrees; other TTreeFormula specials (`Sum$`, `Length$`, ...) do not.
+- `var`, `var1:var2` and `var1:var2:var3` draws use the same default binning, axis ranges and `-type` options (`prof`, `box`, `colz`, `scat`, point and line plots) as TTree::Draw. An axis is aligned to whole numbers when it shows a single variable whose values are all integers.
+- `-tree NAME` selects the RNTuple, which has the name of the corresponding TTree. Files from older JAPAN versions split the TTree `pr` into the RNTuples `pr_yield` and `pr_asym`; for those, `-tree pr` picks the one holding the variables, and a single draw cannot combine yield and asymmetry values.
+- With `-P`, a verbosity of 1 or more (`-v 1`) prints one `PLOT` line per plot (entries, mean, RMS, axis ranges), which can be used to compare the output of two files.
+- [RNTUPLE_MOCK_TEST.md](RNTUPLE_MOCK_TEST.md) walks through generating mock data, writing it as RNTuples and drawing it with `macros/rntuple_mock_test.cfg`.
 ### Non-standard GUI color
 - **guicolor** followed by the string of a color like (white, red, blue) allows you to set the border color of the gui
 ###
