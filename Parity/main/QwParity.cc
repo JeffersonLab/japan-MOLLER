@@ -16,6 +16,8 @@
 #include "Rtypes.h"
 #include "TROOT.h"
 #include "TFile.h"
+#include "TStorage.h"
+#include <limits>
 #ifdef HAS_RNTUPLE_SUPPORT
 #include "ROOT/RNTuple.hxx"
 #include "ROOT/RNTupleModel.hxx"
@@ -59,6 +61,15 @@
 
 Int_t main(Int_t argc, Char_t* argv[])
 {
+  ///  ROOT's libNew (linked for TMapFile support) records the largest block
+  ///  allocated so far without synchronization, and aborts when a larger
+  ///  block is deleted ("unreasonable size").  When several threads allocate
+  ///  (e.g. with ROOT's implicit multi-threading below), a racing update can
+  ///  lower the record below a block still in use.  Setting it above any
+  ///  possible allocation, before any thread is started, keeps every later
+  ///  update at or above that value.
+  TStorage::SetMaxBlockSize(std::numeric_limits<size_t>::max() / 2);
+
   ///  Enable implicit multi-threading in e.g. TTree::Fill
   ROOT::EnableImplicitMT();
 
