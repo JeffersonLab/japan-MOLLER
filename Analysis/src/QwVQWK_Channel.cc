@@ -15,6 +15,7 @@
 #include "QwBlinder.h"
 #include "QwHistogramHelper.h"
 #include "QwRootFile.h"
+#include "QwRootNTupleFields.h"
 #ifdef __USE_DATABASE__
 #include "QwDBInterface.h"
 #endif
@@ -930,98 +931,44 @@ void  QwVQWK_Channel::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleMode
   TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length()) + GetElementName();
   fTreeArrayIndex  = values.size();
 
-  // For derived data (yield_, asym_, diff_), store with _hw_sum suffix for consistency
-  if (fDataToSave == kDerived) {
-    // Store the main hardware sum value with explicit _hw_sum suffix
-    values.push_back(0.0);
-    auto field = model->MakeField<Double_t>((basename + "_hw_sum").Data());
-    fieldPtrs.push_back(field);
-    fTreeArrayNumEntries = 1;
-    return;
+  // Same values, in the same order, as ConstructBranchAndVector;
+  // FillNTupleVector writes the values in this order
+  std::vector<std::string> suffixes;
+  auto add_field = [&](const TString& suffix) { suffixes.push_back(suffix.Data()); };
+
+  if (bHw_sum) {
+    add_field("_hw_sum");
+    if (fDataToSave == kMoments) {
+      add_field("_hw_sum_m2");
+      add_field("_hw_sum_err");
+    }
   }
 
-  // For moments data (stat prefix), use the same structure as TTree to get exact field count match
-  if (fDataToSave == kMoments) {
-    // Create the same structure as TTree kMoments mode
-    if (bHw_sum) {
-      values.push_back(0.0);
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum").Data()));
-      values.push_back(0.0);
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum_m2").Data()));
-      values.push_back(0.0);
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_hw_sum_err").Data()));
-    }
-
-    if (bBlock) {
-      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-        values.push_back(0.0);
-        fieldPtrs.push_back(model->MakeField<Double_t>((basename + Form("_block%d", i)).Data()));
-      }
-    }
-
-    if (bNum_samples) {
-      values.push_back(0.0);
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_num_samples").Data()));
-    }
-
-    if (bDevice_Error_Code) {
-      values.push_back(0.0);
-      fieldPtrs.push_back(model->MakeField<Double_t>((basename + "_Device_Error_Code").Data()));
-    }
-
-    fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
-    return;
+  if (bBlock) {
+    for (Int_t i = 0; i < fBlocksPerEvent; i++)
+      add_field(Form("_block%d", i));
   }
 
-  // For raw data, use the full detailed format
+  if (bNum_samples)
+    add_field("_num_samples");
+
+  if (bDevice_Error_Code)
+    add_field("_Device_Error_Code");
+
   if (fDataToSave == kRaw) {
-    if (bHw_sum) {
-      values.push_back(0.0);
-      auto field = model->MakeField<Double_t>(TString::Format("%s_hw_sum", basename.Data()).Data());
-      fieldPtrs.push_back(field);
-    }
-
-    if (bHw_sum_raw) {
-      values.push_back(0.0);
-      auto field = model->MakeField<Double_t>(TString::Format("%s_hw_sum_raw", basename.Data()).Data());
-      fieldPtrs.push_back(field);
-    }
-
-    if (bBlock) {
-      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-        values.push_back(0.0);
-        auto field = model->MakeField<Double_t>(TString::Format("%s_block%d", basename.Data(), i).Data());
-        fieldPtrs.push_back(field);
-      }
-    }
+    if (bHw_sum_raw)
+      add_field("_hw_sum_raw");
 
     if (bBlock_raw) {
-      for (Int_t i = 0; i < fBlocksPerEvent; i++) {
-        values.push_back(0.0);
-        auto field = model->MakeField<Double_t>(TString::Format("%s_block%d_raw", basename.Data(), i).Data());
-        fieldPtrs.push_back(field);
-      }
+      for (Int_t i = 0; i < fBlocksPerEvent; i++)
+        add_field(Form("_block%d_raw", i));
     }
 
-    if (bNum_samples) {
-      values.push_back(0.0);
-      auto field = model->MakeField<Double_t>(TString::Format("%s_num_samples", basename.Data()).Data());
-      fieldPtrs.push_back(field);
-    }
-
-    if (bDevice_Error_Code) {
-      values.push_back(0.0);
-      auto field = model->MakeField<Double_t>(TString::Format("%s_Device_Error_Code", basename.Data()).Data());
-      fieldPtrs.push_back(field);
-    }
-
-    if (bSequence_number) {
-      values.push_back(0.0);
-      auto field = model->MakeField<Double_t>(TString::Format("%s_sequence_number", basename.Data()).Data());
-      fieldPtrs.push_back(field);
-    }
+    if (bSequence_number)
+      add_field("_sequence_number");
   }
 
+  QwRootNTupleFields::AddChannel(model, basename, suffixes, values, fieldPtrs);
   fTreeArrayNumEntries = values.size() - fTreeArrayIndex;
 
   if (kDEBUG) {

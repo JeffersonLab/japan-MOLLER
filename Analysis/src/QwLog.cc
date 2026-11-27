@@ -20,9 +20,11 @@
 QwLog gQwLog;
 
 // Set the static flags
-bool QwLog::fScreenAtNewLine = true;
-bool QwLog::fScreenInColor = false;
-bool QwLog::fFileAtNewLine = true;
+thread_local bool QwLog::fScreenAtNewLine = true;
+thread_local bool QwLog::fScreenInColor = false;
+thread_local bool QwLog::fFileAtNewLine = true;
+thread_local QwLog::QwLogLevel QwLog::fLogLevel = QwLog::kMessage;
+std::mutex QwLog::fMutex;
 
 // Log file open modes
 const std::ios_base::openmode QwLog::kTruncate = std::ios::trunc;
@@ -38,8 +40,6 @@ QwLog::QwLog()
 
   fFileThreshold = kMessage;
   fFile = 0;
-
-  fLogLevel = kMessage;
 
   fUseColor = true;
 
@@ -191,6 +191,8 @@ QwLog& QwLog::operator()(
   const QwLogLevel level,
   const std::string func_sig)
 {
+  std::lock_guard<std::mutex> lock(fMutex);
+
   // Set the log level of this sink
   fLogLevel = level;
 
@@ -257,6 +259,7 @@ QwLog& QwLog::operator()(
  */
 QwLog& QwLog::operator<<(std::ios_base& (*manip) (std::ios_base&))
 {
+  std::lock_guard<std::mutex> lock(fMutex);
   if (fScreen && (fLogLevel <= fScreenThreshold || fLogLevel <= fFileThreshold) ) {
     *(fScreen) << manip;
   }
@@ -277,6 +280,14 @@ QwLog& QwLog::operator<<(std::ios_base& (*manip) (std::ios_base&))
  */
 QwLog& QwLog::operator<<(std::ostream& (*manip) (std::ostream&))
 {
+  // QwLog::endl and QwLog::flush lock themselves
+  if (manip == &QwLog::endl || manip == &QwLog::flush) {
+    if (fScreen && (fLogLevel <= fScreenThreshold || fLogLevel <= fFileThreshold) ) {
+      *(fScreen) << manip;
+    }
+    return *this;
+  }
+  std::lock_guard<std::mutex> lock(fMutex);
   if (fScreen && (fLogLevel <= fScreenThreshold || fLogLevel <= fFileThreshold) ) {
     *(fScreen) << manip;
   }
@@ -296,6 +307,7 @@ QwLog& QwLog::operator<<(std::ostream& (*manip) (std::ostream&))
  */
 std::ostream& QwLog::endl(std::ostream& strm)
 {
+  std::lock_guard<std::mutex> lock(fMutex);
   if (gQwLog.fScreen && gQwLog.fLogLevel <= gQwLog.fScreenThreshold) {
     if (fScreenInColor)
       *(gQwLog.fScreen) << QwColor(Qw::kNormal) << std::endl;
@@ -316,6 +328,7 @@ std::ostream& QwLog::endl(std::ostream& strm)
  */
 std::ostream& QwLog::flush(std::ostream& strm)
 {
+  std::lock_guard<std::mutex> lock(fMutex);
   if (gQwLog.fScreen) {
     *(gQwLog.fScreen) << std::flush;
   }

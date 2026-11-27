@@ -958,8 +958,9 @@ void QwHelicityPattern::FillTreeVector(QwRootTreeBranchVector &values) const
 void QwHelicityPattern::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleModel>& model, TString& prefix, std::vector<Double_t>& values, std::vector<std::shared_ptr<Double_t>>& fieldPtrs)
 {
   TString basename = prefix(0, (prefix.First("|") >= 0)? prefix.First("|"): prefix.Length())+"BurstCounter";
-  // Note: fBurstCounter is a Short_t, but we're only creating Double_t fields for now
-  // This maintains compatibility with the existing TTree structure
+  values.push_back(0.0);
+  fieldPtrs.push_back(model->MakeField<Double_t>(basename.Data()));
+  fBurstCounterNTupleIndex = values.size() - 1;
 
   TString newprefix = "yield_" + prefix;
   fYield.ConstructNTupleAndVector(model, newprefix, values, fieldPtrs);
@@ -980,6 +981,9 @@ void QwHelicityPattern::ConstructNTupleAndVector(std::unique_ptr<ROOT::RNTupleMo
 
 void QwHelicityPattern::FillNTupleVector(std::vector<Double_t>& values) const
 {
+  // Like the TTree branch, which points at fBurstCounter, filled for every pattern
+  if (fBurstCounterNTupleIndex >= 0 && fBurstCounterNTupleIndex < static_cast<Int_t>(values.size()))
+    values[fBurstCounterNTupleIndex] = fBurstCounter;
   if (fPatternIsGood) {
     fYield.FillNTupleVector(values);
     fAsymmetry.FillNTupleVector(values);

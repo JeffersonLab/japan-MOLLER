@@ -227,9 +227,13 @@ void QwCorrelator::CalcCorrelations()
     }
   }
 
-  // Fill tree
-  if (fTree) fTree->Fill();
-  else QwWarning << "No tree" << QwLog::endl;
+  // Fill tree and RNTuple
+  bool filled = false;
+  if (fTree) { fTree->Fill(); filled = true; }
+#ifdef HAS_RNTUPLE_SUPPORT
+  if (fNTuple.Fill()) filled = true;
+#endif // HAS_RNTUPLE_SUPPORT
+  if (!filled) QwWarning << "No tree" << QwLog::endl;
 
   // Write alpha and alias file
   WriteAlphaFile();
@@ -463,6 +467,29 @@ void QwCorrelator::ConstructTreeBranches(
   branchv(fTree,linReg.mSYp, "dMYp"); // Corrected mean error
 
 }
+
+#ifdef HAS_RNTUPLE_SUPPORT
+/**
+ * Construct the RNTuple with the same content as the tree: integer fields
+ * for the counters, and one std::vector<double> field per matrix (row-major,
+ * with <name>_nrows and <name>_ncols fields) and per vector.  Field names
+ * drop the "|..." part of the branch prefix, like the channel RNTuple fields.
+ */
+void QwCorrelator::ConstructNTupleFields(
+    QwRootFile *treerootfile,
+    const std::string& treeprefix,
+    const std::string& branchprefix)
+{
+  // Same conditions and name as the tree
+  if (nP == 0 || nY == 0 || fTreeName == "") return;
+
+  fNTuple.Begin(branchprefix.substr(0, branchprefix.find('|')));
+  fNTuple.AddScalar("total_count", &fTotalCount);
+  fNTuple.AddScalar("good_count", &fGoodCount);
+  fNTuple.AddRegression(linReg);
+  fNTuple.Create(treerootfile, treeprefix + fTreeName);
+}
+#endif // HAS_RNTUPLE_SUPPORT
 
 /// \brief Construct the histograms in a folder with a prefix
 void QwCorrelator::ConstructHistograms(TDirectory *folder, TString &prefix)

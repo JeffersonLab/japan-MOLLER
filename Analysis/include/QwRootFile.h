@@ -9,9 +9,14 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdint>
+#include <condition_variable>
+#include <deque>
+#include <mutex>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <typeindex>
 #include <unordered_map>
 #include <vector>
@@ -33,6 +38,9 @@ using std::type_info;
 #include "ROOT/RField.hxx"
 #include "ROOT/RNTupleWriter.hxx"
 #include "ROOT/RNTupleWriteOptions.hxx"
+#include "ROOT/REntry.hxx"
+#include "QwRootNTupleFields.h"
+#include <unordered_map>
 #endif
 
 // Qweak headers
@@ -422,6 +430,9 @@ class QwRootTree {
     static const TString kUnitsName;
     static Double_t kUnitsValue[];
 
+    /// RNTuples write the same units fields as the TTree "units" branch
+    friend class QwRootNTuple;
+
     /// Construct the tree
     void ConstructNewTree() {
       QwMessage << "New tree: " << fName << ", " << fDesc << QwLog::endl;
@@ -616,6 +627,61 @@ class QwRootTree {
 };
 
 #ifdef HAS_RNTUPLE_SUPPORT
+class QwRootNTuple;
+
+/**
+ *  \class QwRootNTupleWriterThread
+ *  \ingroup QwAnalysis
+ *  \brief Writes the RNTuple entries of one file in a separate thread
+ *
+ * With --rntuple-writer-thread, QwRootNTuple::Fill copies the values of the
+ * entry into a queue, and this thread writes them with RNTupleWriter::Fill
+ * (serialization into pages, cluster commits, file writes), so that the
+ * event loop continues meanwhile.  The writers of one TFile must be used from
+ * one thread, so each QwRootFile has its own writer thread.  The main thread
+ * calls Drain() before it uses the file itself.
+ */
+class QwRootNTupleWriterThread {
+  public:
+    explicit QwRootNTupleWriterThread(size_t capacity) : fCapacity(capacity) { }
+    ~QwRootNTupleWriterThread() { Stop(); }
+
+    /// Queue an entry of an RNTuple; waits while the queue is full
+    void Push(QwRootNTuple* ntuple, const std::vector<Double_t>& values);
+    /// Wait until all queued entries are written and the thread is idle
+    void Drain();
+    /// Write the queued entries and end the thread
+    void Stop();
+
+  private:
+    void Run();
+    void ReportError();
+
+    struct Item {
+      QwRootNTuple* ntuple;
+      std::vector<Double_t> values;
+    };
+    std::mutex fMutex;
+    std::condition_variable fWork, fSpace, fIdle;
+    std::deque<Item> fQueue;
+    /// Value buffers to reuse
+    std::vector< std::vector<Double_t> > fFree;
+    const size_t fCapacity;
+    bool fBusy = false;
+    bool fStop = false;
+    /// Drain() wants the queued entries written now
+    bool fFlush = false;
+    /// The thread waits for entries
+    bool fWaiting = false;
+    /// The thread is woken for this many queued entries (or by Drain/Stop),
+    /// not for every entry
+    static constexpr size_t kBatch = 16;
+    std::thread fThread;
+    /// First error of the thread, reported by the main thread
+    std::string fError;
+    bool fErrorReported = false;
+};
+
 /**
  *  \class QwRootNTuple
  *  \ingroup QwAnalysis
@@ -644,38 +710,81 @@ class QwRootNTuple {
       // Create RNTuple model
       fModel = ROOT::RNTupleModel::Create();
 
-      // Construct fields and vector
-      ConstructFieldsAndVector(object);
+      // Construct fields and vector, with the units fields like the TTree
+      fVector.reserve(BRANCH_VECTOR_MAX_SIZE);
+      ConstructUnitsFields();
+      ConstructFieldsAndVector(object, prefix);
     }
 
     /// Destructor
     virtual ~QwRootNTuple() {
-      Close();
+      fWriter.reset();
+      fEntry.reset();
+    }
+
+    /// Set the file and write options; the writer is created at the first
+    /// Fill(), or at Close() for an RNTuple without entries
+    void SetOutput(TFile* file, const ROOT::RNTupleWriteOptions& options) {
+      fFile = file;
+      fOptions = options;
+    }
+
+    /// \brief Add the fields of another object to this RNTuple, like the
+    /// branches of several objects in one TTree (e.g. pair yields and
+    /// asymmetries in "pr").  Only possible before the first Fill().
+    template < class T >
+    bool AddObject(T& object, const std::string& prefix) {
+      if (fWriter || !fModel) {
+        QwError << "Cannot add fields to RNTuple " << fName
+                << " after it has been filled" << QwLog::endl;
+        return false;
+      }
+      ConstructFieldsAndVector(object, prefix);
+      return true;
     }
 
     /// Close and finalize the RNTuple writer
     void Close() {
+      // An RNTuple that was never filled is still written, without entries
+      if (!fWriter && fModel && fFile) InitializeWriter(fFile, fOptions);
       if (fWriter) {
         // Explicitly commit any remaining data and close the writer
         // This ensures all data is written to the file before destruction
         fWriter.reset();  // This calls the destructor which should finalize the RNTuple
       }
+      fEntry.reset();
     }
 
   private:
 
+    /// Add the constant units values, one per leaf of the TTree "units" branch
+    void ConstructUnitsFields() {
+      const std::string leaflist = QwRootTree::kUnitsName.Data();
+      std::vector<std::string> suffixes;
+      size_t begin = 0;
+      while (begin < leaflist.size()) {
+        size_t end = leaflist.find(':', begin);
+        if (end == std::string::npos) end = leaflist.size();
+        const std::string leaf = leaflist.substr(begin, end - begin);
+        suffixes.push_back("_" + leaf.substr(0, leaf.find('/')));
+        begin = end + 1;
+      }
+      const size_t first = fVector.size();
+      QwRootNTupleFields::AddChannel(fModel, "units", suffixes, fVector, fFieldPtrs);
+      for (size_t i = 0; i < suffixes.size(); ++i)
+        fVector[first + i] = QwRootTree::kUnitsValue[i];
+    }
+
     /// Construct the fields and vector for generic objects
     template < class T >
-    void ConstructFieldsAndVector(T& object) {
-      // Reserve space for the field vector
-      fVector.reserve(BRANCH_VECTOR_MAX_SIZE);
-
+    void ConstructFieldsAndVector(T& object, const std::string& objectPrefix) {
       // Associate fields with vector - now using shared field pointers
-      TString prefix = Form("%s", fPrefix.c_str());
+      TString prefix = Form("%s", objectPrefix.c_str());
       object.ConstructNTupleAndVector(fModel, prefix, fVector, fFieldPtrs);
 
       // Store the type of object
-      fType = typeid(object).name();
+      if (fTypes.empty()) fType = typeid(object).name();
+      fTypes.insert(typeid(object).name());
 
       // Check memory reservation
       if (fVector.size() > BRANCH_VECTOR_MAX_SIZE) {
@@ -685,6 +794,13 @@ class QwRootNTuple {
         exit(-1);
       }
 
+      // InitializeWriter binds fVector[i] to the field of fFieldPtrs[i]
+      if (fVector.size() != fFieldPtrs.size()) {
+        QwError << "RNTuple " << fName << " has " << fVector.size()
+                << " values but " << fFieldPtrs.size()
+                << " fields; field contents would be misaligned." << QwLog::endl;
+      }
+
       // Shrink memory reservation
       fVector.shrink_to_fit();
     }
@@ -692,7 +808,7 @@ class QwRootNTuple {
   public:
 
     /// Initialize the RNTuple writer with a file
-    void InitializeWriter(TFile* file) {
+    void InitializeWriter(TFile* file, const ROOT::RNTupleWriteOptions& options) {
       if (!fModel) {
         QwError << "RNTuple model not created for " << fName << QwLog::endl;
         return;
@@ -705,26 +821,51 @@ class QwRootNTuple {
       }
 
       try {
-        // Create write options with user-specified compression settings
-        ROOT::RNTupleWriteOptions options;
-        options.SetCompression(
-          static_cast<ROOT::RCompressionSetting::EAlgorithm::EValues>(fRNTupleCompressionAlgorithm),
-          fRNTupleCompressionLevel
-        );
+        // Field names by the address of their buffer in the default entry, so
+        // that each value slot in fVector can be bound to its field below
+        std::unordered_map<const void*, std::string> field_name_by_ptr;
+        for (const auto& value : fModel->GetDefaultEntry()) {
+          field_name_by_ptr[value.GetPtr<void>().get()] = value.GetField().GetFieldName();
+        }
 
         // Create the writer with the model (transfers ownership)
         // Use Append to add RNTuple to existing TFile
         fWriter = ROOT::RNTupleWriter::Append(std::move(fModel), fName, *file, options);
 
+        // Let the writer read every value straight from fVector, which is
+        // never resized after construction, instead of copying each value
+        // into the field buffers on every fill.  With a writer thread, the
+        // writer reads fWriteVector, into which the thread copies each
+        // queued entry, while the event loop fills fVector.
+        if (fWriterThread) fWriteVector.assign(fVector.size(), 0.0);
+        std::vector<Double_t>& bound = fWriterThread ? fWriteVector : fVector;
+        fEntry = fWriter->CreateEntry();
+        for (size_t i = 0; i < fFieldPtrs.size() && i < fVector.size(); ++i) {
+          if (!fFieldPtrs[i]) continue;
+          auto it = field_name_by_ptr.find(fFieldPtrs[i].get());
+          if (it == field_name_by_ptr.end()) {
+            QwError << "RNTuple " << fName << ": no field for value " << i << QwLog::endl;
+            continue;
+          }
+          fEntry->BindRawPtr(it->second, &bound[i]);
+        }
+        // The default-entry buffers are no longer used
+        fFieldPtrs.assign(fFieldPtrs.size(), nullptr);
+
+        const int algorithm = options.GetCompression() / 100;
         const char* algo_name = "UNKNOWN";
-        switch(fRNTupleCompressionAlgorithm) {
+        switch(algorithm) {
           case 1: algo_name = "ZLIB"; break;
           case 2: algo_name = "LZMA"; break;
           case 4: algo_name = "LZ4"; break;
           case 5: algo_name = "ZSTD"; break;
         }
-        QwMessage << "Created RNTuple '" << fName << "' with " << algo_name 
-                  << " compression (level " << fRNTupleCompressionLevel << ") in file " 
+        QwMessage << "Created RNTuple '" << fName << "' with " << algo_name
+                  << " compression (level " << options.GetCompression() % 100 << "), "
+                  << field_name_by_ptr.size() << " fields ("
+                  << fVector.size() << " values), cluster size "
+                  << (options.GetApproxZippedClusterSize() >> 20) << " MiB, page buffer budget "
+                  << (options.GetPageBufferBudget() >> 20) << " MiB in file "
                   << file->GetName() << QwLog::endl;
 
       } catch (const std::exception& e) {
@@ -732,33 +873,12 @@ class QwRootNTuple {
       }
     }
 
-    /// Fill the fields for generic objects
+    /// Fill the field vector for generic objects; Fill() writes the entry
     template < class T >
     void FillNTupleFields(const T& object) {
-      if (typeid(object).name() == fType) {
-        // Fill the field vector
+      if (fTypes.count(typeid(object).name()) > 0) {
+        // Each object fills its own slots of the field vector
         object.FillNTupleVector(fVector);
-
-        // Use the shared field pointers which remain valid
-        if (fWriter) {
-          for (size_t i = 0; i < fVector.size() && i < fFieldPtrs.size(); ++i) {
-            if (fFieldPtrs[i]) {
-              *(fFieldPtrs[i]) = fVector[i];
-            }
-          }
-
-          // CRITICAL: Actually commit the data to the RNTuple
-          fWriter->Fill();
-
-          // Update event counter
-          fCurrentEvent++;
-          // RNTuple prescaling
-          if (fNumEventsCycle > 0) {
-            fCurrentEvent %= fNumEventsCycle;
-          }
-        } else {
-          QwError << "RNTuple writer not initialized for " << fName << QwLog::endl;
-        }
       } else {
         QwError << "Attempting to fill RNTuple vector for type " << fType << " with "
                 << "object of type " << typeid(object).name() << QwLog::endl;
@@ -766,11 +886,44 @@ class QwRootNTuple {
       }
     }
 
-    /// Fill the RNTuple (called by FillTree wrapper methods)
+    /// Write one entry with the values filled by FillNTupleFields, like
+    /// TTree::Fill after the branches of all objects have been filled
     void Fill() {
-      // This method is now called indirectly - the actual filling happens in FillNTupleFields
-      // Just here for compatibility with the tree interface
+      // All objects have added their fields by now: create the writer.  It
+      // writes the RNTuple header to the file, so a writer thread of this
+      // file must be idle meanwhile.
+      if (!fWriter && fModel && fFile) {
+        if (fWriterThread) fWriterThread->Drain();
+        InitializeWriter(fFile, fOptions);
+      }
+
+      // The entry's fields are bound to the fVector (or fWriteVector) slots
+      if (fWriter && fEntry) {
+        if (fWriterThread) {
+          fWriterThread->Push(this, fVector);
+        } else {
+          fWriter->Fill(*fEntry);
+        }
+
+        // Update event counter
+        fCurrentEvent++;
+        // RNTuple prescaling
+        if (fNumEventsCycle > 0) {
+          fCurrentEvent %= fNumEventsCycle;
+        }
+      } else {
+        QwError << "RNTuple writer not initialized for " << fName << QwLog::endl;
+      }
     }
+
+    /// Write an entry queued by Fill() (called in the writer thread)
+    void WriteEntry(const std::vector<Double_t>& values) {
+      std::copy(values.begin(), values.end(), fWriteVector.begin());
+      fWriter->Fill(*fEntry);
+    }
+
+    /// Queue the entries of Fill() for a writer thread (before the first Fill)
+    void SetWriterThread(QwRootNTupleWriterThread* thread) { fWriterThread = thread; }
 
     /// Get the name of the RNTuple
     const std::string& GetName() const { return fName; }
@@ -801,6 +954,8 @@ class QwRootNTuple {
     /// RNTuple model and writer
     std::unique_ptr<ROOT::RNTupleModel> fModel;
     std::unique_ptr<ROOT::RNTupleWriter> fWriter;
+    /// Entry whose fields are bound to the slots of fVector
+    std::unique_ptr<ROOT::REntry> fEntry;
 
     /// Vector of values and shared field pointers (for RNTuple)
     std::vector<Double_t> fVector;
@@ -811,18 +966,24 @@ class QwRootNTuple {
     const std::string fDesc;
     const std::string fPrefix;
 
-    /// Object type
+    /// Object type (of the first object), and the types of all objects
     std::string fType;
+    std::set<std::string> fTypes;
+
+    /// File and options for the writer, created at the first Fill()
+    TFile* fFile = nullptr;
+    ROOT::RNTupleWriteOptions fOptions;
+
+    /// Writer thread of the file (nullptr: Fill() writes the entry itself),
+    /// and the values of the entry it writes
+    QwRootNTupleWriterThread* fWriterThread = nullptr;
+    std::vector<Double_t> fWriteVector;
 
     /// RNTuple prescaling parameters
     UInt_t fCurrentEvent;
     UInt_t fNumEventsCycle;
     UInt_t fNumEventsToSave;
     UInt_t fNumEventsToSkip;
-
-    /// RNTuple compression settings
-    Int_t fRNTupleCompressionAlgorithm;
-    Int_t fRNTupleCompressionLevel;
 
   friend class QwRootFile;
 };
@@ -925,6 +1086,15 @@ class QwRootFile {
     /// Fill histograms of the subsystem array
     template < class T >
     void FillHistograms(T& object) {
+      if (ShouldFillHistograms(object)) object.FillHistograms();
+    }
+
+    /// \brief The bookkeeping of FillHistograms (map file updates, fill
+    /// prescaling, registered directory): returns whether the histograms of
+    /// the object are to be filled now.  The caller then calls
+    /// object.FillHistograms(), possibly in another thread.
+    template < class T >
+    bool ShouldFillHistograms(T& object) {
       // Update regularly
       static Int_t update_count = 0;
       update_count++;
@@ -936,16 +1106,11 @@ class QwRootFile {
       // visual refresh rate is unaffected because the displayed histograms
       // simply accumulate slightly fewer entries.
       if (fHistoFillPrescale > 1) {
-        if (++fHistoFillCount % fHistoFillPrescale != 0) return;
+        if (++fHistoFillCount % fHistoFillPrescale != 0) return false;
       }
 
-      // Debug directory registration
-      std::string type = typeid(object).name();
-      bool hasDir = HasDirByType(object);
-
-      if (! hasDir) return;
-      // Fill histograms
-      object.FillHistograms();
+      // Only objects with a registered histogram directory
+      return HasDirByType(object);
     }
 
 
@@ -965,15 +1130,12 @@ class QwRootFile {
 #ifdef HAS_RNTUPLE_SUPPORT
     /// Create a new RNTuple with name and description
     void NewNTuple(const std::string& name, const std::string& desc) {
-      if (IsTreeDisabled(name) || !fEnableRNTuples) return;
+      if (IsNTupleDisabled(name) || !fEnableRNTuples) return;
       QwRootNTuple *ntuple = 0;
       if (! HasNTupleByName(name)) {
         ntuple = new QwRootNTuple(name, desc);
-        // Set compression settings before initializing writer
-        ntuple->fRNTupleCompressionAlgorithm = fRNTupleCompressionAlgorithm;
-        ntuple->fRNTupleCompressionLevel = fRNTupleCompressionLevel;
-        // Initialize the writer with our file
-        ntuple->InitializeWriter(fRootFile);
+        ntuple->SetOutput(fRootFile, GetRNTupleWriteOptions());
+        ntuple->SetWriterThread(fNTupleWriterThread.get());
       } else {
         // For simplicity, don't support copying existing RNTuples yet
         QwError << "Cannot create duplicate RNTuple: " << name << QwLog::endl;
@@ -981,6 +1143,13 @@ class QwRootFile {
       }
       fNTupleByName[name].push_back(ntuple);
     }
+
+    /// \brief Create an RNTuple with a custom model, for output that is not a
+    /// flat list of values (e.g. the correlator matrices).  The writer is
+    /// owned by this file and finalized when it is closed.  Returns nullptr
+    /// when RNTuple output is disabled for this name.
+    ROOT::RNTupleWriter* NewNTupleWriter(const std::string& name,
+                                         std::unique_ptr<ROOT::RNTupleModel> model);
 #endif // HAS_RNTUPLE_SUPPORT
 
     /// Get the tree with name
@@ -1056,9 +1225,18 @@ class QwRootFile {
     template < class T >
     Int_t WriteObject(const T* obj, const char* name, Option_t* option = "", Int_t bufsize = 0) {
       Int_t retval = 0;
+      DrainNTupleWriterThread();
       // TMapFile has no support for WriteObject
       if (fRootFile) retval = fRootFile->WriteObject(obj,name,option,bufsize);
       return retval;
+    }
+
+    /// Wait until the RNTuple writer thread is idle, before the file is used
+    /// by the calling thread
+    void DrainNTupleWriterThread() {
+#ifdef HAS_RNTUPLE_SUPPORT
+      if (fNTupleWriterThread) fNTupleWriterThread->Drain();
+#endif // HAS_RNTUPLE_SUPPORT
     }
 
 
@@ -1120,6 +1298,12 @@ class QwRootFile {
   public:
     void Close()  {
 
+#ifdef HAS_RNTUPLE_SUPPORT
+      // Write the queued RNTuple entries and end the writer thread: from
+      // here on, this thread uses the file
+      if (fNTupleWriterThread) fNTupleWriterThread->Stop();
+#endif // HAS_RNTUPLE_SUPPORT
+
       if (fRootFile) {
         // Step 1: Write all trees explicitly
         for (auto iter = fTreeByName.begin(); iter != fTreeByName.end(); iter++) {
@@ -1145,7 +1329,7 @@ class QwRootFile {
         // which would create duplicate cycles. The histograms are already
         // safely written to disk in Step 2.
 #ifdef HAS_RNTUPLE_SUPPORT
-        if (!fNTupleByName.empty()) {
+        if (!fNTupleByName.empty() || !fNTupleWriters.empty()) {
           ClearInMemoryObjects(fRootFile);
         }
 #endif // HAS_RNTUPLE_SUPPORT
@@ -1160,6 +1344,7 @@ class QwRootFile {
           if (ntuple) ntuple->Close();
         }
       }
+      fNTupleWriters.clear();
 #endif // HAS_RNTUPLE_SUPPORT
 
       // Step 5: Close the file
@@ -1182,6 +1367,7 @@ class QwRootFile {
 
     // Wrapped functionality
     TDirectory* mkdir(const char* name, const char* title = "") {
+      DrainNTupleWriterThread();
       // TMapFile has no support for mkdir
       if (fRootFile) return fRootFile->mkdir(name, title);
       else return 0;
@@ -1190,6 +1376,7 @@ class QwRootFile {
     // Wrapped functionality
     Int_t Write(const char* name = 0, Int_t option = 0, Int_t bufsize = 0) {
       Int_t retval = 0;
+      DrainNTupleWriterThread();
       // TMapFile has no support for Write
       if (fRootFile) retval = fRootFile->Write(name, option, bufsize);
       return retval;
@@ -1236,6 +1423,17 @@ class QwRootFile {
     Int_t fCompressionLevel;
     Int_t fRNTupleCompressionAlgorithm;
     Int_t fRNTupleCompressionLevel;
+    /// RNTuple cluster/page tuning (MiB, except page size in KiB; 0 = ROOT default)
+    Int_t fRNTupleClusterSize;
+    Int_t fRNTupleMaxUnzippedClusterSize;
+    Int_t fRNTuplePageBufferBudget;
+    Int_t fRNTupleMaxPageSize;
+    /// TFile write cache size in KiB (0 = disabled)
+    Int_t fWriteCacheSize;
+#ifdef HAS_RNTUPLE_SUPPORT
+    /// Build the RNTuple write options from the configured settings
+    ROOT::RNTupleWriteOptions GetRNTupleWriteOptions() const;
+#endif // HAS_RNTUPLE_SUPPORT
     Int_t fBasketSize;
     Int_t fAutoFlush;
     Int_t fAutoSave;
@@ -1247,15 +1445,31 @@ class QwRootFile {
     /// List of excluded trees
     std::vector< TPRegexp > fDisabledTrees;
     std::vector< TPRegexp > fDisabledHistos;
+    /// List of excluded RNTuples: the per-name tree options apply to the
+    /// RNTuples too, but disabling all TTrees (--disable-trees, or the
+    /// automatic disabling in RNTuple mode) must not disable the RNTuples
+    std::vector< TPRegexp > fDisabledNTuples;
 
     /// Add regexp to list of disabled trees names
     void DisableTree(const TString& regexp) {
       fDisabledTrees.push_back(regexp);
     }
+    /// Add regexp to the lists of disabled tree and RNTuple names
+    void DisableTreeAndNTuple(const TString& regexp) {
+      DisableTree(regexp);
+      fDisabledNTuples.push_back(regexp);
+    }
     /// Does this tree name match a disabled tree name?
     bool IsTreeDisabled(const std::string& name) {
       for (size_t i = 0; i < fDisabledTrees.size(); i++)
         if (fDisabledTrees.at(i).Match(name)) return true;
+      return false;
+    }
+    /// Does this RNTuple name match a disabled RNTuple (or tree) name?
+    bool IsNTupleDisabled(const std::string& name) {
+      for (size_t i = 0; i < fDisabledNTuples.size(); i++)
+        if (fDisabledNTuples.at(i).Match(name))
+          return true;
       return false;
     }
     /// Add regexp to list of disabled histogram directories
@@ -1283,6 +1497,15 @@ class QwRootFile {
     std::map< const std::string, std::vector<QwRootNTuple*> > fNTupleByName;
     std::map< const void*      , std::vector<QwRootNTuple*> > fNTupleByAddr;
     std::map< const std::type_index , std::vector<QwRootNTuple*> > fNTupleByType;
+
+    /// RNTuples with custom models (see NewNTupleWriter), in creation order
+    std::vector<std::unique_ptr<ROOT::RNTupleWriter>> fNTupleWriters;
+    std::vector<std::string> fNTupleWriterNames;
+
+    /// Thread that writes the RNTuple entries (--rntuple-writer-thread)
+    std::unique_ptr<QwRootNTupleWriterThread> fNTupleWriterThread;
+    /// Entries in its queue (the event loop waits when it is full)
+    static constexpr size_t kNTupleWriterQueueSize = 256;
 
     /// RNTuple support flag
     Bool_t fEnableRNTuples;
@@ -1517,8 +1740,8 @@ void QwRootFile::ConstructNTupleFields(
         T& object,
         const std::string& prefix)
 {
-  // Return if RNTuples are disabled
-  if (!fEnableRNTuples) return;
+  // Return if RNTuples are disabled, or this one is
+  if (!fEnableRNTuples || IsNTupleDisabled(name)) return;
 
   // Pointer to new RNTuple
   QwRootNTuple* ntuple = 0;
@@ -1529,12 +1752,10 @@ void QwRootFile::ConstructNTupleFields(
     // New RNTuple with name, description, object, prefix
     ntuple = new QwRootNTuple(name, desc, object, prefix);
 
-    // Set compression settings before initializing writer
-    ntuple->fRNTupleCompressionAlgorithm = fRNTupleCompressionAlgorithm;
-    ntuple->fRNTupleCompressionLevel = fRNTupleCompressionLevel;
-
-    // Initialize the writer with our file
-    ntuple->InitializeWriter(fRootFile);
+    // The writer is created with the first entry, after all objects of
+    // this RNTuple have added their fields
+    ntuple->SetOutput(fRootFile, GetRNTupleWriteOptions());
+    ntuple->SetWriterThread(fNTupleWriterThread.get());
 
     // Settings only relevant for new RNTuples
     if (name == "evt")
@@ -1542,17 +1763,19 @@ void QwRootFile::ConstructNTupleFields(
     else if (name == "mul")
       ntuple->SetPrescaling(fNumHelEventsToSave, fNumHelEventsToSkip);
 
+    fNTupleByName[name].push_back(ntuple);
+
   } else {
 
-    // For simplicity, don't support multiple RNTuples with same name yet
-    QwError << "Cannot create duplicate RNTuple: " << name << QwLog::endl;
-    return;
+    // Another object in the same RNTuple, like the pair yields and
+    // asymmetries that share the "pr" tree
+    ntuple = fNTupleByName[name].front();
+    if (! ntuple->AddObject(object, prefix)) return;
   }
 
-   // Add the fields to the list of RNTuples by name, object, type
+   // Add the fields to the list of RNTuples by object, type
   const void* addr = static_cast<const void*>(&object);
   const std::type_index type = typeid(object);
-  fNTupleByName[name].push_back(ntuple);
   fNTupleByAddr[addr].push_back(ntuple);
   fNTupleByType[type].push_back(ntuple);
 }
@@ -1615,6 +1838,9 @@ void QwRootFile::FillNTupleFields(
 template < class T >
 void QwRootFile::ConstructObjects(const std::string& name, T& object)
 {
+  // A new directory takes space in the file
+  DrainNTupleWriterThread();
+
   // Create the objects in a directory
   if (fRootFile) {
     std::string type = typeid(object).name();
@@ -1658,6 +1884,9 @@ void QwRootFile::ConstructHistograms(const std::string& name, T& object)
 {
   // Return if we do not want this histogram information
   if (IsHistoDisabled(name)) return;
+
+  // A new directory takes space in the file
+  DrainNTupleWriterThread();
 
   // Create the histograms in a directory
   if (fRootFile) {
@@ -1705,6 +1934,7 @@ template < class T >
 Int_t QwRootFile::WriteParamFileList(const TString &name, T& object)
 {
   Int_t retval = 0;
+  DrainNTupleWriterThread();
   if (fRootFile) {
     TList *param_list = (TList*) fRootFile->FindObjectAny(name);
     if (not param_list) {
